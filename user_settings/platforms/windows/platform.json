@@ -1,0 +1,7 @@
+{
+  "engineVersion": "1.0.0-custom",
+  "platformId": "windows",
+  "displayName": "Windows DirectX",
+  "builderAssemblyPath": "..\\..\\..\\..\\..\\helworks\\helengine-windows\\CMakeLists.txt",
+  "playerSourceRootPath": "..\\..\\..\\..\\..\\helworks\\helengine-windows"
+}

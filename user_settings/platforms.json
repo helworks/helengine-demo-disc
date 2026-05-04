@@ -1,0 +1,7 @@
+{
+  "platforms": [
+    {
+      "platformDescriptorPath": "platforms/windows/platform.json"
+    }
+  ]
+}
