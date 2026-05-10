@@ -16,6 +16,11 @@ namespace city.rendering.tools {
         public const string CubeTestSceneId = "scenes/rendering/cube_test.helen";
 
         /// <summary>
+        /// Stable scene id used by the colored cube-grid showcase.
+        /// </summary>
+        public const string ColoredCubeGridSceneId = "scenes/rendering/colored_cube_grid.helen";
+
+        /// <summary>
         /// Stable scene id used by the directional-shadow plaza showcase.
         /// </summary>
         public const string DirectionalShadowPlazaSceneId = "scenes/rendering/directional_shadow_plaza.helen";
@@ -36,11 +41,17 @@ namespace city.rendering.tools {
         readonly CubeTestSceneFactory CubeTestFactory;
 
         /// <summary>
+        /// Factory used to author the colored cube-grid scene and its material assets.
+        /// </summary>
+        readonly ColoredCubeGridSceneFactory ColoredCubeGridFactory;
+
+        /// <summary>
         /// Initializes one city rendering scene generator.
         /// </summary>
         public RenderingSceneGenerator() {
             SceneWriteService = new GeneratedSceneWriteService();
             CubeTestFactory = new CubeTestSceneFactory();
+            ColoredCubeGridFactory = new ColoredCubeGridSceneFactory();
         }
 
         /// <summary>
@@ -52,7 +63,10 @@ namespace city.rendering.tools {
             SceneAssetReference standardMaterialReference = CreateGeneratedReference(EngineGeneratedAssetProvider.StandardMaterialRelativePath, EngineGeneratedMaterialCache.StandardAssetId);
 
             SceneAsset cubeTestSceneAsset = CubeTestFactory.CreateSceneAsset(cubeReference, standardMaterialReference);
+            SceneAsset coloredCubeGridSceneAsset = ColoredCubeGridFactory.CreateSceneAsset(cubeReference);
+            ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
             SceneWriteService.WriteScene(projectRootPath, CubeTestSceneId, cubeTestSceneAsset);
+            SceneWriteService.WriteScene(projectRootPath, ColoredCubeGridSceneId, coloredCubeGridSceneAsset);
         }
 
         /// <summary>
