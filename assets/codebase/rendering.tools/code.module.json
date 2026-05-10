@@ -1,0 +1,10 @@
+{
+  "moduleId": "rendering.tools",
+  "dependencyModuleIds": [
+    "scene.tools"
+  ],
+  "loadScopes": [
+    "always-loaded"
+  ],
+  "moduleKind": "editor"
+}

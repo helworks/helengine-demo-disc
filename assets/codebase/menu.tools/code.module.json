@@ -1,0 +1,12 @@
+{
+  "moduleId": "menu.tools",
+  "dependencyModuleIds": [
+    "gameplay",
+    "rendering.tools",
+    "physics.tools"
+  ],
+  "loadScopes": [
+    "always-loaded"
+  ],
+  "moduleKind": "editor"
+}

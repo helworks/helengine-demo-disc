@@ -1,0 +1,8 @@
+{
+  "moduleId": "scene.tools",
+  "dependencyModuleIds": [],
+  "loadScopes": [
+    "always-loaded"
+  ],
+  "moduleKind": "editor"
+}
