@@ -9,6 +9,7 @@ namespace city.menu {
         /// <returns>Curated scene menu items.</returns>
         public MenuItemDefinition[] CreateSceneItems() {
             return new[] {
+                new MenuItemDefinition("scene-textured-cube-grid", "Textured Cube Grid", "Sixteen rotating cubes with distinct lit texture materials.", true, new MenuActionDefinition(MenuActionKind.LoadScene, "scenes/rendering/textured_cube_grid.helen")),
                 new MenuItemDefinition("scene-colored-cube-grid", "Colored Cube Grid", "Sixteen rotating cubes with distinct lit material colors.", true, new MenuActionDefinition(MenuActionKind.LoadScene, "scenes/rendering/colored_cube_grid.helen")),
                 new MenuItemDefinition("scene-cube-test", "Cube Test", "Minimal one-cube rendering validation scene.", true, new MenuActionDefinition(MenuActionKind.LoadScene, "scenes/rendering/cube_test.helen")),
                 new MenuItemDefinition("scene-back", "Back", "Returns to the main menu.", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))

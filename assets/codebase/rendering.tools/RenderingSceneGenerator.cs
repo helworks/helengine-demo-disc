@@ -26,6 +26,11 @@ namespace city.rendering.tools {
         public const string DirectionalShadowPlazaSceneId = "scenes/rendering/directional_shadow_plaza.helen";
 
         /// <summary>
+        /// Stable scene id used by the textured cube-grid showcase.
+        /// </summary>
+        public const string TexturedCubeGridSceneId = "scenes/rendering/textured_cube_grid.helen";
+
+        /// <summary>
         /// Stable scene id used by the spotlight street-slice showcase.
         /// </summary>
         public const string SpotlightStreetSliceSceneId = "scenes/rendering/spotlight_street_slice.helen";
@@ -46,12 +51,18 @@ namespace city.rendering.tools {
         readonly ColoredCubeGridSceneFactory ColoredCubeGridFactory;
 
         /// <summary>
+        /// Factory used to author the textured cube-grid scene, its texture sources, and its material assets.
+        /// </summary>
+        readonly TexturedCubeGridSceneFactory TexturedCubeGridFactory;
+
+        /// <summary>
         /// Initializes one city rendering scene generator.
         /// </summary>
         public RenderingSceneGenerator() {
             SceneWriteService = new GeneratedSceneWriteService();
             CubeTestFactory = new CubeTestSceneFactory();
             ColoredCubeGridFactory = new ColoredCubeGridSceneFactory();
+            TexturedCubeGridFactory = new TexturedCubeGridSceneFactory();
         }
 
         /// <summary>
@@ -64,9 +75,12 @@ namespace city.rendering.tools {
 
             SceneAsset cubeTestSceneAsset = CubeTestFactory.CreateSceneAsset(cubeReference, standardMaterialReference);
             SceneAsset coloredCubeGridSceneAsset = ColoredCubeGridFactory.CreateSceneAsset(cubeReference);
+            SceneAsset texturedCubeGridSceneAsset = TexturedCubeGridFactory.CreateSceneAsset(cubeReference);
             ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
+            TexturedCubeGridFactory.WriteAssets(projectRootPath);
             SceneWriteService.WriteScene(projectRootPath, CubeTestSceneId, cubeTestSceneAsset);
             SceneWriteService.WriteScene(projectRootPath, ColoredCubeGridSceneId, coloredCubeGridSceneAsset);
+            SceneWriteService.WriteScene(projectRootPath, TexturedCubeGridSceneId, texturedCubeGridSceneAsset);
         }
 
         /// <summary>
