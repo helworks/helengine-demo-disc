@@ -284,25 +284,6 @@ namespace city.rendering.tools {
         /// <summary>
         /// Stable authored starting orientations used to expose different cube faces before spin updates.
         /// </summary>
-        static readonly float4[] InitialOrientations = {
-            float4.Identity,
-            CreateYawPitch(-0.35f, 0f),
-            CreateYawPitch(0.35f, 0f),
-            CreateYawPitch(0.7f, -0.2f),
-            CreateYawPitch(-0.7f, -0.2f),
-            CreateYawPitch(0f, 0.35f),
-            CreateYawPitch(0f, -0.35f),
-            CreateYawPitch(1.05f, 0f),
-            CreateYawPitch(-1.05f, 0f),
-            CreateYawPitch(0.52f, 0.28f),
-            CreateYawPitch(-0.52f, 0.28f),
-            CreateYawPitch(0.52f, -0.28f),
-            CreateYawPitch(-0.52f, -0.28f),
-            CreateYawPitch(1.4f, 0.18f),
-            CreateYawPitch(-1.4f, 0.18f),
-            CreateYawPitch((float)Math.PI, 0f)
-        };
-
         /// <summary>
         /// Descriptor used to serialize authored mesh payloads for committed editor scenes.
         /// </summary>
@@ -362,7 +343,7 @@ namespace city.rendering.tools {
                         cubeReference,
                         CreateTexturedMaterialReference(cubeIndex),
                         new float3((column - 1.5f) * 3.0f, (1.5f - row) * 3.0f, 0f),
-                        InitialOrientations[cubeIndex]));
+                        float4.Identity));
                 }
             }
 
@@ -407,7 +388,8 @@ namespace city.rendering.tools {
                 LocalScale = float3.One,
                 LocalOrientation = float4.Identity,
                 Components = [
-                    CreateCameraComponentRecord()
+                    CreateCameraComponentRecord(),
+                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(1)
                 ],
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -570,7 +552,7 @@ namespace city.rendering.tools {
             DirectionalLightComponent lightComponent = new DirectionalLightComponent {
                 Color = new float4(1f, 1f, 1f, 1f),
                 Intensity = intensity,
-                ShadowsEnabled = true,
+                ShadowsEnabled = false,
                 ShadowMapMode = ShadowMapMode.Forced,
                 ShadowStrength = 1f,
                 ShadowDistance = shadowDistance
@@ -1200,15 +1182,5 @@ namespace city.rendering.tools {
             return "TexturedCubeGridCube" + cubeIndex.ToString("00");
         }
 
-        /// <summary>
-        /// Creates one quaternion from authored yaw and pitch angles expressed in radians.
-        /// </summary>
-        /// <param name="yawRadians">Yaw angle around the Y axis.</param>
-        /// <param name="pitchRadians">Pitch angle around the X axis.</param>
-        /// <returns>Converted quaternion.</returns>
-        static float4 CreateYawPitch(float yawRadians, float pitchRadians) {
-            float4.CreateFromYawPitchRoll(yawRadians, pitchRadians, 0f, out float4 orientation);
-            return orientation;
-        }
     }
 }

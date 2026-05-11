@@ -109,7 +109,8 @@ namespace city.rendering.tools {
                 LocalScale = float3.One,
                 LocalOrientation = float4.Identity,
                 Components = new[] {
-                    CreateCameraComponentRecord()
+                    CreateCameraComponentRecord(),
+                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(1)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -264,7 +265,7 @@ namespace city.rendering.tools {
             DirectionalLightComponent lightComponent = new DirectionalLightComponent {
                 Color = new float4(1f, 1f, 1f, 1f),
                 Intensity = intensity,
-                ShadowsEnabled = true,
+                ShadowsEnabled = false,
                 ShadowMapMode = ShadowMapMode.Forced,
                 ShadowStrength = 1f,
                 ShadowDistance = shadowDistance
