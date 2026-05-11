@@ -41,6 +41,16 @@ namespace city.rendering.tools {
         readonly GeneratedSceneWriteService SceneWriteService;
 
         /// <summary>
+        /// Factory used to author the directional-shadow plaza scene.
+        /// </summary>
+        readonly DirectionalShadowPlazaSceneFactory DirectionalShadowPlazaFactory;
+
+        /// <summary>
+        /// Factory used to author the spotlight street-slice scene.
+        /// </summary>
+        readonly SpotlightStreetSliceSceneFactory SpotlightStreetSliceFactory;
+
+        /// <summary>
         /// Factory used to author the minimal cube-test scene.
         /// </summary>
         readonly CubeTestSceneFactory CubeTestFactory;
@@ -60,6 +70,8 @@ namespace city.rendering.tools {
         /// </summary>
         public RenderingSceneGenerator() {
             SceneWriteService = new GeneratedSceneWriteService();
+            DirectionalShadowPlazaFactory = new DirectionalShadowPlazaSceneFactory();
+            SpotlightStreetSliceFactory = new SpotlightStreetSliceSceneFactory();
             CubeTestFactory = new CubeTestSceneFactory();
             ColoredCubeGridFactory = new ColoredCubeGridSceneFactory();
             TexturedCubeGridFactory = new TexturedCubeGridSceneFactory();
@@ -71,16 +83,30 @@ namespace city.rendering.tools {
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         public void Generate(string projectRootPath) {
             SceneAssetReference cubeReference = CreateGeneratedReference(EngineGeneratedAssetProvider.CubeRelativePath, EngineGeneratedModelCache.CubeAssetId);
+            SceneAssetReference planeReference = CreateGeneratedReference(EngineGeneratedAssetProvider.PlaneRelativePath, EngineGeneratedModelCache.PlaneAssetId);
+            SceneAssetReference sphereReference = CreateGeneratedReference(EngineGeneratedAssetProvider.SphereRelativePath, EngineGeneratedModelCache.SphereAssetId);
             SceneAssetReference standardMaterialReference = CreateGeneratedReference(EngineGeneratedAssetProvider.StandardMaterialRelativePath, EngineGeneratedMaterialCache.StandardAssetId);
+            SceneAssetReference lamppostReference = CreateFileReference("models/Riemers/lamppost.x");
+            SceneAssetReference racerReference = CreateFileReference("models/Riemers/racer.x");
+            SceneAssetReference[] racerMaterialReferences = new[] {
+                CreateFileReference("models/Riemers/racer/x3ds_mat_ruedas.helmat"),
+                CreateFileReference("models/Riemers/racer/x3ds_mat_Material__0_3.helmat"),
+                CreateFileReference("models/Riemers/racer/x3ds_mat_Material_1_2.helmat"),
+                CreateFileReference("models/Riemers/racer/x3ds_mat_Material_2_1.helmat")
+            };
 
             SceneAsset cubeTestSceneAsset = CubeTestFactory.CreateSceneAsset(cubeReference, standardMaterialReference);
             SceneAsset coloredCubeGridSceneAsset = ColoredCubeGridFactory.CreateSceneAsset(cubeReference);
             SceneAsset texturedCubeGridSceneAsset = TexturedCubeGridFactory.CreateSceneAsset(cubeReference);
+            SceneAsset directionalShadowPlazaSceneAsset = DirectionalShadowPlazaFactory.CreateSceneAsset(planeReference, cubeReference, sphereReference, standardMaterialReference);
+            SceneAsset spotlightStreetSliceSceneAsset = SpotlightStreetSliceFactory.CreateSceneAsset(planeReference, cubeReference, standardMaterialReference, lamppostReference, racerReference, racerMaterialReferences);
             ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
             TexturedCubeGridFactory.WriteAssets(projectRootPath);
             SceneWriteService.WriteScene(projectRootPath, CubeTestSceneId, cubeTestSceneAsset);
             SceneWriteService.WriteScene(projectRootPath, ColoredCubeGridSceneId, coloredCubeGridSceneAsset);
             SceneWriteService.WriteScene(projectRootPath, TexturedCubeGridSceneId, texturedCubeGridSceneAsset);
+            SceneWriteService.WriteScene(projectRootPath, DirectionalShadowPlazaSceneId, directionalShadowPlazaSceneAsset);
+            SceneWriteService.WriteScene(projectRootPath, SpotlightStreetSliceSceneId, spotlightStreetSliceSceneAsset);
         }
 
         /// <summary>
@@ -101,6 +127,24 @@ namespace city.rendering.tools {
                 RelativePath = relativePath,
                 ProviderId = GeneratedProviderId,
                 AssetId = assetId
+            };
+        }
+
+        /// <summary>
+        /// Creates one file-backed scene asset reference for an authored project asset.
+        /// </summary>
+        /// <param name="relativePath">Project-relative asset path.</param>
+        /// <returns>Stable file-backed scene asset reference.</returns>
+        SceneAssetReference CreateFileReference(string relativePath) {
+            if (string.IsNullOrWhiteSpace(relativePath)) {
+                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
+            }
+
+            return new SceneAssetReference {
+                SourceKind = SceneAssetReferenceSourceKind.FileSystem,
+                RelativePath = relativePath.Replace('\\', '/'),
+                ProviderId = string.Empty,
+                AssetId = string.Empty
             };
         }
 
