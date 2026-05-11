@@ -214,7 +214,7 @@ namespace city.rendering.tools {
                     fieldWriter,
                     new CameraClearSettings(
                         true,
-                        new float4(0.04f, 0.04f, 0.05f, 1f),
+                        new float4(100f / 255f, 149f / 255f, 237f / 255f, 1f),
                         true,
                         1f,
                         false,

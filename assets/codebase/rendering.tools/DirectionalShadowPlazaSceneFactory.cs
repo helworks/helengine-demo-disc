@@ -105,6 +105,7 @@ namespace city.rendering.tools {
                     CreateCameraEntity(),
                     CreateDirectionalLightEntity(),
                     CreateGroundEntity(planeReference, standardMaterialReference),
+                    CreateShadowMastEntity(cubeReference, standardMaterialReference),
                     CreateBuildingEntity("directional-shadow-plaza-tower-left", "DirectionalShadowPlazaWestTower", new float3(-16f, 7f, -9f), new float3(6f, 14f, 6f), cubeReference, standardMaterialReference),
                     CreateBuildingEntity("directional-shadow-plaza-tower-center", "DirectionalShadowPlazaCentralTower", new float3(0f, 9f, -12f), new float3(7f, 18f, 7f), cubeReference, standardMaterialReference),
                     CreateBuildingEntity("directional-shadow-plaza-tower-right", "DirectionalShadowPlazaEastTower", new float3(15f, 6f, -7f), new float3(5f, 12f, 5f), cubeReference, standardMaterialReference),
@@ -127,12 +128,13 @@ namespace city.rendering.tools {
             return new SceneEntityAsset {
                 Id = "directional-shadow-plaza-camera",
                 Name = "DirectionalShadowPlazaCamera",
-                LocalPosition = new float3(0f, 24f, 78f),
+                LocalPosition = new float3(0f, 24f, 64f),
                 LocalScale = float3.One,
                 LocalOrientation = orientation,
                 Components = new[] {
                     CreateCameraComponentRecord(),
-                    RenderingScriptComponentRecordFactory.CreateCameraOrbitRecord(1, new float3(0f, 0f, 0f), 78f, 24f, 0f, 0.07f, -0.28f)
+                    RenderingScriptComponentRecordFactory.CreateCameraOrbitRecord(1, new float3(0f, 0f, 0f), 64f, 24f, 0f, 0.07f, -0.28f),
+                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(2)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -144,7 +146,7 @@ namespace city.rendering.tools {
         /// <returns>Serialized directional light entity.</returns>
         SceneEntityAsset CreateDirectionalLightEntity() {
             float4 orientation;
-            float4.CreateFromYawPitchRoll(0f, -0.95f, 0f, out orientation);
+            float4.CreateFromYawPitchRoll(0f, -0.72f, 0f, out orientation);
             return new SceneEntityAsset {
                 Id = "directional-shadow-plaza-sun",
                 Name = "DirectionalShadowPlazaSun",
@@ -152,8 +154,28 @@ namespace city.rendering.tools {
                 LocalScale = float3.One,
                 LocalOrientation = orientation,
                 Components = new[] {
-                    CreateDirectionalLightComponentRecord(1f, 60f),
-                    RenderingScriptComponentRecordFactory.CreateSunSweepRecord(1, -0.18f, 0.18f, -0.95f, 0.08f)
+                    CreateDirectionalLightComponentRecord(1f, 80f),
+                    RenderingScriptComponentRecordFactory.CreateSunSweepRecord(1, -0.18f, 0.18f, -0.72f, 0.05f)
+                },
+                Children = Array.Empty<SceneEntityAsset>()
+            };
+        }
+
+        /// <summary>
+        /// Creates one tall, narrow occluder that throws a clear directional shadow across the plaza.
+        /// </summary>
+        /// <param name="modelReference">Stable generated model reference used by the mesh payload.</param>
+        /// <param name="materialReference">Stable generated material reference used by the mesh payload.</param>
+        /// <returns>Serialized shadow mast entity.</returns>
+        SceneEntityAsset CreateShadowMastEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
+            return new SceneEntityAsset {
+                Id = "directional-shadow-plaza-shadow-mast",
+                Name = "DirectionalShadowPlazaShadowMast",
+                LocalPosition = new float3(-9f, 7f, 4f),
+                LocalScale = new float3(1.4f, 14f, 1.4f),
+                LocalOrientation = float4.Identity,
+                Components = new[] {
+                    CreateMeshComponentRecord(modelReference, materialReference)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -220,7 +242,7 @@ namespace city.rendering.tools {
             return new SceneEntityAsset {
                 Id = "directional-shadow-plaza-ground",
                 Name = "DirectionalShadowPlazaGround",
-                LocalPosition = new float3(0f, -0.5f, 0f),
+                LocalPosition = new float3(0f, 0f, 0f),
                 LocalScale = new float3(48f, 1f, 48f),
                 LocalOrientation = float4.Identity,
                 Components = new[] {
@@ -287,7 +309,7 @@ namespace city.rendering.tools {
                     fieldWriter,
                     new CameraClearSettings(
                         true,
-                        new float4(0.06f, 0.06f, 0.09f, 1f),
+                        new float4(100f / 255f, 149f / 255f, 237f / 255f, 1f),
                         true,
                         1f,
                         false,
@@ -298,7 +320,7 @@ namespace city.rendering.tools {
                     fieldWriter,
                     new CameraRenderSettings {
                         DepthPrepassMode = DepthPrepassMode.Auto,
-                        ShadowDistance = 60f,
+                        ShadowDistance = 80f,
                         PostProcessTier = PostProcessTier.Disabled
                     }));
             return writer.BuildPayload();
