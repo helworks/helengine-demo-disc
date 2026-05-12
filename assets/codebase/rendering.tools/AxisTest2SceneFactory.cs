@@ -4,13 +4,13 @@ using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
-    /// Builds the authored axis-test scene and its generated file-backed assets.
+    /// Builds the authored axis-test-2 scene and its generated file-backed assets.
     /// </summary>
-    public sealed class AxisTestSceneFactory {
+    public sealed class AxisTest2SceneFactory {
         /// <summary>
-        /// Stable scene id used by the generated axis-test asset.
+        /// Stable scene id used by the generated axis-test-2 asset.
         /// </summary>
-        public const string SceneId = RenderingSceneGenerator.AxisTestSceneId;
+        public const string SceneId = RenderingSceneGenerator.AxisTest2SceneId;
 
         /// <summary>
         /// Stable serialized component identifier used by mesh records.
@@ -186,7 +186,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// World-space position used to keep the directional-light arrow centered in the authored camera view.
         /// </summary>
-        static readonly float3 ArrowRigLocalPosition = new float3(5f, 6f, 0f);
+        static readonly float3 ArrowRigLocalPosition = new float3(5f, 6f, 5f);
 
         /// <summary>
         /// Descriptor used to serialize authored mesh payloads for committed editor scenes.
@@ -216,7 +216,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes the axis-test scene factory with the descriptors and services required for authored output.
         /// </summary>
-        public AxisTestSceneFactory() {
+        public AxisTest2SceneFactory() {
             MeshDescriptor = new MeshComponentPersistenceDescriptor();
             DirectionalLightDescriptor = new DirectionalLightComponentPersistenceDescriptor();
             MaterialSettingsService = new MaterialAssetSettingsService();
@@ -225,10 +225,10 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates the canonical axis-test scene asset.
+        /// Creates the canonical axis-test-2 scene asset.
         /// </summary>
         /// <param name="cubeReference">Stable generated cube model reference.</param>
-        /// <returns>Authored scene asset for the three-axis transform-gizmo test.</returns>
+        /// <returns>Authored scene asset for the camera-forward-axis directional-light validation test.</returns>
         public SceneAsset CreateSceneAsset(SceneAssetReference cubeReference) {
             if (cubeReference == null) {
                 throw new ArgumentNullException(nameof(cubeReference));
@@ -238,7 +238,7 @@ namespace city.rendering.tools {
             SceneAssetReference markerMaterialReference = CreateAxisMaterialReference(4);
 
             return new SceneAsset {
-                Id = "axis_test",
+                Id = "axis_test2",
                 AssetReferences = new[] {
                     cubeReference,
                     arrowModelReference,
@@ -265,7 +265,7 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Writes the generated file-backed assets used by the axis-test scene.
+        /// Writes the generated file-backed assets used by the axis-test-2 scene.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         public void WriteAssets(string projectRootPath) {
@@ -281,16 +281,19 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates the authored camera entity for the axis-test scene.
+        /// Creates the authored camera entity for the axis-test-2 scene.
         /// </summary>
         /// <returns>Serialized camera entity.</returns>
         SceneEntityAsset CreateCameraEntity() {
+            float4 orientation;
+            float4.CreateFromYawPitchRoll((float)(Math.PI * 0.5), 0f, 0f, out orientation);
+
             return new SceneEntityAsset {
-                Id = "axis-test-camera",
-                Name = "AxisTestCamera",
-                LocalPosition = new float3(5f, 6f, 30f),
+                Id = "axis-test-2-camera",
+                Name = "AxisTest2Camera",
+                LocalPosition = new float3(16f, 5f, 5f),
                 LocalScale = float3.One,
-                LocalOrientation = float4.Identity,
+                LocalOrientation = orientation,
                 Components = new[] {
                     CreateCameraComponentRecord(),
                     DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(1)
@@ -300,7 +303,7 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates the authored directional-light rig root that keeps the arrow centered and points the child light forward axis upward in camera space.
+        /// Creates the authored directional-light rig root that rotates around the camera forward axis.
         /// </summary>
         /// <param name="modelReference">Stable generated directional-light arrow model reference.</param>
         /// <param name="materialReference">Stable file-backed marker material reference used by the arrow mesh.</param>
@@ -313,12 +316,14 @@ namespace city.rendering.tools {
             }
 
             return new SceneEntityAsset {
-                Id = "axis-test-sun-rig",
-                Name = "AxisTestSunRig",
+                Id = "axis-test-2-sun-rig",
+                Name = "AxisTest2SunRig",
                 LocalPosition = ArrowRigLocalPosition,
                 LocalScale = float3.One,
-                LocalOrientation = CreateArrowFacingUpOrientation(),
-                Components = Array.Empty<SceneComponentAssetRecord>(),
+                LocalOrientation = float4.Identity,
+                Components = new[] {
+                    RenderingScriptComponentRecordFactory.CreateAxisTestCameraForwardSpinRecord(0, 0f, ArrowAngularSpeedRadians, -1f, 0f, 0f)
+                },
                 Children = new[] {
                     CreateDirectionalLightArrowEntity(modelReference, materialReference)
                 }
@@ -326,7 +331,7 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates the authored directional-light arrow entity that carries the visible mesh, the real light component, and the packaged spin script.
+        /// Creates the authored directional-light arrow entity that carries the visible mesh and the real light component.
         /// </summary>
         /// <param name="modelReference">Stable generated directional-light arrow model reference.</param>
         /// <param name="materialReference">Stable file-backed marker material reference used by the arrow mesh.</param>
@@ -339,15 +344,14 @@ namespace city.rendering.tools {
             }
 
             return new SceneEntityAsset {
-                Id = "axis-test-sun-arrow",
-                Name = "AxisTestSunArrow",
+                Id = "axis-test-2-sun-arrow",
+                Name = "AxisTest2SunArrow",
                 LocalPosition = float3.Zero,
                 LocalScale = new float3(ArrowVisualScale, ArrowVisualScale, ArrowVisualScale),
                 LocalOrientation = float4.Identity,
                 Components = new[] {
                     CreateMeshComponentRecord(0, modelReference, materialReference),
-                    CreateDirectionalLightComponentRecord(1, 1.2f, 32f),
-                    RenderingScriptComponentRecordFactory.CreateAxisTestZSpinRecord(2, 0f, ArrowAngularSpeedRadians)
+                    CreateDirectionalLightComponentRecord(1, 1.2f, 32f)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -418,16 +422,16 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates the authored neutral wall entity used to read light direction against one large surface.
+        /// Creates the authored neutral wall entity used to read light direction against one large surface from the new camera position.
         /// </summary>
         /// <param name="modelReference">Stable generated cube model reference used by the mesh payload.</param>
         /// <param name="materialReference">Stable file-backed ground material reference.</param>
         /// <returns>Serialized wall entity.</returns>
         SceneEntityAsset CreateGroundEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return CreateAxisEntity(
-                "axis-test-ground",
-                "AxisTestGround",
-                new float3(16f, 5f, 5f),
+                "axis-test-2-ground",
+                "AxisTest2Ground",
+                new float3(16f, 5f, -6f),
                 new float3(0.5f, 12f, 14f),
                 modelReference,
                 materialReference);

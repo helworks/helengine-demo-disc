@@ -11,6 +11,16 @@ namespace city.rendering.tools {
         const string TowerSpinTypeId = "helengine.DirectionalShadowTowerSpinComponent";
 
         /// <summary>
+        /// Stable serialized component type id for the axis-test Z-spin runtime component.
+        /// </summary>
+        const string AxisTestZSpinTypeId = "gameplay.rendering.AxisTestZSpinComponent, gameplay";
+
+        /// <summary>
+        /// Stable serialized component type id for the axis-test-2 camera-forward spin runtime component.
+        /// </summary>
+        const string AxisTestCameraForwardSpinTypeId = "gameplay.rendering.AxisTestCameraForwardSpinComponent, gameplay";
+
+        /// <summary>
         /// Stable serialized component type id for the orbit runtime component.
         /// </summary>
         const string OrbitTypeId = "gameplay.rendering.DirectionalShadowOrbitComponent, gameplay";
@@ -48,6 +58,62 @@ namespace city.rendering.tools {
                 ComponentTypeId = TowerSpinTypeId,
                 ComponentIndex = componentIndex,
                 Payload = stream.ToArray()
+            };
+        }
+
+        /// <summary>
+        /// Creates one serialized axis-test Z-spin component record.
+        /// </summary>
+        /// <param name="componentIndex">Entity-local component index.</param>
+        /// <param name="baseRollRadians">Base roll offset in radians.</param>
+        /// <param name="angularSpeedRadians">Angular speed in radians per second.</param>
+        /// <returns>Serialized scene component record for the axis-test Z-spin component.</returns>
+        public static SceneComponentAssetRecord CreateAxisTestZSpinRecord(int componentIndex, float baseRollRadians, float angularSpeedRadians) {
+            if (componentIndex < 0) {
+                throw new ArgumentOutOfRangeException(nameof(componentIndex), "Component index must be non-negative.");
+            }
+
+            EditorTaggedSceneComponentFieldWriter writer = new EditorTaggedSceneComponentFieldWriter();
+            writer.WriteField("AngularSpeedRadians", fieldWriter => fieldWriter.WriteSingle(angularSpeedRadians));
+            writer.WriteField("BaseRollRadians", fieldWriter => fieldWriter.WriteSingle(baseRollRadians));
+            return new SceneComponentAssetRecord {
+                ComponentTypeId = AxisTestZSpinTypeId,
+                ComponentIndex = componentIndex,
+                Payload = writer.BuildPayload()
+            };
+        }
+
+        /// <summary>
+        /// Creates one serialized axis-test-2 camera-forward spin component record.
+        /// </summary>
+        /// <param name="componentIndex">Entity-local component index.</param>
+        /// <param name="baseAngleRadians">Base angle offset in radians.</param>
+        /// <param name="angularSpeedRadians">Angular speed in radians per second.</param>
+        /// <param name="cameraForwardAxisX">Camera-forward axis X component.</param>
+        /// <param name="cameraForwardAxisY">Camera-forward axis Y component.</param>
+        /// <param name="cameraForwardAxisZ">Camera-forward axis Z component.</param>
+        /// <returns>Serialized scene component record for the axis-test-2 camera-forward spin component.</returns>
+        public static SceneComponentAssetRecord CreateAxisTestCameraForwardSpinRecord(
+            int componentIndex,
+            float baseAngleRadians,
+            float angularSpeedRadians,
+            float cameraForwardAxisX,
+            float cameraForwardAxisY,
+            float cameraForwardAxisZ) {
+            if (componentIndex < 0) {
+                throw new ArgumentOutOfRangeException(nameof(componentIndex), "Component index must be non-negative.");
+            }
+
+            EditorTaggedSceneComponentFieldWriter writer = new EditorTaggedSceneComponentFieldWriter();
+            writer.WriteField("AngularSpeedRadians", fieldWriter => fieldWriter.WriteSingle(angularSpeedRadians));
+            writer.WriteField("BaseAngleRadians", fieldWriter => fieldWriter.WriteSingle(baseAngleRadians));
+            writer.WriteField("CameraForwardAxisX", fieldWriter => fieldWriter.WriteSingle(cameraForwardAxisX));
+            writer.WriteField("CameraForwardAxisY", fieldWriter => fieldWriter.WriteSingle(cameraForwardAxisY));
+            writer.WriteField("CameraForwardAxisZ", fieldWriter => fieldWriter.WriteSingle(cameraForwardAxisZ));
+            return new SceneComponentAssetRecord {
+                ComponentTypeId = AxisTestCameraForwardSpinTypeId,
+                ComponentIndex = componentIndex,
+                Payload = writer.BuildPayload()
             };
         }
 

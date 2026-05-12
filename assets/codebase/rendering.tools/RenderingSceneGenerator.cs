@@ -41,6 +41,11 @@ namespace city.rendering.tools {
         public const string AxisTestSceneId = "scenes/rendering/axis_test.helen";
 
         /// <summary>
+        /// Stable scene id used by the axis-test-2 showcase.
+        /// </summary>
+        public const string AxisTest2SceneId = "scenes/rendering/axis_test2.helen";
+
+        /// <summary>
         /// Writer used to persist generated scene assets into the active city project.
         /// </summary>
         readonly GeneratedSceneWriteService SceneWriteService;
@@ -76,6 +81,11 @@ namespace city.rendering.tools {
         readonly AxisTestSceneFactory AxisTestFactory;
 
         /// <summary>
+        /// Factory used to author the axis-test-2 scene and its material assets.
+        /// </summary>
+        readonly AxisTest2SceneFactory AxisTest2Factory;
+
+        /// <summary>
         /// Initializes one city rendering scene generator.
         /// </summary>
         public RenderingSceneGenerator() {
@@ -86,6 +96,7 @@ namespace city.rendering.tools {
             ColoredCubeGridFactory = new ColoredCubeGridSceneFactory();
             TexturedCubeGridFactory = new TexturedCubeGridSceneFactory();
             AxisTestFactory = new AxisTestSceneFactory();
+            AxisTest2Factory = new AxisTest2SceneFactory();
         }
 
         /// <summary>
@@ -110,15 +121,18 @@ namespace city.rendering.tools {
             SceneAsset coloredCubeGridSceneAsset = ColoredCubeGridFactory.CreateSceneAsset(cubeReference);
             SceneAsset texturedCubeGridSceneAsset = TexturedCubeGridFactory.CreateSceneAsset(cubeReference);
             SceneAsset axisTestSceneAsset = AxisTestFactory.CreateSceneAsset(cubeReference);
+            SceneAsset axisTest2SceneAsset = AxisTest2Factory.CreateSceneAsset(cubeReference);
             SceneAsset directionalShadowPlazaSceneAsset = DirectionalShadowPlazaFactory.CreateSceneAsset(planeReference, cubeReference, sphereReference, standardMaterialReference);
             SceneAsset spotlightStreetSliceSceneAsset = SpotlightStreetSliceFactory.CreateSceneAsset(planeReference, cubeReference, standardMaterialReference, lamppostReference, racerReference, racerMaterialReferences);
             ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
             TexturedCubeGridFactory.WriteAssets(projectRootPath);
-            AxisTestFactory.WriteMaterialAssets(projectRootPath);
+            AxisTestFactory.WriteAssets(projectRootPath);
+            AxisTest2Factory.WriteAssets(projectRootPath);
             SceneWriteService.WriteScene(projectRootPath, CubeTestSceneId, cubeTestSceneAsset);
             SceneWriteService.WriteScene(projectRootPath, ColoredCubeGridSceneId, coloredCubeGridSceneAsset);
             SceneWriteService.WriteScene(projectRootPath, TexturedCubeGridSceneId, texturedCubeGridSceneAsset);
             SceneWriteService.WriteScene(projectRootPath, AxisTestSceneId, axisTestSceneAsset);
+            SceneWriteService.WriteScene(projectRootPath, AxisTest2SceneId, axisTest2SceneAsset);
             SceneWriteService.WriteScene(projectRootPath, DirectionalShadowPlazaSceneId, directionalShadowPlazaSceneAsset);
             SceneWriteService.WriteScene(projectRootPath, SpotlightStreetSliceSceneId, spotlightStreetSliceSceneAsset);
         }
