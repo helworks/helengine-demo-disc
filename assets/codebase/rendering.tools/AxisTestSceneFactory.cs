@@ -569,6 +569,15 @@ namespace city.rendering.tools {
             ps2Settings.Material.FieldValues[VertexColorModeFieldId] = "ignore";
             ps2Settings.Material.FieldValues[BaseColorFieldId] = baseColor;
             settings.Processor.Platforms["ps2"] = ps2Settings;
+
+            AssetPlatformProcessorSettings pspSettings = new AssetPlatformProcessorSettings();
+            pspSettings.Material.SchemaId = WindowsMaterialSchemaId;
+            pspSettings.Material.FieldValues[UseCustomShaderFieldId] = "false";
+            pspSettings.Material.FieldValues[TextureIdFieldId] = string.Empty;
+            pspSettings.Material.FieldValues[CastsShadowFieldId] = "true";
+            pspSettings.Material.FieldValues[ReceivesShadowFieldId] = "true";
+            pspSettings.Material.FieldValues[BaseColorFieldId] = baseColor;
+            settings.Processor.Platforms["psp"] = pspSettings;
             return settings;
         }
 
