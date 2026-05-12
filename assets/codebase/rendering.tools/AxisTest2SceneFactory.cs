@@ -291,7 +291,7 @@ namespace city.rendering.tools {
             return new SceneEntityAsset {
                 Id = "axis-test-2-camera",
                 Name = "AxisTest2Camera",
-                LocalPosition = new float3(16f, 5f, 5f),
+                LocalPosition = new float3(30f, 6f, 5f),
                 LocalScale = float3.One,
                 LocalOrientation = orientation,
                 Components = new[] {
@@ -432,7 +432,7 @@ namespace city.rendering.tools {
                 "axis-test-2-ground",
                 "AxisTest2Ground",
                 new float3(16f, 5f, -6f),
-                new float3(0.5f, 12f, 14f),
+                new float3(14f, 12f, 0.5f),
                 modelReference,
                 materialReference);
         }
@@ -685,39 +685,39 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="materialIndex">Stable zero-based axis-test material index.</param>
         /// <returns>Generated import-settings payload for the axis-test material.</returns>
-        AssetImportSettings CreateMaterialSettings(int materialIndex) {
-            AssetImportSettings settings = new AssetImportSettings();
+        MaterialAssetImportSettings CreateMaterialSettings(int materialIndex) {
+            MaterialAssetImportSettings settings = new MaterialAssetImportSettings();
             settings.Importer.ImporterId = MaterialImporterId;
             settings.Importer.SourceChecksum = string.Empty;
             settings.Importer.AssetId = CreateMaterialAssetId(materialIndex);
 
             string baseColor = AxisMaterialColors[materialIndex];
 
-            AssetPlatformProcessorSettings windowsSettings = new AssetPlatformProcessorSettings();
-            windowsSettings.Material.SchemaId = WindowsMaterialSchemaId;
-            windowsSettings.Material.FieldValues[UseCustomShaderFieldId] = "false";
-            windowsSettings.Material.FieldValues[TextureIdFieldId] = string.Empty;
-            windowsSettings.Material.FieldValues[CastsShadowFieldId] = "true";
-            windowsSettings.Material.FieldValues[ReceivesShadowFieldId] = "true";
-            windowsSettings.Material.FieldValues[BaseColorFieldId] = baseColor;
+            MaterialAssetProcessorSettings windowsSettings = new MaterialAssetProcessorSettings();
+            windowsSettings.SchemaId = WindowsMaterialSchemaId;
+            windowsSettings.FieldValues[UseCustomShaderFieldId] = "false";
+            windowsSettings.FieldValues[TextureIdFieldId] = string.Empty;
+            windowsSettings.FieldValues[CastsShadowFieldId] = "true";
+            windowsSettings.FieldValues[ReceivesShadowFieldId] = "true";
+            windowsSettings.FieldValues[BaseColorFieldId] = baseColor;
             settings.Processor.Platforms["windows"] = windowsSettings;
 
-            AssetPlatformProcessorSettings ps2Settings = new AssetPlatformProcessorSettings();
-            ps2Settings.Material.SchemaId = Ps2MaterialSchemaId;
-            ps2Settings.Material.FieldValues[AlphaModeFieldId] = "opaque";
-            ps2Settings.Material.FieldValues[DoubleSidedFieldId] = "false";
-            ps2Settings.Material.FieldValues[Ps2CastShadowsFieldId] = "true";
-            ps2Settings.Material.FieldValues[VertexColorModeFieldId] = "ignore";
-            ps2Settings.Material.FieldValues[BaseColorFieldId] = baseColor;
+            MaterialAssetProcessorSettings ps2Settings = new MaterialAssetProcessorSettings();
+            ps2Settings.SchemaId = Ps2MaterialSchemaId;
+            ps2Settings.FieldValues[AlphaModeFieldId] = "opaque";
+            ps2Settings.FieldValues[DoubleSidedFieldId] = "false";
+            ps2Settings.FieldValues[Ps2CastShadowsFieldId] = "true";
+            ps2Settings.FieldValues[VertexColorModeFieldId] = "ignore";
+            ps2Settings.FieldValues[BaseColorFieldId] = baseColor;
             settings.Processor.Platforms["ps2"] = ps2Settings;
 
-            AssetPlatformProcessorSettings pspSettings = new AssetPlatformProcessorSettings();
-            pspSettings.Material.SchemaId = WindowsMaterialSchemaId;
-            pspSettings.Material.FieldValues[UseCustomShaderFieldId] = "false";
-            pspSettings.Material.FieldValues[TextureIdFieldId] = string.Empty;
-            pspSettings.Material.FieldValues[CastsShadowFieldId] = "true";
-            pspSettings.Material.FieldValues[ReceivesShadowFieldId] = "true";
-            pspSettings.Material.FieldValues[BaseColorFieldId] = baseColor;
+            MaterialAssetProcessorSettings pspSettings = new MaterialAssetProcessorSettings();
+            pspSettings.SchemaId = WindowsMaterialSchemaId;
+            pspSettings.FieldValues[UseCustomShaderFieldId] = "false";
+            pspSettings.FieldValues[TextureIdFieldId] = string.Empty;
+            pspSettings.FieldValues[CastsShadowFieldId] = "true";
+            pspSettings.FieldValues[ReceivesShadowFieldId] = "true";
+            pspSettings.FieldValues[BaseColorFieldId] = baseColor;
             settings.Processor.Platforms["psp"] = pspSettings;
             return settings;
         }

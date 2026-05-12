@@ -78,13 +78,15 @@ namespace city.rendering.tools {
         /// <param name="standardMaterialReference">Stable generated standard material reference.</param>
         /// <param name="lamppostReference">Stable file-backed lamppost model reference.</param>
         /// <param name="racerReference">Stable file-backed racer model reference.</param>
+        /// <param name="racerMaterialReferences">Stable file-backed racer material references ordered by imported submesh slot.</param>
         /// <returns>Authored scene asset for the spotlight street-slice showcase.</returns>
         public SceneAsset CreateSceneAsset(
             SceneAssetReference planeReference,
             SceneAssetReference cubeReference,
             SceneAssetReference standardMaterialReference,
             SceneAssetReference lamppostReference,
-            SceneAssetReference racerReference) {
+            SceneAssetReference racerReference,
+            SceneAssetReference[] racerMaterialReferences) {
             if (planeReference == null) {
                 throw new ArgumentNullException(nameof(planeReference));
             } else if (cubeReference == null) {
@@ -95,6 +97,8 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(lamppostReference));
             } else if (racerReference == null) {
                 throw new ArgumentNullException(nameof(racerReference));
+            } else if (racerMaterialReferences == null) {
+                throw new ArgumentNullException(nameof(racerMaterialReferences));
             }
 
             return new SceneAsset {
@@ -105,7 +109,7 @@ namespace city.rendering.tools {
                     standardMaterialReference,
                     lamppostReference,
                     racerReference
-                },
+                }.Concat(racerMaterialReferences).ToArray(),
                 RootEntities = new[] {
                     CreateCameraEntity(),
                     CreateSpotLightEntity(),
@@ -114,8 +118,8 @@ namespace city.rendering.tools {
                     CreateStreetEdgeEntity("spotlight-street-slice-curb-right", "SpotlightStreetSliceCurbRight", new float3(9f, 0.25f, 0f), new float3(1f, 0.5f, 28f), cubeReference, standardMaterialReference),
                     CreateStreetEdgeEntity("spotlight-street-slice-back-wall", "SpotlightStreetSliceBackWall", new float3(0f, 6f, -12f), new float3(20f, 12f, 1f), cubeReference, standardMaterialReference),
                     CreateStreetEdgeEntity("spotlight-street-slice-side-block", "SpotlightStreetSliceSideBlock", new float3(12f, 2.5f, 6f), new float3(4f, 5f, 8f), cubeReference, standardMaterialReference),
-                    CreateImportedMeshEntity("spotlight-street-slice-lamppost", "SpotlightStreetSliceLamppost", new float3(-4f, 0f, -2f), new float3(2.2f, 2.2f, 2.2f), CreateYawOrientation(0.0), lamppostReference, standardMaterialReference),
-                    CreateImportedMeshEntity("spotlight-street-slice-racer", "SpotlightStreetSliceRacer", new float3(1.8f, 0f, 2f), new float3(2.8f, 2.8f, 2.8f), CreateYawOrientation(-0.42), racerReference, standardMaterialReference)
+                    CreateImportedMeshEntity("spotlight-street-slice-lamppost", "SpotlightStreetSliceLamppost", new float3(-4f, 0f, -2f), new float3(2.2f, 2.2f, 2.2f), CreateYawOrientation(0.0), lamppostReference, new[] { standardMaterialReference }),
+                    CreateImportedMeshEntity("spotlight-street-slice-racer", "SpotlightStreetSliceRacer", new float3(1.8f, 0f, 2f), new float3(2.8f, 2.8f, 2.8f), CreateYawOrientation(-0.42), racerReference, racerMaterialReferences)
                 }
             };
         }
@@ -135,7 +139,8 @@ namespace city.rendering.tools {
                 LocalOrientation = orientation,
                 Components = new[] {
                     CreateCameraComponentRecord(),
-                    RenderingScriptComponentRecordFactory.CreateCameraOrbitRecord(1, new float3(0f, 2f, 0f), 28f, 12f, 0f, 0.05f, -0.24f)
+                    RenderingScriptComponentRecordFactory.CreateCameraOrbitRecord(1, new float3(0f, 2f, 0f), 28f, 12f, 0f, 0.05f, -0.24f),
+                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(2)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -155,7 +160,7 @@ namespace city.rendering.tools {
                 LocalScale = float3.One,
                 LocalOrientation = orientation,
                 Components = new[] {
-                    CreateSpotLightComponentRecord(34f, 22f, 35f, 9f)
+                    CreateSpotLightComponentRecord(34f, 22f, 35f, 1f)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -175,7 +180,7 @@ namespace city.rendering.tools {
                 LocalScale = new float3(20f, 1f, 28f),
                 LocalOrientation = float4.Identity,
                 Components = new[] {
-                    CreateMeshComponentRecord(modelReference, materialReference)
+                    CreateMeshComponentRecord(modelReference, new[] { materialReference })
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -205,7 +210,7 @@ namespace city.rendering.tools {
                 LocalScale = localScale,
                 LocalOrientation = float4.Identity,
                 Components = new[] {
-                    CreateMeshComponentRecord(modelReference, materialReference)
+                    CreateMeshComponentRecord(modelReference, new[] { materialReference })
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -220,7 +225,7 @@ namespace city.rendering.tools {
         /// <param name="localScale">Local scale assigned to the entity.</param>
         /// <param name="localOrientation">Local orientation assigned to the entity.</param>
         /// <param name="modelReference">Stable file-backed model reference.</param>
-        /// <param name="materialReference">Stable generated material reference used by the mesh payload.</param>
+        /// <param name="materialReferences">Stable generated material references used by the mesh payload.</param>
         /// <returns>Serialized imported mesh entity.</returns>
         SceneEntityAsset CreateImportedMeshEntity(
             string id,
@@ -229,7 +234,7 @@ namespace city.rendering.tools {
             float3 localScale,
             float4 localOrientation,
             SceneAssetReference modelReference,
-            SceneAssetReference materialReference) {
+            SceneAssetReference[] materialReferences) {
             return new SceneEntityAsset {
                 Id = id,
                 Name = name,
@@ -237,7 +242,7 @@ namespace city.rendering.tools {
                 LocalScale = localScale,
                 LocalOrientation = localOrientation,
                 Components = new[] {
-                    CreateMeshComponentRecord(modelReference, materialReference)
+                    CreateMeshComponentRecord(modelReference, materialReferences)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -259,13 +264,13 @@ namespace city.rendering.tools {
         /// Creates one serialized mesh component record.
         /// </summary>
         /// <param name="modelReference">Stable model reference used by the mesh payload.</param>
-        /// <param name="materialReference">Stable material reference used by the mesh payload.</param>
+        /// <param name="materialReferences">Stable material references used by the mesh payload.</param>
         /// <returns>Serialized mesh component record.</returns>
-        SceneComponentAssetRecord CreateMeshComponentRecord(SceneAssetReference modelReference, SceneAssetReference materialReference) {
+        SceneComponentAssetRecord CreateMeshComponentRecord(SceneAssetReference modelReference, SceneAssetReference[] materialReferences) {
             return new SceneComponentAssetRecord {
                 ComponentTypeId = MeshComponentTypeId,
                 ComponentIndex = 0,
-                Payload = WriteMeshPayload(modelReference, materialReference)
+                Payload = WriteMeshPayload(modelReference, materialReferences)
             };
         }
 
@@ -323,24 +328,52 @@ namespace city.rendering.tools {
         /// Writes one serialized mesh component payload.
         /// </summary>
         /// <param name="modelReference">Stable model reference used by the mesh.</param>
-        /// <param name="materialReference">Stable material reference used by the mesh.</param>
+        /// <param name="materialReferences">Stable material references used by the mesh.</param>
         /// <returns>Serialized mesh component payload.</returns>
-        byte[] WriteMeshPayload(SceneAssetReference modelReference, SceneAssetReference materialReference) {
+        byte[] WriteMeshPayload(SceneAssetReference modelReference, SceneAssetReference[] materialReferences) {
             if (modelReference == null) {
                 throw new ArgumentNullException(nameof(modelReference));
-            } else if (materialReference == null) {
-                throw new ArgumentNullException(nameof(materialReference));
+            } else if (materialReferences == null) {
+                throw new ArgumentNullException(nameof(materialReferences));
             }
 
             MeshComponent meshComponent = new MeshComponent {
                 Model = PlaceholderModel,
-                Material = PlaceholderMaterial,
                 RenderOrder3D = 0
             };
+            RuntimeMaterial[] placeholderMaterials = new RuntimeMaterial[materialReferences.Length];
+            for (int materialIndex = 0; materialIndex < placeholderMaterials.Length; materialIndex++) {
+                placeholderMaterials[materialIndex] = PlaceholderMaterial;
+            }
+
+            meshComponent.SetMaterials(placeholderMaterials);
             EntityComponentSaveState saveState = new EntityComponentSaveState();
             saveState.SetAssetReference(MeshModelReferenceName, modelReference);
-            saveState.SetAssetReference(MeshMaterialReferenceName, materialReference);
+            for (int materialIndex = 0; materialIndex < materialReferences.Length; materialIndex++) {
+                SceneAssetReference materialReference = materialReferences[materialIndex];
+                if (materialReference == null) {
+                    throw new ArgumentNullException(nameof(materialReferences), "Imported model material references must not contain null entries.");
+                }
+
+                saveState.SetAssetReference(BuildMaterialReferenceName(materialIndex), materialReference);
+            }
+
             return MeshDescriptor.SerializeComponent(meshComponent, 0, saveState).Payload;
+        }
+
+        /// <summary>
+        /// Resolves one stable save-state material-reference name for the supplied slot index.
+        /// </summary>
+        /// <param name="slotIndex">Zero-based material slot index.</param>
+        /// <returns>Stable save-state reference name.</returns>
+        static string BuildMaterialReferenceName(int slotIndex) {
+            if (slotIndex < 0) {
+                throw new ArgumentOutOfRangeException(nameof(slotIndex), "Material slot index must be non-negative.");
+            }
+
+            return slotIndex == 0
+                ? MeshMaterialReferenceName
+                : string.Concat(MeshMaterialReferenceName, "[", slotIndex.ToString(), "]");
         }
 
         /// <summary>

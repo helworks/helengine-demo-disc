@@ -1,12 +1,17 @@
 namespace city.menu {
     /// <summary>
-    /// Returns the current demo-disc scene to the curated main menu when the platform back bind is pressed.
+    /// Returns the active demo-disc scene to the main menu when the temporary back bind is pressed.
     /// </summary>
     public sealed class DemoDiscReturnToMenuComponent : UpdateComponent {
         /// <summary>
-        /// Stable authored scene id used for the demo-disc main menu.
+        /// Stable runtime scene id used by the demo-disc main menu.
         /// </summary>
-        public const string MainMenuSceneId = "Scenes/DemoDiscMainMenu.helen";
+        public const string MainMenuSceneId = "DemoDiscMainMenu";
+
+        /// <summary>
+        /// Stable authored scene path used by editor-mode direct scene loading.
+        /// </summary>
+        public const string MainMenuScenePath = "scenes/DemoDiscMainMenu.helen";
 
         /// <summary>
         /// Previous primary gamepad state used for edge detection.
@@ -32,7 +37,7 @@ namespace city.menu {
         }
 
         /// <summary>
-        /// Returns the active demo scene to the main menu using the current execution mode's scene loading path.
+        /// Returns the active demo scene to the main menu using the current execution mode's scene-loading path.
         /// </summary>
         void ReturnToMainMenu() {
             if (Core.Instance == null) {
@@ -44,8 +49,7 @@ namespace city.menu {
                     throw new InvalidOperationException("Core scene loading services must be initialized before returning to the demo-disc main menu.");
                 }
 
-                string resolvedScenePath = ResolveSceneContentPath(MainMenuSceneId);
-                SceneAsset sceneAsset = Core.Instance.ContentManager.Load<SceneAsset>(resolvedScenePath, RuntimeContentProcessorIds.SceneAsset);
+                SceneAsset sceneAsset = Core.Instance.ContentManager.Load<SceneAsset>(MainMenuScenePath, RuntimeContentProcessorIds.SceneAsset);
                 Core.Instance.SceneLoadService.Load(sceneAsset);
                 if (Parent != null) {
                     Parent.Enabled = false;
@@ -58,14 +62,16 @@ namespace city.menu {
         }
 
         /// <summary>
-        /// Returns whether the current frame pressed the platform return bind.
+        /// Returns whether the current frame pressed the temporary platform return bind.
         /// </summary>
         /// <param name="inputSystem">Input system supplying the current frame state.</param>
         /// <returns>True when the current frame should navigate back to the main menu.</returns>
         bool WasReturnPressed(InputSystem inputSystem) {
+#if DESKTOP_PLATFORM
             if (inputSystem.WasKeyPressed(Keys.Escape) || inputSystem.WasKeyPressed(Keys.Back)) {
                 return true;
             }
+#endif
 
             InputGamepadState currentGamepadState = ReadPrimaryGamepadState(inputSystem);
             if (!currentGamepadState.Connected) {
@@ -100,91 +106,6 @@ namespace city.menu {
             }
 
             return inputSystem.GetGamepadState(0);
-        }
-
-        /// <summary>
-        /// Resolves one authored scene id into the content-relative path available in the current execution layout.
-        /// </summary>
-        /// <param name="scenePath">Authored or packaged scene path requested by the return bind.</param>
-        /// <returns>Content-relative path that exists beneath the current content root.</returns>
-        string ResolveSceneContentPath(string scenePath) {
-            if (Core.Instance == null) {
-                throw new InvalidOperationException("A core instance must exist before resolving demo-disc scene paths.");
-            }
-            if (string.IsNullOrWhiteSpace(scenePath)) {
-                throw new ArgumentException("Scene path must be provided.", nameof(scenePath));
-            }
-
-            string normalizedScenePath = NormalizeRelativeContentPath(scenePath);
-            string contentRootPath = Core.Instance.InitializationOptions.ContentRootPath;
-            if (DoesContentFileExist(contentRootPath, normalizedScenePath)) {
-                return normalizedScenePath;
-            }
-            if (ComponentExecutionContext.CurrentMode == ComponentExecutionMode.Editor) {
-                throw new InvalidOperationException(
-                    $"Demo-disc scene '{scenePath}' could not be found in authored form '{normalizedScenePath}'.");
-            }
-
-            string packagedScenePath = BuildPackagedSceneContentPath(normalizedScenePath);
-            if (DoesContentFileExist(contentRootPath, packagedScenePath)) {
-                return packagedScenePath;
-            }
-
-            throw new InvalidOperationException(
-                $"Demo-disc scene '{scenePath}' could not be found in authored form '{normalizedScenePath}' or packaged form '{packagedScenePath}'.");
-        }
-
-        /// <summary>
-        /// Builds the packaged content-relative path used by player builds for one authored scene id.
-        /// </summary>
-        /// <param name="scenePath">Normalized authored scene id.</param>
-        /// <returns>Packaged content-relative scene path.</returns>
-        string BuildPackagedSceneContentPath(string scenePath) {
-            if (string.IsNullOrWhiteSpace(scenePath)) {
-                throw new ArgumentException("Scene path must be provided.", nameof(scenePath));
-            }
-
-            if (scenePath.EndsWith(".hasset", StringComparison.OrdinalIgnoreCase)) {
-                return scenePath;
-            }
-            if (scenePath.StartsWith("cooked/", StringComparison.OrdinalIgnoreCase)) {
-                return scenePath;
-            }
-
-            string changedExtensionPath = Path.ChangeExtension(scenePath, ".hasset");
-            return NormalizeRelativeContentPath(Path.Combine("scenes", changedExtensionPath));
-        }
-
-        /// <summary>
-        /// Returns whether the supplied content-relative path exists beneath the current content root.
-        /// </summary>
-        /// <param name="contentRootPath">Absolute content root path.</param>
-        /// <param name="relativePath">Content-relative path to inspect.</param>
-        /// <returns>True when the content file exists.</returns>
-        bool DoesContentFileExist(string contentRootPath, string relativePath) {
-            if (string.IsNullOrWhiteSpace(contentRootPath)) {
-                throw new ArgumentException("Content root path must be provided.", nameof(contentRootPath));
-            }
-            if (string.IsNullOrWhiteSpace(relativePath)) {
-                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
-            }
-
-            string normalizedRelativePath = relativePath.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
-            string fullPath = Path.GetFullPath(Path.Combine(contentRootPath, normalizedRelativePath));
-            return File.Exists(fullPath);
-        }
-
-        /// <summary>
-        /// Normalizes one content-relative path to the forward-slash form used by runtime asset ids.
-        /// </summary>
-        /// <param name="relativePath">Relative content path to normalize.</param>
-        /// <returns>Normalized content-relative path.</returns>
-        string NormalizeRelativeContentPath(string relativePath) {
-            if (string.IsNullOrWhiteSpace(relativePath)) {
-                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
-            }
-
-            return relativePath.Replace('\\', '/');
         }
     }
 }

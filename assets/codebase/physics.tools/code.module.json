@@ -1,0 +1,8 @@
+{
+  "moduleId": "physics.tools",
+  "dependencyModuleIds": [],
+  "loadScopes": [
+    "always-loaded"
+  ],
+  "moduleKind": "editor"
+}

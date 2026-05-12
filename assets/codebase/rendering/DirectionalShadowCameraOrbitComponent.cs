@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace gameplay.rendering {
     /// <summary>
     /// Keeps the showcase camera on a slow elevated orbit while always looking back toward the plaza center.
     /// </summary>
@@ -44,7 +44,7 @@ namespace city.rendering {
             double z = OrbitCenter.Z + (Math.Cos(angleRadians) * OrbitRadius);
             Parent.LocalPosition = new float3((float)x, OrbitCenter.Y + OrbitHeight, (float)z);
 
-            double inwardYawRadians = Math.Atan2(x - OrbitCenter.X, z - OrbitCenter.Z);
+            double inwardYawRadians = Math.Atan2(OrbitCenter.X - x, -(OrbitCenter.Z - z));
             float4 orientation;
             float4.CreateFromYawPitchRoll((float)inwardYawRadians, LookDownPitchRadians, 0f, out orientation);
             orientation.Normalize();

@@ -1,0 +1,25 @@
+{
+  "platformId": "psp",
+  "build": {
+    "selectedBuildProfileId": "",
+    "textureScalePercent": 100,
+    "shaderVariantPruningEnabled": true,
+    "selectedOptionValues": {}
+  },
+  "graphics": {
+    "selectedGraphicsProfileId": "",
+    "defaultWidth": 480,
+    "defaultHeight": 272,
+    "vSyncEnabled": true,
+    "fullscreenEnabled": true,
+    "rendererDepthPrepassMode": 0,
+    "rendererShadowQualityTier": "disabled",
+    "rendererHdrEnabled": false,
+    "rendererPostProcessTier": 0,
+    "selectedOptionValues": {}
+  },
+  "codegen": {
+    "selectedCodegenProfileId": "",
+    "selectedOptionValues": {}
+  }
+}

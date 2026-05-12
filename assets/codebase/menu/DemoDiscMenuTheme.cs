@@ -1,17 +1,42 @@
-namespace city.menu {
+﻿namespace city.menu {
     /// <summary>
-    /// Stores reusable colors and font paths for the first-pass demo-disc menu.
+    /// Stores reusable colors, fonts, and decorative artwork paths for the demo-disc menu.
     /// </summary>
     public sealed class DemoDiscMenuTheme {
         /// <summary>
-        /// Gets the packaged title font path.
+        /// Gets the authored title font path.
         /// </summary>
-        public string TitleFontPath => "Fonts/DemoDiscTitle.hefont";
+        public string TitleFontPath => "Fonts/DemoDiscTitle.ttf";
 
         /// <summary>
-        /// Gets the packaged body font path.
+        /// Gets the authored body font path.
         /// </summary>
-        public string BodyFontPath => "Fonts/DemoDiscBody.hefont";
+        public string BodyFontPath => "Fonts/DemoDiscBody.ttf";
+
+        /// <summary>
+        /// Gets the decorative logo texture path.
+        /// </summary>
+        public string LogoTexturePath => "Images/Menu/helengine-logo.png";
+
+        /// <summary>
+        /// Gets the decorative logo width in authored canvas pixels.
+        /// </summary>
+        public int LogoWidth => 220;
+
+        /// <summary>
+        /// Gets the decorative logo height in authored canvas pixels.
+        /// </summary>
+        public int LogoHeight => 220;
+
+        /// <summary>
+        /// Gets the decorative logo top margin in authored canvas pixels.
+        /// </summary>
+        public int LogoTopMargin => 36;
+
+        /// <summary>
+        /// Gets the decorative logo right margin in authored canvas pixels.
+        /// </summary>
+        public int LogoRightMargin => 44;
 
         /// <summary>
         /// Gets the primary lilac background color.
@@ -27,7 +52,6 @@ namespace city.menu {
         /// Gets the panel border color.
         /// </summary>
         public byte4 SurfaceBorderColor => new byte4(135, 94, 163, 255);
-
 
         /// <summary>
         /// Gets the primary accent color.

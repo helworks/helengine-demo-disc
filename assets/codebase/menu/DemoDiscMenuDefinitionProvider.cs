@@ -1,4 +1,4 @@
-namespace city.menu {
+﻿namespace city.menu {
     /// <summary>
     /// Produces the first-pass demo-disc menu definition used by the generated city menu scene.
     /// </summary>
@@ -11,8 +11,8 @@ namespace city.menu {
             DemoDiscMenuTheme theme = new DemoDiscMenuTheme();
             DemoDiscSceneCatalog sceneCatalog = new DemoDiscSceneCatalog();
             return new MenuDefinition(
-                "Helengine Demo Disc",
-                "Lilac nights, bright experiments, and a little street grit.",
+                string.Empty,
+                string.Empty,
                 "main",
                 theme.TitleFontPath,
                 theme.BodyFontPath,
@@ -37,12 +37,12 @@ namespace city.menu {
                         "scene-select",
                         "Select Scene",
                         "Every entry here is explicitly curated and ordered from city-side code.",
-                        7,
+                        4,
                         sceneCatalog.CreateSceneItems()),
                     new MenuPanelDefinition(
                         "options",
                         "Options",
-                        "Polished shell for future settings categories and user-authored menu experiments.",
+                        "Polished shell for future settings categories.",
                         6,
                         new[] {
                             new MenuItemDefinition("options-display", "Display", "Placeholder row for future video settings.", true, new MenuActionDefinition(MenuActionKind.None, string.Empty)),
@@ -50,7 +50,13 @@ namespace city.menu {
                             new MenuItemDefinition("options-controls", "Controls", "Placeholder row for future input remapping.", true, new MenuActionDefinition(MenuActionKind.None, string.Empty)),
                             new MenuItemDefinition("options-back", "Back", "Returns to the main menu.", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))
                         })
-                });
+                },
+                new MenuOverlayImageDefinition(
+                    theme.LogoTexturePath,
+                    theme.LogoWidth,
+                    theme.LogoHeight,
+                    theme.LogoTopMargin,
+                    theme.LogoRightMargin));
         }
     }
 }

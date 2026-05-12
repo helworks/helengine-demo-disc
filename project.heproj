@@ -5,7 +5,8 @@
   "requiredEngineVersion": "1.0.0\u002B13db86b8a91031015e3d0475799b6e6b1a56b309",
   "supportedPlatforms": [
     "windows",
-    "ps2"
+    "ps2",
+    "psp"
   ],
   "created": "2026-04-08T22:28:00.3959454Z",
   "lastOpened": "2026-04-28T16:20:48.8005795Z",

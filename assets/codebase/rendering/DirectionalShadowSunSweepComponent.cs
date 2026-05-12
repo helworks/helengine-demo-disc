@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace gameplay.rendering {
     /// <summary>
     /// Sweeps one directional light through a narrow sun arc using a sine wave over absolute runtime time.
     /// </summary>

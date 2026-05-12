@@ -697,30 +697,39 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="cubeIndex">Stable zero-based cube index.</param>
         /// <returns>Generated import-settings payload for the cube material.</returns>
-        AssetImportSettings CreateMaterialSettings(int cubeIndex) {
-            AssetImportSettings settings = new AssetImportSettings();
+        MaterialAssetImportSettings CreateMaterialSettings(int cubeIndex) {
+            MaterialAssetImportSettings settings = new MaterialAssetImportSettings();
             settings.Importer.ImporterId = MaterialImporterId;
             settings.Importer.SourceChecksum = string.Empty;
             settings.Importer.AssetId = CreateMaterialAssetId(cubeIndex);
 
-            AssetPlatformProcessorSettings windowsSettings = new AssetPlatformProcessorSettings();
-            windowsSettings.Material.SchemaId = WindowsMaterialSchemaId;
-            windowsSettings.Material.FieldValues[UseCustomShaderFieldId] = "false";
-            windowsSettings.Material.FieldValues[TextureIdFieldId] = CubeTextureAssetIds[cubeIndex];
-            windowsSettings.Material.FieldValues[CastsShadowFieldId] = "true";
-            windowsSettings.Material.FieldValues[ReceivesShadowFieldId] = "true";
-            windowsSettings.Material.FieldValues[BaseColorFieldId] = "#FFFFFFFF";
+            MaterialAssetProcessorSettings windowsSettings = new MaterialAssetProcessorSettings();
+            windowsSettings.SchemaId = WindowsMaterialSchemaId;
+            windowsSettings.FieldValues[UseCustomShaderFieldId] = "false";
+            windowsSettings.FieldValues[TextureIdFieldId] = CubeTextureAssetIds[cubeIndex];
+            windowsSettings.FieldValues[CastsShadowFieldId] = "true";
+            windowsSettings.FieldValues[ReceivesShadowFieldId] = "true";
+            windowsSettings.FieldValues[BaseColorFieldId] = "#FFFFFFFF";
             settings.Processor.Platforms["windows"] = windowsSettings;
 
-            AssetPlatformProcessorSettings ps2Settings = new AssetPlatformProcessorSettings();
-            ps2Settings.Material.SchemaId = Ps2MaterialSchemaId;
-            ps2Settings.Material.FieldValues[TextureIdFieldId] = CubeTextureAssetIds[cubeIndex];
-            ps2Settings.Material.FieldValues[AlphaModeFieldId] = "opaque";
-            ps2Settings.Material.FieldValues[DoubleSidedFieldId] = "false";
-            ps2Settings.Material.FieldValues[Ps2CastShadowsFieldId] = "true";
-            ps2Settings.Material.FieldValues[VertexColorModeFieldId] = "ignore";
-            ps2Settings.Material.FieldValues[BaseColorFieldId] = "#FFFFFFFF";
+            MaterialAssetProcessorSettings ps2Settings = new MaterialAssetProcessorSettings();
+            ps2Settings.SchemaId = Ps2MaterialSchemaId;
+            ps2Settings.FieldValues[TextureIdFieldId] = CubeTextureAssetIds[cubeIndex];
+            ps2Settings.FieldValues[AlphaModeFieldId] = "opaque";
+            ps2Settings.FieldValues[DoubleSidedFieldId] = "false";
+            ps2Settings.FieldValues[Ps2CastShadowsFieldId] = "true";
+            ps2Settings.FieldValues[VertexColorModeFieldId] = "ignore";
+            ps2Settings.FieldValues[BaseColorFieldId] = "#FFFFFFFF";
             settings.Processor.Platforms["ps2"] = ps2Settings;
+
+            MaterialAssetProcessorSettings pspSettings = new MaterialAssetProcessorSettings();
+            pspSettings.SchemaId = WindowsMaterialSchemaId;
+            pspSettings.FieldValues[UseCustomShaderFieldId] = "false";
+            pspSettings.FieldValues[TextureIdFieldId] = CubeTextureAssetIds[cubeIndex];
+            pspSettings.FieldValues[CastsShadowFieldId] = "true";
+            pspSettings.FieldValues[ReceivesShadowFieldId] = "true";
+            pspSettings.FieldValues[BaseColorFieldId] = "#FFFFFFFF";
+            settings.Processor.Platforms["psp"] = pspSettings;
             return settings;
         }
 
