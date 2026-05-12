@@ -8,7 +8,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Stable serialized component type id for the tower-spin runtime component.
         /// </summary>
-        const string TowerSpinTypeId = "city.rendering.DirectionalShadowTowerSpinComponent, gameplay";
+        const string TowerSpinTypeId = "gameplay.rendering.DirectionalShadowTowerSpinComponent, gameplay";
 
         /// <summary>
         /// Stable serialized component type id for the orbit runtime component.
@@ -37,13 +37,19 @@ namespace city.rendering.tools {
                 throw new ArgumentOutOfRangeException(nameof(componentIndex), "Component index must be non-negative.");
             }
 
-            EditorTaggedSceneComponentFieldWriter writer = new EditorTaggedSceneComponentFieldWriter();
-            writer.WriteField("AngularSpeedRadians", fieldWriter => fieldWriter.WriteSingle(angularSpeedRadians));
-            writer.WriteField("BaseYawRadians", fieldWriter => fieldWriter.WriteSingle(baseYawRadians));
+            using MemoryStream stream = new MemoryStream();
+            using EngineBinaryWriter writer = EngineBinaryWriter.Create(stream, EngineBinaryEndianness.LittleEndian);
+            DirectionalShadowTowerSpinComponent component = new DirectionalShadowTowerSpinComponent {
+                BaseYawRadians = baseYawRadians,
+                AngularSpeedRadians = angularSpeedRadians
+            };
+
+            writer.WriteByte(DirectionalShadowMotionComponentScenePayloadSerializer.CurrentVersion);
+            DirectionalShadowMotionComponentScenePayloadSerializer.WriteTowerSpin(writer, component);
             return new SceneComponentAssetRecord {
                 ComponentTypeId = TowerSpinTypeId,
                 ComponentIndex = componentIndex,
-                Payload = writer.BuildPayload()
+                Payload = stream.ToArray()
             };
         }
 
