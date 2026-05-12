@@ -8,22 +8,22 @@ namespace city.rendering.tools {
         /// <summary>
         /// Stable serialized component type id for the tower-spin runtime component.
         /// </summary>
-        const string TowerSpinTypeId = "gameplay.rendering.DirectionalShadowTowerSpinComponent, gameplay";
+        const string TowerSpinTypeId = "helengine.DirectionalShadowTowerSpinComponent";
 
         /// <summary>
         /// Stable serialized component type id for the orbit runtime component.
         /// </summary>
-        const string OrbitTypeId = "city.rendering.DirectionalShadowOrbitComponent, gameplay";
+        const string OrbitTypeId = "gameplay.rendering.DirectionalShadowOrbitComponent, gameplay";
 
         /// <summary>
         /// Stable serialized component type id for the sun-sweep runtime component.
         /// </summary>
-        const string SunSweepTypeId = "city.rendering.DirectionalShadowSunSweepComponent, gameplay";
+        const string SunSweepTypeId = "gameplay.rendering.DirectionalShadowSunSweepComponent, gameplay";
 
         /// <summary>
         /// Stable serialized component type id for the camera-orbit runtime component.
         /// </summary>
-        const string CameraOrbitTypeId = "city.rendering.DirectionalShadowCameraOrbitComponent, gameplay";
+        const string CameraOrbitTypeId = "gameplay.rendering.DirectionalShadowCameraOrbitComponent, gameplay";
 
         /// <summary>
         /// Creates one serialized tower-spin component record.
@@ -39,13 +39,11 @@ namespace city.rendering.tools {
 
             using MemoryStream stream = new MemoryStream();
             using EngineBinaryWriter writer = EngineBinaryWriter.Create(stream, EngineBinaryEndianness.LittleEndian);
-            DirectionalShadowTowerSpinComponent component = new DirectionalShadowTowerSpinComponent {
+            writer.WriteByte(DirectionalShadowMotionComponentScenePayloadSerializer.CurrentVersion);
+            DirectionalShadowMotionComponentScenePayloadSerializer.WriteTowerSpin(writer, new DirectionalShadowTowerSpinComponent {
                 BaseYawRadians = baseYawRadians,
                 AngularSpeedRadians = angularSpeedRadians
-            };
-
-            writer.WriteByte(DirectionalShadowMotionComponentScenePayloadSerializer.CurrentVersion);
-            DirectionalShadowMotionComponentScenePayloadSerializer.WriteTowerSpin(writer, component);
+            });
             return new SceneComponentAssetRecord {
                 ComponentTypeId = TowerSpinTypeId,
                 ComponentIndex = componentIndex,
