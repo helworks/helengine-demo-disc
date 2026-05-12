@@ -114,7 +114,7 @@ namespace city.rendering.tools {
             SceneAsset spotlightStreetSliceSceneAsset = SpotlightStreetSliceFactory.CreateSceneAsset(planeReference, cubeReference, standardMaterialReference, lamppostReference, racerReference, racerMaterialReferences);
             ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
             TexturedCubeGridFactory.WriteAssets(projectRootPath);
-            AxisTestFactory.WriteMaterialAssets(projectRootPath);
+            AxisTestFactory.WriteAssets(projectRootPath);
             SceneWriteService.WriteScene(projectRootPath, CubeTestSceneId, cubeTestSceneAsset);
             SceneWriteService.WriteScene(projectRootPath, ColoredCubeGridSceneId, coloredCubeGridSceneAsset);
             SceneWriteService.WriteScene(projectRootPath, TexturedCubeGridSceneId, texturedCubeGridSceneAsset);

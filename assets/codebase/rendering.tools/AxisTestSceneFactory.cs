@@ -1,8 +1,10 @@
+using System.Globalization;
+using System.Text;
 using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
-    /// Builds the authored axis-test scene and its file-backed lit material assets.
+    /// Builds the authored axis-test scene and its generated file-backed assets.
     /// </summary>
     public sealed class AxisTestSceneFactory {
         /// <summary>
@@ -126,6 +128,46 @@ namespace city.rendering.tools {
         const string MaterialRootRelativePath = "materials/rendering/axis_test";
 
         /// <summary>
+        /// Relative project path used by the generated directional-light arrow model source.
+        /// </summary>
+        const string ArrowModelRelativePath = "models/rendering/axis_test/directional_light_arrow.obj";
+
+        /// <summary>
+        /// Radius of the generated directional-light arrow shaft.
+        /// </summary>
+        const float ArrowShaftRadius = 0.05f;
+
+        /// <summary>
+        /// Length of the generated directional-light arrow shaft.
+        /// </summary>
+        const float ArrowShaftLength = 0.58f;
+
+        /// <summary>
+        /// Radius of the generated directional-light arrow head.
+        /// </summary>
+        const float ArrowHeadRadius = 0.18f;
+
+        /// <summary>
+        /// Length of the generated directional-light arrow head.
+        /// </summary>
+        const float ArrowHeadLength = 0.28f;
+
+        /// <summary>
+        /// Segment count used for the generated directional-light arrow round details.
+        /// </summary>
+        const int ArrowRoundSegments = 18;
+
+        /// <summary>
+        /// Uniform scale applied to the generated directional-light arrow so it remains readable from the authored camera.
+        /// </summary>
+        const float ArrowVisualScale = 8f;
+
+        /// <summary>
+        /// Angular speed applied to the directional-light arrow sweep in radians per second.
+        /// </summary>
+        const float ArrowAngularSpeedRadians = (float)(-Math.PI / 8.0);
+
+        /// <summary>
         /// Authored colors used by the axis shafts, neutral ground, and lighting markers.
         /// </summary>
         static readonly string[] AxisMaterialColors = {
@@ -140,6 +182,11 @@ namespace city.rendering.tools {
         /// Stable authored material paths used by the axis-test scene.
         /// </summary>
         static readonly string[] AxisMaterialRelativePaths = BuildMaterialRelativePaths();
+
+        /// <summary>
+        /// World-space position used to keep the directional-light arrow centered in the authored camera view.
+        /// </summary>
+        static readonly float3 ArrowRigLocalPosition = new float3(5f, 6f, 0f);
 
         /// <summary>
         /// Descriptor used to serialize authored mesh payloads for committed editor scenes.
@@ -187,37 +234,41 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(cubeReference));
             }
 
+            SceneAssetReference arrowModelReference = CreateArrowModelReference();
+            SceneAssetReference markerMaterialReference = CreateAxisMaterialReference(4);
+
             return new SceneAsset {
                 Id = "axis_test",
                 AssetReferences = new[] {
                     cubeReference,
+                    arrowModelReference,
                     CreateAxisMaterialReference(0),
                     CreateAxisMaterialReference(1),
                     CreateAxisMaterialReference(2),
                     CreateAxisMaterialReference(3),
-                    CreateAxisMaterialReference(4)
+                    markerMaterialReference
                 },
                 RootEntities = new[] {
                     CreateCameraEntity(),
-                    CreateDirectionalLightEntity(),
+                    CreateDirectionalLightRigEntity(arrowModelReference, markerMaterialReference),
                     CreateFloorEntity(cubeReference, CreateAxisMaterialReference(3)),
                     CreateGroundEntity(cubeReference, CreateAxisMaterialReference(3)),
                     CreateXAxisEntity(cubeReference, CreateAxisMaterialReference(0)),
                     CreateYAxisEntity(cubeReference, CreateAxisMaterialReference(1)),
                     CreateZAxisEntity(cubeReference, CreateAxisMaterialReference(2)),
-                    CreateOriginMarkerEntity(cubeReference, CreateAxisMaterialReference(4)),
-                    CreateXAxisMarkerEntity(cubeReference, CreateAxisMaterialReference(4)),
-                    CreateYAxisMarkerEntity(cubeReference, CreateAxisMaterialReference(4)),
-                    CreateZAxisMarkerEntity(cubeReference, CreateAxisMaterialReference(4))
+                    CreateOriginMarkerEntity(cubeReference, markerMaterialReference),
+                    CreateXAxisMarkerEntity(cubeReference, markerMaterialReference),
+                    CreateYAxisMarkerEntity(cubeReference, markerMaterialReference),
+                    CreateZAxisMarkerEntity(cubeReference, markerMaterialReference)
                 }
             };
         }
 
         /// <summary>
-        /// Writes the file-backed material assets and sidecars used by the axis-test scene.
+        /// Writes the generated file-backed assets used by the axis-test scene.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        public void WriteMaterialAssets(string projectRootPath) {
+        public void WriteAssets(string projectRootPath) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
@@ -225,6 +276,8 @@ namespace city.rendering.tools {
             for (int materialIndex = 0; materialIndex < AxisMaterialRelativePaths.Length; materialIndex++) {
                 WriteMaterialAsset(projectRootPath, materialIndex);
             }
+
+            WriteArrowModelSource(projectRootPath);
         }
 
         /// <summary>
@@ -247,20 +300,54 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates the authored directional light entity for the axis-test scene.
+        /// Creates the authored directional-light rig root that keeps the arrow centered and points the child light forward axis upward in camera space.
         /// </summary>
-        /// <returns>Serialized directional light entity.</returns>
-        SceneEntityAsset CreateDirectionalLightEntity() {
-            float4 orientation;
-            float4.CreateFromYawPitchRoll(-0.65f, -0.85f, 0f, out orientation);
+        /// <param name="modelReference">Stable generated directional-light arrow model reference.</param>
+        /// <param name="materialReference">Stable file-backed marker material reference used by the arrow mesh.</param>
+        /// <returns>Serialized directional-light rig root entity.</returns>
+        SceneEntityAsset CreateDirectionalLightRigEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
+            if (modelReference == null) {
+                throw new ArgumentNullException(nameof(modelReference));
+            } else if (materialReference == null) {
+                throw new ArgumentNullException(nameof(materialReference));
+            }
+
             return new SceneEntityAsset {
-                Id = "axis-test-sun",
-                Name = "AxisTestSun",
-                LocalPosition = new float3(0f, 8f, 0f),
+                Id = "axis-test-sun-rig",
+                Name = "AxisTestSunRig",
+                LocalPosition = ArrowRigLocalPosition,
                 LocalScale = float3.One,
-                LocalOrientation = orientation,
+                LocalOrientation = CreateArrowFacingUpOrientation(),
+                Components = Array.Empty<SceneComponentAssetRecord>(),
+                Children = new[] {
+                    CreateDirectionalLightArrowEntity(modelReference, materialReference)
+                }
+            };
+        }
+
+        /// <summary>
+        /// Creates the authored directional-light arrow entity that carries the visible mesh, the real light component, and the packaged spin script.
+        /// </summary>
+        /// <param name="modelReference">Stable generated directional-light arrow model reference.</param>
+        /// <param name="materialReference">Stable file-backed marker material reference used by the arrow mesh.</param>
+        /// <returns>Serialized directional-light arrow entity.</returns>
+        SceneEntityAsset CreateDirectionalLightArrowEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
+            if (modelReference == null) {
+                throw new ArgumentNullException(nameof(modelReference));
+            } else if (materialReference == null) {
+                throw new ArgumentNullException(nameof(materialReference));
+            }
+
+            return new SceneEntityAsset {
+                Id = "axis-test-sun-arrow",
+                Name = "AxisTestSunArrow",
+                LocalPosition = float3.Zero,
+                LocalScale = new float3(ArrowVisualScale, ArrowVisualScale, ArrowVisualScale),
+                LocalOrientation = float4.Identity,
                 Components = new[] {
-                    CreateDirectionalLightComponentRecord(1.2f, 32f)
+                    CreateMeshComponentRecord(0, modelReference, materialReference),
+                    CreateDirectionalLightComponentRecord(1, 1.2f, 32f),
+                    RenderingScriptComponentRecordFactory.CreateAxisTestZSpinRecord(2, 0f, ArrowAngularSpeedRadians)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -459,9 +546,20 @@ namespace city.rendering.tools {
         /// <param name="materialReference">Stable generated material reference used by the mesh payload.</param>
         /// <returns>Serialized mesh component record.</returns>
         SceneComponentAssetRecord CreateMeshComponentRecord(SceneAssetReference modelReference, SceneAssetReference materialReference) {
+            return CreateMeshComponentRecord(0, modelReference, materialReference);
+        }
+
+        /// <summary>
+        /// Creates one serialized mesh component record.
+        /// </summary>
+        /// <param name="componentIndex">Entity-local component index.</param>
+        /// <param name="modelReference">Stable generated model reference used by the mesh payload.</param>
+        /// <param name="materialReference">Stable generated material reference used by the mesh payload.</param>
+        /// <returns>Serialized mesh component record.</returns>
+        SceneComponentAssetRecord CreateMeshComponentRecord(int componentIndex, SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return new SceneComponentAssetRecord {
                 ComponentTypeId = MeshComponentTypeId,
-                ComponentIndex = 0,
+                ComponentIndex = componentIndex,
                 Payload = WriteMeshPayload(modelReference, materialReference)
             };
         }
@@ -473,9 +571,20 @@ namespace city.rendering.tools {
         /// <param name="shadowDistance">Authored directional-light shadow cutoff distance.</param>
         /// <returns>Serialized directional-light component record.</returns>
         SceneComponentAssetRecord CreateDirectionalLightComponentRecord(float intensity, float shadowDistance) {
+            return CreateDirectionalLightComponentRecord(0, intensity, shadowDistance);
+        }
+
+        /// <summary>
+        /// Creates one serialized directional-light component record.
+        /// </summary>
+        /// <param name="componentIndex">Entity-local component index.</param>
+        /// <param name="intensity">Authored directional-light intensity.</param>
+        /// <param name="shadowDistance">Authored directional-light shadow cutoff distance.</param>
+        /// <returns>Serialized directional-light component record.</returns>
+        SceneComponentAssetRecord CreateDirectionalLightComponentRecord(int componentIndex, float intensity, float shadowDistance) {
             return new SceneComponentAssetRecord {
                 ComponentTypeId = DirectionalLightComponentTypeId,
-                ComponentIndex = 0,
+                ComponentIndex = componentIndex,
                 Payload = WriteDirectionalLightPayload(intensity, shadowDistance)
             };
         }
@@ -493,6 +602,19 @@ namespace city.rendering.tools {
             return new SceneAssetReference {
                 SourceKind = SceneAssetReferenceSourceKind.FileSystem,
                 RelativePath = AxisMaterialRelativePaths[materialIndex],
+                ProviderId = string.Empty,
+                AssetId = string.Empty
+            };
+        }
+
+        /// <summary>
+        /// Creates one stable file-backed model reference for the generated directional-light arrow source.
+        /// </summary>
+        /// <returns>Scene asset reference targeting the generated directional-light arrow source file.</returns>
+        SceneAssetReference CreateArrowModelReference() {
+            return new SceneAssetReference {
+                SourceKind = SceneAssetReferenceSourceKind.FileSystem,
+                RelativePath = ArrowModelRelativePath,
                 ProviderId = string.Empty,
                 AssetId = string.Empty
             };
@@ -518,6 +640,21 @@ namespace city.rendering.tools {
             }
 
             MaterialSettingsService.Save(fullPath, CreateMaterialSettings(materialIndex));
+        }
+
+        /// <summary>
+        /// Writes the generated directional-light arrow model source used by the axis-test light rig.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
+        void WriteArrowModelSource(string projectRootPath) {
+            string fullPath = Path.Combine(projectRootPath, "assets", ArrowModelRelativePath.Replace('/', Path.DirectorySeparatorChar));
+            string directoryPath = Path.GetDirectoryName(fullPath);
+            if (string.IsNullOrWhiteSpace(directoryPath)) {
+                throw new InvalidOperationException($"Could not resolve a model directory for '{ArrowModelRelativePath}'.");
+            }
+
+            Directory.CreateDirectory(directoryPath);
+            File.WriteAllText(fullPath, BuildArrowModelSource());
         }
 
         /// <summary>
@@ -655,6 +792,204 @@ namespace city.rendering.tools {
                 ShadowDistance = shadowDistance
             };
             return DirectionalLightDescriptor.SerializeComponent(lightComponent, 0, null).Payload;
+        }
+
+        /// <summary>
+        /// Builds the wavefront OBJ source used by the directional-light arrow mesh.
+        /// </summary>
+        /// <returns>Wavefront OBJ text for the generated directional-light arrow.</returns>
+        string BuildArrowModelSource() {
+            ModelAsset arrowModel = CreateArrowModelAsset();
+            if (arrowModel.Indices16 == null || arrowModel.Indices16.Length == 0) {
+                throw new InvalidOperationException("Directional-light arrow generation produced no triangle indices.");
+            }
+
+            StringBuilder builder = new StringBuilder();
+            builder.AppendLine("# Generated axis-test directional-light arrow");
+            builder.AppendLine("o directional_light_arrow");
+
+            for (int vertexIndex = 0; vertexIndex < arrowModel.Positions.Length; vertexIndex++) {
+                builder.Append("v ");
+                AppendInvariantFloat(builder, arrowModel.Positions[vertexIndex].X);
+                builder.Append(' ');
+                AppendInvariantFloat(builder, arrowModel.Positions[vertexIndex].Y);
+                builder.Append(' ');
+                AppendInvariantFloat(builder, arrowModel.Positions[vertexIndex].Z);
+                builder.AppendLine();
+            }
+
+            for (int texCoordIndex = 0; texCoordIndex < arrowModel.TexCoords.Length; texCoordIndex++) {
+                builder.Append("vt ");
+                AppendInvariantFloat(builder, arrowModel.TexCoords[texCoordIndex].X);
+                builder.Append(' ');
+                AppendInvariantFloat(builder, arrowModel.TexCoords[texCoordIndex].Y);
+                builder.AppendLine();
+            }
+
+            for (int normalIndex = 0; normalIndex < arrowModel.Normals.Length; normalIndex++) {
+                builder.Append("vn ");
+                AppendInvariantFloat(builder, arrowModel.Normals[normalIndex].X);
+                builder.Append(' ');
+                AppendInvariantFloat(builder, arrowModel.Normals[normalIndex].Y);
+                builder.Append(' ');
+                AppendInvariantFloat(builder, arrowModel.Normals[normalIndex].Z);
+                builder.AppendLine();
+            }
+
+            for (int index = 0; index < arrowModel.Indices16.Length; index += 3) {
+                builder.Append("f ");
+                AppendObjFaceVertex(builder, arrowModel.Indices16[index]);
+                builder.Append(' ');
+                AppendObjFaceVertex(builder, arrowModel.Indices16[index + 1]);
+                builder.Append(' ');
+                AppendObjFaceVertex(builder, arrowModel.Indices16[index + 2]);
+                builder.AppendLine();
+            }
+
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// Builds one combined model asset that matches the editor directional-light icon orientation.
+        /// </summary>
+        /// <returns>Combined directional-light arrow model asset.</returns>
+        ModelAsset CreateArrowModelAsset() {
+            List<float3> positions = new List<float3>();
+            List<float3> normals = new List<float3>();
+            List<float2> texCoords = new List<float2>();
+            List<ushort> indices = new List<ushort>();
+
+            float4 forwardOrientation = CreateNegativeZAxisOrientation();
+            AppendModelAsset(
+                positions,
+                normals,
+                texCoords,
+                indices,
+                TransformGizmoMeshFactory.CreateCylinder(ArrowShaftRadius, ArrowShaftLength, ArrowRoundSegments),
+                forwardOrientation,
+                float3.Zero);
+            AppendModelAsset(
+                positions,
+                normals,
+                texCoords,
+                indices,
+                TransformGizmoMeshFactory.CreateCone(ArrowHeadRadius, ArrowHeadLength, ArrowRoundSegments),
+                forwardOrientation,
+                new float3(0f, 0f, -ArrowShaftLength));
+
+            return new ModelAsset {
+                Id = "Models.rendering.axis_test.directional_light_arrow",
+                Positions = positions.ToArray(),
+                Normals = normals.ToArray(),
+                TexCoords = texCoords.ToArray(),
+                Indices16 = indices.ToArray()
+            };
+        }
+
+        /// <summary>
+        /// Appends one source model asset into the supplied combined directional-light arrow mesh.
+        /// </summary>
+        /// <param name="positions">Destination position stream.</param>
+        /// <param name="normals">Destination normal stream.</param>
+        /// <param name="texCoords">Destination texture-coordinate stream.</param>
+        /// <param name="indices">Destination 16-bit triangle-index stream.</param>
+        /// <param name="source">Source model asset to append.</param>
+        /// <param name="orientation">Orientation applied to positions and normals.</param>
+        /// <param name="translation">Translation applied after rotation.</param>
+        void AppendModelAsset(
+            List<float3> positions,
+            List<float3> normals,
+            List<float2> texCoords,
+            List<ushort> indices,
+            ModelAsset source,
+            float4 orientation,
+            float3 translation) {
+            if (positions == null) {
+                throw new ArgumentNullException(nameof(positions));
+            } else if (normals == null) {
+                throw new ArgumentNullException(nameof(normals));
+            } else if (texCoords == null) {
+                throw new ArgumentNullException(nameof(texCoords));
+            } else if (indices == null) {
+                throw new ArgumentNullException(nameof(indices));
+            } else if (source == null) {
+                throw new ArgumentNullException(nameof(source));
+            } else if (source.Positions == null || source.Normals == null || source.TexCoords == null || source.Indices16 == null) {
+                throw new InvalidOperationException("Directional-light arrow generation requires complete 16-bit mesh data.");
+            }
+
+            int vertexOffset = positions.Count;
+            if (vertexOffset > ushort.MaxValue) {
+                throw new InvalidOperationException("Directional-light arrow vertex count exceeds 16-bit index capacity.");
+            }
+
+            for (int vertexIndex = 0; vertexIndex < source.Positions.Length; vertexIndex++) {
+                positions.Add(float4.RotateVector(source.Positions[vertexIndex], orientation) + translation);
+                normals.Add(float4.RotateVector(source.Normals[vertexIndex], orientation));
+                texCoords.Add(source.TexCoords[vertexIndex]);
+            }
+
+            for (int index = 0; index < source.Indices16.Length; index++) {
+                int combinedIndex = source.Indices16[index] + vertexOffset;
+                if (combinedIndex > ushort.MaxValue) {
+                    throw new InvalidOperationException("Directional-light arrow index exceeds 16-bit capacity.");
+                }
+
+                indices.Add((ushort)combinedIndex);
+            }
+        }
+
+        /// <summary>
+        /// Creates the fixed child orientation that points the authored light arrow upward in camera space.
+        /// </summary>
+        /// <returns>Quaternion rotating local -Z into world +Y.</returns>
+        float4 CreateArrowFacingUpOrientation() {
+            float3 xAxis = new float3(1f, 0f, 0f);
+            float4 orientation;
+            float4.CreateFromAxisAngle(ref xAxis, (float)(Math.PI * 0.5), out orientation);
+            return orientation;
+        }
+
+        /// <summary>
+        /// Creates the rotation that maps +Y-aligned primitive meshes into the local -Z forward axis.
+        /// </summary>
+        /// <returns>Quaternion rotating +Y into -Z.</returns>
+        float4 CreateNegativeZAxisOrientation() {
+            float3 xAxis = new float3(1f, 0f, 0f);
+            float4 orientation;
+            float4.CreateFromAxisAngle(ref xAxis, (float)(-Math.PI * 0.5), out orientation);
+            return orientation;
+        }
+
+        /// <summary>
+        /// Appends one float to the supplied OBJ builder using invariant formatting.
+        /// </summary>
+        /// <param name="builder">Destination text builder.</param>
+        /// <param name="value">Float value to append.</param>
+        void AppendInvariantFloat(StringBuilder builder, float value) {
+            if (builder == null) {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            builder.Append(value.ToString("G9", CultureInfo.InvariantCulture));
+        }
+
+        /// <summary>
+        /// Appends one OBJ face vertex reference using the shared position, texture-coordinate, and normal index.
+        /// </summary>
+        /// <param name="builder">Destination text builder.</param>
+        /// <param name="zeroBasedIndex">Zero-based mesh vertex index.</param>
+        void AppendObjFaceVertex(StringBuilder builder, ushort zeroBasedIndex) {
+            if (builder == null) {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            int oneBasedIndex = zeroBasedIndex + 1;
+            builder.Append(oneBasedIndex);
+            builder.Append('/');
+            builder.Append(oneBasedIndex);
+            builder.Append('/');
+            builder.Append(oneBasedIndex);
         }
 
         /// <summary>
