@@ -108,7 +108,8 @@ namespace city.rendering.tools {
                     cubeReference,
                     standardMaterialReference,
                     lamppostReference,
-                    racerReference
+                    racerReference,
+                    DemoDiscSceneComponentRecordFactory.CreateEditorFontReference()
                 }.Concat(racerMaterialReferences).ToArray(),
                 RootEntities = new[] {
                     CreateCameraEntity(),
@@ -140,7 +141,8 @@ namespace city.rendering.tools {
                 Components = new[] {
                     CreateCameraComponentRecord(),
                     RenderingScriptComponentRecordFactory.CreateCameraOrbitRecord(1, new float3(0f, 2f, 0f), 28f, 12f, 0f, 0.05f, -0.24f),
-                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(2)
+                    DemoDiscSceneComponentRecordFactory.CreateFpsComponentRecord(2),
+                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(3)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };

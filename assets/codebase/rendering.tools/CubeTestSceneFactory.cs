@@ -87,7 +87,8 @@ namespace city.rendering.tools {
                 Id = SceneId,
                 AssetReferences = new[] {
                     cubeReference,
-                    standardMaterialReference
+                    standardMaterialReference,
+                    DemoDiscSceneComponentRecordFactory.CreateEditorFontReference()
                 },
                 RootEntities = new[] {
                     CreateCameraEntity(),
@@ -110,7 +111,8 @@ namespace city.rendering.tools {
                 LocalOrientation = float4.Identity,
                 Components = new[] {
                     CreateCameraComponentRecord(),
-                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(1)
+                    DemoDiscSceneComponentRecordFactory.CreateFpsComponentRecord(1),
+                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(2)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };

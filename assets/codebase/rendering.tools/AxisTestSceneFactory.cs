@@ -246,7 +246,8 @@ namespace city.rendering.tools {
                     CreateAxisMaterialReference(1),
                     CreateAxisMaterialReference(2),
                     CreateAxisMaterialReference(3),
-                    markerMaterialReference
+                    markerMaterialReference,
+                    DemoDiscSceneComponentRecordFactory.CreateEditorFontReference()
                 },
                 RootEntities = new[] {
                     CreateCameraEntity(),
@@ -293,7 +294,8 @@ namespace city.rendering.tools {
                 LocalOrientation = float4.Identity,
                 Components = new[] {
                     CreateCameraComponentRecord(),
-                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(1)
+                    DemoDiscSceneComponentRecordFactory.CreateFpsComponentRecord(1),
+                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(2)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };

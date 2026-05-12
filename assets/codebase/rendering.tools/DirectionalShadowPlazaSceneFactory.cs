@@ -99,7 +99,8 @@ namespace city.rendering.tools {
                     planeReference,
                     cubeReference,
                     sphereReference,
-                    standardMaterialReference
+                    standardMaterialReference,
+                    DemoDiscSceneComponentRecordFactory.CreateEditorFontReference()
                 },
                 RootEntities = new[] {
                     CreateCameraEntity(),
@@ -134,7 +135,8 @@ namespace city.rendering.tools {
                 Components = new[] {
                     CreateCameraComponentRecord(),
                     RenderingScriptComponentRecordFactory.CreateCameraOrbitRecord(1, new float3(0f, 0f, 0f), 64f, 24f, 0f, 0.07f, -0.28f),
-                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(2)
+                    DemoDiscSceneComponentRecordFactory.CreateFpsComponentRecord(2),
+                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(3)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };

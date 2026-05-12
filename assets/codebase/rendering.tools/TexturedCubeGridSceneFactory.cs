@@ -348,7 +348,8 @@ namespace city.rendering.tools {
             }
 
             List<SceneAssetReference> assetReferences = new List<SceneAssetReference> {
-                cubeReference
+                cubeReference,
+                DemoDiscSceneComponentRecordFactory.CreateEditorFontReference()
             };
             for (int cubeIndex = 0; cubeIndex < CubeMaterialRelativePaths.Length; cubeIndex++) {
                 assetReferences.Add(CreateTexturedMaterialReference(cubeIndex));
@@ -389,7 +390,8 @@ namespace city.rendering.tools {
                 LocalOrientation = float4.Identity,
                 Components = [
                     CreateCameraComponentRecord(),
-                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(1)
+                    DemoDiscSceneComponentRecordFactory.CreateFpsComponentRecord(1),
+                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(2)
                 ],
                 Children = Array.Empty<SceneEntityAsset>()
             };
