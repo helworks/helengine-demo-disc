@@ -24,8 +24,10 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
+            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService();
+            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(context.ProjectRootPath);
             RenderingSceneGenerator generator = new RenderingSceneGenerator();
-            generator.Generate(context.ProjectRootPath);
+            generator.Generate(context.ProjectRootPath, assets);
         }
     }
 }

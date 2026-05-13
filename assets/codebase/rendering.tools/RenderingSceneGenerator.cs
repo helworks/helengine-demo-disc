@@ -6,11 +6,6 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class RenderingSceneGenerator {
         /// <summary>
-        /// Stable generated provider identifier used for built-in primitive assets.
-        /// </summary>
-        const string GeneratedProviderId = EngineGeneratedAssetProvider.ProviderIdValue;
-
-        /// <summary>
         /// Stable scene id used by the cube-test showcase.
         /// </summary>
         public const string CubeTestSceneId = "scenes/rendering/cube_test.helen";
@@ -109,83 +104,48 @@ namespace city.rendering.tools {
         /// Writes the current rendering showcase scene set into the supplied city project.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        public void Generate(string projectRootPath) {
-            RuntimeModel generatedCubeModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.CubeAssetId);
-            RuntimeMaterial generatedStandardMaterial = EngineGeneratedMaterialCache.GetRuntimeMaterial(EngineGeneratedMaterialCache.StandardAssetId);
-            SceneAssetReference cubeReference = CreateGeneratedReference(EngineGeneratedAssetProvider.CubeRelativePath, EngineGeneratedModelCache.CubeAssetId);
-            SceneAssetReference planeReference = CreateGeneratedReference(EngineGeneratedAssetProvider.PlaneRelativePath, EngineGeneratedModelCache.PlaneAssetId);
-            SceneAssetReference sphereReference = CreateGeneratedReference(EngineGeneratedAssetProvider.SphereRelativePath, EngineGeneratedModelCache.SphereAssetId);
-            SceneAssetReference standardMaterialReference = CreateGeneratedReference(EngineGeneratedAssetProvider.StandardMaterialRelativePath, EngineGeneratedMaterialCache.StandardAssetId);
-            SceneAssetReference lamppostReference = CreateFileReference("models/Riemers/lamppost.x");
-            SceneAssetReference racerReference = CreateFileReference("models/Riemers/racer.x");
-            SceneAssetReference[] racerMaterialReferences = new[] {
-                CreateFileReference("models/Riemers/racer/x3ds_mat_ruedas.hasset"),
-                CreateFileReference("models/Riemers/racer/x3ds_mat_Material__0_3.hasset"),
-                CreateFileReference("models/Riemers/racer/x3ds_mat_Material_1_2.hasset"),
-                CreateFileReference("models/Riemers/racer/x3ds_mat_Material_2_1.hasset")
-            };
+        /// <param name="assets">Prepared runtime assets required by the showcase scene factories.</param>
+        public void Generate(string projectRootPath, RenderingSceneGenerationAssets assets) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (assets == null) {
+                throw new ArgumentNullException(nameof(assets));
+            } else if (assets.GeneratedCubeModel == null) {
+                throw new ArgumentNullException(nameof(assets));
+            } else if (assets.GeneratedPlaneModel == null) {
+                throw new ArgumentNullException(nameof(assets));
+            } else if (assets.GeneratedSphereModel == null) {
+                throw new ArgumentNullException(nameof(assets));
+            } else if (assets.GeneratedStandardMaterial == null) {
+                throw new ArgumentNullException(nameof(assets));
+            } else if (assets.GeneratedArrowModel == null) {
+                throw new ArgumentNullException(nameof(assets));
+            } else if (assets.AxisMaterials == null) {
+                throw new ArgumentNullException(nameof(assets));
+            } else if (assets.RacerMaterials == null) {
+                throw new ArgumentNullException(nameof(assets));
+            } else if (assets.LamppostModel == null) {
+                throw new ArgumentNullException(nameof(assets));
+            } else if (assets.RacerModel == null) {
+                throw new ArgumentNullException(nameof(assets));
+            }
 
-            GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(generatedCubeModel, generatedStandardMaterial);
+            GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition coloredCubeGridSceneDefinition;
             GeneratedAuthoringSceneDefinition texturedCubeGridSceneDefinition;
-            SceneAsset axisTestSceneAsset = AxisTestFactory.CreateSceneAsset(cubeReference);
-            SceneAsset axisTest2SceneAsset = AxisTest2Factory.CreateSceneAsset(cubeReference);
-            SceneAsset directionalShadowPlazaSceneAsset = DirectionalShadowPlazaFactory.CreateSceneAsset(planeReference, cubeReference, sphereReference, standardMaterialReference);
-            SceneAsset spotlightStreetSliceSceneAsset = SpotlightStreetSliceFactory.CreateSceneAsset(planeReference, cubeReference, standardMaterialReference, lamppostReference, racerReference, racerMaterialReferences);
-            ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
-            coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(generatedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
-            TexturedCubeGridFactory.WriteAssets(projectRootPath);
-            texturedCubeGridSceneDefinition = TexturedCubeGridFactory.CreateSceneDefinition(generatedCubeModel, TexturedCubeGridFactory.CreateRuntimeMaterials(generatedStandardMaterial));
-            AxisTestFactory.WriteAssets(projectRootPath);
-            AxisTest2Factory.WriteAssets(projectRootPath);
+            GeneratedAuthoringSceneDefinition axisTestSceneDefinition = AxisTestFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
+            GeneratedAuthoringSceneDefinition axisTest2SceneDefinition = AxisTest2Factory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
+            GeneratedAuthoringSceneDefinition directionalShadowPlazaSceneDefinition = DirectionalShadowPlazaFactory.CreateSceneDefinition(assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial);
+            GeneratedAuthoringSceneDefinition spotlightStreetSliceSceneDefinition = SpotlightStreetSliceFactory.CreateSceneDefinition(assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial, assets.LamppostModel, assets.RacerModel, assets.RacerMaterials);
+            coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(assets.GeneratedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
+            texturedCubeGridSceneDefinition = TexturedCubeGridFactory.CreateSceneDefinition(assets.GeneratedCubeModel, TexturedCubeGridFactory.CreateRuntimeMaterials(assets.GeneratedStandardMaterial));
             AuthoringSceneWriteService.WriteScene(projectRootPath, cubeTestSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, coloredCubeGridSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, texturedCubeGridSceneDefinition);
-            SceneWriteService.WriteScene(projectRootPath, AxisTestSceneId, axisTestSceneAsset);
-            SceneWriteService.WriteScene(projectRootPath, AxisTest2SceneId, axisTest2SceneAsset);
-            SceneWriteService.WriteScene(projectRootPath, DirectionalShadowPlazaSceneId, directionalShadowPlazaSceneAsset);
-            SceneWriteService.WriteScene(projectRootPath, SpotlightStreetSliceSceneId, spotlightStreetSliceSceneAsset);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, axisTestSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, axisTest2SceneDefinition);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, directionalShadowPlazaSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, spotlightStreetSliceSceneDefinition);
         }
-
-        /// <summary>
-        /// Creates one generated scene asset reference for a built-in engine asset.
-        /// </summary>
-        /// <param name="relativePath">Relative generated asset path.</param>
-        /// <param name="assetId">Stable generated asset identifier.</param>
-        /// <returns>Stable generated scene asset reference.</returns>
-        SceneAssetReference CreateGeneratedReference(string relativePath, string assetId) {
-            if (string.IsNullOrWhiteSpace(relativePath)) {
-                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
-            } else if (string.IsNullOrWhiteSpace(assetId)) {
-                throw new ArgumentException("Asset id must be provided.", nameof(assetId));
-            }
-
-            return new SceneAssetReference {
-                SourceKind = SceneAssetReferenceSourceKind.Generated,
-                RelativePath = relativePath,
-                ProviderId = GeneratedProviderId,
-                AssetId = assetId
-            };
-        }
-
-        /// <summary>
-        /// Creates one file-backed scene asset reference for an authored project asset.
-        /// </summary>
-        /// <param name="relativePath">Project-relative asset path.</param>
-        /// <returns>Stable file-backed scene asset reference.</returns>
-        SceneAssetReference CreateFileReference(string relativePath) {
-            if (string.IsNullOrWhiteSpace(relativePath)) {
-                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
-            }
-
-            return new SceneAssetReference {
-                SourceKind = SceneAssetReferenceSourceKind.FileSystem,
-                RelativePath = relativePath.Replace('\\', '/'),
-                ProviderId = string.Empty,
-                AssetId = string.Empty
-            };
-        }
-
     }
 }
-
