@@ -235,6 +235,7 @@ namespace city.rendering.tools {
             MaterialAssetProcessorSettings windowsSettings = new MaterialAssetProcessorSettings();
             windowsSettings.SchemaId = "standard-shader";
             windowsSettings.FieldValues["use-custom-shader"] = "false";
+            windowsSettings.FieldValues["shader-asset-id"] = "ForwardStandardShader";
             windowsSettings.FieldValues["texture-id"] = string.Empty;
             windowsSettings.FieldValues["casts-shadow"] = "true";
             windowsSettings.FieldValues["receives-shadow"] = "true";
@@ -253,6 +254,7 @@ namespace city.rendering.tools {
             MaterialAssetProcessorSettings pspSettings = new MaterialAssetProcessorSettings();
             pspSettings.SchemaId = "standard-shader";
             pspSettings.FieldValues["use-custom-shader"] = "false";
+            pspSettings.FieldValues["shader-asset-id"] = "ForwardStandardShader";
             pspSettings.FieldValues["texture-id"] = string.Empty;
             pspSettings.FieldValues["casts-shadow"] = "true";
             pspSettings.FieldValues["receives-shadow"] = "true";
@@ -347,3 +349,5 @@ namespace city.rendering.tools {
         }
     }
 }
+
+

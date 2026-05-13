@@ -44,7 +44,8 @@ namespace city.menu {
                 throw new InvalidOperationException("A core instance must exist before returning to the demo-disc main menu.");
             }
 
-            if (ComponentExecutionContext.CurrentMode == ComponentExecutionMode.Editor) {
+#if HELENGINE_EDITOR
+            if (true) {
                 if (Core.Instance.SceneLoadService == null) {
                     throw new InvalidOperationException("Core scene loading services must be initialized before returning to the demo-disc main menu.");
                 }
@@ -54,11 +55,14 @@ namespace city.menu {
                 if (Parent != null) {
                     Parent.Enabled = false;
                 }
-            } else if (Core.Instance.SceneManager == null) {
+            }
+#else
+            if (Core.Instance.SceneManager == null) {
                 throw new InvalidOperationException("Core scene manager must be initialized before returning to the demo-disc main menu.");
             } else {
                 Core.Instance.SceneManager.LoadScene(MainMenuSceneId, SceneLoadMode.Single);
             }
+#endif
         }
 
         /// <summary>
@@ -109,3 +113,5 @@ namespace city.menu {
         }
     }
 }
+
+

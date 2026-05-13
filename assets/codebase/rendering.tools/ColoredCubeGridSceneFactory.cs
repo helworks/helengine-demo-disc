@@ -59,6 +59,7 @@ namespace city.rendering.tools {
         /// Stable material field identifier used for authored texture bindings.
         /// </summary>
         const string TextureIdFieldId = "texture-id";
+        const string ShaderAssetIdFieldId = "shader-asset-id";
 
         /// <summary>
         /// Stable material field identifier used for shadow-casting participation.
@@ -365,6 +366,7 @@ namespace city.rendering.tools {
             MaterialAssetProcessorSettings windowsSettings = new MaterialAssetProcessorSettings();
             windowsSettings.SchemaId = WindowsMaterialSchemaId;
             windowsSettings.FieldValues[UseCustomShaderFieldId] = "false";
+            windowsSettings.FieldValues[ShaderAssetIdFieldId] = StandardShaderAssetId;
             windowsSettings.FieldValues[TextureIdFieldId] = string.Empty;
             windowsSettings.FieldValues[CastsShadowFieldId] = "true";
             windowsSettings.FieldValues[ReceivesShadowFieldId] = "true";
@@ -383,6 +385,7 @@ namespace city.rendering.tools {
             MaterialAssetProcessorSettings pspSettings = new MaterialAssetProcessorSettings();
             pspSettings.SchemaId = WindowsMaterialSchemaId;
             pspSettings.FieldValues[UseCustomShaderFieldId] = "false";
+            pspSettings.FieldValues[ShaderAssetIdFieldId] = StandardShaderAssetId;
             pspSettings.FieldValues[TextureIdFieldId] = string.Empty;
             pspSettings.FieldValues[CastsShadowFieldId] = "true";
             pspSettings.FieldValues[ReceivesShadowFieldId] = "true";
@@ -455,3 +458,5 @@ namespace city.rendering.tools {
         }
     }
 }
+
+

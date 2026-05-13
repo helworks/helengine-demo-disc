@@ -50,7 +50,17 @@ namespace city.menu {
                             new MenuItemDefinition("options-controls", "Controls", "Placeholder row for future input remapping.", true, new MenuActionDefinition(MenuActionKind.None, string.Empty)),
                             new MenuItemDefinition("options-back", "Back", "Returns to the main menu.", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))
                         })
-                });
+                },
+                new MenuOverlayImageDefinition(
+                    theme.LogoTexturePath,
+                    theme.LogoWidth,
+                    theme.LogoHeight,
+                    theme.LogoBottomMargin,
+                    theme.LogoRightMargin),
+                new MenuPlatformInfoDefinition(
+                    theme.PlatformInfoTopMargin,
+                    theme.PlatformInfoRightMargin,
+                    theme.PlatformInfoLineSpacing));
         }
     }
 }

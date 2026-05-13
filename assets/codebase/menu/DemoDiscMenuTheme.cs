@@ -1,6 +1,6 @@
-﻿namespace city.menu {
+namespace city.menu {
     /// <summary>
-    /// Stores reusable colors, fonts, and decorative artwork paths for the demo-disc menu.
+    /// Stores reusable colors, font paths, and decorative artwork paths for the first-pass demo-disc menu.
     /// </summary>
     public sealed class DemoDiscMenuTheme {
         /// <summary>
@@ -29,14 +29,29 @@
         public int LogoHeight => 220;
 
         /// <summary>
-        /// Gets the decorative logo top margin in authored canvas pixels.
+        /// Gets the decorative logo bottom margin in authored canvas pixels.
         /// </summary>
-        public int LogoTopMargin => 36;
+        public int LogoBottomMargin => 36;
 
         /// <summary>
         /// Gets the decorative logo right margin in authored canvas pixels.
         /// </summary>
         public int LogoRightMargin => 44;
+
+        /// <summary>
+        /// Gets the top margin used by the platform-info overlay.
+        /// </summary>
+        public int PlatformInfoTopMargin => 28;
+
+        /// <summary>
+        /// Gets the right margin used by the platform-info overlay.
+        /// </summary>
+        public int PlatformInfoRightMargin => 44;
+
+        /// <summary>
+        /// Gets the vertical spacing between the platform-name and platform-version lines.
+        /// </summary>
+        public int PlatformInfoLineSpacing => 6;
 
         /// <summary>
         /// Gets the primary lilac background color.
@@ -52,6 +67,7 @@
         /// Gets the panel border color.
         /// </summary>
         public byte4 SurfaceBorderColor => new byte4(135, 94, 163, 255);
+
 
         /// <summary>
         /// Gets the primary accent color.
