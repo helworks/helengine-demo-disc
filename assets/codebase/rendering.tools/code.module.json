@@ -1,6 +1,7 @@
 {
   "moduleId": "rendering.tools",
   "dependencyModuleIds": [
+    "gameplay",
     "scene.tools"
   ],
   "loadScopes": [

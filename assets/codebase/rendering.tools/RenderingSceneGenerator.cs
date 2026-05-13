@@ -51,6 +51,11 @@ namespace city.rendering.tools {
         readonly GeneratedSceneWriteService SceneWriteService;
 
         /// <summary>
+        /// Writer used to persist generated live-authored scenes through the editor save pipeline.
+        /// </summary>
+        readonly GeneratedAuthoringSceneWriteService AuthoringSceneWriteService;
+
+        /// <summary>
         /// Factory used to author the directional-shadow plaza scene.
         /// </summary>
         readonly DirectionalShadowPlazaSceneFactory DirectionalShadowPlazaFactory;
@@ -90,6 +95,7 @@ namespace city.rendering.tools {
         /// </summary>
         public RenderingSceneGenerator() {
             SceneWriteService = new GeneratedSceneWriteService();
+            AuthoringSceneWriteService = new GeneratedAuthoringSceneWriteService();
             DirectionalShadowPlazaFactory = new DirectionalShadowPlazaSceneFactory();
             SpotlightStreetSliceFactory = new SpotlightStreetSliceSceneFactory();
             CubeTestFactory = new CubeTestSceneFactory();
@@ -111,13 +117,13 @@ namespace city.rendering.tools {
             SceneAssetReference lamppostReference = CreateFileReference("models/Riemers/lamppost.x");
             SceneAssetReference racerReference = CreateFileReference("models/Riemers/racer.x");
             SceneAssetReference[] racerMaterialReferences = new[] {
-                CreateFileReference("models/Riemers/racer/x3ds_mat_ruedas.helmat"),
-                CreateFileReference("models/Riemers/racer/x3ds_mat_Material__0_3.helmat"),
-                CreateFileReference("models/Riemers/racer/x3ds_mat_Material_1_2.helmat"),
-                CreateFileReference("models/Riemers/racer/x3ds_mat_Material_2_1.helmat")
+                CreateFileReference("models/Riemers/racer/x3ds_mat_ruedas.hasset"),
+                CreateFileReference("models/Riemers/racer/x3ds_mat_Material__0_3.hasset"),
+                CreateFileReference("models/Riemers/racer/x3ds_mat_Material_1_2.hasset"),
+                CreateFileReference("models/Riemers/racer/x3ds_mat_Material_2_1.hasset")
             };
 
-            SceneAsset cubeTestSceneAsset = CubeTestFactory.CreateSceneAsset(cubeReference, standardMaterialReference);
+            GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(cubeReference, standardMaterialReference);
             SceneAsset coloredCubeGridSceneAsset = ColoredCubeGridFactory.CreateSceneAsset(cubeReference);
             SceneAsset texturedCubeGridSceneAsset = TexturedCubeGridFactory.CreateSceneAsset(cubeReference);
             SceneAsset axisTestSceneAsset = AxisTestFactory.CreateSceneAsset(cubeReference);
@@ -128,7 +134,7 @@ namespace city.rendering.tools {
             TexturedCubeGridFactory.WriteAssets(projectRootPath);
             AxisTestFactory.WriteAssets(projectRootPath);
             AxisTest2Factory.WriteAssets(projectRootPath);
-            SceneWriteService.WriteScene(projectRootPath, CubeTestSceneId, cubeTestSceneAsset);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, cubeTestSceneDefinition);
             SceneWriteService.WriteScene(projectRootPath, ColoredCubeGridSceneId, coloredCubeGridSceneAsset);
             SceneWriteService.WriteScene(projectRootPath, TexturedCubeGridSceneId, texturedCubeGridSceneAsset);
             SceneWriteService.WriteScene(projectRootPath, AxisTestSceneId, axisTestSceneAsset);

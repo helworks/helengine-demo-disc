@@ -1000,11 +1000,11 @@ namespace city.rendering.tools {
         /// <returns>Stable project-relative material paths.</returns>
         static string[] BuildMaterialRelativePaths() {
             return new[] {
-                MaterialRootRelativePath + "/X.helmat",
-                MaterialRootRelativePath + "/Y.helmat",
-                MaterialRootRelativePath + "/Z.helmat",
-                MaterialRootRelativePath + "/Ground.helmat",
-                MaterialRootRelativePath + "/Marker.helmat"
+                MaterialRootRelativePath + "/X.hasset",
+                MaterialRootRelativePath + "/Y.hasset",
+                MaterialRootRelativePath + "/Z.hasset",
+                MaterialRootRelativePath + "/Ground.hasset",
+                MaterialRootRelativePath + "/Marker.hasset"
             };
         }
 

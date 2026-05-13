@@ -742,7 +742,7 @@ namespace city.rendering.tools {
         static string[] BuildMaterialRelativePaths() {
             string[] relativePaths = new string[16];
             for (int cubeIndex = 0; cubeIndex < relativePaths.Length; cubeIndex++) {
-                relativePaths[cubeIndex] = MaterialRootRelativePath + "/Cube" + cubeIndex.ToString("00") + ".helmat";
+                relativePaths[cubeIndex] = MaterialRootRelativePath + "/Cube" + cubeIndex.ToString("00") + ".hasset";
             }
 
             return relativePaths;
