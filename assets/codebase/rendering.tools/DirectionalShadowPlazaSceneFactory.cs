@@ -61,6 +61,11 @@ namespace city.rendering.tools {
         readonly RuntimeMaterial PlaceholderMaterial;
 
         /// <summary>
+        /// Allocates scene-local numeric entity ids for one authored scene build.
+        /// </summary>
+        readonly SceneEntityAssetIdAllocator SceneEntityIdAllocator;
+
+        /// <summary>
         /// Initializes the directional-shadow plaza scene factory with the persistence descriptors required for authored output.
         /// </summary>
         public DirectionalShadowPlazaSceneFactory() {
@@ -68,6 +73,7 @@ namespace city.rendering.tools {
             DirectionalLightDescriptor = new DirectionalLightComponentPersistenceDescriptor();
             PlaceholderModel = new AuthoringPlaceholderRuntimeModel();
             PlaceholderMaterial = new RuntimeMaterial();
+            SceneEntityIdAllocator = new SceneEntityAssetIdAllocator();
         }
 
         /// <summary>
@@ -93,6 +99,8 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(standardMaterialReference));
             }
 
+            SceneEntityIdAllocator.Reset();
+
             return new SceneAsset {
                 Id = SceneId,
                 AssetReferences = new[] {
@@ -107,14 +115,14 @@ namespace city.rendering.tools {
                     CreateDirectionalLightEntity(),
                     CreateGroundEntity(planeReference, standardMaterialReference),
                     CreateShadowMastEntity(cubeReference, standardMaterialReference),
-                    CreateBuildingEntity("directional-shadow-plaza-tower-left", "DirectionalShadowPlazaWestTower", new float3(-16f, 7f, -9f), new float3(6f, 14f, 6f), cubeReference, standardMaterialReference),
-                    CreateBuildingEntity("directional-shadow-plaza-tower-center", "DirectionalShadowPlazaCentralTower", new float3(0f, 9f, -12f), new float3(7f, 18f, 7f), cubeReference, standardMaterialReference),
-                    CreateBuildingEntity("directional-shadow-plaza-tower-right", "DirectionalShadowPlazaEastTower", new float3(15f, 6f, -7f), new float3(5f, 12f, 5f), cubeReference, standardMaterialReference),
+                    CreateBuildingEntity("DirectionalShadowPlazaWestTower", new float3(-16f, 7f, -9f), new float3(6f, 14f, 6f), cubeReference, standardMaterialReference),
+                    CreateBuildingEntity("DirectionalShadowPlazaCentralTower", new float3(0f, 9f, -12f), new float3(7f, 18f, 7f), cubeReference, standardMaterialReference),
+                    CreateBuildingEntity("DirectionalShadowPlazaEastTower", new float3(15f, 6f, -7f), new float3(5f, 12f, 5f), cubeReference, standardMaterialReference),
                     CreateOrbitHeroEntity(sphereReference, standardMaterialReference),
-                    CreateBuildingEntity("directional-shadow-plaza-receiver-a", "DirectionalShadowPlazaSouthwestBlock", new float3(-15f, 3f, 12f), new float3(6f, 6f, 6f), cubeReference, standardMaterialReference),
-                    CreateBuildingEntity("directional-shadow-plaza-receiver-b", "DirectionalShadowPlazaSouthCentralBlock", new float3(-4f, 2.5f, 14f), new float3(5f, 5f, 5f), cubeReference, standardMaterialReference),
-                    CreateBuildingEntity("directional-shadow-plaza-receiver-c", "DirectionalShadowPlazaNortheastBlock", new float3(13f, 2f, 11f), new float3(4f, 4f, 4f), cubeReference, standardMaterialReference),
-                    CreateBuildingEntity("directional-shadow-plaza-receiver-d", "DirectionalShadowPlazaMidriseBlock", new float3(8f, 3.5f, 2f), new float3(5f, 7f, 5f), cubeReference, standardMaterialReference)
+                    CreateBuildingEntity("DirectionalShadowPlazaSouthwestBlock", new float3(-15f, 3f, 12f), new float3(6f, 6f, 6f), cubeReference, standardMaterialReference),
+                    CreateBuildingEntity("DirectionalShadowPlazaSouthCentralBlock", new float3(-4f, 2.5f, 14f), new float3(5f, 5f, 5f), cubeReference, standardMaterialReference),
+                    CreateBuildingEntity("DirectionalShadowPlazaNortheastBlock", new float3(13f, 2f, 11f), new float3(4f, 4f, 4f), cubeReference, standardMaterialReference),
+                    CreateBuildingEntity("DirectionalShadowPlazaMidriseBlock", new float3(8f, 3.5f, 2f), new float3(5f, 7f, 5f), cubeReference, standardMaterialReference)
                 }
             };
         }
@@ -127,7 +135,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(0f, -0.28f, 0f, out orientation);
             return new SceneEntityAsset {
-                Id = "directional-shadow-plaza-camera",
+                Id = AllocateSceneEntityId(),
                 Name = "DirectionalShadowPlazaCamera",
                 LocalPosition = new float3(0f, 24f, 64f),
                 LocalScale = float3.One,
@@ -150,7 +158,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(0f, -0.72f, 0f, out orientation);
             return new SceneEntityAsset {
-                Id = "directional-shadow-plaza-sun",
+                Id = AllocateSceneEntityId(),
                 Name = "DirectionalShadowPlazaSun",
                 LocalPosition = new float3(0f, 18f, 0f),
                 LocalScale = float3.One,
@@ -171,7 +179,7 @@ namespace city.rendering.tools {
         /// <returns>Serialized shadow mast entity.</returns>
         SceneEntityAsset CreateShadowMastEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return new SceneEntityAsset {
-                Id = "directional-shadow-plaza-shadow-mast",
+                Id = AllocateSceneEntityId(),
                 Name = "DirectionalShadowPlazaShadowMast",
                 LocalPosition = new float3(-9f, 7f, 4f),
                 LocalScale = new float3(1.4f, 14f, 1.4f),
@@ -186,7 +194,6 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates one static building entity for the city-block composition.
         /// </summary>
-        /// <param name="id">Stable entity id.</param>
         /// <param name="name">Display name stored on the entity.</param>
         /// <param name="localPosition">Local position assigned to the entity.</param>
         /// <param name="localScale">Local scale assigned to the entity.</param>
@@ -194,14 +201,13 @@ namespace city.rendering.tools {
         /// <param name="materialReference">Stable generated material reference used by the mesh payload.</param>
         /// <returns>Serialized building entity.</returns>
         SceneEntityAsset CreateBuildingEntity(
-            string id,
             string name,
             float3 localPosition,
             float3 localScale,
             SceneAssetReference modelReference,
             SceneAssetReference materialReference) {
             return new SceneEntityAsset {
-                Id = id,
+                Id = AllocateSceneEntityId(),
                 Name = name,
                 LocalPosition = localPosition,
                 LocalScale = localScale,
@@ -221,7 +227,7 @@ namespace city.rendering.tools {
         /// <returns>Serialized orbiting sphere entity.</returns>
         SceneEntityAsset CreateOrbitHeroEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return new SceneEntityAsset {
-                Id = "directional-shadow-plaza-hero",
+                Id = AllocateSceneEntityId(),
                 Name = "DirectionalShadowPlazaHeroSphere",
                 LocalPosition = new float3(0f, 2.5f, 10f),
                 LocalScale = new float3(3f, 3f, 3f),
@@ -242,7 +248,7 @@ namespace city.rendering.tools {
         /// <returns>Serialized ground entity.</returns>
         SceneEntityAsset CreateGroundEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return new SceneEntityAsset {
-                Id = "directional-shadow-plaza-ground",
+                Id = AllocateSceneEntityId(),
                 Name = "DirectionalShadowPlazaGround",
                 LocalPosition = new float3(0f, 0f, 0f),
                 LocalScale = new float3(48f, 1f, 48f),
@@ -368,6 +374,14 @@ namespace city.rendering.tools {
                 ShadowDistance = shadowDistance
             };
             return DirectionalLightDescriptor.SerializeComponent(lightComponent, 0, null).Payload;
+        }
+
+        /// <summary>
+        /// Allocates the next scene-local numeric entity id for the current authored scene build.
+        /// </summary>
+        /// <returns>Next scene-local entity id.</returns>
+        uint AllocateSceneEntityId() {
+            return SceneEntityIdAllocator.Allocate();
         }
     }
 }

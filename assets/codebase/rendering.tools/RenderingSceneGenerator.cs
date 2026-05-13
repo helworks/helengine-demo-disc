@@ -110,6 +110,8 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         public void Generate(string projectRootPath) {
+            RuntimeModel generatedCubeModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.CubeAssetId);
+            RuntimeMaterial generatedStandardMaterial = EngineGeneratedMaterialCache.GetRuntimeMaterial(EngineGeneratedMaterialCache.StandardAssetId);
             SceneAssetReference cubeReference = CreateGeneratedReference(EngineGeneratedAssetProvider.CubeRelativePath, EngineGeneratedModelCache.CubeAssetId);
             SceneAssetReference planeReference = CreateGeneratedReference(EngineGeneratedAssetProvider.PlaneRelativePath, EngineGeneratedModelCache.PlaneAssetId);
             SceneAssetReference sphereReference = CreateGeneratedReference(EngineGeneratedAssetProvider.SphereRelativePath, EngineGeneratedModelCache.SphereAssetId);
@@ -123,20 +125,22 @@ namespace city.rendering.tools {
                 CreateFileReference("models/Riemers/racer/x3ds_mat_Material_2_1.hasset")
             };
 
-            GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(cubeReference, standardMaterialReference);
-            SceneAsset coloredCubeGridSceneAsset = ColoredCubeGridFactory.CreateSceneAsset(cubeReference);
-            SceneAsset texturedCubeGridSceneAsset = TexturedCubeGridFactory.CreateSceneAsset(cubeReference);
+            GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(generatedCubeModel, generatedStandardMaterial);
+            GeneratedAuthoringSceneDefinition coloredCubeGridSceneDefinition;
+            GeneratedAuthoringSceneDefinition texturedCubeGridSceneDefinition;
             SceneAsset axisTestSceneAsset = AxisTestFactory.CreateSceneAsset(cubeReference);
             SceneAsset axisTest2SceneAsset = AxisTest2Factory.CreateSceneAsset(cubeReference);
             SceneAsset directionalShadowPlazaSceneAsset = DirectionalShadowPlazaFactory.CreateSceneAsset(planeReference, cubeReference, sphereReference, standardMaterialReference);
             SceneAsset spotlightStreetSliceSceneAsset = SpotlightStreetSliceFactory.CreateSceneAsset(planeReference, cubeReference, standardMaterialReference, lamppostReference, racerReference, racerMaterialReferences);
             ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
+            coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(generatedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
             TexturedCubeGridFactory.WriteAssets(projectRootPath);
+            texturedCubeGridSceneDefinition = TexturedCubeGridFactory.CreateSceneDefinition(generatedCubeModel, TexturedCubeGridFactory.CreateRuntimeMaterials(generatedStandardMaterial));
             AxisTestFactory.WriteAssets(projectRootPath);
             AxisTest2Factory.WriteAssets(projectRootPath);
             AuthoringSceneWriteService.WriteScene(projectRootPath, cubeTestSceneDefinition);
-            SceneWriteService.WriteScene(projectRootPath, ColoredCubeGridSceneId, coloredCubeGridSceneAsset);
-            SceneWriteService.WriteScene(projectRootPath, TexturedCubeGridSceneId, texturedCubeGridSceneAsset);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, coloredCubeGridSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, texturedCubeGridSceneDefinition);
             SceneWriteService.WriteScene(projectRootPath, AxisTestSceneId, axisTestSceneAsset);
             SceneWriteService.WriteScene(projectRootPath, AxisTest2SceneId, axisTest2SceneAsset);
             SceneWriteService.WriteScene(projectRootPath, DirectionalShadowPlazaSceneId, directionalShadowPlazaSceneAsset);
@@ -184,3 +188,4 @@ namespace city.rendering.tools {
 
     }
 }
+

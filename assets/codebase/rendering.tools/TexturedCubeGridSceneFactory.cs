@@ -1,4 +1,4 @@
-using helengine.editor;
+using city.menu;
 
 namespace city.rendering.tools {
     /// <summary>
@@ -9,21 +9,6 @@ namespace city.rendering.tools {
         /// Stable scene id used by the generated textured cube-grid asset.
         /// </summary>
         public const string SceneId = RenderingSceneGenerator.TexturedCubeGridSceneId;
-
-        /// <summary>
-        /// Stable serialized component identifier used by mesh records.
-        /// </summary>
-        const string MeshComponentTypeId = "helengine.MeshComponent";
-
-        /// <summary>
-        /// Stable serialized component identifier used by camera records.
-        /// </summary>
-        const string CameraComponentTypeId = "helengine.CameraComponent";
-
-        /// <summary>
-        /// Stable serialized component identifier used by directional-light records.
-        /// </summary>
-        const string DirectionalLightComponentTypeId = "helengine.DirectionalLightComponent";
 
         /// <summary>
         /// Stable material importer identifier stored on generated sidecar settings.
@@ -49,6 +34,11 @@ namespace city.rendering.tools {
         /// Stable standard shader asset identifier used by compatibility material payloads.
         /// </summary>
         const string StandardShaderAssetId = "ForwardStandardShader";
+
+        /// <summary>
+        /// Stable standard shader source file used by generated textured cube-grid runtime materials.
+        /// </summary>
+        const string StandardShaderSourceFileName = "ForwardStandardShader.hlsl";
 
         /// <summary>
         /// Stable standard shader vertex program used by compatibility material payloads.
@@ -109,21 +99,6 @@ namespace city.rendering.tools {
         /// Stable PS2 material field identifier used for vertex-color control.
         /// </summary>
         const string VertexColorModeFieldId = "vertex-color-mode";
-
-        /// <summary>
-        /// Layer mask used by authored scene objects in packaged runtime scenes.
-        /// </summary>
-        const ushort SceneObjectsLayerMask = 0b0100000000000000;
-
-        /// <summary>
-        /// Stable save-state slot name used for serialized mesh model references.
-        /// </summary>
-        const string MeshModelReferenceName = "Model";
-
-        /// <summary>
-        /// Stable save-state slot name used for serialized mesh material references.
-        /// </summary>
-        const string MeshMaterialReferenceName = "Material";
 
         /// <summary>
         /// Relative project folder used for the generated textured cube-grid materials.
@@ -282,84 +257,15 @@ namespace city.rendering.tools {
         static readonly string[] CubeTextureAssetIds = BuildTextureAssetIds();
 
         /// <summary>
-        /// Stable authored starting orientations used to expose different cube faces before spin updates.
-        /// </summary>
-        /// <summary>
-        /// Descriptor used to serialize authored mesh payloads for committed editor scenes.
-        /// </summary>
-        readonly MeshComponentPersistenceDescriptor MeshDescriptor;
-
-        /// <summary>
-        /// Descriptor used to serialize authored directional-light payloads for committed editor scenes.
-        /// </summary>
-        readonly DirectionalLightComponentPersistenceDescriptor DirectionalLightDescriptor;
-
-        /// <summary>
         /// Service used to write generated material settings sidecars.
         /// </summary>
         readonly MaterialAssetSettingsService MaterialSettingsService;
 
         /// <summary>
-        /// Placeholder runtime model used only to satisfy authored mesh serialization before stable asset references are applied.
-        /// </summary>
-        readonly AuthoringPlaceholderRuntimeModel PlaceholderModel;
-
-        /// <summary>
-        /// Placeholder runtime material used only to satisfy authored mesh serialization before stable asset references are applied.
-        /// </summary>
-        readonly RuntimeMaterial PlaceholderMaterial;
-
-        /// <summary>
         /// Initializes the textured cube-grid scene factory with the descriptors and services required for authored output.
         /// </summary>
         public TexturedCubeGridSceneFactory() {
-            MeshDescriptor = new MeshComponentPersistenceDescriptor();
-            DirectionalLightDescriptor = new DirectionalLightComponentPersistenceDescriptor();
             MaterialSettingsService = new MaterialAssetSettingsService();
-            PlaceholderModel = new AuthoringPlaceholderRuntimeModel();
-            PlaceholderMaterial = new RuntimeMaterial();
-        }
-
-        /// <summary>
-        /// Creates the canonical textured cube-grid scene asset.
-        /// </summary>
-        /// <param name="cubeReference">Stable generated cube model reference.</param>
-        /// <returns>Authored scene asset for the sixteen-cube textured grid.</returns>
-        public SceneAsset CreateSceneAsset(SceneAssetReference cubeReference) {
-            if (cubeReference == null) {
-                throw new ArgumentNullException(nameof(cubeReference));
-            }
-
-            List<SceneEntityAsset> rootEntities = new List<SceneEntityAsset> {
-                CreateCameraEntity(),
-                CreateDirectionalLightEntity()
-            };
-
-            for (int row = 0; row < 4; row++) {
-                for (int column = 0; column < 4; column++) {
-                    int cubeIndex = (row * 4) + column;
-                    rootEntities.Add(CreateCubeEntity(
-                        cubeIndex,
-                        cubeReference,
-                        CreateTexturedMaterialReference(cubeIndex),
-                        new float3((column - 1.5f) * 3.0f, (1.5f - row) * 3.0f, 0f),
-                        float4.Identity));
-                }
-            }
-
-            List<SceneAssetReference> assetReferences = new List<SceneAssetReference> {
-                cubeReference,
-                DemoDiscSceneComponentRecordFactory.CreateEditorFontReference()
-            };
-            for (int cubeIndex = 0; cubeIndex < CubeMaterialRelativePaths.Length; cubeIndex++) {
-                assetReferences.Add(CreateTexturedMaterialReference(cubeIndex));
-            }
-
-            return new SceneAsset {
-                Id = SceneId,
-                AssetReferences = [.. assetReferences],
-                RootEntities = [.. rootEntities]
-            };
         }
 
         /// <summary>
@@ -378,206 +284,160 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
+        /// Creates the canonical textured cube-grid live-authored scene definition.
+        /// </summary>
+        /// <param name="cubeModel">Generated cube runtime model assigned to every cube.</param>
+        /// <param name="texturedMaterials">Generated runtime materials assigned to the sixteen cubes.</param>
+        /// <returns>Live-authored scene definition for the sixteen-cube textured grid.</returns>
+        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(RuntimeModel cubeModel, RuntimeMaterial[] texturedMaterials) {
+            if (cubeModel == null) {
+                throw new ArgumentNullException(nameof(cubeModel));
+            } else if (texturedMaterials == null) {
+                throw new ArgumentNullException(nameof(texturedMaterials));
+            } else if (texturedMaterials.Length != CubeMaterialRelativePaths.Length) {
+                throw new ArgumentException("Textured cube-grid generation requires sixteen runtime materials.", nameof(texturedMaterials));
+            }
+
+            Entity[] cubeEntities = CreateCubeEntities(cubeModel, texturedMaterials);
+            Entity[] rootEntities = new Entity[cubeEntities.Length + 2];
+            rootEntities[0] = CreateCameraEntity();
+            rootEntities[1] = CreateDirectionalLightEntity();
+            Array.Copy(cubeEntities, 0, rootEntities, 2, cubeEntities.Length);
+
+            return new GeneratedAuthoringSceneDefinition {
+                SceneId = SceneId,
+                SceneSettings = new SceneSettingsAsset(),
+                RootEntities = rootEntities
+            };
+        }
+
+        /// <summary>
+        /// Creates the runtime materials used while authoring the textured cube-grid scene.
+        /// </summary>
+        /// <param name="standardMaterial">Generated standard runtime material used as the parent for the textured material instances.</param>
+        /// <returns>Runtime materials ordered to match the generated cube indices.</returns>
+        public RuntimeMaterial[] CreateRuntimeMaterials(RuntimeMaterial standardMaterial) {
+            if (standardMaterial == null) {
+                throw new ArgumentNullException(nameof(standardMaterial));
+            }
+
+            RuntimeMaterial[] materials = new RuntimeMaterial[CubeMaterialRelativePaths.Length];
+            for (int cubeIndex = 0; cubeIndex < materials.Length; cubeIndex++) {
+                materials[cubeIndex] = CreateRuntimeMaterial(cubeIndex, standardMaterial);
+            }
+
+            return materials;
+        }
+
+        /// <summary>
         /// Creates the authored camera entity for the textured cube-grid scene.
         /// </summary>
-        /// <returns>Serialized camera entity.</returns>
-        SceneEntityAsset CreateCameraEntity() {
-            return new SceneEntityAsset {
-                Id = "textured-cube-grid-camera",
-                Name = "TexturedCubeGridCamera",
-                LocalPosition = new float3(0f, 0f, 18f),
-                LocalScale = float3.One,
-                LocalOrientation = float4.Identity,
-                Components = [
-                    CreateCameraComponentRecord(),
-                    DemoDiscSceneComponentRecordFactory.CreateFpsComponentRecord(1),
-                    DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(2)
-                ],
-                Children = Array.Empty<SceneEntityAsset>()
-            };
+        /// <returns>Live authored camera entity.</returns>
+        Entity CreateCameraEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("TexturedCubeGridCamera");
+            entity.LocalPosition = new float3(0f, 0f, 18f);
+            entity.AddComponent(new CameraComponent {
+                CameraDrawOrder = 0,
+                LayerMask = EditorLayerMasks.SceneObjects,
+                Viewport = new float4(0f, 0f, 1f, 1f),
+                NearPlaneDistance = 0.1f,
+                FarPlaneDistance = 96f,
+                ClearSettings = new CameraClearSettings(
+                    true,
+                    new float4(100f / 255f, 149f / 255f, 237f / 255f, 1f),
+                    true,
+                    1f,
+                    false,
+                    0),
+                RenderSettings = new CameraRenderSettings {
+                    DepthPrepassMode = DepthPrepassMode.Auto,
+                    ShadowDistance = 40f,
+                    PostProcessTier = PostProcessTier.Disabled
+                }
+            });
+            entity.AddComponent(new FPSComponent {
+                Font = ResolveRequiredEditorFont()
+            });
+            entity.AddComponent(new DemoDiscReturnToMenuComponent());
+            return entity;
         }
 
         /// <summary>
         /// Creates the authored directional light entity for the textured cube-grid scene.
         /// </summary>
-        /// <returns>Serialized directional light entity.</returns>
-        SceneEntityAsset CreateDirectionalLightEntity() {
+        /// <returns>Live authored directional light entity.</returns>
+        Entity CreateDirectionalLightEntity() {
             float4 orientation;
             float4.CreateFromYawPitchRoll(-0.65f, -0.85f, 0f, out orientation);
-            return new SceneEntityAsset {
-                Id = "textured-cube-grid-sun",
-                Name = "TexturedCubeGridSun",
-                LocalPosition = new float3(0f, 6f, 0f),
-                LocalScale = float3.One,
-                LocalOrientation = orientation,
-                Components = [
-                    CreateDirectionalLightComponentRecord(1.35f, 40f)
-                ],
-                Children = Array.Empty<SceneEntityAsset>()
-            };
+            Entity entity = Core.Instance.EntityFactory.Create("TexturedCubeGridSun");
+            entity.LocalPosition = new float3(0f, 6f, 0f);
+            entity.LocalOrientation = orientation;
+            entity.AddComponent(new DirectionalLightComponent {
+                Color = new float4(1f, 1f, 1f, 1f),
+                Intensity = 1.35f,
+                ShadowsEnabled = false,
+                ShadowMapMode = ShadowMapMode.Forced,
+                ShadowStrength = 1f,
+                ShadowDistance = 40f
+            });
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates the authored rotating cube entities for the textured cube-grid scene.
+        /// </summary>
+        /// <param name="cubeModel">Generated cube runtime model assigned to every cube.</param>
+        /// <param name="texturedMaterials">Generated runtime materials assigned to the sixteen cubes.</param>
+        /// <returns>Live authored cube entities ordered by row-major grid position.</returns>
+        Entity[] CreateCubeEntities(RuntimeModel cubeModel, RuntimeMaterial[] texturedMaterials) {
+            Entity[] cubeEntities = new Entity[texturedMaterials.Length];
+            for (int row = 0; row < 4; row++) {
+                for (int column = 0; column < 4; column++) {
+                    int cubeIndex = (row * 4) + column;
+                    cubeEntities[cubeIndex] = CreateCubeEntity(
+                        cubeIndex,
+                        cubeModel,
+                        texturedMaterials[cubeIndex],
+                        new float3((column - 1.5f) * 3.0f, (1.5f - row) * 3.0f, 0f));
+                }
+            }
+
+            return cubeEntities;
         }
 
         /// <summary>
         /// Creates one rotating cube entity for the textured cube-grid scene.
         /// </summary>
         /// <param name="cubeIndex">Stable zero-based cube index.</param>
-        /// <param name="modelReference">Stable generated cube model reference.</param>
-        /// <param name="materialReference">Stable file-backed textured material reference.</param>
+        /// <param name="cubeModel">Generated cube runtime model.</param>
+        /// <param name="material">Generated runtime material assigned to the cube.</param>
         /// <param name="localPosition">Authored local position for the cube.</param>
-        /// <param name="localOrientation">Authored starting orientation for the cube.</param>
-        /// <returns>Serialized cube entity.</returns>
-        SceneEntityAsset CreateCubeEntity(
+        /// <returns>Live authored cube entity.</returns>
+        Entity CreateCubeEntity(
             int cubeIndex,
-            SceneAssetReference modelReference,
-            SceneAssetReference materialReference,
-            float3 localPosition,
-            float4 localOrientation) {
-            return new SceneEntityAsset {
-                Id = CreateCubeEntityId(cubeIndex),
-                Name = CreateCubeEntityName(cubeIndex),
-                LocalPosition = localPosition,
-                LocalScale = new float3(1.5f, 1.5f, 1.5f),
-                LocalOrientation = localOrientation,
-                Components = [
-                    CreateMeshComponentRecord(modelReference, materialReference),
-                    RenderingScriptComponentRecordFactory.CreateTowerSpinRecord(1, 0f, (float)(Math.PI / 2.0))
-                ],
-                Children = Array.Empty<SceneEntityAsset>()
-            };
-        }
-
-        /// <summary>
-        /// Creates one serialized camera component record.
-        /// </summary>
-        /// <returns>Serialized camera component record.</returns>
-        SceneComponentAssetRecord CreateCameraComponentRecord() {
-            return new SceneComponentAssetRecord {
-                ComponentTypeId = CameraComponentTypeId,
-                ComponentIndex = 0,
-                Payload = WriteCameraPayload()
-            };
-        }
-
-        /// <summary>
-        /// Creates one serialized mesh component record.
-        /// </summary>
-        /// <param name="modelReference">Stable generated model reference used by the mesh payload.</param>
-        /// <param name="materialReference">Stable file-backed material reference used by the mesh payload.</param>
-        /// <returns>Serialized mesh component record.</returns>
-        SceneComponentAssetRecord CreateMeshComponentRecord(SceneAssetReference modelReference, SceneAssetReference materialReference) {
-            return new SceneComponentAssetRecord {
-                ComponentTypeId = MeshComponentTypeId,
-                ComponentIndex = 0,
-                Payload = WriteMeshPayload(modelReference, materialReference)
-            };
-        }
-
-        /// <summary>
-        /// Creates one serialized directional-light component record.
-        /// </summary>
-        /// <param name="intensity">Authored directional-light intensity.</param>
-        /// <param name="shadowDistance">Authored directional-light shadow cutoff distance.</param>
-        /// <returns>Serialized directional-light component record.</returns>
-        SceneComponentAssetRecord CreateDirectionalLightComponentRecord(float intensity, float shadowDistance) {
-            return new SceneComponentAssetRecord {
-                ComponentTypeId = DirectionalLightComponentTypeId,
-                ComponentIndex = 0,
-                Payload = WriteDirectionalLightPayload(intensity, shadowDistance)
-            };
-        }
-
-        /// <summary>
-        /// Writes one serialized camera component payload.
-        /// </summary>
-        /// <returns>Serialized camera component payload.</returns>
-        byte[] WriteCameraPayload() {
-            EditorTaggedSceneComponentFieldWriter writer = new EditorTaggedSceneComponentFieldWriter();
-            writer.WriteField("CameraDrawOrder", fieldWriter => fieldWriter.WriteByte(0));
-            writer.WriteField("LayerMask", fieldWriter => fieldWriter.WriteUInt16(SceneObjectsLayerMask));
-            writer.WriteField("Viewport", fieldWriter => fieldWriter.WriteFloat4(new float4(0f, 0f, 1f, 1f)));
-            writer.WriteField("NearPlaneDistance", fieldWriter => fieldWriter.WriteSingle(0.1f));
-            writer.WriteField("FarPlaneDistance", fieldWriter => fieldWriter.WriteSingle(96f));
-            writer.WriteField(
-                "ClearSettings",
-                fieldWriter => SceneComponentBinaryFieldEncoding.WriteCameraClearSettings(
-                    fieldWriter,
-                    new CameraClearSettings(
-                        true,
-                        new float4(100f / 255f, 149f / 255f, 237f / 255f, 1f),
-                        true,
-                        1f,
-                        false,
-                        0)));
-            writer.WriteField(
-                "RenderSettings",
-                fieldWriter => SceneComponentBinaryFieldEncoding.WriteCameraRenderSettings(
-                    fieldWriter,
-                    new CameraRenderSettings {
-                        DepthPrepassMode = DepthPrepassMode.Auto,
-                        ShadowDistance = 40f,
-                        PostProcessTier = PostProcessTier.Disabled
-                    }));
-            return writer.BuildPayload();
-        }
-
-        /// <summary>
-        /// Writes one serialized mesh component payload.
-        /// </summary>
-        /// <param name="modelReference">Stable generated model reference used by the mesh.</param>
-        /// <param name="materialReference">Stable material reference used by the mesh.</param>
-        /// <returns>Serialized mesh component payload.</returns>
-        byte[] WriteMeshPayload(SceneAssetReference modelReference, SceneAssetReference materialReference) {
-            if (modelReference == null) {
-                throw new ArgumentNullException(nameof(modelReference));
-            } else if (materialReference == null) {
-                throw new ArgumentNullException(nameof(materialReference));
+            RuntimeModel cubeModel,
+            RuntimeMaterial material,
+            float3 localPosition) {
+            if (cubeModel == null) {
+                throw new ArgumentNullException(nameof(cubeModel));
+            } else if (material == null) {
+                throw new ArgumentNullException(nameof(material));
             }
 
-            MeshComponent meshComponent = new MeshComponent {
-                Model = PlaceholderModel,
-                Material = PlaceholderMaterial,
+            Entity entity = Core.Instance.EntityFactory.Create(CreateCubeEntityName(cubeIndex));
+            entity.LocalPosition = localPosition;
+            entity.LocalScale = new float3(1.5f, 1.5f, 1.5f);
+            entity.LocalOrientation = float4.Identity;
+            entity.AddComponent(new MeshComponent {
+                Model = cubeModel,
+                Material = material,
                 RenderOrder3D = 0
-            };
-            EntityComponentSaveState saveState = new EntityComponentSaveState();
-            saveState.SetAssetReference(MeshModelReferenceName, modelReference);
-            saveState.SetAssetReference(MeshMaterialReferenceName, materialReference);
-            return MeshDescriptor.SerializeComponent(meshComponent, 0, saveState).Payload;
-        }
-
-        /// <summary>
-        /// Writes one serialized directional-light component payload.
-        /// </summary>
-        /// <param name="intensity">Authored directional-light intensity.</param>
-        /// <param name="shadowDistance">Authored directional-light shadow cutoff distance.</param>
-        /// <returns>Serialized directional-light component payload.</returns>
-        byte[] WriteDirectionalLightPayload(float intensity, float shadowDistance) {
-            DirectionalLightComponent lightComponent = new DirectionalLightComponent {
-                Color = new float4(1f, 1f, 1f, 1f),
-                Intensity = intensity,
-                ShadowsEnabled = false,
-                ShadowMapMode = ShadowMapMode.Forced,
-                ShadowStrength = 1f,
-                ShadowDistance = shadowDistance
-            };
-            return DirectionalLightDescriptor.SerializeComponent(lightComponent, 0, null).Payload;
-        }
-
-        /// <summary>
-        /// Creates one stable file-backed material reference for the supplied cube index.
-        /// </summary>
-        /// <param name="cubeIndex">Stable zero-based cube index.</param>
-        /// <returns>Scene asset reference targeting one file-backed textured material.</returns>
-        SceneAssetReference CreateTexturedMaterialReference(int cubeIndex) {
-            if (cubeIndex < 0 || cubeIndex >= CubeMaterialRelativePaths.Length) {
-                throw new ArgumentOutOfRangeException(nameof(cubeIndex), "Cube index must address one generated material.");
-            }
-
-            return new SceneAssetReference {
-                SourceKind = SceneAssetReferenceSourceKind.FileSystem,
-                RelativePath = CubeMaterialRelativePaths[cubeIndex],
-                ProviderId = string.Empty,
-                AssetId = string.Empty
-            };
+            });
+            entity.AddComponent(new gameplay.rendering.DirectionalShadowTowerSpinComponent {
+                BaseYawRadians = 0f,
+                AngularSpeedRadians = (float)(Math.PI / 2.0)
+            });
+            return entity;
         }
 
         /// <summary>
@@ -733,6 +593,44 @@ namespace city.rendering.tools {
             pspSettings.FieldValues[BaseColorFieldId] = "#FFFFFFFF";
             settings.Processor.Platforms["psp"] = pspSettings;
             return settings;
+        }
+
+        /// <summary>
+        /// Creates one runtime material for the supplied cube index by parenting a generated standard material and binding the generated texture.
+        /// </summary>
+        /// <param name="cubeIndex">Stable zero-based cube index.</param>
+        /// <param name="standardMaterial">Generated standard runtime material used as the shared parent.</param>
+        /// <returns>Runtime material instance for the supplied cube.</returns>
+        RuntimeMaterial CreateRuntimeMaterial(int cubeIndex, RuntimeMaterial standardMaterial) {
+            if (standardMaterial == null) {
+                throw new ArgumentNullException(nameof(standardMaterial));
+            }
+
+            MaterialAsset materialAsset = CreateMaterialAsset(cubeIndex);
+            ShaderAsset shaderAsset = helengine.editor.EditorBuiltInShaderAssetLibrary.LoadShaderAsset(Core.Instance.RenderManager3D, StandardShaderSourceFileName);
+            RuntimeMaterial runtimeMaterial = Core.Instance.RenderManager3D.BuildMaterialFromRaw(materialAsset, shaderAsset);
+
+            int diffuseTextureBindingIndex = runtimeMaterial.Layout.FindTextureBindingIndex(StandardMaterialTextureBindingDefaults.DiffuseTextureBindingName);
+            if (diffuseTextureBindingIndex < 0) {
+                throw new InvalidOperationException("The generated standard material must expose a diffuse texture binding.");
+            }
+
+            RuntimeTexture runtimeTexture = Core.Instance.RenderManager2D.BuildTextureFromRaw(CreateTextureAsset(cubeIndex));
+            runtimeMaterial.Properties.SetTexture(diffuseTextureBindingIndex, runtimeTexture);
+            StandardMaterialTextureBindingDefaults.Apply(runtimeMaterial);
+            return runtimeMaterial;
+        }
+
+        /// <summary>
+        /// Resolves the editor font that should back the generated FPS overlay during live authoring.
+        /// </summary>
+        /// <returns>Editor font asset required by the FPS component.</returns>
+        FontAsset ResolveRequiredEditorFont() {
+            if (Core.Instance == null || Core.Instance.DefaultFontAsset == null) {
+                throw new InvalidOperationException("A default editor font must be loaded before the textured cube-grid scene can be generated.");
+            }
+
+            return Core.Instance.DefaultFontAsset;
         }
 
         /// <summary>
@@ -1173,15 +1071,6 @@ namespace city.rendering.tools {
         /// <returns>Material asset id stored inside the serialized file-backed asset.</returns>
         static string CreateMaterialAssetId(int cubeIndex) {
             return "Materials.rendering.textured_cube_grid.Cube" + cubeIndex.ToString("00");
-        }
-
-        /// <summary>
-        /// Creates one stable cube entity id for the supplied cube index.
-        /// </summary>
-        /// <param name="cubeIndex">Stable zero-based cube index.</param>
-        /// <returns>Stable scene entity id.</returns>
-        static string CreateCubeEntityId(int cubeIndex) {
-            return "textured-cube-grid-cube-" + cubeIndex.ToString("00");
         }
 
         /// <summary>

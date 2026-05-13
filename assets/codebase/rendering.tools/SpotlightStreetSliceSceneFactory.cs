@@ -61,6 +61,11 @@ namespace city.rendering.tools {
         readonly RuntimeMaterial PlaceholderMaterial;
 
         /// <summary>
+        /// Allocates scene-local numeric entity ids for one authored scene build.
+        /// </summary>
+        readonly SceneEntityAssetIdAllocator SceneEntityIdAllocator;
+
+        /// <summary>
         /// Initializes the spotlight street-slice scene factory with the persistence descriptors required for authored output.
         /// </summary>
         public SpotlightStreetSliceSceneFactory() {
@@ -68,6 +73,7 @@ namespace city.rendering.tools {
             SpotLightDescriptor = new SpotLightComponentPersistenceDescriptor();
             PlaceholderModel = new AuthoringPlaceholderRuntimeModel();
             PlaceholderMaterial = new RuntimeMaterial();
+            SceneEntityIdAllocator = new SceneEntityAssetIdAllocator();
         }
 
         /// <summary>
@@ -101,6 +107,8 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(racerMaterialReferences));
             }
 
+            SceneEntityIdAllocator.Reset();
+
             return new SceneAsset {
                 Id = SceneId,
                 AssetReferences = new[] {
@@ -115,12 +123,12 @@ namespace city.rendering.tools {
                     CreateCameraEntity(),
                     CreateSpotLightEntity(),
                     CreateStreetEntity(planeReference, standardMaterialReference),
-                    CreateStreetEdgeEntity("spotlight-street-slice-curb-left", "SpotlightStreetSliceCurbLeft", new float3(-9f, 0.25f, 0f), new float3(1f, 0.5f, 28f), cubeReference, standardMaterialReference),
-                    CreateStreetEdgeEntity("spotlight-street-slice-curb-right", "SpotlightStreetSliceCurbRight", new float3(9f, 0.25f, 0f), new float3(1f, 0.5f, 28f), cubeReference, standardMaterialReference),
-                    CreateStreetEdgeEntity("spotlight-street-slice-back-wall", "SpotlightStreetSliceBackWall", new float3(0f, 6f, -12f), new float3(20f, 12f, 1f), cubeReference, standardMaterialReference),
-                    CreateStreetEdgeEntity("spotlight-street-slice-side-block", "SpotlightStreetSliceSideBlock", new float3(12f, 2.5f, 6f), new float3(4f, 5f, 8f), cubeReference, standardMaterialReference),
-                    CreateImportedMeshEntity("spotlight-street-slice-lamppost", "SpotlightStreetSliceLamppost", new float3(-4f, 0f, -2f), new float3(2.2f, 2.2f, 2.2f), CreateYawOrientation(0.0), lamppostReference, new[] { standardMaterialReference }),
-                    CreateImportedMeshEntity("spotlight-street-slice-racer", "SpotlightStreetSliceRacer", new float3(1.8f, 0f, 2f), new float3(2.8f, 2.8f, 2.8f), CreateYawOrientation(-0.42), racerReference, racerMaterialReferences)
+                    CreateStreetEdgeEntity("SpotlightStreetSliceCurbLeft", new float3(-9f, 0.25f, 0f), new float3(1f, 0.5f, 28f), cubeReference, standardMaterialReference),
+                    CreateStreetEdgeEntity("SpotlightStreetSliceCurbRight", new float3(9f, 0.25f, 0f), new float3(1f, 0.5f, 28f), cubeReference, standardMaterialReference),
+                    CreateStreetEdgeEntity("SpotlightStreetSliceBackWall", new float3(0f, 6f, -12f), new float3(20f, 12f, 1f), cubeReference, standardMaterialReference),
+                    CreateStreetEdgeEntity("SpotlightStreetSliceSideBlock", new float3(12f, 2.5f, 6f), new float3(4f, 5f, 8f), cubeReference, standardMaterialReference),
+                    CreateImportedMeshEntity("SpotlightStreetSliceLamppost", new float3(-4f, 0f, -2f), new float3(2.2f, 2.2f, 2.2f), CreateYawOrientation(0.0), lamppostReference, new[] { standardMaterialReference }),
+                    CreateImportedMeshEntity("SpotlightStreetSliceRacer", new float3(1.8f, 0f, 2f), new float3(2.8f, 2.8f, 2.8f), CreateYawOrientation(-0.42), racerReference, racerMaterialReferences)
                 }
             };
         }
@@ -133,7 +141,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(0f, -0.24f, 0f, out orientation);
             return new SceneEntityAsset {
-                Id = "spotlight-street-slice-camera",
+                Id = AllocateSceneEntityId(),
                 Name = "SpotlightStreetSliceCamera",
                 LocalPosition = new float3(0f, 12f, 28f),
                 LocalScale = float3.One,
@@ -156,7 +164,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(0.28f, -1.22f, 0f, out orientation);
             return new SceneEntityAsset {
-                Id = "spotlight-street-slice-light",
+                Id = AllocateSceneEntityId(),
                 Name = "SpotlightStreetSliceLight",
                 LocalPosition = new float3(-3.2f, 9.5f, -1.4f),
                 LocalScale = float3.One,
@@ -176,7 +184,7 @@ namespace city.rendering.tools {
         /// <returns>Serialized ground entity.</returns>
         SceneEntityAsset CreateStreetEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return new SceneEntityAsset {
-                Id = "spotlight-street-slice-street",
+                Id = AllocateSceneEntityId(),
                 Name = "SpotlightStreetSliceStreet",
                 LocalPosition = new float3(0f, -0.05f, 0f),
                 LocalScale = new float3(20f, 1f, 28f),
@@ -191,7 +199,6 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates one supporting static street-edge mass for the spotlight scene.
         /// </summary>
-        /// <param name="id">Stable entity id.</param>
         /// <param name="name">Display name stored on the entity.</param>
         /// <param name="localPosition">Local position assigned to the entity.</param>
         /// <param name="localScale">Local scale assigned to the entity.</param>
@@ -199,14 +206,13 @@ namespace city.rendering.tools {
         /// <param name="materialReference">Stable generated material reference used by the mesh payload.</param>
         /// <returns>Serialized street-edge entity.</returns>
         SceneEntityAsset CreateStreetEdgeEntity(
-            string id,
             string name,
             float3 localPosition,
             float3 localScale,
             SceneAssetReference modelReference,
             SceneAssetReference materialReference) {
             return new SceneEntityAsset {
-                Id = id,
+                Id = AllocateSceneEntityId(),
                 Name = name,
                 LocalPosition = localPosition,
                 LocalScale = localScale,
@@ -221,7 +227,6 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates one imported model entity that uses the shared standard material path.
         /// </summary>
-        /// <param name="id">Stable entity id.</param>
         /// <param name="name">Display name stored on the entity.</param>
         /// <param name="localPosition">Local position assigned to the entity.</param>
         /// <param name="localScale">Local scale assigned to the entity.</param>
@@ -230,7 +235,6 @@ namespace city.rendering.tools {
         /// <param name="materialReferences">Stable generated material references used by the mesh payload.</param>
         /// <returns>Serialized imported mesh entity.</returns>
         SceneEntityAsset CreateImportedMeshEntity(
-            string id,
             string name,
             float3 localPosition,
             float3 localScale,
@@ -238,7 +242,7 @@ namespace city.rendering.tools {
             SceneAssetReference modelReference,
             SceneAssetReference[] materialReferences) {
             return new SceneEntityAsset {
-                Id = id,
+                Id = AllocateSceneEntityId(),
                 Name = name,
                 LocalPosition = localPosition,
                 LocalScale = localScale,
@@ -409,6 +413,14 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll((float)yawRadians, 0f, 0f, out orientation);
             return orientation;
+        }
+
+        /// <summary>
+        /// Allocates the next scene-local numeric entity id for the current authored scene build.
+        /// </summary>
+        /// <returns>Next scene-local entity id.</returns>
+        uint AllocateSceneEntityId() {
+            return SceneEntityIdAllocator.Allocate();
         }
     }
 }

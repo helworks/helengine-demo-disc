@@ -47,11 +47,9 @@ namespace city.rendering.tools {
             persistenceRegistry.Register(new MeshComponentPersistenceDescriptor());
             persistenceRegistry.Register(new CameraComponentPersistenceDescriptor());
             persistenceRegistry.Register(new TextComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new SpriteComponentPersistenceDescriptor());
             persistenceRegistry.Register(new RoundedRectComponentPersistenceDescriptor());
             persistenceRegistry.Register(new FPSComponentPersistenceDescriptor());
             persistenceRegistry.Register(new DirectionalLightComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new AmbientLightComponentPersistenceDescriptor());
             persistenceRegistry.Register(new PointLightComponentPersistenceDescriptor());
             persistenceRegistry.Register(new SpotLightComponentPersistenceDescriptor());
             persistenceRegistry.Register(new MenuComponentPersistenceDescriptor());
@@ -66,12 +64,18 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="generatedRoots">Generated roots that should remain visible to the serializer.</param>
         /// <returns>Snapshots used to restore the hidden roots.</returns>
-        EditorEntityLayerMaskSnapshot[] HideExistingUserSceneRoots(EditorEntity[] generatedRoots) {
+        EditorEntityLayerMaskSnapshot[] HideExistingUserSceneRoots(Entity[] generatedRoots) {
             if (generatedRoots == null) {
                 throw new ArgumentNullException(nameof(generatedRoots));
             }
 
-            HashSet<EditorEntity> generatedRootSet = new HashSet<EditorEntity>(generatedRoots);
+            HashSet<EditorEntity> generatedRootSet = new HashSet<EditorEntity>();
+            for (int index = 0; index < generatedRoots.Length; index++) {
+                if (generatedRoots[index] is EditorEntity editorGeneratedRoot) {
+                    generatedRootSet.Add(editorGeneratedRoot);
+                }
+            }
+
             List<EditorEntityLayerMaskSnapshot> snapshots = new List<EditorEntityLayerMaskSnapshot>();
             List<Entity> liveEntities = Core.Instance.ObjectManager.Entities;
             for (int index = 0; index < liveEntities.Count; index++) {
@@ -112,7 +116,7 @@ namespace city.rendering.tools {
         /// Disposes every generated root created for the current save operation.
         /// </summary>
         /// <param name="generatedRoots">Generated roots to dispose.</param>
-        void DisposeGeneratedRoots(EditorEntity[] generatedRoots) {
+        void DisposeGeneratedRoots(Entity[] generatedRoots) {
             if (generatedRoots == null) {
                 return;
             }

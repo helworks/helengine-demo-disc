@@ -214,6 +214,11 @@ namespace city.rendering.tools {
         readonly RuntimeMaterial PlaceholderMaterial;
 
         /// <summary>
+        /// Allocates scene-local numeric entity ids for one authored scene build.
+        /// </summary>
+        readonly SceneEntityAssetIdAllocator SceneEntityIdAllocator;
+
+        /// <summary>
         /// Initializes the axis-test scene factory with the descriptors and services required for authored output.
         /// </summary>
         public AxisTest2SceneFactory() {
@@ -222,6 +227,7 @@ namespace city.rendering.tools {
             MaterialSettingsService = new MaterialAssetSettingsService();
             PlaceholderModel = new AuthoringPlaceholderRuntimeModel();
             PlaceholderMaterial = new RuntimeMaterial();
+            SceneEntityIdAllocator = new SceneEntityAssetIdAllocator();
         }
 
         /// <summary>
@@ -233,6 +239,8 @@ namespace city.rendering.tools {
             if (cubeReference == null) {
                 throw new ArgumentNullException(nameof(cubeReference));
             }
+
+            SceneEntityIdAllocator.Reset();
 
             SceneAssetReference arrowModelReference = CreateArrowModelReference();
             SceneAssetReference markerMaterialReference = CreateAxisMaterialReference(4);
@@ -290,7 +298,7 @@ namespace city.rendering.tools {
             float4.CreateFromYawPitchRoll((float)(Math.PI * 0.5), 0f, 0f, out orientation);
 
             return new SceneEntityAsset {
-                Id = "axis-test-2-camera",
+                Id = AllocateSceneEntityId(),
                 Name = "AxisTest2Camera",
                 LocalPosition = new float3(30f, 6f, 5f),
                 LocalScale = float3.One,
@@ -318,7 +326,7 @@ namespace city.rendering.tools {
             }
 
             return new SceneEntityAsset {
-                Id = "axis-test-2-sun-rig",
+                Id = AllocateSceneEntityId(),
                 Name = "AxisTest2SunRig",
                 LocalPosition = ArrowRigLocalPosition,
                 LocalScale = float3.One,
@@ -346,7 +354,7 @@ namespace city.rendering.tools {
             }
 
             return new SceneEntityAsset {
-                Id = "axis-test-2-sun-arrow",
+                Id = AllocateSceneEntityId(),
                 Name = "AxisTest2SunArrow",
                 LocalPosition = float3.Zero,
                 LocalScale = new float3(ArrowVisualScale, ArrowVisualScale, ArrowVisualScale),
@@ -367,7 +375,6 @@ namespace city.rendering.tools {
         /// <returns>Serialized X-axis entity.</returns>
         SceneEntityAsset CreateXAxisEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return CreateAxisEntity(
-                "axis-test-x-axis",
                 "AxisTestXAxis",
                 new float3(5f, 0f, 0f),
                 new float3(10f, 0.5f, 0.5f),
@@ -383,7 +390,6 @@ namespace city.rendering.tools {
         /// <returns>Serialized Y-axis entity.</returns>
         SceneEntityAsset CreateYAxisEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return CreateAxisEntity(
-                "axis-test-y-axis",
                 "AxisTestYAxis",
                 new float3(0f, 5f, 0f),
                 new float3(0.5f, 10f, 0.5f),
@@ -399,7 +405,6 @@ namespace city.rendering.tools {
         /// <returns>Serialized Z-axis entity.</returns>
         SceneEntityAsset CreateZAxisEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return CreateAxisEntity(
-                "axis-test-z-axis",
                 "AxisTestZAxis",
                 new float3(0f, 0f, 5f),
                 new float3(0.5f, 0.5f, 10f),
@@ -415,7 +420,6 @@ namespace city.rendering.tools {
         /// <returns>Serialized floor entity.</returns>
         SceneEntityAsset CreateFloorEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return CreateAxisEntity(
-                "axis-test-floor",
                 "AxisTestFloor",
                 new float3(5f, -5f, 5f),
                 new float3(14f, 0.5f, 14f),
@@ -431,7 +435,6 @@ namespace city.rendering.tools {
         /// <returns>Serialized wall entity.</returns>
         SceneEntityAsset CreateGroundEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return CreateAxisEntity(
-                "axis-test-2-ground",
                 "AxisTest2Ground",
                 new float3(16f, 5f, -6f),
                 new float3(14f, 12f, 0.5f),
@@ -447,7 +450,6 @@ namespace city.rendering.tools {
         /// <returns>Serialized origin marker entity.</returns>
         SceneEntityAsset CreateOriginMarkerEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return CreateAxisEntity(
-                "axis-test-origin-marker",
                 "AxisTestOriginMarker",
                 float3.Zero,
                 new float3(1.25f, 1.25f, 1.25f),
@@ -463,7 +465,6 @@ namespace city.rendering.tools {
         /// <returns>Serialized positive X marker entity.</returns>
         SceneEntityAsset CreateXAxisMarkerEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return CreateAxisEntity(
-                "axis-test-x-marker",
                 "AxisTestXMarker",
                 new float3(10f, 0f, 0f),
                 new float3(1.5f, 1.5f, 1.5f),
@@ -479,7 +480,6 @@ namespace city.rendering.tools {
         /// <returns>Serialized positive Y marker entity.</returns>
         SceneEntityAsset CreateYAxisMarkerEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return CreateAxisEntity(
-                "axis-test-y-marker",
                 "AxisTestYMarker",
                 new float3(0f, 10f, 0f),
                 new float3(1.5f, 1.5f, 1.5f),
@@ -495,7 +495,6 @@ namespace city.rendering.tools {
         /// <returns>Serialized positive Z marker entity.</returns>
         SceneEntityAsset CreateZAxisMarkerEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
             return CreateAxisEntity(
-                "axis-test-z-marker",
                 "AxisTestZMarker",
                 new float3(0f, 0f, 10f),
                 new float3(1.5f, 1.5f, 1.5f),
@@ -506,7 +505,6 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates one axis mesh entity with the supplied transform.
         /// </summary>
-        /// <param name="id">Stable entity id.</param>
         /// <param name="name">Display name stored on the entity.</param>
         /// <param name="localPosition">Local position assigned to the entity.</param>
         /// <param name="localScale">Local scale assigned to the entity.</param>
@@ -514,14 +512,13 @@ namespace city.rendering.tools {
         /// <param name="materialReference">Stable file-backed material reference used by the mesh payload.</param>
         /// <returns>Serialized axis mesh entity.</returns>
         SceneEntityAsset CreateAxisEntity(
-            string id,
             string name,
             float3 localPosition,
             float3 localScale,
             SceneAssetReference modelReference,
             SceneAssetReference materialReference) {
             return new SceneEntityAsset {
-                Id = id,
+                Id = AllocateSceneEntityId(),
                 Name = name,
                 LocalPosition = localPosition,
                 LocalScale = localScale,
@@ -1032,6 +1029,14 @@ namespace city.rendering.tools {
                 default:
                     throw new ArgumentOutOfRangeException(nameof(materialIndex), "Axis-test material index must be between zero and four.");
             }
+        }
+
+        /// <summary>
+        /// Allocates the next scene-local numeric entity id for the current authored scene build.
+        /// </summary>
+        /// <returns>Next scene-local entity id.</returns>
+        uint AllocateSceneEntityId() {
+            return SceneEntityIdAllocator.Allocate();
         }
     }
 }

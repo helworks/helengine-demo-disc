@@ -1,4 +1,4 @@
-﻿namespace city.menu {
+namespace city.menu {
     /// <summary>
     /// Produces the first-pass demo-disc menu definition used by the generated city menu scene.
     /// </summary>
@@ -50,13 +50,7 @@
                             new MenuItemDefinition("options-controls", "Controls", "Placeholder row for future input remapping.", true, new MenuActionDefinition(MenuActionKind.None, string.Empty)),
                             new MenuItemDefinition("options-back", "Back", "Returns to the main menu.", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))
                         })
-                },
-                new MenuOverlayImageDefinition(
-                    theme.LogoTexturePath,
-                    theme.LogoWidth,
-                    theme.LogoHeight,
-                    theme.LogoTopMargin,
-                    theme.LogoRightMargin));
+                });
         }
     }
 }

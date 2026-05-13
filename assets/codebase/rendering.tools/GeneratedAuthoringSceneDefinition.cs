@@ -1,5 +1,3 @@
-using helengine.editor;
-
 namespace city.rendering.tools {
     /// <summary>
     /// Stores one generated live-authored scene definition before editor serialization persists it.
@@ -18,6 +16,6 @@ namespace city.rendering.tools {
         /// <summary>
         /// Gets or sets the live root entities that define the scene.
         /// </summary>
-        public EditorEntity[] RootEntities { get; set; }
+        public Entity[] RootEntities { get; set; }
     }
 }

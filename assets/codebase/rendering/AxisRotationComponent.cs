@@ -24,7 +24,7 @@ namespace gameplay.rendering {
             }
 
             float3 normalizedAxis = float3.Normalize(Axis);
-            float deltaAngleRadians = AngularSpeedRadiansPerSecond * Core.Instance.DeltaTime;
+            float deltaAngleRadians = AngularSpeedRadiansPerSecond * (float)Core.Instance.FrameDeltaSeconds;
             float4 deltaRotation;
             float4.CreateFromAxisAngle(ref normalizedAxis, deltaAngleRadians, out deltaRotation);
 
