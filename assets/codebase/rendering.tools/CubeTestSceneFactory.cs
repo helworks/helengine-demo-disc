@@ -13,64 +13,50 @@ namespace city.rendering.tools {
         public const string SceneId = "scenes/rendering/cube_test.helen";
 
         /// <summary>
-        /// Stable save-state slot name used for serialized mesh model references.
+        /// Factory used to create authored scene entities for the active host.
         /// </summary>
-        const string MeshModelReferenceName = "Model";
+        readonly IEntityFactory EntityFactory;
 
         /// <summary>
-        /// Stable save-state slot name used for serialized mesh material references.
+        /// Initializes one cube-test scene factory.
         /// </summary>
-        const string MeshMaterialReferenceName = "Material";
+        public CubeTestSceneFactory()
+            : this(ResolveEntityFactory()) {
+        }
 
         /// <summary>
-        /// Stable save-state slot name used for serialized FPS font references.
+        /// Initializes one cube-test scene factory.
         /// </summary>
-        const string FontReferenceName = "Font";
+        /// <param name="entityFactory">Factory used to create authored scene entities for the active host.</param>
+        public CubeTestSceneFactory(IEntityFactory entityFactory) {
+            EntityFactory = entityFactory ?? throw new ArgumentNullException(nameof(entityFactory));
+        }
 
         /// <summary>
-        /// Stable generated provider id reserved for the editor's built-in font asset.
+        /// Resolves the host-owned authored entity factory from the active core instance.
         /// </summary>
-        const string EditorFontProviderId = "editor";
+        /// <returns>Host-owned authored entity factory.</returns>
+        static IEntityFactory ResolveEntityFactory() {
+            if (Core.Instance == null) {
+                throw new InvalidOperationException("Cube-test scene generation requires Core.Instance before resolving EntityFactory.");
+            } else if (Core.Instance.EntityFactory == null) {
+                throw new InvalidOperationException("Cube-test scene generation requires Core.Instance.EntityFactory.");
+            }
 
-        /// <summary>
-        /// Stable generated asset id used for the editor's built-in font asset.
-        /// </summary>
-        const string EditorFontAssetId = "ui-font";
-
-        /// <summary>
-        /// Stable generated relative path used for the editor's built-in font asset.
-        /// </summary>
-        const string EditorFontRelativePath = "generated/editor/fonts/ui.hefont";
-
-        /// <summary>
-        /// Placeholder runtime model used only to satisfy authored mesh serialization before stable asset references are applied.
-        /// </summary>
-        readonly AuthoringPlaceholderRuntimeModel PlaceholderModel;
-
-        /// <summary>
-        /// Placeholder runtime material used only to satisfy authored mesh serialization before stable asset references are applied.
-        /// </summary>
-        readonly RuntimeMaterial PlaceholderMaterial;
-
-        /// <summary>
-        /// Initializes the cube-test scene factory.
-        /// </summary>
-        public CubeTestSceneFactory() {
-            PlaceholderModel = new AuthoringPlaceholderRuntimeModel();
-            PlaceholderMaterial = new RuntimeMaterial();
+            return Core.Instance.EntityFactory;
         }
 
         /// <summary>
         /// Creates the canonical cube-test live scene definition.
         /// </summary>
-        /// <param name="cubeReference">Stable generated cube model reference.</param>
-        /// <param name="standardMaterialReference">Stable generated standard material reference.</param>
+        /// <param name="cubeModel">Generated cube runtime model assigned to the authored mesh.</param>
+        /// <param name="standardMaterial">Generated standard runtime material assigned to the authored mesh.</param>
         /// <returns>Live-authored cube-test scene definition.</returns>
-        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(SceneAssetReference cubeReference, SceneAssetReference standardMaterialReference) {
-            if (cubeReference == null) {
-                throw new ArgumentNullException(nameof(cubeReference));
-            } else if (standardMaterialReference == null) {
-                throw new ArgumentNullException(nameof(standardMaterialReference));
+        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
+            if (cubeModel == null) {
+                throw new ArgumentNullException(nameof(cubeModel));
+            } else if (standardMaterial == null) {
+                throw new ArgumentNullException(nameof(standardMaterial));
             }
 
             return new GeneratedAuthoringSceneDefinition {
@@ -79,7 +65,7 @@ namespace city.rendering.tools {
                 RootEntities = new[] {
                     CreateCameraEntity(),
                     CreateDirectionalLightEntity(),
-                    CreateCubeEntity(cubeReference, standardMaterialReference)
+                    CreateCubeEntity(cubeModel, standardMaterial)
                 }
             };
         }
@@ -117,7 +103,6 @@ namespace city.rendering.tools {
                 Font = ResolveRequiredEditorFont()
             };
             entity.AddComponent(fpsComponent);
-            GetSaveComponent(entity).SetAssetReference(fpsComponent, FontReferenceName, BuildEditorFontReference());
 
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;
@@ -148,22 +133,19 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates the authored cube mesh entity for the minimal rendering scene.
         /// </summary>
-        /// <param name="modelReference">Stable generated model reference used by the mesh payload.</param>
-        /// <param name="materialReference">Stable generated material reference used by the mesh payload.</param>
+        /// <param name="cubeModel">Generated cube runtime model assigned to the mesh.</param>
+        /// <param name="standardMaterial">Generated standard runtime material assigned to the mesh.</param>
         /// <returns>Live authored cube entity.</returns>
-        EditorEntity CreateCubeEntity(SceneAssetReference modelReference, SceneAssetReference materialReference) {
+        EditorEntity CreateCubeEntity(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
             EditorEntity entity = CreateSceneRootEntity("CubeTestCube", "cube-test-cube");
             entity.LocalScale = new float3(2f, 2f, 2f);
 
             MeshComponent meshComponent = new MeshComponent {
-                Model = PlaceholderModel,
-                Material = PlaceholderMaterial,
+                Model = cubeModel,
+                Material = standardMaterial,
                 RenderOrder3D = 0
             };
             entity.AddComponent(meshComponent);
-            EntitySaveComponent saveComponent = GetSaveComponent(entity);
-            saveComponent.SetAssetReference(meshComponent, MeshModelReferenceName, modelReference);
-            saveComponent.SetAssetReference(meshComponent, MeshMaterialReferenceName, materialReference);
 
             entity.AddComponent(new AxisRotationComponent {
                 Axis = new float3(0f, 1f, 0f),
@@ -185,16 +167,13 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Entity id must be provided.", nameof(entityId));
             }
 
-            EditorEntity entity = new EditorEntity {
-                Name = name,
-                LayerMask = EditorLayerMasks.SceneObjects,
-                SuppressUpdateComponentExecutionInEditor = true,
-                LocalPosition = float3.Zero,
-                LocalScale = float3.One,
-                LocalOrientation = float4.Identity
-            };
-            GetSaveComponent(entity).EntityId = entityId;
-            return entity;
+            Entity entity = EntityFactory.Create(name);
+            if (entity is not EditorEntity editorEntity) {
+                throw new InvalidOperationException("Generated authored scene creation requires EditorEntity instances.");
+            }
+
+            GetSaveComponent(editorEntity).EntityId = entityId;
+            return editorEntity;
         }
 
         /// <summary>
@@ -202,7 +181,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="entity">Entity whose save component should be returned.</param>
         /// <returns>Hidden save component attached to the entity.</returns>
-        EntitySaveComponent GetSaveComponent(EditorEntity entity) {
+        EntitySaveComponent GetSaveComponent(Entity entity) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
             }
@@ -228,17 +207,5 @@ namespace city.rendering.tools {
             return Core.Instance.DefaultFontAsset;
         }
 
-        /// <summary>
-        /// Builds the stable generated scene asset reference for the editor's built-in UI font.
-        /// </summary>
-        /// <returns>Stable generated editor-font reference.</returns>
-        SceneAssetReference BuildEditorFontReference() {
-            return new SceneAssetReference {
-                SourceKind = SceneAssetReferenceSourceKind.Generated,
-                RelativePath = EditorFontRelativePath,
-                ProviderId = EditorFontProviderId,
-                AssetId = EditorFontAssetId
-            };
-        }
     }
 }
