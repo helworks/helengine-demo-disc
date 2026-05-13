@@ -73,6 +73,7 @@ namespace city.rendering.tools {
                 SceneSettings = new SceneSettingsAsset(),
                 RootEntities = new[] {
                     CreateCameraEntity(),
+                    CreateFpsEntity(),
                     CreateDirectionalLightEntity(),
                     CreateGroundEntity(planeModel, standardMaterial),
                     CreateShadowMastEntity(cubeModel, standardMaterial),
@@ -127,10 +128,19 @@ namespace city.rendering.tools {
                 AngularSpeedRadians = 0.07f,
                 LookDownPitchRadians = -0.28f
             });
+            entity.AddComponent(new DemoDiscReturnToMenuComponent());
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates the authored FPS overlay entity for the live directional-shadow plaza scene.
+        /// </summary>
+        /// <returns>Live authored FPS overlay entity.</returns>
+        Entity CreateFpsEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("DirectionalShadowPlazaFps");
             entity.AddComponent(new FPSComponent {
                 Font = ResolveRequiredEditorFont()
             });
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;
         }
 

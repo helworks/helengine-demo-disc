@@ -57,6 +57,7 @@ namespace city.rendering.tools {
                 SceneSettings = new SceneSettingsAsset(),
                 RootEntities = new[] {
                     CreateCameraEntity(),
+                    CreateFpsEntity(),
                     CreateSpotLightEntity(),
                     CreateStreetEntity(planeModel, standardMaterial),
                     CreateStreetEdgeEntity("SpotlightStreetSliceCurbLeft", new float3(-9f, 0.25f, 0f), new float3(1f, 0.5f, 28f), cubeModel, standardMaterial),
@@ -108,10 +109,19 @@ namespace city.rendering.tools {
                 AngularSpeedRadians = 0.05f,
                 LookDownPitchRadians = -0.24f
             });
+            entity.AddComponent(new DemoDiscReturnToMenuComponent());
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates the authored FPS overlay entity for the live spotlight street-slice scene.
+        /// </summary>
+        /// <returns>Live authored FPS overlay entity.</returns>
+        Entity CreateFpsEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("SpotlightStreetSliceFps");
             entity.AddComponent(new FPSComponent {
                 Font = ResolveRequiredEditorFont()
             });
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;
         }
 
