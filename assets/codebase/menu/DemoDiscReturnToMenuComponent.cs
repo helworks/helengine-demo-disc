@@ -22,8 +22,9 @@ namespace city.menu {
         /// Performs per-frame input polling for the demo-disc return bind.
         /// </summary>
         public override void Update() {
-            if (!WasReturnPressed()) {
-                PreviousGamepadState = Core.Instance.Input.GetGamepadState(0);
+            InputSystem inputSystem = Core.Instance.Input;
+            if (!WasReturnPressed(inputSystem)) {
+                PreviousGamepadState = inputSystem.GetGamepadState(0);
                 return;
             }
 
@@ -40,38 +41,27 @@ namespace city.menu {
         /// <summary>
         /// Returns whether the current frame pressed the temporary platform return bind.
         /// </summary>
-        /// <param name="inputSystem">Input system supplying the current frame state.</param>
         /// <returns>True when the current frame should navigate back to the main menu.</returns>
-        bool WasReturnPressed() {
+        /// <param name="inputSystem">Input system supplying the current frame state.</param>
+        bool WasReturnPressed(InputSystem inputSystem) {
 #if DESKTOP_PLATFORM
-            if (Core.Instance.Input.WasKeyPressed(Keys.Escape) || Core.Instance.Input.WasKeyPressed(Keys.Back)) {
+            if (inputSystem.WasKeyPressed(Keys.Escape) || inputSystem.WasKeyPressed(Keys.Back)) {
                 return true;
             }
 #endif
 
-            InputGamepadState currentGamepadState = Core.Instance.Input.GetGamepadState(0);
+            InputGamepadState currentGamepadState = inputSystem.GetGamepadState(0);
             if (!currentGamepadState.Connected) {
                 PreviousGamepadState = currentGamepadState;
                 return false;
             }
 
             bool wasReturnPressed =
-                WasGamepadButtonPressed(currentGamepadState, PreviousGamepadState, InputGamepadButton.East)
-                || WasGamepadButtonPressed(currentGamepadState, PreviousGamepadState, InputGamepadButton.North)
-                || WasGamepadButtonPressed(currentGamepadState, PreviousGamepadState, InputGamepadButton.Select);
+                inputSystem.WasGamepadButtonPressed(currentGamepadState, PreviousGamepadState, InputGamepadButton.East)
+                || inputSystem.WasGamepadButtonPressed(currentGamepadState, PreviousGamepadState, InputGamepadButton.North)
+                || inputSystem.WasGamepadButtonPressed(currentGamepadState, PreviousGamepadState, InputGamepadButton.Select);
             PreviousGamepadState = currentGamepadState;
             return wasReturnPressed;
-        }
-
-        /// <summary>
-        /// Returns whether one abstract gamepad button transitioned from up to down on the current frame.
-        /// </summary>
-        /// <param name="currentState">Current raw gamepad state.</param>
-        /// <param name="previousState">Previous raw gamepad state.</param>
-        /// <param name="button">Button to test.</param>
-        /// <returns>True when the button was pressed this frame.</returns>
-        bool WasGamepadButtonPressed(InputGamepadState currentState, InputGamepadState previousState, InputGamepadButton button) {
-            return currentState.IsButtonDown(button) && !previousState.IsButtonDown(button);
         }
     }
 }

@@ -53,10 +53,6 @@ namespace city.menu.tools {
                 throw new ArgumentException("Provider type name must be provided.", nameof(providerTypeName));
             } else if (definition == null) {
                 throw new ArgumentNullException(nameof(definition));
-            } else if (Core.Instance == null) {
-                throw new InvalidOperationException("A core instance must exist before generated scenes can be authored.");
-            } else if (Core.Instance.EntityFactory == null) {
-                throw new InvalidOperationException("An entity factory must exist before generated scenes can be authored.");
             }
 
             return new GeneratedAuthoringSceneDefinition {

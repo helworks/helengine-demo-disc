@@ -19,8 +19,6 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Scene id must be provided.", nameof(sceneDefinition));
             } else if (sceneDefinition.RootEntities == null) {
                 throw new ArgumentNullException(nameof(sceneDefinition));
-            } else if (Core.Instance == null) {
-                throw new InvalidOperationException("A core instance must exist before generated scenes can be written.");
             }
 
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);

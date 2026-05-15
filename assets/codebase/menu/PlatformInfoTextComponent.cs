@@ -26,9 +26,6 @@ namespace city.menu {
 
             if (Applied) {
                 return;
-            }
-            if (Core.Instance == null) {
-                throw new InvalidOperationException("PlatformInfoTextComponent requires a core instance.");
             } else if (Parent == null) {
                 throw new InvalidOperationException("PlatformInfoTextComponent requires a parent entity.");
             } else if (Parent.Children == null || Parent.Children.Count < 2) {
