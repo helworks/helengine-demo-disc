@@ -1,6 +1,6 @@
 namespace city.menu.tools {
     /// <summary>
-    /// Regenerates the authored demo-disc main menu scene through the editor-only menu scene regeneration pipeline.
+    /// Regenerates the authored demo-disc main menu scene through the city-owned live scene generator.
     /// </summary>
     public sealed class RegenerateDemoDiscMainMenuCommand : IEditorCommand {
         /// <summary>
@@ -22,9 +22,8 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            context.MenuSceneRegenerationService.Regenerate(
-                "Scenes/DemoDiscMainMenu.helen",
-                "city.menu.DemoDiscMenuDefinitionProvider, gameplay");
+            DemoDiscSceneGenerator generator = new DemoDiscSceneGenerator();
+            generator.Generate(context.ProjectRootPath);
         }
     }
 }
