@@ -125,16 +125,15 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Resolves the editor font that should back the generated FPS overlay during live authoring.
+        /// Resolves the optional font reference assigned to the generated FPS overlay during live authoring.
         /// </summary>
-        /// <returns>Editor font asset required by the FPS component.</returns>
+        /// <returns>Optional font asset assigned to the FPS component.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance == null || Core.Instance.DefaultFontAsset == null) {
-                throw new InvalidOperationException("A default editor font must be loaded before the cube-test scene can be generated.");
-            }
-
-            return Core.Instance.DefaultFontAsset;
+            return null;
         }
 
     }
 }
+
+
+

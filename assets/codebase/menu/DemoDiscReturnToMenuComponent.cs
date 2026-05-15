@@ -22,14 +22,8 @@ namespace city.menu {
         /// Performs per-frame input polling for the demo-disc return bind.
         /// </summary>
         public override void Update() {
-            InputSystem inputSystem = Core.Instance != null ? Core.Instance.Input : null;
-            if (inputSystem == null) {
-                PreviousGamepadState = default;
-                return;
-            }
-
-            if (!WasReturnPressed(inputSystem)) {
-                PreviousGamepadState = ReadPrimaryGamepadState(inputSystem);
+            if (!WasReturnPressed()) {
+                PreviousGamepadState = Core.Instance.Input.GetGamepadState(0);
                 return;
             }
 
@@ -40,29 +34,7 @@ namespace city.menu {
         /// Returns the active demo scene to the main menu using the current execution mode's scene-loading path.
         /// </summary>
         void ReturnToMainMenu() {
-            if (Core.Instance == null) {
-                throw new InvalidOperationException("A core instance must exist before returning to the demo-disc main menu.");
-            }
-
-#if HELENGINE_EDITOR
-            if (true) {
-                if (Core.Instance.SceneLoadService == null) {
-                    throw new InvalidOperationException("Core scene loading services must be initialized before returning to the demo-disc main menu.");
-                }
-
-                SceneAsset sceneAsset = Core.Instance.ContentManager.Load<SceneAsset>(MainMenuScenePath, RuntimeContentProcessorIds.SceneAsset);
-                Core.Instance.SceneLoadService.Load(sceneAsset);
-                if (Parent != null) {
-                    Parent.Enabled = false;
-                }
-            }
-#else
-            if (Core.Instance.SceneManager == null) {
-                throw new InvalidOperationException("Core scene manager must be initialized before returning to the demo-disc main menu.");
-            } else {
-                Core.Instance.SceneManager.LoadScene(MainMenuSceneId, SceneLoadMode.Single);
-            }
-#endif
+            Core.Instance.SceneManager.LoadScene(MainMenuSceneId, SceneLoadMode.Single);
         }
 
         /// <summary>
@@ -70,22 +42,25 @@ namespace city.menu {
         /// </summary>
         /// <param name="inputSystem">Input system supplying the current frame state.</param>
         /// <returns>True when the current frame should navigate back to the main menu.</returns>
-        bool WasReturnPressed(InputSystem inputSystem) {
+        bool WasReturnPressed() {
 #if DESKTOP_PLATFORM
-            if (inputSystem.WasKeyPressed(Keys.Escape) || inputSystem.WasKeyPressed(Keys.Back)) {
+            if (Core.Instance.Input.WasKeyPressed(Keys.Escape) || Core.Instance.Input.WasKeyPressed(Keys.Back)) {
                 return true;
             }
 #endif
 
-            InputGamepadState currentGamepadState = ReadPrimaryGamepadState(inputSystem);
+            InputGamepadState currentGamepadState = Core.Instance.Input.GetGamepadState(0);
             if (!currentGamepadState.Connected) {
                 PreviousGamepadState = currentGamepadState;
                 return false;
             }
 
-            return WasGamepadButtonPressed(currentGamepadState, PreviousGamepadState, InputGamepadButton.East)
+            bool wasReturnPressed =
+                WasGamepadButtonPressed(currentGamepadState, PreviousGamepadState, InputGamepadButton.East)
                 || WasGamepadButtonPressed(currentGamepadState, PreviousGamepadState, InputGamepadButton.North)
                 || WasGamepadButtonPressed(currentGamepadState, PreviousGamepadState, InputGamepadButton.Select);
+            PreviousGamepadState = currentGamepadState;
+            return wasReturnPressed;
         }
 
         /// <summary>
@@ -98,20 +73,5 @@ namespace city.menu {
         bool WasGamepadButtonPressed(InputGamepadState currentState, InputGamepadState previousState, InputGamepadButton button) {
             return currentState.IsButtonDown(button) && !previousState.IsButtonDown(button);
         }
-
-        /// <summary>
-        /// Reads the current primary gamepad state from the shared input system.
-        /// </summary>
-        /// <param name="inputSystem">Input system supplying the current frame state.</param>
-        /// <returns>Current primary gamepad state.</returns>
-        InputGamepadState ReadPrimaryGamepadState(InputSystem inputSystem) {
-            if (inputSystem == null) {
-                return default;
-            }
-
-            return inputSystem.GetGamepadState(0);
-        }
     }
 }
-
-

@@ -7,28 +7,6 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class RenderingSceneAssetPreparationService {
         /// <summary>
-        /// Relative project paths used by the axis showcase materials.
-        /// </summary>
-        static readonly string[] AxisMaterialRelativePaths = {
-            "materials/rendering/axis_test/X.hasset",
-            "materials/rendering/axis_test/Y.hasset",
-            "materials/rendering/axis_test/Z.hasset",
-            "materials/rendering/axis_test/Ground.hasset",
-            "materials/rendering/axis_test/Marker.hasset"
-        };
-
-        /// <summary>
-        /// Base colors used by the axis showcase materials.
-        /// </summary>
-        static readonly string[] AxisMaterialColors = {
-            "#FF4040FF",
-            "#40FF40FF",
-            "#4080FFFF",
-            "#B8C2CCFF",
-            "#FFFFFFFF"
-        };
-
-        /// <summary>
         /// Prepares all runtime assets required by the rendering showcase scene generator.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
@@ -44,17 +22,6 @@ namespace city.rendering.tools {
             RuntimeModel generatedPlaneModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.PlaneAssetId);
             RuntimeModel generatedSphereModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.SphereAssetId);
             RuntimeMaterial generatedStandardMaterial = EngineGeneratedMaterialCache.GetRuntimeMaterial(EngineGeneratedMaterialCache.StandardAssetId);
-
-            ColoredCubeGridSceneFactory coloredCubeGridFactory = new ColoredCubeGridSceneFactory();
-            coloredCubeGridFactory.WriteMaterialAssets(projectRootPath);
-
-            TexturedCubeGridSceneFactory texturedCubeGridFactory = new TexturedCubeGridSceneFactory();
-            texturedCubeGridFactory.WriteAssets(projectRootPath);
-
-            WriteAxisMaterialAssets(fullProjectRootPath);
-
-            RuntimeModel generatedArrowModel = LoadImportedModelRuntime(projectRootPath, "models/rendering/axis_test/directional_light_arrow.obj");
-            RuntimeMaterial[] axisMaterials = LoadRuntimeMaterials(bootstrap, fullProjectRootPath, AxisMaterialRelativePaths);
             RuntimeMaterial[] racerMaterials = new[] {
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "models/Riemers/racer/x3ds_mat_ruedas.hasset"),
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "models/Riemers/racer/x3ds_mat_Material__0_3.hasset"),
@@ -69,60 +36,10 @@ namespace city.rendering.tools {
                 GeneratedPlaneModel = generatedPlaneModel,
                 GeneratedSphereModel = generatedSphereModel,
                 GeneratedStandardMaterial = generatedStandardMaterial,
-                GeneratedArrowModel = generatedArrowModel,
-                AxisMaterials = axisMaterials,
                 RacerMaterials = racerMaterials,
                 LamppostModel = lamppostModel,
                 RacerModel = racerModel
             };
-        }
-
-        /// <summary>
-        /// Loads one ordered set of authored runtime materials from project material settings documents.
-        /// </summary>
-        /// <param name="fullProjectRootPath">Absolute city project root path.</param>
-        /// <param name="relativeMaterialPaths">Project-relative material paths.</param>
-        /// <returns>Runtime materials loaded in the requested order.</returns>
-        RuntimeMaterial[] LoadRuntimeMaterials(EditorProjectBootstrapContext bootstrap, string fullProjectRootPath, string[] relativeMaterialPaths) {
-            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
-            } else if (bootstrap == null) {
-                throw new ArgumentNullException(nameof(bootstrap));
-            } else if (relativeMaterialPaths == null) {
-                throw new ArgumentNullException(nameof(relativeMaterialPaths));
-            }
-
-            RuntimeMaterial[] materials = new RuntimeMaterial[relativeMaterialPaths.Length];
-            for (int index = 0; index < relativeMaterialPaths.Length; index++) {
-                materials[index] = LoadRuntimeMaterial(bootstrap, fullProjectRootPath, relativeMaterialPaths[index]);
-            }
-
-            return materials;
-        }
-
-        /// <summary>
-        /// Writes the axis showcase materials using the shared material settings service.
-        /// </summary>
-        /// <param name="fullProjectRootPath">Absolute city project root path.</param>
-        void WriteAxisMaterialAssets(string fullProjectRootPath) {
-            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
-            }
-
-            MaterialAssetSettingsService materialSettingsService = new MaterialAssetSettingsService();
-            for (int index = 0; index < AxisMaterialRelativePaths.Length; index++) {
-                string fullMaterialPath = Path.Combine(
-                    fullProjectRootPath,
-                    "assets",
-                    AxisMaterialRelativePaths[index].Replace('/', Path.DirectorySeparatorChar));
-                string directoryPath = Path.GetDirectoryName(fullMaterialPath);
-                if (string.IsNullOrWhiteSpace(directoryPath)) {
-                    throw new InvalidOperationException($"Could not resolve a material directory for '{AxisMaterialRelativePaths[index]}'.");
-                }
-
-                Directory.CreateDirectory(directoryPath);
-                materialSettingsService.Save(fullMaterialPath, CreateAxisMaterialSettings(index));
-            }
         }
 
         /// <summary>
@@ -215,68 +132,6 @@ namespace city.rendering.tools {
             settingsService.LoadOrCreate(fullMaterialPath, materialAsset, bootstrap.SupportedPlatforms, bootstrap.ResolveSelectionModel);
             MaterialAsset migratedMaterialAsset = settingsService.LoadMaterialAsset(fullMaterialPath, platformId);
             return migratedMaterialAsset;
-        }
-
-        /// <summary>
-        /// Creates one material settings document for an axis showcase material.
-        /// </summary>
-        /// <param name="materialIndex">Zero-based axis material index.</param>
-        /// <returns>Generated import-settings payload for the axis material.</returns>
-        MaterialAssetImportSettings CreateAxisMaterialSettings(int materialIndex) {
-            if (materialIndex < 0 || materialIndex >= AxisMaterialRelativePaths.Length) {
-                throw new ArgumentOutOfRangeException(nameof(materialIndex));
-            }
-
-            MaterialAssetImportSettings settings = new MaterialAssetImportSettings();
-            settings.Importer.ImporterId = "helengine.material";
-            settings.Importer.SourceChecksum = string.Empty;
-            settings.Importer.AssetId = CreateAxisMaterialAssetId(materialIndex);
-
-            MaterialAssetProcessorSettings windowsSettings = new MaterialAssetProcessorSettings();
-            windowsSettings.SchemaId = "standard-shader";
-            windowsSettings.FieldValues["use-custom-shader"] = "false";
-            windowsSettings.FieldValues["shader-asset-id"] = "ForwardStandardShader";
-            windowsSettings.FieldValues["texture-id"] = string.Empty;
-            windowsSettings.FieldValues["casts-shadow"] = "true";
-            windowsSettings.FieldValues["receives-shadow"] = "true";
-            windowsSettings.FieldValues["base-color"] = AxisMaterialColors[materialIndex];
-            settings.Processor.Platforms["windows"] = windowsSettings;
-
-            MaterialAssetProcessorSettings ps2Settings = new MaterialAssetProcessorSettings();
-            ps2Settings.SchemaId = "ps2-simple-lit-textured";
-            ps2Settings.FieldValues["alpha-mode"] = "opaque";
-            ps2Settings.FieldValues["double-sided"] = "false";
-            ps2Settings.FieldValues["cast-shadows"] = "true";
-            ps2Settings.FieldValues["vertex-color-mode"] = "ignore";
-            ps2Settings.FieldValues["base-color"] = AxisMaterialColors[materialIndex];
-            settings.Processor.Platforms["ps2"] = ps2Settings;
-
-            MaterialAssetProcessorSettings pspSettings = new MaterialAssetProcessorSettings();
-            pspSettings.SchemaId = "standard-shader";
-            pspSettings.FieldValues["use-custom-shader"] = "false";
-            pspSettings.FieldValues["shader-asset-id"] = "ForwardStandardShader";
-            pspSettings.FieldValues["texture-id"] = string.Empty;
-            pspSettings.FieldValues["casts-shadow"] = "true";
-            pspSettings.FieldValues["receives-shadow"] = "true";
-            pspSettings.FieldValues["base-color"] = AxisMaterialColors[materialIndex];
-            settings.Processor.Platforms["psp"] = pspSettings;
-            return settings;
-        }
-
-        /// <summary>
-        /// Creates one stable asset id for an axis showcase material.
-        /// </summary>
-        /// <param name="materialIndex">Zero-based axis material index.</param>
-        /// <returns>Stable material asset id.</returns>
-        static string CreateAxisMaterialAssetId(int materialIndex) {
-            return materialIndex switch {
-                0 => "Materials.rendering.axis_test.X",
-                1 => "Materials.rendering.axis_test.Y",
-                2 => "Materials.rendering.axis_test.Z",
-                3 => "Materials.rendering.axis_test.Ground",
-                4 => "Materials.rendering.axis_test.Marker",
-                _ => throw new ArgumentOutOfRangeException(nameof(materialIndex))
-            };
         }
 
         /// <summary>

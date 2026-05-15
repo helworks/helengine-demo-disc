@@ -1,4 +1,5 @@
 using city.menu;
+using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
@@ -8,22 +9,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Stable scene id used by the generated directional-shadow plaza asset.
         /// </summary>
-        public const string SceneId = RenderingSceneGenerator.DirectionalShadowPlazaSceneId;
-
-        /// <summary>
-        /// Stable serialized component identifier used by mesh records.
-        /// </summary>
-        const string MeshComponentTypeId = "helengine.MeshComponent";
-
-        /// <summary>
-        /// Stable serialized component identifier used by camera records.
-        /// </summary>
-        const string CameraComponentTypeId = "helengine.CameraComponent";
-
-        /// <summary>
-        /// Stable serialized component identifier used by directional-light records.
-        /// </summary>
-        const string DirectionalLightComponentTypeId = "helengine.DirectionalLightComponent";
+        public const string SceneId = "scenes/rendering/directional_shadow_plaza.helen";
 
         /// <summary>
         /// Layer mask used by user-authored scene objects in packaged runtime scenes.
@@ -41,9 +27,30 @@ namespace city.rendering.tools {
         const string MeshMaterialReferenceName = "Material";
 
         /// <summary>
+        /// Stable save-state slot name used for serialized font references.
+        /// </summary>
+        const string FontReferenceName = "Font";
+
+        /// <summary>
+        /// Placeholder font assigned during live authoring before the real generated editor-font reference is serialized.
+        /// </summary>
+        readonly FontAsset PlaceholderFont;
+
+        /// <summary>
         /// Initializes one directional-shadow plaza scene factory.
         /// </summary>
-        public DirectionalShadowPlazaSceneFactory() { }
+        public DirectionalShadowPlazaSceneFactory() {
+            PlaceholderFont = new FontAsset(
+                new FontInfo("DirectionalShadowPlazaPlaceholder", 16, 4f),
+                new ManagedRuntimeTexture {
+                    Width = 1,
+                    Height = 1
+                },
+                new Dictionary<char, FontChar>(),
+                16f,
+                1,
+                1);
+        }
 
         /// <summary>
         /// Creates the live-authored directional-shadow plaza scene definition that the editor save pipeline will serialize.
@@ -138,9 +145,11 @@ namespace city.rendering.tools {
         /// <returns>Live authored FPS overlay entity.</returns>
         Entity CreateFpsEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("DirectionalShadowPlazaFps");
-            entity.AddComponent(new FPSComponent {
-                Font = ResolveRequiredEditorFont()
-            });
+            FPSComponent fpsComponent = new FPSComponent {
+                Font = PlaceholderFont
+            };
+            entity.AddComponent(fpsComponent);
+            ApplyEditorFontReference(entity, fpsComponent);
             return entity;
         }
 
@@ -255,15 +264,43 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Resolves the editor font used by the live camera entity.
+        /// Stores the generated editor-font reference on the entity save state for the supplied FPS component.
         /// </summary>
-        /// <returns>Loaded default editor font.</returns>
-        FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance == null || Core.Instance.DefaultFontAsset == null) {
-                throw new InvalidOperationException("A default editor font must be loaded before the scene can be generated.");
+        /// <param name="entity">Entity that owns the FPS component.</param>
+        /// <param name="component">FPS component whose font reference should be stored.</param>
+        void ApplyEditorFontReference(Entity entity, FPSComponent component) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (component == null) {
+                throw new ArgumentNullException(nameof(component));
             }
 
-            return Core.Instance.DefaultFontAsset;
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(component, FontReferenceName, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
+        }
+
+        /// <summary>
+        /// Resolves the hidden entity save component attached by the editor entity factory.
+        /// </summary>
+        /// <param name="entity">Entity whose save component should be returned.</param>
+        /// <returns>Attached entity save component.</returns>
+        EntitySaveComponent FindRequiredEntitySaveComponent(Entity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (entity.Components == null) {
+                throw new InvalidOperationException("Generated entities must expose initialized component collections.");
+            }
+
+            for (int index = 0; index < entity.Components.Count; index++) {
+                if (entity.Components[index] is EntitySaveComponent saveComponent) {
+                    return saveComponent;
+                }
+            }
+
+            throw new InvalidOperationException("Generated entities must include EntitySaveComponent.");
         }
     }
 }
+
+
+
