@@ -14,33 +14,56 @@ namespace city.menu {
         const string PlatformVersionTextEntityName = "DemoDiscPlatformInfoVersionText";
 
         /// <summary>
-        /// Tracks whether the overlay text has already been populated.
+        /// Cached child entity that renders the platform name.
         /// </summary>
-        bool Applied;
+        Entity PlatformNameTextEntity;
+        /// <summary>
+        /// Cached child entity that renders the platform version.
+        /// </summary>
+        Entity PlatformVersionTextEntity;
+        /// <summary>
+        /// Cached text component that renders the platform name.
+        /// </summary>
+        TextComponent PlatformNameTextComponent;
+        /// <summary>
+        /// Cached text component that renders the platform version.
+        /// </summary>
+        TextComponent PlatformVersionTextComponent;
 
         /// <summary>
-        /// Applies the current platform name and version to the child text entities once.
+        /// Resolves the child text entities and applies the platform information once the full hierarchy is available.
         /// </summary>
-        public override void Update() {
-            base.Update();
+        /// <param name="entity">Owning initialized entity.</param>
+        public override void ComponentInitialized(Entity entity) {
+            base.ComponentInitialized(entity);
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
 
-            if (Applied) {
-                return;
+            BindTextEntities(entity);
+            string platformName = Core.Instance.PlatformInfo.Name;
+            string platformVersion = Core.Instance.PlatformInfo.Version;
+            ApplyText(PlatformNameTextEntity, PlatformNameTextComponent, platformName, 0f);
+            ApplyText(PlatformVersionTextEntity, PlatformVersionTextComponent, platformVersion, PlatformNameTextComponent.Size.Y + 6f);
+        }
+
+        /// <summary>
+        /// Resolves and caches the platform-info child text entities and components from the initialized subtree.
+        /// </summary>
+        /// <param name="entity">Owning initialized entity.</param>
+        void BindTextEntities(Entity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
             } else if (Parent == null) {
                 throw new InvalidOperationException("PlatformInfoTextComponent requires a parent entity.");
             } else if (Parent.Children == null || Parent.Children.Count < 2) {
                 throw new InvalidOperationException("Platform-info overlay requires two child text entities.");
             }
 
-            Entity nameEntity = Parent.Children[0];
-            Entity versionEntity = Parent.Children[1];
-            TextComponent nameText = FindTextComponent(nameEntity);
-            TextComponent versionText = FindTextComponent(versionEntity);
-            string platformName = Core.Instance.PlatformInfo.Name;
-            string platformVersion = Core.Instance.PlatformInfo.Version;
-            ApplyText(nameEntity, nameText, platformName, 0f);
-            ApplyText(versionEntity, versionText, platformVersion, nameText.Size.Y + 6f);
-            Applied = true;
+            PlatformNameTextEntity = FindRequiredChildEntity(entity, PlatformNameTextEntityName);
+            PlatformVersionTextEntity = FindRequiredChildEntity(entity, PlatformVersionTextEntityName);
+            PlatformNameTextComponent = FindTextComponent(PlatformNameTextEntity);
+            PlatformVersionTextComponent = FindTextComponent(PlatformVersionTextEntity);
         }
 
         /// <summary>
@@ -61,6 +84,29 @@ namespace city.menu {
             float2 measuredSize = textComponent.Font.MeasureString(text);
             textComponent.Size = new int2((int)Math.Ceiling(measuredSize.X), (int)Math.Ceiling(measuredSize.Y));
             entity.LocalPosition = new float3(-textComponent.Size.X, topOffset, 0f);
+        }
+
+        /// <summary>
+        /// Finds one required named child entity beneath the platform-info host.
+        /// </summary>
+        /// <param name="parentEntity">Parent entity whose direct children should be searched.</param>
+        /// <param name="childEntityName">Stable child entity name to resolve.</param>
+        /// <returns>Resolved child entity.</returns>
+        Entity FindRequiredChildEntity(Entity parentEntity, string childEntityName) {
+            if (parentEntity == null) {
+                throw new ArgumentNullException(nameof(parentEntity));
+            } else if (parentEntity.Children == null) {
+                throw new InvalidOperationException("Platform-info overlay requires child entities.");
+            }
+
+            for (int index = 0; index < parentEntity.Children.Count; index++) {
+                Entity childEntity = parentEntity.Children[index];
+                if (childEntity.Name == childEntityName) {
+                    return childEntity;
+                }
+            }
+
+            throw new InvalidOperationException($"Platform-info overlay is missing child entity '{childEntityName}'.");
         }
 
         /// <summary>

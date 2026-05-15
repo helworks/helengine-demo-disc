@@ -26,7 +26,7 @@ namespace city.menu.tools {
 
             RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService();
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(context.ProjectRootPath);
-            DemoDiscRenderingSceneGenerationService generator = new DemoDiscRenderingSceneGenerationService();
+            RenderingSceneGenerator generator = new RenderingSceneGenerator();
             generator.Generate(context.ProjectRootPath, assets);
         }
     }
