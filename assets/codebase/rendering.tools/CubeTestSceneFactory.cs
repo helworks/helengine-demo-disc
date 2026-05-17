@@ -74,7 +74,6 @@ namespace city.rendering.tools {
             };
             entity.AddComponent(fpsComponent);
 
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;
         }
 
@@ -129,7 +128,11 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Optional font asset assigned to the FPS component.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            return null;
+            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+                throw new InvalidOperationException("A default editor font must be loaded before the cube-test scene can be generated.");
+            }
+
+            return editorCore.DefaultFontAssetForEditor;
         }
 
     }

@@ -4,6 +4,11 @@ namespace gameplay.rendering {
     /// </summary>
     public sealed class DirectionalShadowTowerSpinComponent : UpdateComponent {
         /// <summary>
+        /// Stores the accumulated local elapsed time used to evaluate the tower spin phase.
+        /// </summary>
+        double ElapsedSeconds;
+
+        /// <summary>
         /// Gets or sets the base yaw offset in radians applied before time-based rotation.
         /// </summary>
         public float BaseYawRadians { get; set; }
@@ -14,12 +19,22 @@ namespace gameplay.rendering {
         public float AngularSpeedRadians { get; set; }
 
         /// <summary>
-        /// Evaluates the current orientation from total elapsed runtime time.
+        /// Resets the local spin timer when the component joins a scene entity.
+        /// </summary>
+        /// <param name="entity">Owning entity receiving the component.</param>
+        public override void ComponentAdded(Entity entity) {
+            base.ComponentAdded(entity);
+            ElapsedSeconds = 0d;
+        }
+
+        /// <summary>
+        /// Evaluates the current orientation from accumulated local runtime time.
         /// </summary>
         public override void Update() {
             base.Update();
 
-            double yawRadians = BaseYawRadians + (AngularSpeedRadians * Core.Instance.TotalElapsedSeconds);
+            ElapsedSeconds += Core.Instance.FrameDeltaSeconds;
+            double yawRadians = BaseYawRadians + (AngularSpeedRadians * ElapsedSeconds);
             float4 orientation;
             float4.CreateFromYawPitchRoll((float)yawRadians, 0f, 0f, out orientation);
             orientation.Normalize();

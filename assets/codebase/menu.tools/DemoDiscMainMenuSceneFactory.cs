@@ -165,7 +165,7 @@ namespace city.menu.tools {
 
             CreateBackgroundEntity(panelEntity, $"panel-{panelDefinition.PanelId}-surface", new float3(0f, 0f, 0f), new int2(DemoMenuLayout.PanelWidth, DemoMenuLayout.PanelHeight), 18f, 3f, definition.SurfaceColor, definition.SurfaceBorderColor, 30);
             CreateBackgroundEntity(panelEntity, $"panel-{panelDefinition.PanelId}-top-band", new float3(0f, 0f, 0f), new int2(DemoMenuLayout.PanelWidth, 18), 9f, 0f, definition.AccentColor, definition.AccentColor, 31);
-            CreateTextEntity(panelEntity, $"panel-{panelDefinition.PanelId}-heading", new float3(32f, 30f, 0.1f), panelDefinition.Heading, definition.BodyFontPath, definition.TextColor, new int2(420, 36), 41, null);
+            CreateTextEntity(panelEntity, $"panel-{panelDefinition.PanelId}-heading", new float3(32f, 30f, 0.1f), panelDefinition.Heading, definition.BodyFontPath, definition.TextColor, new int2(420, 36), 41, null, true);
             CreateSelectedDescriptionEntity(panelEntity, panelDefinition.PanelId, new float3(32f, 410f, 0.1f), firstItem.Description, definition.BodyFontPath, definition.MutedTextColor);
 
             Entity itemsViewportEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, $"Panel-{panelDefinition.PanelId}-ItemsViewport");
@@ -252,7 +252,8 @@ namespace city.menu.tools {
                 definition.TextColor,
                 new int2(DemoMenuLayout.ButtonWidth - 40, 24),
                 34,
-                null);
+                null,
+                true);
         }
 
         /// <summary>
@@ -275,6 +276,7 @@ namespace city.menu.tools {
 
             Entity entity = Core.Instance.EntityFactory.CreateChild(panelEntity, $"SelectedDescription-{panelId}");
             entity.LocalPosition = localPosition;
+            entity.Static = false;
             entity.AddComponent(new MenuSelectedDescriptionComponent());
 
             TextComponent textComponent = new TextComponent {
@@ -301,7 +303,8 @@ namespace city.menu.tools {
         /// <param name="size">Text layout size.</param>
         /// <param name="renderOrder2D">2D render order.</param>
         /// <param name="anchorComponent">Optional anchor component attached to the entity.</param>
-        void CreateTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, AnchorComponent anchorComponent) {
+        /// <param name="isStatic">Whether the authored text entity should be marked static for runtime caching.</param>
+        void CreateTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, AnchorComponent anchorComponent, bool isStatic = true) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -312,6 +315,7 @@ namespace city.menu.tools {
 
             Entity entity = Core.Instance.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
+            entity.Static = isStatic;
 
             TextComponent textComponent = new TextComponent {
                 Text = text ?? string.Empty,
@@ -408,8 +412,8 @@ namespace city.menu.tools {
             entity.AddComponent(anchorComponent);
             entity.AddComponent(new PlatformInfoTextComponent());
 
-            CreateTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0.1f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, null);
-            CreateTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(0f, platformInfoOverlay.LineSpacing, 0.1f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(1, 1), 42, null);
+            CreateTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0.1f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, null, false);
+            CreateTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(0f, platformInfoOverlay.LineSpacing, 0.1f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(1, 1), 42, null, false);
         }
 
         /// <summary>

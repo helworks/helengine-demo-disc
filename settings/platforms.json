@@ -2,6 +2,7 @@
   "supportedPlatforms": [
     "ps2",
     "psp",
-    "windows"
+    "windows",
+    "gamecube"
   ]
 }

@@ -4,6 +4,11 @@ namespace gameplay.rendering {
     /// </summary>
     public sealed class DirectionalShadowSunSweepComponent : UpdateComponent {
         /// <summary>
+        /// Stores the accumulated local elapsed time used to evaluate the authored sweep phase.
+        /// </summary>
+        double ElapsedSeconds;
+
+        /// <summary>
         /// Gets or sets the minimum yaw reached by the light sweep in radians.
         /// </summary>
         public float MinYawRadians { get; set; }
@@ -24,12 +29,22 @@ namespace gameplay.rendering {
         public float SweepSpeedRadians { get; set; }
 
         /// <summary>
-        /// Evaluates the current light orientation from total elapsed runtime time.
+        /// Resets the local sweep timer when the component joins a scene entity.
+        /// </summary>
+        /// <param name="entity">Owning entity receiving the component.</param>
+        public override void ComponentAdded(Entity entity) {
+            base.ComponentAdded(entity);
+            ElapsedSeconds = 0d;
+        }
+
+        /// <summary>
+        /// Evaluates the current light orientation from accumulated local runtime time.
         /// </summary>
         public override void Update() {
             base.Update();
 
-            double normalized = (Math.Sin(Core.Instance.TotalElapsedSeconds * SweepSpeedRadians) * 0.5d) + 0.5d;
+            ElapsedSeconds += Core.Instance.FrameDeltaSeconds;
+            double normalized = (Math.Sin(ElapsedSeconds * SweepSpeedRadians) * 0.5d) + 0.5d;
             double yawRadians = MinYawRadians + ((MaxYawRadians - MinYawRadians) * normalized);
             float4 orientation;
             float4.CreateFromYawPitchRoll((float)yawRadians, PitchRadians, 0f, out orientation);

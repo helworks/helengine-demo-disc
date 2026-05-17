@@ -486,11 +486,11 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Loaded default editor font.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance == null || Core.Instance.DefaultFontAsset == null) {
+            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the scene can be generated.");
             }
 
-            return Core.Instance.DefaultFontAsset;
+            return editorCore.DefaultFontAssetForEditor;
         }
     }
 }

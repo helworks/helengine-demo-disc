@@ -21,7 +21,15 @@ namespace city.rendering.tools {
             RuntimeModel generatedCubeModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.CubeAssetId);
             RuntimeModel generatedPlaneModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.PlaneAssetId);
             RuntimeModel generatedSphereModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.SphereAssetId);
+            RuntimeModel generatedArrowModel = LoadImportedModelRuntime(projectRootPath, "models/rendering/axis_test/directional_light_arrow.obj");
             RuntimeMaterial generatedStandardMaterial = EngineGeneratedMaterialCache.GetRuntimeMaterial(EngineGeneratedMaterialCache.StandardAssetId);
+            RuntimeMaterial[] axisMaterials = new[] {
+                LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/X.hasset"),
+                LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/Y.hasset"),
+                LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/Z.hasset"),
+                LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/Ground.hasset"),
+                LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/Marker.hasset")
+            };
             RuntimeMaterial[] racerMaterials = new[] {
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "models/Riemers/racer/x3ds_mat_ruedas.hasset"),
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "models/Riemers/racer/x3ds_mat_Material__0_3.hasset"),
@@ -36,6 +44,8 @@ namespace city.rendering.tools {
                 GeneratedPlaneModel = generatedPlaneModel,
                 GeneratedSphereModel = generatedSphereModel,
                 GeneratedStandardMaterial = generatedStandardMaterial,
+                GeneratedArrowModel = generatedArrowModel,
+                AxisMaterials = axisMaterials,
                 RacerMaterials = racerMaterials,
                 LamppostModel = lamppostModel,
                 RacerModel = racerModel

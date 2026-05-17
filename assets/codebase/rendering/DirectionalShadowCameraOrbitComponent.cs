@@ -4,6 +4,11 @@ namespace gameplay.rendering {
     /// </summary>
     public sealed class DirectionalShadowCameraOrbitComponent : UpdateComponent {
         /// <summary>
+        /// Stores the accumulated local elapsed time used to evaluate the orbit phase.
+        /// </summary>
+        double ElapsedSeconds;
+
+        /// <summary>
         /// Gets or sets the world-space orbit center.
         /// </summary>
         public float3 OrbitCenter { get; set; }
@@ -34,12 +39,22 @@ namespace gameplay.rendering {
         public float LookDownPitchRadians { get; set; }
 
         /// <summary>
-        /// Evaluates the current camera orbit position and inward-facing orientation from total elapsed runtime time.
+        /// Resets the local orbit timer when the component joins a scene entity.
+        /// </summary>
+        /// <param name="entity">Owning entity receiving the component.</param>
+        public override void ComponentAdded(Entity entity) {
+            base.ComponentAdded(entity);
+            ElapsedSeconds = 0d;
+        }
+
+        /// <summary>
+        /// Evaluates the current camera orbit position and inward-facing orientation from accumulated local runtime time.
         /// </summary>
         public override void Update() {
             base.Update();
 
-            double angleRadians = BaseAngleRadians + (AngularSpeedRadians * Core.Instance.TotalElapsedSeconds);
+            ElapsedSeconds += Core.Instance.FrameDeltaSeconds;
+            double angleRadians = BaseAngleRadians + (AngularSpeedRadians * ElapsedSeconds);
             double x = OrbitCenter.X + (Math.Sin(angleRadians) * OrbitRadius);
             double z = OrbitCenter.Z + (Math.Cos(angleRadians) * OrbitRadius);
             Parent.LocalPosition = new float3((float)x, OrbitCenter.Y + OrbitHeight, (float)z);

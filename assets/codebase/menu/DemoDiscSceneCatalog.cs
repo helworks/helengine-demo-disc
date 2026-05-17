@@ -10,6 +10,7 @@ namespace city.menu {
         public MenuItemDefinition[] CreateSceneItems() {
             return new[] {
                 new MenuItemDefinition("scene-cube-test", "Cube Test", "Minimal one-cube rendering validation scene.", true, new MenuActionDefinition(MenuActionKind.LoadScene, "cube_test")),
+                new MenuItemDefinition("scene-scaled-cube", "Scaled Cube", "Single large non-uniformly scaled cube with an orbit camera.", true, new MenuActionDefinition(MenuActionKind.LoadScene, "scaled_cube")),
                 new MenuItemDefinition("scene-colored-cube-grid", "Colored Cubes", "Sixteen rotating cubes with distinct lit material colors.", true, new MenuActionDefinition(MenuActionKind.LoadScene, "colored_cube_grid")),
                 new MenuItemDefinition("scene-textured-cube-grid", "Textured Cubes", "Sixteen rotating cubes with distinct lit texture materials.", true, new MenuActionDefinition(MenuActionKind.LoadScene, "textured_cube_grid")),
                 new MenuItemDefinition("scene-axis-test", "Axis 1", "Three-axis rotation validation scene with a directional-light arrow.", true, new MenuActionDefinition(MenuActionKind.LoadScene, "axis_test")),

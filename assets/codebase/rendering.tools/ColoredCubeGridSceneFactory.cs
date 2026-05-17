@@ -117,6 +117,16 @@ namespace city.rendering.tools {
         static readonly string[] CubeMaterialRelativePaths = BuildMaterialRelativePaths();
 
         /// <summary>
+        /// Stable minimum angular speed applied to rotating cubes in degrees per second.
+        /// </summary>
+        const double CubeBaseAngularSpeedDegreesPerSecond = 48.0;
+
+        /// <summary>
+        /// Stable per-cube angular speed increase in degrees per second.
+        /// </summary>
+        const double CubeAngularSpeedDegreesPerIndex = 4.0;
+
+        /// <summary>
         /// Service used to write generated material settings documents.
         /// </summary>
         readonly MaterialAssetSettingsService MaterialSettingsService;
@@ -251,6 +261,8 @@ namespace city.rendering.tools {
                     int cubeIndex = (row * 4) + column;
                     cubeEntities[cubeIndex] = CreateCubeEntity(
                         cubeIndex,
+                        row,
+                        column,
                         cubeModel,
                         coloredMaterials[cubeIndex],
                         new float3((column - 1.5f) * 3.0f, (1.5f - row) * 3.0f, 0f));
@@ -268,7 +280,7 @@ namespace city.rendering.tools {
         /// <param name="material">Generated runtime material assigned to the cube.</param>
         /// <param name="localPosition">Authored local position for the cube.</param>
         /// <returns>Live authored cube entity.</returns>
-        Entity CreateCubeEntity(int cubeIndex, RuntimeModel cubeModel, RuntimeMaterial material, float3 localPosition) {
+        Entity CreateCubeEntity(int cubeIndex, int row, int column, RuntimeModel cubeModel, RuntimeMaterial material, float3 localPosition) {
             if (cubeModel == null) {
                 throw new ArgumentNullException(nameof(cubeModel));
             } else if (material == null) {
@@ -284,11 +296,35 @@ namespace city.rendering.tools {
                 Material = material,
                 RenderOrder3D = 0
             });
-            entity.AddComponent(new gameplay.rendering.DirectionalShadowTowerSpinComponent {
-                BaseYawRadians = 0f,
-                AngularSpeedRadians = (float)(Math.PI / 2.0)
+            entity.AddComponent(new gameplay.rendering.AxisRotationComponent {
+                Axis = new float3(0f, 1f, 0f),
+                AngularSpeedRadiansPerSecond = GetCubeAngularSpeedRadiansPerSecond(cubeIndex, row, column)
             });
             return entity;
+        }
+
+        /// <summary>
+        /// Returns the authored angular speed magnitude for one cube.
+        /// </summary>
+        /// <param name="cubeIndex">Stable zero-based cube index.</param>
+        /// <returns>Unsigned angular speed in radians per second.</returns>
+        float GetCubeAngularSpeedMagnitudeRadiansPerSecond(int cubeIndex) {
+            double angularSpeedDegreesPerSecond = CubeBaseAngularSpeedDegreesPerSecond + (CubeAngularSpeedDegreesPerIndex * cubeIndex);
+            return (float)(angularSpeedDegreesPerSecond * (Math.PI / 180.0));
+        }
+
+        /// <summary>
+        /// Returns the authored angular speed for one cube, alternating direction across the grid.
+        /// </summary>
+        /// <param name="cubeIndex">Stable zero-based cube index.</param>
+        /// <param name="row">Stable zero-based row index.</param>
+        /// <param name="column">Stable zero-based column index.</param>
+        /// <returns>Signed angular speed in radians per second.</returns>
+        float GetCubeAngularSpeedRadiansPerSecond(int cubeIndex, int row, int column) {
+            float angularSpeedRadiansPerSecond = GetCubeAngularSpeedMagnitudeRadiansPerSecond(cubeIndex);
+            return ((row + column) & 1) == 0
+                ? angularSpeedRadiansPerSecond
+                : -angularSpeedRadiansPerSecond;
         }
 
         /// <summary>
@@ -399,11 +435,11 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Editor font asset required by the FPS component.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance == null || Core.Instance.DefaultFontAsset == null) {
+            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the colored cube-grid scene can be generated.");
             }
 
-            return Core.Instance.DefaultFontAsset;
+            return editorCore.DefaultFontAssetForEditor;
         }
 
         /// <summary>

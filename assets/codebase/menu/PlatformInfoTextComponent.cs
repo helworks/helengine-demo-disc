@@ -6,13 +6,6 @@ namespace city.menu {
         /// <summary>
         /// Stable child entity name used for the platform name text line.
         /// </summary>
-        const string PlatformNameTextEntityName = "DemoDiscPlatformInfoNameText";
-
-        /// <summary>
-        /// Stable child entity name used for the platform version text line.
-        /// </summary>
-        const string PlatformVersionTextEntityName = "DemoDiscPlatformInfoVersionText";
-
         /// <summary>
         /// Cached child entity that renders the platform name.
         /// </summary>
@@ -60,8 +53,8 @@ namespace city.menu {
                 throw new InvalidOperationException("Platform-info overlay requires two child text entities.");
             }
 
-            PlatformNameTextEntity = FindRequiredChildEntity(entity, PlatformNameTextEntityName);
-            PlatformVersionTextEntity = FindRequiredChildEntity(entity, PlatformVersionTextEntityName);
+            PlatformNameTextEntity = FindRequiredChildEntity(entity, 0);
+            PlatformVersionTextEntity = FindRequiredChildEntity(entity, 1);
             PlatformNameTextComponent = FindTextComponent(PlatformNameTextEntity);
             PlatformVersionTextComponent = FindTextComponent(PlatformVersionTextEntity);
         }
@@ -90,23 +83,18 @@ namespace city.menu {
         /// Finds one required named child entity beneath the platform-info host.
         /// </summary>
         /// <param name="parentEntity">Parent entity whose direct children should be searched.</param>
-        /// <param name="childEntityName">Stable child entity name to resolve.</param>
+        /// <param name="childIndex">Direct child index to resolve.</param>
         /// <returns>Resolved child entity.</returns>
-        Entity FindRequiredChildEntity(Entity parentEntity, string childEntityName) {
+        Entity FindRequiredChildEntity(Entity parentEntity, int childIndex) {
             if (parentEntity == null) {
                 throw new ArgumentNullException(nameof(parentEntity));
             } else if (parentEntity.Children == null) {
                 throw new InvalidOperationException("Platform-info overlay requires child entities.");
+            } else if (childIndex < 0 || childIndex >= parentEntity.Children.Count) {
+                throw new InvalidOperationException($"Platform-info overlay is missing child entity at index {childIndex}.");
             }
 
-            for (int index = 0; index < parentEntity.Children.Count; index++) {
-                Entity childEntity = parentEntity.Children[index];
-                if (childEntity.Name == childEntityName) {
-                    return childEntity;
-                }
-            }
-
-            throw new InvalidOperationException($"Platform-info overlay is missing child entity '{childEntityName}'.");
+            return parentEntity.Children[childIndex];
         }
 
         /// <summary>
