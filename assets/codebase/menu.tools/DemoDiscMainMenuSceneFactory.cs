@@ -118,7 +118,6 @@ namespace city.menu.tools {
             });
 
             Entity generatedRootEntity = Core.Instance.EntityFactory.CreateChild(entity, DemoMenuLayout.GeneratedRootEntityName);
-            AttachFpsComponent(generatedRootEntity, definition.BodyFontPath);
 
             if (definition.OverlayImage != null) {
                 CreateOverlayImageEntity(generatedRootEntity, definition.OverlayImage);
@@ -414,25 +413,6 @@ namespace city.menu.tools {
 
             CreateTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0.1f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, null, false);
             CreateTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(0f, platformInfoOverlay.LineSpacing, 0.1f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(1, 1), 42, null, false);
-        }
-
-        /// <summary>
-        /// Attaches the authored FPS component to the generated fitted menu root.
-        /// </summary>
-        /// <param name="generatedRootEntity">Generated menu subtree root that should own the FPS overlay.</param>
-        /// <param name="fontPath">Project-relative body font path used by the overlay.</param>
-        void AttachFpsComponent(Entity generatedRootEntity, string fontPath) {
-            if (generatedRootEntity == null) {
-                throw new ArgumentNullException(nameof(generatedRootEntity));
-            } else if (string.IsNullOrWhiteSpace(fontPath)) {
-                throw new ArgumentException("Font path must be provided.", nameof(fontPath));
-            }
-
-            FPSComponent fpsComponent = new FPSComponent {
-                Font = PlaceholderFont
-            };
-            generatedRootEntity.AddComponent(fpsComponent);
-            ApplyFontReference(generatedRootEntity, fpsComponent, fontPath);
         }
 
         /// <summary>

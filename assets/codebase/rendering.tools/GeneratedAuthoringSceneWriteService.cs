@@ -47,6 +47,7 @@ namespace city.rendering.tools {
             persistenceRegistry.Register(new TextComponentPersistenceDescriptor());
             persistenceRegistry.Register(new SpriteComponentPersistenceDescriptor());
             persistenceRegistry.Register(new RoundedRectComponentPersistenceDescriptor());
+            persistenceRegistry.Register(new DebugComponentPersistenceDescriptor());
             persistenceRegistry.Register(new FPSComponentPersistenceDescriptor());
             persistenceRegistry.Register(new DirectionalLightComponentPersistenceDescriptor());
             persistenceRegistry.Register(new PointLightComponentPersistenceDescriptor());

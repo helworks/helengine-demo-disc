@@ -73,6 +73,7 @@ namespace city.rendering.tools {
                 Font = ResolveRequiredEditorFont()
             };
             entity.AddComponent(fpsComponent);
+            entity.AddComponent(new DemoDiscReturnToMenuComponent());
 
             return entity;
         }

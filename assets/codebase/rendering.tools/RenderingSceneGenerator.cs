@@ -46,6 +46,11 @@ namespace city.rendering.tools {
         public const string AxisTest2SceneId = "scenes/rendering/axis_test2.helen";
 
         /// <summary>
+        /// Stable scene id used by the persistent scene-memory probe showcase.
+        /// </summary>
+        public const string SceneMemoryProbeSceneId = "scenes/rendering/scene_memory_probe.helen";
+
+        /// <summary>
         /// Writer used to persist generated scene assets into the active city project.
         /// </summary>
         readonly GeneratedSceneWriteService SceneWriteService;
@@ -96,6 +101,11 @@ namespace city.rendering.tools {
         readonly AxisTest2SceneFactory AxisTest2Factory;
 
         /// <summary>
+        /// Factory used to author the persistent scene-memory probe scene.
+        /// </summary>
+        readonly SceneMemoryProbeSceneFactory SceneMemoryProbeFactory;
+
+        /// <summary>
         /// Initializes one city rendering scene generator.
         /// </summary>
         public RenderingSceneGenerator() {
@@ -109,6 +119,7 @@ namespace city.rendering.tools {
             TexturedCubeGridFactory = new TexturedCubeGridSceneFactory();
             AxisTestFactory = new AxisTestSceneFactory();
             AxisTest2Factory = new AxisTest2SceneFactory();
+            SceneMemoryProbeFactory = new SceneMemoryProbeSceneFactory();
         }
 
         /// <summary>
@@ -147,6 +158,7 @@ namespace city.rendering.tools {
             GeneratedAuthoringSceneDefinition texturedCubeGridSceneDefinition;
             GeneratedAuthoringSceneDefinition axisTestSceneDefinition = AxisTestFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
             GeneratedAuthoringSceneDefinition axisTest2SceneDefinition = AxisTest2Factory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
+            GeneratedAuthoringSceneDefinition sceneMemoryProbeSceneDefinition = SceneMemoryProbeFactory.CreateSceneDefinition();
             GeneratedAuthoringSceneDefinition directionalShadowPlazaSceneDefinition = DirectionalShadowPlazaFactory.CreateSceneDefinition(assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition spotlightStreetSliceSceneDefinition = SpotlightStreetSliceFactory.CreateSceneDefinition(assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial, assets.LamppostModel, assets.RacerModel, assets.RacerMaterials);
             coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(assets.GeneratedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
@@ -157,6 +169,7 @@ namespace city.rendering.tools {
             AuthoringSceneWriteService.WriteScene(projectRootPath, texturedCubeGridSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, axisTestSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, axisTest2SceneDefinition);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, sceneMemoryProbeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, directionalShadowPlazaSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, spotlightStreetSliceSceneDefinition);
         }
