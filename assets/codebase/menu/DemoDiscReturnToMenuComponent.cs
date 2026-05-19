@@ -17,7 +17,8 @@ namespace city.menu {
                 || WasGamepadReturnPressed(inputSystem);
 
             if (wasReturnPressed) {
-                Core.Instance.SceneManager.LoadScene(MainMenuSceneId, SceneLoadMode.Single);
+                string resolvedSceneId = SceneMapComponent.ResolveSceneId(MainMenuSceneId);
+                Core.Instance.SceneManager.LoadScene(resolvedSceneId, SceneLoadMode.Single);
             }
         }
 

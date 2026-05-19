@@ -6,7 +6,8 @@
   "supportedPlatforms": [
     "windows",
     "ps2",
-    "psp"
+    "psp",
+    "ds"
   ],
   "created": "2026-04-08T22:28:00.3959454Z",
   "lastOpened": "2026-04-28T16:20:48.8005795Z",
