@@ -17,5 +17,10 @@ namespace city.rendering.tools {
         /// Gets or sets the live root entities that define the scene.
         /// </summary>
         public Entity[] RootEntities { get; set; }
+
+        /// <summary>
+        /// Gets or sets the optional Nintendo DS companion-scene definition emitted alongside the default generated scene.
+        /// </summary>
+        public GeneratedDsSceneDefinition NintendoDsScene { get; set; }
     }
 }

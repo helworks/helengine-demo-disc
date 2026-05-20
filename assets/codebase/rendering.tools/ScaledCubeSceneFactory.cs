@@ -33,6 +33,11 @@ namespace city.rendering.tools {
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
+                NintendoDsScene = new GeneratedDsSceneDefinition {
+                    SceneId = RenderingSceneGenerator.ScaledCubeNintendoDsSceneId,
+                    UseDefaultBottomOverlay = true,
+                    BottomScreenRootEntities = Array.Empty<Entity>()
+                },
                 RootEntities = new[] {
                     CreateCameraEntity(),
                     CreateUiEntity(),

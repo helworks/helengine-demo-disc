@@ -1,15 +1,15 @@
 namespace city.menu {
     /// <summary>
-    /// Returns the active demo-disc scene to the main menu when the temporary back bind is pressed.
+    /// Owns Nintendo DS companion-scene return behavior from the bottom-screen back overlay.
     /// </summary>
-    public sealed class DemoDiscReturnToMenuComponent : UpdateComponent {
+    public sealed class NintendoDsReturnOverlayComponent : UpdateComponent {
         /// <summary>
-        /// Stable runtime scene id used by the demo-disc main menu.
+        /// Stable logical scene id used by the demo-disc main menu.
         /// </summary>
         public const string MainMenuSceneId = "DemoDiscMainMenu";
 
         /// <summary>
-        /// Interactable host used by pointer-enabled return buttons.
+        /// Interactable host used by the bottom-screen back button.
         /// </summary>
         InteractableComponent BoundInteractable;
 
@@ -19,55 +19,34 @@ namespace city.menu {
         bool PointerPressStartedInside;
 
         /// <summary>
-        /// Gets or sets whether keyboard return bindings may trigger the menu load.
-        /// </summary>
-        public bool AllowKeyboardReturn { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets whether gamepad return bindings may trigger the menu load.
-        /// </summary>
-        public bool AllowGamepadReturn { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets whether pointer interaction on a sibling interactable may trigger the menu load.
-        /// </summary>
-        public bool AllowPointerReturn { get; set; } = true;
-
-        /// <summary>
-        /// Tracks whether this component already requested a return transition during its current lifetime.
+        /// Tracks whether this component already requested the return transition during its current lifetime.
         /// </summary>
         bool SceneLoadWasRequested;
 
         /// <summary>
-        /// Binds one sibling interactable when the component is attached to an authored clickable host.
+        /// Binds the sibling interactable when the component is attached to the back-button host.
         /// </summary>
         /// <param name="entity">Owning entity.</param>
         public override void ComponentAdded(Entity entity) {
             base.ComponentAdded(entity);
-            if (AllowPointerReturn) {
-                TryBindInteractable();
-            }
+            TryBindInteractable();
         }
 
         /// <summary>
-        /// Performs per-frame input polling for the demo-disc return bind.
+        /// Performs per-frame polling for the Nintendo DS back bind.
         /// </summary>
         public override void Update() {
-            if (AllowPointerReturn) {
-                TryBindInteractable();
-            }
+            TryBindInteractable();
 
             InputSystem inputSystem = Core.Instance.Input;
-            bool wasReturnPressed = (AllowKeyboardReturn && WasKeyboardReturnPressed(inputSystem))
-                || (AllowGamepadReturn && WasGamepadReturnPressed(inputSystem));
-
+            bool wasReturnPressed = inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.East);
             if (wasReturnPressed) {
                 LoadResolvedMainMenuScene();
             }
         }
 
         /// <summary>
-        /// Releases any bound pointer interactable subscription before the component instance is deleted.
+        /// Releases the sibling interactable subscription before the component instance is deleted.
         /// </summary>
         public override void Dispose() {
             UnbindInteractable();
@@ -75,7 +54,7 @@ namespace city.menu {
         }
 
         /// <summary>
-        /// Releases any bound pointer interactable subscription when the component detaches from its owner.
+        /// Releases the sibling interactable subscription when the component detaches from its owner.
         /// </summary>
         /// <param name="entity">Owning entity.</param>
         public override void ComponentRemoved(Entity entity) {
@@ -84,36 +63,12 @@ namespace city.menu {
         }
 
         /// <summary>
-        /// Returns whether the current frame pressed one of the desktop return keys.
-        /// </summary>
-        /// <param name="inputSystem">Input system supplying the current frame state.</param>
-        /// <returns>True when one desktop return key pressed this frame.</returns>
-        bool WasKeyboardReturnPressed(InputSystem inputSystem) {
-#if DESKTOP_PLATFORM
-            return inputSystem.WasKeyPressed(Keys.Escape) || inputSystem.WasKeyPressed(Keys.Back);
-#else
-            return false;
-#endif
-        }
-
-        /// <summary>
-        /// Returns whether the current frame pressed one of the temporary gamepad return buttons.
-        /// </summary>
-        /// <param name="inputSystem">Input system supplying the current frame state.</param>
-        /// <returns>True when one return button pressed this frame.</returns>
-        bool WasGamepadReturnPressed(InputSystem inputSystem) {
-            return inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.East)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.North)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.Select);
-        }
-
-        /// <summary>
-        /// Binds one sibling interactable so pointer-enabled hosts can trigger return-to-menu clicks.
+        /// Binds the sibling interactable used to receive pointer clicks from the back button host.
         /// </summary>
         void TryBindInteractable() {
-            if (!AllowPointerReturn) {
+            if (BoundInteractable != null) {
                 return;
-            } else if (BoundInteractable != null || Parent == null || Parent.Components == null) {
+            } else if (Parent == null || Parent.Components == null) {
                 return;
             }
 
@@ -124,10 +79,12 @@ namespace city.menu {
                     return;
                 }
             }
+
+            throw new InvalidOperationException("NintendoDsReturnOverlayComponent requires a sibling InteractableComponent.");
         }
 
         /// <summary>
-        /// Releases the current pointer-interactable binding when the host no longer owns this component.
+        /// Releases the current interactable binding and clears active press state.
         /// </summary>
         void UnbindInteractable() {
             if (BoundInteractable == null) {
@@ -140,16 +97,12 @@ namespace city.menu {
         }
 
         /// <summary>
-        /// Handles pointer press and release events routed from one bound clickable host.
+        /// Handles pointer press and release events from the back button interactable.
         /// </summary>
         /// <param name="relativePosition">Pointer position relative to the interactable.</param>
         /// <param name="delta">Pointer delta reported by the shared interaction router.</param>
         /// <param name="interaction">Current pointer interaction state.</param>
         void HandleCursorEvent(int2 relativePosition, int2 delta, PointerInteraction interaction) {
-            if (!AllowPointerReturn) {
-                return;
-            }
-
             if (interaction == PointerInteraction.Press) {
                 PointerPressStartedInside = true;
                 return;
@@ -173,6 +126,12 @@ namespace city.menu {
         void LoadResolvedMainMenuScene() {
             if (SceneLoadWasRequested) {
                 return;
+            }
+            if (Core.Instance == null) {
+                throw new InvalidOperationException("A core instance must exist before returning to the main menu.");
+            }
+            if (Core.Instance.SceneManager == null) {
+                throw new InvalidOperationException("Core scene manager must be initialized before runtime menu scene loading can occur.");
             }
 
             string resolvedSceneId = SceneMapComponent.ResolveSceneId(MainMenuSceneId);

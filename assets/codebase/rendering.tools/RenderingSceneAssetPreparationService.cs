@@ -7,6 +7,41 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class RenderingSceneAssetPreparationService {
         /// <summary>
+        /// Preferred editor preview platform used when authored material settings need one shader-backed runtime preview path.
+        /// </summary>
+        const string PreferredEditorPreviewPlatformId = "windows";
+
+        /// <summary>
+        /// Built-in standard shader source file used by synthesized editor preview materials.
+        /// </summary>
+        const string StandardShaderSourceFileName = "ForwardStandardShader.hlsl";
+
+        /// <summary>
+        /// Built-in standard shader asset id used by synthesized editor preview materials.
+        /// </summary>
+        const string StandardShaderAssetId = "ForwardStandardShader";
+
+        /// <summary>
+        /// Built-in standard vertex program used by synthesized editor preview materials.
+        /// </summary>
+        const string StandardVertexProgramName = "ForwardStandardShader.vs";
+
+        /// <summary>
+        /// Built-in standard pixel program used by synthesized editor preview materials.
+        /// </summary>
+        const string StandardPixelProgramName = "ForwardStandardShader.ps";
+
+        /// <summary>
+        /// Standard mesh variant used by synthesized editor preview materials.
+        /// </summary>
+        const string StandardMeshVariantName = "Mesh";
+
+        /// <summary>
+        /// Field id that stores fixed-pipeline authored base color in material settings.
+        /// </summary>
+        const string BaseColorFieldId = "base-color";
+
+        /// <summary>
         /// Prepares all runtime assets required by the rendering showcase scene generator.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
@@ -90,7 +125,7 @@ namespace city.rendering.tools {
 
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             string assetsRootPath = Path.Combine(fullProjectRootPath, "assets");
-            string platformId = ResolveActivePlatformId(fullProjectRootPath);
+            string platformId = ResolveMaterialPreviewPlatformId(fullProjectRootPath);
             string fullMaterialPath = Path.GetFullPath(Path.Combine(assetsRootPath, relativeMaterialPath.Replace('/', Path.DirectorySeparatorChar)));
             MaterialAssetSettingsService settingsService = new MaterialAssetSettingsService();
             MaterialAsset materialAsset;
@@ -99,12 +134,97 @@ namespace city.rendering.tools {
             } catch (InvalidOperationException) {
                 materialAsset = MigrateLegacyMaterialAsset(fullMaterialPath, bootstrap, settingsService, platformId);
             }
+            MaterialAssetProcessorSettings platformSettings;
+            if (!settingsService.TryLoadPlatformSettings(fullMaterialPath, platformId, out platformSettings) || platformSettings == null) {
+                throw new InvalidOperationException($"Material settings for platform '{platformId}' could not be loaded from '{relativeMaterialPath}'.");
+            }
+
             if (string.IsNullOrWhiteSpace(materialAsset.ShaderAssetId)) {
-                throw new InvalidOperationException($"Material '{relativeMaterialPath}' did not resolve a shader asset.");
+                return BuildPreviewRuntimeMaterial(materialAsset, platformSettings);
             }
 
             ShaderAsset shaderAsset = global::helengine.editor.EditorShaderPackageService.LoadShaderAsset(materialAsset.ShaderAssetId);
             return Core.Instance.RenderManager3D.BuildMaterialFromRaw(materialAsset, shaderAsset);
+        }
+
+        /// <summary>
+        /// Builds one shader-backed preview runtime material for authored fixed-pipeline material settings that do not expose one direct shader asset id.
+        /// </summary>
+        /// <param name="materialAsset">Authored material asset carrying the stable asset id that must survive scene serialization.</param>
+        /// <param name="platformSettings">Effective platform settings document used to extract preview-facing values such as base color.</param>
+        /// <returns>Shader-backed preview runtime material that preserves the authored material asset id.</returns>
+        RuntimeMaterial BuildPreviewRuntimeMaterial(MaterialAsset materialAsset, MaterialAssetProcessorSettings platformSettings) {
+            if (materialAsset == null) {
+                throw new ArgumentNullException(nameof(materialAsset));
+            } else if (platformSettings == null) {
+                throw new ArgumentNullException(nameof(platformSettings));
+            }
+
+            ShaderAsset shaderAsset = helengine.editor.EditorBuiltInShaderAssetLibrary.LoadShaderAsset(Core.Instance.RenderManager3D, StandardShaderSourceFileName);
+            MaterialAsset previewMaterialAsset = new MaterialAsset {
+                Id = materialAsset.Id,
+                ShaderAssetId = StandardShaderAssetId,
+                VertexProgram = StandardVertexProgramName,
+                PixelProgram = StandardPixelProgramName,
+                Variant = StandardMeshVariantName,
+                ConstantBuffers = new[] {
+                    new MaterialConstantBufferAsset {
+                        Name = helengine.editor.StandardMaterialBaseColorDefaults.BaseColorBufferName,
+                        Data = helengine.editor.StandardMaterialBaseColorDefaults.CreateConstantBufferData(ResolvePreviewBaseColor(platformSettings))
+                    }
+                },
+                CastsShadows = materialAsset.CastsShadows,
+                ReceivesShadows = materialAsset.ReceivesShadows
+            };
+            RuntimeMaterial runtimeMaterial = Core.Instance.RenderManager3D.BuildMaterialFromRaw(previewMaterialAsset, shaderAsset);
+            StandardMaterialTextureBindingDefaults.Apply(runtimeMaterial);
+            return runtimeMaterial;
+        }
+
+        /// <summary>
+        /// Resolves one preview base color from the effective fixed-pipeline platform settings.
+        /// </summary>
+        /// <param name="platformSettings">Effective platform settings that may publish one HTML-style base-color field.</param>
+        /// <returns>Preview base color, or opaque white when the settings omit or corrupt the field.</returns>
+        float4 ResolvePreviewBaseColor(MaterialAssetProcessorSettings platformSettings) {
+            if (platformSettings == null) {
+                throw new ArgumentNullException(nameof(platformSettings));
+            } else if (platformSettings.FieldValues == null) {
+                return new float4(1f, 1f, 1f, 1f);
+            }
+
+            if (!platformSettings.FieldValues.TryGetValue(BaseColorFieldId, out string colorValue) || string.IsNullOrWhiteSpace(colorValue)) {
+                return new float4(1f, 1f, 1f, 1f);
+            }
+
+            return ParseHtmlColor(colorValue);
+        }
+
+        /// <summary>
+        /// Parses one `#RRGGBBAA` HTML color string into normalized float components.
+        /// </summary>
+        /// <param name="colorValue">HTML-style color string to parse.</param>
+        /// <returns>Normalized float color representation.</returns>
+        float4 ParseHtmlColor(string colorValue) {
+            if (string.IsNullOrWhiteSpace(colorValue) || colorValue.Length != 9 || colorValue[0] != '#') {
+                return new float4(1f, 1f, 1f, 1f);
+            }
+
+            try {
+                byte red = byte.Parse(colorValue.Substring(1, 2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
+                byte green = byte.Parse(colorValue.Substring(3, 2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
+                byte blue = byte.Parse(colorValue.Substring(5, 2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
+                byte alpha = byte.Parse(colorValue.Substring(7, 2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
+                return new float4(
+                    red / 255f,
+                    green / 255f,
+                    blue / 255f,
+                    alpha / 255f);
+            } catch (FormatException) {
+                return new float4(1f, 1f, 1f, 1f);
+            } catch (OverflowException) {
+                return new float4(1f, 1f, 1f, 1f);
+            }
         }
 
         /// <summary>
@@ -194,15 +314,21 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Resolves the active project platform that should drive authored material loading.
+        /// Resolves the editor preview platform that should drive authored material loading during headless rendering-scene generation.
         /// </summary>
         /// <param name="projectRootPath">Absolute project root path.</param>
-        /// <returns>Active platform identifier, or the first supported platform when no explicit active platform is available.</returns>
-        string ResolveActivePlatformId(string projectRootPath) {
+        /// <returns>Preferred preview platform identifier, or the active/first supported platform when the preferred preview platform is unavailable.</returns>
+        string ResolveMaterialPreviewPlatformId(string projectRootPath) {
             EditorProjectPlatformsDocument platformsDocument = new EditorProjectPlatformsService(projectRootPath).Load();
             IReadOnlyList<string> supportedPlatforms = platformsDocument.SupportedPlatforms;
             if (supportedPlatforms.Count == 0) {
                 throw new InvalidOperationException("At least one supported project platform must exist before authored materials can be loaded.");
+            }
+
+            for (int index = 0; index < supportedPlatforms.Count; index++) {
+                if (string.Equals(supportedPlatforms[index], PreferredEditorPreviewPlatformId, StringComparison.OrdinalIgnoreCase)) {
+                    return supportedPlatforms[index];
+                }
             }
 
             string activePlatformId = new EditorProjectLocalSettingsService(projectRootPath, supportedPlatforms).LoadActivePlatform();

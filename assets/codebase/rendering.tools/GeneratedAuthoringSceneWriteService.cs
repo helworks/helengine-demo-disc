@@ -6,6 +6,18 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class GeneratedAuthoringSceneWriteService {
         /// <summary>
+        /// Shared Nintendo DS scaffold builder used to derive companion scenes from generated showcase roots.
+        /// </summary>
+        readonly NintendoDsRenderingSceneScaffoldFactory NintendoDsRenderingSceneScaffoldFactoryValue;
+
+        /// <summary>
+        /// Initializes one generated authored-scene writer.
+        /// </summary>
+        public GeneratedAuthoringSceneWriteService() {
+            NintendoDsRenderingSceneScaffoldFactoryValue = new NintendoDsRenderingSceneScaffoldFactory();
+        }
+
+        /// <summary>
         /// Writes one generated live-authored scene into the supplied city project.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
@@ -22,18 +34,54 @@ namespace city.rendering.tools {
             }
 
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
-            string scenePath = Path.Combine(fullProjectRootPath, "assets", sceneDefinition.SceneId.Replace('/', Path.DirectorySeparatorChar));
             ComponentPersistenceRegistry persistenceRegistry = CreatePersistenceRegistry();
             SceneSaveService saveService = new SceneSaveService(fullProjectRootPath, persistenceRegistry);
             EditorEntityLayerMaskSnapshot[] hiddenRootSnapshots = Array.Empty<EditorEntityLayerMaskSnapshot>();
+            Entity[] rootsToDispose = sceneDefinition.RootEntities;
 
             try {
                 hiddenRootSnapshots = HideExistingUserSceneRoots(sceneDefinition.RootEntities);
-                saveService.Save(scenePath, sceneDefinition.SceneSettings ?? new SceneSettingsAsset());
+                SaveSceneAsset(fullProjectRootPath, saveService, sceneDefinition.SceneId, sceneDefinition.SceneSettings, sceneDefinition.RootEntities);
+                if (sceneDefinition.NintendoDsScene != null) {
+                    Entity[] nintendoDsSceneRoots = NintendoDsRenderingSceneScaffoldFactoryValue.CreateSceneRoots(
+                        sceneDefinition.RootEntities,
+                        sceneDefinition.NintendoDsScene.UseDefaultBottomOverlay,
+                        sceneDefinition.NintendoDsScene.BottomScreenRootEntities ?? Array.Empty<Entity>());
+                    rootsToDispose = nintendoDsSceneRoots;
+                    SaveSceneAsset(fullProjectRootPath, saveService, sceneDefinition.NintendoDsScene.SceneId, sceneDefinition.SceneSettings, nintendoDsSceneRoots);
+                }
             } finally {
                 RestoreHiddenUserSceneRoots(hiddenRootSnapshots);
-                DisposeGeneratedRoots(sceneDefinition.RootEntities);
+                DisposeGeneratedRoots(rootsToDispose);
             }
+        }
+
+        /// <summary>
+        /// Saves one generated scene asset with the supplied id, settings, and currently live generated roots.
+        /// </summary>
+        /// <param name="fullProjectRootPath">Absolute project root path.</param>
+        /// <param name="saveService">Scene save service writing the current editor scene.</param>
+        /// <param name="sceneId">Project-relative scene id to persist.</param>
+        /// <param name="sceneSettings">Scene-level settings to persist.</param>
+        /// <param name="generatedRoots">Currently live generated roots visible to the serializer.</param>
+        void SaveSceneAsset(
+            string fullProjectRootPath,
+            SceneSaveService saveService,
+            string sceneId,
+            SceneSettingsAsset sceneSettings,
+            Entity[] generatedRoots) {
+            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
+            } else if (saveService == null) {
+                throw new ArgumentNullException(nameof(saveService));
+            } else if (string.IsNullOrWhiteSpace(sceneId)) {
+                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            } else if (generatedRoots == null) {
+                throw new ArgumentNullException(nameof(generatedRoots));
+            }
+
+            string scenePath = Path.Combine(fullProjectRootPath, "assets", sceneId.Replace('/', Path.DirectorySeparatorChar));
+            saveService.Save(scenePath, sceneSettings ?? new SceneSettingsAsset());
         }
 
         /// <summary>

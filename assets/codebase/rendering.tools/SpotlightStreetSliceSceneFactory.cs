@@ -18,9 +18,39 @@ namespace city.rendering.tools {
         const ushort SceneObjectsLayerMask = 0b0100000000000000;
 
         /// <summary>
+        /// Stable save-state slot name used for serialized mesh model references.
+        /// </summary>
+        const string MeshModelReferenceName = "Model";
+
+        /// <summary>
+        /// Stable save-state slot name used for serialized mesh material references.
+        /// </summary>
+        const string MeshMaterialReferenceName = "Material";
+
+        /// <summary>
         /// Stable save-state slot name used for serialized font references.
         /// </summary>
         const string FontReferenceName = "Font";
+
+        /// <summary>
+        /// Stable project-relative path to the imported lamppost model source.
+        /// </summary>
+        const string LamppostModelRelativePath = "models/Riemers/lamppost.x";
+
+        /// <summary>
+        /// Stable project-relative path to the imported racer model source.
+        /// </summary>
+        const string RacerModelRelativePath = "models/Riemers/racer.x";
+
+        /// <summary>
+        /// Stable project-relative material paths used by the imported racer model.
+        /// </summary>
+        static readonly string[] RacerMaterialRelativePaths = {
+            "models/Riemers/racer/x3ds_mat_ruedas.hasset",
+            "models/Riemers/racer/x3ds_mat_Material__0_3.hasset",
+            "models/Riemers/racer/x3ds_mat_Material_1_2.hasset",
+            "models/Riemers/racer/x3ds_mat_Material_2_1.hasset"
+        };
 
         /// <summary>
         /// Placeholder font assigned during live authoring before the real generated editor-font reference is serialized.
@@ -77,6 +107,11 @@ namespace city.rendering.tools {
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
+                NintendoDsScene = new GeneratedDsSceneDefinition {
+                    SceneId = RenderingSceneGenerator.SpotlightStreetSliceNintendoDsSceneId,
+                    UseDefaultBottomOverlay = true,
+                    BottomScreenRootEntities = Array.Empty<Entity>()
+                },
                 RootEntities = new[] {
                     CreateCameraEntity(),
                     CreateFpsEntity(),
@@ -86,8 +121,8 @@ namespace city.rendering.tools {
                     CreateStreetEdgeEntity("SpotlightStreetSliceCurbRight", new float3(9f, 0.25f, 0f), new float3(1f, 0.5f, 28f), cubeModel, standardMaterial),
                     CreateStreetEdgeEntity("SpotlightStreetSliceBackWall", new float3(0f, 6f, -12f), new float3(20f, 12f, 1f), cubeModel, standardMaterial),
                     CreateStreetEdgeEntity("SpotlightStreetSliceSideBlock", new float3(12f, 2.5f, 6f), new float3(4f, 5f, 8f), cubeModel, standardMaterial),
-                    CreateImportedMeshEntity("SpotlightStreetSliceLamppost", new float3(-4f, 0f, -2f), new float3(2.2f, 2.2f, 2.2f), CreateYawOrientation(0.0), lamppostModel, new[] { standardMaterial }),
-                    CreateImportedMeshEntity("SpotlightStreetSliceRacer", new float3(1.8f, 0f, 2f), new float3(2.8f, 2.8f, 2.8f), CreateYawOrientation(-0.42), racerModel, racerMaterials)
+                    CreateImportedMeshEntity("SpotlightStreetSliceLamppost", new float3(-4f, 0f, -2f), new float3(2.2f, 2.2f, 2.2f), CreateYawOrientation(0.0), lamppostModel, LamppostModelRelativePath, new[] { standardMaterial }, Array.Empty<string>()),
+                    CreateImportedMeshEntity("SpotlightStreetSliceRacer", new float3(1.8f, 0f, 2f), new float3(2.8f, 2.8f, 2.8f), CreateYawOrientation(-0.42), racerModel, RacerModelRelativePath, racerMaterials, RacerMaterialRelativePaths)
                 }
             };
         }
@@ -207,9 +242,21 @@ namespace city.rendering.tools {
         /// <param name="model">Runtime imported model.</param>
         /// <param name="materials">Runtime materials assigned to the mesh in slot order.</param>
         /// <returns>Live authored imported-mesh entity.</returns>
-        Entity CreateImportedMeshEntity(string name, float3 localPosition, float3 localScale, float4 localOrientation, RuntimeModel model, RuntimeMaterial[] materials) {
+        Entity CreateImportedMeshEntity(
+            string name,
+            float3 localPosition,
+            float3 localScale,
+            float4 localOrientation,
+            RuntimeModel model,
+            string modelRelativePath,
+            RuntimeMaterial[] materials,
+            string[] materialRelativePaths) {
             if (materials == null) {
                 throw new ArgumentNullException(nameof(materials));
+            } else if (string.IsNullOrWhiteSpace(modelRelativePath)) {
+                throw new ArgumentException("Model path must be provided.", nameof(modelRelativePath));
+            } else if (materialRelativePaths == null) {
+                throw new ArgumentNullException(nameof(materialRelativePaths));
             }
 
             Entity entity = Core.Instance.EntityFactory.Create(name);
@@ -222,6 +269,7 @@ namespace city.rendering.tools {
             };
             meshComponent.SetMaterials(materials);
             entity.AddComponent(meshComponent);
+            ApplyImportedMeshAssetReferences(entity, meshComponent, modelRelativePath, materialRelativePaths);
             return entity;
         }
 
@@ -273,6 +321,36 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
+        /// Stores the stable imported model and optional material references required by scene serialization.
+        /// </summary>
+        /// <param name="entity">Entity that owns the imported mesh.</param>
+        /// <param name="component">Mesh component whose save references should be stored.</param>
+        /// <param name="modelRelativePath">Project-relative imported model path.</param>
+        /// <param name="materialRelativePaths">Project-relative material paths ordered by mesh slot.</param>
+        void ApplyImportedMeshAssetReferences(Entity entity, MeshComponent component, string modelRelativePath, string[] materialRelativePaths) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (component == null) {
+                throw new ArgumentNullException(nameof(component));
+            } else if (string.IsNullOrWhiteSpace(modelRelativePath)) {
+                throw new ArgumentException("Model path must be provided.", nameof(modelRelativePath));
+            } else if (materialRelativePaths == null) {
+                throw new ArgumentNullException(nameof(materialRelativePaths));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(component, MeshModelReferenceName, CreateFileReference(modelRelativePath));
+            for (int materialIndex = 0; materialIndex < materialRelativePaths.Length; materialIndex++) {
+                string materialRelativePath = materialRelativePaths[materialIndex];
+                if (string.IsNullOrWhiteSpace(materialRelativePath)) {
+                    throw new InvalidOperationException("Imported mesh material paths must be provided for every authored slot.");
+                }
+
+                saveComponent.SetAssetReference(component, BuildMaterialReferenceName(materialIndex), CreateFileReference(materialRelativePath));
+            }
+        }
+
+        /// <summary>
         /// Resolves the hidden entity save component attached by the editor entity factory.
         /// </summary>
         /// <param name="entity">Entity whose save component should be returned.</param>
@@ -291,6 +369,39 @@ namespace city.rendering.tools {
             }
 
             throw new InvalidOperationException("Generated entities must include EntitySaveComponent.");
+        }
+
+        /// <summary>
+        /// Builds the stable mesh-material reference slot name for the supplied submesh index.
+        /// </summary>
+        /// <param name="materialIndex">Zero-based material slot index.</param>
+        /// <returns>Stable material reference slot name.</returns>
+        string BuildMaterialReferenceName(int materialIndex) {
+            if (materialIndex < 0) {
+                throw new ArgumentOutOfRangeException(nameof(materialIndex), "Material index must be non-negative.");
+            }
+
+            return materialIndex == 0
+                ? MeshMaterialReferenceName
+                : string.Concat(MeshMaterialReferenceName, "[", materialIndex.ToString(), "]");
+        }
+
+        /// <summary>
+        /// Builds one file-system scene asset reference for the supplied project-relative asset path.
+        /// </summary>
+        /// <param name="relativePath">Project-relative asset path.</param>
+        /// <returns>Scene asset reference that resolves through the project file system.</returns>
+        SceneAssetReference CreateFileReference(string relativePath) {
+            if (string.IsNullOrWhiteSpace(relativePath)) {
+                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
+            }
+
+            return new SceneAssetReference {
+                SourceKind = SceneAssetReferenceSourceKind.FileSystem,
+                RelativePath = relativePath,
+                ProviderId = string.Empty,
+                AssetId = string.Empty
+            };
         }
 
         /// <summary>

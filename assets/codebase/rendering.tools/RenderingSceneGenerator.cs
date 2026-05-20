@@ -11,9 +11,19 @@ namespace city.rendering.tools {
         public const string CubeTestSceneId = "scenes/rendering/cube_test.helen";
 
         /// <summary>
+        /// Stable Nintendo DS companion-scene id used by the cube-test showcase.
+        /// </summary>
+        public const string CubeTestNintendoDsSceneId = "scenes/rendering/ds/cube_test_ds.helen";
+
+        /// <summary>
         /// Stable scene id used by the colored cube-grid showcase.
         /// </summary>
         public const string ColoredCubeGridSceneId = "scenes/rendering/colored_cube_grid.helen";
+
+        /// <summary>
+        /// Stable Nintendo DS companion-scene id used by the colored cube-grid showcase.
+        /// </summary>
+        public const string ColoredCubeGridNintendoDsSceneId = "scenes/rendering/ds/colored_cube_grid_ds.helen";
 
         /// <summary>
         /// Stable scene id used by the scaled-cube showcase.
@@ -21,9 +31,19 @@ namespace city.rendering.tools {
         public const string ScaledCubeSceneId = "scenes/rendering/scaled_cube.helen";
 
         /// <summary>
+        /// Stable Nintendo DS companion-scene id used by the scaled-cube showcase.
+        /// </summary>
+        public const string ScaledCubeNintendoDsSceneId = "scenes/rendering/ds/scaled_cube_ds.helen";
+
+        /// <summary>
         /// Stable scene id used by the directional-shadow plaza showcase.
         /// </summary>
         public const string DirectionalShadowPlazaSceneId = "scenes/rendering/directional_shadow_plaza.helen";
+
+        /// <summary>
+        /// Stable Nintendo DS companion-scene id used by the directional-shadow plaza showcase.
+        /// </summary>
+        public const string DirectionalShadowPlazaNintendoDsSceneId = "scenes/rendering/ds/directional_shadow_plaza_ds.helen";
 
         /// <summary>
         /// Stable scene id used by the textured cube-grid showcase.
@@ -31,9 +51,19 @@ namespace city.rendering.tools {
         public const string TexturedCubeGridSceneId = "scenes/rendering/textured_cube_grid.helen";
 
         /// <summary>
+        /// Stable Nintendo DS companion-scene id used by the textured cube-grid showcase.
+        /// </summary>
+        public const string TexturedCubeGridNintendoDsSceneId = "scenes/rendering/ds/textured_cube_grid_ds.helen";
+
+        /// <summary>
         /// Stable scene id used by the spotlight street-slice showcase.
         /// </summary>
         public const string SpotlightStreetSliceSceneId = "scenes/rendering/spotlight_street_slice.helen";
+
+        /// <summary>
+        /// Stable Nintendo DS companion-scene id used by the spotlight street-slice showcase.
+        /// </summary>
+        public const string SpotlightStreetSliceNintendoDsSceneId = "scenes/rendering/ds/spotlight_street_slice_ds.helen";
 
         /// <summary>
         /// Stable scene id used by the axis-test showcase.
@@ -41,14 +71,29 @@ namespace city.rendering.tools {
         public const string AxisTestSceneId = "scenes/rendering/axis_test.helen";
 
         /// <summary>
+        /// Stable Nintendo DS companion-scene id used by the axis-test showcase.
+        /// </summary>
+        public const string AxisTestNintendoDsSceneId = "scenes/rendering/ds/axis_test_ds.helen";
+
+        /// <summary>
         /// Stable scene id used by the axis-test-2 showcase.
         /// </summary>
         public const string AxisTest2SceneId = "scenes/rendering/axis_test2.helen";
 
         /// <summary>
+        /// Stable Nintendo DS companion-scene id used by the axis-test-2 showcase.
+        /// </summary>
+        public const string AxisTest2NintendoDsSceneId = "scenes/rendering/ds/axis_test2_ds.helen";
+
+        /// <summary>
         /// Stable scene id used by the persistent scene-memory probe showcase.
         /// </summary>
         public const string SceneMemoryProbeSceneId = "scenes/rendering/scene_memory_probe.helen";
+
+        /// <summary>
+        /// Stable Nintendo DS companion-scene id used by the persistent scene-memory probe showcase.
+        /// </summary>
+        public const string SceneMemoryProbeNintendoDsSceneId = "scenes/rendering/ds/scene_memory_probe_ds.helen";
 
         /// <summary>
         /// Writer used to persist generated scene assets into the active city project.

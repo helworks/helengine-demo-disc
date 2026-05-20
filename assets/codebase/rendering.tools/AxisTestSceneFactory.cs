@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using city.menu;
 using gameplay.rendering;
+using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
@@ -17,6 +18,26 @@ namespace city.rendering.tools {
         /// Layer mask used by authored scene objects in packaged runtime scenes.
         /// </summary>
         const ushort SceneObjectsLayerMask = 0b0100000000000000;
+
+        /// <summary>
+        /// Stable save-state slot name used for serialized mesh model references.
+        /// </summary>
+        const string MeshModelReferenceName = "Model";
+
+        /// <summary>
+        /// Stable save-state slot name used for serialized mesh material references.
+        /// </summary>
+        const string MeshMaterialReferenceName = "Material";
+
+        /// <summary>
+        /// Stable project-relative path to the imported directional-light arrow model source.
+        /// </summary>
+        const string ArrowModelRelativePath = "models/rendering/axis_test/directional_light_arrow.obj";
+
+        /// <summary>
+        /// Stable project-relative path to the marker material settings used by the directional-light arrow.
+        /// </summary>
+        const string MarkerMaterialRelativePath = "materials/rendering/axis_test/Marker.hasset";
 
         /// <summary>
         /// Stable material paths used by the axis-test scene.
@@ -95,6 +116,11 @@ namespace city.rendering.tools {
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
+                NintendoDsScene = new GeneratedDsSceneDefinition {
+                    SceneId = RenderingSceneGenerator.AxisTestNintendoDsSceneId,
+                    UseDefaultBottomOverlay = true,
+                    BottomScreenRootEntities = Array.Empty<Entity>()
+                },
                 RootEntities = new[] {
                     CreateCameraEntity(),
                     CreateDirectionalLightRigEntity(arrowModel, axisMaterials[4]),
@@ -197,6 +223,7 @@ namespace city.rendering.tools {
                 Material = markerMaterial,
                 RenderOrder3D = 0
             });
+            ApplyArrowMeshAssetReferences(entity);
             entity.AddComponent(new DirectionalLightComponent {
                 Color = new float4(1f, 1f, 1f, 1f),
                 Intensity = 1.2f,
@@ -210,6 +237,21 @@ namespace city.rendering.tools {
                 AngularSpeedRadians = ArrowAngularSpeedRadians
             });
             return entity;
+        }
+
+        /// <summary>
+        /// Stores the stable imported arrow-model and marker-material references required by scene serialization.
+        /// </summary>
+        /// <param name="entity">Arrow entity that owns the generated mesh component.</param>
+        void ApplyArrowMeshAssetReferences(Entity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            MeshComponent meshComponent = FindRequiredComponent<MeshComponent>(entity);
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(meshComponent, MeshModelReferenceName, CreateFileReference(ArrowModelRelativePath));
+            saveComponent.SetAssetReference(meshComponent, MeshMaterialReferenceName, CreateFileReference(MarkerMaterialRelativePath));
         }
 
         /// <summary>
@@ -485,6 +527,67 @@ namespace city.rendering.tools {
             }
 
             return editorCore.DefaultFontAssetForEditor;
+        }
+
+        /// <summary>
+        /// Builds one file-system scene asset reference for the supplied project-relative asset path.
+        /// </summary>
+        /// <param name="relativePath">Project-relative asset path.</param>
+        /// <returns>Scene asset reference that resolves through the project file system.</returns>
+        SceneAssetReference CreateFileReference(string relativePath) {
+            if (string.IsNullOrWhiteSpace(relativePath)) {
+                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
+            }
+
+            return new SceneAssetReference {
+                SourceKind = SceneAssetReferenceSourceKind.FileSystem,
+                RelativePath = relativePath,
+                ProviderId = string.Empty,
+                AssetId = string.Empty
+            };
+        }
+
+        /// <summary>
+        /// Resolves the hidden entity save component attached by the editor entity factory.
+        /// </summary>
+        /// <param name="entity">Entity whose save component should be returned.</param>
+        /// <returns>Attached entity save component.</returns>
+        EntitySaveComponent FindRequiredEntitySaveComponent(Entity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (entity.Components == null) {
+                throw new InvalidOperationException("Generated entities must expose initialized component collections.");
+            }
+
+            for (int index = 0; index < entity.Components.Count; index++) {
+                if (entity.Components[index] is EntitySaveComponent saveComponent) {
+                    return saveComponent;
+                }
+            }
+
+            throw new InvalidOperationException("Generated entities must include EntitySaveComponent.");
+        }
+
+        /// <summary>
+        /// Resolves one required component from the supplied generated entity.
+        /// </summary>
+        /// <typeparam name="TComponent">Component type to resolve.</typeparam>
+        /// <param name="entity">Entity whose component should be returned.</param>
+        /// <returns>Attached component instance.</returns>
+        TComponent FindRequiredComponent<TComponent>(Entity entity) where TComponent : Component {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (entity.Components == null) {
+                throw new InvalidOperationException("Generated entities must expose initialized component collections.");
+            }
+
+            for (int index = 0; index < entity.Components.Count; index++) {
+                if (entity.Components[index] is TComponent component) {
+                    return component;
+                }
+            }
+
+            throw new InvalidOperationException($"Generated entity is missing required component '{typeof(TComponent).Name}'.");
         }
     }
 }
