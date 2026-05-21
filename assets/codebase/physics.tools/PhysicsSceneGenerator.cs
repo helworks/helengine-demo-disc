@@ -12,7 +12,7 @@ namespace city.physics.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            PhysicsValidationSceneFactory factory = new PhysicsValidationSceneFactory();
+            PhysicsSceneFactory factory = new PhysicsSceneFactory();
             factory.WriteScenes(projectRootPath);
         }
     }
