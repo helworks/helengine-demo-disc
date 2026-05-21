@@ -432,7 +432,7 @@ namespace city.physics.tools {
 
                 Directory.CreateDirectory(directoryPath);
                 using FileStream stream = File.Create(fullPath);
-                AssetSerializer.Serialize(stream, sceneAsset);
+                global::helengine.editor.AssetSerializer.Serialize(stream, sceneAsset);
             }
         }
 
@@ -1136,7 +1136,7 @@ namespace city.physics.tools {
             };
 
             using FileStream stream = File.Create(fullPath);
-            AssetSerializer.Serialize(stream, materialAsset);
+            global::helengine.editor.AssetSerializer.Serialize(stream, materialAsset);
         }
 
         /// <summary>
