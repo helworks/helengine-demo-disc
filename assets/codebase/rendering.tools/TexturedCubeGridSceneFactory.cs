@@ -31,6 +31,11 @@ namespace city.rendering.tools {
         const string Ps2MaterialSchemaId = "ps2-simple-lit-textured";
 
         /// <summary>
+        /// Stable Nintendo DS textured material schema identifier used by the DS runtime path.
+        /// </summary>
+        const string DsMaterialSchemaId = "ds-standard-textured";
+
+        /// <summary>
         /// Stable standard shader asset identifier used by compatibility material payloads.
         /// </summary>
         const string StandardShaderAssetId = "ForwardStandardShader";
@@ -64,6 +69,20 @@ namespace city.rendering.tools {
         /// Stable material field identifier used for authored texture bindings.
         /// </summary>
         const string TextureIdFieldId = "texture-id";
+
+        /// <summary>
+        /// Stable DS material field identifier used for cooked imported texture paths.
+        /// </summary>
+        const string DsTextureRelativePathFieldId = "texture-relative-path";
+
+        /// <summary>
+        /// Stable DS material field identifier used to select fixed-pipeline lighting behavior.
+        /// </summary>
+        const string LightingModeFieldId = "lighting-mode";
+
+        /// <summary>
+        /// Stable material field identifier used for compatibility shader asset references.
+        /// </summary>
         const string ShaderAssetIdFieldId = "shader-asset-id";
 
         /// <summary>
@@ -638,6 +657,16 @@ namespace city.rendering.tools {
             pspSettings.FieldValues[ReceivesShadowFieldId] = "true";
             pspSettings.FieldValues[BaseColorFieldId] = "#FFFFFFFF";
             settings.Processor.Platforms["psp"] = pspSettings;
+
+            MaterialAssetProcessorSettings dsSettings = new MaterialAssetProcessorSettings();
+            dsSettings.SchemaId = DsMaterialSchemaId;
+            dsSettings.FieldValues[TextureIdFieldId] = CubeTextureAssetIds[cubeIndex];
+            dsSettings.FieldValues[DsTextureRelativePathFieldId] = "cooked/imported/" + CubeTextureAssetIds[cubeIndex];
+            dsSettings.FieldValues[DoubleSidedFieldId] = "false";
+            dsSettings.FieldValues[VertexColorModeFieldId] = "ignore";
+            dsSettings.FieldValues[BaseColorFieldId] = "#FFFFFFFF";
+            dsSettings.FieldValues[LightingModeFieldId] = "lit";
+            settings.Processor.Platforms["ds"] = dsSettings;
             return settings;
         }
 
