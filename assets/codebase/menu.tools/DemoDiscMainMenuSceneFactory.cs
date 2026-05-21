@@ -12,6 +12,11 @@ namespace city.menu.tools {
         public const string SceneId = "Scenes/DemoDiscMainMenu.helen";
 
         /// <summary>
+        /// Main-console menu panel width expressed as a fraction of the authored canvas width.
+        /// </summary>
+        const double MainMenuPanelWidthRatio = 0.4d;
+
+        /// <summary>
         /// Runtime 2D layer mask used by baked menu visuals after authored scene layers are normalized during packaging.
         /// </summary>
         const byte RuntimeLayerMask = 0b00000001;
@@ -149,7 +154,7 @@ namespace city.menu.tools {
             }
 
             Entity panelEntity = Core.Instance.EntityFactory.CreateChild(generatedRootEntity, $"Panel-{panelDefinition.PanelId}");
-            panelEntity.LocalPosition = new float3(88f, 190f, 0f);
+            panelEntity.LocalPosition = new float3(0f, 0f, 0f);
 
             MenuPanelComponent panelComponent = new MenuPanelComponent {
                 PanelId = panelDefinition.PanelId
@@ -157,13 +162,20 @@ namespace city.menu.tools {
             panelEntity.AddComponent(panelComponent);
 
             AnchorComponent anchorComponent = new AnchorComponent();
-            anchorComponent.SetAnchorDistances(left: 88f, top: 190f);
+            anchorComponent.SetAnchorDistances(left: 0f, top: 0f);
             panelEntity.AddComponent(anchorComponent);
 
+            CreateBackgroundEntity(
+                panelEntity,
+                $"panel-{panelDefinition.PanelId}-surface",
+                new float3(0f, 0f, 0f),
+                ResolveMainMenuPanelSize(),
+                18f,
+                3f,
+                definition.SurfaceColor,
+                definition.SurfaceBorderColor,
+                30);
             MenuItemDefinition firstItem = ResolveFirstEnabledItem(panelDefinition);
-
-            CreateBackgroundEntity(panelEntity, $"panel-{panelDefinition.PanelId}-surface", new float3(0f, 0f, 0f), new int2(DemoMenuLayout.PanelWidth, DemoMenuLayout.PanelHeight), 18f, 3f, definition.SurfaceColor, definition.SurfaceBorderColor, 30);
-            CreateBackgroundEntity(panelEntity, $"panel-{panelDefinition.PanelId}-top-band", new float3(0f, 0f, 0f), new int2(DemoMenuLayout.PanelWidth, 18), 9f, 0f, definition.AccentColor, definition.AccentColor, 31);
             CreateTextEntity(panelEntity, $"panel-{panelDefinition.PanelId}-heading", new float3(32f, 30f, 0.1f), panelDefinition.Heading, definition.BodyFontPath, definition.TextColor, new int2(420, 36), 41, null, true);
             CreateSelectedDescriptionEntity(panelEntity, panelDefinition.PanelId, new float3(32f, 410f, 0.1f), firstItem.Description, definition.BodyFontPath, definition.MutedTextColor);
 
@@ -193,6 +205,15 @@ namespace city.menu.tools {
                 CreateItemEntity(itemsRootEntity, definition, panelDefinition, itemDefinition, visibleIndex);
                 visibleIndex++;
             }
+        }
+
+        /// <summary>
+        /// Resolves the main-console menu panel size from the authored canvas size.
+        /// </summary>
+        /// <returns>Panel size in authored scene pixels.</returns>
+        int2 ResolveMainMenuPanelSize() {
+            int panelWidth = (int)Math.Round((double)DemoMenuLayout.CanvasWidth * MainMenuPanelWidthRatio);
+            return new int2(panelWidth, DemoMenuLayout.CanvasHeight);
         }
 
         /// <summary>
@@ -409,7 +430,7 @@ namespace city.menu.tools {
             AnchorComponent anchorComponent = new AnchorComponent();
             anchorComponent.SetAnchorDistances(right: platformInfoOverlay.RightMargin, top: platformInfoOverlay.TopMargin);
             entity.AddComponent(anchorComponent);
-            entity.AddComponent(new PlatformInfoTextComponent());
+            entity.AddComponent(new global::helengine.PlatformInfoTextComponent());
 
             CreateTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0.1f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, null, false);
             CreateTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(0f, platformInfoOverlay.LineSpacing, 0.1f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(1, 1), 42, null, false);
