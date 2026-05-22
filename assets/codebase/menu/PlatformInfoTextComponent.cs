@@ -24,11 +24,11 @@ namespace city.menu {
         TextComponent PlatformVersionTextComponent;
 
         /// <summary>
-        /// Resolves the child text entities and applies the platform information once the component is attached.
+        /// Resolves the child text entities and applies the platform information once the full overlay hierarchy has been initialized.
         /// </summary>
-        /// <param name="entity">Owning attached entity.</param>
-        public override void ComponentAdded(Entity entity) {
-            base.ComponentAdded(entity);
+        /// <param name="entity">Owning initialized entity.</param>
+        public override void ComponentInitialized(Entity entity) {
+            base.ComponentInitialized(entity);
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
             }

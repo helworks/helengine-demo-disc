@@ -4,6 +4,18 @@ namespace city.physics.tools {
     /// </summary>
     public sealed class PhysicsSceneGenerator {
         /// <summary>
+        /// Writer used to persist generated live-authored physics scenes through the editor save pipeline.
+        /// </summary>
+        readonly PhysicsAuthoringSceneWriteService AuthoringSceneWriteService;
+
+        /// <summary>
+        /// Initializes one city physics scene generator.
+        /// </summary>
+        public PhysicsSceneGenerator() {
+            AuthoringSceneWriteService = new PhysicsAuthoringSceneWriteService();
+        }
+
+        /// <summary>
         /// Writes the current city physics showcase scene set into the supplied project.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
@@ -13,7 +25,13 @@ namespace city.physics.tools {
             }
 
             PhysicsSceneFactory factory = new PhysicsSceneFactory();
-            factory.WriteScenes(projectRootPath);
+            factory.WriteSupportAssets(projectRootPath);
+
+            string[] sceneIds = PhysicsSceneCatalog.GetSceneIds();
+            for (int index = 0; index < sceneIds.Length; index++) {
+                PhysicsAuthoringSceneDefinition sceneDefinition = factory.CreateSceneDefinition(sceneIds[index]);
+                AuthoringSceneWriteService.WriteScene(projectRootPath, sceneDefinition);
+            }
         }
     }
 }

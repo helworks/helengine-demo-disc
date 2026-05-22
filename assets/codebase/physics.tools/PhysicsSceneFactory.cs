@@ -64,29 +64,39 @@ namespace city.physics.tools {
         const string PhysicsDemoCyanMaterialRelativePath = "Materials/physics/PhysicsDemoCyan" + EditorFileTemplateRegistry.MaterialExtension;
 
         /// <summary>
-        /// Shader asset identifier derived from the shared physics demo shader path.
+        /// Stable material importer identifier stored on generated material settings.
         /// </summary>
-        const string PhysicsDemoShaderAssetId = "Shaders.physics.PhysicsDemoMesh";
+        const string MaterialImporterId = "helengine.material";
 
         /// <summary>
-        /// Vertex program name used by the shared physics demo shader.
+        /// Stable Windows standard-material schema identifier used by the shared editor material pipeline.
         /// </summary>
-        const string PhysicsDemoVertexProgramName = "PhysicsDemoMesh.vs";
+        const string WindowsMaterialSchemaId = "standard-shader";
 
         /// <summary>
-        /// Pixel program name used by the shared physics demo shader.
+        /// Stable material field identifier used to opt into standard-shader defaults.
         /// </summary>
-        const string PhysicsDemoPixelProgramName = "PhysicsDemoMesh.ps";
+        const string UseCustomShaderFieldId = "use-custom-shader";
 
         /// <summary>
-        /// Shader variant name used by the shared physics demo materials.
+        /// Stable material field identifier used for authored texture bindings.
         /// </summary>
-        const string PhysicsDemoVariantName = "default";
+        const string TextureIdFieldId = "texture-id";
 
         /// <summary>
-        /// Material constant-buffer name consumed by the shared physics demo shader.
+        /// Stable material field identifier used for shadow-casting participation.
         /// </summary>
-        const string MaterialColorBufferName = "MaterialColorBuffer";
+        const string CastsShadowFieldId = "casts-shadow";
+
+        /// <summary>
+        /// Stable material field identifier used for shadow receiving.
+        /// </summary>
+        const string ReceivesShadowFieldId = "receives-shadow";
+
+        /// <summary>
+        /// Stable material field identifier used for authored base color.
+        /// </summary>
+        const string BaseColorFieldId = "base-color";
 
         /// <summary>
         /// Shared shader source used to render the exported physics demo meshes with per-material colors and shadowed forward lighting.
@@ -332,7 +342,7 @@ namespace city.physics.tools {
         /// <summary>
         /// Current payload version for serialized box-collider component scene records.
         /// </summary>
-        const byte BoxColliderComponentPayloadVersion = 1;
+        const byte BoxColliderComponentPayloadVersion = 2;
 
         /// <summary>
         /// Current payload version for serialized kinematic-motion component scene records.
@@ -360,28 +370,62 @@ namespace city.physics.tools {
         const byte KinematicBodyKindCode = 1;
 
         /// <summary>
-        /// Allocates numeric entity ids while one validation scene asset is being built.
+        /// Generated cube model assigned to each visible physics primitive.
         /// </summary>
-        readonly SceneEntityAssetIdAllocator SceneEntityIdAllocator;
+        readonly RuntimeModel CubeModel;
 
         /// <summary>
-        /// Initializes the validation-scene factory with a fresh scene-local entity id allocator.
+        /// Runtime material used by neutral physics demo geometry while authoring generated scenes.
+        /// </summary>
+        readonly RuntimeMaterial NeutralMaterial;
+
+        /// <summary>
+        /// Runtime material used by blue physics demo geometry while authoring generated scenes.
+        /// </summary>
+        readonly RuntimeMaterial BlueMaterial;
+
+        /// <summary>
+        /// Runtime material used by green physics demo geometry while authoring generated scenes.
+        /// </summary>
+        readonly RuntimeMaterial GreenMaterial;
+
+        /// <summary>
+        /// Runtime material used by magenta physics demo geometry while authoring generated scenes.
+        /// </summary>
+        readonly RuntimeMaterial MagentaMaterial;
+
+        /// <summary>
+        /// Runtime material used by yellow physics demo geometry while authoring generated scenes.
+        /// </summary>
+        readonly RuntimeMaterial YellowMaterial;
+
+        /// <summary>
+        /// Runtime material used by cyan physics demo geometry while authoring generated scenes.
+        /// </summary>
+        readonly RuntimeMaterial CyanMaterial;
+
+        /// <summary>
+        /// Initializes the validation-scene factory with generated runtime assets used during authoring.
         /// </summary>
         public PhysicsSceneFactory() {
-            SceneEntityIdAllocator = new SceneEntityAssetIdAllocator();
+            CubeModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.CubeAssetId);
+            NeutralMaterial = CreateRuntimeMaterial("PhysicsDemoNeutral", "#C4CCD6FF");
+            BlueMaterial = CreateRuntimeMaterial("PhysicsDemoBlue", "#548FE6FF");
+            GreenMaterial = CreateRuntimeMaterial("PhysicsDemoGreen", "#61C27DFF");
+            MagentaMaterial = CreateRuntimeMaterial("PhysicsDemoMagenta", "#D66BBAFF");
+            YellowMaterial = CreateRuntimeMaterial("PhysicsDemoYellow", "#EBC954FF");
+            CyanMaterial = CreateRuntimeMaterial("PhysicsDemoCyan", "#4FC9D1FF");
         }
 
         /// <summary>
-        /// Creates one fully-authored physics validation scene asset for the requested scene id.
+        /// Creates one live-authored physics validation scene definition for the requested scene id.
         /// </summary>
         /// <param name="sceneId">Stable relative scene id to author.</param>
-        /// <returns>Generated scene asset ready for serialization.</returns>
-        public SceneAsset CreateSceneAsset(string sceneId) {
+        /// <returns>Generated scene definition ready for editor-owned persistence.</returns>
+        public PhysicsAuthoringSceneDefinition CreateSceneDefinition(string sceneId) {
             if (string.IsNullOrWhiteSpace(sceneId)) {
                 throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
             }
-
-            SceneEntityIdAllocator.Reset();
 
             if (string.Equals(sceneId, PhysicsSceneCatalog.CharacterSlopeSceneId, StringComparison.Ordinal)) {
                 return CreateCharacterSlopeScene();
@@ -405,85 +449,53 @@ namespace city.physics.tools {
         }
 
         /// <summary>
-        /// Writes every known validation scene into the target project assets folder.
-        /// </summary>
-        /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
-        public void WriteScenes(string projectRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            }
-
-            string assetsRootPath = Path.Combine(projectRootPath, "assets");
-            if (!Directory.Exists(assetsRootPath)) {
-                throw new DirectoryNotFoundException($"Physics validation scene export requires an assets directory at '{assetsRootPath}'.");
-            }
-
-            WriteSupportAssets(projectRootPath);
-
-            string[] sceneIds = PhysicsSceneCatalog.GetSceneIds();
-            for (int index = 0; index < sceneIds.Length; index++) {
-                string sceneId = sceneIds[index];
-                SceneAsset sceneAsset = CreateSceneAsset(sceneId);
-                string fullPath = GetSceneFullPath(projectRootPath, sceneId);
-                string directoryPath = Path.GetDirectoryName(fullPath);
-                if (string.IsNullOrWhiteSpace(directoryPath)) {
-                    throw new InvalidOperationException($"Could not resolve the directory path for scene '{sceneId}'.");
-                }
-
-                Directory.CreateDirectory(directoryPath);
-                using FileStream stream = File.Create(fullPath);
-                global::helengine.editor.AssetSerializer.Serialize(stream, sceneAsset);
-            }
-        }
-
-        /// <summary>
         /// Creates the character slope validation scene.
         /// </summary>
         /// <returns>Authored slope validation scene asset.</returns>
-        SceneAsset CreateCharacterSlopeScene() {
-            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+        PhysicsAuthoringSceneDefinition CreateCharacterSlopeScene() {
+            Entity scenarioEntity = CreateScenarioRoot(
                 "character_slope.scenario",
                 new[] {
-                    CreatePhysicsBoxMeshEntity("character_slope.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(14f, 1f, 14f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoNeutralMaterialRelativePath)),
-                    CreatePhysicsBoxMeshEntity("character_slope.ramp", "SlopeRamp", new float3(2.25f, 0.6f, 0f), new float3(5f, 0.6f, 3f), CreateYawPitchRollDegrees(0.0, 0.0, 18.0), StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath)),
-                    CreateCharacterControllerBoxMeshEntity("character_slope.controller", "CharacterController", new float3(-4f, 0.75f, 0f), new float3(0.9f, 1.5f, 0.9f), float4.Identity, new float3(1f, 0f, 0f), 3d, 1d, 0.75d, 0.3d, CreatePhysicsDemoMaterialReference(PhysicsDemoMagentaMaterialRelativePath)),
+                    CreatePhysicsBoxMeshEntity("character_slope.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(14f, 1f, 14f), float4.Identity, StaticBodyKindCode, false, NeutralMaterial),
+                    CreatePhysicsBoxMeshEntity("character_slope.ramp", "SlopeRamp", new float3(2.25f, 0.6f, 0f), new float3(5f, 0.6f, 3f), CreateYawPitchRollDegrees(0.0, 0.0, 18.0), StaticBodyKindCode, false, GreenMaterial),
+                    CreateCharacterControllerBoxMeshEntity("character_slope.controller", "CharacterController", new float3(-4f, 0.75f, 0f), new float3(0.9f, 1.5f, 0.9f), float4.Identity, new float3(1f, 0f, 0f), 3d, 1d, 0.75d, 0.3d, MagentaMaterial),
                     CreateMarkerEntity("character_slope.spawn", "ControllerSpawn", new float3(-4f, 0.75f, 0f)),
                     CreateMarkerEntity("character_slope.goal", "SlopeGoal", new float3(4.25f, 1.75f, 0f))
                 });
-            SceneEntityAsset cameraEntity = CreateCameraEntity("character_slope.camera", new float3(8.5f, 5f, 7.5f), CreateYawPitchRollDegrees(-135.0, -18.0, 0.0));
-            return CreateSceneAsset(PhysicsSceneCatalog.CharacterSlopeSceneId, cameraEntity, scenarioEntity);
+            Entity cameraEntity = CreateCameraEntity("character_slope.camera", new float3(0f, 5.5f, 18f), CreateYawPitchRollDegrees(0.0, -18.0, 0.0));
+            return CreateSceneDefinition(PhysicsSceneCatalog.CharacterSlopeSceneId, cameraEntity, scenarioEntity);
         }
 
         /// <summary>
         /// Creates the character steps validation scene.
         /// </summary>
         /// <returns>Authored steps validation scene asset.</returns>
-        SceneAsset CreateCharacterStepsScene() {
-            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+        PhysicsAuthoringSceneDefinition CreateCharacterStepsScene() {
+            Entity scenarioEntity = CreateScenarioRoot(
                 "character_steps.scenario",
                 new[] {
-                    CreateCubeMeshEntity("character_steps.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(16f, 1f, 12f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoNeutralMaterialRelativePath)),
-                    CreateCubeMeshEntity("character_steps.step01", "Step01", new float3(0.75f, 0.15f, 0f), new float3(1.5f, 0.3f, 3f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath)),
-                    CreateCubeMeshEntity("character_steps.step02", "Step02", new float3(2.25f, 0.45f, 0f), new float3(1.5f, 0.9f, 3f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath)),
-                    CreateCubeMeshEntity("character_steps.step03", "Step03", new float3(3.75f, 0.75f, 0f), new float3(1.5f, 1.5f, 3f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
-                    CreateCubeMeshEntity("character_steps.step04", "Step04", new float3(5.25f, 1.05f, 0f), new float3(1.5f, 2.1f, 3f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoMagentaMaterialRelativePath)),
+                    CreateCubeMeshEntity("character_steps.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(16f, 1f, 12f), float4.Identity, NeutralMaterial),
+                    CreateCubeMeshEntity("character_steps.step01", "Step01", new float3(0.75f, 0.15f, 0f), new float3(1.5f, 0.3f, 3f), float4.Identity, BlueMaterial),
+                    CreateCubeMeshEntity("character_steps.step02", "Step02", new float3(2.25f, 0.45f, 0f), new float3(1.5f, 0.9f, 3f), float4.Identity, GreenMaterial),
+                    CreateCubeMeshEntity("character_steps.step03", "Step03", new float3(3.75f, 0.75f, 0f), new float3(1.5f, 1.5f, 3f), float4.Identity, YellowMaterial),
+                    CreateCubeMeshEntity("character_steps.step04", "Step04", new float3(5.25f, 1.05f, 0f), new float3(1.5f, 2.1f, 3f), float4.Identity, MagentaMaterial),
                     CreateMarkerEntity("character_steps.spawn", "ControllerSpawn", new float3(-4.5f, 0.75f, 0f))
                 });
-            SceneEntityAsset cameraEntity = CreateCameraEntity("character_steps.camera", new float3(9f, 5.5f, 7f), CreateYawPitchRollDegrees(-138.0, -20.0, 0.0));
-            return CreateSceneAsset(PhysicsSceneCatalog.CharacterStepsSceneId, cameraEntity, scenarioEntity);
+            Entity cameraEntity = CreateCameraEntity("character_steps.camera", new float3(0f, 6f, 18f), CreateYawPitchRollDegrees(0.0, -20.0, 0.0));
+            return CreateSceneDefinition(PhysicsSceneCatalog.CharacterStepsSceneId, cameraEntity, scenarioEntity);
         }
 
         /// <summary>
         /// Creates the character moving-platform validation scene.
         /// </summary>
         /// <returns>Authored moving-platform validation scene asset.</returns>
-        SceneAsset CreateCharacterMovingPlatformScene() {
-            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+        PhysicsAuthoringSceneDefinition CreateCharacterMovingPlatformScene() {
+            Entity scenarioEntity = CreateScenarioRoot(
                 "character_moving_platform.scenario",
                 new[] {
-                    CreatePhysicsBoxMeshEntity("character_moving_platform.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(18f, 1f, 14f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoNeutralMaterialRelativePath)),
-                    CreatePhysicsBoxMeshEntity("character_moving_platform.gap_a", "GapEdgeA", new float3(-1.75f, 0.25f, 0f), new float3(4f, 0.5f, 4f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath)),
-                    CreatePhysicsBoxMeshEntity("character_moving_platform.gap_b", "GapEdgeB", new float3(4.75f, 0.25f, 0f), new float3(4f, 0.5f, 4f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
+                    CreatePhysicsBoxMeshEntity("character_moving_platform.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(18f, 1f, 14f), float4.Identity, StaticBodyKindCode, false, NeutralMaterial),
+                    CreatePhysicsBoxMeshEntity("character_moving_platform.gap_a", "GapEdgeA", new float3(-1.75f, 0.25f, 0f), new float3(4f, 0.5f, 4f), float4.Identity, StaticBodyKindCode, false, GreenMaterial),
+                    CreatePhysicsBoxMeshEntity("character_moving_platform.gap_b", "GapEdgeB", new float3(4.75f, 0.25f, 0f), new float3(4f, 0.5f, 4f), float4.Identity, StaticBodyKindCode, false, YellowMaterial),
                     CreateKinematicPhysicsBoxMeshEntity(
                         "character_moving_platform.platform",
                         "MovingPlatform",
@@ -494,61 +506,59 @@ namespace city.physics.tools {
                         new float3(3.5f, 0.75f, 0f),
                         2d,
                         true,
-                        CreatePhysicsDemoMaterialReference(PhysicsDemoCyanMaterialRelativePath)),
+                        CyanMaterial),
                     CreateMarkerEntity("character_moving_platform.platform_start", "PlatformStart", new float3(-0.5f, 0.75f, 0f)),
                     CreateMarkerEntity("character_moving_platform.platform_end", "PlatformEnd", new float3(3.5f, 0.75f, 0f)),
                     CreateMarkerEntity("character_moving_platform.spawn", "ControllerSpawn", new float3(-5f, 0.75f, 0f))
                 });
-            SceneEntityAsset cameraEntity = CreateCameraEntity("character_moving_platform.camera", new float3(10f, 5.75f, 8f), CreateYawPitchRollDegrees(-140.0, -18.0, 0.0));
-            return CreateSceneAsset(PhysicsSceneCatalog.CharacterMovingPlatformSceneId, cameraEntity, scenarioEntity);
+            Entity cameraEntity = CreateCameraEntity("character_moving_platform.camera", new float3(0f, 6f, 20f), CreateYawPitchRollDegrees(0.0, -18.0, 0.0));
+            return CreateSceneDefinition(PhysicsSceneCatalog.CharacterMovingPlatformSceneId, cameraEntity, scenarioEntity);
         }
 
         /// <summary>
-        /// Creates the stacked dynamic-body validation scene.
+        /// Creates the readable two-box offset dynamic-body validation scene.
         /// </summary>
-        /// <returns>Authored stacked-box validation scene asset.</returns>
-        SceneAsset CreateDynamicStackBoxesScene() {
-            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+        /// <returns>Authored two-box offset-stack validation scene asset.</returns>
+        PhysicsAuthoringSceneDefinition CreateDynamicStackBoxesScene() {
+            Entity scenarioEntity = CreateScenarioRoot(
                 "dynamic_stack_boxes.scenario",
                 new[] {
-                    CreatePhysicsBoxMeshEntity("dynamic_stack_boxes.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(14f, 1f, 14f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoNeutralMaterialRelativePath)),
-                    CreatePhysicsBoxMeshEntity("dynamic_stack_boxes.box01", "StackBox01", new float3(0f, 0.5f, 0f), new float3(1f, 1f, 1f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath)),
-                    CreatePhysicsBoxMeshEntity("dynamic_stack_boxes.box02", "StackBox02", new float3(0f, 1.5f, 0f), new float3(1f, 1f, 1f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath)),
-                    CreatePhysicsBoxMeshEntity("dynamic_stack_boxes.box03", "StackBox03", new float3(0f, 2.5f, 0f), new float3(1f, 1f, 1f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoMagentaMaterialRelativePath)),
-                    CreatePhysicsBoxMeshEntity("dynamic_stack_boxes.box04", "StackBox04", new float3(0f, 3.5f, 0f), new float3(1f, 1f, 1f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
+                    CreatePhysicsBoxMeshEntity("dynamic_stack_boxes.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(14f, 1f, 14f), float4.Identity, StaticBodyKindCode, false, NeutralMaterial),
+                    CreateOffsetPhysicsBoxMeshEntity("dynamic_stack_boxes.box01", "StackBox01", new float3(0f, 1f, 0f), float4.Identity, float3.Zero, BlueMaterial),
+                    CreateOffsetPhysicsBoxMeshEntity("dynamic_stack_boxes.box02", "StackBox02", new float3(0.9f, 3f, 0f), float4.Identity, float3.Zero, GreenMaterial),
                     CreateMarkerEntity("dynamic_stack_boxes.spawn", "DynamicSpawn", new float3(-2.5f, 1.5f, 0f))
                 });
-            SceneEntityAsset cameraEntity = CreateCameraEntity("dynamic_stack_boxes.camera", new float3(8f, 5.25f, 8f), CreateYawPitchRollDegrees(-135.0, -20.0, 0.0));
-            return CreateSceneAsset(PhysicsSceneCatalog.DynamicStackBoxesSceneId, cameraEntity, scenarioEntity);
+            Entity cameraEntity = CreateCameraEntity("dynamic_stack_boxes.camera", new float3(8f, 5.5f, 12f), CreateYawPitchRollDegrees(34.0, -14.0, 0.0));
+            return CreateSceneDefinition(PhysicsSceneCatalog.DynamicStackBoxesSceneId, cameraEntity, scenarioEntity);
         }
 
         /// <summary>
         /// Creates the sphere-ramp validation scene.
         /// </summary>
         /// <returns>Authored sphere-ramp validation scene asset.</returns>
-        SceneAsset CreateDynamicSphereRampScene() {
-            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+        PhysicsAuthoringSceneDefinition CreateDynamicSphereRampScene() {
+            Entity scenarioEntity = CreateScenarioRoot(
                 "dynamic_sphere_ramp.scenario",
                 new[] {
-                    CreateCubeMeshEntity("dynamic_sphere_ramp.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(16f, 1f, 14f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoNeutralMaterialRelativePath)),
-                    CreateCubeMeshEntity("dynamic_sphere_ramp.ramp", "Ramp", new float3(2.5f, 0.8f, 0f), new float3(6f, 0.6f, 4f), CreateYawPitchRollDegrees(0.0, 0.0, -16.0), CreatePhysicsDemoMaterialReference(PhysicsDemoCyanMaterialRelativePath)),
+                    CreateCubeMeshEntity("dynamic_sphere_ramp.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(16f, 1f, 14f), float4.Identity, NeutralMaterial),
+                    CreateCubeMeshEntity("dynamic_sphere_ramp.ramp", "Ramp", new float3(2.5f, 0.8f, 0f), new float3(6f, 0.6f, 4f), CreateYawPitchRollDegrees(0.0, 0.0, -16.0), CyanMaterial),
                     CreateMarkerEntity("dynamic_sphere_ramp.spawn", "SphereSpawn", new float3(-3.5f, 1.5f, 0f)),
                     CreateMarkerEntity("dynamic_sphere_ramp.goal", "RampGoal", new float3(5.5f, 1.75f, 0f))
                 });
-            SceneEntityAsset cameraEntity = CreateCameraEntity("dynamic_sphere_ramp.camera", new float3(9.5f, 5.5f, 8.5f), CreateYawPitchRollDegrees(-138.0, -18.0, 0.0));
-            return CreateSceneAsset(PhysicsSceneCatalog.DynamicSphereRampSceneId, cameraEntity, scenarioEntity);
+            Entity cameraEntity = CreateCameraEntity("dynamic_sphere_ramp.camera", new float3(0f, 6f, 18f), CreateYawPitchRollDegrees(0.0, -18.0, 0.0));
+            return CreateSceneDefinition(PhysicsSceneCatalog.DynamicSphereRampSceneId, cameraEntity, scenarioEntity);
         }
 
         /// <summary>
         /// Creates the kinematic push validation scene.
         /// </summary>
         /// <returns>Authored kinematic push validation scene asset.</returns>
-        SceneAsset CreateKinematicPushScene() {
-            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+        PhysicsAuthoringSceneDefinition CreateKinematicPushScene() {
+            Entity scenarioEntity = CreateScenarioRoot(
                 "kinematic_push.scenario",
                 new[] {
-                    CreatePhysicsBoxMeshEntity("kinematic_push.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(16f, 1f, 12f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoNeutralMaterialRelativePath)),
-                    CreatePhysicsBoxMeshEntity("kinematic_push.block", "DynamicTarget", new float3(1.5f, 0.5f, 0f), new float3(1f, 1f, 1f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
+                    CreatePhysicsBoxMeshEntity("kinematic_push.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(16f, 1f, 12f), float4.Identity, StaticBodyKindCode, false, NeutralMaterial),
+                    CreatePhysicsBoxMeshEntity("kinematic_push.block", "DynamicTarget", new float3(1.5f, 0.5f, 0f), new float3(1f, 1f, 1f), float4.Identity, DynamicBodyKindCode, true, YellowMaterial),
                     CreateKinematicPhysicsBoxMeshEntity(
                         "kinematic_push.pusher",
                         "KinematicPusher",
@@ -559,62 +569,62 @@ namespace city.physics.tools {
                         new float3(0.5f, 0.5f, 0f),
                         1d,
                         true,
-                        CreatePhysicsDemoMaterialReference(PhysicsDemoCyanMaterialRelativePath)),
+                        CyanMaterial),
                     CreateMarkerEntity("kinematic_push.start", "PusherStart", new float3(-3.5f, 0.5f, 0f)),
                     CreateMarkerEntity("kinematic_push.end", "PusherEnd", new float3(0.5f, 0.5f, 0f)),
                     CreateMarkerEntity("kinematic_push.dynamic_spawn", "DynamicSpawn", new float3(1.5f, 0.5f, 0f))
                 });
-            SceneEntityAsset cameraEntity = CreateCameraEntity("kinematic_push.camera", new float3(8.5f, 4.75f, 7.25f), CreateYawPitchRollDegrees(-135.0, -16.0, 0.0));
-            return CreateSceneAsset(PhysicsSceneCatalog.KinematicPushSceneId, cameraEntity, scenarioEntity);
+            Entity cameraEntity = CreateCameraEntity("kinematic_push.camera", new float3(0f, 5f, 17f), CreateYawPitchRollDegrees(0.0, -16.0, 0.0));
+            return CreateSceneDefinition(PhysicsSceneCatalog.KinematicPushSceneId, cameraEntity, scenarioEntity);
         }
 
         /// <summary>
         /// Creates the static-mesh ground stability validation scene.
         /// </summary>
         /// <returns>Authored static-ground stability validation scene asset.</returns>
-        SceneAsset CreateMeshGroundStabilityScene() {
-            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+        PhysicsAuthoringSceneDefinition CreateMeshGroundStabilityScene() {
+            Entity scenarioEntity = CreateScenarioRoot(
                 "mesh_ground_stability.scenario",
                 new[] {
-                    CreateCubeMeshEntity("mesh_ground_stability.base", "GroundBase", new float3(0f, -0.5f, 0f), new float3(20f, 1f, 14f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoNeutralMaterialRelativePath)),
-                    CreateCubeMeshEntity("mesh_ground_stability.section01", "StaticMeshGround01", new float3(-2.5f, 0.15f, 0f), new float3(3f, 0.3f, 4f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath)),
-                    CreateCubeMeshEntity("mesh_ground_stability.section02", "StaticMeshGround02", new float3(0.5f, 0.35f, 0f), new float3(3f, 0.7f, 4f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath)),
-                    CreateCubeMeshEntity("mesh_ground_stability.section03", "StaticMeshGround03", new float3(3.5f, 0.2f, 0f), new float3(3f, 0.4f, 4f), CreateYawPitchRollDegrees(0.0, 0.0, -6.0), CreatePhysicsDemoMaterialReference(PhysicsDemoMagentaMaterialRelativePath)),
-                    CreateCubeMeshEntity("mesh_ground_stability.section04", "StaticMeshGround04", new float3(6.5f, 0.45f, 0f), new float3(3f, 0.9f, 4f), CreateYawPitchRollDegrees(0.0, 0.0, 5.0), CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
+                    CreateCubeMeshEntity("mesh_ground_stability.base", "GroundBase", new float3(0f, -0.5f, 0f), new float3(20f, 1f, 14f), float4.Identity, NeutralMaterial),
+                    CreateCubeMeshEntity("mesh_ground_stability.section01", "StaticMeshGround01", new float3(-2.5f, 0.15f, 0f), new float3(3f, 0.3f, 4f), float4.Identity, BlueMaterial),
+                    CreateCubeMeshEntity("mesh_ground_stability.section02", "StaticMeshGround02", new float3(0.5f, 0.35f, 0f), new float3(3f, 0.7f, 4f), float4.Identity, GreenMaterial),
+                    CreateCubeMeshEntity("mesh_ground_stability.section03", "StaticMeshGround03", new float3(3.5f, 0.2f, 0f), new float3(3f, 0.4f, 4f), CreateYawPitchRollDegrees(0.0, 0.0, -6.0), MagentaMaterial),
+                    CreateCubeMeshEntity("mesh_ground_stability.section04", "StaticMeshGround04", new float3(6.5f, 0.45f, 0f), new float3(3f, 0.9f, 4f), CreateYawPitchRollDegrees(0.0, 0.0, 5.0), YellowMaterial),
                     CreateMarkerEntity("mesh_ground_stability.spawn", "WalkerSpawn", new float3(-5.5f, 0.75f, 0f))
                 });
-            SceneEntityAsset cameraEntity = CreateCameraEntity("mesh_ground_stability.camera", new float3(11f, 6f, 8.5f), CreateYawPitchRollDegrees(-140.0, -18.0, 0.0));
-            return CreateSceneAsset(PhysicsSceneCatalog.MeshGroundStabilitySceneId, cameraEntity, scenarioEntity);
+            Entity cameraEntity = CreateCameraEntity("mesh_ground_stability.camera", new float3(0f, 6.5f, 22f), CreateYawPitchRollDegrees(0.0, -18.0, 0.0));
+            return CreateSceneDefinition(PhysicsSceneCatalog.MeshGroundStabilitySceneId, cameraEntity, scenarioEntity);
         }
 
         /// <summary>
         /// Creates the trigger-volume validation scene.
         /// </summary>
         /// <returns>Authored trigger-volume validation scene asset.</returns>
-        SceneAsset CreateTriggerVolumeScene() {
-            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+        PhysicsAuthoringSceneDefinition CreateTriggerVolumeScene() {
+            Entity scenarioEntity = CreateScenarioRoot(
                 "trigger_volume.scenario",
                 new[] {
-                    CreateCubeMeshEntity("trigger_volume.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(18f, 1f, 12f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoNeutralMaterialRelativePath)),
-                    CreateCubeMeshEntity("trigger_volume.arch", "TriggerVolume", new float3(1.5f, 1.5f, 0f), new float3(2.5f, 3f, 2.5f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoCyanMaterialRelativePath)),
+                    CreateCubeMeshEntity("trigger_volume.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(18f, 1f, 12f), float4.Identity, NeutralMaterial),
+                    CreateCubeMeshEntity("trigger_volume.arch", "TriggerVolume", new float3(1.5f, 1.5f, 0f), new float3(2.5f, 3f, 2.5f), float4.Identity, CyanMaterial),
                     CreateMarkerEntity("trigger_volume.start", "PlayerPathStart", new float3(-5f, 0.75f, 0f)),
                     CreateMarkerEntity("trigger_volume.end", "PlayerPathEnd", new float3(5.5f, 0.75f, 0f))
                 });
-            SceneEntityAsset cameraEntity = CreateCameraEntity("trigger_volume.camera", new float3(9.5f, 5f, 7.5f), CreateYawPitchRollDegrees(-136.0, -18.0, 0.0));
-            return CreateSceneAsset(PhysicsSceneCatalog.TriggerVolumeSceneId, cameraEntity, scenarioEntity);
+            Entity cameraEntity = CreateCameraEntity("trigger_volume.camera", new float3(0f, 5.5f, 19f), CreateYawPitchRollDegrees(0.0, -18.0, 0.0));
+            return CreateSceneDefinition(PhysicsSceneCatalog.TriggerVolumeSceneId, cameraEntity, scenarioEntity);
         }
 
         /// <summary>
-        /// Creates the final scene asset wrapper shared by every validation scenario.
+        /// Creates the final live-authored scene definition shared by every validation scenario.
         /// </summary>
         /// <param name="sceneId">Stable relative scene id.</param>
         /// <param name="cameraEntity">Root camera entity.</param>
         /// <param name="scenarioEntity">Root scenario entity.</param>
-        /// <returns>Scene asset ready for serialization.</returns>
-        SceneAsset CreateSceneAsset(
+        /// <returns>Scene definition ready for editor-owned persistence.</returns>
+        PhysicsAuthoringSceneDefinition CreateSceneDefinition(
             string sceneId,
-            SceneEntityAsset cameraEntity,
-            SceneEntityAsset scenarioEntity) {
+            Entity cameraEntity,
+            Entity scenarioEntity) {
             if (string.IsNullOrWhiteSpace(sceneId)) {
                 throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
             }
@@ -625,20 +635,51 @@ namespace city.physics.tools {
                 throw new ArgumentNullException(nameof(scenarioEntity));
             }
 
-            return new SceneAsset {
-                Id = sceneId,
-                AssetReferences = CreateAssetReferences(),
-                RootEntities = new[] { cameraEntity, scenarioEntity }
+            return new PhysicsAuthoringSceneDefinition {
+                SceneId = sceneId,
+                SceneSettings = new SceneSettingsAsset(),
+                RootEntities = new[] { cameraEntity, scenarioEntity, CreateDebugOverlayEntity() }
             };
+        }
+
+        /// <summary>
+        /// Creates the debug overlay root included in every generated physics scene for runtime diagnostics.
+        /// </summary>
+        /// <returns>Root entity that owns one configured debug overlay component.</returns>
+        Entity CreateDebugOverlayEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("DebugOverlay");
+            entity.LocalPosition = float3.Zero;
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = float4.Identity;
+            entity.AddComponent(new DebugComponent {
+                Font = ResolveRequiredEditorFont(),
+                Padding = new int2(8, 8),
+                RenderOrder2D = 250,
+                RefreshIntervalSeconds = 0.25d
+            });
+            return entity;
+        }
+
+        /// <summary>
+        /// Resolves the editor default font required by the generated debug overlays.
+        /// </summary>
+        /// <returns>Editor default font asset used by debug overlay text rows.</returns>
+        FontAsset ResolveRequiredEditorFont() {
+            EditorCore editorCore = Core.Instance as EditorCore;
+            if (editorCore == null || editorCore.DefaultFontAssetForEditor == null) {
+                throw new InvalidOperationException("A default editor font must be loaded before physics validation scenes can be generated with debug overlays.");
+            }
+
+            return editorCore.DefaultFontAssetForEditor;
         }
 
         /// <summary>
         /// Creates the scenario root entity that owns the authored test geometry and markers.
         /// </summary>
-        /// <param name="entityId">Stable serialized entity id.</param>
+        /// <param name="entityId">Stable authoring id used to name generated roots during creation.</param>
         /// <param name="children">Authored scenario children.</param>
         /// <returns>Scenario root entity.</returns>
-        SceneEntityAsset CreateScenarioRoot(string entityId, SceneEntityAsset[] children) {
+        Entity CreateScenarioRoot(string entityId, Entity[] children) {
             if (string.IsNullOrWhiteSpace(entityId)) {
                 throw new ArgumentException("Scenario entity id must be provided.", nameof(entityId));
             }
@@ -646,91 +687,98 @@ namespace city.physics.tools {
                 throw new ArgumentNullException(nameof(children));
             }
 
-            SceneEntityAsset[] sceneChildren = AppendKeyLight(children);
+            Entity scenario = Core.Instance.EntityFactory.Create("Scenario");
+            scenario.LocalPosition = float3.Zero;
+            scenario.LocalScale = float3.One;
+            scenario.LocalOrientation = float4.Identity;
+            for (int index = 0; index < children.Length; index++) {
+                scenario.AddChild(children[index]);
+            }
 
-            return new SceneEntityAsset {
-                Id = AllocateSceneEntityId(),
-                Name = "Scenario",
-                LocalPosition = float3.Zero,
-                LocalScale = float3.One,
-                LocalOrientation = float4.Identity,
-                Components = Array.Empty<SceneComponentAssetRecord>(),
-                Children = sceneChildren
-            };
+            scenario.AddChild(CreateKeyLightEntity());
+            return scenario;
         }
 
         /// <summary>
         /// Creates one camera root entity for a validation scene.
         /// </summary>
-        /// <param name="entityId">Stable serialized entity id.</param>
+        /// <param name="entityId">Stable authoring id used to name generated roots during creation.</param>
         /// <param name="position">Camera position.</param>
         /// <param name="orientation">Camera orientation.</param>
-        /// <returns>Camera entity with a serialized camera component.</returns>
-        SceneEntityAsset CreateCameraEntity(string entityId, float3 position, float4 orientation) {
+        /// <returns>Camera entity with a live camera component.</returns>
+        Entity CreateCameraEntity(string entityId, float3 position, float4 orientation) {
             if (string.IsNullOrWhiteSpace(entityId)) {
                 throw new ArgumentException("Camera entity id must be provided.", nameof(entityId));
             }
 
-            return new SceneEntityAsset {
-                Id = AllocateSceneEntityId(),
-                Name = "Camera",
-                LocalPosition = position,
-                LocalScale = float3.One,
-                LocalOrientation = orientation,
-                Components = new[] { CreateCameraComponentRecord() },
-                Children = Array.Empty<SceneEntityAsset>()
-            };
+            Entity entity = Core.Instance.EntityFactory.Create("Camera");
+            entity.LocalPosition = position;
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = orientation;
+            entity.AddComponent(new CameraComponent {
+                CameraDrawOrder = DefaultCameraDrawOrder,
+                LayerMask = EditorLayerMasks.SceneObjects,
+                Viewport = new float4(0f, 0f, 1f, 1f),
+                ClearSettings = new CameraClearSettings(true, new float4(100f / 255f, 149f / 255f, 237f / 255f, 1f), true, 1f, false, 0),
+                RenderSettings = new CameraRenderSettings {
+                    DepthPrepassMode = DepthPrepassMode.Disabled,
+                    ShadowDistance = 0f,
+                    PostProcessTier = PostProcessTier.Disabled
+                }
+            });
+            return entity;
         }
 
         /// <summary>
         /// Creates one mesh-backed cube entity for the validation scene.
         /// </summary>
-        /// <param name="entityId">Stable serialized entity id.</param>
+        /// <param name="entityId">Stable authoring id used to name generated roots during creation.</param>
         /// <param name="name">Authored entity name.</param>
         /// <param name="position">Entity position.</param>
         /// <param name="scale">Entity scale.</param>
         /// <param name="orientation">Entity orientation.</param>
         /// <returns>Mesh-backed entity.</returns>
-        SceneEntityAsset CreateCubeMeshEntity(
+        Entity CreateCubeMeshEntity(
             string entityId,
             string name,
             float3 position,
             float3 scale,
             float4 orientation,
-            SceneAssetReference materialReference) {
+            RuntimeMaterial material) {
             if (string.IsNullOrWhiteSpace(entityId)) {
                 throw new ArgumentException("Mesh entity id must be provided.", nameof(entityId));
             }
             if (string.IsNullOrWhiteSpace(name)) {
                 throw new ArgumentException("Mesh entity name must be provided.", nameof(name));
             }
-            if (materialReference == null) {
-                throw new ArgumentNullException(nameof(materialReference));
+            if (material == null) {
+                throw new ArgumentNullException(nameof(material));
             }
 
-            return new SceneEntityAsset {
-                Id = AllocateSceneEntityId(),
-                Name = name,
-                LocalPosition = position,
-                LocalScale = scale,
-                LocalOrientation = orientation,
-                Components = new[] { CreateMeshComponentRecord(materialReference) },
-                Children = Array.Empty<SceneEntityAsset>()
-            };
+            Entity entity = Core.Instance.EntityFactory.Create(name);
+            entity.LocalPosition = position;
+            entity.LocalScale = scale;
+            entity.LocalOrientation = orientation;
+            entity.AddComponent(new MeshComponent {
+                Model = CubeModel,
+                Material = material,
+                RenderOrder3D = DefaultMeshRenderOrder
+            });
+            return entity;
         }
 
         /// <summary>
         /// Creates one mesh-backed box entity that also carries serialized 3D physics records.
         /// </summary>
-        /// <param name="entityId">Stable serialized entity id.</param>
+        /// <param name="entityId">Stable authoring id used to name generated roots during creation.</param>
         /// <param name="name">Authored entity name.</param>
         /// <param name="position">Entity position.</param>
-        /// <param name="scale">Entity scale and collider size.</param>
+        /// <param name="scale">Entity scale used to size the rendered cube and its unit collider in world space.</param>
         /// <param name="orientation">Entity orientation.</param>
         /// <param name="bodyKindCode">Rigid-body participation mode byte to serialize.</param>
         /// <param name="useGravity">True when the serialized rigid body should receive gravity.</param>
-        /// <returns>Mesh-backed entity with serialized rigid-body and box-collider records.</returns>
-        SceneEntityAsset CreatePhysicsBoxMeshEntity(
+        /// <returns>Mesh-backed entity with live rigid-body and box-collider components.</returns>
+        Entity CreatePhysicsBoxMeshEntity(
             string entityId,
             string name,
             float3 position,
@@ -738,46 +786,92 @@ namespace city.physics.tools {
             float4 orientation,
             byte bodyKindCode,
             bool useGravity,
-            SceneAssetReference materialReference) {
+            RuntimeMaterial material) {
+            return CreatePhysicsBoxMeshEntity(entityId, name, position, scale, orientation, bodyKindCode, useGravity, float3.Zero, material);
+        }
+
+        /// <summary>
+        /// Creates one mesh-backed box entity with explicit rigid-body angular velocity.
+        /// </summary>
+        /// <param name="entityId">Stable authoring id used to name generated roots during creation.</param>
+        /// <param name="name">Authored entity name.</param>
+        /// <param name="position">Entity position.</param>
+        /// <param name="scale">Entity scale used to size the rendered cube and its unit collider in world space.</param>
+        /// <param name="orientation">Entity orientation.</param>
+        /// <param name="bodyKindCode">Rigid-body participation mode byte to serialize.</param>
+        /// <param name="useGravity">True when the serialized rigid body should receive gravity.</param>
+        /// <param name="angularVelocity">Initial angular velocity in radians per second.</param>
+        /// <param name="material">Runtime material assigned to the cube mesh.</param>
+        /// <returns>Mesh-backed entity with live rigid-body and box-collider components.</returns>
+        Entity CreatePhysicsBoxMeshEntity(
+            string entityId,
+            string name,
+            float3 position,
+            float3 scale,
+            float4 orientation,
+            byte bodyKindCode,
+            bool useGravity,
+            float3 angularVelocity,
+            RuntimeMaterial material) {
             if (string.IsNullOrWhiteSpace(entityId)) {
                 throw new ArgumentException("Physics entity id must be provided.", nameof(entityId));
             }
             if (string.IsNullOrWhiteSpace(name)) {
                 throw new ArgumentException("Physics entity name must be provided.", nameof(name));
             }
-            if (materialReference == null) {
-                throw new ArgumentNullException(nameof(materialReference));
+            if (material == null) {
+                throw new ArgumentNullException(nameof(material));
             }
 
-            return new SceneEntityAsset {
-                Id = AllocateSceneEntityId(),
-                Name = name,
-                LocalPosition = position,
-                LocalScale = scale,
-                LocalOrientation = orientation,
-                Components = new[] {
-                    CreateMeshComponentRecord(materialReference),
-                    CreateRigidBodyComponentRecord(bodyKindCode, useGravity, 1d, 1d, float3.Zero, 1),
-                    CreateBoxColliderComponentRecord(scale, 2)
-                },
-                Children = Array.Empty<SceneEntityAsset>()
-            };
+            Entity entity = CreateCubeMeshEntity(entityId, name, position, scale, orientation, material);
+            entity.AddComponent(new RigidBody3DComponent {
+                BodyKind = (BodyKind3D)bodyKindCode,
+                UseGravity = useGravity,
+                Mass = 1d,
+                GravityScale = 1d,
+                LinearVelocity = float3.Zero,
+                AngularVelocity = angularVelocity
+            });
+            entity.AddComponent(new BoxCollider3DComponent {
+                Size = float3.One
+            });
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates one dynamic box with authored initial rotation for deterministic physics validation scenes.
+        /// </summary>
+        /// <param name="entityId">Stable authoring id used to name generated roots during creation.</param>
+        /// <param name="name">Authored entity name.</param>
+        /// <param name="position">Entity spawn position.</param>
+        /// <param name="orientation">Initial visual orientation.</param>
+        /// <param name="angularVelocity">Initial angular velocity in radians per second.</param>
+        /// <param name="material">Runtime material assigned to the cube mesh.</param>
+        /// <returns>Mesh-backed dynamic physics box with authored initial rotation.</returns>
+        Entity CreateOffsetPhysicsBoxMeshEntity(
+            string entityId,
+            string name,
+            float3 position,
+            float4 orientation,
+            float3 angularVelocity,
+            RuntimeMaterial material) {
+            return CreatePhysicsBoxMeshEntity(entityId, name, position, float3.One, orientation, DynamicBodyKindCode, true, angularVelocity, material);
         }
 
         /// <summary>
         /// Creates one mesh-backed box entity that also carries serialized 3D kinematic-motion records.
         /// </summary>
-        /// <param name="entityId">Stable serialized entity id.</param>
+        /// <param name="entityId">Stable authoring id used to name generated roots during creation.</param>
         /// <param name="name">Authored entity name.</param>
         /// <param name="position">Entity position.</param>
-        /// <param name="scale">Entity scale and collider size.</param>
+        /// <param name="scale">Entity scale used to size the rendered cube and its unit collider in world space.</param>
         /// <param name="orientation">Entity orientation.</param>
         /// <param name="startLocalPosition">Kinematic motion start position.</param>
         /// <param name="endLocalPosition">Kinematic motion end position.</param>
         /// <param name="travelDurationSeconds">One-way travel duration in seconds.</param>
         /// <param name="pingPong">True when the motion should reverse at the end.</param>
-        /// <returns>Mesh-backed entity with serialized rigid-body, box-collider, and kinematic-motion records.</returns>
-        SceneEntityAsset CreateKinematicPhysicsBoxMeshEntity(
+        /// <returns>Mesh-backed entity with live rigid-body, box-collider, and kinematic-motion components.</returns>
+        Entity CreateKinematicPhysicsBoxMeshEntity(
             string entityId,
             string name,
             float3 position,
@@ -787,37 +881,31 @@ namespace city.physics.tools {
             float3 endLocalPosition,
             double travelDurationSeconds,
             bool pingPong,
-            SceneAssetReference materialReference) {
+            RuntimeMaterial material) {
             if (string.IsNullOrWhiteSpace(entityId)) {
                 throw new ArgumentException("Physics entity id must be provided.", nameof(entityId));
             }
             if (string.IsNullOrWhiteSpace(name)) {
                 throw new ArgumentException("Physics entity name must be provided.", nameof(name));
             }
-            if (materialReference == null) {
-                throw new ArgumentNullException(nameof(materialReference));
+            if (material == null) {
+                throw new ArgumentNullException(nameof(material));
             }
 
-            return new SceneEntityAsset {
-                Id = AllocateSceneEntityId(),
-                Name = name,
-                LocalPosition = position,
-                LocalScale = scale,
-                LocalOrientation = orientation,
-                Components = new[] {
-                    CreateMeshComponentRecord(materialReference),
-                    CreateRigidBodyComponentRecord(KinematicBodyKindCode, false, 1d, 1d, float3.Zero, 1),
-                    CreateBoxColliderComponentRecord(scale, 2),
-                    CreateKinematicMotionComponentRecord(startLocalPosition, endLocalPosition, travelDurationSeconds, pingPong, 3)
-                },
-                Children = Array.Empty<SceneEntityAsset>()
-            };
+            Entity entity = CreatePhysicsBoxMeshEntity(entityId, name, position, scale, orientation, KinematicBodyKindCode, false, material);
+            entity.AddComponent(new KinematicMotion3DComponent {
+                StartLocalPosition = startLocalPosition,
+                EndLocalPosition = endLocalPosition,
+                TravelDurationSeconds = travelDurationSeconds,
+                PingPong = pingPong
+            });
+            return entity;
         }
 
         /// <summary>
         /// Creates one mesh-backed box entity that carries serialized 3D character-controller records.
         /// </summary>
-        /// <param name="entityId">Stable serialized entity id.</param>
+        /// <param name="entityId">Stable authoring id used to name generated roots during creation.</param>
         /// <param name="name">Authored entity name.</param>
         /// <param name="position">Entity position.</param>
         /// <param name="scale">Entity scale and collider size.</param>
@@ -827,8 +915,8 @@ namespace city.physics.tools {
         /// <param name="gravityScale">Gravity multiplier used by the controller.</param>
         /// <param name="stepHeight">Maximum upward snap height used while climbing support surfaces.</param>
         /// <param name="groundSnapDistance">Maximum downward snap distance used to keep the controller grounded.</param>
-        /// <returns>Mesh-backed entity with serialized box-collider and character-controller records.</returns>
-        SceneEntityAsset CreateCharacterControllerBoxMeshEntity(
+        /// <returns>Mesh-backed entity with live box-collider and character-controller components.</returns>
+        Entity CreateCharacterControllerBoxMeshEntity(
             string entityId,
             string name,
             float3 position,
@@ -839,40 +927,39 @@ namespace city.physics.tools {
             double gravityScale,
             double stepHeight,
             double groundSnapDistance,
-            SceneAssetReference materialReference) {
+            RuntimeMaterial material) {
             if (string.IsNullOrWhiteSpace(entityId)) {
                 throw new ArgumentException("Character controller entity id must be provided.", nameof(entityId));
             }
             if (string.IsNullOrWhiteSpace(name)) {
                 throw new ArgumentException("Character controller entity name must be provided.", nameof(name));
             }
-            if (materialReference == null) {
-                throw new ArgumentNullException(nameof(materialReference));
+            if (material == null) {
+                throw new ArgumentNullException(nameof(material));
             }
 
-            return new SceneEntityAsset {
-                Id = AllocateSceneEntityId(),
-                Name = name,
-                LocalPosition = position,
-                LocalScale = scale,
-                LocalOrientation = orientation,
-                Components = new[] {
-                    CreateMeshComponentRecord(materialReference),
-                    CreateBoxColliderComponentRecord(scale, 1),
-                    CreateCharacterControllerComponentRecord(desiredMoveDirection, moveSpeed, gravityScale, stepHeight, groundSnapDistance, 2)
-                },
-                Children = Array.Empty<SceneEntityAsset>()
-            };
+            Entity entity = CreateCubeMeshEntity(entityId, name, position, scale, orientation, material);
+            entity.AddComponent(new BoxCollider3DComponent {
+                Size = float3.One
+            });
+            entity.AddComponent(new CharacterController3DComponent {
+                DesiredMoveDirection = desiredMoveDirection,
+                MoveSpeed = moveSpeed,
+                GravityScale = gravityScale,
+                StepHeight = stepHeight,
+                GroundSnapDistance = groundSnapDistance
+            });
+            return entity;
         }
 
         /// <summary>
         /// Creates one empty marker entity used as a future spawn, target, or motion reference.
         /// </summary>
-        /// <param name="entityId">Stable serialized entity id.</param>
+        /// <param name="entityId">Stable authoring id used to name generated roots during creation.</param>
         /// <param name="name">Authored entity name.</param>
         /// <param name="position">Marker position.</param>
         /// <returns>Marker entity without components.</returns>
-        SceneEntityAsset CreateMarkerEntity(string entityId, string name, float3 position) {
+        Entity CreateMarkerEntity(string entityId, string name, float3 position) {
             if (string.IsNullOrWhiteSpace(entityId)) {
                 throw new ArgumentException("Marker entity id must be provided.", nameof(entityId));
             }
@@ -880,200 +967,104 @@ namespace city.physics.tools {
                 throw new ArgumentException("Marker entity name must be provided.", nameof(name));
             }
 
-            return new SceneEntityAsset {
-                Id = AllocateSceneEntityId(),
-                Name = name,
-                LocalPosition = position,
-                LocalScale = float3.One,
-                LocalOrientation = float4.Identity,
-                Components = Array.Empty<SceneComponentAssetRecord>(),
-                Children = Array.Empty<SceneEntityAsset>()
-            };
-        }
-
-        /// <summary>
-        /// Creates the shared generated-asset reference list used by validation scene mesh components.
-        /// </summary>
-        /// <returns>Stable generated asset reference list.</returns>
-        static SceneAssetReference[] CreateAssetReferences() {
-            return new[] {
-                CreateGeneratedReference(EngineGeneratedAssetProvider.CubeRelativePath, EngineGeneratedModelCache.CubeAssetId),
-                CreatePhysicsDemoMaterialReference(PhysicsDemoNeutralMaterialRelativePath),
-                CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath),
-                CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath),
-                CreatePhysicsDemoMaterialReference(PhysicsDemoMagentaMaterialRelativePath),
-                CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath),
-                CreatePhysicsDemoMaterialReference(PhysicsDemoCyanMaterialRelativePath)
-            };
-        }
-
-        /// <summary>
-        /// Creates one file-backed scene asset reference used for the exported physics demo materials.
-        /// </summary>
-        /// <param name="relativePath">Relative project asset path.</param>
-        /// <returns>Scene asset reference targeting a file-backed asset.</returns>
-        static SceneAssetReference CreatePhysicsDemoMaterialReference(string relativePath) {
-            if (string.IsNullOrWhiteSpace(relativePath)) {
-                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
-            }
-
-            return new SceneAssetReference {
-                SourceKind = FileSystemSourceKind,
-                RelativePath = relativePath,
-                ProviderId = string.Empty,
-                AssetId = string.Empty
-            };
-        }
-
-        /// <summary>
-        /// Creates one generated asset reference.
-        /// </summary>
-        /// <param name="relativePath">Generated asset relative path.</param>
-        /// <param name="assetId">Stable generated asset id.</param>
-        /// <returns>Generated scene asset reference.</returns>
-        static SceneAssetReference CreateGeneratedReference(string relativePath, string assetId) {
-            if (string.IsNullOrWhiteSpace(relativePath)) {
-                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
-            }
-            if (string.IsNullOrWhiteSpace(assetId)) {
-                throw new ArgumentException("Asset id must be provided.", nameof(assetId));
-            }
-
-            return new SceneAssetReference {
-                SourceKind = GeneratedSourceKind,
-                RelativePath = relativePath,
-                ProviderId = GeneratedProviderId,
-                AssetId = assetId
-            };
-        }
-
-        /// <summary>
-        /// Creates one serialized mesh component record that references the generated cube model and standard material.
-        /// </summary>
-        /// <returns>Serialized mesh component record.</returns>
-        static SceneComponentAssetRecord CreateMeshComponentRecord(SceneAssetReference materialReference) {
-            if (materialReference == null) {
-                throw new ArgumentNullException(nameof(materialReference));
-            }
-
-            SceneAssetReference modelReference = CreateGeneratedReference(EngineGeneratedAssetProvider.CubeRelativePath, EngineGeneratedModelCache.CubeAssetId);
-
-            using MemoryStream stream = new MemoryStream();
-            using EngineBinaryWriter writer = EngineBinaryWriter.Create(stream, EngineBinaryEndianness.LittleEndian);
-            MeshComponentScenePayloadSerializer.Write(
-                writer,
-                modelReference,
-                new[] { materialReference },
-                DefaultMeshRenderOrder);
-
-            return new SceneComponentAssetRecord {
-                ComponentTypeId = "helengine.MeshComponent",
-                ComponentIndex = 0,
-                Payload = stream.ToArray()
-            };
-        }
-
-        /// <summary>
-        /// Creates one serialized camera component record using the editor scene-object layer mask.
-        /// </summary>
-        /// <returns>Serialized camera component record.</returns>
-        static SceneComponentAssetRecord CreateCameraComponentRecord() {
-            using MemoryStream stream = new MemoryStream();
-            using EngineBinaryWriter writer = EngineBinaryWriter.Create(stream, EngineBinaryEndianness.LittleEndian);
-            writer.WriteByte(2);
-            writer.WriteByte(DefaultCameraDrawOrder);
-            writer.WriteUInt16(EditorLayerMasks.SceneObjects);
-            WriteFloat4(writer, new float4(0f, 0f, 1f, 1f));
-            writer.WriteByte(1);
-            WriteFloat4(writer, new float4(0f, 0f, 0f, 0f));
-            writer.WriteByte(1);
-            writer.WriteSingle(1f);
-            writer.WriteByte(0);
-            writer.WriteByte(0);
-            writer.WriteByte((byte)DepthPrepassMode.Disabled);
-            writer.WriteSingle(0f);
-            writer.WriteByte((byte)PostProcessTier.Disabled);
-
-            return new SceneComponentAssetRecord {
-                ComponentTypeId = "helengine.CameraComponent",
-                ComponentIndex = 0,
-                Payload = stream.ToArray()
-            };
-        }
-
-        /// <summary>
-        /// Appends the shared key light to the authored scenario children.
-        /// </summary>
-        /// <param name="children">Authored scenario children.</param>
-        /// <returns>Copied child array with the shared key light appended at the end.</returns>
-        SceneEntityAsset[] AppendKeyLight(SceneEntityAsset[] children) {
-            if (children == null) {
-                throw new ArgumentNullException(nameof(children));
-            }
-
-            SceneEntityAsset[] sceneChildren = new SceneEntityAsset[children.Length + 1];
-            Array.Copy(children, sceneChildren, children.Length);
-            sceneChildren[children.Length] = CreateKeyLightEntity();
-            return sceneChildren;
+            Entity entity = Core.Instance.EntityFactory.Create(name);
+            entity.LocalPosition = position;
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = float4.Identity;
+            return entity;
         }
 
         /// <summary>
         /// Creates the shared directional light used to give the exported validation scenes stronger shape and visible shadows.
         /// </summary>
         /// <returns>Directional light entity appended to each scenario root.</returns>
-        SceneEntityAsset CreateKeyLightEntity() {
-            return new SceneEntityAsset {
-                Id = AllocateSceneEntityId(),
-                Name = "KeyLight",
-                LocalPosition = new float3(0f, 6f, 0f),
-                LocalScale = float3.One,
-                LocalOrientation = CreateYawPitchRollDegrees(-48.0, -44.0, 0.0),
-                Components = new[] { CreateDirectionalLightComponentRecord() },
-                Children = Array.Empty<SceneEntityAsset>()
-            };
-        }
-
-        /// <summary>
-        /// Creates one serialized directional light component record configured for shadowed validation-scene rendering.
-        /// </summary>
-        /// <returns>Directional light scene component payload.</returns>
-        static SceneComponentAssetRecord CreateDirectionalLightComponentRecord() {
-            DirectionalLightComponent lightComponent = new DirectionalLightComponent {
+        Entity CreateKeyLightEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("KeyLight");
+            entity.LocalPosition = new float3(0f, 6f, 0f);
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = CreateYawPitchRollDegrees(-48.0, -44.0, 0.0);
+            entity.AddComponent(new DirectionalLightComponent {
                 Color = new float4(1.0f, 0.96f, 0.90f, 1.0f),
                 Intensity = 2.35f,
                 ShadowsEnabled = true,
                 ShadowMapMode = ShadowMapMode.Forced,
-                ShadowStrength = 0.95f
+                ShadowStrength = 0.95f,
+                ShadowDistance = 72f
+            });
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates one runtime material used while authoring generated physics scenes.
+        /// </summary>
+        /// <param name="assetId">Stable material asset id written to material settings.</param>
+        /// <param name="surfaceColor">Authored color string in <c>#RRGGBBAA</c> form.</param>
+        /// <returns>Runtime material with an id that the editor save pipeline can map back to the authored material file.</returns>
+        RuntimeMaterial CreateRuntimeMaterial(string assetId, string surfaceColor) {
+            if (string.IsNullOrWhiteSpace(assetId)) {
+                throw new ArgumentException("Asset id must be provided.", nameof(assetId));
+            } else if (string.IsNullOrWhiteSpace(surfaceColor)) {
+                throw new ArgumentException("Surface color must be provided.", nameof(surfaceColor));
+            }
+
+            MaterialAsset materialAsset = new MaterialAsset {
+                Id = assetId,
+                ShaderAssetId = "ForwardStandardShader",
+                VertexProgram = "ForwardStandardShader.vs",
+                PixelProgram = "ForwardStandardShader.ps",
+                Variant = "Mesh",
+                RenderState = new MaterialRenderState(),
+                ConstantBuffers = new[] {
+                    new MaterialConstantBufferAsset {
+                        Name = StandardMaterialBaseColorDefaults.BaseColorBufferName,
+                        Data = StandardMaterialBaseColorDefaults.CreateConstantBufferData(ParseColor(surfaceColor))
+                    }
+                },
+                CastsShadows = true,
+                ReceivesShadows = true
             };
 
-            using MemoryStream stream = new MemoryStream();
-            using EngineBinaryWriter writer = EngineBinaryWriter.Create(stream, EngineBinaryEndianness.LittleEndian);
-            writer.WriteByte(LightComponentScenePayloadSerializer.CurrentVersion);
-            LightComponentScenePayloadSerializer.WriteDirectionalLight(writer, lightComponent);
+            ShaderAsset shaderAsset = EditorBuiltInShaderAssetLibrary.LoadShaderAsset(Core.Instance.RenderManager3D, "ForwardStandardShader.hlsl");
+            RuntimeMaterial runtimeMaterial = Core.Instance.RenderManager3D.BuildMaterialFromRaw(materialAsset, shaderAsset);
+            StandardMaterialTextureBindingDefaults.Apply(runtimeMaterial);
+            return runtimeMaterial;
+        }
 
-            return new SceneComponentAssetRecord {
-                ComponentTypeId = "helengine.DirectionalLightComponent",
-                ComponentIndex = 0,
-                Payload = stream.ToArray()
-            };
+        /// <summary>
+        /// Parses one authored hex color string into a normalized float4 color.
+        /// </summary>
+        /// <param name="colorValue">Authored color string in <c>#RRGGBBAA</c> form.</param>
+        /// <returns>Normalized float4 color.</returns>
+        static float4 ParseColor(string colorValue) {
+            if (string.IsNullOrWhiteSpace(colorValue)) {
+                throw new ArgumentException("Color value must be provided.", nameof(colorValue));
+            } else if (!colorValue.StartsWith('#') || colorValue.Length != 9) {
+                throw new InvalidOperationException($"Color value '{colorValue}' must use #RRGGBBAA format.");
+            }
+
+            uint rgba = Convert.ToUInt32(colorValue.Substring(1, 8), 16);
+            return new float4(
+                ((rgba >> 24) & 0xFF) / 255f,
+                ((rgba >> 16) & 0xFF) / 255f,
+                ((rgba >> 8) & 0xFF) / 255f,
+                (rgba & 0xFF) / 255f);
         }
 
         /// <summary>
         /// Writes the shared shader and material assets consumed by the exported physics validation scenes.
         /// </summary>
         /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
-        static void WriteSupportAssets(string projectRootPath) {
+        public void WriteSupportAssets(string projectRootPath) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            WriteShaderAsset(projectRootPath);
-            WriteMaterialAsset(projectRootPath, PhysicsDemoNeutralMaterialRelativePath, "PhysicsDemoNeutral", new float4(0.77f, 0.80f, 0.84f, 1.0f));
-            WriteMaterialAsset(projectRootPath, PhysicsDemoBlueMaterialRelativePath, "PhysicsDemoBlue", new float4(0.33f, 0.56f, 0.90f, 1.0f));
-            WriteMaterialAsset(projectRootPath, PhysicsDemoGreenMaterialRelativePath, "PhysicsDemoGreen", new float4(0.38f, 0.76f, 0.49f, 1.0f));
-            WriteMaterialAsset(projectRootPath, PhysicsDemoMagentaMaterialRelativePath, "PhysicsDemoMagenta", new float4(0.84f, 0.42f, 0.73f, 1.0f));
-            WriteMaterialAsset(projectRootPath, PhysicsDemoYellowMaterialRelativePath, "PhysicsDemoYellow", new float4(0.92f, 0.79f, 0.33f, 1.0f));
-            WriteMaterialAsset(projectRootPath, PhysicsDemoCyanMaterialRelativePath, "PhysicsDemoCyan", new float4(0.31f, 0.79f, 0.82f, 1.0f));
+            WriteMaterialAsset(projectRootPath, PhysicsDemoNeutralMaterialRelativePath, "PhysicsDemoNeutral", "#C4CCD6FF");
+            WriteMaterialAsset(projectRootPath, PhysicsDemoBlueMaterialRelativePath, "PhysicsDemoBlue", "#548FE6FF");
+            WriteMaterialAsset(projectRootPath, PhysicsDemoGreenMaterialRelativePath, "PhysicsDemoGreen", "#61C27DFF");
+            WriteMaterialAsset(projectRootPath, PhysicsDemoMagentaMaterialRelativePath, "PhysicsDemoMagenta", "#D66BBAFF");
+            WriteMaterialAsset(projectRootPath, PhysicsDemoYellowMaterialRelativePath, "PhysicsDemoYellow", "#EBC954FF");
+            WriteMaterialAsset(projectRootPath, PhysicsDemoCyanMaterialRelativePath, "PhysicsDemoCyan", "#4FC9D1FF");
         }
 
         /// <summary>
@@ -1096,13 +1087,13 @@ namespace city.physics.tools {
         }
 
         /// <summary>
-        /// Writes one file-backed material asset used by the exported physics validation scenes.
+        /// Writes one settings-backed material asset used by the exported physics validation scenes.
         /// </summary>
         /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
         /// <param name="relativePath">Relative project asset path for the material file.</param>
-        /// <param name="assetId">Serialized material asset identifier.</param>
-        /// <param name="surfaceColor">Authored constant-buffer color passed into the demo shader.</param>
-        static void WriteMaterialAsset(string projectRootPath, string relativePath, string assetId, float4 surfaceColor) {
+        /// <param name="assetId">Stable material asset identifier stored in importer settings.</param>
+        /// <param name="surfaceColor">HTML color used by the standard material base-color field.</param>
+        static void WriteMaterialAsset(string projectRootPath, string relativePath, string assetId, string surfaceColor) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
@@ -1121,219 +1112,22 @@ namespace city.physics.tools {
 
             Directory.CreateDirectory(directoryPath);
 
-            MaterialAsset materialAsset = new MaterialAsset {
-                Id = assetId,
-                ShaderAssetId = PhysicsDemoShaderAssetId,
-                VertexProgram = PhysicsDemoVertexProgramName,
-                PixelProgram = PhysicsDemoPixelProgramName,
-                Variant = PhysicsDemoVariantName,
-                ConstantBuffers = new[] {
-                    new MaterialConstantBufferAsset {
-                        Name = MaterialColorBufferName,
-                        Data = CreateFloat4ConstantBufferData(surfaceColor)
-                    }
-                }
-            };
+            MaterialAssetImportSettings settings = new MaterialAssetImportSettings();
+            settings.Importer.ImporterId = MaterialImporterId;
+            settings.Importer.SourceChecksum = string.Empty;
+            settings.Importer.AssetId = assetId;
 
-            using FileStream stream = File.Create(fullPath);
-            global::helengine.editor.AssetSerializer.Serialize(stream, materialAsset);
-        }
+            MaterialAssetProcessorSettings windowsSettings = new MaterialAssetProcessorSettings();
+            windowsSettings.SchemaId = WindowsMaterialSchemaId;
+            windowsSettings.FieldValues[UseCustomShaderFieldId] = "false";
+            windowsSettings.FieldValues[TextureIdFieldId] = string.Empty;
+            windowsSettings.FieldValues[CastsShadowFieldId] = "true";
+            windowsSettings.FieldValues[ReceivesShadowFieldId] = "true";
+            windowsSettings.FieldValues[BaseColorFieldId] = surfaceColor;
+            settings.Processor.Platforms["windows"] = windowsSettings;
 
-        /// <summary>
-        /// Packs one <see cref="float4"/> into the exact 16-byte constant-buffer payload consumed by the demo mesh shader.
-        /// </summary>
-        /// <param name="value">Vector value to serialize.</param>
-        /// <returns>Packed constant-buffer bytes.</returns>
-        static byte[] CreateFloat4ConstantBufferData(float4 value) {
-            using MemoryStream stream = new MemoryStream();
-            using EngineBinaryWriter writer = EngineBinaryWriter.Create(stream, EngineBinaryEndianness.LittleEndian);
-            writer.WriteSingle(value.X);
-            writer.WriteSingle(value.Y);
-            writer.WriteSingle(value.Z);
-            writer.WriteSingle(value.W);
-            return stream.ToArray();
-        }
-
-        /// <summary>
-        /// Creates one serialized rigid-body component record.
-        /// </summary>
-        /// <param name="bodyKindCode">Rigid-body participation mode byte to serialize.</param>
-        /// <param name="useGravity">True when gravity should be enabled.</param>
-        /// <param name="mass">Serialized authored mass value.</param>
-        /// <param name="gravityScale">Serialized authored gravity scale.</param>
-        /// <param name="linearVelocity">Serialized authored linear velocity.</param>
-        /// <param name="componentIndex">Entity-local component order index.</param>
-        /// <returns>Serialized rigid-body component record.</returns>
-        static SceneComponentAssetRecord CreateRigidBodyComponentRecord(
-            byte bodyKindCode,
-            bool useGravity,
-            double mass,
-            double gravityScale,
-            float3 linearVelocity,
-            int componentIndex) {
-            if (componentIndex < 0) {
-                throw new ArgumentOutOfRangeException(nameof(componentIndex), "Component index must be non-negative.");
-            }
-
-            using MemoryStream stream = new MemoryStream();
-            using EngineBinaryWriter writer = EngineBinaryWriter.Create(stream, EngineBinaryEndianness.LittleEndian);
-            writer.WriteByte(RigidBodyComponentPayloadVersion);
-            writer.WriteByte(bodyKindCode);
-            writer.WriteByte(useGravity ? (byte)1 : (byte)0);
-            writer.WriteSingle((float)mass);
-            writer.WriteSingle((float)gravityScale);
-            writer.WriteFloat3(linearVelocity);
-
-            return new SceneComponentAssetRecord {
-                ComponentTypeId = "helengine.RigidBody3DComponent",
-                ComponentIndex = componentIndex,
-                Payload = stream.ToArray()
-            };
-        }
-
-        /// <summary>
-        /// Creates one serialized box-collider component record.
-        /// </summary>
-        /// <param name="size">Serialized authored full collider size.</param>
-        /// <param name="componentIndex">Entity-local component order index.</param>
-        /// <returns>Serialized box-collider component record.</returns>
-        static SceneComponentAssetRecord CreateBoxColliderComponentRecord(float3 size, int componentIndex) {
-            if (componentIndex < 0) {
-                throw new ArgumentOutOfRangeException(nameof(componentIndex), "Component index must be non-negative.");
-            }
-
-            using MemoryStream stream = new MemoryStream();
-            using EngineBinaryWriter writer = EngineBinaryWriter.Create(stream, EngineBinaryEndianness.LittleEndian);
-            writer.WriteByte(BoxColliderComponentPayloadVersion);
-            writer.WriteFloat3(size);
-
-            return new SceneComponentAssetRecord {
-                ComponentTypeId = "helengine.BoxCollider3DComponent",
-                ComponentIndex = componentIndex,
-                Payload = stream.ToArray()
-            };
-        }
-
-        /// <summary>
-        /// Creates one serialized kinematic-motion component record.
-        /// </summary>
-        /// <param name="startLocalPosition">Motion path start position.</param>
-        /// <param name="endLocalPosition">Motion path end position.</param>
-        /// <param name="travelDurationSeconds">One-way travel duration in seconds.</param>
-        /// <param name="pingPong">True when the motion should reverse at the end.</param>
-        /// <param name="componentIndex">Entity-local component order index.</param>
-        /// <returns>Serialized kinematic-motion component record.</returns>
-        static SceneComponentAssetRecord CreateKinematicMotionComponentRecord(
-            float3 startLocalPosition,
-            float3 endLocalPosition,
-            double travelDurationSeconds,
-            bool pingPong,
-            int componentIndex) {
-            if (componentIndex < 0) {
-                throw new ArgumentOutOfRangeException(nameof(componentIndex), "Component index must be non-negative.");
-            }
-            if (double.IsNaN(travelDurationSeconds) || double.IsInfinity(travelDurationSeconds) || travelDurationSeconds <= 0d) {
-                throw new ArgumentOutOfRangeException(nameof(travelDurationSeconds), "Travel duration must be a finite value greater than zero.");
-            }
-
-            using MemoryStream stream = new MemoryStream();
-            using EngineBinaryWriter writer = EngineBinaryWriter.Create(stream, EngineBinaryEndianness.LittleEndian);
-            writer.WriteByte(KinematicMotionComponentPayloadVersion);
-            writer.WriteFloat3(startLocalPosition);
-            writer.WriteFloat3(endLocalPosition);
-            writer.WriteInt64(BitConverter.DoubleToInt64Bits(travelDurationSeconds));
-            writer.WriteByte(pingPong ? (byte)1 : (byte)0);
-
-            return new SceneComponentAssetRecord {
-                ComponentTypeId = "helengine.KinematicMotion3DComponent",
-                ComponentIndex = componentIndex,
-                Payload = stream.ToArray()
-            };
-        }
-
-        /// <summary>
-        /// Creates one serialized character-controller component record.
-        /// </summary>
-        /// <param name="desiredMoveDirection">Desired planar move direction.</param>
-        /// <param name="moveSpeed">Horizontal move speed in world units per second.</param>
-        /// <param name="gravityScale">Gravity multiplier used by the controller.</param>
-        /// <param name="stepHeight">Maximum upward snap height used while climbing support surfaces.</param>
-        /// <param name="groundSnapDistance">Maximum downward snap distance used to keep the controller grounded.</param>
-        /// <param name="componentIndex">Entity-local component order index.</param>
-        /// <returns>Serialized character-controller component record.</returns>
-        static SceneComponentAssetRecord CreateCharacterControllerComponentRecord(
-            float3 desiredMoveDirection,
-            double moveSpeed,
-            double gravityScale,
-            double stepHeight,
-            double groundSnapDistance,
-            int componentIndex) {
-            if (componentIndex < 0) {
-                throw new ArgumentOutOfRangeException(nameof(componentIndex), "Component index must be non-negative.");
-            }
-            if (double.IsNaN(moveSpeed) || double.IsInfinity(moveSpeed) || moveSpeed < 0d) {
-                throw new ArgumentOutOfRangeException(nameof(moveSpeed), "Move speed must be a finite value greater than or equal to zero.");
-            }
-            if (double.IsNaN(gravityScale) || double.IsInfinity(gravityScale) || gravityScale < 0d) {
-                throw new ArgumentOutOfRangeException(nameof(gravityScale), "Gravity scale must be a finite value greater than or equal to zero.");
-            }
-            if (double.IsNaN(stepHeight) || double.IsInfinity(stepHeight) || stepHeight < 0d) {
-                throw new ArgumentOutOfRangeException(nameof(stepHeight), "Step height must be a finite value greater than or equal to zero.");
-            }
-            if (double.IsNaN(groundSnapDistance) || double.IsInfinity(groundSnapDistance) || groundSnapDistance < 0d) {
-                throw new ArgumentOutOfRangeException(nameof(groundSnapDistance), "Ground snap distance must be a finite value greater than or equal to zero.");
-            }
-
-            using MemoryStream stream = new MemoryStream();
-            using EngineBinaryWriter writer = EngineBinaryWriter.Create(stream, EngineBinaryEndianness.LittleEndian);
-            writer.WriteByte(CharacterControllerComponentPayloadVersion);
-            writer.WriteFloat3(desiredMoveDirection);
-            writer.WriteInt64(BitConverter.DoubleToInt64Bits(moveSpeed));
-            writer.WriteInt64(BitConverter.DoubleToInt64Bits(gravityScale));
-            writer.WriteInt64(BitConverter.DoubleToInt64Bits(stepHeight));
-            writer.WriteInt64(BitConverter.DoubleToInt64Bits(groundSnapDistance));
-
-            return new SceneComponentAssetRecord {
-                ComponentTypeId = "helengine.CharacterController3DComponent",
-                ComponentIndex = componentIndex,
-                Payload = stream.ToArray()
-            };
-        }
-
-        /// <summary>
-        /// Writes one optional scene asset reference into a component payload.
-        /// </summary>
-        /// <param name="writer">Destination writer receiving the payload.</param>
-        /// <param name="reference">Reference to serialize.</param>
-        static void WriteOptionalReference(EngineBinaryWriter writer, SceneAssetReference reference) {
-            if (writer == null) {
-                throw new ArgumentNullException(nameof(writer));
-            }
-            if (reference == null) {
-                throw new ArgumentNullException(nameof(reference));
-            }
-
-            writer.WriteByte(1);
-            writer.WriteInt32((int)reference.SourceKind);
-            writer.WriteString(reference.RelativePath);
-            writer.WriteString(reference.ProviderId);
-            writer.WriteString(reference.AssetId);
-        }
-
-        /// <summary>
-        /// Writes one `float4` payload into a binary component stream.
-        /// </summary>
-        /// <param name="writer">Destination writer receiving the payload.</param>
-        /// <param name="value">Vector value to write.</param>
-        static void WriteFloat4(EngineBinaryWriter writer, float4 value) {
-            if (writer == null) {
-                throw new ArgumentNullException(nameof(writer));
-            }
-
-            writer.WriteSingle(value.X);
-            writer.WriteSingle(value.Y);
-            writer.WriteSingle(value.Z);
-            writer.WriteSingle(value.W);
+            MaterialAssetSettingsService settingsService = new MaterialAssetSettingsService();
+            settingsService.Save(fullPath, settings);
         }
 
         /// <summary>
@@ -1352,30 +1146,5 @@ namespace city.physics.tools {
             return result;
         }
 
-        /// <summary>
-        /// Resolves the absolute output path for one relative physics validation scene id.
-        /// </summary>
-        /// <param name="projectRootPath">Absolute project root path.</param>
-        /// <param name="sceneId">Relative scene id stored in the asset.</param>
-        /// <returns>Absolute output file path.</returns>
-        static string GetSceneFullPath(string projectRootPath, string sceneId) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            }
-            if (string.IsNullOrWhiteSpace(sceneId)) {
-                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
-            }
-
-            string relativePath = sceneId.Replace('/', Path.DirectorySeparatorChar);
-            return Path.Combine(projectRootPath, "assets", relativePath);
-        }
-
-        /// <summary>
-        /// Allocates the next scene-local entity id for the validation scene currently being built.
-        /// </summary>
-        /// <returns>Next non-zero scene-local entity id.</returns>
-        uint AllocateSceneEntityId() {
-            return SceneEntityIdAllocator.Allocate();
-        }
     }
 }
