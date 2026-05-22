@@ -1,3 +1,4 @@
+using city.menu;
 using city.rendering.tools;
 using helengine.editor;
 
@@ -176,7 +177,7 @@ namespace city.menu.tools {
                 definition.SurfaceBorderColor,
                 30);
             MenuItemDefinition firstItem = ResolveFirstEnabledItem(panelDefinition);
-            CreateTextEntity(panelEntity, $"panel-{panelDefinition.PanelId}-heading", new float3(32f, 30f, 0.1f), panelDefinition.Heading, definition.BodyFontPath, definition.TextColor, new int2(420, 36), 41, null, true);
+
             CreateSelectedDescriptionEntity(panelEntity, panelDefinition.PanelId, new float3(32f, 410f, 0.1f), firstItem.Description, definition.BodyFontPath, definition.MutedTextColor);
 
             Entity itemsViewportEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, $"Panel-{panelDefinition.PanelId}-ItemsViewport");
@@ -430,7 +431,7 @@ namespace city.menu.tools {
             AnchorComponent anchorComponent = new AnchorComponent();
             anchorComponent.SetAnchorDistances(right: platformInfoOverlay.RightMargin, top: platformInfoOverlay.TopMargin);
             entity.AddComponent(anchorComponent);
-            entity.AddComponent(new global::helengine.PlatformInfoTextComponent());
+            entity.AddComponent(new PlatformInfoTextComponent());
 
             CreateTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0.1f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, null, false);
             CreateTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(0f, platformInfoOverlay.LineSpacing, 0.1f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(1, 1), 42, null, false);
