@@ -158,7 +158,7 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new gameplay.rendering.DirectionalShadowCameraOrbitComponent {
+            entity.AddComponent(new city.rendering.DirectionalShadowCameraOrbitComponent {
                 OrbitCenter = new float3(0f, 2f, 0f),
                 OrbitRadius = 28f,
                 OrbitHeight = 12f,

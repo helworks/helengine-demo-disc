@@ -8,7 +8,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Stable serialized component type id for the tower-spin runtime component.
         /// </summary>
-        const string TowerSpinTypeId = "gameplay.rendering.DirectionalShadowTowerSpinComponent, gameplay";
+        const string TowerSpinTypeId = "city.rendering.DirectionalShadowTowerSpinComponent, gameplay";
 
         /// <summary>
         /// Stable serialized component type id for the axis-test Z-spin runtime component.
@@ -23,17 +23,17 @@ namespace city.rendering.tools {
         /// <summary>
         /// Stable serialized component type id for the orbit runtime component.
         /// </summary>
-        const string OrbitTypeId = "gameplay.rendering.DirectionalShadowOrbitComponent, gameplay";
+        const string OrbitTypeId = "city.rendering.DirectionalShadowOrbitComponent, gameplay";
 
         /// <summary>
         /// Stable serialized component type id for the sun-sweep runtime component.
         /// </summary>
-        const string SunSweepTypeId = "gameplay.rendering.DirectionalShadowSunSweepComponent, gameplay";
+        const string SunSweepTypeId = "city.rendering.DirectionalShadowSunSweepComponent, gameplay";
 
         /// <summary>
         /// Stable serialized component type id for the camera-orbit runtime component.
         /// </summary>
-        const string CameraOrbitTypeId = "gameplay.rendering.DirectionalShadowCameraOrbitComponent, gameplay";
+        const string CameraOrbitTypeId = "city.rendering.DirectionalShadowCameraOrbitComponent, gameplay";
 
         /// <summary>
         /// Creates one serialized tower-spin component record.

@@ -1,4 +1,4 @@
-namespace gameplay.rendering {
+namespace city.rendering {
     /// <summary>
     /// Rotates one plaza tower group around the local Y axis using deterministic absolute time.
     /// </summary>

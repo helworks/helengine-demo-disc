@@ -132,7 +132,7 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new gameplay.rendering.DirectionalShadowCameraOrbitComponent {
+            entity.AddComponent(new city.rendering.DirectionalShadowCameraOrbitComponent {
                 OrbitCenter = new float3(0f, 0f, 0f),
                 OrbitRadius = 64f,
                 OrbitHeight = 24f,
@@ -178,7 +178,7 @@ namespace city.rendering.tools {
                 ShadowStrength = 1f,
                 ShadowDistance = 80f
             });
-            entity.AddComponent(new gameplay.rendering.DirectionalShadowSunSweepComponent {
+            entity.AddComponent(new city.rendering.DirectionalShadowSunSweepComponent {
                 MinYawRadians = -0.18f,
                 MaxYawRadians = 0.18f,
                 PitchRadians = -0.72f,
@@ -228,7 +228,7 @@ namespace city.rendering.tools {
         /// <returns>Live authored orbit hero entity.</returns>
         Entity CreateOrbitHeroEntity(RuntimeModel model, RuntimeMaterial material) {
             Entity entity = CreateMeshEntity("DirectionalShadowPlazaHeroSphere", new float3(0f, 2.5f, 10f), new float3(3f, 3f, 3f), model, material);
-            entity.AddComponent(new gameplay.rendering.DirectionalShadowOrbitComponent {
+            entity.AddComponent(new city.rendering.DirectionalShadowOrbitComponent {
                 OrbitCenter = new float3(0f, 0f, 0f),
                 OrbitRadius = 10f,
                 OrbitHeight = 2.5f,

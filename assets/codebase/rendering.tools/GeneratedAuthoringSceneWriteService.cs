@@ -100,10 +100,6 @@ namespace city.rendering.tools {
             persistenceRegistry.Register(new DirectionalLightComponentPersistenceDescriptor());
             persistenceRegistry.Register(new PointLightComponentPersistenceDescriptor());
             persistenceRegistry.Register(new SpotLightComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new MenuComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new MenuPanelComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new MenuItemComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new MenuSelectedDescriptionComponentPersistenceDescriptor());
             return persistenceRegistry;
         }
 
