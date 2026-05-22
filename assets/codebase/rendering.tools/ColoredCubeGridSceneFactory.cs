@@ -338,7 +338,7 @@ namespace city.rendering.tools {
         /// <param name="cubeIndex">Stable zero-based cube index.</param>
         /// <returns>Runtime material instance for the supplied cube.</returns>
         RuntimeMaterial CreateRuntimeMaterial(int cubeIndex) {
-            MaterialAsset materialAsset = CreateMaterialAsset(cubeIndex);
+            ShaderMaterialAsset materialAsset = CreatePreviewMaterialAsset(cubeIndex);
             ShaderAsset shaderAsset = helengine.editor.EditorBuiltInShaderAssetLibrary.LoadShaderAsset(Core.Instance.RenderManager3D, StandardShaderSourceFileName);
             materialAsset.ConstantBuffers = new[] {
                 new MaterialConstantBufferAsset {
@@ -348,7 +348,7 @@ namespace city.rendering.tools {
             };
 
             RuntimeMaterial runtimeMaterial = Core.Instance.RenderManager3D.BuildMaterialFromRaw(materialAsset, shaderAsset);
-            StandardMaterialTextureBindingDefaults.Apply(runtimeMaterial);
+            StandardMaterialTextureBindingDefaults.Apply(ShaderRuntimeMaterialAccess.Require(runtimeMaterial));
             return runtimeMaterial;
         }
 
@@ -368,7 +368,7 @@ namespace city.rendering.tools {
             Directory.CreateDirectory(directoryPath);
 
             using (FileStream stream = File.Create(fullPath)) {
-                helengine.editor.AssetSerializer.Serialize(stream, CreateMaterialAsset(cubeIndex));
+                helengine.editor.AssetSerializer.Serialize(stream, CreateAuthoredMaterialAsset(cubeIndex));
             }
 
             MaterialSettingsService.Save(fullPath, CreateMaterialSettings(cubeIndex));
@@ -379,8 +379,22 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="cubeIndex">Stable zero-based cube index.</param>
         /// <returns>File-backed material asset for the supplied cube.</returns>
-        MaterialAsset CreateMaterialAsset(int cubeIndex) {
-            return new MaterialAsset {
+        MaterialAsset CreateAuthoredMaterialAsset(int cubeIndex) {
+            return new ShaderMaterialAsset {
+                Id = CreateMaterialAssetId(cubeIndex),
+                RenderState = new MaterialRenderState(),
+                CastsShadows = true,
+                ReceivesShadows = true
+            };
+        }
+
+        /// <summary>
+        /// Creates one shader-backed preview material asset that resolves to the shared standard shader.
+        /// </summary>
+        /// <param name="cubeIndex">Stable zero-based cube index.</param>
+        /// <returns>Shader-backed preview material asset for the supplied cube.</returns>
+        ShaderMaterialAsset CreatePreviewMaterialAsset(int cubeIndex) {
+            return new ShaderMaterialAsset {
                 Id = CreateMaterialAssetId(cubeIndex),
                 ShaderAssetId = StandardShaderAssetId,
                 VertexProgram = StandardVertexProgramName,

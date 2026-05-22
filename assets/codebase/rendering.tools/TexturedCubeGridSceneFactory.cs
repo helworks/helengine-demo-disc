@@ -558,7 +558,7 @@ namespace city.rendering.tools {
             Directory.CreateDirectory(directoryPath);
 
             using (FileStream stream = File.Create(fullPath)) {
-                global::helengine.editor.AssetSerializer.Serialize(stream, CreateMaterialAsset(cubeIndex));
+                global::helengine.editor.AssetSerializer.Serialize(stream, CreateAuthoredMaterialAsset(cubeIndex));
             }
 
             MaterialSettingsService.Save(fullPath, CreateMaterialSettings(cubeIndex));
@@ -569,8 +569,22 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="cubeIndex">Stable zero-based cube index.</param>
         /// <returns>File-backed textured material asset.</returns>
-        MaterialAsset CreateMaterialAsset(int cubeIndex) {
-            return new MaterialAsset {
+        MaterialAsset CreateAuthoredMaterialAsset(int cubeIndex) {
+            return new ShaderMaterialAsset {
+                Id = CreateMaterialAssetId(cubeIndex),
+                RenderState = new MaterialRenderState(),
+                CastsShadows = true,
+                ReceivesShadows = true
+            };
+        }
+
+        /// <summary>
+        /// Creates one shader-backed preview material asset for the supplied cube.
+        /// </summary>
+        /// <param name="cubeIndex">Stable zero-based cube index.</param>
+        /// <returns>Shader-backed preview material asset for the supplied cube.</returns>
+        ShaderMaterialAsset CreatePreviewMaterialAsset(int cubeIndex) {
+            return new ShaderMaterialAsset {
                 Id = CreateMaterialAssetId(cubeIndex),
                 ShaderAssetId = StandardShaderAssetId,
                 VertexProgram = StandardVertexProgramName,
@@ -681,18 +695,19 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(standardMaterial));
             }
 
-            MaterialAsset materialAsset = CreateMaterialAsset(cubeIndex);
+            ShaderMaterialAsset materialAsset = CreatePreviewMaterialAsset(cubeIndex);
             ShaderAsset shaderAsset = helengine.editor.EditorBuiltInShaderAssetLibrary.LoadShaderAsset(Core.Instance.RenderManager3D, StandardShaderSourceFileName);
             RuntimeMaterial runtimeMaterial = Core.Instance.RenderManager3D.BuildMaterialFromRaw(materialAsset, shaderAsset);
+            ShaderRuntimeMaterial shaderRuntimeMaterial = ShaderRuntimeMaterialAccess.Require(runtimeMaterial);
 
-            int diffuseTextureBindingIndex = runtimeMaterial.Layout.FindTextureBindingIndex(StandardMaterialTextureBindingDefaults.DiffuseTextureBindingName);
+            int diffuseTextureBindingIndex = shaderRuntimeMaterial.Layout.FindTextureBindingIndex(StandardMaterialTextureBindingDefaults.DiffuseTextureBindingName);
             if (diffuseTextureBindingIndex < 0) {
                 throw new InvalidOperationException("The generated standard material must expose a diffuse texture binding.");
             }
 
             RuntimeTexture runtimeTexture = Core.Instance.RenderManager2D.BuildTextureFromRaw(CreateTextureAsset(cubeIndex));
-            runtimeMaterial.Properties.SetTexture(diffuseTextureBindingIndex, runtimeTexture);
-            StandardMaterialTextureBindingDefaults.Apply(runtimeMaterial);
+            shaderRuntimeMaterial.Properties.SetTexture(diffuseTextureBindingIndex, runtimeTexture);
+            StandardMaterialTextureBindingDefaults.Apply(shaderRuntimeMaterial);
             return runtimeMaterial;
         }
 

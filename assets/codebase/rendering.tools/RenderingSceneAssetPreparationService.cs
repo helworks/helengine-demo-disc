@@ -128,7 +128,7 @@ namespace city.rendering.tools {
             string platformId = ResolveMaterialPreviewPlatformId(fullProjectRootPath);
             string fullMaterialPath = Path.GetFullPath(Path.Combine(assetsRootPath, relativeMaterialPath.Replace('/', Path.DirectorySeparatorChar)));
             MaterialAssetSettingsService settingsService = new MaterialAssetSettingsService();
-            MaterialAsset materialAsset;
+            ShaderMaterialAsset materialAsset;
             try {
                 materialAsset = settingsService.LoadMaterialAsset(fullMaterialPath, platformId);
             } catch (InvalidOperationException) {
@@ -153,7 +153,7 @@ namespace city.rendering.tools {
         /// <param name="materialAsset">Authored material asset carrying the stable asset id that must survive scene serialization.</param>
         /// <param name="platformSettings">Effective platform settings document used to extract preview-facing values such as base color.</param>
         /// <returns>Shader-backed preview runtime material that preserves the authored material asset id.</returns>
-        RuntimeMaterial BuildPreviewRuntimeMaterial(MaterialAsset materialAsset, MaterialAssetProcessorSettings platformSettings) {
+        RuntimeMaterial BuildPreviewRuntimeMaterial(ShaderMaterialAsset materialAsset, MaterialAssetProcessorSettings platformSettings) {
             if (materialAsset == null) {
                 throw new ArgumentNullException(nameof(materialAsset));
             } else if (platformSettings == null) {
@@ -161,7 +161,7 @@ namespace city.rendering.tools {
             }
 
             ShaderAsset shaderAsset = helengine.editor.EditorBuiltInShaderAssetLibrary.LoadShaderAsset(Core.Instance.RenderManager3D, StandardShaderSourceFileName);
-            MaterialAsset previewMaterialAsset = new MaterialAsset {
+            ShaderMaterialAsset previewMaterialAsset = new ShaderMaterialAsset {
                 Id = materialAsset.Id,
                 ShaderAssetId = StandardShaderAssetId,
                 VertexProgram = StandardVertexProgramName,
@@ -177,7 +177,7 @@ namespace city.rendering.tools {
                 ReceivesShadows = materialAsset.ReceivesShadows
             };
             RuntimeMaterial runtimeMaterial = Core.Instance.RenderManager3D.BuildMaterialFromRaw(previewMaterialAsset, shaderAsset);
-            StandardMaterialTextureBindingDefaults.Apply(runtimeMaterial);
+            StandardMaterialTextureBindingDefaults.Apply(ShaderRuntimeMaterialAccess.Require(runtimeMaterial));
             return runtimeMaterial;
         }
 
@@ -235,7 +235,7 @@ namespace city.rendering.tools {
         /// <param name="settingsService">Material settings service used to write the migrated document.</param>
         /// <param name="platformId">Platform whose effective runtime material should be resolved after migration.</param>
         /// <returns>Runtime-facing material asset loaded from the migrated settings document.</returns>
-        MaterialAsset MigrateLegacyMaterialAsset(
+        ShaderMaterialAsset MigrateLegacyMaterialAsset(
             string fullMaterialPath,
             EditorProjectBootstrapContext bootstrap,
             MaterialAssetSettingsService settingsService,
@@ -260,7 +260,7 @@ namespace city.rendering.tools {
             }
 
             settingsService.LoadOrCreate(fullMaterialPath, materialAsset, bootstrap.SupportedPlatforms, bootstrap.ResolveSelectionModel);
-            MaterialAsset migratedMaterialAsset = settingsService.LoadMaterialAsset(fullMaterialPath, platformId);
+            ShaderMaterialAsset migratedMaterialAsset = settingsService.LoadMaterialAsset(fullMaterialPath, platformId);
             return migratedMaterialAsset;
         }
 

@@ -1007,7 +1007,7 @@ namespace city.physics.tools {
                 throw new ArgumentException("Surface color must be provided.", nameof(surfaceColor));
             }
 
-            MaterialAsset materialAsset = new MaterialAsset {
+            ShaderMaterialAsset materialAsset = new ShaderMaterialAsset {
                 Id = assetId,
                 ShaderAssetId = "ForwardStandardShader",
                 VertexProgram = "ForwardStandardShader.vs",
@@ -1026,7 +1026,7 @@ namespace city.physics.tools {
 
             ShaderAsset shaderAsset = EditorBuiltInShaderAssetLibrary.LoadShaderAsset(Core.Instance.RenderManager3D, "ForwardStandardShader.hlsl");
             RuntimeMaterial runtimeMaterial = Core.Instance.RenderManager3D.BuildMaterialFromRaw(materialAsset, shaderAsset);
-            StandardMaterialTextureBindingDefaults.Apply(runtimeMaterial);
+            StandardMaterialTextureBindingDefaults.Apply(ShaderRuntimeMaterialAccess.Require(runtimeMaterial));
             return runtimeMaterial;
         }
 
