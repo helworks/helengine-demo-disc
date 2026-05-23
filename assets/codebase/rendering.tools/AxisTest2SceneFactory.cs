@@ -177,7 +177,8 @@ namespace city.rendering.tools {
                 }
             });
             entity.AddComponent(new FPSComponent {
-                Font = ResolveRequiredEditorFont()
+                Font = ResolveRequiredEditorFont(),
+                FontScale = 2f
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;

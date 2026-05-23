@@ -21,12 +21,12 @@ namespace city.menu {
         /// <summary>
         /// Gets the decorative logo width in authored canvas pixels.
         /// </summary>
-        public int LogoWidth => 220;
+        public int LogoWidth => 440;
 
         /// <summary>
         /// Gets the decorative logo height in authored canvas pixels.
         /// </summary>
-        public int LogoHeight => 220;
+        public int LogoHeight => 440;
 
         /// <summary>
         /// Gets the decorative logo bottom margin in authored canvas pixels.

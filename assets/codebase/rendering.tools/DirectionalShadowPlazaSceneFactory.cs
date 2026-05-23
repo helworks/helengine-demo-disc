@@ -151,7 +151,8 @@ namespace city.rendering.tools {
         Entity CreateFpsEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("DirectionalShadowPlazaFps");
             FPSComponent fpsComponent = new FPSComponent {
-                Font = PlaceholderFont
+                Font = PlaceholderFont,
+                FontScale = 2f
             };
             entity.AddComponent(fpsComponent);
             ApplyEditorFontReference(entity, fpsComponent);

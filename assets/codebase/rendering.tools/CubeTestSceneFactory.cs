@@ -75,7 +75,8 @@ namespace city.rendering.tools {
             entity.AddComponent(cameraComponent);
 
             FPSComponent fpsComponent = new FPSComponent {
-                Font = ResolveRequiredEditorFont()
+                Font = ResolveRequiredEditorFont(),
+                FontScale = 2f
             };
             entity.AddComponent(fpsComponent);
             entity.AddComponent(new DemoDiscReturnToMenuComponent());

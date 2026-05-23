@@ -11,11 +11,6 @@ namespace city.rendering.tools {
         public const string SceneId = RenderingSceneGenerator.TexturedCubeGridSceneId;
 
         /// <summary>
-        /// Stable material importer identifier stored on generated sidecar settings.
-        /// </summary>
-        const string MaterialImporterId = "helengine.material";
-
-        /// <summary>
         /// Stable texture importer identifier stored on generated texture sidecar settings.
         /// </summary>
         const string TextureImporterId = "gdi";
@@ -287,15 +282,15 @@ namespace city.rendering.tools {
         const double CubeAngularSpeedDegreesPerIndex = 4.0;
 
         /// <summary>
-        /// Service used to write generated material settings sidecars.
+        /// Service used to persist generated authored material assets plus their per-platform material settings.
         /// </summary>
-        readonly MaterialAssetSettingsService MaterialSettingsService;
+        readonly GeneratedMaterialAssetWriteService MaterialWriteService;
 
         /// <summary>
         /// Initializes the textured cube-grid scene factory with the descriptors and services required for authored output.
         /// </summary>
         public TexturedCubeGridSceneFactory() {
-            MaterialSettingsService = new MaterialAssetSettingsService();
+            MaterialWriteService = new GeneratedMaterialAssetWriteService();
         }
 
         /// <summary>
@@ -391,7 +386,8 @@ namespace city.rendering.tools {
                 }
             });
             entity.AddComponent(new FPSComponent {
-                Font = ResolveRequiredEditorFont()
+                Font = ResolveRequiredEditorFont(),
+                FontScale = 2f
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;
@@ -549,19 +545,7 @@ namespace city.rendering.tools {
         /// <param name="cubeIndex">Stable zero-based cube index.</param>
         void WriteMaterialAsset(string projectRootPath, int cubeIndex) {
             string relativePath = CubeMaterialRelativePaths[cubeIndex];
-            string fullPath = Path.Combine(projectRootPath, "assets", relativePath.Replace('/', Path.DirectorySeparatorChar));
-            string directoryPath = Path.GetDirectoryName(fullPath);
-            if (string.IsNullOrWhiteSpace(directoryPath)) {
-                throw new InvalidOperationException($"Could not resolve a material directory for '{relativePath}'.");
-            }
-
-            Directory.CreateDirectory(directoryPath);
-
-            using (FileStream stream = File.Create(fullPath)) {
-                global::helengine.editor.AssetSerializer.Serialize(stream, CreateAuthoredMaterialAsset(cubeIndex));
-            }
-
-            MaterialSettingsService.Save(fullPath, CreateMaterialSettings(cubeIndex));
+            MaterialWriteService.WriteMaterial(projectRootPath, relativePath, CreateGeneratedMaterialDefinition(cubeIndex));
         }
 
         /// <summary>
@@ -632,56 +616,50 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates one per-platform settings sidecar for the supplied cube material.
+        /// Creates one generated authored material definition for the supplied cube material.
         /// </summary>
         /// <param name="cubeIndex">Stable zero-based cube index.</param>
-        /// <returns>Generated import-settings payload for the cube material.</returns>
-        MaterialAssetImportSettings CreateMaterialSettings(int cubeIndex) {
-            MaterialAssetImportSettings settings = new MaterialAssetImportSettings();
-            settings.Importer.ImporterId = MaterialImporterId;
-            settings.Importer.SourceChecksum = string.Empty;
-            settings.Importer.AssetId = CreateMaterialAssetId(cubeIndex);
+        /// <returns>Generated authored material definition for the cube material.</returns>
+        GeneratedMaterialAssetDefinition CreateGeneratedMaterialDefinition(int cubeIndex) {
+            GeneratedMaterialAssetDefinition definition = new GeneratedMaterialAssetDefinition();
+            definition.MaterialAsset = CreateAuthoredMaterialAsset(cubeIndex);
 
-            MaterialAssetProcessorSettings windowsSettings = new MaterialAssetProcessorSettings();
+            GeneratedMaterialPlatformDefinition windowsSettings = definition.GetOrCreatePlatform("windows");
             windowsSettings.SchemaId = WindowsMaterialSchemaId;
-            windowsSettings.FieldValues[UseCustomShaderFieldId] = "false";
-            windowsSettings.FieldValues[ShaderAssetIdFieldId] = StandardShaderAssetId;
-            windowsSettings.FieldValues[TextureIdFieldId] = CubeTextureAssetIds[cubeIndex];
-            windowsSettings.FieldValues[CastsShadowFieldId] = "true";
-            windowsSettings.FieldValues[ReceivesShadowFieldId] = "true";
-            windowsSettings.FieldValues[BaseColorFieldId] = "#FFFFFFFF";
-            settings.Processor.Platforms["windows"] = windowsSettings;
+            windowsSettings.SetFieldValue(UseCustomShaderFieldId, "false");
+            windowsSettings.SetFieldValue(ShaderAssetIdFieldId, StandardShaderAssetId);
+            windowsSettings.SetFieldValue(TextureIdFieldId, CubeTextureAssetIds[cubeIndex]);
+            windowsSettings.SetFieldValue(CastsShadowFieldId, "true");
+            windowsSettings.SetFieldValue(ReceivesShadowFieldId, "true");
+            windowsSettings.SetFieldValue(BaseColorFieldId, "#FFFFFFFF");
 
-            MaterialAssetProcessorSettings ps2Settings = new MaterialAssetProcessorSettings();
+            GeneratedMaterialPlatformDefinition ps2Settings = definition.GetOrCreatePlatform("ps2");
             ps2Settings.SchemaId = Ps2MaterialSchemaId;
-            ps2Settings.FieldValues[TextureIdFieldId] = CubeTextureAssetIds[cubeIndex];
-            ps2Settings.FieldValues[AlphaModeFieldId] = "opaque";
-            ps2Settings.FieldValues[DoubleSidedFieldId] = "false";
-            ps2Settings.FieldValues[Ps2CastShadowsFieldId] = "true";
-            ps2Settings.FieldValues[VertexColorModeFieldId] = "ignore";
-            ps2Settings.FieldValues[BaseColorFieldId] = "#FFFFFFFF";
-            settings.Processor.Platforms["ps2"] = ps2Settings;
+            ps2Settings.SetFieldValue(TextureIdFieldId, CubeTextureAssetIds[cubeIndex]);
+            ps2Settings.SetFieldValue(AlphaModeFieldId, "opaque");
+            ps2Settings.SetFieldValue(DoubleSidedFieldId, "false");
+            ps2Settings.SetFieldValue(Ps2CastShadowsFieldId, "true");
+            ps2Settings.SetFieldValue(VertexColorModeFieldId, "ignore");
+            ps2Settings.SetFieldValue(BaseColorFieldId, "#FFFFFFFF");
 
-            MaterialAssetProcessorSettings pspSettings = new MaterialAssetProcessorSettings();
+            GeneratedMaterialPlatformDefinition pspSettings = definition.GetOrCreatePlatform("psp");
             pspSettings.SchemaId = WindowsMaterialSchemaId;
-            pspSettings.FieldValues[UseCustomShaderFieldId] = "false";
-            pspSettings.FieldValues[ShaderAssetIdFieldId] = StandardShaderAssetId;
-            pspSettings.FieldValues[TextureIdFieldId] = CubeTextureAssetIds[cubeIndex];
-            pspSettings.FieldValues[CastsShadowFieldId] = "true";
-            pspSettings.FieldValues[ReceivesShadowFieldId] = "true";
-            pspSettings.FieldValues[BaseColorFieldId] = "#FFFFFFFF";
-            settings.Processor.Platforms["psp"] = pspSettings;
+            pspSettings.SetFieldValue(UseCustomShaderFieldId, "false");
+            pspSettings.SetFieldValue(ShaderAssetIdFieldId, StandardShaderAssetId);
+            pspSettings.SetFieldValue(TextureIdFieldId, CubeTextureAssetIds[cubeIndex]);
+            pspSettings.SetFieldValue(CastsShadowFieldId, "true");
+            pspSettings.SetFieldValue(ReceivesShadowFieldId, "true");
+            pspSettings.SetFieldValue(BaseColorFieldId, "#FFFFFFFF");
 
-            MaterialAssetProcessorSettings dsSettings = new MaterialAssetProcessorSettings();
+            GeneratedMaterialPlatformDefinition dsSettings = definition.GetOrCreatePlatform("ds");
             dsSettings.SchemaId = DsMaterialSchemaId;
-            dsSettings.FieldValues[TextureIdFieldId] = CubeTextureAssetIds[cubeIndex];
-            dsSettings.FieldValues[DsTextureRelativePathFieldId] = "cooked/imported/" + CubeTextureAssetIds[cubeIndex];
-            dsSettings.FieldValues[DoubleSidedFieldId] = "false";
-            dsSettings.FieldValues[VertexColorModeFieldId] = "ignore";
-            dsSettings.FieldValues[BaseColorFieldId] = "#FFFFFFFF";
-            dsSettings.FieldValues[LightingModeFieldId] = "lit";
-            settings.Processor.Platforms["ds"] = dsSettings;
-            return settings;
+            dsSettings.SetFieldValue(TextureIdFieldId, CubeTextureAssetIds[cubeIndex]);
+            dsSettings.SetFieldValue(DsTextureRelativePathFieldId, "cooked/imported/" + CubeTextureAssetIds[cubeIndex]);
+            dsSettings.SetFieldValue(DoubleSidedFieldId, "false");
+            dsSettings.SetFieldValue(VertexColorModeFieldId, "ignore");
+            dsSettings.SetFieldValue(BaseColorFieldId, "#FFFFFFFF");
+            dsSettings.SetFieldValue(LightingModeFieldId, "lit");
+            return definition;
         }
 
         /// <summary>

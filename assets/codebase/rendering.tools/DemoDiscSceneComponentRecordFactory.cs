@@ -16,9 +16,10 @@ namespace city.rendering.tools {
         const string FontReferenceName = "Font";
 
         /// <summary>
-        /// Descriptor used to serialize the FPS overlay component attached to showcase cameras.
+        /// Automatic reflected descriptor used to serialize built-in engine components for authored rendering showcase scenes.
         /// </summary>
-        static readonly FPSComponentPersistenceDescriptor FpsDescriptor = new FPSComponentPersistenceDescriptor();
+        static readonly AutomaticScriptComponentPersistenceDescriptor AutomaticDescriptor =
+            new AutomaticScriptComponentPersistenceDescriptor(new ScriptComponentReflectionSchemaBuilder());
 
         /// <summary>
         /// Creates one scripted component record that returns a demo-disc scene to the main menu.
@@ -54,11 +55,12 @@ namespace city.rendering.tools {
             }
 
             FPSComponent fpsComponent = new FPSComponent {
-                Font = new FontAsset(new FontInfo("CityRenderingFpsPlaceholder", 16, 4f), null, new Dictionary<char, FontChar>(), 16f, 1, 1)
+                Font = new FontAsset(new FontInfo("CityRenderingFpsPlaceholder", 16, 4f), null, new Dictionary<char, FontChar>(), 16f, 1, 1),
+                FontScale = 2f
             };
             EntityComponentSaveState saveState = new EntityComponentSaveState();
             saveState.SetAssetReference(FontReferenceName, CreateEditorFontReference());
-            return FpsDescriptor.SerializeComponent(fpsComponent, componentIndex, saveState);
+            return AutomaticDescriptor.SerializeComponent(fpsComponent, componentIndex, saveState);
         }
 
         /// <summary>

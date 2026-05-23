@@ -23,6 +23,11 @@ namespace city.menu.tools {
         const byte RuntimeLayerMask = 0b00000001;
 
         /// <summary>
+        /// Fixed top offset where panel item viewports begin beneath the menu header chrome.
+        /// </summary>
+        const float ItemsViewportTop = 90f;
+
+        /// <summary>
         /// Stable save-state slot name used for serialized font references.
         /// </summary>
         const string FontReferenceName = "Font";
@@ -176,12 +181,9 @@ namespace city.menu.tools {
                 definition.SurfaceColor,
                 definition.SurfaceBorderColor,
                 30);
-            MenuItemDefinition firstItem = ResolveFirstEnabledItem(panelDefinition);
-
-            CreateSelectedDescriptionEntity(panelEntity, panelDefinition.PanelId, new float3(32f, 410f, 0.1f), firstItem.Description, definition.BodyFontPath, definition.MutedTextColor);
 
             Entity itemsViewportEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, $"Panel-{panelDefinition.PanelId}-ItemsViewport");
-            itemsViewportEntity.LocalPosition = new float3(32f, 90f, 0f);
+            itemsViewportEntity.LocalPosition = new float3(0f, ItemsViewportTop, 0f);
             itemsViewportEntity.AddComponent(new ClipRectComponent {
                 Size = BuildItemsViewportSize(panelDefinition)
             });
@@ -246,7 +248,6 @@ namespace city.menu.tools {
             itemEntity.AddComponent(new MenuItemComponent {
                 PanelId = panelDefinition.PanelId,
                 ItemId = itemDefinition.ItemId,
-                Description = itemDefinition.Description,
                 ActionKind = itemDefinition.Action.Kind,
                 TargetId = itemDefinition.Action.TargetId,
                 IdleFillColor = idleFillColor,
@@ -267,49 +268,15 @@ namespace city.menu.tools {
             CreateTextEntity(
                 itemEntity,
                 $"item-label-{itemDefinition.ItemId}",
-                new float3(20f, 12f, 0.1f),
+                new float3(20f, 10f, 0.1f),
                 itemDefinition.Label,
                 definition.BodyFontPath,
                 definition.TextColor,
-                new int2(DemoMenuLayout.ButtonWidth - 40, 24),
+                new int2(DemoMenuLayout.ButtonWidth - 40, 76),
                 34,
                 null,
+                2f,
                 true);
-        }
-
-        /// <summary>
-        /// Creates one selected-description marker entity and its text component.
-        /// </summary>
-        /// <param name="panelEntity">Panel that owns the selected-description marker.</param>
-        /// <param name="panelId">Panel id used in the stable entity name.</param>
-        /// <param name="localPosition">Local position applied to the marker entity.</param>
-        /// <param name="description">Initial description text.</param>
-        /// <param name="fontPath">Project-relative body font path.</param>
-        /// <param name="color">Description text color.</param>
-        void CreateSelectedDescriptionEntity(Entity panelEntity, string panelId, float3 localPosition, string description, string fontPath, byte4 color) {
-            if (panelEntity == null) {
-                throw new ArgumentNullException(nameof(panelEntity));
-            } else if (string.IsNullOrWhiteSpace(panelId)) {
-                throw new ArgumentException("Panel id must be provided.", nameof(panelId));
-            } else if (string.IsNullOrWhiteSpace(fontPath)) {
-                throw new ArgumentException("Font path must be provided.", nameof(fontPath));
-            }
-
-            Entity entity = Core.Instance.EntityFactory.CreateChild(panelEntity, $"SelectedDescription-{panelId}");
-            entity.LocalPosition = localPosition;
-            entity.Static = false;
-            entity.AddComponent(new MenuSelectedDescriptionComponent());
-
-            TextComponent textComponent = new TextComponent {
-                Text = description ?? string.Empty,
-                Font = PlaceholderFont,
-                Color = color,
-                Size = new int2(500, 64),
-                RenderOrder2D = 41,
-                LayerMask = RuntimeLayerMask
-            };
-            entity.AddComponent(textComponent);
-            ApplyFontReference(entity, textComponent, fontPath);
         }
 
         /// <summary>
@@ -324,8 +291,9 @@ namespace city.menu.tools {
         /// <param name="size">Text layout size.</param>
         /// <param name="renderOrder2D">2D render order.</param>
         /// <param name="anchorComponent">Optional anchor component attached to the entity.</param>
+        /// <param name="fontScale">Uniform glyph scale applied to the authored text component.</param>
         /// <param name="isStatic">Whether the authored text entity should be marked static for runtime caching.</param>
-        void CreateTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, AnchorComponent anchorComponent, bool isStatic = true) {
+        void CreateTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, AnchorComponent anchorComponent, float fontScale = 1f, bool isStatic = true) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -343,6 +311,7 @@ namespace city.menu.tools {
                 Font = PlaceholderFont,
                 Color = color,
                 Size = size,
+                FontScale = fontScale,
                 RenderOrder2D = renderOrder2D,
                 LayerMask = RuntimeLayerMask
             };
@@ -433,8 +402,8 @@ namespace city.menu.tools {
             entity.AddComponent(anchorComponent);
             entity.AddComponent(new PlatformInfoTextComponent());
 
-            CreateTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0.1f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, null, false);
-            CreateTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(0f, platformInfoOverlay.LineSpacing, 0.1f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(1, 1), 42, null, false);
+            CreateTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0.1f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, null, 2f, false);
+            CreateTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(0f, platformInfoOverlay.LineSpacing, 0.1f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(1, 1), 42, null, 2f, false);
         }
 
         /// <summary>
@@ -515,25 +484,6 @@ namespace city.menu.tools {
         }
 
         /// <summary>
-        /// Resolves the first enabled item in the supplied menu panel.
-        /// </summary>
-        /// <param name="panelDefinition">Panel whose first enabled item should be returned.</param>
-        /// <returns>First enabled item definition.</returns>
-        MenuItemDefinition ResolveFirstEnabledItem(MenuPanelDefinition panelDefinition) {
-            if (panelDefinition == null) {
-                throw new ArgumentNullException(nameof(panelDefinition));
-            }
-
-            for (int itemIndex = 0; itemIndex < panelDefinition.Items.Length; itemIndex++) {
-                if (panelDefinition.Items[itemIndex].Enabled) {
-                    return panelDefinition.Items[itemIndex];
-                }
-            }
-
-            throw new InvalidOperationException($"Menu panel '{panelDefinition.PanelId}' does not contain any enabled items.");
-        }
-
-        /// <summary>
         /// Counts the number of enabled items in the supplied panel.
         /// </summary>
         /// <param name="panelDefinition">Panel whose enabled items should be counted.</param>
@@ -582,7 +532,7 @@ namespace city.menu.tools {
             int viewportHeight = (visibleItemCount * DemoMenuLayout.ButtonHeight)
                 + ((visibleItemCount - 1) * DemoMenuLayout.ButtonSpacing);
             if (string.Equals(panelDefinition.PanelId, "scene-select", StringComparison.Ordinal)) {
-                viewportHeight += DemoMenuLayout.ButtonSpacing + (DemoMenuLayout.ButtonHeight / 2);
+                viewportHeight = DemoMenuLayout.CanvasHeight - (int)Math.Round((double)ItemsViewportTop);
             }
 
             return new int2(DemoMenuLayout.ButtonWidth, viewportHeight);

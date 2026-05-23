@@ -27,28 +27,25 @@ namespace city.menu {
                     new MenuPanelDefinition(
                         "main",
                         "Main Menu",
-                        "Pick a destination or peek at the menu shell.",
                         6,
                         new[] {
-                            new MenuItemDefinition("main-scenes", "Select Scene", "Browse the curated demo-disc lineup.", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "scene-select")),
-                            new MenuItemDefinition("main-options", "Options", "Preview the reusable options shell layout.", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "options"))
+                            new MenuItemDefinition("main-scenes", "Demo Scenes", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "scene-select")),
+                            new MenuItemDefinition("main-options", "Options", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "options"))
                         }),
                     new MenuPanelDefinition(
                         "scene-select",
-                        "Select Scene",
-                        "Every entry here is explicitly curated and ordered from city-side code.",
+                        "Demo Scenes",
                         4,
                         sceneCatalog.CreateSceneItems()),
                     new MenuPanelDefinition(
                         "options",
                         "Options",
-                        "Polished shell for future settings categories.",
                         6,
                         new[] {
-                            new MenuItemDefinition("options-display", "Display", "Placeholder row for future video settings.", true, new MenuActionDefinition(MenuActionKind.None, string.Empty)),
-                            new MenuItemDefinition("options-audio", "Audio", "Placeholder row for future volume settings.", true, new MenuActionDefinition(MenuActionKind.None, string.Empty)),
-                            new MenuItemDefinition("options-controls", "Controls", "Placeholder row for future input remapping.", true, new MenuActionDefinition(MenuActionKind.None, string.Empty)),
-                            new MenuItemDefinition("options-back", "Back", "Returns to the main menu.", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))
+                            new MenuItemDefinition("options-display", "Display", true, new MenuActionDefinition(MenuActionKind.None, string.Empty)),
+                            new MenuItemDefinition("options-audio", "Audio", true, new MenuActionDefinition(MenuActionKind.None, string.Empty)),
+                            new MenuItemDefinition("options-controls", "Controls", true, new MenuActionDefinition(MenuActionKind.None, string.Empty)),
+                            new MenuItemDefinition("options-back", "Back", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))
                         })
                 },
                 new MenuOverlayImageDefinition(

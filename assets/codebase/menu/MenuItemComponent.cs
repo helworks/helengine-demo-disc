@@ -24,11 +24,6 @@ namespace city.menu {
         string ItemIdValue;
 
         /// <summary>
-        /// Backing field for the item description rendered when selected.
-        /// </summary>
-        string DescriptionValue;
-
-        /// <summary>
         /// Backing field for the action target id or scene path.
         /// </summary>
         string TargetIdValue;
@@ -39,7 +34,6 @@ namespace city.menu {
         public MenuItemComponent() {
             PanelIdValue = string.Empty;
             ItemIdValue = string.Empty;
-            DescriptionValue = string.Empty;
             TargetIdValue = string.Empty;
         }
 
@@ -57,14 +51,6 @@ namespace city.menu {
         public string ItemId {
             get { return ItemIdValue; }
             set { ItemIdValue = value ?? string.Empty; }
-        }
-
-        /// <summary>
-        /// Gets or sets the supporting description shown when the item is selected.
-        /// </summary>
-        public string Description {
-            get { return DescriptionValue; }
-            set { DescriptionValue = value ?? string.Empty; }
         }
 
         /// <summary>

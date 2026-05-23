@@ -31,12 +31,12 @@ namespace city.menu {
         /// <summary>
         /// Width of one baked menu item row.
         /// </summary>
-        public const int ButtonWidth = 420;
+        public const int ButtonWidth = 512;
 
         /// <summary>
         /// Height of one baked menu item row.
         /// </summary>
-        public const int ButtonHeight = 48;
+        public const int ButtonHeight = 96;
 
         /// <summary>
         /// Vertical spacing inserted between adjacent item rows.

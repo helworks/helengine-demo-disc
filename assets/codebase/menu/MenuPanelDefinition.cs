@@ -8,10 +8,9 @@ namespace city.menu {
         /// </summary>
         /// <param name="panelId">Stable panel identifier used for navigation.</param>
         /// <param name="heading">Primary heading rendered when the panel is active.</param>
-        /// <param name="description">Optional supporting copy rendered under the heading.</param>
         /// <param name="visibleItemCount">Maximum number of visible rows before the panel scrolls.</param>
         /// <param name="items">Selectable items rendered by the panel.</param>
-        public MenuPanelDefinition(string panelId, string heading, string description, int visibleItemCount, MenuItemDefinition[] items) {
+        public MenuPanelDefinition(string panelId, string heading, int visibleItemCount, MenuItemDefinition[] items) {
             if (string.IsNullOrWhiteSpace(panelId)) {
                 throw new ArgumentException("Panel id must be provided.", nameof(panelId));
             }
@@ -30,7 +29,6 @@ namespace city.menu {
 
             PanelId = panelId;
             Heading = heading;
-            Description = description ?? string.Empty;
             VisibleItemCount = visibleItemCount;
             Items = items;
         }
@@ -44,11 +42,6 @@ namespace city.menu {
         /// Gets the heading rendered for the panel.
         /// </summary>
         public string Heading { get; }
-
-        /// <summary>
-        /// Gets the optional supporting copy rendered for the panel.
-        /// </summary>
-        public string Description { get; }
 
         /// <summary>
         /// Gets the maximum number of visible rows before the panel scrolls.

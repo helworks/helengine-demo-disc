@@ -75,7 +75,10 @@ namespace city.menu {
 
             textComponent.Text = text;
             float2 measuredSize = textComponent.Font.MeasureString(text);
-            textComponent.Size = new int2((int)Math.Ceiling(measuredSize.X), (int)Math.Ceiling(measuredSize.Y));
+            double fontScale = Math.Max((double)textComponent.FontScale, 0.0001d);
+            textComponent.Size = new int2(
+                (int)Math.Ceiling(measuredSize.X * fontScale),
+                (int)Math.Ceiling(measuredSize.Y * fontScale));
             entity.LocalPosition = new float3(-textComponent.Size.X, topOffset, 0f);
         }
 

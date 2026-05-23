@@ -183,6 +183,7 @@ namespace city.rendering.tools {
             Entity debugRootEntity = Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenDebugRoot");
             DebugComponent debugComponent = new DebugComponent();
             debugComponent.Font = ResolveRequiredEditorFont();
+            debugComponent.FontScale = 2f;
             debugComponent.Padding = new int2(8, 8);
             debugComponent.RenderOrder2D = 220;
             debugComponent.RefreshIntervalSeconds = 0.25d;

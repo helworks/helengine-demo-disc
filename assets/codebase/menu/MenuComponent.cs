@@ -190,7 +190,6 @@ namespace city.menu {
             for (int panelIndex = 0; panelIndex < panelEntities.Count; panelIndex++) {
                 Entity panelEntity = panelEntities[panelIndex];
                 MenuPanelComponent panelComponent = FindRequiredComponent<MenuPanelComponent>(panelEntity);
-                TextComponent selectedDescriptionText = ResolveSelectedDescriptionText(panelEntity);
                 MenuItemRuntime[] itemRuntimes = BindItems(panelEntity, panelComponent.PanelId);
                 ScrollComponent itemsScrollComponent = ResolveItemsScrollComponent(panelEntity, panelComponent.PanelId);
                 itemsScrollComponent.ItemCount = itemRuntimes.Length;
@@ -198,7 +197,6 @@ namespace city.menu {
                 MenuPanelRuntime panelRuntime = new MenuPanelRuntime(
                     panelComponent,
                     panelEntity,
-                    selectedDescriptionText,
                     itemsScrollComponent.Parent,
                     itemsScrollComponent,
                     itemRuntimes);
@@ -602,26 +600,6 @@ namespace city.menu {
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Resolves the selected-description text component hosted somewhere beneath one panel root.
-        /// </summary>
-        /// <param name="panelEntity">Panel root to inspect.</param>
-        /// <returns>Selected-description text component for the panel.</returns>
-        TextComponent ResolveSelectedDescriptionText(Entity panelEntity) {
-            List<Entity> markerEntities = new List<Entity>();
-            CollectEntitiesWithComponent<MenuSelectedDescriptionComponent>(panelEntity, markerEntities);
-            if (markerEntities.Count != 1) {
-                throw new InvalidOperationException("Each baked menu panel must contain exactly one selected-description marker.");
-            }
-
-            MenuSelectedDescriptionComponent markerComponent = FindRequiredComponent<MenuSelectedDescriptionComponent>(markerEntities[0]);
-            if (markerComponent == null) {
-                throw new InvalidOperationException("Selected-description marker component could not be resolved.");
-            }
-
-            return FindRequiredComponent<TextComponent>(markerEntities[0]);
         }
 
         /// <summary>

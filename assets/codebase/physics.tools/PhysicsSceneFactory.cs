@@ -64,11 +64,6 @@ namespace city.physics.tools {
         const string PhysicsDemoCyanMaterialRelativePath = "Materials/physics/PhysicsDemoCyan" + EditorFileTemplateRegistry.MaterialExtension;
 
         /// <summary>
-        /// Stable material importer identifier stored on generated material settings.
-        /// </summary>
-        const string MaterialImporterId = "helengine.material";
-
-        /// <summary>
         /// Stable Windows standard-material schema identifier used by the shared editor material pipeline.
         /// </summary>
         const string WindowsMaterialSchemaId = "standard-shader";
@@ -653,6 +648,7 @@ namespace city.physics.tools {
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new DebugComponent {
                 Font = ResolveRequiredEditorFont(),
+                FontScale = 2f,
                 Padding = new int2(8, 8),
                 RenderOrder2D = 250,
                 RefreshIntervalSeconds = 0.25d
@@ -1110,24 +1106,24 @@ namespace city.physics.tools {
                 throw new InvalidOperationException($"Could not resolve a directory path for material '{relativePath}'.");
             }
 
-            Directory.CreateDirectory(directoryPath);
+            GeneratedMaterialAssetDefinition definition = new GeneratedMaterialAssetDefinition();
+            definition.MaterialAsset = new ShaderMaterialAsset {
+                Id = assetId,
+                RenderState = new MaterialRenderState(),
+                CastsShadows = true,
+                ReceivesShadows = true
+            };
 
-            MaterialAssetImportSettings settings = new MaterialAssetImportSettings();
-            settings.Importer.ImporterId = MaterialImporterId;
-            settings.Importer.SourceChecksum = string.Empty;
-            settings.Importer.AssetId = assetId;
-
-            MaterialAssetProcessorSettings windowsSettings = new MaterialAssetProcessorSettings();
+            GeneratedMaterialPlatformDefinition windowsSettings = definition.GetOrCreatePlatform("windows");
             windowsSettings.SchemaId = WindowsMaterialSchemaId;
-            windowsSettings.FieldValues[UseCustomShaderFieldId] = "false";
-            windowsSettings.FieldValues[TextureIdFieldId] = string.Empty;
-            windowsSettings.FieldValues[CastsShadowFieldId] = "true";
-            windowsSettings.FieldValues[ReceivesShadowFieldId] = "true";
-            windowsSettings.FieldValues[BaseColorFieldId] = surfaceColor;
-            settings.Processor.Platforms["windows"] = windowsSettings;
+            windowsSettings.SetFieldValue(UseCustomShaderFieldId, "false");
+            windowsSettings.SetFieldValue(TextureIdFieldId, string.Empty);
+            windowsSettings.SetFieldValue(CastsShadowFieldId, "true");
+            windowsSettings.SetFieldValue(ReceivesShadowFieldId, "true");
+            windowsSettings.SetFieldValue(BaseColorFieldId, surfaceColor);
 
-            MaterialAssetSettingsService settingsService = new MaterialAssetSettingsService();
-            settingsService.Save(fullPath, settings);
+            GeneratedMaterialAssetWriteService writeService = new GeneratedMaterialAssetWriteService();
+            writeService.WriteMaterial(projectRootPath, relativePath, definition);
         }
 
         /// <summary>

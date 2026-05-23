@@ -8,10 +8,9 @@ namespace city.menu {
         /// </summary>
         /// <param name="itemId">Stable item identifier used for validation and diagnostics.</param>
         /// <param name="label">Visible label shown on the interactive button.</param>
-        /// <param name="description">Optional supporting description shown near the item.</param>
         /// <param name="enabled">True when the item may currently be selected and activated.</param>
         /// <param name="action">Action performed when the item is confirmed.</param>
-        public MenuItemDefinition(string itemId, string label, string description, bool enabled, MenuActionDefinition action) {
+        public MenuItemDefinition(string itemId, string label, bool enabled, MenuActionDefinition action) {
             if (string.IsNullOrWhiteSpace(itemId)) {
                 throw new ArgumentException("Menu item id must be provided.", nameof(itemId));
             }
@@ -24,7 +23,6 @@ namespace city.menu {
 
             ItemId = itemId;
             Label = label;
-            Description = description ?? string.Empty;
             Enabled = enabled;
             Action = action;
         }
@@ -38,11 +36,6 @@ namespace city.menu {
         /// Gets the visible label rendered for the item.
         /// </summary>
         public string Label { get; }
-
-        /// <summary>
-        /// Gets the supporting description rendered for the item.
-        /// </summary>
-        public string Description { get; }
 
         /// <summary>
         /// Gets a value indicating whether the item may be selected and activated.
