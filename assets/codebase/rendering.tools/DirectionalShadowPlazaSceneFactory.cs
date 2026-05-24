@@ -132,13 +132,9 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DirectionalShadowCameraOrbitComponent {
+            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = new float3(0f, 0f, 0f),
-                OrbitRadius = 64f,
-                OrbitHeight = 24f,
-                BaseAngleRadians = 0f,
-                AngularSpeedRadians = 0.07f,
-                LookDownPitchRadians = -0.28f
+                AutoYawSpeedRadians = 0.07f
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;
@@ -156,6 +152,7 @@ namespace city.rendering.tools {
             };
             entity.AddComponent(fpsComponent);
             ApplyEditorFontReference(entity, fpsComponent);
+            entity.AddComponent(new DemoDiscLightToggleComponent());
             return entity;
         }
 
@@ -178,12 +175,6 @@ namespace city.rendering.tools {
                 ShadowMapMode = ShadowMapMode.Forced,
                 ShadowStrength = 1f,
                 ShadowDistance = 80f
-            });
-            entity.AddComponent(new city.rendering.DirectionalShadowSunSweepComponent {
-                MinYawRadians = -0.18f,
-                MaxYawRadians = 0.18f,
-                PitchRadians = -0.72f,
-                SweepSpeedRadians = 0.05f
             });
             return entity;
         }
@@ -267,6 +258,19 @@ namespace city.rendering.tools {
                 RenderOrder3D = 0
             });
             return entity;
+        }
+
+        /// <summary>
+        /// Resolves the editor font assigned to generated runtime overlays during live authoring.
+        /// </summary>
+        /// <returns>Editor font asset used by the generated overlays.</returns>
+        FontAsset ResolveRequiredEditorFont() {
+            EditorCore editorCore = Core.Instance as EditorCore;
+            if (editorCore == null || editorCore.DefaultFontAssetForEditor == null) {
+                throw new InvalidOperationException("A default editor font must be loaded before the directional-shadow plaza scene can be generated.");
+            }
+
+            return editorCore.DefaultFontAssetForEditor;
         }
 
         /// <summary>

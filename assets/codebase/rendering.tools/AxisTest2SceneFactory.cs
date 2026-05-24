@@ -123,6 +123,7 @@ namespace city.rendering.tools {
                 },
                 RootEntities = new[] {
                     CreateCameraEntity(),
+                    CreateUiEntity(),
                     CreateDirectionalLightRigEntity(arrowModel, axisMaterials[4]),
                     CreateFloorEntity(cubeModel, axisMaterials[3]),
                     CreateGroundEntity(cubeModel, axisMaterials[3]),
@@ -176,11 +177,25 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
+            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+                OrbitCenter = float3.Zero,
+                AutoYawSpeedRadians = 0.08f
+            });
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates the authored UI root entity for the live axis-test-2 scene.
+        /// </summary>
+        /// <returns>Live authored UI entity.</returns>
+        Entity CreateUiEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("AxisTest2Ui");
             entity.AddComponent(new FPSComponent {
                 Font = ResolveRequiredEditorFont(),
                 FontScale = 2f
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
+            entity.AddComponent(new DemoDiscLightToggleComponent());
             return entity;
         }
 
@@ -201,13 +216,6 @@ namespace city.rendering.tools {
             entity.LocalPosition = ArrowRigLocalPosition;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new AxisTestCameraForwardSpinComponent {
-                BaseAngleRadians = 0f,
-                AngularSpeedRadians = ArrowAngularSpeedRadians,
-                CameraForwardAxisX = -1f,
-                CameraForwardAxisY = 0f,
-                CameraForwardAxisZ = 0f
-            });
             entity.AddChild(CreateDirectionalLightArrowEntity(arrowModel, markerMaterial));
             return entity;
         }

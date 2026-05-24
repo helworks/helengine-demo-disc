@@ -158,13 +158,9 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DirectionalShadowCameraOrbitComponent {
+            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = new float3(0f, 2f, 0f),
-                OrbitRadius = 28f,
-                OrbitHeight = 12f,
-                BaseAngleRadians = 0f,
-                AngularSpeedRadians = 0.05f,
-                LookDownPitchRadians = -0.24f
+                AutoYawSpeedRadians = 0.05f
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;

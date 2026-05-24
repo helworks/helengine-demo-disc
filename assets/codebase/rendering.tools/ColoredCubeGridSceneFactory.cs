@@ -149,10 +149,11 @@ namespace city.rendering.tools {
             }
 
             Entity[] cubeEntities = CreateCubeEntities(cubeModel, coloredMaterials);
-            Entity[] rootEntities = new Entity[cubeEntities.Length + 2];
+            Entity[] rootEntities = new Entity[cubeEntities.Length + 3];
             rootEntities[0] = CreateCameraEntity();
-            rootEntities[1] = CreateDirectionalLightEntity();
-            Array.Copy(cubeEntities, 0, rootEntities, 2, cubeEntities.Length);
+            rootEntities[1] = CreateUiEntity();
+            rootEntities[2] = CreateDirectionalLightEntity();
+            Array.Copy(cubeEntities, 0, rootEntities, 3, cubeEntities.Length);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -219,11 +220,25 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
+            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+                OrbitCenter = float3.Zero,
+                AutoYawSpeedRadians = 0.09f
+            });
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates the authored UI root entity for the colored cube-grid scene.
+        /// </summary>
+        /// <returns>Live authored UI entity.</returns>
+        Entity CreateUiEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("ColoredCubeGridUi");
             entity.AddComponent(new FPSComponent {
                 Font = ResolveRequiredEditorFont(),
                 FontScale = 2f
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
+            entity.AddComponent(new DemoDiscLightToggleComponent());
             return entity;
         }
 

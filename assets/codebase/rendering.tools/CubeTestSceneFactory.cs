@@ -39,6 +39,7 @@ namespace city.rendering.tools {
                 },
                 RootEntities = new[] {
                     CreateCameraEntity(),
+                    CreateUiEntity(),
                     CreateDirectionalLightEntity(),
                     CreateCubeEntity(cubeModel, standardMaterial)
                 }
@@ -73,14 +74,25 @@ namespace city.rendering.tools {
                 }
             };
             entity.AddComponent(cameraComponent);
+            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+                OrbitCenter = float3.Zero,
+                AutoYawSpeedRadians = 0.1f
+            });
+            return entity;
+        }
 
-            FPSComponent fpsComponent = new FPSComponent {
+        /// <summary>
+        /// Creates the authored UI root entity for the cube-test scene.
+        /// </summary>
+        /// <returns>Live authored UI entity.</returns>
+        Entity CreateUiEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("CubeTestUi");
+            entity.AddComponent(new FPSComponent {
                 Font = ResolveRequiredEditorFont(),
                 FontScale = 2f
-            };
-            entity.AddComponent(fpsComponent);
+            });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
-
+            entity.AddComponent(new DemoDiscLightToggleComponent());
             return entity;
         }
 

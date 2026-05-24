@@ -78,13 +78,9 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DirectionalShadowCameraOrbitComponent {
+            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = new float3(0f, 10f, 0f),
-                OrbitRadius = 48f,
-                OrbitHeight = 18f,
-                BaseAngleRadians = 0f,
-                AngularSpeedRadians = 0.07f,
-                LookDownPitchRadians = -0.28f
+                AutoYawSpeedRadians = 0.07f
             });
             return entity;
         }
@@ -103,6 +99,7 @@ namespace city.rendering.tools {
                 FontScale = 2f
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
+            entity.AddComponent(new DemoDiscLightToggleComponent());
             return entity;
         }
 

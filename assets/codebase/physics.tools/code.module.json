@@ -1,6 +1,8 @@
 {
   "moduleId": "physics.tools",
-  "dependencyModuleIds": [],
+  "dependencyModuleIds": [
+    "gameplay"
+  ],
   "loadScopes": [
     "always-loaded"
   ],

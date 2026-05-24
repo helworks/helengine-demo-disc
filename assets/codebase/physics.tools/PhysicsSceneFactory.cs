@@ -653,6 +653,7 @@ namespace city.physics.tools {
                 RenderOrder2D = 250,
                 RefreshIntervalSeconds = 0.25d
             });
+            entity.AddComponent(new city.rendering.DemoDiscLightToggleComponent());
             return entity;
         }
 
@@ -721,6 +722,10 @@ namespace city.physics.tools {
                     ShadowDistance = 0f,
                     PostProcessTier = PostProcessTier.Disabled
                 }
+            });
+            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+                OrbitCenter = new float3(0f, 1.5f, 0f),
+                AutoYawSpeedRadians = 0.07f
             });
             return entity;
         }

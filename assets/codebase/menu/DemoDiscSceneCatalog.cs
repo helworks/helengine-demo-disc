@@ -16,7 +16,6 @@ namespace city.menu {
                 new MenuItemDefinition("scene-axis-test", "Axis 1", true, new MenuActionDefinition(MenuActionKind.LoadScene, "axis_test")),
                 new MenuItemDefinition("scene-axis-test-2", "Axis 2", true, new MenuActionDefinition(MenuActionKind.LoadScene, "axis_test2")),
                 new MenuItemDefinition("scene-directional-shadow-plaza", "Directional Shadow Plaza", true, new MenuActionDefinition(MenuActionKind.LoadScene, "directional_shadow_plaza")),
-                new MenuItemDefinition("scene-spotlight-street-slice", "Spotlight Street Slice", true, new MenuActionDefinition(MenuActionKind.LoadScene, "spotlight_street_slice")),
                 new MenuItemDefinition("scene-back", "Back", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))
             };
         }
