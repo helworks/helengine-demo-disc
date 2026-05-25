@@ -13,6 +13,11 @@ namespace city.menu.tools {
         public const string SceneId = "Scenes/DemoDiscMainMenu.helen";
 
         /// <summary>
+        /// Stable scene id used by the Nintendo DS companion demo-disc menu scene.
+        /// </summary>
+        public const string NintendoDsSceneId = "scenes/DemoDiscMainMenuDs.helen";
+
+        /// <summary>
         /// Main-console menu panel width expressed as a fraction of the authored canvas width.
         /// </summary>
         const double MainMenuPanelWidthRatio = 0.4d;
@@ -26,6 +31,36 @@ namespace city.menu.tools {
         /// Fixed top offset where panel item viewports begin beneath the menu header chrome.
         /// </summary>
         const float ItemsViewportTop = 90f;
+
+        /// <summary>
+        /// Fixed Nintendo DS screen width in authored pixels.
+        /// </summary>
+        const int NintendoDsScreenWidth = 256;
+
+        /// <summary>
+        /// Fixed Nintendo DS screen height in authored pixels.
+        /// </summary>
+        const int NintendoDsScreenHeight = 192;
+
+        /// <summary>
+        /// Fixed Nintendo DS button height in authored pixels.
+        /// </summary>
+        const int NintendoDsButtonHeight = 36;
+
+        /// <summary>
+        /// Fixed Nintendo DS button spacing in authored pixels.
+        /// </summary>
+        const int NintendoDsButtonSpacing = 4;
+
+        /// <summary>
+        /// Maximum Nintendo DS logo width in authored pixels.
+        /// </summary>
+        const int NintendoDsLogoMaxWidth = 144;
+
+        /// <summary>
+        /// Maximum Nintendo DS logo height in authored pixels.
+        /// </summary>
+        const int NintendoDsLogoMaxHeight = 96;
 
         /// <summary>
         /// Stable save-state slot name used for serialized font references.
@@ -73,6 +108,12 @@ namespace city.menu.tools {
                         Width = DemoMenuLayout.CanvasWidth,
                         Height = DemoMenuLayout.CanvasHeight
                     }
+                },
+                NintendoDsScene = new GeneratedDsSceneDefinition {
+                    SceneId = NintendoDsSceneId,
+                    RootEntities = CreateNintendoDsSceneRoots(providerTypeName, definition),
+                    UseDefaultBottomOverlay = false,
+                    BottomScreenRootEntities = Array.Empty<Entity>()
                 },
                 RootEntities = new[] {
                     CreateCameraEntity(),
@@ -353,6 +394,360 @@ namespace city.menu.tools {
                 RenderOrder2D = renderOrder2D,
                 LayerMask = RuntimeLayerMask
             });
+        }
+
+        /// <summary>
+        /// Creates the dedicated Nintendo DS split-screen menu roots that keep branding on the top screen and the interactive menu on the bottom screen.
+        /// </summary>
+        /// <param name="providerTypeName">Assembly-qualified menu provider type name persisted on the menu root.</param>
+        /// <param name="definition">Menu definition used to author the Nintendo DS menu hierarchy.</param>
+        /// <returns>Nintendo DS scene roots written directly for the DS menu scene.</returns>
+        Entity[] CreateNintendoDsSceneRoots(string providerTypeName, MenuDefinition definition) {
+            if (string.IsNullOrWhiteSpace(providerTypeName)) {
+                throw new ArgumentException("Provider type name must be provided.", nameof(providerTypeName));
+            } else if (definition == null) {
+                throw new ArgumentNullException(nameof(definition));
+            }
+
+            return [
+                CreateNintendoDsTopScreenCameraEntity(definition),
+                CreateNintendoDsBottomScreenCameraEntity(providerTypeName, definition)
+            ];
+        }
+
+        /// <summary>
+        /// Creates the Nintendo DS top-screen camera and branding subtree.
+        /// </summary>
+        /// <param name="definition">Menu definition that provides branding colors and artwork.</param>
+        /// <returns>Top-screen camera root.</returns>
+        Entity CreateNintendoDsTopScreenCameraEntity(MenuDefinition definition) {
+            Entity entity = Core.Instance.EntityFactory.Create("DemoDiscTopScreenCamera");
+            entity.AddComponent(new CameraComponent {
+                CameraDrawOrder = 0,
+                LayerMask = 1,
+                Viewport = new float4(0f, 0f, 1f, 1f),
+                ClearSettings = BuildNintendoDsCameraClearSettings(definition.AccentColor),
+                RenderSettings = new CameraRenderSettings {
+                    DepthPrepassMode = DepthPrepassMode.Auto,
+                    ShadowDistance = 50f,
+                    PostProcessTier = PostProcessTier.High
+                }
+            });
+
+            Entity topScreenRootEntity = Core.Instance.EntityFactory.CreateChild(entity, "DemoDiscTopScreenRoot");
+            topScreenRootEntity.AddComponent(new ViewportComponent {
+                BindingMode = ViewportComponent.AncestorCameraBindingMode,
+                FixedSize = new int2(NintendoDsScreenWidth, NintendoDsScreenHeight),
+                ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
+                ReferenceWidth = NintendoDsScreenWidth,
+                ReferenceHeight = NintendoDsScreenHeight
+            });
+
+            if (definition.OverlayImage != null) {
+                CreateNintendoDsTopScreenLogoEntity(topScreenRootEntity, definition.OverlayImage);
+            }
+            if (definition.PlatformInfoOverlay != null) {
+                CreateNintendoDsTopScreenPlatformInfoEntity(topScreenRootEntity, definition);
+            }
+
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates the Nintendo DS bottom-screen camera and interactive menu subtree.
+        /// </summary>
+        /// <param name="providerTypeName">Assembly-qualified menu provider type name persisted on the menu root.</param>
+        /// <param name="definition">Menu definition used to author the bottom-screen menu hierarchy.</param>
+        /// <returns>Bottom-screen camera root.</returns>
+        Entity CreateNintendoDsBottomScreenCameraEntity(string providerTypeName, MenuDefinition definition) {
+            Entity entity = Core.Instance.EntityFactory.Create("DemoDiscBottomScreenCamera");
+            entity.AddComponent(new CameraComponent {
+                CameraDrawOrder = 1,
+                LayerMask = 1,
+                Viewport = new float4(0f, 1f, 1f, 1f),
+                ClearSettings = BuildNintendoDsCameraClearSettings(definition.AccentColor),
+                RenderSettings = new CameraRenderSettings {
+                    DepthPrepassMode = DepthPrepassMode.Auto,
+                    ShadowDistance = 50f,
+                    PostProcessTier = PostProcessTier.High
+                }
+            });
+
+            Entity menuRootEntity = Core.Instance.EntityFactory.CreateChild(entity, "DemoDiscMenuRoot");
+            menuRootEntity.AddComponent(new MenuComponent {
+                ProviderTypeName = providerTypeName,
+                InitialPanelId = definition.InitialPanelId
+            });
+            menuRootEntity.AddComponent(new ViewportComponent {
+                BindingMode = ViewportComponent.AncestorCameraBindingMode,
+                FixedSize = new int2(NintendoDsScreenWidth, NintendoDsScreenHeight),
+                ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
+                ReferenceWidth = NintendoDsScreenWidth,
+                ReferenceHeight = NintendoDsScreenHeight
+            });
+
+            Entity generatedRootEntity = Core.Instance.EntityFactory.CreateChild(menuRootEntity, DemoMenuLayout.GeneratedRootEntityName);
+            for (int panelIndex = 0; panelIndex < definition.Panels.Length; panelIndex++) {
+                CreateNintendoDsPanelEntity(generatedRootEntity, definition, definition.Panels[panelIndex]);
+            }
+
+            return entity;
+        }
+
+        /// <summary>
+        /// Builds the clear settings used by the Nintendo DS menu cameras.
+        /// </summary>
+        /// <param name="clearColor">Opaque camera clear color.</param>
+        /// <returns>Nintendo DS camera clear settings.</returns>
+        CameraClearSettings BuildNintendoDsCameraClearSettings(byte4 clearColor) {
+            return new CameraClearSettings(
+                true,
+                new float4(clearColor.X / 255f, clearColor.Y / 255f, clearColor.Z / 255f, clearColor.W / 255f),
+                true,
+                1f,
+                true,
+                1);
+        }
+
+        /// <summary>
+        /// Creates the Nintendo DS top-screen logo entity centered within the available branding area.
+        /// </summary>
+        /// <param name="topScreenRootEntity">Top-screen viewport root that owns the logo.</param>
+        /// <param name="overlayImage">Decorative overlay image definition.</param>
+        void CreateNintendoDsTopScreenLogoEntity(Entity topScreenRootEntity, MenuOverlayImageDefinition overlayImage) {
+            if (topScreenRootEntity == null) {
+                throw new ArgumentNullException(nameof(topScreenRootEntity));
+            } else if (overlayImage == null) {
+                throw new ArgumentNullException(nameof(overlayImage));
+            }
+
+            int displayWidth = ResolveNintendoDsLogoWidth(overlayImage);
+            int displayHeight = ResolveNintendoDsLogoHeight(overlayImage, displayWidth);
+            Entity entity = Core.Instance.EntityFactory.CreateChild(topScreenRootEntity, "DemoDiscOverlayImage");
+            entity.LocalPosition = new float3((NintendoDsScreenWidth - displayWidth) * 0.5f, 0f, 0f);
+
+            SpriteComponent spriteComponent = new SpriteComponent {
+                Size = new int2(displayWidth, displayHeight),
+                RenderOrder2D = 20,
+                LayerMask = RuntimeLayerMask
+            };
+            entity.AddComponent(spriteComponent);
+            ApplyTextureReference(entity, spriteComponent, overlayImage.TexturePath);
+        }
+
+        /// <summary>
+        /// Creates the Nintendo DS top-screen platform information overlay.
+        /// </summary>
+        /// <param name="topScreenRootEntity">Top-screen viewport root that owns the overlay.</param>
+        /// <param name="definition">Menu definition that provides the body font and colors.</param>
+        void CreateNintendoDsTopScreenPlatformInfoEntity(Entity topScreenRootEntity, MenuDefinition definition) {
+            if (topScreenRootEntity == null) {
+                throw new ArgumentNullException(nameof(topScreenRootEntity));
+            } else if (definition == null) {
+                throw new ArgumentNullException(nameof(definition));
+            }
+
+            Entity entity = Core.Instance.EntityFactory.CreateChild(topScreenRootEntity, "DemoDiscPlatformInfoOverlay");
+            entity.LocalPosition = new float3(248f, 148f, 0.1f);
+            entity.AddComponent(new PlatformInfoTextComponent());
+
+            CreateTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, null, 0.35f, false);
+            CreateTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(0f, 0f, 0f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(1, 1), 42, null, 0.35f, false);
+        }
+
+        /// <summary>
+        /// Creates one Nintendo DS bottom-screen panel subtree.
+        /// </summary>
+        /// <param name="generatedRootEntity">Generated menu subtree root that owns the panel.</param>
+        /// <param name="definition">Menu definition that owns the panel.</param>
+        /// <param name="panelDefinition">Panel definition that should be authored.</param>
+        void CreateNintendoDsPanelEntity(Entity generatedRootEntity, MenuDefinition definition, MenuPanelDefinition panelDefinition) {
+            if (generatedRootEntity == null) {
+                throw new ArgumentNullException(nameof(generatedRootEntity));
+            } else if (definition == null) {
+                throw new ArgumentNullException(nameof(definition));
+            } else if (panelDefinition == null) {
+                throw new ArgumentNullException(nameof(panelDefinition));
+            }
+
+            Entity panelEntity = Core.Instance.EntityFactory.CreateChild(generatedRootEntity, $"Panel-{panelDefinition.PanelId}");
+            panelEntity.LocalPosition = new float3(0f, 8f, 0f);
+            panelEntity.AddComponent(new MenuPanelComponent {
+                PanelId = panelDefinition.PanelId
+            });
+
+            Entity itemsViewportEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, $"Panel-{panelDefinition.PanelId}-ItemsViewport");
+            itemsViewportEntity.LocalPosition = new float3(0f, 12f, 0f);
+            itemsViewportEntity.AddComponent(new ClipRectComponent {
+                Size = BuildNintendoDsItemsViewportSize(panelDefinition)
+            });
+
+            Entity itemsRootEntity = Core.Instance.EntityFactory.CreateChild(itemsViewportEntity, $"Panel-{panelDefinition.PanelId}-ItemsRoot");
+            itemsRootEntity.AddComponent(new ScrollComponent {
+                Size = BuildNintendoDsItemsViewportSize(panelDefinition),
+                ItemCount = CountEnabledItems(panelDefinition),
+                VisibleItemCount = ResolveVisibleItemCount(panelDefinition),
+                ScrollStepCount = 1,
+                WheelNotchSize = 120,
+                RequiresPointerInside = true
+            });
+
+            int visibleIndex = 0;
+            for (int itemIndex = 0; itemIndex < panelDefinition.Items.Length; itemIndex++) {
+                MenuItemDefinition itemDefinition = panelDefinition.Items[itemIndex];
+                if (!itemDefinition.Enabled) {
+                    continue;
+                }
+
+                CreateNintendoDsItemEntity(itemsRootEntity, definition, panelDefinition, itemDefinition, visibleIndex);
+                visibleIndex++;
+            }
+        }
+
+        /// <summary>
+        /// Creates one Nintendo DS bottom-screen item row entity.
+        /// </summary>
+        /// <param name="itemsRootEntity">Scrolling item root that owns the row.</param>
+        /// <param name="definition">Menu definition that owns the row.</param>
+        /// <param name="panelDefinition">Panel that owns the row.</param>
+        /// <param name="itemDefinition">Item definition that should be authored.</param>
+        /// <param name="visibleIndex">Zero-based visible item index within the panel.</param>
+        void CreateNintendoDsItemEntity(Entity itemsRootEntity, MenuDefinition definition, MenuPanelDefinition panelDefinition, MenuItemDefinition itemDefinition, int visibleIndex) {
+            if (itemsRootEntity == null) {
+                throw new ArgumentNullException(nameof(itemsRootEntity));
+            } else if (definition == null) {
+                throw new ArgumentNullException(nameof(definition));
+            } else if (panelDefinition == null) {
+                throw new ArgumentNullException(nameof(panelDefinition));
+            } else if (itemDefinition == null) {
+                throw new ArgumentNullException(nameof(itemDefinition));
+            }
+
+            byte4 idleFillColor = ResolveNintendoDsOpaqueCompositeColor(definition.AccentColor, definition.SurfaceColor);
+            byte4 selectedFillColor = definition.SurfaceBorderColor;
+
+            Entity itemEntity = Core.Instance.EntityFactory.CreateChild(itemsRootEntity, $"Item-{itemDefinition.ItemId}");
+            itemEntity.LocalPosition = new float3(0f, visibleIndex * (NintendoDsButtonHeight + NintendoDsButtonSpacing), 0f);
+            itemEntity.AddComponent(new MenuItemComponent {
+                PanelId = panelDefinition.PanelId,
+                ItemId = itemDefinition.ItemId,
+                ActionKind = itemDefinition.Action.Kind,
+                TargetId = itemDefinition.Action.TargetId,
+                IdleFillColor = idleFillColor,
+                IdleBorderColor = idleFillColor,
+                SelectedFillColor = selectedFillColor,
+                SelectedBorderColor = selectedFillColor
+            });
+            itemEntity.AddComponent(new RoundedRectComponent {
+                Size = new int2(NintendoDsScreenWidth, NintendoDsButtonHeight),
+                Radius = 0f,
+                BorderThickness = 0f,
+                FillColor = visibleIndex == 0 ? selectedFillColor : idleFillColor,
+                BorderColor = visibleIndex == 0 ? selectedFillColor : idleFillColor,
+                RenderOrder2D = 33,
+                LayerMask = RuntimeLayerMask
+            });
+
+            CreateTextEntity(
+                itemEntity,
+                $"item-label-{itemDefinition.ItemId}",
+                new float3(8f, 2f, 0.1f),
+                itemDefinition.Label,
+                definition.BodyFontPath,
+                definition.TextColor,
+                new int2(NintendoDsScreenWidth - 16, 14),
+                34,
+                null,
+                0.75f,
+                true);
+        }
+
+        /// <summary>
+        /// Builds the fixed Nintendo DS viewport size used for one panel item list.
+        /// </summary>
+        /// <param name="panelDefinition">Panel whose visible-row count determines the viewport height.</param>
+        /// <returns>Viewport size in authored Nintendo DS pixels.</returns>
+        int2 BuildNintendoDsItemsViewportSize(MenuPanelDefinition panelDefinition) {
+            if (panelDefinition == null) {
+                throw new ArgumentNullException(nameof(panelDefinition));
+            }
+
+            int visibleItemCount = ResolveVisibleItemCount(panelDefinition);
+            int viewportHeight = (visibleItemCount * NintendoDsButtonHeight)
+                + ((visibleItemCount - 1) * NintendoDsButtonSpacing);
+            return new int2(NintendoDsScreenWidth, viewportHeight);
+        }
+
+        /// <summary>
+        /// Resolves the Nintendo DS logo width while preserving the authored aspect ratio and maximum top-screen footprint.
+        /// </summary>
+        /// <param name="overlayImage">Overlay image definition to inspect.</param>
+        /// <returns>Display width in authored Nintendo DS pixels.</returns>
+        int ResolveNintendoDsLogoWidth(MenuOverlayImageDefinition overlayImage) {
+            if (overlayImage == null) {
+                throw new ArgumentNullException(nameof(overlayImage));
+            } else if (overlayImage.Width < 1) {
+                throw new InvalidOperationException("Nintendo DS logo width must be greater than zero.");
+            } else if (overlayImage.Height < 1) {
+                throw new InvalidOperationException("Nintendo DS logo height must be greater than zero.");
+            }
+
+            double widthScale = (double)NintendoDsLogoMaxWidth / overlayImage.Width;
+            double heightScale = (double)NintendoDsLogoMaxHeight / overlayImage.Height;
+            double scale = Math.Min(widthScale, heightScale);
+            return Math.Max(1, (int)Math.Round(overlayImage.Width * scale));
+        }
+
+        /// <summary>
+        /// Resolves the Nintendo DS logo height from the authored aspect ratio and display width.
+        /// </summary>
+        /// <param name="overlayImage">Overlay image definition to inspect.</param>
+        /// <param name="displayWidth">Resolved display width.</param>
+        /// <returns>Display height in authored Nintendo DS pixels.</returns>
+        int ResolveNintendoDsLogoHeight(MenuOverlayImageDefinition overlayImage, int displayWidth) {
+            if (overlayImage == null) {
+                throw new ArgumentNullException(nameof(overlayImage));
+            } else if (overlayImage.Width < 1) {
+                throw new InvalidOperationException("Nintendo DS logo width must be greater than zero.");
+            }
+
+            double aspectRatio = (double)overlayImage.Height / overlayImage.Width;
+            return Math.Max(1, (int)Math.Round(displayWidth * aspectRatio));
+        }
+
+        /// <summary>
+        /// Resolves one opaque Nintendo DS menu color by compositing a translucent overlay color over the supplied background.
+        /// </summary>
+        /// <param name="backgroundColor">Opaque background color.</param>
+        /// <param name="overlayColor">Overlay color that may still carry translucency.</param>
+        /// <returns>Opaque composite color.</returns>
+        byte4 ResolveNintendoDsOpaqueCompositeColor(byte4 backgroundColor, byte4 overlayColor) {
+            if (overlayColor.W >= 255) {
+                return overlayColor;
+            }
+
+            double alpha = overlayColor.W / 255d;
+            double inverseAlpha = 1d - alpha;
+            return new byte4(
+                ComposeNintendoDsOpaqueChannel(backgroundColor.X, overlayColor.X, alpha, inverseAlpha),
+                ComposeNintendoDsOpaqueChannel(backgroundColor.Y, overlayColor.Y, alpha, inverseAlpha),
+                ComposeNintendoDsOpaqueChannel(backgroundColor.Z, overlayColor.Z, alpha, inverseAlpha),
+                255);
+        }
+
+        /// <summary>
+        /// Resolves one 8-bit color channel for the Nintendo DS menu opaque composite color.
+        /// </summary>
+        /// <param name="backgroundChannel">Opaque background channel value.</param>
+        /// <param name="overlayChannel">Overlay channel value.</param>
+        /// <param name="alpha">Normalized overlay alpha.</param>
+        /// <param name="inverseAlpha">Inverse normalized overlay alpha.</param>
+        /// <returns>Composite channel value.</returns>
+        byte ComposeNintendoDsOpaqueChannel(byte backgroundChannel, byte overlayChannel, double alpha, double inverseAlpha) {
+            return (byte)Math.Clamp(
+                (int)Math.Round((overlayChannel * alpha) + (backgroundChannel * inverseAlpha)),
+                0,
+                255);
         }
 
         /// <summary>

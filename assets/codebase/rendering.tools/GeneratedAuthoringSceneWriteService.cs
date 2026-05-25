@@ -36,22 +36,24 @@ namespace city.rendering.tools {
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             ComponentPersistenceRegistry persistenceRegistry = CreatePersistenceRegistry();
             SceneSaveService saveService = new SceneSaveService(fullProjectRootPath, persistenceRegistry);
-            EditorEntityLayerMaskSnapshot[] hiddenRootSnapshots = Array.Empty<EditorEntityLayerMaskSnapshot>();
-            Entity[] rootsToDispose = sceneDefinition.RootEntities;
+            List<Entity> rootsToDispose = new List<Entity>();
 
             try {
-                hiddenRootSnapshots = HideExistingUserSceneRoots(sceneDefinition.RootEntities);
+                AddUniqueRoots(rootsToDispose, sceneDefinition.RootEntities);
                 SaveSceneAsset(fullProjectRootPath, saveService, sceneDefinition.SceneId, sceneDefinition.SceneSettings, sceneDefinition.RootEntities);
                 if (sceneDefinition.NintendoDsScene != null) {
-                    Entity[] nintendoDsSceneRoots = NintendoDsRenderingSceneScaffoldFactoryValue.CreateSceneRoots(
-                        sceneDefinition.RootEntities,
-                        sceneDefinition.NintendoDsScene.UseDefaultBottomOverlay,
-                        sceneDefinition.NintendoDsScene.BottomScreenRootEntities ?? Array.Empty<Entity>());
-                    rootsToDispose = nintendoDsSceneRoots;
+                    Entity[] nintendoDsSceneRoots = sceneDefinition.NintendoDsScene.RootEntities;
+                    if (nintendoDsSceneRoots == null || nintendoDsSceneRoots.Length < 1) {
+                        nintendoDsSceneRoots = NintendoDsRenderingSceneScaffoldFactoryValue.CreateSceneRoots(
+                            sceneDefinition.RootEntities,
+                            sceneDefinition.NintendoDsScene.UseDefaultBottomOverlay,
+                            sceneDefinition.NintendoDsScene.BottomScreenRootEntities ?? Array.Empty<Entity>());
+                    }
+
+                    AddUniqueRoots(rootsToDispose, nintendoDsSceneRoots);
                     SaveSceneAsset(fullProjectRootPath, saveService, sceneDefinition.NintendoDsScene.SceneId, sceneDefinition.SceneSettings, nintendoDsSceneRoots);
                 }
             } finally {
-                RestoreHiddenUserSceneRoots(hiddenRootSnapshots);
                 DisposeGeneratedRoots(rootsToDispose);
             }
         }
@@ -81,7 +83,13 @@ namespace city.rendering.tools {
             }
 
             string scenePath = Path.Combine(fullProjectRootPath, "assets", sceneId.Replace('/', Path.DirectorySeparatorChar));
-            saveService.Save(scenePath, sceneSettings ?? new SceneSettingsAsset());
+            EditorEntityLayerMaskSnapshot[] hiddenRootSnapshots = HideNonTargetSceneRoots(generatedRoots);
+
+            try {
+                saveService.Save(scenePath, sceneSettings ?? new SceneSettingsAsset());
+            } finally {
+                RestoreHiddenUserSceneRoots(hiddenRootSnapshots);
+            }
         }
 
         /// <summary>
@@ -92,23 +100,15 @@ namespace city.rendering.tools {
             ComponentPersistenceRegistry persistenceRegistry = new ComponentPersistenceRegistry();
             persistenceRegistry.Register(new MeshComponentPersistenceDescriptor());
             persistenceRegistry.Register(new CameraComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new TextComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new SpriteComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new RoundedRectComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new DebugComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new FPSComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new DirectionalLightComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new PointLightComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new SpotLightComponentPersistenceDescriptor());
             return persistenceRegistry;
         }
 
         /// <summary>
-        /// Temporarily hides pre-existing user scene roots so the editor serializer only sees the generated roots being written.
+        /// Temporarily hides every non-target scene root so the editor serializer only sees the generated roots being written.
         /// </summary>
         /// <param name="generatedRoots">Generated roots that should remain visible to the serializer.</param>
         /// <returns>Snapshots used to restore the hidden roots.</returns>
-        EditorEntityLayerMaskSnapshot[] HideExistingUserSceneRoots(Entity[] generatedRoots) {
+        EditorEntityLayerMaskSnapshot[] HideNonTargetSceneRoots(Entity[] generatedRoots) {
             if (generatedRoots == null) {
                 throw new ArgumentNullException(nameof(generatedRoots));
             }
@@ -160,15 +160,37 @@ namespace city.rendering.tools {
         /// Disposes every generated root created for the current save operation.
         /// </summary>
         /// <param name="generatedRoots">Generated roots to dispose.</param>
-        void DisposeGeneratedRoots(Entity[] generatedRoots) {
+        void DisposeGeneratedRoots(List<Entity> generatedRoots) {
             if (generatedRoots == null) {
                 return;
             }
 
-            for (int index = 0; index < generatedRoots.Length; index++) {
+            for (int index = 0; index < generatedRoots.Count; index++) {
                 if (generatedRoots[index] != null) {
                     generatedRoots[index].Dispose();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Adds one root-entity set to the pending disposal list without duplicating shared root references.
+        /// </summary>
+        /// <param name="pendingRoots">Accumulated root entities that should be disposed.</param>
+        /// <param name="candidateRoots">Root entities produced by the current scene-generation step.</param>
+        void AddUniqueRoots(List<Entity> pendingRoots, Entity[] candidateRoots) {
+            if (pendingRoots == null) {
+                throw new ArgumentNullException(nameof(pendingRoots));
+            } else if (candidateRoots == null) {
+                return;
+            }
+
+            for (int index = 0; index < candidateRoots.Length; index++) {
+                Entity rootEntity = candidateRoots[index];
+                if (rootEntity == null || pendingRoots.Contains(rootEntity)) {
+                    continue;
+                }
+
+                pendingRoots.Add(rootEntity);
             }
         }
     }

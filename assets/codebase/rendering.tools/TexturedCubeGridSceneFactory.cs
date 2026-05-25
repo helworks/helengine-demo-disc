@@ -1,4 +1,5 @@
 using city.menu;
+using helengine;
 
 namespace city.rendering.tools {
     /// <summary>
@@ -568,7 +569,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="cubeIndex">Stable zero-based cube index.</param>
         /// <returns>File-backed textured material asset.</returns>
-        MaterialAsset CreateAuthoredMaterialAsset(int cubeIndex) {
+        ShaderMaterialAsset CreateAuthoredMaterialAsset(int cubeIndex) {
             return new ShaderMaterialAsset {
                 Id = CreateMaterialAssetId(cubeIndex),
                 RenderState = new MaterialRenderState(),

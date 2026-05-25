@@ -4,8 +4,10 @@ namespace city.menu {
     /// </summary>
     public sealed class PlatformInfoTextComponent : UpdateComponent {
         /// <summary>
-        /// Stable child entity name used for the platform name text line.
+        /// Owning entity that hosts the platform-info overlay hierarchy.
         /// </summary>
+        Entity OwnerEntity;
+
         /// <summary>
         /// Cached child entity that renders the platform name.
         /// </summary>
@@ -24,39 +26,155 @@ namespace city.menu {
         TextComponent PlatformVersionTextComponent;
 
         /// <summary>
-        /// Resolves the child text entities and applies the platform information once the full overlay hierarchy has been initialized.
+        /// Tracks whether the runtime overlay hierarchy has been bound successfully.
+        /// </summary>
+        bool IsInitialized;
+
+        /// <summary>
+        /// Captures the owning entity and attempts initialization once the runtime hierarchy becomes available.
         /// </summary>
         /// <param name="entity">Owning initialized entity.</param>
-        public override void ComponentInitialized(Entity entity) {
-            base.ComponentInitialized(entity);
+        public override void ComponentAdded(Entity entity) {
+            base.ComponentAdded(entity);
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            BindTextEntities(entity);
-            string platformName = Core.Instance.PlatformInfo.Name;
-            string platformVersion = Core.Instance.PlatformInfo.Version;
-            ApplyText(PlatformNameTextEntity, PlatformNameTextComponent, platformName, 0f);
-            ApplyText(PlatformVersionTextEntity, PlatformVersionTextComponent, platformVersion, PlatformNameTextComponent.Size.Y + 6f);
+            OwnerEntity = entity;
+            IsInitialized = false;
+            ClearBinding();
+            TryInitialize();
         }
 
         /// <summary>
-        /// Resolves and caches the platform-info child text entities and components from the initialized subtree.
+        /// Releases cached runtime-only binding state when the component leaves the scene hierarchy.
         /// </summary>
-        /// <param name="entity">Owning initialized entity.</param>
-        void BindTextEntities(Entity entity) {
-            if (entity == null) {
-                throw new ArgumentNullException(nameof(entity));
-            } else if (Parent == null) {
-                throw new InvalidOperationException("PlatformInfoTextComponent requires a parent entity.");
-            } else if (Parent.Children == null || Parent.Children.Count < 2) {
-                throw new InvalidOperationException("Platform-info overlay requires two child text entities.");
+        /// <param name="entity">Owning entity that is removing this component.</param>
+        public override void ComponentRemoved(Entity entity) {
+            ClearBinding();
+            OwnerEntity = null;
+            IsInitialized = false;
+            base.ComponentRemoved(entity);
+        }
+
+        /// <summary>
+        /// Waits until the runtime scene loader has attached the child text hierarchy, then applies the live platform information.
+        /// </summary>
+        public override void Update() {
+            if (!IsInitialized) {
+                TryInitialize();
+            }
+        }
+
+        /// <summary>
+        /// Attempts to bind the overlay subtree once the scene loader has attached all child entities.
+        /// </summary>
+        void TryInitialize() {
+            if (OwnerEntity == null) {
+                return;
+            }
+            if (!TryBindTextEntities(OwnerEntity)) {
+                return;
+            } else if (!AreTextComponentsReadyForLayout()) {
+                return;
             }
 
-            PlatformNameTextEntity = FindRequiredChildEntity(entity, 0);
-            PlatformVersionTextEntity = FindRequiredChildEntity(entity, 1);
+            ApplyCurrentPlatformInfo();
+            IsInitialized = true;
+        }
+
+        /// <summary>
+        /// Returns whether the bound overlay text components have the runtime font assets required for measurement and layout.
+        /// </summary>
+        /// <returns><c>true</c> when both cached text components expose non-null runtime fonts; otherwise <c>false</c>.</returns>
+        bool AreTextComponentsReadyForLayout() {
+            if (PlatformNameTextComponent == null || PlatformVersionTextComponent == null) {
+                return false;
+            }
+
+            return PlatformNameTextComponent.Font != null
+                && PlatformVersionTextComponent.Font != null;
+        }
+
+        /// <summary>
+        /// Applies the current runtime platform name and version to the two overlay rows.
+        /// </summary>
+        void ApplyCurrentPlatformInfo() {
+            if (Core.Instance == null) {
+                throw new InvalidOperationException("Platform info requires an active Core instance.");
+            } else if (Core.Instance.PlatformInfo == null) {
+                throw new InvalidOperationException("Platform info requires initialized runtime platform metadata.");
+            }
+
+            ApplyText(PlatformNameTextEntity, PlatformNameTextComponent, Core.Instance.PlatformInfo.Name, 0f);
+            ApplyText(PlatformVersionTextEntity, PlatformVersionTextComponent, Core.Instance.PlatformInfo.Version, PlatformNameTextComponent.Size.Y + 6f);
+        }
+
+        /// <summary>
+        /// Resolves and caches the first two descendant text entities beneath the overlay host.
+        /// </summary>
+        /// <param name="entity">Owning initialized entity.</param>
+        /// <returns><c>true</c> when the platform-info rows were bound successfully; otherwise <c>false</c>.</returns>
+        bool TryBindTextEntities(Entity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            List<Entity> textEntities = new List<Entity>();
+            CollectChildTextEntities(entity, textEntities);
+            if (textEntities.Count < 2) {
+                return false;
+            }
+
+            PlatformNameTextEntity = textEntities[0];
+            PlatformVersionTextEntity = textEntities[1];
             PlatformNameTextComponent = FindTextComponent(PlatformNameTextEntity);
             PlatformVersionTextComponent = FindTextComponent(PlatformVersionTextEntity);
+            return true;
+        }
+
+        /// <summary>
+        /// Collects descendant entities that carry a text component in stable depth-first order.
+        /// </summary>
+        /// <param name="parentEntity">Current subtree root to scan.</param>
+        /// <param name="textEntities">Accumulated descendant text entities.</param>
+        void CollectChildTextEntities(Entity parentEntity, List<Entity> textEntities) {
+            if (parentEntity == null) {
+                throw new ArgumentNullException(nameof(parentEntity));
+            } else if (textEntities == null) {
+                throw new ArgumentNullException(nameof(textEntities));
+            } else if (parentEntity.Children == null) {
+                return;
+            }
+
+            for (int childIndex = 0; childIndex < parentEntity.Children.Count; childIndex++) {
+                Entity childEntity = parentEntity.Children[childIndex];
+                if (childEntity == null) {
+                    continue;
+                }
+
+                if (TryFindTextComponent(childEntity, out TextComponent textComponent)) {
+                    textEntities.Add(childEntity);
+                    if (textEntities.Count >= 2) {
+                        return;
+                    }
+                }
+
+                CollectChildTextEntities(childEntity, textEntities);
+                if (textEntities.Count >= 2) {
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Clears every cached runtime overlay reference.
+        /// </summary>
+        void ClearBinding() {
+            PlatformNameTextEntity = null;
+            PlatformVersionTextEntity = null;
+            PlatformNameTextComponent = null;
+            PlatformVersionTextComponent = null;
         }
 
         /// <summary>
@@ -75,29 +193,10 @@ namespace city.menu {
 
             textComponent.Text = text;
             float2 measuredSize = textComponent.Font.MeasureString(text);
-            double fontScale = Math.Max((double)textComponent.FontScale, 0.0001d);
             textComponent.Size = new int2(
-                (int)Math.Ceiling(measuredSize.X * fontScale),
-                (int)Math.Ceiling(measuredSize.Y * fontScale));
+                (int)Math.Ceiling(measuredSize.X),
+                (int)Math.Ceiling(measuredSize.Y));
             entity.LocalPosition = new float3(-textComponent.Size.X, topOffset, 0f);
-        }
-
-        /// <summary>
-        /// Finds one required named child entity beneath the platform-info host.
-        /// </summary>
-        /// <param name="parentEntity">Parent entity whose direct children should be searched.</param>
-        /// <param name="childIndex">Direct child index to resolve.</param>
-        /// <returns>Resolved child entity.</returns>
-        Entity FindRequiredChildEntity(Entity parentEntity, int childIndex) {
-            if (parentEntity == null) {
-                throw new ArgumentNullException(nameof(parentEntity));
-            } else if (parentEntity.Children == null) {
-                throw new InvalidOperationException("Platform-info overlay requires child entities.");
-            } else if (childIndex < 0 || childIndex >= parentEntity.Children.Count) {
-                throw new InvalidOperationException($"Platform-info overlay is missing child entity at index {childIndex}.");
-            }
-
-            return parentEntity.Children[childIndex];
         }
 
         /// <summary>
@@ -117,6 +216,28 @@ namespace city.menu {
             }
 
             throw new InvalidOperationException("Platform-info overlay child must include a text component.");
+        }
+
+        /// <summary>
+        /// Attempts to find a text component attached to one child entity.
+        /// </summary>
+        /// <param name="entity">Child entity whose text component should be searched.</param>
+        /// <param name="textComponent">Resolved text component when one exists.</param>
+        /// <returns><c>true</c> when the entity contains a text component; otherwise <c>false</c>.</returns>
+        bool TryFindTextComponent(Entity entity, out TextComponent textComponent) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            for (int index = 0; index < entity.Components.Count; index++) {
+                if (entity.Components[index] is TextComponent foundTextComponent) {
+                    textComponent = foundTextComponent;
+                    return true;
+                }
+            }
+
+            textComponent = null;
+            return false;
         }
     }
 }

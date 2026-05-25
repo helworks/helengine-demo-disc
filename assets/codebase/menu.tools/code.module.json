@@ -2,8 +2,7 @@
   "moduleId": "menu.tools",
   "dependencyModuleIds": [
     "gameplay",
-    "rendering.tools",
-    "physics.tools"
+    "rendering.tools"
   ],
   "loadScopes": [
     "always-loaded"

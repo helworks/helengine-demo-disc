@@ -24,15 +24,7 @@ namespace city.menu.tools {
                     "demo.generate-rendering-scenes",
                     "Generate Rendering Scenes",
                     200,
-                    "menu.generate-rendering-scenes"),
-                new EditorMenuItemDescriptor(
-                    "demo",
-                    "Demo",
-                    100,
-                    "demo.generate-physics-scenes",
-                    "Generate Physics Scenes",
-                    300,
-                    "menu.generate-physics-scenes")
+                    "menu.generate-rendering-scenes")
             ];
         }
     }

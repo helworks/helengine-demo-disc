@@ -30,13 +30,19 @@ namespace city.menu {
                         6,
                         new[] {
                             new MenuItemDefinition("main-scenes", "Demo Scenes", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "scene-select")),
+                            new MenuItemDefinition("main-physics", "Physics Scenes", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "physics-select")),
                             new MenuItemDefinition("main-options", "Options", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "options"))
                         }),
                     new MenuPanelDefinition(
                         "scene-select",
                         "Demo Scenes",
                         4,
-                        sceneCatalog.CreateSceneItems()),
+                        sceneCatalog.CreateDemoSceneItems()),
+                    new MenuPanelDefinition(
+                        "physics-select",
+                        "Physics Scenes",
+                        4,
+                        sceneCatalog.CreatePhysicsSceneItems()),
                     new MenuPanelDefinition(
                         "options",
                         "Options",

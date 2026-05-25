@@ -4,10 +4,10 @@ namespace city.menu {
     /// </summary>
     public sealed class DemoDiscSceneCatalog {
         /// <summary>
-        /// Builds the ordered playable scene menu items shown by the demo-disc menu.
+        /// Builds the ordered rendering-demo scene menu items shown by the demo-disc menu.
         /// </summary>
-        /// <returns>Curated scene menu items.</returns>
-        public MenuItemDefinition[] CreateSceneItems() {
+        /// <returns>Curated rendering scene menu items.</returns>
+        public MenuItemDefinition[] CreateDemoSceneItems() {
             return new[] {
                 new MenuItemDefinition("scene-cube-test", "Cube Test", true, new MenuActionDefinition(MenuActionKind.LoadScene, "cube_test")),
                 new MenuItemDefinition("scene-scaled-cube", "Scaled Cube", true, new MenuActionDefinition(MenuActionKind.LoadScene, "scaled_cube")),
@@ -17,6 +17,19 @@ namespace city.menu {
                 new MenuItemDefinition("scene-axis-test-2", "Axis 2", true, new MenuActionDefinition(MenuActionKind.LoadScene, "axis_test2")),
                 new MenuItemDefinition("scene-directional-shadow-plaza", "Directional Shadow Plaza", true, new MenuActionDefinition(MenuActionKind.LoadScene, "directional_shadow_plaza")),
                 new MenuItemDefinition("scene-back", "Back", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))
+            };
+        }
+
+        /// <summary>
+        /// Builds the ordered physics-demo scene menu items shown by the demo-disc menu.
+        /// </summary>
+        /// <returns>Curated physics scene menu items.</returns>
+        public MenuItemDefinition[] CreatePhysicsSceneItems() {
+            return new[] {
+                new MenuItemDefinition("physics-dynamic-stack-boxes", "Stacked Boxes", true, new MenuActionDefinition(MenuActionKind.LoadScene, "test_scene_dynamic_stack_boxes")),
+                new MenuItemDefinition("physics-dynamic-sphere-stack", "Sphere Stack", true, new MenuActionDefinition(MenuActionKind.LoadScene, "test_scene_dynamic_sphere_stack")),
+                new MenuItemDefinition("physics-dynamic-mixed-stack", "Mixed Stack", true, new MenuActionDefinition(MenuActionKind.LoadScene, "test_scene_dynamic_mixed_stack")),
+                new MenuItemDefinition("physics-back", "Back", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))
             };
         }
     }

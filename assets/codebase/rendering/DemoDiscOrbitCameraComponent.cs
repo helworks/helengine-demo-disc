@@ -123,7 +123,7 @@ namespace city.rendering {
 
             Core core = Core.Instance ?? throw new InvalidOperationException("A core instance must exist before orbit camera updates can run.");
             InputSystem inputSystem = core.Input;
-            double elapsedSeconds = core.DeltaTime;
+            double elapsedSeconds = core.FrameDeltaSeconds;
             double yawInput = ResolveYawInput(inputSystem);
             double pitchInput = ResolvePitchInput(inputSystem);
             bool hasManualInput = Math.Abs(yawInput) > 0.0001d || Math.Abs(pitchInput) > 0.0001d;

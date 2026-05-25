@@ -9,6 +9,11 @@ namespace city.rendering.tools {
         public string SceneId { get; set; }
 
         /// <summary>
+        /// Gets or sets optional live root entities that should be written directly when the DS companion scene needs a custom authored layout.
+        /// </summary>
+        public Entity[] RootEntities { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the standard DS bottom overlay should be emitted automatically.
         /// </summary>
         public bool UseDefaultBottomOverlay { get; set; }
