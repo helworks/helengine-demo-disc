@@ -1,25 +1,27 @@
 {
-  "platformId": "ps2",
+  "platformId": "ds",
   "build": {
-    "selectedBuildProfileId": "",
+    "selectedBuildProfileId": "ds-default",
     "textureScalePercent": 100,
     "shaderVariantPruningEnabled": true,
     "selectedOptionValues": {}
   },
   "graphics": {
-    "selectedGraphicsProfileId": "",
-    "defaultWidth": 1280,
-    "defaultHeight": 720,
+    "selectedGraphicsProfileId": "ds-main-2d",
+    "defaultWidth": 256,
+    "defaultHeight": 192,
     "vSyncEnabled": true,
-    "fullscreenEnabled": false,
+    "fullscreenEnabled": true,
     "rendererDepthPrepassMode": 0,
-    "rendererShadowQualityTier": "medium",
-    "rendererHdrEnabled": true,
-    "rendererPostProcessTier": 2,
-    "selectedOptionValues": {}
+    "rendererShadowQualityTier": "disabled",
+    "rendererHdrEnabled": false,
+    "rendererPostProcessTier": 0,
+    "selectedOptionValues": {
+      "screen-layout": "main-top-sub-bottom"
+    }
   },
   "codegen": {
-    "selectedCodegenProfileId": "",
+    "selectedCodegenProfileId": "default",
     "selectedOptionValues": {}
   },
   "input": {
@@ -34,7 +36,7 @@
         "deviceKind": 0,
         "controlKind": 0,
         "deviceIndex": 0,
-        "controlIndex": 3
+        "controlIndex": 1
       }
     }
   }

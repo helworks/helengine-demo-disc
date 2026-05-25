@@ -69,9 +69,8 @@ namespace city.menu {
         /// <summary>
         /// Releases any bound pointer interactable subscription before the component instance is deleted.
         /// </summary>
-        public override void Dispose() {
+        public void Dispose() {
             UnbindInteractable();
-            base.Dispose();
         }
 
         /// <summary>
@@ -97,14 +96,19 @@ namespace city.menu {
         }
 
         /// <summary>
-        /// Returns whether the current frame pressed one of the temporary gamepad return buttons.
+        /// Returns whether the current frame pressed the configured standard platform return action.
         /// </summary>
         /// <param name="inputSystem">Input system supplying the current frame state.</param>
         /// <returns>True when one return button pressed this frame.</returns>
         bool WasGamepadReturnPressed(InputSystem inputSystem) {
-            return inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.East)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.North)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.Select);
+            if (inputSystem == null) {
+                throw new ArgumentNullException(nameof(inputSystem));
+            }
+            if (Core.Instance == null) {
+                throw new InvalidOperationException("A core instance must exist before querying the standard platform return action.");
+            }
+
+            return Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Return);
         }
 
         /// <summary>
@@ -178,6 +182,17 @@ namespace city.menu {
             string resolvedSceneId = SceneMapComponent.ResolveSceneId(MainMenuSceneId);
             SceneLoadWasRequested = true;
             Core.Instance.SceneManager.LoadScene(resolvedSceneId, SceneLoadMode.Single);
+        }
+
+        /// <summary>
+        /// Returns whether one gamepad button transitioned from up to down during the current frame.
+        /// </summary>
+        /// <param name="currentState">Current frame gamepad state.</param>
+        /// <param name="previousState">Previous frame gamepad state.</param>
+        /// <param name="button">Button to test for a press transition.</param>
+        /// <returns>True when the button was pressed this frame.</returns>
+        static bool WasGamepadButtonPressed(InputGamepadState currentState, InputGamepadState previousState, InputGamepadButton button) {
+            return currentState.IsButtonDown(button) && !previousState.IsButtonDown(button);
         }
     }
 }

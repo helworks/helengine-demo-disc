@@ -122,9 +122,26 @@ namespace city.menu {
         }
 
         /// <summary>
+        /// Releases runtime-only menu binding state when the component leaves the scene hierarchy.
+        /// </summary>
+        /// <param name="entity">Owning menu root entity.</param>
+        public override void ComponentRemoved(Entity entity) {
+            ReleasePanelRuntimes();
+            PanelsById.Clear();
+            PanelRuntimes.Clear();
+            PanelHistory.Clear();
+            ActivePanel = null;
+            PressedPointerItem = null;
+            ActivePanelIdValue = string.Empty;
+            SelectedItemIdValue = string.Empty;
+            IsInitialized = false;
+            base.ComponentRemoved(entity);
+        }
+
+        /// <summary>
         /// Releases runtime-only menu binding state before the native backend deletes the component instance.
         /// </summary>
-        public override void Dispose() {
+        public void Dispose() {
             ReleasePanelRuntimes();
             PanelsById.Clear();
             PanelRuntimes.Clear();
@@ -426,7 +443,9 @@ namespace city.menu {
                 return;
             }
 
-            MenuItemRuntime hoveredItem = FindHoveredItem(ActivePanel, inputSystem.GetMouseX(), inputSystem.GetMouseY());
+            int pointerX = ResolvePointerXInMenuSpace(inputSystem);
+            int pointerY = ResolvePointerYInMenuSpace(inputSystem);
+            MenuItemRuntime hoveredItem = FindHoveredItem(ActivePanel, pointerX, pointerY);
             if (hoveredItem != null
                 && hoveredItem.Index != ActivePanel.SelectedItemIndex
                 && IsMouseHoverSelectionUpdateRequired(inputSystem)) {
@@ -478,12 +497,62 @@ namespace city.menu {
                 MoveSelection(-1);
             } else if (inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.DPadDown)) {
                 MoveSelection(1);
-            } else if (inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.South)) {
+            } else if (Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept)) {
                 ConfirmSelection(Keys.Enter);
-            } else if (inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.East)
+            } else if (Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Return)
                 || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.Select)) {
                 NavigateBack();
             }
+        }
+
+        /// <summary>
+        /// Resolves the current pointer X coordinate in the menu root's local viewport space.
+        /// </summary>
+        /// <param name="inputSystem">Input system supplying the current frame state.</param>
+        /// <returns>Pointer X coordinate normalized into the active menu viewport.</returns>
+        int ResolvePointerXInMenuSpace(InputSystem inputSystem) {
+            if (inputSystem == null) {
+                throw new ArgumentNullException(nameof(inputSystem));
+            }
+
+            float4 viewportBounds = ResolveMenuViewportBounds();
+            return inputSystem.GetMouseX() - (int)Math.Round(viewportBounds.X);
+        }
+
+        /// <summary>
+        /// Resolves the current pointer Y coordinate in the menu root's local viewport space.
+        /// </summary>
+        /// <param name="inputSystem">Input system supplying the current frame state.</param>
+        /// <returns>Pointer Y coordinate normalized into the active menu viewport.</returns>
+        int ResolvePointerYInMenuSpace(InputSystem inputSystem) {
+            if (inputSystem == null) {
+                throw new ArgumentNullException(nameof(inputSystem));
+            }
+
+            float4 viewportBounds = ResolveMenuViewportBounds();
+            return inputSystem.GetMouseY() - (int)Math.Round(viewportBounds.Y);
+        }
+
+        /// <summary>
+        /// Resolves the current menu viewport bounds so pointer hit tests can normalize bottom-screen coordinates into menu-local space.
+        /// </summary>
+        /// <returns>Menu viewport bounds in window-space pixels when camera-bound; otherwise a zero-origin rectangle.</returns>
+        float4 ResolveMenuViewportBounds() {
+            if (Parent == null) {
+                return new float4(0f, 0f, 0f, 0f);
+            }
+
+            ViewportComponent viewportComponent = FindFirstComponent<ViewportComponent>(Parent);
+            if (viewportComponent == null) {
+                return new float4(0f, 0f, 0f, 0f);
+            }
+
+            if (viewportComponent.BindingMode != ViewportComponent.AncestorCameraBindingMode
+                && viewportComponent.BindingMode != ViewportComponent.ExplicitCameraBindingMode) {
+                return new float4(0f, 0f, 0f, 0f);
+            }
+
+            return viewportComponent.ResolvedViewportBounds;
         }
 
         /// <summary>

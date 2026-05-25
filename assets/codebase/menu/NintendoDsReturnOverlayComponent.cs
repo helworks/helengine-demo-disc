@@ -37,10 +37,8 @@ namespace city.menu {
         /// </summary>
         public override void Update() {
             TryBindInteractable();
-
             InputSystem inputSystem = Core.Instance.Input;
-            bool wasReturnPressed = inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.East);
-            if (wasReturnPressed) {
+            if (WasGamepadReturnPressed(inputSystem)) {
                 LoadResolvedMainMenuScene();
             }
         }
@@ -48,9 +46,8 @@ namespace city.menu {
         /// <summary>
         /// Releases the sibling interactable subscription before the component instance is deleted.
         /// </summary>
-        public override void Dispose() {
+        public void Dispose() {
             UnbindInteractable();
-            base.Dispose();
         }
 
         /// <summary>
@@ -118,6 +115,22 @@ namespace city.menu {
             if (interaction == PointerInteraction.Leave) {
                 PointerPressStartedInside = false;
             }
+        }
+
+        /// <summary>
+        /// Returns whether the current frame pressed the configured standard platform return action.
+        /// </summary>
+        /// <param name="inputSystem">Input system supplying the current frame state.</param>
+        /// <returns>True when the configured standard platform return action was pressed this frame.</returns>
+        bool WasGamepadReturnPressed(InputSystem inputSystem) {
+            if (inputSystem == null) {
+                throw new ArgumentNullException(nameof(inputSystem));
+            }
+            if (Core.Instance == null) {
+                throw new InvalidOperationException("A core instance must exist before querying the standard platform return action.");
+            }
+
+            return Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Return);
         }
 
         /// <summary>
