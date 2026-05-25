@@ -34,7 +34,7 @@ namespace city.rendering.tools {
             }
 
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
-            ComponentPersistenceRegistry persistenceRegistry = CreatePersistenceRegistry();
+            ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create();
             SceneSaveService saveService = new SceneSaveService(fullProjectRootPath, persistenceRegistry);
             List<Entity> rootsToDispose = new List<Entity>();
 
@@ -53,6 +53,49 @@ namespace city.rendering.tools {
                     AddUniqueRoots(rootsToDispose, nintendoDsSceneRoots);
                     SaveSceneAsset(fullProjectRootPath, saveService, sceneDefinition.NintendoDsScene.SceneId, sceneDefinition.SceneSettings, nintendoDsSceneRoots);
                 }
+            } finally {
+                DisposeGeneratedRoots(rootsToDispose);
+            }
+        }
+
+        /// <summary>
+        /// Writes one Nintendo DS companion scene from already-authored top-screen roots through the shared DS scaffold path.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
+        /// <param name="sceneId">Project-relative Nintendo DS scene id to persist.</param>
+        /// <param name="sceneSettings">Scene-level settings copied from the authored source scene.</param>
+        /// <param name="topScreenRoots">Live authored roots that should remain on the top screen.</param>
+        /// <param name="useDefaultBottomOverlay">True when the standard bottom return overlay should be emitted.</param>
+        /// <param name="bottomScreenRootEntities">Optional custom bottom-screen roots that should be attached beneath the bottom viewport root.</param>
+        public void WriteNintendoDsCompanionScene(
+            string projectRootPath,
+            string sceneId,
+            SceneSettingsAsset sceneSettings,
+            Entity[] topScreenRoots,
+            bool useDefaultBottomOverlay,
+            Entity[] bottomScreenRootEntities) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (string.IsNullOrWhiteSpace(sceneId)) {
+                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            } else if (topScreenRoots == null) {
+                throw new ArgumentNullException(nameof(topScreenRoots));
+            } else if (bottomScreenRootEntities == null) {
+                throw new ArgumentNullException(nameof(bottomScreenRootEntities));
+            }
+
+            string fullProjectRootPath = Path.GetFullPath(projectRootPath);
+            ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create();
+            SceneSaveService saveService = new SceneSaveService(fullProjectRootPath, persistenceRegistry);
+            Entity[] nintendoDsSceneRoots = NintendoDsRenderingSceneScaffoldFactoryValue.CreateSceneRoots(
+                topScreenRoots,
+                useDefaultBottomOverlay,
+                bottomScreenRootEntities);
+            List<Entity> rootsToDispose = new List<Entity>();
+
+            try {
+                AddUniqueRootsExcept(rootsToDispose, nintendoDsSceneRoots, topScreenRoots);
+                SaveSceneAsset(fullProjectRootPath, saveService, sceneId, sceneSettings, nintendoDsSceneRoots);
             } finally {
                 DisposeGeneratedRoots(rootsToDispose);
             }
@@ -90,17 +133,6 @@ namespace city.rendering.tools {
             } finally {
                 RestoreHiddenUserSceneRoots(hiddenRootSnapshots);
             }
-        }
-
-        /// <summary>
-        /// Creates the persistence registry used by generated authored scene save operations.
-        /// </summary>
-        /// <returns>Configured scene persistence registry.</returns>
-        ComponentPersistenceRegistry CreatePersistenceRegistry() {
-            ComponentPersistenceRegistry persistenceRegistry = new ComponentPersistenceRegistry();
-            persistenceRegistry.Register(new MeshComponentPersistenceDescriptor());
-            persistenceRegistry.Register(new CameraComponentPersistenceDescriptor());
-            return persistenceRegistry;
         }
 
         /// <summary>
@@ -187,6 +219,31 @@ namespace city.rendering.tools {
             for (int index = 0; index < candidateRoots.Length; index++) {
                 Entity rootEntity = candidateRoots[index];
                 if (rootEntity == null || pendingRoots.Contains(rootEntity)) {
+                    continue;
+                }
+
+                pendingRoots.Add(rootEntity);
+            }
+        }
+
+        /// <summary>
+        /// Adds one root-entity set to the pending disposal list while excluding caller-owned shared roots that should remain under external ownership.
+        /// </summary>
+        /// <param name="pendingRoots">Accumulated root entities that should be disposed.</param>
+        /// <param name="candidateRoots">Root entities produced by the current scene-generation step.</param>
+        /// <param name="excludedRoots">Caller-owned root entities that must not be disposed by this service.</param>
+        void AddUniqueRootsExcept(List<Entity> pendingRoots, Entity[] candidateRoots, Entity[] excludedRoots) {
+            if (pendingRoots == null) {
+                throw new ArgumentNullException(nameof(pendingRoots));
+            } else if (candidateRoots == null) {
+                return;
+            } else if (excludedRoots == null) {
+                throw new ArgumentNullException(nameof(excludedRoots));
+            }
+
+            for (int index = 0; index < candidateRoots.Length; index++) {
+                Entity rootEntity = candidateRoots[index];
+                if (rootEntity == null || pendingRoots.Contains(rootEntity) || Array.IndexOf(excludedRoots, rootEntity) >= 0) {
                     continue;
                 }
 

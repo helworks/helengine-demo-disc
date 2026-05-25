@@ -25,12 +25,43 @@ namespace city.menu {
         /// </summary>
         /// <returns>Curated physics scene menu items.</returns>
         public MenuItemDefinition[] CreatePhysicsSceneItems() {
-            return new[] {
-                new MenuItemDefinition("physics-dynamic-stack-boxes", "Stacked Boxes", true, new MenuActionDefinition(MenuActionKind.LoadScene, "test_scene_dynamic_stack_boxes")),
-                new MenuItemDefinition("physics-dynamic-sphere-stack", "Sphere Stack", true, new MenuActionDefinition(MenuActionKind.LoadScene, "test_scene_dynamic_sphere_stack")),
-                new MenuItemDefinition("physics-dynamic-mixed-stack", "Mixed Stack", true, new MenuActionDefinition(MenuActionKind.LoadScene, "test_scene_dynamic_mixed_stack")),
-                new MenuItemDefinition("physics-back", "Back", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))
-            };
+            IReadOnlyList<DemoDiscPhysicsSceneEntry> physicsSceneEntries = CreatePhysicsSceneEntries();
+            MenuItemDefinition[] items = new MenuItemDefinition[physicsSceneEntries.Count + 1];
+            for (int index = 0; index < physicsSceneEntries.Count; index++) {
+                DemoDiscPhysicsSceneEntry sceneEntry = physicsSceneEntries[index];
+                items[index] = new MenuItemDefinition(
+                    sceneEntry.MenuItemId,
+                    sceneEntry.DisplayName,
+                    true,
+                    new MenuActionDefinition(MenuActionKind.LoadScene, sceneEntry.SceneId));
+            }
+
+            items[physicsSceneEntries.Count] = new MenuItemDefinition("physics-back", "Back", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty));
+            return items;
+        }
+
+        /// <summary>
+        /// Builds the curated physics scene entry set shared by the demo-disc menu and DS companion scene generators.
+        /// </summary>
+        /// <returns>Curated physics scene entries.</returns>
+        public IReadOnlyList<DemoDiscPhysicsSceneEntry> CreatePhysicsSceneEntries() {
+            return [
+                new DemoDiscPhysicsSceneEntry(
+                    "physics-dynamic-stack-boxes",
+                    "Stacked Boxes",
+                    "test_scene_dynamic_stack_boxes",
+                    "test_scene_dynamic_stack_boxes_ds"),
+                new DemoDiscPhysicsSceneEntry(
+                    "physics-dynamic-sphere-stack",
+                    "Sphere Stack",
+                    "test_scene_dynamic_sphere_stack",
+                    "test_scene_dynamic_sphere_stack_ds"),
+                new DemoDiscPhysicsSceneEntry(
+                    "physics-dynamic-mixed-stack",
+                    "Mixed Stack",
+                    "test_scene_dynamic_mixed_stack",
+                    "test_scene_dynamic_mixed_stack_ds")
+            ];
         }
     }
 }
