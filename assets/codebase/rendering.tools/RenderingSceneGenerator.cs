@@ -206,6 +206,8 @@ namespace city.rendering.tools {
             GeneratedAuthoringSceneDefinition sceneMemoryProbeSceneDefinition = SceneMemoryProbeFactory.CreateSceneDefinition();
             GeneratedAuthoringSceneDefinition directionalShadowPlazaSceneDefinition = DirectionalShadowPlazaFactory.CreateSceneDefinition(assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition spotlightStreetSliceSceneDefinition = SpotlightStreetSliceFactory.CreateSceneDefinition(assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial, assets.LamppostModel, assets.RacerModel, assets.RacerMaterials);
+            ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
+            TexturedCubeGridFactory.WriteAssets(projectRootPath);
             coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(assets.GeneratedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
             texturedCubeGridSceneDefinition = TexturedCubeGridFactory.CreateSceneDefinition(assets.GeneratedCubeModel, TexturedCubeGridFactory.CreateRuntimeMaterials(assets.GeneratedStandardMaterial));
             AuthoringSceneWriteService.WriteScene(projectRootPath, cubeTestSceneDefinition);

@@ -1,25 +1,28 @@
 {
-  "platformId": "gamecube",
+  "platformId": "3ds",
   "build": {
-    "selectedBuildProfileId": "",
+    "selectedBuildProfileId": "3ds-default",
     "textureScalePercent": 100,
     "shaderVariantPruningEnabled": true,
-    "selectedOptionValues": {}
+    "selectedOptionValues": {
+      "startup-top-screen-color": "#FF0000",
+      "startup-bottom-screen-color": "#0000FF"
+    }
   },
   "graphics": {
-    "selectedGraphicsProfileId": "",
-    "defaultWidth": 640,
-    "defaultHeight": 480,
+    "selectedGraphicsProfileId": "3ds-bootstrap",
+    "defaultWidth": 1280,
+    "defaultHeight": 720,
     "vSyncEnabled": true,
-    "fullscreenEnabled": true,
+    "fullscreenEnabled": false,
     "rendererDepthPrepassMode": 0,
-    "rendererShadowQualityTier": "disabled",
-    "rendererHdrEnabled": false,
-    "rendererPostProcessTier": 0,
+    "rendererShadowQualityTier": "medium",
+    "rendererHdrEnabled": true,
+    "rendererPostProcessTier": 2,
     "selectedOptionValues": {}
   },
   "codegen": {
-    "selectedCodegenProfileId": "",
+    "selectedCodegenProfileId": "default",
     "selectedOptionValues": {}
   },
   "input": {

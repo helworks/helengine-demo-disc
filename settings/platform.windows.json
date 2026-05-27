@@ -21,5 +21,11 @@
   "codegen": {
     "selectedCodegenProfileId": "",
     "selectedOptionValues": {}
+  },
+  "input": {
+    "standardActions": {
+      "accept": null,
+      "return": null
+    }
   }
 }

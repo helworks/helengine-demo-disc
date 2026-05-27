@@ -27,6 +27,11 @@ namespace city.rendering.tools {
         const string Ps2MaterialSchemaId = "ps2-simple-lit-textured";
 
         /// <summary>
+        /// Stable GameCube textured material schema identifier used by the GX runtime path.
+        /// </summary>
+        const string GameCubeMaterialSchemaId = "gamecube-standard-textured";
+
+        /// <summary>
         /// Stable Nintendo DS textured material schema identifier used by the DS runtime path.
         /// </summary>
         const string DsMaterialSchemaId = "ds-standard-textured";
@@ -70,6 +75,11 @@ namespace city.rendering.tools {
         /// Stable DS material field identifier used for cooked imported texture paths.
         /// </summary>
         const string DsTextureRelativePathFieldId = "texture-relative-path";
+
+        /// <summary>
+        /// Stable GameCube material field identifier used for cooked imported texture paths.
+        /// </summary>
+        const string GameCubeTextureRelativePathFieldId = "texture-relative-path";
 
         /// <summary>
         /// Stable DS material field identifier used to select fixed-pipeline lighting behavior.
@@ -666,6 +676,15 @@ namespace city.rendering.tools {
             pspSettings.SetFieldValue(CastsShadowFieldId, "true");
             pspSettings.SetFieldValue(ReceivesShadowFieldId, "true");
             pspSettings.SetFieldValue(BaseColorFieldId, "#FFFFFFFF");
+
+            GeneratedMaterialPlatformDefinition gameCubeSettings = definition.GetOrCreatePlatform("gamecube");
+            gameCubeSettings.SchemaId = GameCubeMaterialSchemaId;
+            gameCubeSettings.SetFieldValue(TextureIdFieldId, CubeTextureAssetIds[cubeIndex]);
+            gameCubeSettings.SetFieldValue(GameCubeTextureRelativePathFieldId, "cooked/imported/" + CubeTextureAssetIds[cubeIndex]);
+            gameCubeSettings.SetFieldValue(DoubleSidedFieldId, "false");
+            gameCubeSettings.SetFieldValue(VertexColorModeFieldId, "ignore");
+            gameCubeSettings.SetFieldValue(BaseColorFieldId, "#FFFFFFFF");
+            gameCubeSettings.SetFieldValue(LightingModeFieldId, "lit");
 
             GeneratedMaterialPlatformDefinition dsSettings = definition.GetOrCreatePlatform("ds");
             dsSettings.SchemaId = DsMaterialSchemaId;
