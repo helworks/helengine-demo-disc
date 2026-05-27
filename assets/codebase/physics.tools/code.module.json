@@ -1,8 +1,6 @@
 {
-  "moduleId": "menu.tools",
+  "moduleId": "physics.tools",
   "dependencyModuleIds": [
-    "gameplay",
-    "physics.tools",
     "rendering.tools"
   ],
   "loadScopes": [

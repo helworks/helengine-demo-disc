@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gameplay", "user_settings/g
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "menu.tools", "user_settings/generated_code/projects/menu.tools/menu.tools.csproj", "{0F8DD5DB-C1DF-5123-9BEE-0E11B21180D5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "physics.tools", "user_settings/generated_code/projects/physics.tools/physics.tools.csproj", "{02B50E59-F318-529D-B2BE-33CCDCE1F11E}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rendering.tools", "user_settings/generated_code/projects/rendering.tools/rendering.tools.csproj", "{62D83508-3FEF-5E30-B852-9844DA39EEB3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "scene.tools", "user_settings/generated_code/projects/scene.tools/scene.tools.csproj", "{FBA313E4-E43F-56BC-B800-1740CF4F87D0}"
@@ -24,6 +26,10 @@ Global
 		{0F8DD5DB-C1DF-5123-9BEE-0E11B21180D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F8DD5DB-C1DF-5123-9BEE-0E11B21180D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F8DD5DB-C1DF-5123-9BEE-0E11B21180D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02B50E59-F318-529D-B2BE-33CCDCE1F11E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02B50E59-F318-529D-B2BE-33CCDCE1F11E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02B50E59-F318-529D-B2BE-33CCDCE1F11E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02B50E59-F318-529D-B2BE-33CCDCE1F11E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{62D83508-3FEF-5E30-B852-9844DA39EEB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{62D83508-3FEF-5E30-B852-9844DA39EEB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62D83508-3FEF-5E30-B852-9844DA39EEB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
