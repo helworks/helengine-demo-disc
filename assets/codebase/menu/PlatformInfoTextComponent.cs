@@ -191,11 +191,13 @@ namespace city.menu {
                 throw new ArgumentNullException(nameof(textComponent));
             }
 
+            textComponent.Alignment = TextAlignment.Right;
             textComponent.Text = text;
             float2 measuredSize = textComponent.Font.MeasureString(text);
+            double fontScale = textComponent.FontScale;
             textComponent.Size = new int2(
-                (int)Math.Ceiling(measuredSize.X),
-                (int)Math.Ceiling(measuredSize.Y));
+                (int)Math.Ceiling(measuredSize.X * fontScale),
+                (int)Math.Ceiling(measuredSize.Y * fontScale));
             entity.LocalPosition = new float3(-textComponent.Size.X, topOffset, 0f);
         }
 
