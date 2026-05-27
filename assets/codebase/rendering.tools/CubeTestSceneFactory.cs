@@ -29,16 +29,21 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(standardMaterial));
             }
 
+            FontAsset instructionFont = ResolveRequiredEditorFont();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            Entity cameraEntity = CreateCameraEntity();
+            instructionOverlayFactory.AttachDesktopInstructionOverlay(cameraEntity, instructionFont);
+
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
                     SceneId = RenderingSceneGenerator.CubeTestNintendoDsSceneId,
                     UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = Array.Empty<Entity>()
+                    BottomScreenRootEntities = instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont)
                 },
                 RootEntities = new[] {
-                    CreateCameraEntity(),
+                    cameraEntity,
                     CreateUiEntity(),
                     CreateDirectionalLightEntity(),
                     CreateCubeEntity(cubeModel, standardMaterial)
@@ -76,7 +81,7 @@ namespace city.rendering.tools {
             entity.AddComponent(cameraComponent);
             entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = float3.Zero,
-                AutoYawSpeedRadians = 0.1f
+                AutoYawSpeedRadians = 0f
             });
             return entity;
         }

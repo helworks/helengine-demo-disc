@@ -149,9 +149,13 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Colored cube-grid generation requires sixteen runtime materials.", nameof(coloredMaterials));
             }
 
+            FontAsset instructionFont = ResolveRequiredEditorFont();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
             Entity[] cubeEntities = CreateCubeEntities(cubeModel, coloredMaterials);
             Entity[] rootEntities = new Entity[cubeEntities.Length + 3];
-            rootEntities[0] = CreateCameraEntity();
+            Entity cameraEntity = CreateCameraEntity();
+            instructionOverlayFactory.AttachDesktopInstructionOverlay(cameraEntity, instructionFont);
+            rootEntities[0] = cameraEntity;
             rootEntities[1] = CreateUiEntity();
             rootEntities[2] = CreateDirectionalLightEntity();
             Array.Copy(cubeEntities, 0, rootEntities, 3, cubeEntities.Length);
@@ -162,7 +166,7 @@ namespace city.rendering.tools {
                 NintendoDsScene = new GeneratedDsSceneDefinition {
                     SceneId = RenderingSceneGenerator.ColoredCubeGridNintendoDsSceneId,
                     UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = Array.Empty<Entity>()
+                    BottomScreenRootEntities = instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont)
                 },
                 RootEntities = rootEntities
             };

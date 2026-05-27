@@ -75,16 +75,21 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(standardMaterial));
             }
 
+            FontAsset instructionFont = ResolveRequiredEditorFont();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            Entity cameraEntity = CreateCameraEntity();
+            instructionOverlayFactory.AttachDesktopInstructionOverlay(cameraEntity, instructionFont);
+
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
                     SceneId = RenderingSceneGenerator.DirectionalShadowPlazaNintendoDsSceneId,
                     UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = Array.Empty<Entity>()
+                    BottomScreenRootEntities = instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont)
                 },
                 RootEntities = new[] {
-                    CreateCameraEntity(),
+                    cameraEntity,
                     CreateFpsEntity(),
                     CreateDirectionalLightEntity(),
                     CreateGroundEntity(planeModel, standardMaterial),

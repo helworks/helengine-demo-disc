@@ -113,16 +113,21 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Axis-test generation requires five runtime materials.", nameof(axisMaterials));
             }
 
+            FontAsset instructionFont = ResolveRequiredEditorFont();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            Entity cameraEntity = CreateCameraEntity();
+            instructionOverlayFactory.AttachDesktopInstructionOverlay(cameraEntity, instructionFont);
+
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
                     SceneId = RenderingSceneGenerator.AxisTestNintendoDsSceneId,
                     UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = Array.Empty<Entity>()
+                    BottomScreenRootEntities = instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont)
                 },
                 RootEntities = new[] {
-                    CreateCameraEntity(),
+                    cameraEntity,
                     CreateUiEntity(),
                     CreateDirectionalLightRigEntity(arrowModel, axisMaterials[4]),
                     CreateFloorEntity(cubeModel, axisMaterials[3]),
