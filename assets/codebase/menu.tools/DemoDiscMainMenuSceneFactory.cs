@@ -53,14 +53,9 @@ namespace city.menu.tools {
         const int NintendoDsButtonSpacing = 4;
 
         /// <summary>
-        /// Maximum Nintendo DS logo width in authored pixels.
+        /// Fixed Nintendo DS logo width in authored pixels.
         /// </summary>
-        const int NintendoDsLogoMaxWidth = 144;
-
-        /// <summary>
-        /// Maximum Nintendo DS logo height in authored pixels.
-        /// </summary>
-        const int NintendoDsLogoMaxHeight = 96;
+        const int NintendoDsLogoWidth = 180;
 
         /// <summary>
         /// Stable save-state slot name used for serialized font references.
@@ -521,7 +516,7 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(overlayImage));
             }
 
-            int displayWidth = ResolveNintendoDsLogoWidth(overlayImage);
+            int displayWidth = NintendoDsLogoWidth;
             int displayHeight = ResolveNintendoDsLogoHeight(overlayImage, displayWidth);
             Entity entity = Core.Instance.EntityFactory.CreateChild(topScreenRootEntity, "DemoDiscOverlayImage");
             entity.LocalPosition = new float3((NintendoDsScreenWidth - displayWidth) * 0.5f, 0f, 0f);
@@ -548,11 +543,11 @@ namespace city.menu.tools {
             }
 
             Entity entity = Core.Instance.EntityFactory.CreateChild(topScreenRootEntity, "DemoDiscPlatformInfoOverlay");
-            entity.LocalPosition = new float3(248f, 148f, 0.1f);
+            entity.LocalPosition = new float3(8f, 148f, 0.1f);
             entity.AddComponent(new PlatformInfoTextComponent());
 
-            CreateTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, null, 0.35f, false);
-            CreateTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(0f, 0f, 0f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(1, 1), 42, null, 0.35f, false);
+            CreateTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, null, 0.84f, false);
+            CreateTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(240f, 0f, 0f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(1, 1), 42, null, 0.84f, false);
         }
 
         /// <summary>
@@ -679,7 +674,7 @@ namespace city.menu.tools {
         }
 
         /// <summary>
-        /// Resolves the Nintendo DS logo width while preserving the authored aspect ratio and maximum top-screen footprint.
+        /// Resolves the Nintendo DS logo width from the fixed authored Nintendo DS top-screen presentation contract.
         /// </summary>
         /// <param name="overlayImage">Overlay image definition to inspect.</param>
         /// <returns>Display width in authored Nintendo DS pixels.</returns>
@@ -692,10 +687,7 @@ namespace city.menu.tools {
                 throw new InvalidOperationException("Nintendo DS logo height must be greater than zero.");
             }
 
-            double widthScale = (double)NintendoDsLogoMaxWidth / overlayImage.Width;
-            double heightScale = (double)NintendoDsLogoMaxHeight / overlayImage.Height;
-            double scale = Math.Min(widthScale, heightScale);
-            return Math.Max(1, (int)Math.Round(overlayImage.Width * scale));
+            return NintendoDsLogoWidth;
         }
 
         /// <summary>

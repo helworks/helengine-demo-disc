@@ -26,6 +26,16 @@ namespace city.menu {
         TextComponent PlatformVersionTextComponent;
 
         /// <summary>
+        /// Captures the authored local position assigned to the platform-name text entity before runtime layout adjusts it.
+        /// </summary>
+        float3 PlatformNameBaseLocalPosition;
+
+        /// <summary>
+        /// Captures the authored local position assigned to the platform-version text entity before runtime layout adjusts it.
+        /// </summary>
+        float3 PlatformVersionBaseLocalPosition;
+
+        /// <summary>
         /// Tracks whether the runtime overlay hierarchy has been bound successfully.
         /// </summary>
         bool IsInitialized;
@@ -106,6 +116,13 @@ namespace city.menu {
                 throw new InvalidOperationException("Platform info requires initialized runtime platform metadata.");
             }
 
+            bool useHorizontalRowLayout = Math.Abs(PlatformNameBaseLocalPosition.Y - PlatformVersionBaseLocalPosition.Y) < 0.01f;
+            if (useHorizontalRowLayout) {
+                ApplyHorizontalText(PlatformNameTextEntity, PlatformNameTextComponent, Core.Instance.PlatformInfo.Name, PlatformNameBaseLocalPosition.X, PlatformNameBaseLocalPosition.Y, TextAlignment.Left);
+                ApplyHorizontalText(PlatformVersionTextEntity, PlatformVersionTextComponent, Core.Instance.PlatformInfo.Version, PlatformVersionBaseLocalPosition.X, PlatformVersionBaseLocalPosition.Y, TextAlignment.Right);
+                return;
+            }
+
             ApplyText(PlatformNameTextEntity, PlatformNameTextComponent, Core.Instance.PlatformInfo.Name, 0f);
             ApplyText(PlatformVersionTextEntity, PlatformVersionTextComponent, Core.Instance.PlatformInfo.Version, PlatformNameTextComponent.Size.Y + 6f);
         }
@@ -130,6 +147,8 @@ namespace city.menu {
             PlatformVersionTextEntity = textEntities[1];
             PlatformNameTextComponent = FindTextComponent(PlatformNameTextEntity);
             PlatformVersionTextComponent = FindTextComponent(PlatformVersionTextEntity);
+            PlatformNameBaseLocalPosition = PlatformNameTextEntity.LocalPosition;
+            PlatformVersionBaseLocalPosition = PlatformVersionTextEntity.LocalPosition;
             return true;
         }
 
@@ -175,6 +194,8 @@ namespace city.menu {
             PlatformVersionTextEntity = null;
             PlatformNameTextComponent = null;
             PlatformVersionTextComponent = null;
+            PlatformNameBaseLocalPosition = float3.Zero;
+            PlatformVersionBaseLocalPosition = float3.Zero;
         }
 
         /// <summary>
@@ -199,6 +220,37 @@ namespace city.menu {
                 (int)Math.Ceiling(measuredSize.X * fontScale),
                 (int)Math.Ceiling(measuredSize.Y * fontScale));
             entity.LocalPosition = new float3(-textComponent.Size.X, topOffset, 0f);
+        }
+
+        /// <summary>
+        /// Applies one platform-info text line using authored horizontal anchors so the overlay can present one left/right row.
+        /// </summary>
+        /// <param name="entity">Child text entity that should be updated.</param>
+        /// <param name="textComponent">Text component that renders the value.</param>
+        /// <param name="text">Text content to display.</param>
+        /// <param name="baseX">Authored local X anchor.</param>
+        /// <param name="baseY">Authored local Y anchor.</param>
+        /// <param name="alignment">Requested horizontal text alignment.</param>
+        void ApplyHorizontalText(Entity entity, TextComponent textComponent, string text, float baseX, float baseY, TextAlignment alignment) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (textComponent == null) {
+                throw new ArgumentNullException(nameof(textComponent));
+            }
+
+            textComponent.Alignment = alignment;
+            textComponent.Text = text;
+            float2 measuredSize = textComponent.Font.MeasureString(text);
+            double fontScale = textComponent.FontScale;
+            textComponent.Size = new int2(
+                (int)Math.Ceiling(measuredSize.X * fontScale),
+                (int)Math.Ceiling(measuredSize.Y * fontScale));
+            if (alignment == TextAlignment.Right) {
+                entity.LocalPosition = new float3(baseX - textComponent.Size.X, baseY, 0f);
+                return;
+            }
+
+            entity.LocalPosition = new float3(baseX, baseY, 0f);
         }
 
         /// <summary>
