@@ -1,4 +1,4 @@
-using city.rendering.tools;
+using city.physics.tools;
 
 namespace city.menu.tools {
     /// <summary>
@@ -24,7 +24,7 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            PhysicsNintendoDsSceneGenerator generator = new PhysicsNintendoDsSceneGenerator();
+            PhysicsNintendoDsSceneGenerator generator = new PhysicsNintendoDsSceneGenerator(context.ScriptTypeResolver);
             generator.Generate(context.ProjectRootPath);
         }
     }

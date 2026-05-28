@@ -1,7 +1,7 @@
 using city.menu;
-using helengine.editor;
+using city.rendering.tools;
 
-namespace city.rendering.tools {
+namespace city.physics.tools {
     /// <summary>
     /// Generates Nintendo DS companion scenes for the curated authored physics showcase scenes.
     /// </summary>
@@ -10,11 +10,6 @@ namespace city.rendering.tools {
         /// Relative assets subfolder that owns the curated authored physics scenes.
         /// </summary>
         const string PhysicsSceneFolderRelativePath = "scenes/physics";
-
-        /// <summary>
-        /// Stable desktop instruction overlay viewport root name that should not remain on the DS top screen.
-        /// </summary>
-        const string DesktopInstructionOverlayRootName = "DemoSceneInstructionViewport";
 
         /// <summary>
         /// Writer used to persist Nintendo DS companion scenes through the shared generated authored-scene pipeline.
@@ -68,6 +63,11 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(sceneEntry));
             }
 
+            if (IsPlayablePhysicsShowcaseScene(sceneEntry)) {
+                WritePlayablePhysicsShowcaseCompanionScene(fullProjectRootPath, sceneEntry);
+                return;
+            }
+
             ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create(ScriptTypeResolver);
             EditorSceneAssetReferenceResolver referenceResolver = new EditorSceneAssetReferenceResolver(Core.Instance.ContentManager, fullProjectRootPath);
             SceneFileLoadService sceneLoadService = new SceneFileLoadService(fullProjectRootPath, persistenceRegistry, referenceResolver);
@@ -79,20 +79,13 @@ namespace city.rendering.tools {
             LoadedEditorSceneDocument loadedScene = sceneLoadService.Load(authoredScenePath);
 
             try {
-                Entity[] bottomScreenRoots = Array.Empty<Entity>();
-                Entity[] topScreenRoots = loadedScene.RootEntities;
-                if (IsPlayablePhysicsShowcaseScene(sceneEntry)) {
-                    topScreenRoots = RemoveDesktopInstructionOverlayRoot(loadedScene.RootEntities);
-                    bottomScreenRoots = CreatePhysicsShowcaseNintendoDsBottomInstructionRoots();
-                }
-
                 SceneWriteService.WriteNintendoDsCompanionScene(
                     fullProjectRootPath,
                     BuildNintendoDsSceneAssetId(sceneEntry.NintendoDsSceneId),
                     loadedScene.SceneSettings,
-                    topScreenRoots,
+                    loadedScene.RootEntities,
                     true,
-                    bottomScreenRoots);
+                    Array.Empty<Entity>());
             } finally {
                 DisposeRoots(loadedScene.RootEntities);
             }
@@ -122,28 +115,39 @@ namespace city.rendering.tools {
             return instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(ResolveRequiredEditorFont());
         }
 
-        /// Removes the desktop instruction overlay viewport root from one playable showcase scene before the DS scaffold reuses the authored top-screen roots.
+        /// <summary>
+        /// Builds one playable physics showcase DS companion scene directly from the shared live scene-definition path so the DS workflow does not depend on the editor-only reloadability of the desktop `.helen` file.
         /// </summary>
-        /// <param name="rootEntities">Authored top-screen roots loaded from the desktop scene file.</param>
-        /// <returns>Top-screen roots without the desktop instruction overlay viewport.</returns>
-        static Entity[] RemoveDesktopInstructionOverlayRoot(EditorEntity[] rootEntities) {
-            if (rootEntities == null) {
-                throw new ArgumentNullException(nameof(rootEntities));
+        /// <param name="fullProjectRootPath">Absolute city project root path.</param>
+        /// <param name="sceneEntry">Curated playable physics showcase scene entry being transformed into a DS companion scene.</param>
+        void WritePlayablePhysicsShowcaseCompanionScene(string fullProjectRootPath, DemoDiscPhysicsSceneEntry sceneEntry) {
+            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
+            } else if (sceneEntry == null) {
+                throw new ArgumentNullException(nameof(sceneEntry));
             }
 
-            List<Entity> filteredRoots = new List<Entity>(rootEntities.Length);
-            for (int index = 0; index < rootEntities.Length; index++) {
-                EditorEntity rootEntity = rootEntities[index];
-                if (rootEntity == null) {
-                    continue;
-                } else if (string.Equals(rootEntity.Name, DesktopInstructionOverlayRootName, StringComparison.Ordinal)) {
-                    continue;
-                }
-
-                filteredRoots.Add(rootEntity);
+            PhysicsSceneFactory physicsSceneFactory = new PhysicsSceneFactory();
+            GeneratedAuthoringSceneDefinition sceneDefinition = physicsSceneFactory.CreatePlayablePhysicsShowcaseSceneDefinition(
+                fullProjectRootPath,
+                sceneEntry.SceneId,
+                false);
+            Entity[] bottomScreenRoots = CreatePhysicsShowcaseNintendoDsBottomInstructionRoots();
+            uint nextEntityId = 1u;
+            nextEntityId = AssignFreshGeneratedEntityIds(sceneDefinition.RootEntities, nextEntityId);
+            AssignFreshGeneratedEntityIds(bottomScreenRoots, nextEntityId);
+            try {
+                SceneWriteService.WriteNintendoDsCompanionScene(
+                    fullProjectRootPath,
+                    BuildNintendoDsSceneAssetId(sceneEntry.NintendoDsSceneId),
+                    sceneDefinition.SceneSettings,
+                    sceneDefinition.RootEntities,
+                    true,
+                    bottomScreenRoots);
+            } finally {
+                DisposeRoots(sceneDefinition.RootEntities);
+                DisposeRoots(bottomScreenRoots);
             }
-
-            return filteredRoots.ToArray();
         }
 
         /// <summary>
@@ -163,7 +167,7 @@ namespace city.rendering.tools {
         /// Disposes the loaded root entities after the companion scene has been written.
         /// </summary>
         /// <param name="roots">Loaded root entities to dispose.</param>
-        void DisposeRoots(EditorEntity[] roots) {
+        void DisposeRoots(Entity[] roots) {
             if (roots == null) {
                 throw new ArgumentNullException(nameof(roots));
             }
@@ -171,6 +175,83 @@ namespace city.rendering.tools {
             for (int index = 0; index < roots.Length; index++) {
                 roots[index]?.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Assigns fresh save-component entity ids across one generated root set before the shared authoring save pipeline persists the DS companion scene.
+        /// </summary>
+        /// <param name="roots">Generated roots that should receive fresh ids.</param>
+        /// <param name="nextEntityId">First id available for assignment.</param>
+        /// <returns>Next unassigned id after the supplied root set has been processed.</returns>
+        static uint AssignFreshGeneratedEntityIds(Entity[] roots, uint nextEntityId) {
+            if (roots == null) {
+                throw new ArgumentNullException(nameof(roots));
+            } else if (nextEntityId == 0u) {
+                throw new ArgumentOutOfRangeException(nameof(nextEntityId), "Generated entity ids must start at a non-zero value.");
+            }
+
+            uint currentEntityId = nextEntityId;
+            for (int index = 0; index < roots.Length; index++) {
+                if (roots[index] is not EditorEntity editorRootEntity) {
+                    throw new InvalidOperationException("Nintendo DS physics scene roots must be editor entities before they can be saved.");
+                }
+
+                currentEntityId = AssignFreshGeneratedEntityIds(editorRootEntity, currentEntityId);
+            }
+
+            return currentEntityId;
+        }
+
+        /// <summary>
+        /// Assigns fresh save-component entity ids across one generated editor subtree.
+        /// </summary>
+        /// <param name="entity">Generated editor subtree root that should receive fresh ids.</param>
+        /// <param name="nextEntityId">First id available for assignment.</param>
+        /// <returns>Next unassigned id after the subtree has been processed.</returns>
+        static uint AssignFreshGeneratedEntityIds(EditorEntity entity, uint nextEntityId) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (nextEntityId == 0u) {
+                throw new ArgumentOutOfRangeException(nameof(nextEntityId), "Generated entity ids must start at a non-zero value.");
+            }
+
+            EntitySaveComponent saveComponent = EnsureEntitySaveComponent(entity);
+            saveComponent.EntityId = nextEntityId;
+            uint currentEntityId = nextEntityId + 1u;
+            if (entity.Children == null) {
+                return currentEntityId;
+            }
+
+            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                if (entity.Children[childIndex] is not EditorEntity childEntity) {
+                    continue;
+                }
+
+                currentEntityId = AssignFreshGeneratedEntityIds(childEntity, currentEntityId);
+            }
+
+            return currentEntityId;
+        }
+
+        /// <summary>
+        /// Resolves the hidden save component attached to one live editor entity, creating it when a freshly generated subtree has not received one yet.
+        /// </summary>
+        /// <param name="entity">Generated editor entity whose save component should be returned.</param>
+        /// <returns>Attached save component.</returns>
+        static EntitySaveComponent EnsureEntitySaveComponent(EditorEntity entity) {
+            if (entity == null || entity.Components == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is EntitySaveComponent saveComponent) {
+                    return saveComponent;
+                }
+            }
+
+            EntitySaveComponent createdSaveComponent = new EntitySaveComponent();
+            entity.AddComponent(createdSaveComponent);
+            return createdSaveComponent;
         }
 
         /// <summary>

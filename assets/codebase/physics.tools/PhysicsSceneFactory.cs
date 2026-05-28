@@ -470,10 +470,28 @@ namespace city.physics.tools {
         readonly SceneEntityAssetIdAllocator SceneEntityIdAllocator;
 
         /// <summary>
+        /// Shared persistence registry used to serialize live editor-authored overlay entities into scene assets.
+        /// </summary>
+        readonly ComponentPersistenceRegistry PersistenceRegistry;
+
+        /// <summary>
+        /// Shared payload wrapper used to preserve any component-level override metadata while serializing live editor-authored overlay entities.
+        /// </summary>
+        readonly ComponentPlatformOverridePayloadService OverridePayloadService;
+
+        /// <summary>
+        /// Shared editor-authored scene writer used for the playable physics showcases so their instruction overlays follow the standard city save pipeline.
+        /// </summary>
+        readonly city.rendering.tools.GeneratedAuthoringSceneWriteService AuthoringSceneWriteService;
+
+        /// <summary>
         /// Initializes the validation-scene factory with a fresh scene-local entity id allocator.
         /// </summary>
         public PhysicsSceneFactory() {
             SceneEntityIdAllocator = new SceneEntityAssetIdAllocator();
+            PersistenceRegistry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
+            OverridePayloadService = new ComponentPlatformOverridePayloadService();
+            AuthoringSceneWriteService = new city.rendering.tools.GeneratedAuthoringSceneWriteService();
         }
 
         /// <summary>
@@ -530,6 +548,11 @@ namespace city.physics.tools {
             string[] sceneIds = PhysicsSceneCatalog.GetSceneIds();
             for (int index = 0; index < sceneIds.Length; index++) {
                 string sceneId = sceneIds[index];
+                if (IsPlayablePhysicsShowcaseScene(sceneId)) {
+                    WritePlayablePhysicsShowcaseScene(projectRootPath, sceneId);
+                    continue;
+                }
+
                 SceneAsset sceneAsset = CreateSceneAsset(sceneId);
                 string fullPath = GetSceneFullPath(projectRootPath, sceneId);
                 string directoryPath = Path.GetDirectoryName(fullPath);
@@ -625,8 +648,8 @@ namespace city.physics.tools {
                     CreatePhysicsBoxMeshEntity("dynamic_stack_boxes.box04", "StackBox04", new float3(0f, 3.5f, 0f), new float3(1f, 1f, 1f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
                     CreateMarkerEntity("dynamic_stack_boxes.spawn", "DynamicSpawn", new float3(-2.5f, 1.5f, 0f))
                 });
-            SceneEntityAsset cameraEntity = CreateCameraEntity("dynamic_stack_boxes.camera", new float3(8f, 5.25f, 8f), CreateYawPitchRollDegrees(45.0, -20.0, 0.0));
-            return CreateSceneAsset(PhysicsSceneCatalog.DynamicStackBoxesSceneId, cameraEntity, scenarioEntity);
+            SceneEntityAsset cameraEntity = CreatePhysicsShowcaseCameraEntity("dynamic_stack_boxes.camera", new float3(8f, 5.25f, 8f), CreateYawPitchRollDegrees(45.0, -20.0, 0.0), float3.Zero);
+            return CreatePhysicsShowcaseSceneAsset(PhysicsSceneCatalog.DynamicStackBoxesSceneId, cameraEntity, scenarioEntity);
         }
 
         /// <summary>
@@ -637,8 +660,8 @@ namespace city.physics.tools {
             SceneEntityAsset scenarioEntity = CreateScenarioRoot(
                 "dynamic_sphere_stack.scenario",
                 CreateDynamicSphereStackChildren());
-            SceneEntityAsset cameraEntity = CreateCameraEntity("dynamic_sphere_stack.camera", new float3(9.5f, 6.75f, 9f), CreateYawPitchRollDegrees(45.0, -18.0, 0.0));
-            return CreateSceneAsset(PhysicsSceneCatalog.DynamicSphereStackSceneId, cameraEntity, scenarioEntity);
+            SceneEntityAsset cameraEntity = CreatePhysicsShowcaseCameraEntity("dynamic_sphere_stack.camera", new float3(9.5f, 6.75f, 9f), CreateYawPitchRollDegrees(45.0, -18.0, 0.0), float3.Zero);
+            return CreatePhysicsShowcaseSceneAsset(PhysicsSceneCatalog.DynamicSphereStackSceneId, cameraEntity, scenarioEntity);
         }
 
         /// <summary>
@@ -675,8 +698,8 @@ namespace city.physics.tools {
             SceneEntityAsset scenarioEntity = CreateScenarioRoot(
                 "dynamic_mixed_stack.scenario",
                 CreateDynamicMixedStackChildren());
-            SceneEntityAsset cameraEntity = CreateCameraEntity("dynamic_mixed_stack.camera", new float3(9.5f, 6.5f, 9f), CreateYawPitchRollDegrees(45.0, -18.0, 0.0));
-            return CreateSceneAsset(PhysicsSceneCatalog.DynamicMixedStackSceneId, cameraEntity, scenarioEntity);
+            SceneEntityAsset cameraEntity = CreatePhysicsShowcaseCameraEntity("dynamic_mixed_stack.camera", new float3(9.5f, 6.5f, 9f), CreateYawPitchRollDegrees(45.0, -18.0, 0.0), float3.Zero);
+            return CreatePhysicsShowcaseSceneAsset(PhysicsSceneCatalog.DynamicMixedStackSceneId, cameraEntity, scenarioEntity);
         }
 
         /// <summary>
@@ -788,6 +811,50 @@ namespace city.physics.tools {
                 Id = sceneId,
                 AssetReferences = CreateAssetReferences(),
                 RootEntities = new[] { cameraEntity, scenarioEntity }
+            };
+        }
+
+        /// <summary>
+        /// Creates one playable physics showcase scene asset that includes orbit controls, a functional light-toggle updater, and desktop instruction overlay content.
+        /// </summary>
+        /// <param name="sceneId">Stable relative scene id.</param>
+        /// <param name="cameraEntity">Root camera entity.</param>
+        /// <param name="scenarioEntity">Root scenario entity.</param>
+        /// <returns>Playable showcase scene asset ready for serialization.</returns>
+        SceneAsset CreatePhysicsShowcaseSceneAsset(
+            string sceneId,
+            SceneEntityAsset cameraEntity,
+            SceneEntityAsset scenarioEntity) {
+            if (string.IsNullOrWhiteSpace(sceneId)) {
+                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            }
+            if (cameraEntity == null) {
+                throw new ArgumentNullException(nameof(cameraEntity));
+            }
+            if (scenarioEntity == null) {
+                throw new ArgumentNullException(nameof(scenarioEntity));
+            }
+
+            List<SceneAssetReference> assetReferences = CreateSceneAssetReferenceList();
+            HashSet<string> assetReferenceKeys = CreateSceneAssetReferenceKeySet(assetReferences);
+            List<SceneEntityAsset> rootEntities = new List<SceneEntityAsset> {
+                cameraEntity
+            };
+
+            EditorEntity instructionOverlayRootEntity = CreatePhysicsShowcaseDesktopInstructionOverlayRoot();
+            try {
+                rootEntities.Add(SerializeGeneratedEditorEntity(instructionOverlayRootEntity, assetReferences, assetReferenceKeys));
+            } finally {
+                instructionOverlayRootEntity.Dispose();
+            }
+
+            rootEntities.Add(CreatePhysicsShowcaseUiEntity());
+            rootEntities.Add(scenarioEntity);
+
+            return new SceneAsset {
+                Id = sceneId,
+                AssetReferences = assetReferences.ToArray(),
+                RootEntities = rootEntities.ToArray()
             };
         }
 
@@ -921,6 +988,144 @@ namespace city.physics.tools {
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
+        }
+
+        /// <summary>
+        /// Serializes one generated editor-authored entity subtree into a scene-asset entity while collecting any component asset references referenced by the subtree.
+        /// </summary>
+        /// <param name="entity">Generated editor entity to serialize.</param>
+        /// <param name="assetReferences">Scene-level asset references being accumulated.</param>
+        /// <param name="assetReferenceKeys">Deduplication keys for the accumulated scene-level asset references.</param>
+        /// <returns>Serialized scene-asset entity.</returns>
+        SceneEntityAsset SerializeGeneratedEditorEntity(
+            EditorEntity entity,
+            List<SceneAssetReference> assetReferences,
+            HashSet<string> assetReferenceKeys) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (assetReferences == null) {
+                throw new ArgumentNullException(nameof(assetReferences));
+            } else if (assetReferenceKeys == null) {
+                throw new ArgumentNullException(nameof(assetReferenceKeys));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            List<SceneComponentAssetRecord> componentRecords = new List<SceneComponentAssetRecord>();
+            int persistedComponentIndex = 0;
+            if (entity.Components != null) {
+                for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                    Component component = entity.Components[componentIndex];
+                    if (component == null || component is IEditorHiddenComponent) {
+                        continue;
+                    }
+
+                    EntityComponentSaveState saveState = null;
+                    if (saveComponent.TryGetComponentState(component, out EntityComponentSaveState existingSaveState)) {
+                        saveState = existingSaveState;
+                    }
+
+                    IComponentPersistenceDescriptor descriptor = PersistenceRegistry.GetDescriptor(component);
+                    SceneComponentAssetRecord baseRecord = descriptor.SerializeComponent(component, persistedComponentIndex, saveState);
+                    componentRecords.Add(OverridePayloadService.Wrap(baseRecord, saveState));
+                    AppendAssetReferences(saveState, assetReferences, assetReferenceKeys);
+                    persistedComponentIndex++;
+                }
+            }
+
+            List<SceneEntityAsset> childEntities = new List<SceneEntityAsset>();
+            if (entity.Children != null) {
+                for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                    if (entity.Children[childIndex] is not EditorEntity childEntity) {
+                        continue;
+                    } else if (childEntity.InternalEntity) {
+                        continue;
+                    } else if (childEntity.LayerMask != EditorLayerMasks.SceneObjects) {
+                        continue;
+                    }
+
+                    childEntities.Add(SerializeGeneratedEditorEntity(childEntity, assetReferences, assetReferenceKeys));
+                }
+            }
+
+            return new SceneEntityAsset {
+                Id = saveComponent.EntityId,
+                Name = entity.Name,
+                IsStatic = entity.Static,
+                LocalPosition = entity.LocalPosition,
+                LocalScale = entity.LocalScale,
+                LocalOrientation = entity.LocalOrientation,
+                Components = componentRecords.ToArray(),
+                PlatformTransformOverrides = Array.Empty<SceneEntityPlatformTransformOverrideAsset>(),
+                PlatformComponentOverrides = Array.Empty<SceneEntityPlatformComponentOverrideAsset>(),
+                Children = childEntities.ToArray()
+            };
+        }
+
+        /// <summary>
+        /// Creates one playable physics showcase camera entity that includes manual orbit controls around the supplied orbit center.
+        /// </summary>
+        /// <param name="entityId">Stable serialized entity id.</param>
+        /// <param name="position">Camera position.</param>
+        /// <param name="orientation">Camera orientation.</param>
+        /// <param name="orbitCenter">World-space orbit center assigned to the camera controller.</param>
+        /// <returns>Camera entity with serialized camera and orbit-controller components.</returns>
+        SceneEntityAsset CreatePhysicsShowcaseCameraEntity(string entityId, float3 position, float4 orientation, float3 orbitCenter) {
+            if (string.IsNullOrWhiteSpace(entityId)) {
+                throw new ArgumentException("Camera entity id must be provided.", nameof(entityId));
+            }
+
+            return new SceneEntityAsset {
+                Id = AllocateSceneEntityId(),
+                Name = "Camera",
+                LocalPosition = position,
+                LocalScale = float3.One,
+                LocalOrientation = orientation,
+                Components = new[] {
+                    CreateCameraComponentRecord(),
+                    CreateAutomaticComponentRecord(new city.rendering.DemoDiscOrbitCameraComponent {
+                        OrbitCenter = orbitCenter,
+                        AutoYawSpeedRadians = 0f
+                    }, 1)
+                },
+                Children = Array.Empty<SceneEntityAsset>()
+            };
+        }
+
+        /// <summary>
+        /// Creates one lightweight UI root that owns the playable showcase light-toggle updater.
+        /// </summary>
+        /// <returns>Scene entity whose update component toggles authored directional lights.</returns>
+        SceneEntityAsset CreatePhysicsShowcaseUiEntity() {
+            return new SceneEntityAsset {
+                Id = AllocateSceneEntityId(),
+                Name = "ShowcaseUi",
+                LocalPosition = float3.Zero,
+                LocalScale = float3.One,
+                LocalOrientation = float4.Identity,
+                Components = new[] {
+                    CreateAutomaticComponentRecord(new city.rendering.DemoDiscLightToggleComponent(), 0)
+                },
+                Children = Array.Empty<SceneEntityAsset>()
+            };
+        }
+
+        /// <summary>
+        /// Creates the shared desktop instruction overlay root used by the playable physics showcase scenes.
+        /// </summary>
+        /// <returns>Live editor-authored overlay root entity ready for serialization.</returns>
+        EditorEntity CreatePhysicsShowcaseDesktopInstructionOverlayRoot() {
+            if (Core.Instance == null || Core.Instance.EntityFactory == null) {
+                throw new InvalidOperationException("Creating the physics showcase instruction overlay requires an active editor entity factory.");
+            }
+
+            city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory();
+            Entity overlayRootEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(ResolveRequiredEditorFont());
+            if (overlayRootEntity is not EditorEntity editorOverlayRootEntity) {
+                throw new InvalidOperationException("The physics showcase instruction overlay must be authored through editor entities.");
+            }
+
+            ReassignGeneratedEditorEntityIds(editorOverlayRootEntity);
+            return editorOverlayRootEntity;
         }
 
         /// <summary>
@@ -1092,6 +1297,37 @@ namespace city.physics.tools {
                 Components = Array.Empty<SceneComponentAssetRecord>(),
                 Children = Array.Empty<SceneEntityAsset>()
             };
+        }
+
+        /// <summary>
+        /// Creates the mutable asset-reference list used while building one playable physics showcase scene.
+        /// </summary>
+        /// <returns>Mutable scene-level asset-reference list initialized with the shared primitive and material dependencies.</returns>
+        List<SceneAssetReference> CreateSceneAssetReferenceList() {
+            return new List<SceneAssetReference>(CreateAssetReferences());
+        }
+
+        /// <summary>
+        /// Creates one deduplication-key set preloaded from the supplied asset-reference list.
+        /// </summary>
+        /// <param name="assetReferences">Existing scene-level asset references that should seed the deduplication set.</param>
+        /// <returns>Deduplication keys matching the supplied asset-reference list.</returns>
+        HashSet<string> CreateSceneAssetReferenceKeySet(List<SceneAssetReference> assetReferences) {
+            if (assetReferences == null) {
+                throw new ArgumentNullException(nameof(assetReferences));
+            }
+
+            HashSet<string> assetReferenceKeys = new HashSet<string>(StringComparer.Ordinal);
+            for (int referenceIndex = 0; referenceIndex < assetReferences.Count; referenceIndex++) {
+                SceneAssetReference reference = assetReferences[referenceIndex];
+                if (reference == null) {
+                    continue;
+                }
+
+                assetReferenceKeys.Add(BuildAssetReferenceKey(reference));
+            }
+
+            return assetReferenceKeys;
         }
 
         /// <summary>
@@ -1337,6 +1573,227 @@ namespace city.physics.tools {
         }
 
         /// <summary>
+        /// Returns whether the supplied scene id belongs to the three curated playable physics showcase scenes that need orbit controls and instruction overlays.
+        /// </summary>
+        /// <param name="sceneId">Stable scene id under evaluation.</param>
+        /// <returns>True when the scene id belongs to a playable physics showcase scene.</returns>
+        static bool IsPlayablePhysicsShowcaseScene(string sceneId) {
+            return string.Equals(sceneId, PhysicsSceneCatalog.DynamicStackBoxesSceneId, StringComparison.Ordinal)
+                || string.Equals(sceneId, PhysicsSceneCatalog.DynamicSphereStackSceneId, StringComparison.Ordinal)
+                || string.Equals(sceneId, PhysicsSceneCatalog.DynamicMixedStackSceneId, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Writes one playable physics showcase scene through the live authoring save pipeline so the desktop instruction overlay persists with the same metadata contract used by the rendering demo scenes.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
+        /// <param name="sceneId">Stable playable scene id to write.</param>
+        void WritePlayablePhysicsShowcaseScene(string projectRootPath, string sceneId) {
+            city.rendering.tools.GeneratedAuthoringSceneDefinition sceneDefinition = CreatePlayablePhysicsShowcaseSceneDefinition(projectRootPath, sceneId, true);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, sceneDefinition);
+        }
+
+        /// <summary>
+        /// Builds one live authored playable physics showcase scene definition that can be written directly or reused by DS companion-scene generation without reloading the desktop `.helen` file.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute project root path that owns the scene asset dependencies.</param>
+        /// <param name="sceneId">Stable playable scene id to build.</param>
+        /// <param name="includeDesktopInstructionOverlay">True when the desktop instruction overlay root should remain in the returned root-entity list.</param>
+        /// <returns>Generated live-authored playable scene definition.</returns>
+        public city.rendering.tools.GeneratedAuthoringSceneDefinition CreatePlayablePhysicsShowcaseSceneDefinition(
+            string projectRootPath,
+            string sceneId,
+            bool includeDesktopInstructionOverlay) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (string.IsNullOrWhiteSpace(sceneId)) {
+                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            } else if (Core.Instance == null || Core.Instance.ContentManager == null) {
+                throw new InvalidOperationException("Writing playable physics showcase scenes requires an active editor content manager.");
+            }
+
+            string normalizedSceneId = NormalizePlayablePhysicsShowcaseSceneId(sceneId);
+            SceneAsset authoredSceneAsset;
+            Entity cameraEntity;
+            if (string.Equals(normalizedSceneId, PhysicsSceneCatalog.DynamicStackBoxesSceneId, StringComparison.Ordinal)) {
+                authoredSceneAsset = CreateDynamicStackBoxesScene();
+                cameraEntity = CreateLivePhysicsShowcaseCameraEntity(
+                    "DynamicStackBoxesCamera",
+                    new float3(8f, 5.25f, 8f),
+                    CreateYawPitchRollDegrees(45.0, -20.0, 0.0),
+                    new float3(0f, 1.5f, 0f));
+            } else if (string.Equals(normalizedSceneId, PhysicsSceneCatalog.DynamicSphereStackSceneId, StringComparison.Ordinal)) {
+                authoredSceneAsset = CreateDynamicSphereStackScene();
+                cameraEntity = CreateLivePhysicsShowcaseCameraEntity(
+                    "DynamicSphereStackCamera",
+                    new float3(7.75f, 4.75f, 7.5f),
+                    CreateYawPitchRollDegrees(-135.0, -18.0, 0.0),
+                    new float3(0f, 1.6f, 0f));
+            } else if (string.Equals(normalizedSceneId, PhysicsSceneCatalog.DynamicMixedStackSceneId, StringComparison.Ordinal)) {
+                authoredSceneAsset = CreateDynamicMixedStackScene();
+                cameraEntity = CreateLivePhysicsShowcaseCameraEntity(
+                    "DynamicMixedStackCamera",
+                    new float3(8.5f, 5f, 8.25f),
+                    CreateYawPitchRollDegrees(-136.0, -18.0, 0.0),
+                    new float3(0f, 1.4f, 0f));
+            } else {
+                throw new InvalidOperationException($"Scene '{sceneId}' is not one of the playable physics showcases.");
+            }
+
+            List<Entity> rootEntities = new List<Entity> {
+                cameraEntity,
+                CreateLivePhysicsShowcaseUiEntity()
+            };
+            if (includeDesktopInstructionOverlay) {
+                city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory();
+                FontAsset instructionFont = ResolveRequiredEditorFont();
+                rootEntities.Insert(1, instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(instructionFont));
+            }
+
+            IReadOnlyList<EditorEntity> scenarioRoots = LoadPlayablePhysicsShowcaseScenarioRoots(projectRootPath, authoredSceneAsset);
+            for (int index = 0; index < scenarioRoots.Count; index++) {
+                rootEntities.Add(scenarioRoots[index]);
+            }
+            for (int index = 0; index < rootEntities.Count; index++) {
+                if (rootEntities[index] is not EditorEntity editorRootEntity) {
+                    throw new InvalidOperationException("Playable physics showcase roots must be editor entities before they can be saved.");
+                }
+
+                AssignFreshGeneratedEditorEntityIds(editorRootEntity);
+            }
+
+            return new city.rendering.tools.GeneratedAuthoringSceneDefinition {
+                SceneId = normalizedSceneId,
+                SceneSettings = authoredSceneAsset.SceneSettings,
+                RootEntities = rootEntities.ToArray()
+            };
+        }
+
+        /// <summary>
+        /// Normalizes playable showcase scene identifiers so callers may use either authored asset ids or the shorter logical ids exposed by the demo-disc menu catalog.
+        /// </summary>
+        /// <param name="sceneId">Playable scene identifier supplied by the caller.</param>
+        /// <returns>Normalized authored asset scene id.</returns>
+        static string NormalizePlayablePhysicsShowcaseSceneId(string sceneId) {
+            if (string.IsNullOrWhiteSpace(sceneId)) {
+                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            }
+
+            if (string.Equals(sceneId, "test_scene_dynamic_stack_boxes", StringComparison.Ordinal)) {
+                return PhysicsSceneCatalog.DynamicStackBoxesSceneId;
+            } else if (string.Equals(sceneId, "test_scene_dynamic_sphere_stack", StringComparison.Ordinal)) {
+                return PhysicsSceneCatalog.DynamicSphereStackSceneId;
+            } else if (string.Equals(sceneId, "test_scene_dynamic_mixed_stack", StringComparison.Ordinal)) {
+                return PhysicsSceneCatalog.DynamicMixedStackSceneId;
+            }
+
+            return sceneId;
+        }
+
+        /// <summary>
+        /// Loads the serialized scenario root from one playable physics showcase scene into live editor entities so the generated desktop overlay can be saved through the standard authoring pipeline.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute city project root path that owns the scene asset dependencies.</param>
+        /// <param name="authoredSceneAsset">Playable showcase scene asset whose scenario subtree should be materialized.</param>
+        /// <returns>Live editor entities that represent the serialized scenario subtree.</returns>
+        IReadOnlyList<EditorEntity> LoadPlayablePhysicsShowcaseScenarioRoots(string projectRootPath, SceneAsset authoredSceneAsset) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (authoredSceneAsset == null) {
+                throw new ArgumentNullException(nameof(authoredSceneAsset));
+            }
+
+            SceneEntityAsset scenarioRootEntity = ResolveRequiredPlayablePhysicsShowcaseScenarioRoot(authoredSceneAsset);
+            ComponentPersistenceRegistry persistenceRegistry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
+            EditorSceneAssetReferenceResolver referenceResolver = new EditorSceneAssetReferenceResolver(Core.Instance.ContentManager, projectRootPath);
+            SceneLoadService sceneLoadService = new SceneLoadService(persistenceRegistry, referenceResolver);
+            SceneAsset scenarioSceneAsset = new SceneAsset {
+                Id = authoredSceneAsset.Id,
+                SceneSettings = authoredSceneAsset.SceneSettings,
+                AssetReferences = authoredSceneAsset.AssetReferences,
+                RootEntities = new[] {
+                    scenarioRootEntity
+                }
+            };
+            return sceneLoadService.Load(scenarioSceneAsset);
+        }
+
+        /// <summary>
+        /// Resolves the serialized scenario root from one playable physics showcase scene asset.
+        /// </summary>
+        /// <param name="authoredSceneAsset">Playable showcase scene asset whose scenario root should be extracted.</param>
+        /// <returns>Serialized scenario root entity.</returns>
+        static SceneEntityAsset ResolveRequiredPlayablePhysicsShowcaseScenarioRoot(SceneAsset authoredSceneAsset) {
+            if (authoredSceneAsset == null) {
+                throw new ArgumentNullException(nameof(authoredSceneAsset));
+            }
+
+            SceneEntityAsset[] rootEntities = authoredSceneAsset.RootEntities;
+            if (rootEntities == null || rootEntities.Length == 0) {
+                throw new InvalidOperationException("Playable physics showcase scenes must define at least one root entity.");
+            }
+
+            SceneEntityAsset scenarioRootEntity = rootEntities[rootEntities.Length - 1];
+            if (scenarioRootEntity == null) {
+                throw new InvalidOperationException("Playable physics showcase scenes must end with a scenario root entity.");
+            }
+
+            return scenarioRootEntity;
+        }
+
+        /// <summary>
+        /// Creates one live authored camera entity for a playable physics showcase scene.
+        /// </summary>
+        /// <param name="entityName">Human-readable camera entity name.</param>
+        /// <param name="position">Initial camera position.</param>
+        /// <param name="orientation">Initial camera orientation.</param>
+        /// <param name="orbitCenter">Point orbited by manual showcase controls.</param>
+        /// <returns>Live authored camera entity.</returns>
+        Entity CreateLivePhysicsShowcaseCameraEntity(string entityName, float3 position, float4 orientation, float3 orbitCenter) {
+            if (string.IsNullOrWhiteSpace(entityName)) {
+                throw new ArgumentException("Camera entity name must be provided.", nameof(entityName));
+            }
+
+            Entity entity = Core.Instance.EntityFactory.Create(entityName);
+            entity.LocalPosition = position;
+            entity.LocalOrientation = orientation;
+
+            entity.AddComponent(new CameraComponent {
+                CameraDrawOrder = DefaultCameraDrawOrder,
+                LayerMask = EditorLayerMasks.SceneObjects,
+                Viewport = new float4(0f, 0f, 1f, 1f),
+                NearPlaneDistance = 0.1f,
+                FarPlaneDistance = 100f,
+                ClearSettings = new CameraClearSettings(true, CornflowerBlueClearColor, true, 1f, false, 0),
+                RenderSettings = new CameraRenderSettings {
+                    DepthPrepassMode = DepthPrepassMode.Disabled,
+                    ShadowDistance = 0f,
+                    PostProcessTier = PostProcessTier.Disabled
+                }
+            });
+            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+                OrbitCenter = orbitCenter,
+                AutoYawSpeedRadians = 0f
+            });
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates one live authored UI root that shows FPS diagnostics and owns the playable showcase light-toggle updater.
+        /// </summary>
+        /// <returns>Live authored UI entity.</returns>
+        Entity CreateLivePhysicsShowcaseUiEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("ShowcaseUi");
+            entity.AddComponent(new FPSComponent {
+                Font = ResolveRequiredEditorFont(),
+                FontScale = 2f
+            });
+            entity.AddComponent(new city.menu.DemoDiscReturnToMenuComponent());
+            entity.AddComponent(new city.rendering.DemoDiscLightToggleComponent());
+            return entity;
+        }
+
+        /// <summary>
         /// Writes the shared file-backed HLSL shader used by the exported physics validation scenes.
         /// </summary>
         /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
@@ -1518,6 +1975,160 @@ namespace city.physics.tools {
 
             AutomaticScriptComponentPersistenceDescriptor descriptor = new AutomaticScriptComponentPersistenceDescriptor(new ScriptComponentReflectionSchemaBuilder());
             return descriptor.SerializeComponent(component, componentIndex, null);
+        }
+
+        /// <summary>
+        /// Appends the asset references stored on one component save state into the scene-level dependency list.
+        /// </summary>
+        /// <param name="saveState">Component save state that may contain asset references.</param>
+        /// <param name="assetReferences">Scene-level dependency list being populated.</param>
+        /// <param name="assetReferenceKeys">Deduplication keys for the dependency list.</param>
+        void AppendAssetReferences(
+            EntityComponentSaveState saveState,
+            List<SceneAssetReference> assetReferences,
+            HashSet<string> assetReferenceKeys) {
+            if (saveState == null) {
+                return;
+            } else if (assetReferences == null) {
+                throw new ArgumentNullException(nameof(assetReferences));
+            } else if (assetReferenceKeys == null) {
+                throw new ArgumentNullException(nameof(assetReferenceKeys));
+            }
+
+            foreach (SceneAssetReference reference in saveState.EnumerateAssetReferences()) {
+                if (reference == null) {
+                    continue;
+                }
+
+                string referenceKey = BuildAssetReferenceKey(reference);
+                if (assetReferenceKeys.Add(referenceKey)) {
+                    assetReferences.Add(reference);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Ensures one generated live editor subtree owns hidden save components and fresh scene entity ids before it is persisted through the standard authoring pipeline.
+        /// </summary>
+        /// <param name="entity">Generated live editor subtree root that should receive fresh scene entity ids.</param>
+        void AssignFreshGeneratedEditorEntityIds(EditorEntity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            EntitySaveComponent saveComponent = EnsureEntitySaveComponent(entity);
+            saveComponent.EntityId = AllocateSceneEntityId();
+            if (entity.Children == null) {
+                return;
+            }
+
+            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                if (entity.Children[childIndex] is not EditorEntity childEntity) {
+                    continue;
+                }
+
+                AssignFreshGeneratedEditorEntityIds(childEntity);
+            }
+        }
+
+        /// <summary>
+        /// Resolves the hidden save component attached to one generated editor-authored entity.
+        /// </summary>
+        /// <param name="entity">Generated editor entity whose save component should be returned.</param>
+        /// <returns>Attached save component.</returns>
+        EntitySaveComponent FindRequiredEntitySaveComponent(EditorEntity entity) {
+            if (entity == null || entity.Components == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is EntitySaveComponent saveComponent) {
+                    if (saveComponent.EntityId == 0u) {
+                        throw new InvalidOperationException("Generated editor entities must have a preassigned numeric scene entity id.");
+                    }
+
+                    return saveComponent;
+                }
+            }
+
+            throw new InvalidOperationException("Generated editor entities must include EntitySaveComponent.");
+        }
+
+        /// <summary>
+        /// Resolves the hidden save component attached to one live editor entity, creating it when a freshly generated subtree has not received one yet.
+        /// </summary>
+        /// <param name="entity">Generated editor entity whose save component should be returned.</param>
+        /// <returns>Attached save component.</returns>
+        static EntitySaveComponent EnsureEntitySaveComponent(EditorEntity entity) {
+            if (entity == null || entity.Components == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is EntitySaveComponent saveComponent) {
+                    return saveComponent;
+                }
+            }
+
+            EntitySaveComponent createdSaveComponent = new EntitySaveComponent();
+            entity.AddComponent(createdSaveComponent);
+            return createdSaveComponent;
+        }
+
+        /// <summary>
+        /// Builds the stable deduplication key used for one scene asset reference.
+        /// </summary>
+        /// <param name="reference">Scene asset reference being keyed.</param>
+        /// <returns>Stable deduplication key.</returns>
+        static string BuildAssetReferenceKey(SceneAssetReference reference) {
+            if (reference == null) {
+                throw new ArgumentNullException(nameof(reference));
+            }
+
+            return string.Concat(
+                reference.SourceKind.ToString(),
+                "|",
+                reference.RelativePath ?? string.Empty,
+                "|",
+                reference.ProviderId ?? string.Empty,
+                "|",
+                reference.AssetId ?? string.Empty);
+        }
+
+        /// <summary>
+        /// Resolves the editor font required by the shared playable physics showcase instruction overlay.
+        /// </summary>
+        /// <returns>Loaded editor font asset.</returns>
+        FontAsset ResolveRequiredEditorFont() {
+            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+                throw new InvalidOperationException("A default editor font must be loaded before the physics showcase scenes can be generated.");
+            }
+
+            return editorCore.DefaultFontAssetForEditor;
+        }
+
+        /// <summary>
+        /// Reassigns one generated editor-authored subtree into the current scene-local entity-id allocator so mixed manual and live-generated roots remain collision free.
+        /// </summary>
+        /// <param name="entity">Generated editor subtree root whose save-component ids should be reassigned.</param>
+        void ReassignGeneratedEditorEntityIds(EditorEntity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.EntityId = AllocateSceneEntityId();
+            if (entity.Children == null) {
+                return;
+            }
+
+            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                if (entity.Children[childIndex] is not EditorEntity childEntity) {
+                    continue;
+                }
+
+                ReassignGeneratedEditorEntityIds(childEntity);
+            }
         }
 
         /// <summary>

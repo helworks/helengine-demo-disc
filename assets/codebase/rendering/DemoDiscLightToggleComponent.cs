@@ -65,12 +65,49 @@ namespace city.rendering {
         /// </summary>
         void CaptureDirectionalLightStates() {
             LightStates.Clear();
+            if (Core.Instance == null || Core.Instance.ObjectManager == null) {
+                throw new InvalidOperationException("Light toggle component requires an initialized object manager.");
+            }
+
+            List<Entity> entities = Core.Instance.ObjectManager.Entities;
+            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
+                Entity entity = entities[entityIndex];
+                if (entity == null || entity.Components == null) {
+                    continue;
+                }
+
+                for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                    if (entity.Components[componentIndex] is DirectionalLightComponent directionalLightComponent) {
+                        LightStates.Add(new DemoDiscDirectionalLightToggleState {
+                            Light = directionalLightComponent,
+                            Intensity = directionalLightComponent.Intensity,
+                            ShadowsEnabled = directionalLightComponent.ShadowsEnabled
+                        });
+                    }
+                }
+            }
         }
 
         /// <summary>
         /// Applies the current enabled state to all captured directional lights.
         /// </summary>
         void ApplyDirectionalLightState() {
+            for (int lightIndex = 0; lightIndex < LightStates.Count; lightIndex++) {
+                DemoDiscDirectionalLightToggleState lightState = LightStates[lightIndex];
+                if (lightState == null || lightState.Light == null) {
+                    continue;
+                }
+
+                DirectionalLightComponent directionalLightComponent = lightState.Light;
+                if (LightsEnabled) {
+                    directionalLightComponent.Intensity = lightState.Intensity;
+                    directionalLightComponent.ShadowsEnabled = lightState.ShadowsEnabled;
+                    continue;
+                }
+
+                directionalLightComponent.Intensity = 0f;
+                directionalLightComponent.ShadowsEnabled = false;
+            }
         }
 
         /// <summary>
