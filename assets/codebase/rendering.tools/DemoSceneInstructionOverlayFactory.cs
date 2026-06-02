@@ -7,9 +7,19 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class DemoSceneInstructionOverlayFactory {
         /// <summary>
-        /// Fixed runtime layer mask used by generated instruction overlay drawables.
+        /// Fixed desktop and console layer mask used by generated instruction overlays so showcase cameras can render them.
         /// </summary>
-        const byte RuntimeLayerMask = 0b00000001;
+        const ushort DesktopOverlayLayerMask = EditorLayerMasks.SceneObjects;
+
+        /// <summary>
+        /// Fixed Nintendo DS runtime layer mask used by generated bottom-screen instruction overlays.
+        /// </summary>
+        const ushort NintendoDsOverlayLayerMask = 0b0000000000000001;
+
+        /// <summary>
+        /// Fixed drawable layer mask used by overlay render components across all platforms.
+        /// </summary>
+        const byte OverlayDrawableLayerMask = 0b00000001;
 
         /// <summary>
         /// Fixed desktop reference viewport width used for desktop and console instruction overlay layout.
@@ -62,21 +72,19 @@ namespace city.rendering.tools {
         const string SwitchRightShoulderTexturePath = "Images/Instructions/Controls/switch_r.png";
 
         /// <summary>
-        /// Attaches the shared desktop and console instruction overlay beneath the supplied showcase camera.
+        /// Creates the shared desktop and console instruction overlay as one screen-bound root entity.
         /// </summary>
-        /// <param name="cameraEntity">Camera entity that should own the viewport-bound instruction overlay.</param>
         /// <param name="font">Font used for the rendered instruction labels.</param>
-        public void AttachDesktopInstructionOverlay(Entity cameraEntity, FontAsset font) {
-            if (cameraEntity == null) {
-                throw new ArgumentNullException(nameof(cameraEntity));
-            } else if (font == null) {
+        /// <returns>Screen-bound overlay root entity.</returns>
+        public Entity CreateDesktopInstructionOverlayRoot(FontAsset font) {
+            if (font == null) {
                 throw new ArgumentNullException(nameof(font));
             }
 
-            Entity viewportRootEntity = Core.Instance.EntityFactory.CreateChild(cameraEntity, "DemoSceneInstructionViewport");
-            viewportRootEntity.LayerMask = RuntimeLayerMask;
+            Entity viewportRootEntity = Core.Instance.EntityFactory.Create("DemoSceneInstructionViewport");
+            viewportRootEntity.LayerMask = DesktopOverlayLayerMask;
             viewportRootEntity.AddComponent(new ViewportComponent {
-                BindingMode = ViewportComponent.AncestorCameraBindingMode,
+                BindingMode = ViewportComponent.ScreenBindingMode,
                 FixedSize = new int2(DesktopViewportWidth, DesktopViewportHeight),
                 ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
                 ReferenceWidth = DesktopViewportWidth,
@@ -85,7 +93,7 @@ namespace city.rendering.tools {
 
             Entity panelEntity = Core.Instance.EntityFactory.CreateChild(viewportRootEntity, "DemoSceneInstructionPanel");
             panelEntity.LocalPosition = new float3(24f, 614f, 0f);
-            panelEntity.LayerMask = RuntimeLayerMask;
+            panelEntity.LayerMask = DesktopOverlayLayerMask;
             panelEntity.AddComponent(new RoundedRectComponent {
                 Size = new int2(292, 76),
                 Radius = 8f,
@@ -93,11 +101,12 @@ namespace city.rendering.tools {
                 FillColor = new byte4(20, 24, 32, 224),
                 BorderColor = new byte4(120, 140, 170, 255),
                 RenderOrder2D = 200,
-                LayerMask = RuntimeLayerMask
+                LayerMask = OverlayDrawableLayerMask
             });
 
             CreateDesktopInstructionRow(panelEntity, font, "RotateIconSet", "Rotate Camera", 10f, Xbox360DpadTexturePath, new int2(24, 24), Ps2DpadTexturePath, new int2(24, 24), SwitchDpadTexturePath, new int2(24, 24));
             CreateDesktopInstructionRow(panelEntity, font, "ToggleIconSet", "Toggle Light", 42f, Xbox360RightShoulderTexturePath, new int2(38, 22), Ps2RightShoulderTexturePath, new int2(32, 24), SwitchRightShoulderTexturePath, new int2(44, 20));
+            return viewportRootEntity;
         }
 
         /// <summary>
@@ -112,7 +121,7 @@ namespace city.rendering.tools {
 
             Entity panelEntity = Core.Instance.EntityFactory.Create("DemoSceneNintendoDsInstructionPanel");
             panelEntity.LocalPosition = new float3(8f, 76f, 0f);
-            panelEntity.LayerMask = RuntimeLayerMask;
+            panelEntity.LayerMask = NintendoDsOverlayLayerMask;
             panelEntity.AddComponent(new RoundedRectComponent {
                 Size = new int2(NintendoDsScreenWidth - 16, 54),
                 Radius = 0f,
@@ -120,7 +129,7 @@ namespace city.rendering.tools {
                 FillColor = new byte4(20, 24, 32, 224),
                 BorderColor = new byte4(120, 140, 170, 255),
                 RenderOrder2D = 210,
-                LayerMask = RuntimeLayerMask
+                LayerMask = OverlayDrawableLayerMask
             });
 
             CreateNintendoDsInstructionRow(panelEntity, font, "Rotate Camera", 8f, SwitchDpadTexturePath, new int2(18, 18));
@@ -166,7 +175,7 @@ namespace city.rendering.tools {
 
             Entity iconSetEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, iconSetEntityName);
             iconSetEntity.LocalPosition = new float3(14f, topOffset, 0.1f);
-            iconSetEntity.LayerMask = RuntimeLayerMask;
+            iconSetEntity.LayerMask = DesktopOverlayLayerMask;
             iconSetEntity.AddComponent(new DemoScenePlatformInstructionIconSetComponent());
             CreatePlatformIconEntity(iconSetEntity, "Xbox360", xbox360TexturePath, xbox360Size, 201);
             CreatePlatformIconEntity(iconSetEntity, "Ps2", ps2TexturePath, ps2Size, 201);
@@ -174,7 +183,7 @@ namespace city.rendering.tools {
 
             Entity textEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, iconSetEntityName + "Text");
             textEntity.LocalPosition = new float3(58f, topOffset - 1f, 0.1f);
-            textEntity.LayerMask = RuntimeLayerMask;
+            textEntity.LayerMask = DesktopOverlayLayerMask;
             TextComponent textComponent = new TextComponent {
                 Text = text,
                 Font = font,
@@ -182,7 +191,7 @@ namespace city.rendering.tools {
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(220, 20),
                 RenderOrder2D = 202,
-                LayerMask = RuntimeLayerMask
+                LayerMask = OverlayDrawableLayerMask
             };
             textEntity.AddComponent(textComponent);
             ApplyFontReference(textEntity, textComponent);
@@ -208,18 +217,18 @@ namespace city.rendering.tools {
 
             Entity iconEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, text.Replace(" ", string.Empty) + "Icon");
             iconEntity.LocalPosition = new float3(10f, topOffset, 0.1f);
-            iconEntity.LayerMask = RuntimeLayerMask;
+            iconEntity.LayerMask = NintendoDsOverlayLayerMask;
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = size,
                 RenderOrder2D = 211,
-                LayerMask = RuntimeLayerMask
+                LayerMask = OverlayDrawableLayerMask
             };
             iconEntity.AddComponent(spriteComponent);
             ApplyTextureReference(iconEntity, spriteComponent, texturePath);
 
             Entity textEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, text.Replace(" ", string.Empty) + "Text");
             textEntity.LocalPosition = new float3(48f, topOffset - 1f, 0.1f);
-            textEntity.LayerMask = RuntimeLayerMask;
+            textEntity.LayerMask = NintendoDsOverlayLayerMask;
             TextComponent textComponent = new TextComponent {
                 Text = text,
                 Font = font,
@@ -227,7 +236,7 @@ namespace city.rendering.tools {
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(170, 16),
                 RenderOrder2D = 212,
-                LayerMask = RuntimeLayerMask
+                LayerMask = OverlayDrawableLayerMask
             };
             textEntity.AddComponent(textComponent);
             ApplyFontReference(textEntity, textComponent);
@@ -251,11 +260,11 @@ namespace city.rendering.tools {
             }
 
             Entity entity = Core.Instance.EntityFactory.CreateChild(iconSetEntity, entityName);
-            entity.LayerMask = RuntimeLayerMask;
+            entity.LayerMask = DesktopOverlayLayerMask;
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = size,
                 RenderOrder2D = renderOrder2D,
-                LayerMask = RuntimeLayerMask
+                LayerMask = OverlayDrawableLayerMask
             };
             entity.AddComponent(spriteComponent);
             ApplyTextureReference(entity, spriteComponent, texturePath);

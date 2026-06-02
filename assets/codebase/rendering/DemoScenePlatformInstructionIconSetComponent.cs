@@ -98,17 +98,52 @@ namespace city.rendering {
             }
 
             string normalizedPlatformName = platformName.Trim().ToLowerInvariant();
-            if (normalizedPlatformName.Contains("3ds", StringComparison.Ordinal) || normalizedPlatformName == "ds") {
+            if (ContainsNormalizedPlatformToken(normalizedPlatformName, "3ds") || normalizedPlatformName == "ds") {
                 return SwitchGroupChildIndex;
-            } else if (normalizedPlatformName.Contains("ps2", StringComparison.Ordinal) || normalizedPlatformName.Contains("psp", StringComparison.Ordinal)) {
+            } else if (ContainsNormalizedPlatformToken(normalizedPlatformName, "ps2") || ContainsNormalizedPlatformToken(normalizedPlatformName, "psp")) {
                 return Ps2GroupChildIndex;
-            } else if (normalizedPlatformName.Contains("windows", StringComparison.Ordinal)
-                || normalizedPlatformName.Contains("win32", StringComparison.Ordinal)
-                || normalizedPlatformName.Contains("gamecube", StringComparison.Ordinal)) {
+            } else if (ContainsNormalizedPlatformToken(normalizedPlatformName, "windows")
+                || ContainsNormalizedPlatformToken(normalizedPlatformName, "win32")
+                || ContainsNormalizedPlatformToken(normalizedPlatformName, "gamecube")) {
                 return Xbox360GroupChildIndex;
             }
 
             return Xbox360GroupChildIndex;
+        }
+
+        /// <summary>
+        /// Determines whether one normalized runtime platform name contains the supplied lowercase token without relying on framework substring helpers that are unavailable in generated native targets.
+        /// </summary>
+        /// <param name="normalizedPlatformName">Lowercase trimmed platform name.</param>
+        /// <param name="token">Lowercase token that should be matched.</param>
+        /// <returns>True when the token appears anywhere within the normalized platform name.</returns>
+        bool ContainsNormalizedPlatformToken(string normalizedPlatformName, string token) {
+            if (string.IsNullOrWhiteSpace(normalizedPlatformName)) {
+                throw new ArgumentException("Normalized platform name must be provided.", nameof(normalizedPlatformName));
+            } else if (string.IsNullOrWhiteSpace(token)) {
+                throw new ArgumentException("Platform token must be provided.", nameof(token));
+            } else if (token.Length > normalizedPlatformName.Length) {
+                return false;
+            }
+
+            int lastStartIndex = normalizedPlatformName.Length - token.Length;
+            for (int startIndex = 0; startIndex <= lastStartIndex; startIndex++) {
+                bool matched = true;
+                for (int tokenIndex = 0; tokenIndex < token.Length; tokenIndex++) {
+                    if (normalizedPlatformName[startIndex + tokenIndex] == token[tokenIndex]) {
+                        continue;
+                    }
+
+                    matched = false;
+                    break;
+                }
+
+                if (matched) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

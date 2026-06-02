@@ -33,7 +33,7 @@ namespace city.rendering.tools {
             FontAsset instructionFont = ResolveRequiredEditorFont();
             DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
             Entity cameraEntity = CreateCameraEntity();
-            instructionOverlayFactory.AttachDesktopInstructionOverlay(cameraEntity, instructionFont);
+            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(instructionFont);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -45,6 +45,7 @@ namespace city.rendering.tools {
                 },
                 RootEntities = new[] {
                     cameraEntity,
+                    instructionOverlayEntity,
                     CreateUiEntity(),
                     CreateDirectionalLightEntity(),
                     CreateCubeEntity(cubeModel, standardMaterial)

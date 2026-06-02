@@ -46,6 +46,16 @@ namespace city.rendering.tools {
         public const string DirectionalShadowPlazaNintendoDsSceneId = "scenes/rendering/ds/directional_shadow_plaza_ds.helen";
 
         /// <summary>
+        /// Stable scene id used by the ground-cube probe showcase.
+        /// </summary>
+        public const string GroundCubeProbeSceneId = "scenes/rendering/ground_cube_probe.helen";
+
+        /// <summary>
+        /// Stable Nintendo DS companion-scene id used by the ground-cube probe showcase.
+        /// </summary>
+        public const string GroundCubeProbeNintendoDsSceneId = "scenes/rendering/ds/ground_cube_probe_ds.helen";
+
+        /// <summary>
         /// Stable scene id used by the textured cube-grid showcase.
         /// </summary>
         public const string TexturedCubeGridSceneId = "scenes/rendering/textured_cube_grid.helen";
@@ -121,6 +131,11 @@ namespace city.rendering.tools {
         readonly CubeTestSceneFactory CubeTestFactory;
 
         /// <summary>
+        /// Factory used to author the minimal ground-cube probe scene.
+        /// </summary>
+        readonly GroundCubeProbeSceneFactory GroundCubeProbeFactory;
+
+        /// <summary>
         /// Factory used to author the scaled-cube scene.
         /// </summary>
         readonly ScaledCubeSceneFactory ScaledCubeFactory;
@@ -159,6 +174,7 @@ namespace city.rendering.tools {
             DirectionalShadowPlazaFactory = new DirectionalShadowPlazaSceneFactory();
             SpotlightStreetSliceFactory = new SpotlightStreetSliceSceneFactory();
             CubeTestFactory = new CubeTestSceneFactory();
+            GroundCubeProbeFactory = new GroundCubeProbeSceneFactory();
             ScaledCubeFactory = new ScaledCubeSceneFactory();
             ColoredCubeGridFactory = new ColoredCubeGridSceneFactory();
             TexturedCubeGridFactory = new TexturedCubeGridSceneFactory();
@@ -198,6 +214,7 @@ namespace city.rendering.tools {
             }
 
             GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
+            GeneratedAuthoringSceneDefinition groundCubeProbeSceneDefinition = GroundCubeProbeFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition scaledCubeSceneDefinition = ScaledCubeFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition coloredCubeGridSceneDefinition;
             GeneratedAuthoringSceneDefinition texturedCubeGridSceneDefinition;
@@ -211,6 +228,7 @@ namespace city.rendering.tools {
             coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(assets.GeneratedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
             texturedCubeGridSceneDefinition = TexturedCubeGridFactory.CreateSceneDefinition(assets.GeneratedCubeModel, TexturedCubeGridFactory.CreateRuntimeMaterials(assets.GeneratedStandardMaterial));
             AuthoringSceneWriteService.WriteScene(projectRootPath, cubeTestSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, groundCubeProbeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, scaledCubeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, coloredCubeGridSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, texturedCubeGridSceneDefinition);

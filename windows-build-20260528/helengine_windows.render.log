@@ -1,0 +1,5 @@
+3d.draw begin
+3d.camera_count=0
+2d.render_camera queue_count=10 viewport=0.000000,0.000000,1280.000000,720.000000
+2d.command textured_quad bounds=796.000000,244.000000,440.000000,440.000000
+2d.summary command_count=51 command_textured_quads=1 command_glyph_quads=42 command_rounded_rects=4

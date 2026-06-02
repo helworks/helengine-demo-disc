@@ -1,5 +1,4 @@
 using city.menu;
-using gameplay.rendering;
 
 namespace city.rendering.tools {
     /// <summary>
@@ -32,7 +31,7 @@ namespace city.rendering.tools {
             FontAsset instructionFont = ResolveRequiredEditorFont();
             DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
             Entity cameraEntity = CreateCameraEntity();
-            instructionOverlayFactory.AttachDesktopInstructionOverlay(cameraEntity, instructionFont);
+            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(instructionFont);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -44,8 +43,10 @@ namespace city.rendering.tools {
                 },
                 RootEntities = new[] {
                     cameraEntity,
+                    instructionOverlayEntity,
                     CreateUiEntity(),
                     CreateDirectionalLightEntity(),
+                    CreateGroundEntity(cubeModel, standardMaterial),
                     CreateCubeEntity(cubeModel, standardMaterial)
                 }
             };
@@ -57,7 +58,8 @@ namespace city.rendering.tools {
         /// <returns>Live authored camera entity.</returns>
         Entity CreateCameraEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("CubeTestCamera");
-            entity.LocalPosition = new float3(0f, 0f, 6f);
+            entity.LocalPosition = new float3(7f, 4.5f, 7f);
+            entity.LocalOrientation = CreateCameraOrientation();
 
             CameraComponent cameraComponent = new CameraComponent {
                 CameraDrawOrder = 0,
@@ -79,11 +81,17 @@ namespace city.rendering.tools {
                 }
             };
             entity.AddComponent(cameraComponent);
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
-                OrbitCenter = float3.Zero,
-                AutoYawSpeedRadians = 0f
-            });
             return entity;
+        }
+
+        /// <summary>
+        /// Creates the authored camera orientation for the minimal static ground-and-cube layout.
+        /// </summary>
+        /// <returns>Camera orientation that frames the elevated cube and ground.</returns>
+        static float4 CreateCameraOrientation() {
+            float4 orientation;
+            float4.CreateFromYawPitchRoll(-2.35619449f, -0.27925268f, 0f, out orientation);
+            return orientation;
         }
 
         /// <summary>
@@ -96,7 +104,6 @@ namespace city.rendering.tools {
                 Font = ResolveRequiredEditorFont(),
                 FontScale = 2f
             });
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
             entity.AddComponent(new DemoDiscLightToggleComponent());
             return entity;
         }
@@ -124,14 +131,15 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates the authored cube mesh entity for the minimal rendering scene.
+        /// Creates the authored ground cube entity for the minimal rendering scene.
         /// </summary>
         /// <param name="cubeModel">Generated cube runtime model assigned to the mesh.</param>
         /// <param name="standardMaterial">Generated standard runtime material assigned to the mesh.</param>
-        /// <returns>Live authored cube entity.</returns>
-        Entity CreateCubeEntity(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
-            Entity entity = Core.Instance.EntityFactory.Create("CubeTestCube");
-            entity.LocalScale = new float3(2f, 2f, 2f);
+        /// <returns>Live authored ground entity.</returns>
+        Entity CreateGroundEntity(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
+            Entity entity = Core.Instance.EntityFactory.Create("CubeTestGround");
+            entity.LocalPosition = new float3(0f, -0.5f, 0f);
+            entity.LocalScale = new float3(14f, 1f, 14f);
 
             MeshComponent meshComponent = new MeshComponent {
                 Model = cubeModel,
@@ -139,11 +147,26 @@ namespace city.rendering.tools {
                 RenderOrder3D = 0
             };
             entity.AddComponent(meshComponent);
+            return entity;
+        }
 
-            entity.AddComponent(new AxisRotationComponent {
-                Axis = new float3(0f, 1f, 0f),
-                AngularSpeedRadiansPerSecond = (float)(Math.PI / 2.0)
-            });
+        /// <summary>
+        /// Creates the authored cube mesh entity for the minimal rendering scene.
+        /// </summary>
+        /// <param name="cubeModel">Generated cube runtime model assigned to the mesh.</param>
+        /// <param name="standardMaterial">Generated standard runtime material assigned to the mesh.</param>
+        /// <returns>Live authored cube entity.</returns>
+        Entity CreateCubeEntity(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
+            Entity entity = Core.Instance.EntityFactory.Create("CubeTestCube");
+            entity.LocalPosition = new float3(0f, 5f, 0f);
+            entity.LocalScale = float3.One;
+
+            MeshComponent meshComponent = new MeshComponent {
+                Model = cubeModel,
+                Material = standardMaterial,
+                RenderOrder3D = 0
+            };
+            entity.AddComponent(meshComponent);
             return entity;
         }
 

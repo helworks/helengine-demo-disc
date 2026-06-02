@@ -28,7 +28,9 @@ namespace gameplay.rendering {
             float4 deltaRotation;
             float4.CreateFromAxisAngle(ref normalizedAxis, deltaAngleRadians, out deltaRotation);
 
-            float4 orientation = Parent.LocalOrientation * deltaRotation;
+            float4 currentOrientation = Parent.LocalOrientation;
+            float4 orientation;
+            float4.Concatenate(ref currentOrientation, ref deltaRotation, out orientation);
             orientation.Normalize();
             Parent.LocalOrientation = orientation;
         }

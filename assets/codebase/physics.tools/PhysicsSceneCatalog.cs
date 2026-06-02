@@ -24,6 +24,11 @@ namespace city.physics.tools {
         public const string DynamicStackBoxesSceneId = "scenes/physics/test_scene_dynamic_stack_boxes.helen";
 
         /// <summary>
+        /// Relative scene id for the minimal falling-cube validation scene.
+        /// </summary>
+        public const string SingleFallingCubeSceneId = "scenes/physics/test_scene_single_falling_cube.helen";
+
+        /// <summary>
         /// Relative scene id for the dynamic sphere-stack validation scene.
         /// </summary>
         public const string DynamicSphereStackSceneId = "scenes/physics/test_scene_dynamic_sphere_stack.helen";
@@ -56,6 +61,7 @@ namespace city.physics.tools {
             CharacterStepsSceneId,
             CharacterMovingPlatformSceneId,
             DynamicStackBoxesSceneId,
+            SingleFallingCubeSceneId,
             DynamicSphereStackSceneId,
             DynamicMixedStackSceneId,
             KinematicPushSceneId,

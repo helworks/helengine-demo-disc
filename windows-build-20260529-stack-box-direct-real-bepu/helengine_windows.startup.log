@@ -1,0 +1,40 @@
+[Host] Lifecycle log opened at C:\dev\helprojs\city\windows-build-20260529-stack-box-direct-real-bepu\helengine_windows.startup.log
+[Host] Host startup began.
+[Host] profile.json was seeded from deployment defaults.
+[Host] Main window configured to default client size 1280x720.
+[Host] Main window loaded and shown.
+[Host] DirectX 11 bootstrap initialized.
+[Host] Runtime scene catalog initialized with 11 scene entries.
+[Host] Runtime platform info resolved to 'windows' version '1.0.0'.
+[Host] 3D physics runtime registered.
+[Host] Loading packaged startup scene.
+[Host] Loading startup scene from runtime scene catalog entry 'DemoDiscMainMenu'.
+[Host] Packaged startup scene applied through scene manager.
+[Host] Packaged startup scene load completed.
+[Host] Packaged startup scene loaded in 0.80 ms.
+[Host] Engine core initialized.
+[Host] Entering render loop.
+[Host] Unhandled structured exception captured by Windows host.
+[Host] Structured exception code=0xC0000005 address=0x7FF706921171
+[Host] Stack[0] 0x7FF706921171 TypeProcessor_3<TwoBodyReferences,Contact4PrestepData,Contact4AccumulatedImpulses>::BundleShouldIntegrate__out2 +0x111 (C:\Users\Helena\AppData\Local\Temp\helengine-platform-build\windows\9c0790c984af4e1cbd47c78ca82816d6\generated-core\TypeProcessor_3.cpp:325)
+[Host] Stack[1] 0x7FF706772A59 TypeProcessor_3<TwoBodyReferences,Contact4PrestepData,Contact4AccumulatedImpulses>::GatherAndIntegrate__ref1_ref2_ref7_out8_out9_out10_out11<HelengineBepuPoseIntegratorCallbacks,BatchShouldConditionallyIntegrate,AccessNoPose,DisallowPoseIntegration> +0xB59 (C:\Users\Helena\AppData\Local\Temp\helengine-platform-build\windows\9c0790c984af4e1cbd47c78ca82816d6\generated-core\TypeProcessor_3.cpp:523)
+[Host] Stack[2] 0x7FF7068131FC TwoBodyTypeProcessor_7<Contact4PrestepData,Contact4AccumulatedImpulses,Contact4Functions,AccessNoPose,AccessNoPose,AccessNoPose,AccessNoPose>::WarmStart__ref0_ref1_ref3<HelengineBepuPoseIntegratorCallbacks,BatchShouldConditionallyIntegrate,DisallowPoseIntegration> +0x1FC (C:\Users\Helena\AppData\Local\Temp\helengine-platform-build\windows\9c0790c984af4e1cbd47c78ca82816d6\generated-core\TwoBodyTypeProcessor_7.cpp:126)
+[Host] Stack[3] 0x7FF7068EFF3E `Solver_1<HelengineBepuPoseIntegratorCallbacks>::WarmStartBlock__ref5<DisallowPoseIntegration>'::`10'::<lambda_2>::operator() +0xF1E (C:\Users\Helena\AppData\Local\Temp\helengine-platform-build\windows\9c0790c984af4e1cbd47c78ca82816d6\generated-core\Solver_1.cpp:1120)
+[Host] Stack[4] 0x7FF7068082C2 Solver_1<HelengineBepuPoseIntegratorCallbacks>::WarmStartBlock__ref5<DisallowPoseIntegration> +0x1B2 (C:\Users\Helena\AppData\Local\Temp\helengine-platform-build\windows\9c0790c984af4e1cbd47c78ca82816d6\generated-core\Solver_1.cpp:1090)
+[Host] Stack[5] 0x7FF7069773B9 Solver_1<HelengineBepuPoseIntegratorCallbacks>::Solve +0x609 (C:\Users\Helena\AppData\Local\Temp\helengine-platform-build\windows\9c0790c984af4e1cbd47c78ca82816d6\generated-core\Solver_1.cpp:381)
+[Host] Stack[6] 0x7FF706518540 Simulation::Solve +0x110 (C:\Users\Helena\AppData\Local\Temp\helengine-platform-build\windows\9c0790c984af4e1cbd47c78ca82816d6\generated-core\Simulation.cpp:438)
+[Host] Stack[7] 0x7FF70659D1E3 DefaultTimestepper::Timestep +0xD3 (C:\Users\Helena\AppData\Local\Temp\helengine-platform-build\windows\9c0790c984af4e1cbd47c78ca82816d6\generated-core\DefaultTimestepper.cpp:48)
+[Host] Stack[8] 0x7FF7065187CD Simulation::Timestep +0xAD (C:\Users\Helena\AppData\Local\Temp\helengine-platform-build\windows\9c0790c984af4e1cbd47c78ca82816d6\generated-core\Simulation.cpp:459)
+[Host] Stack[9] 0x7FF706515504 BepuPhysicsWorld3D::Step +0x84 (C:\Users\Helena\AppData\Local\Temp\helengine-platform-build\windows\9c0790c984af4e1cbd47c78ca82816d6\generated-core\BepuPhysicsWorld3D.cpp:143)
+[Host] Stack[10] 0x7FF706455BE9 Core::UpdatePhysics +0xB9 (C:\Users\Helena\AppData\Local\Temp\helengine-platform-build\windows\9c0790c984af4e1cbd47c78ca82816d6\generated-core\Core.cpp:779)
+[Host] Stack[11] 0x7FF70645547E Core::AdvanceUpdate +0x32E (C:\Users\Helena\AppData\Local\Temp\helengine-platform-build\windows\9c0790c984af4e1cbd47c78ca82816d6\generated-core\Core.cpp:704)
+[Host] Stack[12] 0x7FF706454FAC Core::Update +0x4C (C:\Users\Helena\AppData\Local\Temp\helengine-platform-build\windows\9c0790c984af4e1cbd47c78ca82816d6\generated-core\Core.cpp:641)
+[Host] Stack[13] 0x7FF7063F3ADB helengine::windows::Win32Application::RenderFrame +0x15B (C:\dev\helworks\helengine-windows\src\platform\windows\win32\win32_application.cpp:1548)
+[Host] Stack[14] 0x7FF7063EEA4A helengine::windows::Win32Application::Run +0x13A (C:\dev\helworks\helengine-windows\src\platform\windows\win32\win32_application.cpp:535)
+[Host] Stack[15] 0x7FF7063CFF72 wWinMain +0x62 (C:\dev\helworks\helengine-windows\src\main.cpp:8)
+[Host] Stack[16] 0x7FF706AA49A2 invoke_main +0x32 (D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_common.inl:123)
+[Host] Stack[17] 0x7FF706AA4852 __scrt_common_main_seh +0x132 (D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_common.inl:288)
+[Host] Stack[18] 0x7FF706AA470E __scrt_common_main +0xE (D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_common.inl:331)
+[Host] Stack[19] 0x7FF706AA4A3E wWinMainCRTStartup +0xE (D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_wwinmain.cpp:17)
+[Host] Stack[20] 0x7FFD2F24E957 BaseThreadInitThunk +0x17
+[Host] Stack[21] 0x7FFD313E427C RtlUserThreadStart +0x2C

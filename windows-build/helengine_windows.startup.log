@@ -1,6 +1,6 @@
 [Host] Lifecycle log opened at C:\dev\helprojs\city\windows-build\helengine_windows.startup.log
 [Host] Host startup began.
-[Host] profile.json was seeded from deployment defaults.
+[Host] profile.json loaded successfully.
 [Host] Main window configured to default client size 1280x720.
 [Host] Main window loaded and shown.
 [Host] DirectX 11 bootstrap initialized.
@@ -11,6 +11,7 @@
 [Host] Loading startup scene from runtime scene catalog entry 'test_scene_dynamic_mixed_stack'.
 [Host] Packaged startup scene applied through scene manager.
 [Host] Packaged startup scene load completed.
-[Host] Packaged startup scene loaded in 55.53 ms.
+[Host] Packaged startup scene loaded in 58.00 ms.
 [Host] Engine core initialized.
 [Host] Entering render loop.
+[Host] Host shutdown requested with exit code 0.

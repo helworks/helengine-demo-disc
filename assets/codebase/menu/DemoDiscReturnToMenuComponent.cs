@@ -180,8 +180,52 @@ namespace city.menu {
             }
 
             string resolvedSceneId = SceneMapComponent.ResolveSceneId(MainMenuSceneId);
+            if (!CanLoadRuntimeScene(resolvedSceneId)) {
+                return;
+            }
+
             SceneLoadWasRequested = true;
             Core.Instance.SceneManager.LoadScene(resolvedSceneId, SceneLoadMode.Single);
+        }
+
+        /// <summary>
+        /// Returns whether the supplied runtime scene id is currently available in the active packaged scene catalog.
+        /// </summary>
+        /// <param name="sceneId">Runtime scene id being evaluated for a load request.</param>
+        /// <returns>True when the scene exists in the active runtime catalog; otherwise false.</returns>
+        bool CanLoadRuntimeScene(string sceneId) {
+            if (string.IsNullOrWhiteSpace(sceneId)) {
+                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            }
+            if (Core.Instance == null) {
+                throw new InvalidOperationException("A core instance must exist before loading runtime scenes.");
+            }
+            if (Core.Instance.SceneManager == null) {
+                throw new InvalidOperationException("Core scene manager must be initialized before runtime scene loading can occur.");
+            }
+
+            CoreInitializationOptions initializationOptions = Core.Instance.InitializationOptions;
+            RuntimeSceneCatalog sceneCatalog = initializationOptions != null ? initializationOptions.SceneCatalog : null;
+            if (sceneCatalog == null) {
+                return true;
+            }
+
+            RuntimeSceneCatalogEntry[] entries = sceneCatalog.Entries;
+            if (entries == null) {
+                return false;
+            }
+
+            for (int entryIndex = 0; entryIndex < entries.Length; entryIndex++) {
+                RuntimeSceneCatalogEntry entry = entries[entryIndex];
+                if (entry == null) {
+                    continue;
+                }
+                if (string.Equals(entry.SceneId, sceneId, StringComparison.OrdinalIgnoreCase)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

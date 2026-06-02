@@ -337,13 +337,14 @@ namespace city.rendering.tools {
             FontAsset instructionFont = ResolveRequiredEditorFont();
             DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
             Entity[] cubeEntities = CreateCubeEntities(cubeModel, texturedMaterials);
-            Entity[] rootEntities = new Entity[cubeEntities.Length + 3];
+            Entity[] rootEntities = new Entity[cubeEntities.Length + 4];
             Entity cameraEntity = CreateCameraEntity();
-            instructionOverlayFactory.AttachDesktopInstructionOverlay(cameraEntity, instructionFont);
+            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(instructionFont);
             rootEntities[0] = cameraEntity;
-            rootEntities[1] = CreateUiEntity();
-            rootEntities[2] = CreateDirectionalLightEntity();
-            Array.Copy(cubeEntities, 0, rootEntities, 3, cubeEntities.Length);
+            rootEntities[1] = instructionOverlayEntity;
+            rootEntities[2] = CreateUiEntity();
+            rootEntities[3] = CreateDirectionalLightEntity();
+            Array.Copy(cubeEntities, 0, rootEntities, 4, cubeEntities.Length);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
