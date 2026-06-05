@@ -12,6 +12,11 @@ namespace city.physics.tools {
         const string PhysicsSceneFolderRelativePath = "scenes/physics";
 
         /// <summary>
+        /// Stable desktop showcase UI root name that should not remain in DS direct-start physics scenes.
+        /// </summary>
+        const string DesktopShowcaseUiRootName = "ShowcaseUi";
+
+        /// <summary>
         /// Writer used to persist Nintendo DS companion scenes through the shared generated authored-scene pipeline.
         /// </summary>
         readonly GeneratedAuthoringSceneWriteService SceneWriteService;
@@ -107,15 +112,6 @@ namespace city.physics.tools {
         }
 
         /// <summary>
-        /// Creates the Nintendo DS bottom-screen instruction roots shared by the curated physics showcase scenes.
-        /// </summary>
-        /// <returns>Bottom-screen instruction roots for the curated physics showcase scenes.</returns>
-        Entity[] CreatePhysicsShowcaseNintendoDsBottomInstructionRoots() {
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
-            return instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(ResolveRequiredEditorFont());
-        }
-
-        /// <summary>
         /// Builds one playable physics showcase DS companion scene directly from the shared live scene-definition path so the DS workflow does not depend on the editor-only reloadability of the desktop `.helen` file.
         /// </summary>
         /// <param name="fullProjectRootPath">Absolute city project root path.</param>
@@ -132,22 +128,46 @@ namespace city.physics.tools {
                 fullProjectRootPath,
                 sceneEntry.SceneId,
                 false);
-            Entity[] bottomScreenRoots = CreatePhysicsShowcaseNintendoDsBottomInstructionRoots();
+            Entity[] topScreenRoots = RemoveDesktopShowcaseUiRoot(sceneDefinition.RootEntities);
             uint nextEntityId = 1u;
-            nextEntityId = AssignFreshGeneratedEntityIds(sceneDefinition.RootEntities, nextEntityId);
-            AssignFreshGeneratedEntityIds(bottomScreenRoots, nextEntityId);
+            AssignFreshGeneratedEntityIds(topScreenRoots, nextEntityId);
             try {
                 SceneWriteService.WriteNintendoDsCompanionScene(
                     fullProjectRootPath,
                     BuildNintendoDsSceneAssetId(sceneEntry.NintendoDsSceneId),
                     sceneDefinition.SceneSettings,
-                    sceneDefinition.RootEntities,
-                    true,
-                    bottomScreenRoots);
+                    topScreenRoots,
+                    false,
+                    Array.Empty<Entity>());
             } finally {
                 DisposeRoots(sceneDefinition.RootEntities);
-                DisposeRoots(bottomScreenRoots);
             }
+        }
+
+        /// <summary>
+        /// Removes the desktop showcase UI root from one generated playable physics showcase root set before the DS scaffold persists it.
+        /// </summary>
+        /// <param name="roots">Generated playable physics showcase roots.</param>
+        /// <returns>Generated roots without the desktop showcase UI root.</returns>
+        static Entity[] RemoveDesktopShowcaseUiRoot(Entity[] roots) {
+            if (roots == null) {
+                throw new ArgumentNullException(nameof(roots));
+            }
+
+            List<Entity> filteredRoots = new List<Entity>(roots.Length);
+            for (int index = 0; index < roots.Length; index++) {
+                Entity root = roots[index];
+                if (root == null) {
+                    continue;
+                } else if (root is EditorEntity editorRoot
+                    && string.Equals(editorRoot.Name, DesktopShowcaseUiRootName, StringComparison.Ordinal)) {
+                    continue;
+                }
+
+                filteredRoots.Add(root);
+            }
+
+            return filteredRoots.ToArray();
         }
 
         /// <summary>
@@ -254,16 +274,5 @@ namespace city.physics.tools {
             return createdSaveComponent;
         }
 
-        /// <summary>
-        /// Resolves the editor font required by the shared physics showcase instruction overlay.
-        /// </summary>
-        /// <returns>Loaded editor font asset.</returns>
-        FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
-                throw new InvalidOperationException("A default editor font must be loaded before Nintendo DS physics showcase scenes can be generated.");
-            }
-
-            return editorCore.DefaultFontAssetForEditor;
-        }
     }
 }

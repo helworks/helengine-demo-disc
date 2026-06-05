@@ -17,6 +17,11 @@ namespace city.rendering.tools {
         const string DesktopInstructionOverlayRootName = "DemoSceneInstructionViewport";
 
         /// <summary>
+        /// Stable desktop showcase UI root name that should not remain in the DS playable physics companion scenes.
+        /// </summary>
+        const string DesktopShowcaseUiRootName = "ShowcaseUi";
+
+        /// <summary>
         /// Writer used to persist Nintendo DS companion scenes through the shared generated authored-scene pipeline.
         /// </summary>
         readonly GeneratedAuthoringSceneWriteService SceneWriteService;
@@ -82,8 +87,7 @@ namespace city.rendering.tools {
                 Entity[] bottomScreenRoots = Array.Empty<Entity>();
                 Entity[] topScreenRoots = loadedScene.RootEntities;
                 if (IsPlayablePhysicsShowcaseScene(sceneEntry)) {
-                    topScreenRoots = RemoveDesktopInstructionOverlayRoot(loadedScene.RootEntities);
-                    bottomScreenRoots = CreatePhysicsShowcaseNintendoDsBottomInstructionRoots();
+                    topScreenRoots = RemoveDesktopOnlyRoots(loadedScene.RootEntities);
                 }
 
                 SceneWriteService.WriteNintendoDsCompanionScene(
@@ -114,19 +118,11 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates the Nintendo DS bottom-screen instruction roots shared by the curated physics showcase scenes.
-        /// </summary>
-        /// <returns>Bottom-screen instruction roots for the curated physics showcase scenes.</returns>
-        Entity[] CreatePhysicsShowcaseNintendoDsBottomInstructionRoots() {
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
-            return instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(ResolveRequiredEditorFont());
-        }
-
-        /// Removes the desktop instruction overlay viewport root from one playable showcase scene before the DS scaffold reuses the authored top-screen roots.
+        /// Removes desktop-only overlay and showcase UI roots from one playable showcase scene before the DS scaffold reuses the authored top-screen roots.
         /// </summary>
         /// <param name="rootEntities">Authored top-screen roots loaded from the desktop scene file.</param>
-        /// <returns>Top-screen roots without the desktop instruction overlay viewport.</returns>
-        static Entity[] RemoveDesktopInstructionOverlayRoot(EditorEntity[] rootEntities) {
+        /// <returns>Top-screen roots without desktop-only UI overlays.</returns>
+        static Entity[] RemoveDesktopOnlyRoots(EditorEntity[] rootEntities) {
             if (rootEntities == null) {
                 throw new ArgumentNullException(nameof(rootEntities));
             }
@@ -137,6 +133,8 @@ namespace city.rendering.tools {
                 if (rootEntity == null) {
                     continue;
                 } else if (string.Equals(rootEntity.Name, DesktopInstructionOverlayRootName, StringComparison.Ordinal)) {
+                    continue;
+                } else if (string.Equals(rootEntity.Name, DesktopShowcaseUiRootName, StringComparison.Ordinal)) {
                     continue;
                 }
 
@@ -174,15 +172,5 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Resolves the editor font required by the shared physics showcase instruction overlay.
-        /// </summary>
-        /// <returns>Loaded editor font asset.</returns>
-        FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
-                throw new InvalidOperationException("A default editor font must be loaded before Nintendo DS physics showcase scenes can be generated.");
-            }
-
-            return editorCore.DefaultFontAssetForEditor;
-        }
     }
 }
