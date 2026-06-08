@@ -1,10 +1,17 @@
 using city.menu;
+using gameplay.rendering;
+using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
-    /// Builds the canonical live-authored scene definition for the minimal cube rendering test.
+    /// Builds the canonical live-authored scene definition for the minimal rotating cube rendering test.
     /// </summary>
     public sealed class CubeTestSceneFactory {
+        /// <summary>
+        /// Stable angular speed used by the rotating cube in radians per second.
+        /// </summary>
+        const float CubeAngularSpeedRadians = (float)(Math.PI / 2.0);
+
         /// <summary>
         /// Stable scene id used by the generated cube-test asset.
         /// </summary>
@@ -38,15 +45,14 @@ namespace city.rendering.tools {
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
                     SceneId = RenderingSceneGenerator.CubeTestNintendoDsSceneId,
-                    UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont)
+                    UseDefaultBottomOverlay = false,
+                    BottomScreenRootEntities = Array.Empty<Entity>()
                 },
                 RootEntities = new[] {
                     cameraEntity,
                     instructionOverlayEntity,
                     CreateUiEntity(),
                     CreateDirectionalLightEntity(),
-                    CreateGroundEntity(cubeModel, standardMaterial),
                     CreateCubeEntity(cubeModel, standardMaterial)
                 }
             };
@@ -58,7 +64,8 @@ namespace city.rendering.tools {
         /// <returns>Live authored camera entity.</returns>
         Entity CreateCameraEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("CubeTestCamera");
-            entity.LocalPosition = new float3(7f, 4.5f, 7f);
+            entity.LocalPosition = new float3(0f, 0f, 5f);
+            entity.LocalScale = float3.One;
             entity.LocalOrientation = CreateCameraOrientation();
 
             CameraComponent cameraComponent = new CameraComponent {
@@ -81,31 +88,21 @@ namespace city.rendering.tools {
                 }
             };
             entity.AddComponent(cameraComponent);
+            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+                OrbitCenter = float3.Zero,
+                AutoYawSpeedRadians = 0f
+            });
             return entity;
         }
 
         /// <summary>
-        /// Creates the authored camera orientation for the minimal static ground-and-cube layout.
+        /// Creates the authored camera orientation for the rotating cube layout.
         /// </summary>
-        /// <returns>Camera orientation that frames the elevated cube and ground.</returns>
+        /// <returns>Camera orientation that frames the cube at the origin.</returns>
         static float4 CreateCameraOrientation() {
             float4 orientation;
-            float4.CreateFromYawPitchRoll(-2.35619449f, -0.27925268f, 0f, out orientation);
+            float4.CreateFromYawPitchRoll(0f, 0f, 0f, out orientation);
             return orientation;
-        }
-
-        /// <summary>
-        /// Creates the authored UI root entity for the cube-test scene.
-        /// </summary>
-        /// <returns>Live authored UI entity.</returns>
-        Entity CreateUiEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("CubeTestUi");
-            entity.AddComponent(new FPSComponent {
-                Font = ResolveRequiredEditorFont(),
-                FontScale = 2f
-            });
-            entity.AddComponent(new DemoDiscLightToggleComponent());
-            return entity;
         }
 
         /// <summary>
@@ -118,6 +115,7 @@ namespace city.rendering.tools {
 
             Entity entity = Core.Instance.EntityFactory.Create("CubeTestSun");
             entity.LocalPosition = new float3(0f, 4f, 0f);
+            entity.LocalScale = float3.One;
             entity.LocalOrientation = orientation;
             entity.AddComponent(new DirectionalLightComponent {
                 Color = new float4(1f, 1f, 1f, 1f),
@@ -131,22 +129,20 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates the authored ground cube entity for the minimal rendering scene.
+        /// Creates the authored UI root entity for the cube-test scene.
         /// </summary>
-        /// <param name="cubeModel">Generated cube runtime model assigned to the mesh.</param>
-        /// <param name="standardMaterial">Generated standard runtime material assigned to the mesh.</param>
-        /// <returns>Live authored ground entity.</returns>
-        Entity CreateGroundEntity(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
-            Entity entity = Core.Instance.EntityFactory.Create("CubeTestGround");
-            entity.LocalPosition = new float3(0f, -0.5f, 0f);
-            entity.LocalScale = new float3(14f, 1f, 14f);
-
-            MeshComponent meshComponent = new MeshComponent {
-                Model = cubeModel,
-                Material = standardMaterial,
-                RenderOrder3D = 0
-            };
-            entity.AddComponent(meshComponent);
+        /// <returns>Live authored UI root entity.</returns>
+        Entity CreateUiEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("CubeTestUi");
+            entity.LocalPosition = float3.Zero;
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = float4.Identity;
+            entity.AddComponent(new FPSComponent {
+                Font = ResolveRequiredEditorFont(),
+                FontScale = 2f
+            });
+            entity.AddComponent(new DemoDiscReturnToMenuComponent());
+            entity.AddComponent(new DemoDiscLightToggleComponent());
             return entity;
         }
 
@@ -158,8 +154,9 @@ namespace city.rendering.tools {
         /// <returns>Live authored cube entity.</returns>
         Entity CreateCubeEntity(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
             Entity entity = Core.Instance.EntityFactory.Create("CubeTestCube");
-            entity.LocalPosition = new float3(0f, 5f, 0f);
-            entity.LocalScale = float3.One;
+            entity.LocalPosition = new float3(0f, 0f, 0f);
+            entity.LocalScale = new float3(1f, 1f, 1f);
+            entity.LocalOrientation = float4.Identity;
 
             MeshComponent meshComponent = new MeshComponent {
                 Model = cubeModel,
@@ -167,13 +164,17 @@ namespace city.rendering.tools {
                 RenderOrder3D = 0
             };
             entity.AddComponent(meshComponent);
+            entity.AddComponent(new city.rendering.CubeTestSpinComponent {
+                BaseYawRadians = 0f,
+                AngularSpeedRadians = CubeAngularSpeedRadians
+            });
             return entity;
         }
 
         /// <summary>
-        /// Resolves the optional font reference assigned to the generated FPS overlay during live authoring.
+        /// Resolves the editor font used by the live instruction and UI entities.
         /// </summary>
-        /// <returns>Optional font asset assigned to the FPS component.</returns>
+        /// <returns>Loaded default editor font.</returns>
         FontAsset ResolveRequiredEditorFont() {
             if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the cube-test scene can be generated.");
@@ -181,9 +182,5 @@ namespace city.rendering.tools {
 
             return editorCore.DefaultFontAssetForEditor;
         }
-
     }
 }
-
-
-
