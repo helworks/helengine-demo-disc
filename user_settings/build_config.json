@@ -1,0 +1,565 @@
+﻿{
+    "platforms":  [
+                      {
+                          "platformId":  "windows",
+                          "selectedSceneIds":  [
+                                                   "test_scene_dynamic_stack_boxes"
+                                               ],
+                          "sceneOrders":  [
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_stack_boxes",
+                                                  "orderNumber":  1
+                                              }
+                                          ],
+                          "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\windows",
+                          "debugBuild":  true,
+                          "selectedBuildProfileId":  "debug",
+                          "selectedGraphicsProfileId":  "directx11",
+                          "selectedBuildOptionValues":  {
+                                                            "texture-scale-percent":  "100",
+                                                            "shader-variant-pruning":  "true"
+                                                        },
+                          "selectedGraphicsOptionValues":  {
+                                                               "default-width":  "1280",
+                                                               "default-height":  "720",
+                                                               "vsync-enabled":  "true",
+                                                               "fullscreen-enabled":  "false"
+                                                           },
+                          "selectedCodegenProfileId":  "default",
+                          "selectedStorageProfileId":  "loose-files",
+                          "selectedMediaProfileId":  "windows-install-tree",
+                          "selectedCodegenOptionValues":  {
+                                                              "write-conversion-report":  "true",
+                                                              "include-project-defined-preprocessor-symbols":  "false",
+                                                              "load-native-runtime-metadata":  "true",
+                                                              "type-remaps":  "System.Numerics.Vector2=helengine.float2;System.Numerics.Vector3=helengine.float3;System.Numerics.Vector4=helengine.float4;System.Numerics.Quaternion=helengine.float4"
+                                                          }
+                      },
+                      {
+                          "platformId":  "ps2",
+                          "selectedSceneIds":  [
+                                                   "DemoDiscMainMenu",
+                                                   "cube_test",
+                                                   "scaled_cube",
+                                                   "colored_cube_grid",
+                                                   "textured_cube_grid",
+                                                   "axis_test",
+                                                   "axis_test2",
+                                                   "directional_shadow_plaza",
+                                                   "test_scene_dynamic_stack_boxes",
+                                                   "test_scene_dynamic_sphere_stack"
+                                               ],
+                          "sceneOrders":  [
+                                              {
+                                                  "sceneId":  "DemoDiscMainMenu",
+                                                  "orderNumber":  1
+                                              },
+                                              {
+                                                  "sceneId":  "cube_test",
+                                                  "orderNumber":  2
+                                              },
+                                              {
+                                                  "sceneId":  "scaled_cube",
+                                                  "orderNumber":  3
+                                              },
+                                              {
+                                                  "sceneId":  "colored_cube_grid",
+                                                  "orderNumber":  4
+                                              },
+                                              {
+                                                  "sceneId":  "textured_cube_grid",
+                                                  "orderNumber":  5
+                                              },
+                                              {
+                                                  "sceneId":  "axis_test",
+                                                  "orderNumber":  6
+                                              },
+                                              {
+                                                  "sceneId":  "axis_test2",
+                                                  "orderNumber":  7
+                                              },
+                                              {
+                                                  "sceneId":  "directional_shadow_plaza",
+                                                  "orderNumber":  8
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_stack_boxes",
+                                                  "orderNumber":  9
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_sphere_stack",
+                                                  "orderNumber":  10
+                                              }
+                                          ],
+                          "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\ps2-city-demo-disc",
+                          "debugBuild":  true,
+                          "selectedBuildProfileId":  "ps2-default",
+                          "selectedGraphicsProfileId":  "ps2-standard-forward",
+                          "selectedBuildOptionValues":  {
+                                                            "texture-scale-percent":  "100",
+                                                            "shader-variant-pruning":  "true"
+                                                        },
+                          "selectedGraphicsOptionValues":  {
+                                                               "default-width":  "640",
+                                                               "default-height":  "448",
+                                                               "vsync-enabled":  "true",
+                                                               "fullscreen-enabled":  "false",
+                                                               "depth-handler-mode":  "hardware"
+                                                           },
+                          "selectedCodegenProfileId":  "default",
+                          "selectedStorageProfileId":  "disc-layout",
+                          "selectedMediaProfileId":  "ps2-install-tree",
+                          "selectedCodegenOptionValues":  {
+                                                              "write-conversion-report":  "true",
+                                                              "include-project-defined-preprocessor-symbols":  "false",
+                                                              "load-native-runtime-metadata":  "true"
+                                                          }
+                      },
+                      {
+                          "platformId":  "psp",
+                          "selectedSceneIds":  [
+                                                   "cube_test"
+                                               ],
+                          "sceneOrders":  [
+                                              {
+                                                  "sceneId":  "cube_test",
+                                                  "orderNumber":  1
+                                              }
+                                          ],
+                          "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\psp-platform-info-startup",
+                          "debugBuild":  true,
+                          "selectedBuildProfileId":  "debug",
+                          "selectedGraphicsProfileId":  "psp-forward",
+                          "selectedBuildOptionValues":  {
+                                                            "texture-scale-percent":  "100",
+                                                            "shader-variant-pruning":  "true"
+                                                        },
+                          "selectedGraphicsOptionValues":  {
+                                                               "default-width":  "480",
+                                                               "default-height":  "272",
+                                                               "vsync-enabled":  "true",
+                                                               "fullscreen-enabled":  "false"
+                                                           },
+                          "selectedCodegenProfileId":  "default",
+                          "selectedStorageProfileId":  "homebrew-app",
+                          "selectedMediaProfileId":  "psp-game-folder",
+                          "selectedCodegenOptionValues":  {
+                                                              "write-conversion-report":  "true",
+                                                              "include-project-defined-preprocessor-symbols":  "false",
+                                                              "load-native-runtime-metadata":  "true"
+                                                          }
+                      },
+                      {
+                          "platformId":  "gamecube",
+                          "selectedSceneIds":  [
+                                                   "DemoDiscMainMenu",
+                                                   "cube_test",
+                                                   "scaled_cube",
+                                                   "colored_cube_grid",
+                                                   "textured_cube_grid",
+                                                   "axis_test",
+                                                   "axis_test2",
+                                                   "directional_shadow_plaza",
+                                                   "test_scene_dynamic_stack_boxes",
+                                                   "test_scene_dynamic_sphere_stack",
+                                                   "test_scene_dynamic_mixed_stack"
+                                               ],
+                          "sceneOrders":  [
+                                              {
+                                                  "sceneId":  "DemoDiscMainMenu",
+                                                  "orderNumber":  1
+                                              },
+                                              {
+                                                  "sceneId":  "cube_test",
+                                                  "orderNumber":  2
+                                              },
+                                              {
+                                                  "sceneId":  "scaled_cube",
+                                                  "orderNumber":  3
+                                              },
+                                              {
+                                                  "sceneId":  "colored_cube_grid",
+                                                  "orderNumber":  4
+                                              },
+                                              {
+                                                  "sceneId":  "textured_cube_grid",
+                                                  "orderNumber":  5
+                                              },
+                                              {
+                                                  "sceneId":  "axis_test",
+                                                  "orderNumber":  6
+                                              },
+                                              {
+                                                  "sceneId":  "axis_test2",
+                                                  "orderNumber":  7
+                                              },
+                                              {
+                                                  "sceneId":  "directional_shadow_plaza",
+                                                  "orderNumber":  8
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_stack_boxes",
+                                                  "orderNumber":  9
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_sphere_stack",
+                                                  "orderNumber":  10
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_mixed_stack",
+                                                  "orderNumber":  11
+                                              }
+                                          ],
+                          "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\gamecube",
+                          "debugBuild":  true,
+                          "selectedBuildProfileId":  "gamecube-default",
+                          "selectedGraphicsProfileId":  "gx",
+                          "selectedBuildOptionValues":  {
+                                                            "texture-scale-percent":  "100",
+                                                            "shader-variant-pruning":  "true"
+                                                        },
+                          "selectedGraphicsOptionValues":  {
+                                                               "default-width":  "640",
+                                                               "default-height":  "480",
+                                                               "vsync-enabled":  "true",
+                                                               "fullscreen-enabled":  "true"
+                                                           },
+                          "selectedCodegenProfileId":  "default",
+                          "selectedStorageProfileId":  "disc-layout",
+                          "selectedMediaProfileId":  "gamecube-install-tree",
+                          "selectedCodegenOptionValues":  {
+                                                              "write-conversion-report":  "true",
+                                                              "include-project-defined-preprocessor-symbols":  "false",
+                                                              "load-native-runtime-metadata":  "true"
+                                                          }
+                      },
+                      {
+                          "platformId":  "wii",
+                          "selectedSceneIds":  [
+                                                   "DemoDiscMainMenu",
+                                                   "cube_test",
+                                                   "scaled_cube",
+                                                   "colored_cube_grid",
+                                                   "textured_cube_grid",
+                                                   "axis_test",
+                                                   "axis_test2",
+                                                   "directional_shadow_plaza",
+                                                   "test_scene_dynamic_stack_boxes",
+                                                   "test_scene_dynamic_sphere_stack",
+                                                   "test_scene_dynamic_mixed_stack"
+                                               ],
+                          "sceneOrders":  [
+                                              {
+                                                  "sceneId":  "DemoDiscMainMenu",
+                                                  "orderNumber":  1
+                                              },
+                                              {
+                                                  "sceneId":  "cube_test",
+                                                  "orderNumber":  2
+                                              },
+                                              {
+                                                  "sceneId":  "scaled_cube",
+                                                  "orderNumber":  3
+                                              },
+                                              {
+                                                  "sceneId":  "colored_cube_grid",
+                                                  "orderNumber":  4
+                                              },
+                                              {
+                                                  "sceneId":  "textured_cube_grid",
+                                                  "orderNumber":  5
+                                              },
+                                              {
+                                                  "sceneId":  "axis_test",
+                                                  "orderNumber":  6
+                                              },
+                                              {
+                                                  "sceneId":  "axis_test2",
+                                                  "orderNumber":  7
+                                              },
+                                              {
+                                                  "sceneId":  "directional_shadow_plaza",
+                                                  "orderNumber":  8
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_stack_boxes",
+                                                  "orderNumber":  9
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_sphere_stack",
+                                                  "orderNumber":  10
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_mixed_stack",
+                                                  "orderNumber":  11
+                                              }
+                                          ],
+                          "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\wii",
+                          "debugBuild":  true,
+                          "selectedBuildProfileId":  "wii-default",
+                          "selectedGraphicsProfileId":  "",
+                          "selectedBuildOptionValues":  {
+                                                            "texture-scale-percent":  "100",
+                                                            "shader-variant-pruning":  "true"
+                                                        },
+                          "selectedGraphicsOptionValues":  {
+                                                               "default-width":  "640",
+                                                               "default-height":  "480",
+                                                               "vsync-enabled":  "true",
+                                                               "fullscreen-enabled":  "true"
+                                                           },
+                          "selectedCodegenProfileId":  "default",
+                          "selectedStorageProfileId":  "",
+                          "selectedMediaProfileId":  "",
+                          "selectedCodegenOptionValues":  {
+                                                              "write-conversion-report":  "true",
+                                                              "include-project-defined-preprocessor-symbols":  "false",
+                                                              "load-native-runtime-metadata":  "true"
+                                                          }
+                      },
+                      {
+                          "platformId":  "ds",
+                          "selectedSceneIds":  [
+                                                   "colored_cube_grid_ds"
+                                               ],
+                          "sceneOrders":  [
+                                              {
+                                                  "sceneId":  "colored_cube_grid_ds",
+                                                  "orderNumber":  1
+                                              }
+                                          ],
+                          "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\ds",
+                          "debugBuild":  true,
+                          "selectedBuildProfileId":  "ds-default",
+                          "selectedGraphicsProfileId":  "ds-main-2d",
+                          "selectedBuildOptionValues":  {
+                                                            "startup-top-screen-color":  "#FF0000",
+                                                            "startup-bottom-screen-color":  "#0000FF"
+                                                        },
+                          "selectedGraphicsOptionValues":  {
+
+                                                           },
+                          "selectedCodegenProfileId":  "default",
+                          "selectedStorageProfileId":  "nitrofs-package",
+                          "selectedMediaProfileId":  "ds-cartridge",
+                          "selectedCodegenOptionValues":  {
+                                                              "load-native-runtime-metadata":  "true",
+                                                              "include-project-defined-preprocessor-symbols":  "false",
+                                                              "write-conversion-report":  "true",
+                                                              "type-remaps":  "System.Numerics.Vector2=helengine.float2;System.Numerics.Vector3=helengine.float3;System.Numerics.Vector4=helengine.float4;System.Numerics.Quaternion=helengine.float4"
+                                                          }
+                      },
+                      {
+                          "platformId":  "3ds",
+                          "selectedSceneIds":  [
+                                                   "GeneratedBootScene",
+                                                   "DemoDiscMainMenuDs",
+                                                   "axis_test2_ds",
+                                                   "axis_test_ds",
+                                                   "colored_cube_grid_ds",
+                                                   "cube_test_ds",
+                                                   "directional_shadow_plaza_ds",
+                                                   "scaled_cube_ds",
+                                                   "test_scene_dynamic_mixed_stack_ds",
+                                                   "test_scene_dynamic_sphere_stack_ds",
+                                                   "test_scene_dynamic_stack_boxes_ds",
+                                                   "spotlight_street_slice_ds",
+                                                   "textured_cube_grid_ds"
+                                               ],
+                          "sceneOrders":  [
+                                              {
+                                                  "sceneId":  "GeneratedBootScene",
+                                                  "orderNumber":  1
+                                              },
+                                              {
+                                                  "sceneId":  "DemoDiscMainMenuDs",
+                                                  "orderNumber":  2
+                                              },
+                                              {
+                                                  "sceneId":  "axis_test2_ds",
+                                                  "orderNumber":  3
+                                              },
+                                              {
+                                                  "sceneId":  "axis_test_ds",
+                                                  "orderNumber":  4
+                                              },
+                                              {
+                                                  "sceneId":  "colored_cube_grid_ds",
+                                                  "orderNumber":  5
+                                              },
+                                              {
+                                                  "sceneId":  "cube_test_ds",
+                                                  "orderNumber":  6
+                                              },
+                                              {
+                                                  "sceneId":  "directional_shadow_plaza_ds",
+                                                  "orderNumber":  7
+                                              },
+                                              {
+                                                  "sceneId":  "scaled_cube_ds",
+                                                  "orderNumber":  8
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_mixed_stack_ds",
+                                                  "orderNumber":  9
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_sphere_stack_ds",
+                                                  "orderNumber":  10
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_stack_boxes_ds",
+                                                  "orderNumber":  11
+                                              },
+                                              {
+                                                  "sceneId":  "spotlight_street_slice_ds",
+                                                  "orderNumber":  12
+                                              },
+                                              {
+                                                  "sceneId":  "textured_cube_grid_ds",
+                                                  "orderNumber":  13
+                                              }
+                                          ],
+                          "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\3ds",
+                          "debugBuild":  true,
+                          "selectedBuildProfileId":  "3ds-default",
+                          "selectedGraphicsProfileId":  "3ds-bootstrap",
+                          "selectedBuildOptionValues":  {
+                                                            "startup-top-screen-color":  "#FF0000",
+                                                            "startup-bottom-screen-color":  "#0000FF"
+                                                        },
+                          "selectedGraphicsOptionValues":  {
+
+                                                           },
+                          "selectedCodegenProfileId":  "default",
+                          "selectedStorageProfileId":  "romfs-package",
+                          "selectedMediaProfileId":  "3dsx-homebrew",
+                          "selectedCodegenOptionValues":  {
+                                                              "load-native-runtime-metadata":  "true",
+                                                              "include-project-defined-preprocessor-symbols":  "false",
+                                                              "write-conversion-report":  "true"
+                                                          }
+                      },
+                      {
+                          "platformId":  "psvita",
+                          "selectedSceneIds":  [
+                                                   "cube_test",
+                                                   "DemoDiscMainMenu",
+                                                   "scaled_cube",
+                                                   "colored_cube_grid",
+                                                   "textured_cube_grid",
+                                                   "axis_test",
+                                                   "axis_test2",
+                                                   "directional_shadow_plaza",
+                                                   "test_scene_dynamic_stack_boxes",
+                                                   "test_scene_dynamic_sphere_stack",
+                                                   "test_scene_dynamic_mixed_stack"
+                                               ],
+                          "sceneOrders":  [
+                                              {
+                                                  "sceneId":  "cube_test",
+                                                  "orderNumber":  1
+                                              },
+                                              {
+                                                  "sceneId":  "DemoDiscMainMenu",
+                                                  "orderNumber":  2
+                                              },
+                                              {
+                                                  "sceneId":  "scaled_cube",
+                                                  "orderNumber":  3
+                                              },
+                                              {
+                                                  "sceneId":  "colored_cube_grid",
+                                                  "orderNumber":  4
+                                              },
+                                              {
+                                                  "sceneId":  "textured_cube_grid",
+                                                  "orderNumber":  5
+                                              },
+                                              {
+                                                  "sceneId":  "axis_test",
+                                                  "orderNumber":  6
+                                              },
+                                              {
+                                                  "sceneId":  "axis_test2",
+                                                  "orderNumber":  7
+                                              },
+                                              {
+                                                  "sceneId":  "directional_shadow_plaza",
+                                                  "orderNumber":  8
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_stack_boxes",
+                                                  "orderNumber":  9
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_sphere_stack",
+                                                  "orderNumber":  10
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_mixed_stack",
+                                                  "orderNumber":  11
+                                              }
+                                          ],
+                          "outputDirectoryPath":  "C:\\tmp\\city-psvita-main-menu-cli",
+                          "debugBuild":  true,
+                          "selectedBuildProfileId":  "debug",
+                          "selectedGraphicsProfileId":  "psvita-forward",
+                          "selectedBuildOptionValues":  {
+                                                            "texture-scale-percent":  "100",
+                                                            "shader-variant-pruning":  "true"
+                                                        },
+                          "selectedGraphicsOptionValues":  {
+                                                               "default-width":  "960",
+                                                               "default-height":  "544",
+                                                               "vsync-enabled":  "true",
+                                                               "fullscreen-enabled":  "true"
+                                                           },
+                          "selectedCodegenProfileId":  "default",
+                          "selectedStorageProfileId":  "vpk-package",
+                          "selectedMediaProfileId":  "psvita-memory-card",
+                          "selectedCodegenOptionValues":  {
+                                                              "write-conversion-report":  "true",
+                                                              "include-project-defined-preprocessor-symbols":  "false",
+                                                              "load-native-runtime-metadata":  "true",
+                                                              "type-remaps":  "System.Numerics.Vector2=helengine.float2;System.Numerics.Vector3=helengine.float3;System.Numerics.Vector4=helengine.float4;System.Numerics.Quaternion=helengine.float4"
+                                                          }
+                      },
+                      {
+                          "platformId":  "switch",
+                          "selectedSceneIds":  [
+                                                   "cube_test"
+                                               ],
+                          "sceneOrders":  [
+                                              {
+                                                  "sceneId":  "cube_test",
+                                                  "orderNumber":  1
+                                              }
+                                          ],
+                          "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\switch",
+                          "debugBuild":  true,
+                          "selectedBuildProfileId":  "debug",
+                          "selectedGraphicsProfileId":  "switch-native",
+                          "selectedBuildOptionValues":  {
+                                                            "startup-clear-color":  "#FFFF00"
+                                                        },
+                          "selectedGraphicsOptionValues":  {
+                                                               "default-width":  "1280",
+                                                               "default-height":  "720",
+                                                               "vsync-enabled":  "true"
+                                                           },
+                          "selectedCodegenProfileId":  "default",
+                          "selectedStorageProfileId":  "romfs-package",
+                          "selectedMediaProfileId":  "switch-homebrew-nro",
+                          "selectedCodegenOptionValues":  {
+                                                              "write-conversion-report":  "true",
+                                                              "include-project-defined-preprocessor-symbols":  "false",
+                                        "load-native-runtime-metadata":  "true",
+                                        "type-remaps":  "System.Numerics.Vector2=helengine.float2;System.Numerics.Vector3=helengine.float3;System.Numerics.Vector4=helengine.float4;System.Numerics.Quaternion=helengine.float4"
+                                    }
+}
+                  ],
+    "queueItems":  [
+
+                   ]
+}
