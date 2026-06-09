@@ -26,13 +26,13 @@ namespace city.rendering.tools {
         /// Creates the canonical cube-test live scene definition.
         /// </summary>
         /// <param name="cubeModel">Generated cube runtime model assigned to the authored mesh.</param>
-        /// <param name="standardMaterial">Generated standard runtime material assigned to the authored mesh.</param>
+        /// <param name="solidColorMaterial">Generated shared solid-color runtime material assigned to the authored mesh.</param>
         /// <returns>Live-authored cube-test scene definition.</returns>
-        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
+        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(RuntimeModel cubeModel, RuntimeMaterial solidColorMaterial) {
             if (cubeModel == null) {
                 throw new ArgumentNullException(nameof(cubeModel));
-            } else if (standardMaterial == null) {
-                throw new ArgumentNullException(nameof(standardMaterial));
+            } else if (solidColorMaterial == null) {
+                throw new ArgumentNullException(nameof(solidColorMaterial));
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
@@ -53,7 +53,7 @@ namespace city.rendering.tools {
                     instructionOverlayEntity,
                     CreateUiEntity(),
                     CreateDirectionalLightEntity(),
-                    CreateCubeEntity(cubeModel, standardMaterial)
+                    CreateCubeEntity(cubeModel, solidColorMaterial)
                 }
             };
         }
@@ -150,9 +150,9 @@ namespace city.rendering.tools {
         /// Creates the authored cube mesh entity for the minimal rendering scene.
         /// </summary>
         /// <param name="cubeModel">Generated cube runtime model assigned to the mesh.</param>
-        /// <param name="standardMaterial">Generated standard runtime material assigned to the mesh.</param>
+        /// <param name="solidColorMaterial">Generated shared solid-color runtime material assigned to the mesh.</param>
         /// <returns>Live authored cube entity.</returns>
-        Entity CreateCubeEntity(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
+        Entity CreateCubeEntity(RuntimeModel cubeModel, RuntimeMaterial solidColorMaterial) {
             Entity entity = Core.Instance.EntityFactory.Create("CubeTestCube");
             entity.LocalPosition = new float3(0f, 0f, 0f);
             entity.LocalScale = new float3(1f, 1f, 1f);
@@ -160,7 +160,7 @@ namespace city.rendering.tools {
 
             MeshComponent meshComponent = new MeshComponent {
                 Model = cubeModel,
-                Material = standardMaterial,
+                Material = solidColorMaterial,
                 RenderOrder3D = 0
             };
             entity.AddComponent(meshComponent);

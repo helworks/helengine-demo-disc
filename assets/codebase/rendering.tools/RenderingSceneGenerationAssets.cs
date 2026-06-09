@@ -24,6 +24,11 @@ namespace city.rendering.tools {
         public RuntimeMaterial GeneratedStandardMaterial { get; set; }
 
         /// <summary>
+        /// Gets or sets the generated shared solid-color runtime material used by the cube-test scene.
+        /// </summary>
+        public RuntimeMaterial GeneratedCubeTestSolidMaterial { get; set; }
+
+        /// <summary>
         /// Gets or sets the generated directional-light arrow runtime model used by the axis showcase scenes.
         /// </summary>
         public RuntimeModel GeneratedArrowModel { get; set; }

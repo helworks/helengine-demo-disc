@@ -201,6 +201,8 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(assets));
             } else if (assets.GeneratedStandardMaterial == null) {
                 throw new ArgumentNullException(nameof(assets));
+            } else if (assets.GeneratedCubeTestSolidMaterial == null) {
+                throw new ArgumentNullException(nameof(assets));
             } else if (assets.GeneratedArrowModel == null) {
                 throw new ArgumentNullException(nameof(assets));
             } else if (assets.AxisMaterials == null) {
@@ -213,7 +215,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(assets));
             }
 
-            GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
+            GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedCubeTestSolidMaterial);
             GeneratedAuthoringSceneDefinition groundCubeProbeSceneDefinition = GroundCubeProbeFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition scaledCubeSceneDefinition = ScaledCubeFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition coloredCubeGridSceneDefinition;
