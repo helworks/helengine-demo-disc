@@ -54,11 +54,14 @@ namespace city.rendering.tools {
 
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             EditorProjectBootstrapContext bootstrap = EditorProjectBootstrapper.Create(fullProjectRootPath);
+            ForwardSolidColorMaterialFactory forwardSolidColorMaterialFactory = new ForwardSolidColorMaterialFactory();
+            forwardSolidColorMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             RuntimeModel generatedCubeModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.CubeAssetId);
             RuntimeModel generatedPlaneModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.PlaneAssetId);
             RuntimeModel generatedSphereModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.SphereAssetId);
             RuntimeModel generatedArrowModel = LoadImportedModelRuntime(projectRootPath, "models/rendering/axis_test/directional_light_arrow.obj");
             RuntimeMaterial generatedStandardMaterial = EngineGeneratedMaterialCache.GetRuntimeMaterial(EngineGeneratedMaterialCache.StandardAssetId);
+            RuntimeMaterial generatedCubeTestSolidMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, ForwardSolidColorMaterialFactory.MaterialRelativePath);
             RuntimeMaterial[] axisMaterials = new[] {
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/X.hasset"),
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/Y.hasset"),
@@ -80,6 +83,7 @@ namespace city.rendering.tools {
                 GeneratedPlaneModel = generatedPlaneModel,
                 GeneratedSphereModel = generatedSphereModel,
                 GeneratedStandardMaterial = generatedStandardMaterial,
+                GeneratedCubeTestSolidMaterial = generatedCubeTestSolidMaterial,
                 GeneratedArrowModel = generatedArrowModel,
                 AxisMaterials = axisMaterials,
                 RacerMaterials = racerMaterials,
