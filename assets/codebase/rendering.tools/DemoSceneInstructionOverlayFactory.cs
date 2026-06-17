@@ -40,6 +40,80 @@ namespace city.rendering.tools {
         /// Fixed Nintendo DS bottom-screen height used for DS instruction overlay layout.
         /// </summary>
         const int NintendoDsScreenHeight = 192;
+        /// <summary>
+        /// Fixed font scale used by Nintendo DS instruction labels so the rendering demo bottom-screen guidance matches the compact physics-scene presentation.
+        /// </summary>
+        const float NintendoDsInstructionFontScale = 1.6f;
+
+        /// <summary>
+        /// Fixed desktop and console panel width used by the shared instruction overlay after the readability scale-up pass.
+        /// </summary>
+        const int DesktopInstructionPanelWidth = 384;
+
+        /// <summary>
+        /// Fixed desktop and console panel height used by the shared instruction overlay after the readability scale-up pass.
+        /// </summary>
+        const int DesktopInstructionPanelHeight = 108;
+
+        /// <summary>
+        /// Fixed desktop and console label font scale used by the shared instruction overlay after the readability scale-up pass.
+        /// </summary>
+        const float DesktopInstructionLabelFontScale = 1.92f;
+
+        /// <summary>
+        /// Fixed desktop and console horizontal offset used for the shared icon host after the readability scale-up pass.
+        /// </summary>
+        const float DesktopInstructionIconLeft = 18f;
+
+        /// <summary>
+        /// Fixed desktop and console horizontal offset used for the shared instruction label after the readability scale-up pass.
+        /// </summary>
+        const float DesktopInstructionTextLeft = 104f;
+
+        /// <summary>
+        /// Fixed desktop and console vertical nudge used to visually center the larger labels against the shared icon rows.
+        /// </summary>
+        const float DesktopInstructionTextTopAdjustment = -4f;
+
+        /// <summary>
+        /// Fixed desktop and console label width used by the shared instruction overlay after the readability scale-up pass.
+        /// </summary>
+        const int DesktopInstructionTextWidth = 244;
+
+        /// <summary>
+        /// Fixed desktop and console label height used by the shared instruction overlay after the readability scale-up pass.
+        /// </summary>
+        const int DesktopInstructionTextHeight = 30;
+
+        /// <summary>
+        /// Fixed Nintendo DS bottom-screen panel height used after the readability scale-up pass.
+        /// </summary>
+        const int NintendoDsInstructionPanelHeight = 72;
+
+        /// <summary>
+        /// Fixed Nintendo DS icon left offset used after the readability scale-up pass.
+        /// </summary>
+        const float NintendoDsInstructionIconLeft = 12f;
+
+        /// <summary>
+        /// Fixed Nintendo DS text left offset used after the readability scale-up pass.
+        /// </summary>
+        const float NintendoDsInstructionTextLeft = 60f;
+
+        /// <summary>
+        /// Fixed Nintendo DS text top adjustment used to center the larger labels against their control icons.
+        /// </summary>
+        const float NintendoDsInstructionTextTopAdjustment = -2f;
+
+        /// <summary>
+        /// Fixed Nintendo DS label width used after the readability scale-up pass.
+        /// </summary>
+        const int NintendoDsInstructionTextWidth = 168;
+
+        /// <summary>
+        /// Fixed Nintendo DS label height used after the readability scale-up pass.
+        /// </summary>
+        const int NintendoDsInstructionTextHeight = 22;
 
         /// <summary>
         /// Stable project-relative texture path used for the Xbox 360 D-pad instruction icon.
@@ -92,10 +166,10 @@ namespace city.rendering.tools {
             });
 
             Entity panelEntity = Core.Instance.EntityFactory.CreateChild(viewportRootEntity, "DemoSceneInstructionPanel");
-            panelEntity.LocalPosition = new float3(24f, 614f, 0f);
+            panelEntity.LocalPosition = new float3(24f, 582f, 0f);
             panelEntity.LayerMask = DesktopOverlayLayerMask;
             panelEntity.AddComponent(new RoundedRectComponent {
-                Size = new int2(292, 76),
+                Size = new int2(DesktopInstructionPanelWidth, DesktopInstructionPanelHeight),
                 Radius = 8f,
                 BorderThickness = 2f,
                 FillColor = new byte4(20, 24, 32, 224),
@@ -104,8 +178,8 @@ namespace city.rendering.tools {
                 LayerMask = OverlayDrawableLayerMask
             });
 
-            CreateDesktopInstructionRow(panelEntity, font, "RotateIconSet", "Rotate Camera", 10f, Xbox360DpadTexturePath, new int2(24, 24), Ps2DpadTexturePath, new int2(24, 24), SwitchDpadTexturePath, new int2(24, 24));
-            CreateDesktopInstructionRow(panelEntity, font, "ToggleIconSet", "Toggle Light", 42f, Xbox360RightShoulderTexturePath, new int2(38, 22), Ps2RightShoulderTexturePath, new int2(32, 24), SwitchRightShoulderTexturePath, new int2(44, 20));
+            CreateDesktopInstructionRow(panelEntity, font, "RotateIconSet", "Rotate Camera", 14f, Xbox360DpadTexturePath, new int2(38, 38), Ps2DpadTexturePath, new int2(38, 38), SwitchDpadTexturePath, new int2(38, 38));
+            CreateDesktopInstructionRow(panelEntity, font, "ToggleIconSet", "Toggle Light", 60f, Xbox360RightShoulderTexturePath, new int2(61, 35), Ps2RightShoulderTexturePath, new int2(51, 38), SwitchRightShoulderTexturePath, new int2(70, 32));
             return viewportRootEntity;
         }
 
@@ -123,7 +197,7 @@ namespace city.rendering.tools {
             panelEntity.LocalPosition = new float3(8f, 76f, 0f);
             panelEntity.LayerMask = NintendoDsOverlayLayerMask;
             panelEntity.AddComponent(new RoundedRectComponent {
-                Size = new int2(NintendoDsScreenWidth - 16, 54),
+                Size = new int2(NintendoDsScreenWidth - 16, NintendoDsInstructionPanelHeight),
                 Radius = 0f,
                 BorderThickness = 2f,
                 FillColor = new byte4(20, 24, 32, 224),
@@ -132,8 +206,8 @@ namespace city.rendering.tools {
                 LayerMask = OverlayDrawableLayerMask
             });
 
-            CreateNintendoDsInstructionRow(panelEntity, font, "Rotate Camera", 8f, SwitchDpadTexturePath, new int2(18, 18));
-            CreateNintendoDsInstructionRow(panelEntity, font, "Toggle Light", 30f, SwitchRightShoulderTexturePath, new int2(30, 14));
+            CreateNintendoDsInstructionRow(panelEntity, font, "Rotate Camera", 10f, SwitchDpadTexturePath, new int2(29, 29));
+            CreateNintendoDsInstructionRow(panelEntity, font, "Toggle Light", 40f, SwitchRightShoulderTexturePath, new int2(48, 22));
             return [panelEntity];
         }
 
@@ -174,7 +248,7 @@ namespace city.rendering.tools {
             }
 
             Entity iconSetEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, iconSetEntityName);
-            iconSetEntity.LocalPosition = new float3(14f, topOffset, 0.1f);
+            iconSetEntity.LocalPosition = new float3(DesktopInstructionIconLeft, topOffset, 0.1f);
             iconSetEntity.LayerMask = DesktopOverlayLayerMask;
             iconSetEntity.AddComponent(new DemoScenePlatformInstructionIconSetComponent());
             CreatePlatformIconEntity(iconSetEntity, "Xbox360", xbox360TexturePath, xbox360Size, 201);
@@ -182,14 +256,14 @@ namespace city.rendering.tools {
             CreatePlatformIconEntity(iconSetEntity, "Switch", switchTexturePath, switchSize, 201);
 
             Entity textEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, iconSetEntityName + "Text");
-            textEntity.LocalPosition = new float3(58f, topOffset - 1f, 0.1f);
+            textEntity.LocalPosition = new float3(DesktopInstructionTextLeft, topOffset + DesktopInstructionTextTopAdjustment, 0.1f);
             textEntity.LayerMask = DesktopOverlayLayerMask;
             TextComponent textComponent = new TextComponent {
                 Text = text,
                 Font = font,
-                FontScale = 1.2f,
+                FontScale = DesktopInstructionLabelFontScale,
                 Color = new byte4(255, 255, 255, 255),
-                Size = new int2(220, 20),
+                Size = new int2(DesktopInstructionTextWidth, DesktopInstructionTextHeight),
                 RenderOrder2D = 202,
                 LayerMask = OverlayDrawableLayerMask
             };
@@ -216,7 +290,7 @@ namespace city.rendering.tools {
             }
 
             Entity iconEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, text.Replace(" ", string.Empty) + "Icon");
-            iconEntity.LocalPosition = new float3(10f, topOffset, 0.1f);
+            iconEntity.LocalPosition = new float3(NintendoDsInstructionIconLeft, topOffset, 0.1f);
             iconEntity.LayerMask = NintendoDsOverlayLayerMask;
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = size,
@@ -227,14 +301,14 @@ namespace city.rendering.tools {
             ApplyTextureReference(iconEntity, spriteComponent, texturePath);
 
             Entity textEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, text.Replace(" ", string.Empty) + "Text");
-            textEntity.LocalPosition = new float3(48f, topOffset - 1f, 0.1f);
+            textEntity.LocalPosition = new float3(NintendoDsInstructionTextLeft, topOffset + NintendoDsInstructionTextTopAdjustment, 0.1f);
             textEntity.LayerMask = NintendoDsOverlayLayerMask;
             TextComponent textComponent = new TextComponent {
                 Text = text,
                 Font = font,
-                FontScale = 0.7f,
+                FontScale = NintendoDsInstructionFontScale,
                 Color = new byte4(255, 255, 255, 255),
-                Size = new int2(170, 16),
+                Size = new int2(NintendoDsInstructionTextWidth, NintendoDsInstructionTextHeight),
                 RenderOrder2D = 212,
                 LayerMask = OverlayDrawableLayerMask
             };
