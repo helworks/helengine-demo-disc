@@ -1,0 +1,7 @@
+{
+    "engineVersion":  "1.0.0-custom",
+    "platformId":  "wiiu",
+    "displayName":  "Nintendo Wii U",
+    "builderAssemblyPath":  "C:\\dev\\helworks\\helengine-wiiu\\builder\\bin\\Debug\\net9.0-windows\\helengine.wiiu.builder.dll",
+    "playerSourceRootPath":  "C:\\dev\\helworks\\helengine-wiiu"
+}

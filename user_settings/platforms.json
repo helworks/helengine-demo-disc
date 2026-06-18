@@ -1,0 +1,16 @@
+{
+    "platforms":  [
+                      {
+                          "platformDescriptorPath":  "platforms/windows/platform.json"
+                      },
+                      {
+                          "platformDescriptorPath":  "platforms/ps2/platform.json"
+                      },
+                      {
+                          "platformDescriptorPath":  "platforms/ds/platform.json"
+                      },
+                      {
+                          "platformDescriptorPath":  "platforms/wiiu/platform.json"
+                      }
+                  ]
+}

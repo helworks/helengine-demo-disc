@@ -1,4 +1,4 @@
-﻿{
+{
     "platforms":  [
                       {
                           "platformId":  "windows",
@@ -320,12 +320,77 @@
                       {
                           "platformId":  "ds",
                           "selectedSceneIds":  [
-                                                   "colored_cube_grid_ds"
+                                                   "GeneratedBootScene",
+                                                   "DemoDiscMainMenuDs",
+                                                   "axis_test2_ds",
+                                                   "axis_test_ds",
+                                                   "colored_cube_grid_ds",
+                                                   "cube_test_ds",
+                                                   "directional_shadow_plaza_ds",
+                                                   "ground_cube_probe_ds",
+                                                   "scaled_cube_ds",
+                                                   "spotlight_street_slice_ds",
+                                                   "test_scene_dynamic_mixed_stack_ds",
+                                                   "test_scene_dynamic_sphere_stack_ds",
+                                                   "test_scene_dynamic_stack_boxes_ds",
+                                                   "textured_cube_grid_ds"
                                                ],
                           "sceneOrders":  [
                                               {
-                                                  "sceneId":  "colored_cube_grid_ds",
+                                                  "sceneId":  "GeneratedBootScene",
                                                   "orderNumber":  1
+                                              },
+                                              {
+                                                  "sceneId":  "DemoDiscMainMenuDs",
+                                                  "orderNumber":  2
+                                              },
+                                              {
+                                                  "sceneId":  "axis_test2_ds",
+                                                  "orderNumber":  3
+                                              },
+                                              {
+                                                  "sceneId":  "axis_test_ds",
+                                                  "orderNumber":  4
+                                              },
+                                              {
+                                                  "sceneId":  "colored_cube_grid_ds",
+                                                  "orderNumber":  5
+                                              },
+                                              {
+                                                  "sceneId":  "cube_test_ds",
+                                                  "orderNumber":  6
+                                              },
+                                              {
+                                                  "sceneId":  "directional_shadow_plaza_ds",
+                                                  "orderNumber":  7
+                                              },
+                                              {
+                                                  "sceneId":  "ground_cube_probe_ds",
+                                                  "orderNumber":  8
+                                              },
+                                              {
+                                                  "sceneId":  "scaled_cube_ds",
+                                                  "orderNumber":  9
+                                              },
+                                              {
+                                                  "sceneId":  "spotlight_street_slice_ds",
+                                                  "orderNumber":  10
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_mixed_stack_ds",
+                                                  "orderNumber":  11
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_sphere_stack_ds",
+                                                  "orderNumber":  12
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_stack_boxes_ds",
+                                                  "orderNumber":  13
+                                              },
+                                              {
+                                                  "sceneId":  "textured_cube_grid_ds",
+                                                  "orderNumber":  14
                                               }
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\ds",
@@ -554,10 +619,44 @@
                           "selectedCodegenOptionValues":  {
                                                               "write-conversion-report":  "true",
                                                               "include-project-defined-preprocessor-symbols":  "false",
-                                        "load-native-runtime-metadata":  "true",
-                                        "type-remaps":  "System.Numerics.Vector2=helengine.float2;System.Numerics.Vector3=helengine.float3;System.Numerics.Vector4=helengine.float4;System.Numerics.Quaternion=helengine.float4"
-                                    }
-}
+                                                              "load-native-runtime-metadata":  "true",
+                                                              "type-remaps":  "System.Numerics.Vector2=helengine.float2;System.Numerics.Vector3=helengine.float3;System.Numerics.Vector4=helengine.float4;System.Numerics.Quaternion=helengine.float4"
+                                                          }
+                      },
+                      {
+                          "platformId":  "wiiu",
+                          "selectedSceneIds":  [
+                                                   "cube_test"
+                                               ],
+                          "sceneOrders":  [
+                                              {
+                                                  "sceneId":  "cube_test",
+                                                  "orderNumber":  1
+                                              }
+                                          ],
+                          "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\wiiu",
+                          "debugBuild":  true,
+                          "selectedBuildProfileId":  "wiiu-default",
+                          "selectedGraphicsProfileId":  "wiiu-default",
+                          "selectedBuildOptionValues":  {
+                                                            "texture-scale-percent":  "100",
+                                                            "shader-variant-pruning":  "true"
+                                                        },
+                          "selectedGraphicsOptionValues":  {
+                                                               "default-width":  "1280",
+                                                               "default-height":  "720",
+                                                               "vsync-enabled":  "true",
+                                                               "fullscreen-enabled":  "true"
+                                                           },
+                          "selectedCodegenProfileId":  "default",
+                          "selectedStorageProfileId":  "",
+                          "selectedMediaProfileId":  "",
+                          "selectedCodegenOptionValues":  {
+                                                              "write-conversion-report":  "true",
+                                                              "include-project-defined-preprocessor-symbols":  "false",
+                                                              "load-native-runtime-metadata":  "true"
+                                                          }
+                      }
                   ],
     "queueItems":  [
 
