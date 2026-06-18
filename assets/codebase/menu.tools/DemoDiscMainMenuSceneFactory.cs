@@ -1,5 +1,6 @@
 using city.menu;
 using city.rendering.tools;
+using helengine;
 using helengine.editor;
 
 namespace city.menu.tools {
@@ -61,6 +62,21 @@ namespace city.menu.tools {
         /// Stable save-state slot name used for serialized font references.
         /// </summary>
         const string FontReferenceName = "Font";
+
+        /// <summary>
+        /// Stable generated-font provider id used by the dedicated Nintendo DS debug font.
+        /// </summary>
+        const string NintendoDsDebugFontProviderId = "editor";
+
+        /// <summary>
+        /// Stable generated-font asset id used by the dedicated Nintendo DS debug font.
+        /// </summary>
+        const string NintendoDsDebugFontAssetId = "ds-debug-font";
+
+        /// <summary>
+        /// Stable generated-font relative path used by the dedicated Nintendo DS debug font.
+        /// </summary>
+        const string NintendoDsDebugFontRelativePath = "generated/editor/fonts/ds-debug.hefont";
 
         /// <summary>
         /// Placeholder font assigned during live authoring before the real file-backed font references are serialized.
@@ -203,11 +219,11 @@ namespace city.menu.tools {
             };
             panelEntity.AddComponent(panelComponent);
 
-            AnchorComponent anchorComponent = new AnchorComponent();
+            LayoutComponent anchorComponent = new LayoutComponent();
             anchorComponent.SetAnchorDistances(left: 0f, top: 0f);
             panelEntity.AddComponent(anchorComponent);
 
-            CreateBackgroundEntity(
+            Entity backgroundEntity = CreateBackgroundEntity(
                 panelEntity,
                 $"panel-{panelDefinition.PanelId}-surface",
                 new float3(0f, 0f, 0f),
@@ -217,12 +233,22 @@ namespace city.menu.tools {
                 definition.SurfaceColor,
                 definition.SurfaceBorderColor,
                 30);
+            LayoutComponent backgroundLayoutComponent = new LayoutComponent {
+                LayoutSpace = LayoutComponent.CameraViewportLayoutSpace
+            };
+            backgroundLayoutComponent.SetAnchorDistances(left: 0f, top: 0f, bottom: 0f);
+            backgroundEntity.AddComponent(backgroundLayoutComponent);
 
             Entity itemsViewportEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, $"Panel-{panelDefinition.PanelId}-ItemsViewport");
             itemsViewportEntity.LocalPosition = new float3(0f, ItemsViewportTop, 0f);
             itemsViewportEntity.AddComponent(new ClipRectComponent {
                 Size = BuildItemsViewportSize(panelDefinition)
             });
+            LayoutComponent itemsViewportLayoutComponent = new LayoutComponent {
+                LayoutSpace = LayoutComponent.CameraViewportLayoutSpace
+            };
+            itemsViewportLayoutComponent.SetAnchorDistances(left: 0f, top: ItemsViewportTop, bottom: 0f);
+            itemsViewportEntity.AddComponent(itemsViewportLayoutComponent);
 
             Entity itemsRootEntity = Core.Instance.EntityFactory.CreateChild(itemsViewportEntity, $"Panel-{panelDefinition.PanelId}-ItemsRoot");
             itemsRootEntity.AddComponent(new ScrollComponent {
@@ -329,7 +355,7 @@ namespace city.menu.tools {
         /// <param name="anchorComponent">Optional anchor component attached to the entity.</param>
         /// <param name="fontScale">Uniform glyph scale applied to the authored text component.</param>
         /// <param name="isStatic">Whether the authored text entity should be marked static for runtime caching.</param>
-        void CreateTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, AnchorComponent anchorComponent, float fontScale = 1f, bool isStatic = true) {
+        void CreateTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -360,6 +386,49 @@ namespace city.menu.tools {
         }
 
         /// <summary>
+        /// Creates one Nintendo DS text entity that resolves its font through the generated DS debug font reference instead of the shared file-backed body font.
+        /// </summary>
+        /// <param name="parent">Parent entity that should own the text entity.</param>
+        /// <param name="entityName">Stable entity name.</param>
+        /// <param name="localPosition">Local position applied to the entity.</param>
+        /// <param name="text">Authored text content.</param>
+        /// <param name="color">Text color.</param>
+        /// <param name="size">Text layout size.</param>
+        /// <param name="renderOrder2D">2D render order.</param>
+        /// <param name="anchorComponent">Optional anchor component attached to the entity.</param>
+        /// <param name="fontScale">Uniform glyph scale applied to the authored text component.</param>
+        /// <param name="isStatic">Whether the authored text entity should be marked static for runtime caching.</param>
+        /// <param name="convertTextToSprite">Whether scene packaging should bake this authored text into a sprite-backed runtime component.</param>
+        void CreateNintendoDsTextEntity(Entity parent, string entityName, float3 localPosition, string text, byte4 color, int2 size, byte renderOrder2D, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, bool convertTextToSprite = false) {
+            if (parent == null) {
+                throw new ArgumentNullException(nameof(parent));
+            } else if (string.IsNullOrWhiteSpace(entityName)) {
+                throw new ArgumentException("Entity name must be provided.", nameof(entityName));
+            }
+
+            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, entityName);
+            entity.LocalPosition = localPosition;
+            entity.Static = isStatic;
+
+            TextComponent textComponent = new TextComponent {
+                Text = text ?? string.Empty,
+                Font = PlaceholderFont,
+                Color = color,
+                Size = size,
+                FontScale = fontScale,
+                RenderOrder2D = renderOrder2D,
+                LayerMask = RuntimeLayerMask,
+                ConvertTextToSprite = convertTextToSprite
+            };
+            entity.AddComponent(textComponent);
+            ApplyFontReference(entity, textComponent, BuildNintendoDsDebugFontReference());
+
+            if (anchorComponent != null) {
+                entity.AddComponent(anchorComponent);
+            }
+        }
+
+        /// <summary>
         /// Creates one rounded-rectangle background entity beneath the supplied parent.
         /// </summary>
         /// <param name="parent">Parent entity that should own the background entity.</param>
@@ -371,7 +440,8 @@ namespace city.menu.tools {
         /// <param name="fillColor">Fill color.</param>
         /// <param name="borderColor">Border color.</param>
         /// <param name="renderOrder2D">2D render order.</param>
-        void CreateBackgroundEntity(Entity parent, string entityName, float3 localPosition, int2 size, float radius, float borderThickness, byte4 fillColor, byte4 borderColor, byte renderOrder2D) {
+        /// <returns>The authored background entity so callers can attach layout behavior when needed.</returns>
+        Entity CreateBackgroundEntity(Entity parent, string entityName, float3 localPosition, int2 size, float radius, float borderThickness, byte4 fillColor, byte4 borderColor, byte renderOrder2D) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -389,6 +459,8 @@ namespace city.menu.tools {
                 RenderOrder2D = renderOrder2D,
                 LayerMask = RuntimeLayerMask
             });
+
+            return entity;
         }
 
         /// <summary>
@@ -546,8 +618,8 @@ namespace city.menu.tools {
             entity.LocalPosition = new float3(8f, 148f, 0.1f);
             entity.AddComponent(new PlatformInfoTextComponent());
 
-            CreateTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, null, 0.84f, false);
-            CreateTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(240f, 0f, 0f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(1, 1), 42, null, 0.84f, false);
+            CreateNintendoDsTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0f), string.Empty, definition.TextColor, new int2(1, 1), 42, null, 0.84f, false);
+            CreateNintendoDsTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(240f, 0f, 0f), string.Empty, definition.MutedTextColor, new int2(1, 1), 42, null, 0.84f, false);
         }
 
         /// <summary>
@@ -586,6 +658,11 @@ namespace city.menu.tools {
                 WheelNotchSize = 120,
                 RequiresPointerInside = true
             });
+            LayoutComponent itemsRootLayoutComponent = new LayoutComponent {
+                LayoutSpace = LayoutComponent.CameraViewportLayoutSpace
+            };
+            itemsRootLayoutComponent.SetAnchorDistances(left: 0f, top: 0f, bottom: ItemsViewportTop);
+            itemsRootEntity.AddComponent(itemsRootLayoutComponent);
 
             int visibleIndex = 0;
             for (int itemIndex = 0; itemIndex < panelDefinition.Items.Length; itemIndex++) {
@@ -643,17 +720,17 @@ namespace city.menu.tools {
                 LayerMask = RuntimeLayerMask
             });
 
-            CreateTextEntity(
+            CreateNintendoDsTextEntity(
                 itemEntity,
                 $"item-label-{itemDefinition.ItemId}",
                 new float3(8f, 2f, 0.1f),
                 itemDefinition.Label,
-                definition.BodyFontPath,
                 definition.TextColor,
                 new int2(NintendoDsScreenWidth - 16, 14),
                 34,
                 null,
                 0.75f,
+                true,
                 true);
         }
 
@@ -743,7 +820,7 @@ namespace city.menu.tools {
         }
 
         /// <summary>
-        /// Creates the decorative overlay sprite entity pinned to the bottom-right of the fitted menu canvas.
+        /// Creates the decorative overlay sprite entity pinned to the bottom-right of the live viewport.
         /// </summary>
         /// <param name="generatedRootEntity">Generated menu subtree root that owns the overlay.</param>
         /// <param name="overlayImage">Overlay image definition that should be authored.</param>
@@ -763,7 +840,9 @@ namespace city.menu.tools {
             entity.AddComponent(spriteComponent);
             ApplyTextureReference(entity, spriteComponent, overlayImage.TexturePath);
 
-            AnchorComponent anchorComponent = new AnchorComponent();
+            LayoutComponent anchorComponent = new LayoutComponent {
+                LayoutSpace = LayoutComponent.CameraViewportLayoutSpace
+            };
             anchorComponent.SetAnchorDistances(right: overlayImage.RightMargin, bottom: overlayImage.BottomMargin);
             entity.AddComponent(anchorComponent);
         }
@@ -784,7 +863,8 @@ namespace city.menu.tools {
             }
 
             Entity entity = Core.Instance.EntityFactory.CreateChild(generatedRootEntity, "DemoDiscPlatformInfoOverlay");
-            AnchorComponent anchorComponent = new AnchorComponent();
+            LayoutComponent anchorComponent = new LayoutComponent();
+            anchorComponent.LayoutSpace = LayoutComponent.CameraViewportLayoutSpace;
             anchorComponent.SetAnchorDistances(right: platformInfoOverlay.RightMargin, top: platformInfoOverlay.TopMargin);
             entity.AddComponent(anchorComponent);
             entity.AddComponent(new PlatformInfoTextComponent());
@@ -810,6 +890,25 @@ namespace city.menu.tools {
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             saveComponent.SetAssetReference(component, FontReferenceName, BuildFileReference(fontPath));
+        }
+
+        /// <summary>
+        /// Stores the supplied generated Nintendo DS debug-font reference on the entity save state for the given component.
+        /// </summary>
+        /// <param name="entity">Entity that owns the component.</param>
+        /// <param name="component">Component whose font reference should be stored.</param>
+        /// <param name="fontReference">Generated Nintendo DS debug-font reference.</param>
+        void ApplyFontReference(Entity entity, Component component, SceneAssetReference fontReference) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (component == null) {
+                throw new ArgumentNullException(nameof(component));
+            } else if (fontReference == null) {
+                throw new ArgumentNullException(nameof(fontReference));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(component, FontReferenceName, fontReference);
         }
 
         /// <summary>
@@ -867,6 +966,19 @@ namespace city.menu.tools {
                 RelativePath = relativePath.Replace('\\', '/'),
                 ProviderId = string.Empty,
                 AssetId = string.Empty
+            };
+        }
+
+        /// <summary>
+        /// Builds the stable generated reference used by the Nintendo DS debug font.
+        /// </summary>
+        /// <returns>Generated Nintendo DS debug-font reference.</returns>
+        SceneAssetReference BuildNintendoDsDebugFontReference() {
+            return new SceneAssetReference {
+                SourceKind = SceneAssetReferenceSourceKind.Generated,
+                RelativePath = NintendoDsDebugFontRelativePath,
+                ProviderId = NintendoDsDebugFontProviderId,
+                AssetId = NintendoDsDebugFontAssetId
             };
         }
 
