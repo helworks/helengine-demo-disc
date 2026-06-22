@@ -152,6 +152,7 @@ namespace city.rendering.tools {
         /// <returns>Live authored FPS overlay entity.</returns>
         Entity CreateFpsEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("DirectionalShadowPlazaFps");
+            entity.LayerMask = SceneObjectsLayerMask;
             FPSComponent fpsComponent = new FPSComponent {
                 Font = PlaceholderFont,
                 FontScale = 2f
@@ -159,6 +160,8 @@ namespace city.rendering.tools {
             entity.AddComponent(fpsComponent);
             ApplyEditorFontReference(entity, fpsComponent);
             entity.AddComponent(new DemoDiscLightToggleComponent());
+            DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
+            lightIndicatorOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont());
             return entity;
         }
 
@@ -171,6 +174,7 @@ namespace city.rendering.tools {
             float4.CreateFromYawPitchRoll(0f, -0.72f, 0f, out orientation);
 
             Entity entity = Core.Instance.EntityFactory.Create("DirectionalShadowPlazaSun");
+            entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = new float3(0f, 18f, 0f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = orientation;
@@ -255,12 +259,13 @@ namespace city.rendering.tools {
             }
 
             Entity entity = Core.Instance.EntityFactory.Create(name);
+            entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = localPosition;
             entity.LocalScale = localScale;
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new MeshComponent {
                 Model = model,
-                Material = material,
+                Materials = new[] { material },
                 RenderOrder3D = 0
             });
             return entity;

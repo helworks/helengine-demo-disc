@@ -114,6 +114,7 @@ namespace city.rendering.tools {
             float4.CreateFromYawPitchRoll(-0.65f, -0.85f, 0f, out orientation);
 
             Entity entity = Core.Instance.EntityFactory.Create("CubeTestSun");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 4f, 0f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = orientation;
@@ -134,6 +135,7 @@ namespace city.rendering.tools {
         /// <returns>Live authored UI root entity.</returns>
         Entity CreateUiEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("CubeTestUi");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
@@ -143,6 +145,8 @@ namespace city.rendering.tools {
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             entity.AddComponent(new DemoDiscLightToggleComponent());
+            DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
+            lightIndicatorOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont());
             return entity;
         }
 
@@ -154,13 +158,14 @@ namespace city.rendering.tools {
         /// <returns>Live authored cube entity.</returns>
         Entity CreateCubeEntity(RuntimeModel cubeModel, RuntimeMaterial solidColorMaterial) {
             Entity entity = Core.Instance.EntityFactory.Create("CubeTestCube");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 0f, 0f);
             entity.LocalScale = new float3(1f, 1f, 1f);
             entity.LocalOrientation = float4.Identity;
 
             MeshComponent meshComponent = new MeshComponent {
                 Model = cubeModel,
-                Material = solidColorMaterial,
+                Materials = new[] { solidColorMaterial },
                 RenderOrder3D = 0
             };
             entity.AddComponent(meshComponent);

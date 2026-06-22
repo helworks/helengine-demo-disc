@@ -193,12 +193,15 @@ namespace city.rendering.tools {
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("AxisTestUi");
+            entity.LayerMask = SceneObjectsLayerMask;
             entity.AddComponent(new FPSComponent {
                 Font = ResolveRequiredEditorFont(),
                 FontScale = 2f
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             entity.AddComponent(new DemoDiscLightToggleComponent());
+            DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
+            lightIndicatorOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont());
             return entity;
         }
 
@@ -216,6 +219,7 @@ namespace city.rendering.tools {
             }
 
             Entity entity = Core.Instance.EntityFactory.Create("AxisTestSunRig");
+            entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = ArrowRigLocalPosition;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = CreateArrowFacingUpOrientation();
@@ -237,12 +241,13 @@ namespace city.rendering.tools {
             }
 
             Entity entity = Core.Instance.EntityFactory.Create("AxisTestSunArrow");
+            entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = new float3(ArrowVisualScale, ArrowVisualScale, ArrowVisualScale);
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new MeshComponent {
                 Model = arrowModel,
-                Material = markerMaterial,
+                Materials = new[] { markerMaterial },
                 RenderOrder3D = 0
             });
             ApplyArrowMeshAssetReferences(entity);
@@ -385,12 +390,13 @@ namespace city.rendering.tools {
             }
 
             Entity entity = Core.Instance.EntityFactory.Create(name);
+            entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = localPosition;
             entity.LocalScale = localScale;
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new MeshComponent {
                 Model = model,
-                Material = material,
+                Materials = new[] { material },
                 RenderOrder3D = 0
             });
             return entity;

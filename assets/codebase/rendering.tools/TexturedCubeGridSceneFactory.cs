@@ -415,12 +415,15 @@ namespace city.rendering.tools {
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("TexturedCubeGridUi");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.AddComponent(new FPSComponent {
                 Font = ResolveRequiredEditorFont(),
                 FontScale = 2f
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             entity.AddComponent(new DemoDiscLightToggleComponent());
+            DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
+            lightIndicatorOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont());
             return entity;
         }
 
@@ -432,6 +435,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(-0.65f, -0.85f, 0f, out orientation);
             Entity entity = Core.Instance.EntityFactory.Create("TexturedCubeGridSun");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 6f, 0f);
             entity.LocalOrientation = orientation;
             entity.AddComponent(new DirectionalLightComponent {
@@ -491,12 +495,13 @@ namespace city.rendering.tools {
             }
 
             Entity entity = Core.Instance.EntityFactory.Create(CreateCubeEntityName(cubeIndex));
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = localPosition;
             entity.LocalScale = new float3(1.5f, 1.5f, 1.5f);
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new MeshComponent {
                 Model = cubeModel,
-                Material = material,
+                Materials = new[] { material },
                 RenderOrder3D = 0
             });
             entity.AddComponent(new gameplay.rendering.AxisRotationComponent {

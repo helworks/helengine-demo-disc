@@ -1,6 +1,6 @@
 namespace city.rendering {
     /// <summary>
-    /// Stores one authored directional light state so the demo-disc toggle can restore it after lights were disabled.
+    /// Stores one authored directional light state so the demo-disc light cycle can restore the original intensity and shadow behavior for any active color state.
     /// </summary>
     public sealed class DemoDiscDirectionalLightToggleState {
         /// <summary>
@@ -9,13 +9,13 @@ namespace city.rendering {
         public DirectionalLightComponent Light { get; set; }
 
         /// <summary>
-        /// Gets or sets the authored intensity that should be restored when lighting is enabled again.
+        /// Gets or sets the authored intensity that should be restored whenever the light cycle is in a non-off state.
         /// </summary>
-        public float Intensity { get; set; }
+        public float AuthoredIntensity { get; set; }
 
         /// <summary>
-        /// Gets or sets whether the authored light originally had shadows enabled.
+        /// Gets or sets whether the authored light originally had shadows enabled before the cycle forced the off state.
         /// </summary>
-        public bool ShadowsEnabled { get; set; }
+        public bool AuthoredShadowsEnabled { get; set; }
     }
 }
