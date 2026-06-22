@@ -7,6 +7,26 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class DemoSceneInstructionOverlayFactory {
         /// <summary>
+        /// Fixed font scale used by Nintendo DS instruction labels so the rendering demo bottom-screen guidance matches the compact physics-scene presentation.
+        /// </summary>
+        const float NintendoDsInstructionFontScale = 1.6f;
+
+        /// <summary>
+        /// Stable generated-font provider id used by the dedicated Nintendo DS debug font.
+        /// </summary>
+        const string NintendoDsDebugFontProviderId = "editor";
+
+        /// <summary>
+        /// Stable generated-font asset id used by the dedicated Nintendo DS debug font.
+        /// </summary>
+        const string NintendoDsDebugFontAssetId = "ds-debug-font";
+
+        /// <summary>
+        /// Stable generated-font relative path used by the dedicated Nintendo DS debug font asset.
+        /// </summary>
+        const string NintendoDsDebugFontRelativePath = "generated/editor/fonts/ds-debug.hefont";
+
+        /// <summary>
         /// Fixed desktop and console layer mask used by generated instruction overlays so showcase cameras can render them.
         /// </summary>
         const ushort DesktopOverlayLayerMask = EditorLayerMasks.SceneObjects;
@@ -40,50 +60,91 @@ namespace city.rendering.tools {
         /// Fixed Nintendo DS bottom-screen height used for DS instruction overlay layout.
         /// </summary>
         const int NintendoDsScreenHeight = 192;
+
         /// <summary>
-        /// Fixed font scale used by Nintendo DS instruction labels so the rendering demo bottom-screen guidance matches the compact physics-scene presentation.
+        /// Fixed desktop and console left offset used to anchor the shared instruction panel inside the reference viewport.
         /// </summary>
-        const float NintendoDsInstructionFontScale = 1.6f;
+        const float DesktopInstructionPanelLeft = 24f;
+
+        /// <summary>
+        /// Fixed desktop and console top offset used to keep the larger shared instruction panel inside the reference viewport.
+        /// </summary>
+        const float DesktopInstructionPanelTop = 528f;
 
         /// <summary>
         /// Fixed desktop and console panel width used by the shared instruction overlay after the readability scale-up pass.
         /// </summary>
-        const int DesktopInstructionPanelWidth = 384;
+        const int DesktopInstructionPanelWidth = 576;
 
         /// <summary>
         /// Fixed desktop and console panel height used by the shared instruction overlay after the readability scale-up pass.
         /// </summary>
-        const int DesktopInstructionPanelHeight = 108;
+        const int DesktopInstructionPanelHeight = 162;
+
+        /// <summary>
+        /// Fixed desktop and console first-row top offset used by the shared instruction overlay after the readability scale-up pass.
+        /// </summary>
+        const float DesktopInstructionFirstRowTop = 21f;
+
+        /// <summary>
+        /// Fixed desktop and console second-row top offset used by the shared instruction overlay after the readability scale-up pass.
+        /// </summary>
+        const float DesktopInstructionSecondRowTop = 90f;
 
         /// <summary>
         /// Fixed desktop and console label font scale used by the shared instruction overlay after the readability scale-up pass.
         /// </summary>
-        const float DesktopInstructionLabelFontScale = 1.92f;
+        const float DesktopInstructionLabelFontScale = 1.73f;
 
         /// <summary>
         /// Fixed desktop and console horizontal offset used for the shared icon host after the readability scale-up pass.
         /// </summary>
-        const float DesktopInstructionIconLeft = 18f;
+        const float DesktopInstructionIconLeft = 27f;
 
         /// <summary>
         /// Fixed desktop and console horizontal offset used for the shared instruction label after the readability scale-up pass.
         /// </summary>
-        const float DesktopInstructionTextLeft = 104f;
+        const float DesktopInstructionTextLeft = 126f;
 
         /// <summary>
         /// Fixed desktop and console vertical nudge used to visually center the larger labels against the shared icon rows.
         /// </summary>
-        const float DesktopInstructionTextTopAdjustment = -4f;
+        const float DesktopInstructionRotateTextTopAdjustment = -9f;
+
+        /// <summary>
+        /// Fixed desktop and console vertical nudge used to keep the toggle-light label aligned against the shoulder-button icon row.
+        /// </summary>
+        const float DesktopInstructionToggleTextTopAdjustment = -10f;
 
         /// <summary>
         /// Fixed desktop and console label width used by the shared instruction overlay after the readability scale-up pass.
         /// </summary>
-        const int DesktopInstructionTextWidth = 244;
+        const int DesktopInstructionTextWidth = 300;
 
         /// <summary>
         /// Fixed desktop and console label height used by the shared instruction overlay after the readability scale-up pass.
         /// </summary>
-        const int DesktopInstructionTextHeight = 30;
+        const int DesktopInstructionTextHeight = 28;
+
+        /// <summary>
+        /// Fixed desktop and console D-pad icon size used for the shared rotate-camera row after the readability scale-up pass.
+        /// </summary>
+        static readonly int2 DesktopInstructionDpadIconSize = new int2(57, 57);
+
+        /// <summary>
+        /// Fixed desktop and console Xbox 360 right-shoulder icon size used for the shared toggle-light row after the readability scale-up pass.
+        /// </summary>
+        static readonly int2 DesktopInstructionXbox360ShoulderIconSize = new int2(92, 53);
+
+        /// <summary>
+        /// Fixed desktop and console PS2 right-shoulder icon size used for the shared toggle-light row after the readability scale-up pass.
+        /// </summary>
+        static readonly int2 DesktopInstructionPs2ShoulderIconSize = new int2(77, 57);
+
+        /// <summary>
+        /// Fixed desktop and console Switch right-shoulder icon size used for the shared toggle-light row after the readability scale-up pass.
+        /// </summary>
+        static readonly int2 DesktopInstructionSwitchShoulderIconSize = new int2(105, 48);
 
         /// <summary>
         /// Fixed Nintendo DS bottom-screen panel height used after the readability scale-up pass.
@@ -166,7 +227,7 @@ namespace city.rendering.tools {
             });
 
             Entity panelEntity = Core.Instance.EntityFactory.CreateChild(viewportRootEntity, "DemoSceneInstructionPanel");
-            panelEntity.LocalPosition = new float3(24f, 582f, 0f);
+            panelEntity.LocalPosition = new float3(DesktopInstructionPanelLeft, DesktopInstructionPanelTop, 0f);
             panelEntity.LayerMask = DesktopOverlayLayerMask;
             panelEntity.AddComponent(new RoundedRectComponent {
                 Size = new int2(DesktopInstructionPanelWidth, DesktopInstructionPanelHeight),
@@ -178,8 +239,8 @@ namespace city.rendering.tools {
                 LayerMask = OverlayDrawableLayerMask
             });
 
-            CreateDesktopInstructionRow(panelEntity, font, "RotateIconSet", "Rotate Camera", 14f, Xbox360DpadTexturePath, new int2(38, 38), Ps2DpadTexturePath, new int2(38, 38), SwitchDpadTexturePath, new int2(38, 38));
-            CreateDesktopInstructionRow(panelEntity, font, "ToggleIconSet", "Toggle Light", 60f, Xbox360RightShoulderTexturePath, new int2(61, 35), Ps2RightShoulderTexturePath, new int2(51, 38), SwitchRightShoulderTexturePath, new int2(70, 32));
+            CreateDesktopInstructionRow(panelEntity, font, "RotateIconSet", "Rotate Camera", DesktopInstructionFirstRowTop, DesktopInstructionRotateTextTopAdjustment, Xbox360DpadTexturePath, DesktopInstructionDpadIconSize, Ps2DpadTexturePath, DesktopInstructionDpadIconSize, SwitchDpadTexturePath, DesktopInstructionDpadIconSize);
+            CreateDesktopInstructionRow(panelEntity, font, "ToggleIconSet", "Toggle Light", DesktopInstructionSecondRowTop, DesktopInstructionToggleTextTopAdjustment, Xbox360RightShoulderTexturePath, DesktopInstructionXbox360ShoulderIconSize, Ps2RightShoulderTexturePath, DesktopInstructionPs2ShoulderIconSize, SwitchRightShoulderTexturePath, DesktopInstructionSwitchShoulderIconSize);
             return viewportRootEntity;
         }
 
@@ -219,6 +280,7 @@ namespace city.rendering.tools {
         /// <param name="iconSetEntityName">Stable entity name assigned to the icon-set host.</param>
         /// <param name="text">Row label text.</param>
         /// <param name="topOffset">Vertical offset within the panel.</param>
+        /// <param name="textTopAdjustment">Desktop/shared vertical text adjustment for the row label.</param>
         /// <param name="xbox360TexturePath">Xbox 360 icon texture path.</param>
         /// <param name="xbox360Size">Xbox 360 icon size.</param>
         /// <param name="ps2TexturePath">PS2 icon texture path.</param>
@@ -231,6 +293,7 @@ namespace city.rendering.tools {
             string iconSetEntityName,
             string text,
             float topOffset,
+            float textTopAdjustment,
             string xbox360TexturePath,
             int2 xbox360Size,
             string ps2TexturePath,
@@ -256,7 +319,7 @@ namespace city.rendering.tools {
             CreatePlatformIconEntity(iconSetEntity, "Switch", switchTexturePath, switchSize, 201);
 
             Entity textEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, iconSetEntityName + "Text");
-            textEntity.LocalPosition = new float3(DesktopInstructionTextLeft, topOffset + DesktopInstructionTextTopAdjustment, 0.1f);
+            textEntity.LocalPosition = new float3(DesktopInstructionTextLeft, topOffset + textTopAdjustment, 0.1f);
             textEntity.LayerMask = DesktopOverlayLayerMask;
             TextComponent textComponent = new TextComponent {
                 Text = text,
@@ -313,7 +376,7 @@ namespace city.rendering.tools {
                 LayerMask = OverlayDrawableLayerMask
             };
             textEntity.AddComponent(textComponent);
-            ApplyFontReference(textEntity, textComponent);
+            ApplyFontReference(textEntity, textComponent, BuildNintendoDsDebugFontReference());
         }
 
         /// <summary>
@@ -358,6 +421,25 @@ namespace city.rendering.tools {
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
+        }
+
+        /// <summary>
+        /// Stores the supplied generated Nintendo DS debug-font reference on the generated scene save state for the given text component.
+        /// </summary>
+        /// <param name="entity">Entity that owns the component.</param>
+        /// <param name="component">Component whose font reference should be stored.</param>
+        /// <param name="fontReference">Generated Nintendo DS debug-font reference.</param>
+        void ApplyFontReference(Entity entity, Component component, SceneAssetReference fontReference) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (component == null) {
+                throw new ArgumentNullException(nameof(component));
+            } else if (fontReference == null) {
+                throw new ArgumentNullException(nameof(fontReference));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(component, "Font", fontReference);
         }
 
         /// <summary>
@@ -413,6 +495,19 @@ namespace city.rendering.tools {
             return new SceneAssetReference {
                 SourceKind = SceneAssetReferenceSourceKind.FileSystem,
                 RelativePath = relativePath
+            };
+        }
+
+        /// <summary>
+        /// Builds the stable scene asset reference for the generated Nintendo DS debug font.
+        /// </summary>
+        /// <returns>Stable generated Nintendo DS debug-font reference.</returns>
+        SceneAssetReference BuildNintendoDsDebugFontReference() {
+            return new SceneAssetReference {
+                SourceKind = SceneAssetReferenceSourceKind.Generated,
+                RelativePath = NintendoDsDebugFontRelativePath,
+                ProviderId = NintendoDsDebugFontProviderId,
+                AssetId = NintendoDsDebugFontAssetId
             };
         }
     }
