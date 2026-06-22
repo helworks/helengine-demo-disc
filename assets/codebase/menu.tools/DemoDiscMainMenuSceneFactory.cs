@@ -141,7 +141,7 @@ namespace city.menu.tools {
             Entity entity = Core.Instance.EntityFactory.Create("DemoDiscCamera");
             entity.AddComponent(new CameraComponent {
                 CameraDrawOrder = 0,
-                LayerMask = 1,
+                LayerMask = EditorLayerMasks.SceneObjects,
                 Viewport = new float4(0f, 0f, 1f, 1f),
                 ClearSettings = new CameraClearSettings(
                     true,
@@ -491,7 +491,7 @@ namespace city.menu.tools {
             Entity entity = Core.Instance.EntityFactory.Create("DemoDiscTopScreenCamera");
             entity.AddComponent(new CameraComponent {
                 CameraDrawOrder = 0,
-                LayerMask = 1,
+                LayerMask = EditorLayerMasks.SceneObjects,
                 Viewport = new float4(0f, 0f, 1f, 1f),
                 ClearSettings = BuildNintendoDsCameraClearSettings(definition.AccentColor),
                 RenderSettings = new CameraRenderSettings {
@@ -530,7 +530,7 @@ namespace city.menu.tools {
             Entity entity = Core.Instance.EntityFactory.Create("DemoDiscBottomScreenCamera");
             entity.AddComponent(new CameraComponent {
                 CameraDrawOrder = 1,
-                LayerMask = 1,
+                LayerMask = EditorLayerMasks.SceneObjects,
                 Viewport = new float4(0f, 1f, 1f, 1f),
                 ClearSettings = BuildNintendoDsCameraClearSettings(definition.AccentColor),
                 RenderSettings = new CameraRenderSettings {
