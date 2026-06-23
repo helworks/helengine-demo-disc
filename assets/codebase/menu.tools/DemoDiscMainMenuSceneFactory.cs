@@ -79,6 +79,11 @@ namespace city.menu.tools {
         const string NintendoDsDebugFontRelativePath = "generated/editor/fonts/ds-debug.hefont";
 
         /// <summary>
+        /// Stable project-relative animation path used by the demo-disc logo idle clip.
+        /// </summary>
+        const string DemoDiscLogoIdleAnimationRelativePath = "Animations/DemoDiscLogoIdle.hanim";
+
+        /// <summary>
         /// Placeholder font assigned during live authoring before the real file-backed font references are serialized.
         /// </summary>
         readonly FontAsset PlaceholderFont;
@@ -730,7 +735,6 @@ namespace city.menu.tools {
                 34,
                 null,
                 0.75f,
-                true,
                 true);
         }
 
@@ -845,6 +849,12 @@ namespace city.menu.tools {
             };
             anchorComponent.SetAnchorDistances(right: overlayImage.RightMargin, bottom: overlayImage.BottomMargin);
             entity.AddComponent(anchorComponent);
+            entity.AddComponent(new AnimationPlayerComponent());
+            DemoDiscLogoIdleAnimationComponent animationComponent = new DemoDiscLogoIdleAnimationComponent {
+                IdleClip = LoadRequiredAnimationClipAsset(DemoDiscLogoIdleAnimationRelativePath)
+            };
+            entity.AddComponent(animationComponent);
+            ApplyAnimationClipReference(entity, animationComponent, DemoDiscLogoIdleAnimationRelativePath);
         }
 
         /// <summary>
@@ -931,6 +941,28 @@ namespace city.menu.tools {
         }
 
         /// <summary>
+        /// Stores the supplied file-backed animation clip reference on the entity save state for the given component.
+        /// </summary>
+        /// <param name="entity">Entity that owns the component.</param>
+        /// <param name="component">Component whose animation clip reference should be stored.</param>
+        /// <param name="animationClipPath">Project-relative animation clip path.</param>
+        void ApplyAnimationClipReference(Entity entity, Component component, string animationClipPath) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (component == null) {
+                throw new ArgumentNullException(nameof(component));
+            } else if (string.IsNullOrWhiteSpace(animationClipPath)) {
+                throw new ArgumentException("Animation clip path must be provided.", nameof(animationClipPath));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(
+                component,
+                AutomaticComponentAssetReferenceSupport.BuildReferenceName(nameof(DemoDiscLogoIdleAnimationComponent.IdleClip)),
+                BuildFileReference(animationClipPath));
+        }
+
+        /// <summary>
         /// Resolves the hidden entity save component attached by the editor entity factory.
         /// </summary>
         /// <param name="entity">Entity whose save component should be returned.</param>
@@ -980,6 +1012,53 @@ namespace city.menu.tools {
                 ProviderId = NintendoDsDebugFontProviderId,
                 AssetId = NintendoDsDebugFontAssetId
             };
+        }
+
+        /// <summary>
+        /// Loads one required authored animation clip from the current editor project assets folder so the generated scene preview plays the same data that gets serialized.
+        /// </summary>
+        /// <param name="relativePath">Project-relative animation clip path.</param>
+        /// <returns>Deserialized animation clip asset.</returns>
+        AnimationClipAsset LoadRequiredAnimationClipAsset(string relativePath) {
+            if (string.IsNullOrWhiteSpace(relativePath)) {
+                throw new ArgumentException("Animation clip path must be provided.", nameof(relativePath));
+            } else if (string.IsNullOrWhiteSpace(EditorProjectPaths.AssetsRoot)) {
+                throw new InvalidOperationException("Editor project paths must be initialized before generated animation clips can be loaded.");
+            }
+
+            string fullPath = Path.GetFullPath(Path.Combine(EditorProjectPaths.AssetsRoot, relativePath.Replace('/', Path.DirectorySeparatorChar)));
+            string assetsRootPrefix = EnsureTrailingDirectorySeparator(EditorProjectPaths.AssetsRoot);
+            if (!fullPath.StartsWith(assetsRootPrefix, StringComparison.OrdinalIgnoreCase)) {
+                throw new InvalidOperationException("Generated animation clip paths must stay inside the project assets folder.");
+            }
+            if (!File.Exists(fullPath)) {
+                throw new FileNotFoundException("Generated animation clip asset could not be found.", fullPath);
+            }
+
+            using FileStream stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            if (global::helengine.AssetSerializer.Deserialize(stream) is not AnimationClipAsset animationClipAsset) {
+                throw new InvalidOperationException($"Asset '{relativePath}' is not an animation clip.");
+            }
+
+            return animationClipAsset;
+        }
+
+        /// <summary>
+        /// Ensures one directory path ends with a trailing separator before prefix comparisons occur.
+        /// </summary>
+        /// <param name="path">Directory path that should end with a separator.</param>
+        /// <returns>Directory path with a trailing separator.</returns>
+        string EnsureTrailingDirectorySeparator(string path) {
+            if (string.IsNullOrWhiteSpace(path)) {
+                throw new ArgumentException("Directory path must be provided.", nameof(path));
+            }
+
+            if (path.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)
+                || path.EndsWith(Path.AltDirectorySeparatorChar.ToString(), StringComparison.Ordinal)) {
+                return path;
+            }
+
+            return string.Concat(path, Path.DirectorySeparatorChar);
         }
 
         /// <summary>
