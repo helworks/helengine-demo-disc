@@ -1,0 +1,31 @@
+{
+  "platformId": "switch",
+  "build": {
+    "selectedBuildProfileId": "",
+    "textureScalePercent": 100,
+    "shaderVariantPruningEnabled": true,
+    "selectedOptionValues": {}
+  },
+  "graphics": {
+    "selectedGraphicsProfileId": "",
+    "defaultWidth": 1280,
+    "defaultHeight": 720,
+    "vSyncEnabled": true,
+    "fullscreenEnabled": false,
+    "rendererDepthPrepassMode": 0,
+    "rendererShadowQualityTier": "medium",
+    "rendererHdrEnabled": true,
+    "rendererPostProcessTier": 2,
+    "selectedOptionValues": {}
+  },
+  "codegen": {
+    "selectedCodegenProfileId": "",
+    "selectedOptionValues": {}
+  },
+  "input": {
+    "standardActions": {
+      "accept": null,
+      "return": null
+    }
+  }
+}

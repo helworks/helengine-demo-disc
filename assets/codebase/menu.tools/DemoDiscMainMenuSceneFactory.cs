@@ -849,12 +849,13 @@ namespace city.menu.tools {
             };
             anchorComponent.SetAnchorDistances(right: overlayImage.RightMargin, bottom: overlayImage.BottomMargin);
             entity.AddComponent(anchorComponent);
-            entity.AddComponent(new AnimationPlayerComponent());
-            DemoDiscLogoIdleAnimationComponent animationComponent = new DemoDiscLogoIdleAnimationComponent {
-                IdleClip = LoadRequiredAnimationClipAsset(DemoDiscLogoIdleAnimationRelativePath)
+            AnimationPlayerComponent animationPlayerComponent = new AnimationPlayerComponent {
+                Clip = LoadRequiredAnimationClipAsset(DemoDiscLogoIdleAnimationRelativePath),
+                PlayAutomatically = true,
+                ShouldLoop = true
             };
-            entity.AddComponent(animationComponent);
-            ApplyAnimationClipReference(entity, animationComponent, DemoDiscLogoIdleAnimationRelativePath);
+            entity.AddComponent(animationPlayerComponent);
+            ApplyAnimationClipReference(entity, animationPlayerComponent, DemoDiscLogoIdleAnimationRelativePath);
         }
 
         /// <summary>
@@ -958,7 +959,7 @@ namespace city.menu.tools {
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             saveComponent.SetAssetReference(
                 component,
-                AutomaticComponentAssetReferenceSupport.BuildReferenceName(nameof(DemoDiscLogoIdleAnimationComponent.IdleClip)),
+                AutomaticComponentAssetReferenceSupport.BuildReferenceName(nameof(AnimationPlayerComponent.Clip)),
                 BuildFileReference(animationClipPath));
         }
 

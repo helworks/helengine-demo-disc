@@ -7,6 +7,26 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class NintendoDsRenderingSceneScaffoldFactory {
         /// <summary>
+        /// Fixed font scale used by the Nintendo DS default bottom overlay so debug text and the back button match the physics showcase sizing.
+        /// </summary>
+        const float NintendoDsBottomOverlayFontScale = 1f;
+
+        /// <summary>
+        /// Stable generated-font provider id used by the dedicated Nintendo DS debug font.
+        /// </summary>
+        const string NintendoDsDebugFontProviderId = "editor";
+
+        /// <summary>
+        /// Stable generated-font asset id used by the dedicated Nintendo DS debug font.
+        /// </summary>
+        const string NintendoDsDebugFontAssetId = "ds-debug-font";
+
+        /// <summary>
+        /// Stable generated-font relative path used by the dedicated Nintendo DS debug font asset.
+        /// </summary>
+        const string NintendoDsDebugFontRelativePath = "generated/editor/fonts/ds-debug.hefont";
+
+        /// <summary>
         /// Runtime layer mask used by packaged 2D overlay drawables.
         /// </summary>
         const byte RuntimeLayerMask = 0b00000001;
@@ -20,7 +40,6 @@ namespace city.rendering.tools {
         /// Fixed Nintendo DS screen height used by the default bottom overlay.
         /// </summary>
         const int ScreenHeight = 192;
-
         /// <summary>
         /// Creates one dual-screen Nintendo DS root set from top-screen scene content and optional bottom-screen content.
         /// </summary>
@@ -28,11 +47,13 @@ namespace city.rendering.tools {
         /// <param name="useDefaultBottomOverlay">True when the standard bottom debug and back overlay should be emitted.</param>
         /// <param name="bottomScreenRoots">Optional custom bottom-screen roots supplied by the generator.</param>
         /// <returns>Combined DS companion-scene roots.</returns>
-        public Entity[] CreateSceneRoots(Entity[] topScreenRoots, bool useDefaultBottomOverlay, Entity[] bottomScreenRoots) {
+        public Entity[] CreateSceneRoots(Entity[] topScreenRoots, bool useDefaultBottomOverlay, Entity[] bottomScreenRoots, FontAsset bottomOverlayFont) {
             if (topScreenRoots == null) {
                 throw new ArgumentNullException(nameof(topScreenRoots));
             } else if (bottomScreenRoots == null) {
                 throw new ArgumentNullException(nameof(bottomScreenRoots));
+            } else if (bottomOverlayFont == null) {
+                throw new ArgumentNullException(nameof(bottomOverlayFont));
             }
 
             ConfigureTopScreenRoots(topScreenRoots);
@@ -47,7 +68,7 @@ namespace city.rendering.tools {
             });
 
             if (useDefaultBottomOverlay) {
-                CreateDefaultBottomOverlay(bottomScreenViewportRoot);
+                CreateDefaultBottomOverlay(bottomScreenViewportRoot, bottomOverlayFont);
             }
 
             AttachBottomScreenRoots(bottomScreenViewportRoot, bottomScreenRoots);
@@ -175,19 +196,22 @@ namespace city.rendering.tools {
         /// Creates the standard bottom-screen debug and back overlay beneath the supplied viewport root.
         /// </summary>
         /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the default overlay.</param>
-        void CreateDefaultBottomOverlay(Entity bottomScreenViewportRoot) {
+        void CreateDefaultBottomOverlay(Entity bottomScreenViewportRoot, FontAsset bottomOverlayFont) {
             if (bottomScreenViewportRoot == null) {
                 throw new ArgumentNullException(nameof(bottomScreenViewportRoot));
+            } else if (bottomOverlayFont == null) {
+                throw new ArgumentNullException(nameof(bottomOverlayFont));
             }
 
             Entity debugRootEntity = Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenDebugRoot");
             DebugComponent debugComponent = new DebugComponent();
-            debugComponent.Font = ResolveRequiredEditorFont();
-            debugComponent.FontScale = 2f;
+            debugComponent.Font = bottomOverlayFont;
+            debugComponent.FontScale = NintendoDsBottomOverlayFontScale;
             debugComponent.Padding = new int2(8, 8);
             debugComponent.RenderOrder2D = 220;
             debugComponent.RefreshIntervalSeconds = 0.25d;
             debugRootEntity.AddComponent(debugComponent);
+            ApplyFontReference(debugRootEntity, debugComponent, BuildNintendoDsDebugFontReference());
 
             Entity buttonEntity = Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenBackButton");
             buttonEntity.LocalPosition = new float3(16f, 144f, 0f);
@@ -195,26 +219,27 @@ namespace city.rendering.tools {
                 Size = new int2(224, 32)
             });
             buttonEntity.AddComponent(new NintendoDsReturnOverlayComponent());
-            buttonEntity.AddComponent(new RoundedRectComponent {
+            SpriteComponent spriteComponent = new SpriteComponent {
                 Size = new int2(224, 32),
-                Radius = 0f,
-                BorderThickness = 2f,
-                FillColor = new byte4(52, 36, 76, 255),
-                BorderColor = new byte4(201, 147, 255, 255),
                 RenderOrder2D = 230,
                 LayerMask = RuntimeLayerMask
-            });
+            };
+            buttonEntity.AddComponent(spriteComponent);
+            ApplyTextureReference(buttonEntity, spriteComponent, "Images/Menu/ds-back-button.png");
 
             Entity textEntity = Core.Instance.EntityFactory.CreateChild(buttonEntity, "DemoDiscBottomScreenBackButtonText");
             textEntity.LocalPosition = new float3(16f, 8f, 0.1f);
-            textEntity.AddComponent(new TextComponent {
+            TextComponent textComponent = new TextComponent {
                 Text = "BACK",
-                Font = ResolveRequiredEditorFont(),
+                Font = bottomOverlayFont,
+                FontScale = NintendoDsBottomOverlayFontScale,
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(192, 24),
                 RenderOrder2D = 231,
                 LayerMask = RuntimeLayerMask
-            });
+            };
+            textEntity.AddComponent(textComponent);
+            ApplyFontReference(textEntity, textComponent, BuildNintendoDsDebugFontReference());
         }
 
         /// <summary>
@@ -265,19 +290,6 @@ namespace city.rendering.tools {
             return combinedRoots;
         }
 
-        /// <summary>
-        /// Resolves the current editor default font required by the default Nintendo DS overlay.
-        /// </summary>
-        /// <returns>Editor default font asset.</returns>
-        FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
-                throw new InvalidOperationException("A default editor font must be loaded before Nintendo DS rendering showcase scenes can be generated.");
-            }
-
-            return editorCore.DefaultFontAssetForEditor;
-        }
-
-        /// <summary>
         /// Finds the first component of the requested type on one entity.
         /// </summary>
         /// <typeparam name="TComponent">Component type to resolve.</typeparam>
@@ -295,6 +307,96 @@ namespace city.rendering.tools {
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Stores the supplied generated Nintendo DS debug-font reference on the generated scene save state for the given component.
+        /// </summary>
+        /// <param name="entity">Entity that owns the component.</param>
+        /// <param name="component">Component whose font reference should be stored.</param>
+        /// <param name="fontReference">Generated Nintendo DS debug-font reference.</param>
+        void ApplyFontReference(Entity entity, Component component, SceneAssetReference fontReference) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (component == null) {
+                throw new ArgumentNullException(nameof(component));
+            } else if (fontReference == null) {
+                throw new ArgumentNullException(nameof(fontReference));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(component, "Font", fontReference);
+        }
+
+        /// <summary>
+        /// Stores the supplied texture reference on the generated scene save state for the given sprite component.
+        /// </summary>
+        /// <param name="entity">Entity that owns the component.</param>
+        /// <param name="component">Component whose texture reference should be stored.</param>
+        /// <param name="texturePath">Project-relative texture path.</param>
+        void ApplyTextureReference(Entity entity, Component component, string texturePath) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (component == null) {
+                throw new ArgumentNullException(nameof(component));
+            } else if (string.IsNullOrWhiteSpace(texturePath)) {
+                throw new ArgumentException("Texture path must be provided.", nameof(texturePath));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, BuildFileReference(texturePath));
+        }
+
+        /// <summary>
+        /// Resolves the hidden entity save component attached by the editor entity factory.
+        /// </summary>
+        /// <param name="entity">Entity whose save component should be returned.</param>
+        /// <returns>Attached entity save component.</returns>
+        EntitySaveComponent FindRequiredEntitySaveComponent(Entity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (entity.Components == null) {
+                throw new InvalidOperationException("Generated entities must expose initialized component collections.");
+            }
+
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is EntitySaveComponent saveComponent) {
+                    return saveComponent;
+                }
+            }
+
+            throw new InvalidOperationException("Generated entities must include EntitySaveComponent.");
+        }
+
+        /// <summary>
+        /// Builds one stable file-backed scene asset reference.
+        /// </summary>
+        /// <param name="relativePath">Project-relative asset path.</param>
+        /// <returns>Stable file-backed scene asset reference.</returns>
+        SceneAssetReference BuildFileReference(string relativePath) {
+            if (string.IsNullOrWhiteSpace(relativePath)) {
+                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
+            }
+
+            return new SceneAssetReference {
+                SourceKind = SceneAssetReferenceSourceKind.FileSystem,
+                RelativePath = relativePath.Replace('\\', '/'),
+                ProviderId = string.Empty,
+                AssetId = string.Empty
+            };
+        }
+
+        /// <summary>
+        /// Builds the stable scene asset reference for the generated Nintendo DS debug font.
+        /// </summary>
+        /// <returns>Stable generated Nintendo DS debug-font reference.</returns>
+        SceneAssetReference BuildNintendoDsDebugFontReference() {
+            return new SceneAssetReference {
+                SourceKind = SceneAssetReferenceSourceKind.Generated,
+                RelativePath = NintendoDsDebugFontRelativePath,
+                ProviderId = NintendoDsDebugFontProviderId,
+                AssetId = NintendoDsDebugFontAssetId
+            };
         }
     }
 }

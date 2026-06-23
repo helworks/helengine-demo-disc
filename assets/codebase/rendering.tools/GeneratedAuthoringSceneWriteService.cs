@@ -1,4 +1,5 @@
 using helengine.editor;
+using System.Reflection;
 
 namespace city.rendering.tools {
     /// <summary>
@@ -42,12 +43,14 @@ namespace city.rendering.tools {
                 AddUniqueRoots(rootsToDispose, sceneDefinition.RootEntities);
                 SaveSceneAsset(fullProjectRootPath, saveService, sceneDefinition.SceneId, sceneDefinition.SceneSettings, sceneDefinition.RootEntities);
                 if (sceneDefinition.NintendoDsScene != null) {
+                    FontAsset bottomOverlayFont = ResolveRequiredNintendoDsDebugFont();
                     Entity[] nintendoDsSceneRoots = sceneDefinition.NintendoDsScene.RootEntities;
                     if (nintendoDsSceneRoots == null || nintendoDsSceneRoots.Length < 1) {
                         nintendoDsSceneRoots = NintendoDsRenderingSceneScaffoldFactoryValue.CreateSceneRoots(
                             sceneDefinition.RootEntities,
                             sceneDefinition.NintendoDsScene.UseDefaultBottomOverlay,
-                            sceneDefinition.NintendoDsScene.BottomScreenRootEntities ?? Array.Empty<Entity>());
+                            sceneDefinition.NintendoDsScene.BottomScreenRootEntities ?? Array.Empty<Entity>(),
+                            bottomOverlayFont);
                     }
 
                     AddUniqueRoots(rootsToDispose, nintendoDsSceneRoots);
@@ -87,10 +90,12 @@ namespace city.rendering.tools {
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create();
             SceneSaveService saveService = new SceneSaveService(fullProjectRootPath, persistenceRegistry);
+            FontAsset bottomOverlayFont = ResolveRequiredNintendoDsDebugFont();
             Entity[] nintendoDsSceneRoots = NintendoDsRenderingSceneScaffoldFactoryValue.CreateSceneRoots(
                 topScreenRoots,
                 useDefaultBottomOverlay,
-                bottomScreenRootEntities);
+                bottomScreenRootEntities,
+                bottomOverlayFont);
             List<Entity> rootsToDispose = new List<Entity>();
 
             try {
@@ -99,6 +104,26 @@ namespace city.rendering.tools {
             } finally {
                 DisposeGeneratedRoots(rootsToDispose);
             }
+        }
+
+        /// <summary>
+        /// Loads the dedicated project font used by the Nintendo DS bottom overlay.
+        /// </summary>
+        /// <returns>Generated Nintendo DS debug font asset.</returns>
+        static FontAsset ResolveRequiredNintendoDsDebugFont() {
+            Assembly appAssembly = Assembly.Load("helengine.editor.app");
+            Type debugFontFactoryType = appAssembly.GetType("helengine.editor.app.NintendoDsDebugFontFactory", throwOnError: true);
+            MethodInfo createFontMethod = debugFontFactoryType.GetMethod("CreateBottomOverlayFont", BindingFlags.Public | BindingFlags.Static);
+            if (createFontMethod == null) {
+                throw new InvalidOperationException("NintendoDsDebugFontFactory.CreateBottomOverlayFont was not found.");
+            }
+
+            object result = createFontMethod.Invoke(null, Array.Empty<object>());
+            if (result is not FontAsset fontAsset) {
+                throw new InvalidOperationException("Nintendo DS debug font factory did not return a FontAsset.");
+            }
+
+            return fontAsset;
         }
 
         /// <summary>

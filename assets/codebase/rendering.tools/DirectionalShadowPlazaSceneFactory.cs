@@ -297,7 +297,7 @@ namespace city.rendering.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, FontReferenceName, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
+            saveComponent.SetAssetReference(component, FontReferenceName, DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
         }
 
         /// <summary>

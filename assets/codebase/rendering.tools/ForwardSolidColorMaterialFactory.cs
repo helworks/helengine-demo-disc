@@ -21,19 +21,19 @@ namespace city.rendering.tools {
         const string StandardShaderSchemaId = "standard-shader";
 
         /// <summary>
-        /// Stable built-in solid-color shader asset identifier used by the shared shader pipeline.
+        /// Stable built-in forward standard shader asset identifier used by the shared shader pipeline.
         /// </summary>
-        const string SolidColorShaderAssetId = "ForwardSolidColorShader";
+        const string SolidColorShaderAssetId = "ForwardStandardShader";
 
         /// <summary>
-        /// Stable built-in solid-color vertex program entry used by the shared shader pipeline.
+        /// Stable built-in forward standard vertex program entry used by the shared shader pipeline.
         /// </summary>
-        const string SolidColorVertexProgramName = "ForwardSolidColorShader.vs";
+        const string SolidColorVertexProgramName = "ForwardStandardShader.vs";
 
         /// <summary>
-        /// Stable built-in solid-color pixel program entry used by the shared shader pipeline.
+        /// Stable built-in forward standard pixel program entry used by the shared shader pipeline.
         /// </summary>
-        const string SolidColorPixelProgramName = "ForwardSolidColorShader.ps";
+        const string SolidColorPixelProgramName = "ForwardStandardShader.ps";
 
         /// <summary>
         /// Stable mesh shader variant used by the cube-test solid-color path.
@@ -110,7 +110,7 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Builds the generated material definition that routes cube-test through the shared forward solid-color shader.
+        /// Builds the generated material definition that routes cube-test through the shared lit forward shader while preserving the authored flat white base color.
         /// </summary>
         /// <returns>Generated material definition for the cube-test solid-color material.</returns>
         GeneratedMaterialAssetDefinition CreateGeneratedMaterialDefinition() {

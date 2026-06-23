@@ -48,17 +48,17 @@ namespace city.rendering.tools {
         /// <summary>
         /// Top offset of the indicator label beneath the FPS overlay.
         /// </summary>
-        const float IndicatorLabelTop = 34f;
+        const float IndicatorLabelTop = 54f;
 
         /// <summary>
         /// Left offset of the preview square beside the indicator label.
         /// </summary>
-        const float IndicatorSwatchLeft = 56f;
+        const float IndicatorSwatchLeft = 122f;
 
         /// <summary>
         /// Top offset of the preview square beside the indicator label.
         /// </summary>
-        const float IndicatorSwatchTop = 36f;
+        const float IndicatorSwatchTop = 73f;
 
         /// <summary>
         /// Width of the label text region.
@@ -73,7 +73,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Width and height of the preview square.
         /// </summary>
-        const int IndicatorSwatchSize = 16;
+        const int IndicatorSwatchSize = 32;
 
         /// <summary>
         /// Shared font scale used by the indicator label.

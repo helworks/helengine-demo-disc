@@ -11,6 +11,26 @@ namespace city.rendering.tools {
         const string ReturnToMainMenuComponentTypeId = "city.menu.DemoDiscReturnToMenuComponent, gameplay";
 
         /// <summary>
+        /// Stable project-relative body-font path used by the demo-disc showcase overlays and labels.
+        /// </summary>
+        const string BodyFontRelativePath = "Fonts/DemoDiscBody.ttf";
+
+        /// <summary>
+        /// Generated provider id reserved for the editor-authored UI font asset.
+        /// </summary>
+        const string EditorGeneratedProviderId = "editor";
+
+        /// <summary>
+        /// Stable asset id used for the generated editor UI font asset.
+        /// </summary>
+        const string EditorFontAssetId = "ui-font";
+
+        /// <summary>
+        /// Stable relative path used for the generated editor UI font asset.
+        /// </summary>
+        const string EditorFontRelativePath = "generated/editor/fonts/ui.hefont";
+
+        /// <summary>
         /// Stable save-state slot name used for serialized font references.
         /// </summary>
         const string FontReferenceName = "Font";
@@ -59,20 +79,31 @@ namespace city.rendering.tools {
                 FontScale = 2f
             };
             EntityComponentSaveState saveState = new EntityComponentSaveState();
-            saveState.SetAssetReference(FontReferenceName, CreateEditorFontReference());
+            saveState.SetAssetReference(FontReferenceName, CreateEditorUiFontReference());
             return AutomaticDescriptor.SerializeComponent(fpsComponent, componentIndex, saveState);
         }
 
         /// <summary>
-        /// Creates the stable generated asset reference for the editor's built-in UI font.
+        /// Creates the stable file-backed demo-disc body-font reference used by non-FPS showcase overlays and labels.
         /// </summary>
-        /// <returns>Stable generated editor-font reference.</returns>
+        /// <returns>Stable file-backed demo-disc body-font reference.</returns>
         public static SceneAssetReference CreateEditorFontReference() {
             return new SceneAssetReference {
+                SourceKind = SceneAssetReferenceSourceKind.FileSystem,
+                RelativePath = BodyFontRelativePath
+            };
+        }
+
+        /// <summary>
+        /// Creates the stable generated editor UI-font reference used by showcase FPS overlays.
+        /// </summary>
+        /// <returns>Stable generated editor UI-font reference.</returns>
+        public static SceneAssetReference CreateEditorUiFontReference() {
+            return new SceneAssetReference {
                 SourceKind = SceneAssetReferenceSourceKind.Generated,
-                RelativePath = "generated/editor/fonts/ui.hefont",
-                ProviderId = "editor",
-                AssetId = "ui-font"
+                RelativePath = EditorFontRelativePath,
+                ProviderId = EditorGeneratedProviderId,
+                AssetId = EditorFontAssetId
             };
         }
     }

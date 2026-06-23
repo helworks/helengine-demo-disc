@@ -172,6 +172,7 @@ namespace city.rendering.tools {
         /// <returns>Live authored FPS overlay entity.</returns>
         Entity CreateFpsEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("SpotlightStreetSliceFps");
+            entity.LayerMask = SceneObjectsLayerMask;
             FPSComponent fpsComponent = new FPSComponent {
                 Font = PlaceholderFont,
                 FontScale = 2f
@@ -190,6 +191,7 @@ namespace city.rendering.tools {
             float4.CreateFromYawPitchRoll(0.28f, -1.22f, 0f, out orientation);
 
             Entity entity = Core.Instance.EntityFactory.Create("SpotlightStreetSliceLight");
+            entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = new float3(-3.2f, 9.5f, -1.4f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = orientation;
@@ -257,6 +259,7 @@ namespace city.rendering.tools {
             }
 
             Entity entity = Core.Instance.EntityFactory.Create(name);
+            entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = localPosition;
             entity.LocalScale = localScale;
             entity.LocalOrientation = localOrientation;
@@ -289,6 +292,7 @@ namespace city.rendering.tools {
             }
 
             Entity entity = Core.Instance.EntityFactory.Create(name);
+            entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = localPosition;
             entity.LocalScale = localScale;
             entity.LocalOrientation = float4.Identity;
@@ -314,7 +318,7 @@ namespace city.rendering.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, FontReferenceName, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
+            saveComponent.SetAssetReference(component, FontReferenceName, DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
         }
 
         /// <summary>

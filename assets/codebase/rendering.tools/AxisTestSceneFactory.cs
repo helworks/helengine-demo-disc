@@ -259,9 +259,9 @@ namespace city.rendering.tools {
                 ShadowStrength = 1f,
                 ShadowDistance = 32f
             });
-            entity.AddComponent(new AxisTestZSpinComponent {
-                BaseRollRadians = 0f,
-                AngularSpeedRadians = ArrowAngularSpeedRadians
+            entity.AddComponent(new gameplay.rendering.AxisRotationComponent {
+                Axis = new float3(1f, 0f, 0f),
+                AngularSpeedRadiansPerSecond = ArrowAngularSpeedRadians
             });
             return entity;
         }

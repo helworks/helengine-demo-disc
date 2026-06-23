@@ -1,3 +1,5 @@
+using city.rendering.tools;
+
 namespace city.physics.tools {
     /// <summary>
     /// Creates exportable scene assets for physics validation and demo playback.
@@ -21,12 +23,12 @@ namespace city.physics.tools {
         /// <summary>
         /// Stable tagged field name used for mesh model-reference persistence.
         /// </summary>
-        const string MeshModelReferenceFieldName = "ModelReference";
+        const string MeshModelReferenceFieldName = "Model";
 
         /// <summary>
         /// Stable tagged field name used for mesh material-reference array persistence.
         /// </summary>
-        const string MeshMaterialReferencesFieldName = "MaterialReferences";
+        const string MeshMaterialReferencesFieldName = "Materials";
 
         /// <summary>
         /// Stable tagged field name used for mesh render-order persistence.
@@ -74,14 +76,34 @@ namespace city.physics.tools {
         const string CameraRenderSettingsFieldName = "RenderSettings";
 
         /// <summary>
-        /// File-system scene-asset source kind used for authored shader and material assets.
+        /// File-system scene-asset source kind used for authored file-backed assets.
         /// </summary>
         const SceneAssetReferenceSourceKind FileSystemSourceKind = SceneAssetReferenceSourceKind.FileSystem;
 
         /// <summary>
-        /// Relative project asset path for the shared physics demo mesh shader.
+        /// Stable texture importer identifier stored on the generated sphere-tile texture sidecar.
         /// </summary>
-        const string PhysicsDemoShaderRelativePath = "Shaders/physics/PhysicsDemoMesh.hlsl";
+        const string TextureImporterId = "gdi";
+
+        /// <summary>
+        /// Stable PS2 lit textured-material schema identifier used by the PS2 runtime path.
+        /// </summary>
+        const string Ps2MaterialSchemaId = "ps2-simple-lit-textured";
+
+        /// <summary>
+        /// Stable GameCube textured-material schema identifier used by the GX runtime path.
+        /// </summary>
+        const string GameCubeMaterialSchemaId = "gamecube-standard-textured";
+
+        /// <summary>
+        /// Stable Nintendo DS textured-material schema identifier used by the DS runtime path.
+        /// </summary>
+        const string DsMaterialSchemaId = "ds-standard-textured";
+
+        /// <summary>
+        /// Stable standard shader asset identifier used by compatibility material payloads.
+        /// </summary>
+        const string StandardShaderAssetId = "ForwardStandardShader";
 
         /// <summary>
         /// Relative project asset path for the neutral physics demo material.
@@ -134,29 +156,49 @@ namespace city.physics.tools {
         const string PhysicsDemoPurpleMaterialRelativePath = "Materials/physics/PhysicsDemoPurple" + EditorFileTemplateRegistry.MaterialExtension;
 
         /// <summary>
-        /// Shader asset identifier derived from the shared physics demo shader path.
+        /// Relative project asset path for the shared sphere-stack tile texture.
         /// </summary>
-        const string PhysicsDemoShaderAssetId = "Shaders.physics.PhysicsDemoMesh";
+        const string PhysicsDemoSphereTileTextureRelativePath = "Images/physics/PhysicsDemoSphereTile.bmp";
 
         /// <summary>
-        /// Vertex program name used by the shared physics demo shader.
+        /// Relative project asset path for the blue sphere-stack material.
         /// </summary>
-        const string PhysicsDemoVertexProgramName = "PhysicsDemoMesh.vs";
+        const string PhysicsDemoSphereStackBlueMaterialRelativePath = "Materials/physics/PhysicsDemoSphereStackBlue" + EditorFileTemplateRegistry.MaterialExtension;
 
         /// <summary>
-        /// Pixel program name used by the shared physics demo shader.
+        /// Relative project asset path for the green sphere-stack material.
         /// </summary>
-        const string PhysicsDemoPixelProgramName = "PhysicsDemoMesh.ps";
+        const string PhysicsDemoSphereStackGreenMaterialRelativePath = "Materials/physics/PhysicsDemoSphereStackGreen" + EditorFileTemplateRegistry.MaterialExtension;
 
         /// <summary>
-        /// Shader variant name used by the shared physics demo materials.
+        /// Relative project asset path for the magenta sphere-stack material.
         /// </summary>
-        const string PhysicsDemoVariantName = "default";
+        const string PhysicsDemoSphereStackMagentaMaterialRelativePath = "Materials/physics/PhysicsDemoSphereStackMagenta" + EditorFileTemplateRegistry.MaterialExtension;
 
         /// <summary>
-        /// Material constant-buffer name consumed by the shared physics demo shader.
+        /// Relative project asset path for the yellow sphere-stack material.
         /// </summary>
-        const string MaterialColorBufferName = "MaterialColorBuffer";
+        const string PhysicsDemoSphereStackYellowMaterialRelativePath = "Materials/physics/PhysicsDemoSphereStackYellow" + EditorFileTemplateRegistry.MaterialExtension;
+
+        /// <summary>
+        /// Relative project asset path for the cyan sphere-stack material.
+        /// </summary>
+        const string PhysicsDemoSphereStackCyanMaterialRelativePath = "Materials/physics/PhysicsDemoSphereStackCyan" + EditorFileTemplateRegistry.MaterialExtension;
+
+        /// <summary>
+        /// Relative project asset path for the red sphere-stack material.
+        /// </summary>
+        const string PhysicsDemoSphereStackRedMaterialRelativePath = "Materials/physics/PhysicsDemoSphereStackRed" + EditorFileTemplateRegistry.MaterialExtension;
+
+        /// <summary>
+        /// Relative project asset path for the orange sphere-stack material.
+        /// </summary>
+        const string PhysicsDemoSphereStackOrangeMaterialRelativePath = "Materials/physics/PhysicsDemoSphereStackOrange" + EditorFileTemplateRegistry.MaterialExtension;
+
+        /// <summary>
+        /// Relative project asset path for the purple sphere-stack material.
+        /// </summary>
+        const string PhysicsDemoSphereStackPurpleMaterialRelativePath = "Materials/physics/PhysicsDemoSphereStackPurple" + EditorFileTemplateRegistry.MaterialExtension;
 
         /// <summary>
         /// Material schema id used by the shared forward standard shader.
@@ -179,9 +221,19 @@ namespace city.physics.tools {
         const string TextureAssetIdFieldId = "texture-id";
 
         /// <summary>
+        /// Material field id that stores the compatibility shader asset identifier.
+        /// </summary>
+        const string ShaderAssetIdFieldId = "shader-asset-id";
+
+        /// <summary>
         /// Material field id that controls shadow-map casting.
         /// </summary>
         const string CastsShadowFieldId = "casts-shadow";
+
+        /// <summary>
+        /// PS2 material field id that controls shadow-map casting participation.
+        /// </summary>
+        const string Ps2CastShadowsFieldId = "cast-shadows";
 
         /// <summary>
         /// Material field id that controls shadow attenuation receiving.
@@ -189,245 +241,69 @@ namespace city.physics.tools {
         const string ReceivesShadowFieldId = "receives-shadow";
 
         /// <summary>
+        /// PS2 material field id that controls alpha test and blend mode selection.
+        /// </summary>
+        const string AlphaModeFieldId = "alpha-mode";
+
+        /// <summary>
+        /// Material field id that controls double-sided rasterization.
+        /// </summary>
+        const string DoubleSidedFieldId = "double-sided";
+
+        /// <summary>
+        /// Material field id that controls whether vertex colors tint the final material.
+        /// </summary>
+        const string VertexColorModeFieldId = "vertex-color-mode";
+
+        /// <summary>
+        /// Material field id that controls fixed-function lighting mode selection.
+        /// </summary>
+        const string LightingModeFieldId = "lighting-mode";
+
+        /// <summary>
+        /// GameCube material field id that stores the cooked imported texture path.
+        /// </summary>
+        const string GameCubeTextureRelativePathFieldId = "texture-relative-path";
+
+        /// <summary>
+        /// Nintendo DS material field id that stores the cooked imported texture path.
+        /// </summary>
+        const string DsTextureRelativePathFieldId = "texture-relative-path";
+
+        /// <summary>
         /// Camera clear color used by physics validation scenes.
         /// </summary>
         static readonly float4 CornflowerBlueClearColor = new float4(0.39215687f, 0.58431375f, 0.92941177f, 1f);
 
         /// <summary>
-        /// Shared shader source used to render the exported physics demo meshes with per-material colors and shadowed forward lighting.
+        /// Width, in pixels, of the generated sphere-stack tile texture.
         /// </summary>
-        const string PhysicsDemoShaderSource =
-            "cbuffer TransformBuffer : register(b0)\n" +
-            "{\n" +
-            "    float4x4 world;\n" +
-            "    float4x4 worldViewProj;\n" +
-            "    float4x4 normalMatrix;\n" +
-            "    float4 cameraPosition;\n" +
-            "};\n" +
-            "\n" +
-            "cbuffer ForwardLightBuffer : register(b1)\n" +
-            "{\n" +
-            "    float4 lightMetadata;\n" +
-            "    float4 light0ColorAndType;\n" +
-            "    float4 light0DirectionAndShadow;\n" +
-            "    float4 light0PositionAndRange;\n" +
-            "    float4 light0SpotAngles;\n" +
-            "    float4 light1ColorAndType;\n" +
-            "    float4 light1DirectionAndShadow;\n" +
-            "    float4 light1PositionAndRange;\n" +
-            "    float4 light1SpotAngles;\n" +
-            "    float4 light2ColorAndType;\n" +
-            "    float4 light2DirectionAndShadow;\n" +
-            "    float4 light2PositionAndRange;\n" +
-            "    float4 light2SpotAngles;\n" +
-            "    float4 light3ColorAndType;\n" +
-            "    float4 light3DirectionAndShadow;\n" +
-            "    float4 light3PositionAndRange;\n" +
-            "    float4 light3SpotAngles;\n" +
-            "};\n" +
-            "\n" +
-            "cbuffer ShadowBuffer : register(b2)\n" +
-            "{\n" +
-            "    float4 shadowMetadata;\n" +
-            "    float4 shadowLight0AtlasRect;\n" +
-            "    float4 shadowLight0Metadata;\n" +
-            "    float4x4 shadowLight0WorldToShadowClip;\n" +
-            "    float4 shadowLight1AtlasRect;\n" +
-            "    float4 shadowLight1Metadata;\n" +
-            "    float4x4 shadowLight1WorldToShadowClip;\n" +
-            "    float4 shadowLight2AtlasRect;\n" +
-            "    float4 shadowLight2Metadata;\n" +
-            "    float4x4 shadowLight2WorldToShadowClip;\n" +
-            "    float4 shadowLight3AtlasRect;\n" +
-            "    float4 shadowLight3Metadata;\n" +
-            "    float4x4 shadowLight3WorldToShadowClip;\n" +
-            "};\n" +
-            "\n" +
-            "cbuffer MaterialColorBuffer : register(b3)\n" +
-            "{\n" +
-            "    float4 surfaceColor;\n" +
-            "};\n" +
-            "\n" +
-            "Texture2D shadowAtlasTexture : register(t1);\n" +
-            "SamplerState shadowAtlasSampler : register(s1);\n" +
-            "TextureCube pointShadowTexture0 : register(t2);\n" +
-            "TextureCube pointShadowTexture1 : register(t3);\n" +
-            "TextureCube pointShadowTexture2 : register(t4);\n" +
-            "TextureCube pointShadowTexture3 : register(t5);\n" +
-            "SamplerState pointShadowSampler : register(s2);\n" +
-            "\n" +
-            "struct VS_IN\n" +
-            "{\n" +
-            "    float3 pos : POSITION;\n" +
-            "    float3 normal : NORMAL;\n" +
-            "    float2 texCoord : TEXCOORD0;\n" +
-            "};\n" +
-            "\n" +
-            "struct PS_IN\n" +
-            "{\n" +
-            "    float4 pos : SV_POSITION;\n" +
-            "    float3 worldPos : TEXCOORD0;\n" +
-            "    float3 normal : TEXCOORD1;\n" +
-            "};\n" +
-            "\n" +
-            "PS_IN VS(VS_IN input)\n" +
-            "{\n" +
-            "    PS_IN output;\n" +
-            "    float4 worldPosition = mul(float4(input.pos, 1.0f), world);\n" +
-            "    output.pos = mul(float4(input.pos, 1.0f), worldViewProj);\n" +
-            "    output.worldPos = worldPosition.xyz;\n" +
-            "    output.normal = mul(float4(input.normal, 0.0f), normalMatrix).xyz;\n" +
-            "    return output;\n" +
-            "}\n" +
-            "\n" +
-            "float SamplePointShadowTexture(int textureIndex, float3 sampleDirection)\n" +
-            "{\n" +
-            "    if (textureIndex == 0)\n" +
-            "    {\n" +
-            "        return pointShadowTexture0.Sample(pointShadowSampler, sampleDirection).r;\n" +
-            "    }\n" +
-            "\n" +
-            "    if (textureIndex == 1)\n" +
-            "    {\n" +
-            "        return pointShadowTexture1.Sample(pointShadowSampler, sampleDirection).r;\n" +
-            "    }\n" +
-            "\n" +
-            "    if (textureIndex == 2)\n" +
-            "    {\n" +
-            "        return pointShadowTexture2.Sample(pointShadowSampler, sampleDirection).r;\n" +
-            "    }\n" +
-            "\n" +
-            "    return pointShadowTexture3.Sample(pointShadowSampler, sampleDirection).r;\n" +
-            "}\n" +
-            "\n" +
-            "float3 EvaluateForwardLight(\n" +
-            "    float4 colorAndType,\n" +
-            "    float4 directionAndShadow,\n" +
-            "    float4 positionAndRange,\n" +
-            "    float4 spotAngles,\n" +
-            "    float4 shadowAtlasRect,\n" +
-            "    float4 shadowSlotMetadata,\n" +
-            "    float4x4 worldToShadowClip,\n" +
-            "    float3 litSurfaceColor,\n" +
-            "    float3 worldPos,\n" +
-            "    float3 normal,\n" +
-            "    float3 viewDirection)\n" +
-            "{\n" +
-            "    int lightType = (int)(colorAndType.w + 0.5f);\n" +
-            "    float3 radiance = colorAndType.xyz;\n" +
-            "    float3 lightDirection = float3(0.0f, 0.0f, 0.0f);\n" +
-            "    float attenuation = 1.0f;\n" +
-            "\n" +
-            "    if (lightType == 0)\n" +
-            "    {\n" +
-            "        lightDirection = normalize(-directionAndShadow.xyz);\n" +
-            "    }\n" +
-            "    else\n" +
-            "    {\n" +
-            "        float3 toLight = positionAndRange.xyz - worldPos;\n" +
-            "        float distanceToLight = length(toLight);\n" +
-            "        if (distanceToLight <= 0.0001f || positionAndRange.w <= 0.0f)\n" +
-            "        {\n" +
-            "            return float3(0.0f, 0.0f, 0.0f);\n" +
-            "        }\n" +
-            "\n" +
-            "        lightDirection = toLight / distanceToLight;\n" +
-            "        float normalizedDistance = saturate(distanceToLight / positionAndRange.w);\n" +
-            "        float rangeAttenuation = 1.0f - (normalizedDistance * normalizedDistance);\n" +
-            "        attenuation = rangeAttenuation * rangeAttenuation;\n" +
-            "\n" +
-            "        if (lightType == 2)\n" +
-            "        {\n" +
-            "            float3 lightForward = normalize(directionAndShadow.xyz);\n" +
-            "            float3 lightToSurface = normalize(worldPos - positionAndRange.xyz);\n" +
-            "            float cone = dot(lightForward, lightToSurface);\n" +
-            "            float coneRange = max(spotAngles.x - spotAngles.y, 0.0001f);\n" +
-            "            float spotAttenuation = saturate((cone - spotAngles.y) / coneRange);\n" +
-            "            attenuation *= spotAttenuation * spotAttenuation;\n" +
-            "        }\n" +
-            "    }\n" +
-            "\n" +
-            "    if (attenuation <= 0.0f)\n" +
-            "    {\n" +
-            "        return float3(0.0f, 0.0f, 0.0f);\n" +
-            "    }\n" +
-            "\n" +
-            "    if (shadowSlotMetadata.x > 0.5f && shadowSlotMetadata.z < 1.5f && shadowMetadata.x > 0.5f)\n" +
-            "    {\n" +
-            "        float4 shadowClip = mul(float4(worldPos, 1.0f), worldToShadowClip);\n" +
-            "        if (abs(shadowClip.w) > 0.0001f)\n" +
-            "        {\n" +
-            "            float3 shadowNdc = shadowClip.xyz / shadowClip.w;\n" +
-            "            float2 shadowUv = float2((shadowNdc.x * 0.5f) + 0.5f, (-shadowNdc.y * 0.5f) + 0.5f);\n" +
-            "            if (shadowUv.x >= 0.0f && shadowUv.x <= 1.0f && shadowUv.y >= 0.0f && shadowUv.y <= 1.0f && shadowNdc.z >= 0.0f && shadowNdc.z <= 1.0f)\n" +
-            "            {\n" +
-            "                float2 atlasUv = shadowAtlasRect.xy + (shadowUv * shadowAtlasRect.zw);\n" +
-            "                float sampledDepth = shadowAtlasTexture.Sample(shadowAtlasSampler, atlasUv).r;\n" +
-            "                float shadowBias = 0.0015f;\n" +
-            "                float shadowVisibility = (shadowNdc.z - shadowBias) <= sampledDepth ? 1.0f : 0.0f;\n" +
-            "                attenuation *= lerp(1.0f, shadowVisibility, shadowSlotMetadata.y);\n" +
-            "            }\n" +
-            "        }\n" +
-            "    }\n" +
-            "    else if (shadowSlotMetadata.x > 0.5f && shadowSlotMetadata.z > 1.5f && lightType == 1)\n" +
-            "    {\n" +
-            "        float3 lightToSurface = worldPos - positionAndRange.xyz;\n" +
-            "        float distanceToSurface = length(lightToSurface);\n" +
-            "        if (distanceToSurface > 0.0001f && positionAndRange.w > 0.0f)\n" +
-            "        {\n" +
-            "            int pointShadowTextureIndex = (int)(shadowSlotMetadata.w + 0.5f);\n" +
-            "            float3 sampleDirection = lightToSurface / distanceToSurface;\n" +
-            "            float currentDepth = saturate(distanceToSurface / positionAndRange.w);\n" +
-            "            float sampledDepth = SamplePointShadowTexture(pointShadowTextureIndex, sampleDirection);\n" +
-            "            float shadowBias = 0.01f;\n" +
-            "            float shadowVisibility = (currentDepth - shadowBias) <= sampledDepth ? 1.0f : 0.0f;\n" +
-            "            attenuation *= lerp(1.0f, shadowVisibility, shadowSlotMetadata.y);\n" +
-            "        }\n" +
-            "    }\n" +
-            "\n" +
-            "    float diffuse = saturate(dot(normal, lightDirection));\n" +
-            "    if (diffuse <= 0.0f)\n" +
-            "    {\n" +
-            "        return float3(0.0f, 0.0f, 0.0f);\n" +
-            "    }\n" +
-            "\n" +
-            "    float3 halfVector = normalize(lightDirection + viewDirection);\n" +
-            "    float specular = pow(saturate(dot(normal, halfVector)), 32.0f);\n" +
-            "    float3 diffuseColor = litSurfaceColor * radiance * diffuse * attenuation;\n" +
-            "    float3 specularColor = radiance * specular * 0.35f * attenuation;\n" +
-            "    return diffuseColor + specularColor;\n" +
-            "}\n" +
-            "\n" +
-            "float4 PS(PS_IN input) : SV_Target\n" +
-            "{\n" +
-            "    float3 ambientColor = float3(0.14f, 0.16f, 0.18f);\n" +
-            "    float3 normal = normalize(input.normal);\n" +
-            "    float3 viewDirection = normalize(cameraPosition.xyz - input.worldPos);\n" +
-            "    float3 color = surfaceColor.xyz * ambientColor;\n" +
-            "    int activeLightCount = (int)(lightMetadata.x + 0.5f);\n" +
-            "\n" +
-            "    if (activeLightCount > 0)\n" +
-            "    {\n" +
-            "        color += EvaluateForwardLight(light0ColorAndType, light0DirectionAndShadow, light0PositionAndRange, light0SpotAngles, shadowLight0AtlasRect, shadowLight0Metadata, shadowLight0WorldToShadowClip, surfaceColor.xyz, input.worldPos, normal, viewDirection);\n" +
-            "    }\n" +
-            "\n" +
-            "    if (activeLightCount > 1)\n" +
-            "    {\n" +
-            "        color += EvaluateForwardLight(light1ColorAndType, light1DirectionAndShadow, light1PositionAndRange, light1SpotAngles, shadowLight1AtlasRect, shadowLight1Metadata, shadowLight1WorldToShadowClip, surfaceColor.xyz, input.worldPos, normal, viewDirection);\n" +
-            "    }\n" +
-            "\n" +
-            "    if (activeLightCount > 2)\n" +
-            "    {\n" +
-            "        color += EvaluateForwardLight(light2ColorAndType, light2DirectionAndShadow, light2PositionAndRange, light2SpotAngles, shadowLight2AtlasRect, shadowLight2Metadata, shadowLight2WorldToShadowClip, surfaceColor.xyz, input.worldPos, normal, viewDirection);\n" +
-            "    }\n" +
-            "\n" +
-            "    if (activeLightCount > 3)\n" +
-            "    {\n" +
-            "        color += EvaluateForwardLight(light3ColorAndType, light3DirectionAndShadow, light3PositionAndRange, light3SpotAngles, shadowLight3AtlasRect, shadowLight3Metadata, shadowLight3WorldToShadowClip, surfaceColor.xyz, input.worldPos, normal, viewDirection);\n" +
-            "    }\n" +
-            "\n" +
-            "    return float4(saturate(color), surfaceColor.w);\n" +
-            "}\n";
+        const int PhysicsDemoSphereTileTextureWidth = 64;
+
+        /// <summary>
+        /// Height, in pixels, of the generated sphere-stack tile texture.
+        /// </summary>
+        const int PhysicsDemoSphereTileTextureHeight = 64;
+
+        /// <summary>
+        /// Tile size, in pixels, used by the generated sphere-stack tile texture.
+        /// </summary>
+        const int PhysicsDemoSphereTileTextureTileSize = 16;
+
+        /// <summary>
+        /// Grout thickness, in pixels, used between generated sphere-stack tiles.
+        /// </summary>
+        const int PhysicsDemoSphereTileTextureGroutThickness = 2;
+
+        /// <summary>
+        /// Shared generated bitmap bytes written to the authored sphere-stack tile texture source.
+        /// </summary>
+        static readonly byte[] PhysicsDemoSphereTileTextureBytes = BuildPhysicsDemoSphereTileTextureFileBytes();
+
+        /// <summary>
+        /// Imported texture asset identifier derived from the generated sphere-stack tile texture bytes.
+        /// </summary>
+        static readonly string PhysicsDemoSphereTileTextureAssetId = BuildImporterQualifiedAssetId(ComputeSourceChecksum(PhysicsDemoSphereTileTextureBytes), TextureImporterId);
 
         /// <summary>
         /// Current payload version for serialized rigid-body component scene records.
@@ -871,7 +747,13 @@ namespace city.physics.tools {
                 instructionOverlayRootEntity.Dispose();
             }
 
-            rootEntities.Add(CreatePhysicsShowcaseUiEntity());
+            EditorEntity physicsShowcaseUiEntity = CreateLivePhysicsShowcaseUiEntity();
+            try {
+                ReassignGeneratedEditorEntityIds(physicsShowcaseUiEntity);
+                rootEntities.Add(SerializeGeneratedEditorEntity(physicsShowcaseUiEntity, assetReferences, assetReferenceKeys));
+            } finally {
+                physicsShowcaseUiEntity.Dispose();
+            }
             rootEntities.Add(scenarioEntity);
 
             return new SceneAsset {
@@ -900,6 +782,7 @@ namespace city.physics.tools {
             return new SceneEntityAsset {
                 Id = AllocateSceneEntityId(),
                 Name = "Scenario",
+                LayerMask = EditorLayerMasks.SceneObjects,
                 LocalPosition = float3.Zero,
                 LocalScale = float3.One,
                 LocalOrientation = float4.Identity,
@@ -923,6 +806,7 @@ namespace city.physics.tools {
             return new SceneEntityAsset {
                 Id = AllocateSceneEntityId(),
                 Name = "Camera",
+                LayerMask = EditorLayerMasks.SceneObjects,
                 LocalPosition = position,
                 LocalScale = float3.One,
                 LocalOrientation = orientation,
@@ -960,6 +844,7 @@ namespace city.physics.tools {
             return new SceneEntityAsset {
                 Id = AllocateSceneEntityId(),
                 Name = name,
+                LayerMask = EditorLayerMasks.SceneObjects,
                 LocalPosition = position,
                 LocalScale = scale,
                 LocalOrientation = orientation,
@@ -1001,6 +886,7 @@ namespace city.physics.tools {
             return new SceneEntityAsset {
                 Id = AllocateSceneEntityId(),
                 Name = name,
+                LayerMask = EditorLayerMasks.SceneObjects,
                 LocalPosition = position,
                 LocalScale = scale,
                 LocalOrientation = orientation,
@@ -1045,6 +931,7 @@ namespace city.physics.tools {
                     EntityComponentSaveState saveState = null;
                     if (saveComponent.TryGetComponentState(component, out EntityComponentSaveState existingSaveState)) {
                         saveState = existingSaveState;
+                        NormalizeGeneratedEditorFontReference(component, saveState);
                     }
 
                     IComponentPersistenceDescriptor descriptor = PersistenceRegistry.GetDescriptor(component);
@@ -1115,23 +1002,6 @@ namespace city.physics.tools {
         }
 
         /// <summary>
-        /// Creates one lightweight UI root that owns the playable showcase light-toggle updater.
-        /// </summary>
-        /// <returns>Scene entity whose update component toggles authored directional lights.</returns>
-        SceneEntityAsset CreatePhysicsShowcaseUiEntity() {
-            return new SceneEntityAsset {
-                Id = AllocateSceneEntityId(),
-                Name = "ShowcaseUi",
-                LocalPosition = float3.Zero,
-                LocalScale = float3.One,
-                LocalOrientation = float4.Identity,
-                Components = new[] {
-                    CreateAutomaticComponentRecord(new city.rendering.DemoDiscLightToggleComponent(), 0)
-                },
-                Children = Array.Empty<SceneEntityAsset>()
-            };
-        }
-
         /// <summary>
         /// Creates the shared desktop instruction overlay root used by the playable physics showcase scenes.
         /// </summary>
@@ -1183,6 +1053,7 @@ namespace city.physics.tools {
             return new SceneEntityAsset {
                 Id = AllocateSceneEntityId(),
                 Name = name,
+                LayerMask = EditorLayerMasks.SceneObjects,
                 LocalPosition = position,
                 LocalScale = float3.One,
                 LocalOrientation = orientation,
@@ -1232,6 +1103,7 @@ namespace city.physics.tools {
             return new SceneEntityAsset {
                 Id = AllocateSceneEntityId(),
                 Name = name,
+                LayerMask = EditorLayerMasks.SceneObjects,
                 LocalPosition = position,
                 LocalScale = scale,
                 LocalOrientation = orientation,
@@ -1284,6 +1156,7 @@ namespace city.physics.tools {
             return new SceneEntityAsset {
                 Id = AllocateSceneEntityId(),
                 Name = name,
+                LayerMask = EditorLayerMasks.SceneObjects,
                 LocalPosition = position,
                 LocalScale = scale,
                 LocalOrientation = orientation,
@@ -1314,6 +1187,7 @@ namespace city.physics.tools {
             return new SceneEntityAsset {
                 Id = AllocateSceneEntityId(),
                 Name = name,
+                LayerMask = EditorLayerMasks.SceneObjects,
                 LocalPosition = position,
                 LocalScale = float3.One,
                 LocalOrientation = float4.Identity,
@@ -1371,7 +1245,15 @@ namespace city.physics.tools {
                 CreatePhysicsDemoMaterialReference(PhysicsDemoCyanMaterialRelativePath),
                 CreatePhysicsDemoMaterialReference(PhysicsDemoRedMaterialRelativePath),
                 CreatePhysicsDemoMaterialReference(PhysicsDemoOrangeMaterialRelativePath),
-                CreatePhysicsDemoMaterialReference(PhysicsDemoPurpleMaterialRelativePath)
+                CreatePhysicsDemoMaterialReference(PhysicsDemoPurpleMaterialRelativePath),
+                CreatePhysicsDemoMaterialReference(PhysicsDemoSphereStackBlueMaterialRelativePath),
+                CreatePhysicsDemoMaterialReference(PhysicsDemoSphereStackGreenMaterialRelativePath),
+                CreatePhysicsDemoMaterialReference(PhysicsDemoSphereStackMagentaMaterialRelativePath),
+                CreatePhysicsDemoMaterialReference(PhysicsDemoSphereStackYellowMaterialRelativePath),
+                CreatePhysicsDemoMaterialReference(PhysicsDemoSphereStackCyanMaterialRelativePath),
+                CreatePhysicsDemoMaterialReference(PhysicsDemoSphereStackRedMaterialRelativePath),
+                CreatePhysicsDemoMaterialReference(PhysicsDemoSphereStackOrangeMaterialRelativePath),
+                CreatePhysicsDemoMaterialReference(PhysicsDemoSphereStackPurpleMaterialRelativePath)
             };
         }
 
@@ -1386,14 +1268,14 @@ namespace city.physics.tools {
             }
 
             string[] materialPaths = {
-                PhysicsDemoBlueMaterialRelativePath,
-                PhysicsDemoGreenMaterialRelativePath,
-                PhysicsDemoMagentaMaterialRelativePath,
-                PhysicsDemoYellowMaterialRelativePath,
-                PhysicsDemoCyanMaterialRelativePath,
-                PhysicsDemoRedMaterialRelativePath,
-                PhysicsDemoOrangeMaterialRelativePath,
-                PhysicsDemoPurpleMaterialRelativePath
+                PhysicsDemoSphereStackBlueMaterialRelativePath,
+                PhysicsDemoSphereStackGreenMaterialRelativePath,
+                PhysicsDemoSphereStackMagentaMaterialRelativePath,
+                PhysicsDemoSphereStackYellowMaterialRelativePath,
+                PhysicsDemoSphereStackCyanMaterialRelativePath,
+                PhysicsDemoSphereStackRedMaterialRelativePath,
+                PhysicsDemoSphereStackOrangeMaterialRelativePath,
+                PhysicsDemoSphereStackPurpleMaterialRelativePath
             };
             return CreatePhysicsDemoMaterialReference(materialPaths[sphereIndex % materialPaths.Length]);
         }
@@ -1537,6 +1419,7 @@ namespace city.physics.tools {
             return new SceneEntityAsset {
                 Id = AllocateSceneEntityId(),
                 Name = "KeyLight",
+                LayerMask = EditorLayerMasks.SceneObjects,
                 LocalPosition = new float3(0f, 6f, 0f),
                 LocalScale = float3.One,
                 LocalOrientation = CreateYawPitchRollDegrees(-48.0, -44.0, 0.0),
@@ -1561,7 +1444,7 @@ namespace city.physics.tools {
         }
 
         /// <summary>
-        /// Writes the shared shader and material assets consumed by the exported physics validation scenes.
+        /// Writes the shared texture and material assets consumed by the exported physics validation scenes.
         /// </summary>
         /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
         static void WriteSupportAssets(string projectRootPath) {
@@ -1570,6 +1453,7 @@ namespace city.physics.tools {
             }
 
             DeleteObsoletePhysicsDemoShaderAsset(projectRootPath);
+            WriteSphereTileTextureAssets(projectRootPath);
             WriteMaterialAsset(projectRootPath, PhysicsDemoGroundMaterialRelativePath, "PhysicsDemoGround", new float4(0.77f, 0.80f, 0.84f, 1.0f), false, true);
             WriteMaterialAsset(projectRootPath, PhysicsDemoNeutralMaterialRelativePath, "PhysicsDemoNeutral", new float4(0.77f, 0.80f, 0.84f, 1.0f), true, true);
             WriteMaterialAsset(projectRootPath, PhysicsDemoBlueMaterialRelativePath, "PhysicsDemoBlue", new float4(0.33f, 0.56f, 0.90f, 1.0f), true, true);
@@ -1580,6 +1464,14 @@ namespace city.physics.tools {
             WriteMaterialAsset(projectRootPath, PhysicsDemoRedMaterialRelativePath, "PhysicsDemoRed", new float4(0.90f, 0.32f, 0.29f, 1.0f), true, true);
             WriteMaterialAsset(projectRootPath, PhysicsDemoOrangeMaterialRelativePath, "PhysicsDemoOrange", new float4(0.95f, 0.52f, 0.22f, 1.0f), true, true);
             WriteMaterialAsset(projectRootPath, PhysicsDemoPurpleMaterialRelativePath, "PhysicsDemoPurple", new float4(0.55f, 0.43f, 0.92f, 1.0f), true, true);
+            WriteTexturedMaterialAsset(projectRootPath, PhysicsDemoSphereStackBlueMaterialRelativePath, "PhysicsDemoSphereStackBlue", new float4(0.33f, 0.56f, 0.90f, 1.0f), true, true);
+            WriteTexturedMaterialAsset(projectRootPath, PhysicsDemoSphereStackGreenMaterialRelativePath, "PhysicsDemoSphereStackGreen", new float4(0.38f, 0.76f, 0.49f, 1.0f), true, true);
+            WriteTexturedMaterialAsset(projectRootPath, PhysicsDemoSphereStackMagentaMaterialRelativePath, "PhysicsDemoSphereStackMagenta", new float4(0.84f, 0.42f, 0.73f, 1.0f), true, true);
+            WriteTexturedMaterialAsset(projectRootPath, PhysicsDemoSphereStackYellowMaterialRelativePath, "PhysicsDemoSphereStackYellow", new float4(0.92f, 0.79f, 0.33f, 1.0f), true, true);
+            WriteTexturedMaterialAsset(projectRootPath, PhysicsDemoSphereStackCyanMaterialRelativePath, "PhysicsDemoSphereStackCyan", new float4(0.31f, 0.79f, 0.82f, 1.0f), true, true);
+            WriteTexturedMaterialAsset(projectRootPath, PhysicsDemoSphereStackRedMaterialRelativePath, "PhysicsDemoSphereStackRed", new float4(0.90f, 0.32f, 0.29f, 1.0f), true, true);
+            WriteTexturedMaterialAsset(projectRootPath, PhysicsDemoSphereStackOrangeMaterialRelativePath, "PhysicsDemoSphereStackOrange", new float4(0.95f, 0.52f, 0.22f, 1.0f), true, true);
+            WriteTexturedMaterialAsset(projectRootPath, PhysicsDemoSphereStackPurpleMaterialRelativePath, "PhysicsDemoSphereStackPurple", new float4(0.55f, 0.43f, 0.92f, 1.0f), true, true);
         }
 
         /// <summary>
@@ -1591,9 +1483,13 @@ namespace city.physics.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            string fullPath = Path.Combine(projectRootPath, "assets", PhysicsDemoShaderRelativePath.Replace('/', Path.DirectorySeparatorChar));
-            if (File.Exists(fullPath)) {
-                File.Delete(fullPath);
+            string shaderFullPath = Path.Combine(projectRootPath, "assets", "Shaders", "physics", "PhysicsDemoMesh.hlsl");
+            string shaderSettingsFullPath = shaderFullPath + ".hasset";
+            if (File.Exists(shaderFullPath)) {
+                File.Delete(shaderFullPath);
+            }
+            if (File.Exists(shaderSettingsFullPath)) {
+                File.Delete(shaderSettingsFullPath);
             }
         }
 
@@ -1740,7 +1636,9 @@ namespace city.physics.tools {
 
             SceneEntityAsset scenarioRootEntity = ResolveRequiredPlayablePhysicsShowcaseScenarioRoot(authoredSceneAsset);
             ComponentPersistenceRegistry persistenceRegistry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
-            EditorSceneAssetReferenceResolver referenceResolver = new EditorSceneAssetReferenceResolver(Core.Instance.ContentManager, projectRootPath);
+            ContentManager assetContentManager = new ContentManager(Path.Combine(projectRootPath, "assets"));
+            EditorContentManagerConfiguration.ConfigureSharedAssetContentManager(assetContentManager);
+            EditorSceneAssetReferenceResolver referenceResolver = new EditorSceneAssetReferenceResolver(assetContentManager, projectRootPath);
             SceneLoadService sceneLoadService = new SceneLoadService(persistenceRegistry, referenceResolver);
             SceneAsset scenarioSceneAsset = new SceneAsset {
                 Id = authoredSceneAsset.Id,
@@ -1817,34 +1715,426 @@ namespace city.physics.tools {
         /// Creates one live authored UI root that shows FPS diagnostics and owns the playable showcase light-toggle updater.
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
-        Entity CreateLivePhysicsShowcaseUiEntity() {
+        EditorEntity CreateLivePhysicsShowcaseUiEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("ShowcaseUi");
-            entity.AddComponent(new FPSComponent {
+            FPSComponent fpsComponent = new FPSComponent {
                 Font = ResolveRequiredEditorFont(),
                 FontScale = 2f
-            });
+            };
+            entity.AddComponent(fpsComponent);
+            ApplyEditorFontReference(entity, fpsComponent);
             entity.AddComponent(new city.menu.DemoDiscReturnToMenuComponent());
             entity.AddComponent(new city.rendering.DemoDiscLightToggleComponent());
-            return entity;
+            DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
+            lightIndicatorOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont());
+            if (entity is EditorEntity editorEntity) {
+                return editorEntity;
+            }
+
+            throw new InvalidOperationException("The physics showcase UI root must be authored through editor entities.");
+        }
+        /// <summary>
+        /// Stores the generated editor-font reference on the entity save state for the supplied FPS component.
+        /// </summary>
+        /// <param name="entity">Entity that owns the FPS component.</param>
+        /// <param name="component">FPS component whose font reference should be stored.</param>
+        void ApplyEditorFontReference(Entity entity, FPSComponent component) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (component == null) {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
         }
 
         /// <summary>
-        /// Writes the shared file-backed HLSL shader used by the exported physics validation scenes.
+        /// Rewrites any stale generated-editor font save reference before one generated overlay component is serialized through the manual physics showcase scene path.
+        /// </summary>
+        /// <param name="component">Generated overlay component currently being serialized.</param>
+        /// <param name="saveState">Save metadata that should carry the normalized font reference.</param>
+        void NormalizeGeneratedEditorFontReference(Component component, EntityComponentSaveState saveState) {
+            if (component == null) {
+                throw new ArgumentNullException(nameof(component));
+            } else if (saveState == null) {
+                throw new ArgumentNullException(nameof(saveState));
+            }
+
+            if (component is FPSComponent fpsComponent) {
+                NormalizeGeneratedEditorFontReference(fpsComponent.Font, saveState);
+            } else if (component is DebugComponent debugComponent) {
+                NormalizeGeneratedEditorFontReference(debugComponent.Font, saveState);
+            } else if (component is TextComponent textComponent) {
+                NormalizeGeneratedEditorFontReference(textComponent.Font, saveState);
+            }
+        }
+
+        /// <summary>
+        /// Stores the stable generated editor UI-font reference when one generated overlay component uses the active editor font instance.
+        /// </summary>
+        /// <param name="font">Runtime font assigned to the generated overlay component.</param>
+        /// <param name="saveState">Save metadata that should carry the normalized font reference.</param>
+        void NormalizeGeneratedEditorFontReference(FontAsset font, EntityComponentSaveState saveState) {
+            if (saveState == null) {
+                throw new ArgumentNullException(nameof(saveState));
+            } else if (font == null) {
+                return;
+            } else if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+                return;
+            } else if (!ReferenceEquals(font, editorCore.DefaultFontAssetForEditor)) {
+                return;
+            }
+
+            saveState.SetAssetReference("Font", DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+        }
+
+        /// <summary>
+        /// Resolves the hidden entity save component attached by the editor entity factory.
+        /// </summary>
+        /// <param name="entity">Entity whose save component should be returned.</param>
+        /// <returns>Attached entity save component.</returns>
+        EntitySaveComponent FindRequiredEntitySaveComponent(Entity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (entity.Components == null) {
+                throw new InvalidOperationException("Generated entities must expose initialized component collections.");
+            }
+
+            for (int index = 0; index < entity.Components.Count; index++) {
+                if (entity.Components[index] is EntitySaveComponent saveComponent) {
+                    return saveComponent;
+                }
+            }
+
+            throw new InvalidOperationException("Generated entities must include EntitySaveComponent.");
+        }
+
+        /// <summary>
+        /// Writes the generated authored source texture, import sidecar, and cached texture asset used by the sphere-stack materials.
         /// </summary>
         /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
-        static void WriteShaderAsset(string projectRootPath) {
+        static void WriteSphereTileTextureAssets(string projectRootPath) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            string fullPath = Path.Combine(projectRootPath, "assets", PhysicsDemoShaderRelativePath.Replace('/', Path.DirectorySeparatorChar));
+            WriteSphereTileTextureSource(projectRootPath);
+            WriteSphereTileTextureCacheAsset(projectRootPath);
+        }
+
+        /// <summary>
+        /// Writes the generated sphere-stack tile texture source bitmap and its import-settings sidecar.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
+        static void WriteSphereTileTextureSource(string projectRootPath) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            }
+
+            string fullPath = Path.Combine(projectRootPath, "assets", PhysicsDemoSphereTileTextureRelativePath.Replace('/', Path.DirectorySeparatorChar));
             string directoryPath = Path.GetDirectoryName(fullPath);
             if (string.IsNullOrWhiteSpace(directoryPath)) {
-                throw new InvalidOperationException($"Could not resolve a directory path for shader '{PhysicsDemoShaderRelativePath}'.");
+                throw new InvalidOperationException($"Could not resolve a texture directory for '{PhysicsDemoSphereTileTextureRelativePath}'.");
             }
 
             Directory.CreateDirectory(directoryPath);
-            File.WriteAllText(fullPath, PhysicsDemoShaderSource);
+            File.WriteAllBytes(fullPath, PhysicsDemoSphereTileTextureBytes);
+
+            using FileStream stream = File.Create(fullPath + ".hasset");
+            AssetImportSettingsBinarySerializer.Serialize(stream, CreateSphereTileTextureImportSettings(PhysicsDemoSphereTileTextureBytes));
+        }
+
+        /// <summary>
+        /// Writes the cached runtime texture asset paired with the generated sphere-stack tile texture source.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute project root path that owns the `cache` directory.</param>
+        static void WriteSphereTileTextureCacheAsset(string projectRootPath) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            }
+
+            string cachePath = Path.Combine(projectRootPath, "cache", PhysicsDemoSphereTileTextureAssetId);
+            string directoryPath = Path.GetDirectoryName(cachePath);
+            if (string.IsNullOrWhiteSpace(directoryPath)) {
+                throw new InvalidOperationException($"Could not resolve a texture cache directory for '{PhysicsDemoSphereTileTextureAssetId}'.");
+            }
+
+            Directory.CreateDirectory(directoryPath);
+            using FileStream stream = File.Create(cachePath);
+            global::helengine.editor.AssetSerializer.Serialize(stream, CreateSphereTileTextureAsset());
+        }
+
+        /// <summary>
+        /// Creates the import-settings payload paired with the generated sphere-stack tile texture source.
+        /// </summary>
+        /// <param name="textureBytes">Generated authored texture bytes whose checksum should be persisted into the sidecar.</param>
+        /// <returns>Import settings that match the generated sphere-stack tile texture source.</returns>
+        static AssetImportSettings CreateSphereTileTextureImportSettings(byte[] textureBytes) {
+            if (textureBytes == null) {
+                throw new ArgumentNullException(nameof(textureBytes));
+            }
+
+            AssetImportSettings settings = new AssetImportSettings();
+            settings.Importer.ImporterId = TextureImporterId;
+            settings.Importer.SourceChecksum = ComputeSourceChecksum(textureBytes);
+            settings.Importer.AssetId = PhysicsDemoSphereTileTextureAssetId;
+            return settings;
+        }
+
+        /// <summary>
+        /// Creates the cached runtime texture asset that matches the generated sphere-stack tile texture bitmap.
+        /// </summary>
+        /// <returns>Cached runtime texture asset for the sphere-stack materials.</returns>
+        static TextureAsset CreateSphereTileTextureAsset() {
+            return new TextureAsset {
+                Width = PhysicsDemoSphereTileTextureWidth,
+                Height = PhysicsDemoSphereTileTextureHeight,
+                Colors = BuildPhysicsDemoSphereTileTextureAssetColors()
+            };
+        }
+
+        /// <summary>
+        /// Writes one file-backed textured material asset used by the exported sphere-stack validation scene.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
+        /// <param name="relativePath">Relative project asset path for the material file.</param>
+        /// <param name="assetId">Serialized material asset identifier.</param>
+        /// <param name="surfaceColor">Authored standard material base color.</param>
+        /// <param name="castsShadows">True when the material should cast dynamic shadows where supported.</param>
+        /// <param name="receivesShadows">True when the material should receive dynamic shadows where supported.</param>
+        static void WriteTexturedMaterialAsset(string projectRootPath, string relativePath, string assetId, float4 surfaceColor, bool castsShadows, bool receivesShadows) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            }
+            if (string.IsNullOrWhiteSpace(relativePath)) {
+                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
+            }
+            if (string.IsNullOrWhiteSpace(assetId)) {
+                throw new ArgumentException("Asset id must be provided.", nameof(assetId));
+            }
+
+            string baseColor = ConvertColorToHtml(surfaceColor);
+            string castsShadowValue = castsShadows ? "true" : "false";
+            string receivesShadowValue = receivesShadows ? "true" : "false";
+
+            city.rendering.tools.GeneratedMaterialAssetDefinition definition = new city.rendering.tools.GeneratedMaterialAssetDefinition {
+                MaterialAsset = new ShaderMaterialAsset {
+                    Id = assetId,
+                    RenderState = new MaterialRenderState(),
+                    CastsShadows = castsShadows,
+                    ReceivesShadows = receivesShadows
+                }
+            };
+
+            city.rendering.tools.GeneratedMaterialPlatformDefinition windowsSettings = definition.GetOrCreatePlatform("windows");
+            windowsSettings.SchemaId = StandardShaderSchemaId;
+            windowsSettings.SetFieldValue(UseCustomShaderFieldId, "false");
+            windowsSettings.SetFieldValue(ShaderAssetIdFieldId, StandardShaderAssetId);
+            windowsSettings.SetFieldValue(TextureAssetIdFieldId, PhysicsDemoSphereTileTextureAssetId);
+            windowsSettings.SetFieldValue(CastsShadowFieldId, castsShadowValue);
+            windowsSettings.SetFieldValue(ReceivesShadowFieldId, receivesShadowValue);
+            windowsSettings.SetFieldValue(BaseColorFieldId, baseColor);
+
+            city.rendering.tools.GeneratedMaterialPlatformDefinition ps2Settings = definition.GetOrCreatePlatform("ps2");
+            ps2Settings.SchemaId = Ps2MaterialSchemaId;
+            ps2Settings.SetFieldValue(TextureAssetIdFieldId, PhysicsDemoSphereTileTextureAssetId);
+            ps2Settings.SetFieldValue(AlphaModeFieldId, "opaque");
+            ps2Settings.SetFieldValue(DoubleSidedFieldId, "false");
+            ps2Settings.SetFieldValue(Ps2CastShadowsFieldId, castsShadowValue);
+            ps2Settings.SetFieldValue(VertexColorModeFieldId, "ignore");
+            ps2Settings.SetFieldValue(BaseColorFieldId, baseColor);
+
+            city.rendering.tools.GeneratedMaterialPlatformDefinition pspSettings = definition.GetOrCreatePlatform("psp");
+            pspSettings.SchemaId = StandardShaderSchemaId;
+            pspSettings.SetFieldValue(UseCustomShaderFieldId, "false");
+            pspSettings.SetFieldValue(ShaderAssetIdFieldId, StandardShaderAssetId);
+            pspSettings.SetFieldValue(TextureAssetIdFieldId, PhysicsDemoSphereTileTextureAssetId);
+            pspSettings.SetFieldValue(CastsShadowFieldId, castsShadowValue);
+            pspSettings.SetFieldValue(ReceivesShadowFieldId, receivesShadowValue);
+            pspSettings.SetFieldValue(BaseColorFieldId, baseColor);
+
+            city.rendering.tools.GeneratedMaterialPlatformDefinition gameCubeSettings = definition.GetOrCreatePlatform("gamecube");
+            gameCubeSettings.SchemaId = GameCubeMaterialSchemaId;
+            gameCubeSettings.SetFieldValue(TextureAssetIdFieldId, PhysicsDemoSphereTileTextureAssetId);
+            gameCubeSettings.SetFieldValue(GameCubeTextureRelativePathFieldId, "cooked/imported/" + PhysicsDemoSphereTileTextureAssetId);
+            gameCubeSettings.SetFieldValue(DoubleSidedFieldId, "false");
+            gameCubeSettings.SetFieldValue(VertexColorModeFieldId, "ignore");
+            gameCubeSettings.SetFieldValue(BaseColorFieldId, baseColor);
+            gameCubeSettings.SetFieldValue(LightingModeFieldId, "lit");
+
+            city.rendering.tools.GeneratedMaterialPlatformDefinition dsSettings = definition.GetOrCreatePlatform("ds");
+            dsSettings.SchemaId = DsMaterialSchemaId;
+            dsSettings.SetFieldValue(TextureAssetIdFieldId, PhysicsDemoSphereTileTextureAssetId);
+            dsSettings.SetFieldValue(DsTextureRelativePathFieldId, "cooked/imported/" + PhysicsDemoSphereTileTextureAssetId);
+            dsSettings.SetFieldValue(DoubleSidedFieldId, "false");
+            dsSettings.SetFieldValue(VertexColorModeFieldId, "ignore");
+            dsSettings.SetFieldValue(BaseColorFieldId, baseColor);
+            dsSettings.SetFieldValue(LightingModeFieldId, "lit");
+
+            city.rendering.tools.GeneratedMaterialAssetWriteService writeService = new city.rendering.tools.GeneratedMaterialAssetWriteService();
+            writeService.WriteMaterial(projectRootPath, relativePath, definition);
+        }
+
+        /// <summary>
+        /// Builds the BMP file bytes written to the generated sphere-stack tile texture source file.
+        /// </summary>
+        /// <returns>24-bit BMP bytes for the shared sphere-stack tile texture.</returns>
+        static byte[] BuildPhysicsDemoSphereTileTextureFileBytes() {
+            int rowStride = ((PhysicsDemoSphereTileTextureWidth * 3) + 3) & ~3;
+            int pixelDataLength = rowStride * PhysicsDemoSphereTileTextureHeight;
+            int pixelDataOffset = 14 + 40;
+            int fileLength = pixelDataOffset + pixelDataLength;
+            byte[] fileBytes = new byte[fileLength];
+
+            fileBytes[0] = (byte)'B';
+            fileBytes[1] = (byte)'M';
+            WriteInt32(fileBytes, 2, fileLength);
+            WriteInt32(fileBytes, 10, pixelDataOffset);
+            WriteInt32(fileBytes, 14, 40);
+            WriteInt32(fileBytes, 18, PhysicsDemoSphereTileTextureWidth);
+            WriteInt32(fileBytes, 22, PhysicsDemoSphereTileTextureHeight);
+            WriteInt16(fileBytes, 26, 1);
+            WriteInt16(fileBytes, 28, 24);
+            WriteInt32(fileBytes, 34, pixelDataLength);
+
+            for (int y = 0; y < PhysicsDemoSphereTileTextureHeight; y++) {
+                int rowOffset = pixelDataOffset + ((PhysicsDemoSphereTileTextureHeight - 1 - y) * rowStride);
+                for (int x = 0; x < PhysicsDemoSphereTileTextureWidth; x++) {
+                    ResolvePhysicsDemoSphereTilePixelColor(x, y, out byte red, out byte green, out byte blue, out _);
+                    int pixelOffset = rowOffset + (x * 3);
+                    fileBytes[pixelOffset + 0] = blue;
+                    fileBytes[pixelOffset + 1] = green;
+                    fileBytes[pixelOffset + 2] = red;
+                }
+            }
+
+            return fileBytes;
+        }
+
+        /// <summary>
+        /// Builds the runtime RGBA pixel payload paired with the generated sphere-stack tile texture bitmap.
+        /// </summary>
+        /// <returns>Top-down row-major RGBA pixel bytes.</returns>
+        static byte[] BuildPhysicsDemoSphereTileTextureAssetColors() {
+            byte[] colors = new byte[PhysicsDemoSphereTileTextureWidth * PhysicsDemoSphereTileTextureHeight * 4];
+
+            for (int y = 0; y < PhysicsDemoSphereTileTextureHeight; y++) {
+                for (int x = 0; x < PhysicsDemoSphereTileTextureWidth; x++) {
+                    ResolvePhysicsDemoSphereTilePixelColor(x, y, out byte red, out byte green, out byte blue, out byte alpha);
+                    int pixelOffset = ((y * PhysicsDemoSphereTileTextureWidth) + x) * 4;
+                    colors[pixelOffset + 0] = red;
+                    colors[pixelOffset + 1] = green;
+                    colors[pixelOffset + 2] = blue;
+                    colors[pixelOffset + 3] = alpha;
+                }
+            }
+
+            return colors;
+        }
+
+        /// <summary>
+        /// Resolves one grayscale tile pixel for the shared sphere-stack rotation texture.
+        /// </summary>
+        /// <param name="x">Zero-based pixel column.</param>
+        /// <param name="y">Zero-based pixel row.</param>
+        /// <param name="red">Resolved red channel.</param>
+        /// <param name="green">Resolved green channel.</param>
+        /// <param name="blue">Resolved blue channel.</param>
+        /// <param name="alpha">Resolved alpha channel.</param>
+        static void ResolvePhysicsDemoSphereTilePixelColor(int x, int y, out byte red, out byte green, out byte blue, out byte alpha) {
+            int tileX = x / PhysicsDemoSphereTileTextureTileSize;
+            int tileY = y / PhysicsDemoSphereTileTextureTileSize;
+            int localX = x % PhysicsDemoSphereTileTextureTileSize;
+            int localY = y % PhysicsDemoSphereTileTextureTileSize;
+            bool isGrout = localX < PhysicsDemoSphereTileTextureGroutThickness
+                || localY < PhysicsDemoSphereTileTextureGroutThickness
+                || localX >= PhysicsDemoSphereTileTextureTileSize - PhysicsDemoSphereTileTextureGroutThickness
+                || localY >= PhysicsDemoSphereTileTextureTileSize - PhysicsDemoSphereTileTextureGroutThickness;
+            bool isAccent = !isGrout
+                && localX >= 3
+                && localX <= 7
+                && localY >= 3
+                && localY <= 7;
+
+            byte luminance;
+            if (isGrout) {
+                luminance = 72;
+            } else if (isAccent) {
+                luminance = 252;
+            } else if (((tileX + tileY) & 1) == 0) {
+                luminance = 214;
+            } else {
+                luminance = 168;
+            }
+
+            red = luminance;
+            green = luminance;
+            blue = luminance;
+            alpha = byte.MaxValue;
+        }
+
+        /// <summary>
+        /// Computes the stable lowercase SHA-256 checksum string stored in the generated sphere-stack texture sidecar.
+        /// </summary>
+        /// <param name="sourceBytes">Texture source bytes to hash.</param>
+        /// <returns>Lowercase hexadecimal SHA-256 checksum string.</returns>
+        static string ComputeSourceChecksum(byte[] sourceBytes) {
+            if (sourceBytes == null) {
+                throw new ArgumentNullException(nameof(sourceBytes));
+            }
+
+            byte[] hashBytes = System.Security.Cryptography.SHA256.HashData(sourceBytes);
+            return Convert.ToHexString(hashBytes).ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// Builds one importer-qualified texture asset id using the same identity scheme as the editor import pipeline.
+        /// </summary>
+        /// <param name="sourceChecksum">Lowercase hexadecimal source checksum.</param>
+        /// <param name="importerId">Registered texture importer identifier.</param>
+        /// <returns>Importer-qualified lowercase asset identifier.</returns>
+        static string BuildImporterQualifiedAssetId(string sourceChecksum, string importerId) {
+            if (string.IsNullOrWhiteSpace(sourceChecksum)) {
+                throw new ArgumentException("Source checksum must be provided.", nameof(sourceChecksum));
+            } else if (string.IsNullOrWhiteSpace(importerId)) {
+                throw new ArgumentException("Importer id must be provided.", nameof(importerId));
+            }
+
+            string identity = string.Concat("importer", "\n", sourceChecksum, "\n", importerId);
+            byte[] identityBytes = System.Text.Encoding.UTF8.GetBytes(identity);
+            byte[] hashBytes = System.Security.Cryptography.SHA256.HashData(identityBytes);
+            return Convert.ToHexString(hashBytes).ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// Writes one 32-bit little-endian integer into the supplied buffer.
+        /// </summary>
+        /// <param name="buffer">Buffer receiving the encoded integer.</param>
+        /// <param name="offset">Destination byte offset.</param>
+        /// <param name="value">Value to encode.</param>
+        static void WriteInt32(byte[] buffer, int offset, int value) {
+            if (buffer == null) {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+
+            byte[] encodedBytes = BitConverter.GetBytes(value);
+            Buffer.BlockCopy(encodedBytes, 0, buffer, offset, 4);
+        }
+
+        /// <summary>
+        /// Writes one 16-bit little-endian integer into the supplied buffer.
+        /// </summary>
+        /// <param name="buffer">Buffer receiving the encoded integer.</param>
+        /// <param name="offset">Destination byte offset.</param>
+        /// <param name="value">Value to encode.</param>
+        static void WriteInt16(byte[] buffer, int offset, short value) {
+            if (buffer == null) {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+
+            byte[] encodedBytes = BitConverter.GetBytes(value);
+            Buffer.BlockCopy(encodedBytes, 0, buffer, offset, 2);
         }
 
         /// <summary>

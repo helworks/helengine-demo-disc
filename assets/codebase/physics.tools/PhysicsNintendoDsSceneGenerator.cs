@@ -137,7 +137,7 @@ namespace city.physics.tools {
                     BuildNintendoDsSceneAssetId(sceneEntry.NintendoDsSceneId),
                     sceneDefinition.SceneSettings,
                     topScreenRoots,
-                    false,
+                    true,
                     Array.Empty<Entity>());
             } finally {
                 DisposeRoots(sceneDefinition.RootEntities);

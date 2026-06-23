@@ -137,14 +137,14 @@ namespace city.menu {
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            List<Entity> textEntities = new List<Entity>();
-            CollectChildTextEntities(entity, textEntities);
-            if (textEntities.Count < 2) {
+            Entity firstTextEntity = null;
+            Entity secondTextEntity = null;
+            if (!TryCollectFirstTwoTextEntities(entity, ref firstTextEntity, ref secondTextEntity)) {
                 return false;
             }
 
-            PlatformNameTextEntity = textEntities[0];
-            PlatformVersionTextEntity = textEntities[1];
+            PlatformNameTextEntity = firstTextEntity;
+            PlatformVersionTextEntity = secondTextEntity;
             PlatformNameTextComponent = FindTextComponent(PlatformNameTextEntity);
             PlatformVersionTextComponent = FindTextComponent(PlatformVersionTextEntity);
             PlatformNameBaseLocalPosition = PlatformNameTextEntity.LocalPosition;
@@ -153,17 +153,17 @@ namespace city.menu {
         }
 
         /// <summary>
-        /// Collects descendant entities that carry a text component in stable depth-first order.
+        /// Collects the first two descendant entities that carry a text component in stable depth-first order without allocating a temporary runtime list.
         /// </summary>
         /// <param name="parentEntity">Current subtree root to scan.</param>
-        /// <param name="textEntities">Accumulated descendant text entities.</param>
-        void CollectChildTextEntities(Entity parentEntity, List<Entity> textEntities) {
+        /// <param name="firstTextEntity">First discovered descendant text entity.</param>
+        /// <param name="secondTextEntity">Second discovered descendant text entity.</param>
+        /// <returns><c>true</c> when two descendant text entities were discovered; otherwise <c>false</c>.</returns>
+        bool TryCollectFirstTwoTextEntities(Entity parentEntity, ref Entity firstTextEntity, ref Entity secondTextEntity) {
             if (parentEntity == null) {
                 throw new ArgumentNullException(nameof(parentEntity));
-            } else if (textEntities == null) {
-                throw new ArgumentNullException(nameof(textEntities));
             } else if (parentEntity.Children == null) {
-                return;
+                return false;
             }
 
             for (int childIndex = 0; childIndex < parentEntity.Children.Count; childIndex++) {
@@ -173,17 +173,20 @@ namespace city.menu {
                 }
 
                 if (TryFindTextComponent(childEntity, out TextComponent textComponent)) {
-                    textEntities.Add(childEntity);
-                    if (textEntities.Count >= 2) {
-                        return;
+                    if (firstTextEntity == null) {
+                        firstTextEntity = childEntity;
+                    } else if (secondTextEntity == null) {
+                        secondTextEntity = childEntity;
+                        return true;
                     }
                 }
 
-                CollectChildTextEntities(childEntity, textEntities);
-                if (textEntities.Count >= 2) {
-                    return;
+                if (TryCollectFirstTwoTextEntities(childEntity, ref firstTextEntity, ref secondTextEntity)) {
+                    return true;
                 }
             }
+
+            return false;
         }
 
         /// <summary>

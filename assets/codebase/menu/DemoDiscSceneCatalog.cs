@@ -10,7 +10,6 @@ namespace city.menu {
         public MenuItemDefinition[] CreateDemoSceneItems() {
             return new[] {
                 new MenuItemDefinition("scene-cube-test", "Cube Test", true, new MenuActionDefinition(MenuActionKind.LoadScene, "cube_test")),
-                new MenuItemDefinition("scene-scaled-cube", "Scaled Cube", true, new MenuActionDefinition(MenuActionKind.LoadScene, "scaled_cube")),
                 new MenuItemDefinition("scene-colored-cube-grid", "Colored Cubes", true, new MenuActionDefinition(MenuActionKind.LoadScene, "colored_cube_grid")),
                 new MenuItemDefinition("scene-textured-cube-grid", "Textured Cubes", true, new MenuActionDefinition(MenuActionKind.LoadScene, "textured_cube_grid")),
                 new MenuItemDefinition("scene-axis-test", "Axis 1", true, new MenuActionDefinition(MenuActionKind.LoadScene, "axis_test")),

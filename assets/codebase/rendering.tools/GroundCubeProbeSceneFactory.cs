@@ -85,6 +85,7 @@ namespace city.rendering.tools {
             float4.CreateFromYawPitchRoll(-0.65f, -0.85f, 0f, out orientation);
 
             Entity entity = Core.Instance.EntityFactory.Create("GroundCubeProbeSun");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 8f, 0f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = orientation;
@@ -107,12 +108,13 @@ namespace city.rendering.tools {
         /// <returns>Live authored ground entity.</returns>
         Entity CreateGroundEntity(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
             Entity entity = Core.Instance.EntityFactory.Create("GroundCubeProbeGround");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, -0.5f, 0f);
             entity.LocalScale = new float3(15f, 1f, 15f);
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new MeshComponent {
                 Model = cubeModel,
-                Material = standardMaterial,
+                Materials = new[] { standardMaterial },
                 RenderOrder3D = 0
             });
             entity.AddComponent(CreateStaticRigidBodyComponent());
@@ -128,12 +130,13 @@ namespace city.rendering.tools {
         /// <returns>Live authored elevated cube entity.</returns>
         Entity CreateCubeEntity(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
             Entity entity = Core.Instance.EntityFactory.Create("GroundCubeProbeCube");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 10f, 0f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new MeshComponent {
                 Model = cubeModel,
-                Material = standardMaterial,
+                Materials = new[] { standardMaterial },
                 RenderOrder3D = 0
             });
             entity.AddComponent(CreateDynamicRigidBodyComponent());

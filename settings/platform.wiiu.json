@@ -1,47 +1,41 @@
 {
-    "platformId":  "wiiu",
-    "build":  {
-                  "selectedBuildProfileId":  "",
-                  "textureScalePercent":  100,
-                  "shaderVariantPruningEnabled":  true,
-                  "selectedOptionValues":  {
-
-                                           }
-              },
-    "graphics":  {
-                     "selectedGraphicsProfileId":  "",
-                     "defaultWidth":  1280,
-                     "defaultHeight":  720,
-                     "vSyncEnabled":  true,
-                     "fullscreenEnabled":  true,
-                     "rendererDepthPrepassMode":  0,
-                     "rendererShadowQualityTier":  "disabled",
-                     "rendererHdrEnabled":  false,
-                     "rendererPostProcessTier":  0,
-                     "selectedOptionValues":  {
-
-                                              }
-                 },
-    "codegen":  {
-                    "selectedCodegenProfileId":  "",
-                    "selectedOptionValues":  {
-
-                                             }
-                },
-    "input":  {
-                  "standardActions":  {
-                                          "accept":  {
-                                                         "deviceKind":  0,
-                                                         "controlKind":  0,
-                                                         "deviceIndex":  0,
-                                                         "controlIndex":  0
-                                                     },
-                                          "return":  {
-                                                         "deviceKind":  0,
-                                                         "controlKind":  0,
-                                                         "deviceIndex":  0,
-                                                         "controlIndex":  1
-                                                     }
-                                      }
-              }
+  "platformId": "wiiu",
+  "build": {
+    "selectedBuildProfileId": "",
+    "textureScalePercent": 100,
+    "shaderVariantPruningEnabled": true,
+    "selectedOptionValues": {}
+  },
+  "graphics": {
+    "selectedGraphicsProfileId": "",
+    "defaultWidth": 1280,
+    "defaultHeight": 720,
+    "vSyncEnabled": true,
+    "fullscreenEnabled": true,
+    "rendererDepthPrepassMode": 0,
+    "rendererShadowQualityTier": "disabled",
+    "rendererHdrEnabled": false,
+    "rendererPostProcessTier": 0,
+    "selectedOptionValues": {}
+  },
+  "codegen": {
+    "selectedCodegenProfileId": "",
+    "selectedOptionValues": {}
+  },
+  "input": {
+    "standardActions": {
+      "accept": {
+        "deviceKind": 0,
+        "controlKind": 0,
+        "deviceIndex": 0,
+        "controlIndex": 0
+      },
+      "return": {
+        "deviceKind": 0,
+        "controlKind": 0,
+        "deviceIndex": 0,
+        "controlIndex": 1
+      }
+    }
+  }
 }
