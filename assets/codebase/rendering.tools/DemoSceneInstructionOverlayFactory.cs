@@ -74,12 +74,12 @@ namespace city.rendering.tools {
         /// <summary>
         /// Fixed desktop and console panel width used by the shared instruction overlay after the readability scale-up pass.
         /// </summary>
-        const int DesktopInstructionPanelWidth = 576;
+        const int DesktopInstructionPanelWidth = 300;
 
         /// <summary>
         /// Fixed desktop and console panel height used by the shared instruction overlay after the readability scale-up pass.
         /// </summary>
-        const int DesktopInstructionPanelHeight = 162;
+        const int DesktopInstructionPanelHeight = 150;
 
         /// <summary>
         /// Fixed desktop and console first-row top offset used by the shared instruction overlay after the readability scale-up pass.
@@ -99,12 +99,12 @@ namespace city.rendering.tools {
         /// <summary>
         /// Fixed desktop and console horizontal offset used for the shared icon host after the readability scale-up pass.
         /// </summary>
-        const float DesktopInstructionIconLeft = 27f;
+        const float DesktopInstructionIconLeft = 24f;
 
         /// <summary>
         /// Fixed desktop and console horizontal offset used for the shared instruction label after the readability scale-up pass.
         /// </summary>
-        const float DesktopInstructionTextLeft = 126f;
+        const float DesktopInstructionTextLeft = 112f;
 
         /// <summary>
         /// Fixed desktop and console vertical nudge used to visually center the larger labels against the shared icon rows.
@@ -119,7 +119,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Fixed desktop and console label width used by the shared instruction overlay after the readability scale-up pass.
         /// </summary>
-        const int DesktopInstructionTextWidth = 300;
+        const int DesktopInstructionTextWidth = 140;
 
         /// <summary>
         /// Fixed desktop and console label height used by the shared instruction overlay after the readability scale-up pass.
@@ -129,22 +129,22 @@ namespace city.rendering.tools {
         /// <summary>
         /// Fixed desktop and console D-pad icon size used for the shared rotate-camera row after the readability scale-up pass.
         /// </summary>
-        static readonly int2 DesktopInstructionDpadIconSize = new int2(57, 57);
+        static readonly int2 DesktopInstructionDpadIconSize = new int2(48, 48);
 
         /// <summary>
         /// Fixed desktop and console Xbox 360 right-shoulder icon size used for the shared toggle-light row after the readability scale-up pass.
         /// </summary>
-        static readonly int2 DesktopInstructionXbox360ShoulderIconSize = new int2(92, 53);
+        static readonly int2 DesktopInstructionXbox360ShoulderIconSize = new int2(78, 45);
 
         /// <summary>
         /// Fixed desktop and console PS2 right-shoulder icon size used for the shared toggle-light row after the readability scale-up pass.
         /// </summary>
-        static readonly int2 DesktopInstructionPs2ShoulderIconSize = new int2(77, 57);
+        static readonly int2 DesktopInstructionPs2ShoulderIconSize = new int2(65, 48);
 
         /// <summary>
         /// Fixed desktop and console Switch right-shoulder icon size used for the shared toggle-light row after the readability scale-up pass.
         /// </summary>
-        static readonly int2 DesktopInstructionSwitchShoulderIconSize = new int2(105, 48);
+        static readonly int2 DesktopInstructionSwitchShoulderIconSize = new int2(89, 41);
 
         /// <summary>
         /// Fixed Nintendo DS bottom-screen panel height used after the readability scale-up pass.
@@ -239,8 +239,8 @@ namespace city.rendering.tools {
                 LayerMask = OverlayDrawableLayerMask
             });
 
-            CreateDesktopInstructionRow(panelEntity, font, "RotateIconSet", "Rotate Camera", DesktopInstructionFirstRowTop, DesktopInstructionRotateTextTopAdjustment, Xbox360DpadTexturePath, DesktopInstructionDpadIconSize, Ps2DpadTexturePath, DesktopInstructionDpadIconSize, SwitchDpadTexturePath, DesktopInstructionDpadIconSize);
-            CreateDesktopInstructionRow(panelEntity, font, "ToggleIconSet", "Toggle Light", DesktopInstructionSecondRowTop, DesktopInstructionToggleTextTopAdjustment, Xbox360RightShoulderTexturePath, DesktopInstructionXbox360ShoulderIconSize, Ps2RightShoulderTexturePath, DesktopInstructionPs2ShoulderIconSize, SwitchRightShoulderTexturePath, DesktopInstructionSwitchShoulderIconSize);
+            CreateDesktopInstructionRow(panelEntity, font, "RotateIconSet", "Rotate", DesktopInstructionFirstRowTop, DesktopInstructionRotateTextTopAdjustment, Xbox360DpadTexturePath, DesktopInstructionDpadIconSize, Ps2DpadTexturePath, DesktopInstructionDpadIconSize, SwitchDpadTexturePath, DesktopInstructionDpadIconSize);
+            CreateDesktopInstructionRow(panelEntity, font, "ToggleIconSet", "Light", DesktopInstructionSecondRowTop, DesktopInstructionToggleTextTopAdjustment, Xbox360RightShoulderTexturePath, DesktopInstructionXbox360ShoulderIconSize, Ps2RightShoulderTexturePath, DesktopInstructionPs2ShoulderIconSize, SwitchRightShoulderTexturePath, DesktopInstructionSwitchShoulderIconSize);
             return viewportRootEntity;
         }
 
