@@ -609,13 +609,13 @@ namespace city.physics.tools {
             return new[] {
                 CreatePhysicsBoxMeshEntity("dynamic_mixed_stack.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(16f, 1f, 14f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
                 CreatePhysicsBoxMeshEntity("dynamic_mixed_stack.box01", "StackBox01", new float3(0f, 0.5f, 0f), new float3(1f, 1f, 1f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath)),
-                CreatePhysicsSphereMeshEntity("dynamic_mixed_stack.sphere01", "StackSphere01", new float3(0.08f, 1.5f, -0.04f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath)),
+                CreatePhysicsSphereMeshEntity("dynamic_mixed_stack.sphere01", "StackSphere01", new float3(0.08f, 1.5f, -0.04f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoSphereStackGreenMaterialRelativePath)),
                 CreatePhysicsBoxMeshEntity("dynamic_mixed_stack.box02", "StackBox02", new float3(-0.06f, 2.5f, 0.05f), new float3(1f, 1f, 1f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoMagentaMaterialRelativePath)),
-                CreatePhysicsSphereMeshEntity("dynamic_mixed_stack.sphere02", "StackSphere02", new float3(0.05f, 3.5f, 0.08f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
+                CreatePhysicsSphereMeshEntity("dynamic_mixed_stack.sphere02", "StackSphere02", new float3(0.05f, 3.5f, 0.08f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoSphereStackYellowMaterialRelativePath)),
                 CreatePhysicsBoxMeshEntity("dynamic_mixed_stack.box03", "StackBox03", new float3(0.07f, 4.5f, -0.07f), new float3(1f, 1f, 1f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoCyanMaterialRelativePath)),
-                CreatePhysicsSphereMeshEntity("dynamic_mixed_stack.sphere03", "StackSphere03", new float3(-0.05f, 5.5f, 0.04f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoRedMaterialRelativePath)),
+                CreatePhysicsSphereMeshEntity("dynamic_mixed_stack.sphere03", "StackSphere03", new float3(-0.05f, 5.5f, 0.04f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoSphereStackRedMaterialRelativePath)),
                 CreatePhysicsBoxMeshEntity("dynamic_mixed_stack.box04", "StackBox04", new float3(0.03f, 6.5f, 0.06f), new float3(1f, 1f, 1f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoOrangeMaterialRelativePath)),
-                CreatePhysicsSphereMeshEntity("dynamic_mixed_stack.sphere04", "StackSphere04", new float3(-0.04f, 7.5f, -0.05f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoPurpleMaterialRelativePath)),
+                CreatePhysicsSphereMeshEntity("dynamic_mixed_stack.sphere04", "StackSphere04", new float3(-0.04f, 7.5f, -0.05f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoSphereStackPurpleMaterialRelativePath)),
                 CreateMarkerEntity("dynamic_mixed_stack.spawn", "MixedStackSpawn", new float3(0f, 0.5f, 0f))
             };
         }
@@ -1058,7 +1058,7 @@ namespace city.physics.tools {
                 LocalScale = float3.One,
                 LocalOrientation = orientation,
                 Components = new[] {
-                    CreateMeshComponentRecord(CreateGeneratedReference(EngineGeneratedAssetProvider.SphereRelativePath, EngineGeneratedModelCache.SphereAssetId), materialReference),
+                    CreateMeshComponentRecord(global::helengine.EngineSceneAssetReferenceFactory.CreateSphereModel(), materialReference),
                     CreateRigidBodyComponentRecord(bodyKindCode, useGravity, 1d, 1d, float3.Zero, 1),
                     CreateSphereColliderComponentRecord(0.5f, 2)
                 },
@@ -1233,8 +1233,8 @@ namespace city.physics.tools {
         /// <returns>Stable generated asset reference list.</returns>
         static SceneAssetReference[] CreateAssetReferences() {
             return new[] {
-                CreateGeneratedReference(EngineGeneratedAssetProvider.CubeRelativePath, EngineGeneratedModelCache.CubeAssetId),
-                CreateGeneratedReference(EngineGeneratedAssetProvider.SphereRelativePath, EngineGeneratedModelCache.SphereAssetId),
+                global::helengine.EngineSceneAssetReferenceFactory.CreateCubeModel(),
+                global::helengine.EngineSceneAssetReferenceFactory.CreateSphereModel(),
                 CreateGeneratedStandardMaterialReference(),
                 CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath),
                 CreatePhysicsDemoMaterialReference(PhysicsDemoNeutralMaterialRelativePath),
@@ -1290,12 +1290,7 @@ namespace city.physics.tools {
                 throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
             }
 
-            return new SceneAssetReference {
-                SourceKind = FileSystemSourceKind,
-                RelativePath = relativePath,
-                ProviderId = string.Empty,
-                AssetId = string.Empty
-            };
+            return global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(relativePath);
         }
 
         /// <summary>
@@ -1303,29 +1298,7 @@ namespace city.physics.tools {
         /// </summary>
         /// <returns>Generated standard material scene asset reference.</returns>
         static SceneAssetReference CreateGeneratedStandardMaterialReference() {
-            return CreateGeneratedReference(EngineGeneratedAssetProvider.StandardMaterialRelativePath, EngineGeneratedMaterialCache.StandardAssetId);
-        }
-
-        /// <summary>
-        /// Creates one generated asset reference.
-        /// </summary>
-        /// <param name="relativePath">Generated asset relative path.</param>
-        /// <param name="assetId">Stable generated asset id.</param>
-        /// <returns>Generated scene asset reference.</returns>
-        static SceneAssetReference CreateGeneratedReference(string relativePath, string assetId) {
-            if (string.IsNullOrWhiteSpace(relativePath)) {
-                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
-            }
-            if (string.IsNullOrWhiteSpace(assetId)) {
-                throw new ArgumentException("Asset id must be provided.", nameof(assetId));
-            }
-
-            return new SceneAssetReference {
-                SourceKind = GeneratedSourceKind,
-                RelativePath = relativePath,
-                ProviderId = GeneratedProviderId,
-                AssetId = assetId
-            };
+            return global::helengine.EngineSceneAssetReferenceFactory.CreateStandardMaterial();
         }
 
         /// <summary>
@@ -1337,7 +1310,7 @@ namespace city.physics.tools {
                 throw new ArgumentNullException(nameof(materialReference));
             }
 
-            SceneAssetReference modelReference = CreateGeneratedReference(EngineGeneratedAssetProvider.CubeRelativePath, EngineGeneratedModelCache.CubeAssetId);
+            SceneAssetReference modelReference = global::helengine.EngineSceneAssetReferenceFactory.CreateCubeModel();
 
             return CreateMeshComponentRecord(modelReference, materialReference);
         }

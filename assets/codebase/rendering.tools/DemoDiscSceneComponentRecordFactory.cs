@@ -16,21 +16,6 @@ namespace city.rendering.tools {
         const string BodyFontRelativePath = "Fonts/DemoDiscBody.ttf";
 
         /// <summary>
-        /// Generated provider id reserved for the editor-authored UI font asset.
-        /// </summary>
-        const string EditorGeneratedProviderId = "editor";
-
-        /// <summary>
-        /// Stable asset id used for the generated editor UI font asset.
-        /// </summary>
-        const string EditorFontAssetId = "ui-font";
-
-        /// <summary>
-        /// Stable relative path used for the generated editor UI font asset.
-        /// </summary>
-        const string EditorFontRelativePath = "generated/editor/fonts/ui.hefont";
-
-        /// <summary>
         /// Stable save-state slot name used for serialized font references.
         /// </summary>
         const string FontReferenceName = "Font";
@@ -88,10 +73,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Stable file-backed demo-disc body-font reference.</returns>
         public static SceneAssetReference CreateEditorFontReference() {
-            return new SceneAssetReference {
-                SourceKind = SceneAssetReferenceSourceKind.FileSystem,
-                RelativePath = BodyFontRelativePath
-            };
+            return global::helengine.SceneAssetReferenceFactory.CreateFileSystemFont(BodyFontRelativePath);
         }
 
         /// <summary>
@@ -99,12 +81,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Stable generated editor UI-font reference.</returns>
         public static SceneAssetReference CreateEditorUiFontReference() {
-            return new SceneAssetReference {
-                SourceKind = SceneAssetReferenceSourceKind.Generated,
-                RelativePath = EditorFontRelativePath,
-                ProviderId = EditorGeneratedProviderId,
-                AssetId = EditorFontAssetId
-            };
+            return EditorSceneAssetReferenceFactory.CreateEditorUiFont();
         }
     }
 }

@@ -340,14 +340,14 @@ namespace city.rendering.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, MeshModelReferenceName, CreateFileReference(modelRelativePath));
+            saveComponent.SetAssetReference(component, MeshModelReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(modelRelativePath));
             for (int materialIndex = 0; materialIndex < materialRelativePaths.Length; materialIndex++) {
                 string materialRelativePath = materialRelativePaths[materialIndex];
                 if (string.IsNullOrWhiteSpace(materialRelativePath)) {
                     throw new InvalidOperationException("Imported mesh material paths must be provided for every authored slot.");
                 }
 
-                saveComponent.SetAssetReference(component, BuildMaterialReferenceName(materialIndex), CreateFileReference(materialRelativePath));
+                saveComponent.SetAssetReference(component, BuildMaterialReferenceName(materialIndex), global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(materialRelativePath));
             }
         }
 
@@ -385,24 +385,6 @@ namespace city.rendering.tools {
             return materialIndex == 0
                 ? MeshMaterialReferenceName
                 : string.Concat(MeshMaterialReferenceName, "[", materialIndex.ToString(), "]");
-        }
-
-        /// <summary>
-        /// Builds one file-system scene asset reference for the supplied project-relative asset path.
-        /// </summary>
-        /// <param name="relativePath">Project-relative asset path.</param>
-        /// <returns>Scene asset reference that resolves through the project file system.</returns>
-        SceneAssetReference CreateFileReference(string relativePath) {
-            if (string.IsNullOrWhiteSpace(relativePath)) {
-                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
-            }
-
-            return new SceneAssetReference {
-                SourceKind = SceneAssetReferenceSourceKind.FileSystem,
-                RelativePath = relativePath,
-                ProviderId = string.Empty,
-                AssetId = string.Empty
-            };
         }
 
         /// <summary>

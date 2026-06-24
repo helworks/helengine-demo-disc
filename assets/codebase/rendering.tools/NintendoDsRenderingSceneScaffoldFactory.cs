@@ -12,21 +12,6 @@ namespace city.rendering.tools {
         const float NintendoDsBottomOverlayFontScale = 1f;
 
         /// <summary>
-        /// Stable generated-font provider id used by the dedicated Nintendo DS debug font.
-        /// </summary>
-        const string NintendoDsDebugFontProviderId = "editor";
-
-        /// <summary>
-        /// Stable generated-font asset id used by the dedicated Nintendo DS debug font.
-        /// </summary>
-        const string NintendoDsDebugFontAssetId = "ds-debug-font";
-
-        /// <summary>
-        /// Stable generated-font relative path used by the dedicated Nintendo DS debug font asset.
-        /// </summary>
-        const string NintendoDsDebugFontRelativePath = "generated/editor/fonts/ds-debug.hefont";
-
-        /// <summary>
         /// Runtime layer mask used by packaged 2D overlay drawables.
         /// </summary>
         const byte RuntimeLayerMask = 0b00000001;
@@ -211,7 +196,7 @@ namespace city.rendering.tools {
             debugComponent.RenderOrder2D = 220;
             debugComponent.RefreshIntervalSeconds = 0.25d;
             debugRootEntity.AddComponent(debugComponent);
-            ApplyFontReference(debugRootEntity, debugComponent, BuildNintendoDsDebugFontReference());
+            ApplyFontReference(debugRootEntity, debugComponent, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
 
             Entity buttonEntity = Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenBackButton");
             buttonEntity.LocalPosition = new float3(16f, 144f, 0f);
@@ -239,7 +224,7 @@ namespace city.rendering.tools {
                 LayerMask = RuntimeLayerMask
             };
             textEntity.AddComponent(textComponent);
-            ApplyFontReference(textEntity, textComponent, BuildNintendoDsDebugFontReference());
+            ApplyFontReference(textEntity, textComponent, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
         }
 
         /// <summary>
@@ -378,25 +363,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
             }
 
-            return new SceneAssetReference {
-                SourceKind = SceneAssetReferenceSourceKind.FileSystem,
-                RelativePath = relativePath.Replace('\\', '/'),
-                ProviderId = string.Empty,
-                AssetId = string.Empty
-            };
-        }
-
-        /// <summary>
-        /// Builds the stable scene asset reference for the generated Nintendo DS debug font.
-        /// </summary>
-        /// <returns>Stable generated Nintendo DS debug-font reference.</returns>
-        SceneAssetReference BuildNintendoDsDebugFontReference() {
-            return new SceneAssetReference {
-                SourceKind = SceneAssetReferenceSourceKind.Generated,
-                RelativePath = NintendoDsDebugFontRelativePath,
-                ProviderId = NintendoDsDebugFontProviderId,
-                AssetId = NintendoDsDebugFontAssetId
-            };
+            return global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(relativePath.Replace('\\', '/'));
         }
     }
 }

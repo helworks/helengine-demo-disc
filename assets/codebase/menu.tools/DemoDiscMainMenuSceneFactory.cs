@@ -64,21 +64,6 @@ namespace city.menu.tools {
         const string FontReferenceName = "Font";
 
         /// <summary>
-        /// Stable generated-font provider id used by the dedicated Nintendo DS debug font.
-        /// </summary>
-        const string NintendoDsDebugFontProviderId = "editor";
-
-        /// <summary>
-        /// Stable generated-font asset id used by the dedicated Nintendo DS debug font.
-        /// </summary>
-        const string NintendoDsDebugFontAssetId = "ds-debug-font";
-
-        /// <summary>
-        /// Stable generated-font relative path used by the dedicated Nintendo DS debug font.
-        /// </summary>
-        const string NintendoDsDebugFontRelativePath = "generated/editor/fonts/ds-debug.hefont";
-
-        /// <summary>
         /// Stable project-relative animation path used by the demo-disc logo idle clip.
         /// </summary>
         const string DemoDiscLogoIdleAnimationRelativePath = "Animations/DemoDiscLogoIdle.hanim";
@@ -404,11 +389,13 @@ namespace city.menu.tools {
         /// <param name="fontScale">Uniform glyph scale applied to the authored text component.</param>
         /// <param name="isStatic">Whether the authored text entity should be marked static for runtime caching.</param>
         /// <param name="convertTextToSprite">Whether scene packaging should bake this authored text into a sprite-backed runtime component.</param>
-        void CreateNintendoDsTextEntity(Entity parent, string entityName, float3 localPosition, string text, byte4 color, int2 size, byte renderOrder2D, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, bool convertTextToSprite = false) {
+        void CreateNintendoDsTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, bool convertTextToSprite = false) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
                 throw new ArgumentException("Entity name must be provided.", nameof(entityName));
+            } else if (string.IsNullOrWhiteSpace(fontPath)) {
+                throw new ArgumentException("Font path must be provided.", nameof(fontPath));
             }
 
             Entity entity = Core.Instance.EntityFactory.CreateChild(parent, entityName);
@@ -426,7 +413,7 @@ namespace city.menu.tools {
                 ConvertTextToSprite = convertTextToSprite
             };
             entity.AddComponent(textComponent);
-            ApplyFontReference(entity, textComponent, BuildNintendoDsDebugFontReference());
+            ApplyFontReference(entity, textComponent, fontPath);
 
             if (anchorComponent != null) {
                 entity.AddComponent(anchorComponent);
@@ -623,8 +610,8 @@ namespace city.menu.tools {
             entity.LocalPosition = new float3(8f, 148f, 0.1f);
             entity.AddComponent(new PlatformInfoTextComponent());
 
-            CreateNintendoDsTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0f), string.Empty, definition.TextColor, new int2(1, 1), 42, null, 0.84f, false);
-            CreateNintendoDsTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(240f, 0f, 0f), string.Empty, definition.MutedTextColor, new int2(1, 1), 42, null, 0.84f, false);
+            CreateNintendoDsTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, null, 0.84f, false);
+            CreateNintendoDsTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(240f, 0f, 0f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(1, 1), 42, null, 0.84f, false);
         }
 
         /// <summary>
@@ -730,6 +717,7 @@ namespace city.menu.tools {
                 $"item-label-{itemDefinition.ItemId}",
                 new float3(8f, 2f, 0.1f),
                 itemDefinition.Label,
+                definition.BodyFontPath,
                 definition.TextColor,
                 new int2(NintendoDsScreenWidth - 16, 14),
                 34,
@@ -900,26 +888,7 @@ namespace city.menu.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, FontReferenceName, BuildFileReference(fontPath));
-        }
-
-        /// <summary>
-        /// Stores the supplied generated Nintendo DS debug-font reference on the entity save state for the given component.
-        /// </summary>
-        /// <param name="entity">Entity that owns the component.</param>
-        /// <param name="component">Component whose font reference should be stored.</param>
-        /// <param name="fontReference">Generated Nintendo DS debug-font reference.</param>
-        void ApplyFontReference(Entity entity, Component component, SceneAssetReference fontReference) {
-            if (entity == null) {
-                throw new ArgumentNullException(nameof(entity));
-            } else if (component == null) {
-                throw new ArgumentNullException(nameof(component));
-            } else if (fontReference == null) {
-                throw new ArgumentNullException(nameof(fontReference));
-            }
-
-            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, FontReferenceName, fontReference);
+            saveComponent.SetAssetReference(component, FontReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemFont(fontPath));
         }
 
         /// <summary>
@@ -938,7 +907,7 @@ namespace city.menu.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, BuildFileReference(texturePath));
+            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(texturePath));
         }
 
         /// <summary>
@@ -960,7 +929,7 @@ namespace city.menu.tools {
             saveComponent.SetAssetReference(
                 component,
                 AutomaticComponentAssetReferenceSupport.BuildReferenceName(nameof(AnimationPlayerComponent.Clip)),
-                BuildFileReference(animationClipPath));
+                global::helengine.SceneAssetReferenceFactory.CreateFileSystemAnimationClip(animationClipPath));
         }
 
         /// <summary>
@@ -982,37 +951,6 @@ namespace city.menu.tools {
             }
 
             throw new InvalidOperationException("Generated entities must include EntitySaveComponent.");
-        }
-
-        /// <summary>
-        /// Builds one stable file-backed scene asset reference.
-        /// </summary>
-        /// <param name="relativePath">Project-relative asset path.</param>
-        /// <returns>Stable file-backed scene asset reference.</returns>
-        SceneAssetReference BuildFileReference(string relativePath) {
-            if (string.IsNullOrWhiteSpace(relativePath)) {
-                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
-            }
-
-            return new SceneAssetReference {
-                SourceKind = SceneAssetReferenceSourceKind.FileSystem,
-                RelativePath = relativePath.Replace('\\', '/'),
-                ProviderId = string.Empty,
-                AssetId = string.Empty
-            };
-        }
-
-        /// <summary>
-        /// Builds the stable generated reference used by the Nintendo DS debug font.
-        /// </summary>
-        /// <returns>Generated Nintendo DS debug-font reference.</returns>
-        SceneAssetReference BuildNintendoDsDebugFontReference() {
-            return new SceneAssetReference {
-                SourceKind = SceneAssetReferenceSourceKind.Generated,
-                RelativePath = NintendoDsDebugFontRelativePath,
-                ProviderId = NintendoDsDebugFontProviderId,
-                AssetId = NintendoDsDebugFontAssetId
-            };
         }
 
         /// <summary>

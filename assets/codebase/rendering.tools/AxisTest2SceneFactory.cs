@@ -276,8 +276,8 @@ namespace city.rendering.tools {
 
             MeshComponent meshComponent = FindRequiredComponent<MeshComponent>(entity);
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(meshComponent, MeshModelReferenceName, CreateFileReference(ArrowModelRelativePath));
-            saveComponent.SetAssetReference(meshComponent, MeshMaterialReferenceName, CreateFileReference(MarkerMaterialRelativePath));
+            saveComponent.SetAssetReference(meshComponent, MeshModelReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(ArrowModelRelativePath));
+            saveComponent.SetAssetReference(meshComponent, MeshMaterialReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(MarkerMaterialRelativePath));
         }
 
         /// <summary>
@@ -554,24 +554,6 @@ namespace city.rendering.tools {
             }
 
             return editorCore.DefaultFontAssetForEditor;
-        }
-
-        /// <summary>
-        /// Builds one file-system scene asset reference for the supplied project-relative asset path.
-        /// </summary>
-        /// <param name="relativePath">Project-relative asset path.</param>
-        /// <returns>Scene asset reference that resolves through the project file system.</returns>
-        SceneAssetReference CreateFileReference(string relativePath) {
-            if (string.IsNullOrWhiteSpace(relativePath)) {
-                throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
-            }
-
-            return new SceneAssetReference {
-                SourceKind = SceneAssetReferenceSourceKind.FileSystem,
-                RelativePath = relativePath,
-                ProviderId = string.Empty,
-                AssetId = string.Empty
-            };
         }
 
         /// <summary>

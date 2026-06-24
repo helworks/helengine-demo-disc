@@ -12,21 +12,6 @@ namespace city.rendering.tools {
         const float NintendoDsInstructionFontScale = 1.6f;
 
         /// <summary>
-        /// Stable generated-font provider id used by the dedicated Nintendo DS debug font.
-        /// </summary>
-        const string NintendoDsDebugFontProviderId = "editor";
-
-        /// <summary>
-        /// Stable generated-font asset id used by the dedicated Nintendo DS debug font.
-        /// </summary>
-        const string NintendoDsDebugFontAssetId = "ds-debug-font";
-
-        /// <summary>
-        /// Stable generated-font relative path used by the dedicated Nintendo DS debug font asset.
-        /// </summary>
-        const string NintendoDsDebugFontRelativePath = "generated/editor/fonts/ds-debug.hefont";
-
-        /// <summary>
         /// Fixed desktop and console layer mask used by generated instruction overlays so showcase cameras can render them.
         /// </summary>
         const ushort DesktopOverlayLayerMask = EditorLayerMasks.SceneObjects;
@@ -376,7 +361,7 @@ namespace city.rendering.tools {
                 LayerMask = OverlayDrawableLayerMask
             };
             textEntity.AddComponent(textComponent);
-            ApplyFontReference(textEntity, textComponent, BuildNintendoDsDebugFontReference());
+            ApplyFontReference(textEntity, textComponent, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
         }
 
         /// <summary>
@@ -492,23 +477,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
             }
 
-            return new SceneAssetReference {
-                SourceKind = SceneAssetReferenceSourceKind.FileSystem,
-                RelativePath = relativePath
-            };
-        }
-
-        /// <summary>
-        /// Builds the stable scene asset reference for the generated Nintendo DS debug font.
-        /// </summary>
-        /// <returns>Stable generated Nintendo DS debug-font reference.</returns>
-        SceneAssetReference BuildNintendoDsDebugFontReference() {
-            return new SceneAssetReference {
-                SourceKind = SceneAssetReferenceSourceKind.Generated,
-                RelativePath = NintendoDsDebugFontRelativePath,
-                ProviderId = NintendoDsDebugFontProviderId,
-                AssetId = NintendoDsDebugFontAssetId
-            };
+            return global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(relativePath);
         }
     }
 }
