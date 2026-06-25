@@ -112,10 +112,7 @@ namespace city.rendering.tools {
             viewportEntity.LayerMask = overlayLayerMask;
             viewportEntity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
-                FixedSize = new int2(ReferenceViewportWidth, ReferenceViewportHeight),
-                ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
-                ReferenceWidth = ReferenceViewportWidth,
-                ReferenceHeight = ReferenceViewportHeight
+                FixedSize = new int2(ReferenceViewportWidth, ReferenceViewportHeight)
             });
 
             Entity labelEntity = Core.Instance.EntityFactory.CreateChild(viewportEntity, IndicatorLabelEntityName);

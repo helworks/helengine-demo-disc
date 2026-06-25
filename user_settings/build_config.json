@@ -203,6 +203,7 @@
                           "platformId":  "gamecube",
                           "selectedSceneIds":  [
                                                    "DemoDiscMainMenu",
+                                                   "test_scene_dynamic_sphere_stack",
                                                    "cube_test",
                                                    "scaled_cube",
                                                    "colored_cube_grid",
@@ -211,7 +212,6 @@
                                                    "axis_test2",
                                                    "directional_shadow_plaza",
                                                    "test_scene_dynamic_stack_boxes",
-                                                   "test_scene_dynamic_sphere_stack",
                                                    "test_scene_dynamic_mixed_stack"
                                                ],
                           "sceneOrders":  [
@@ -220,39 +220,39 @@
                                                   "orderNumber":  1
                                               },
                                               {
-                                                  "sceneId":  "cube_test",
+                                                  "sceneId":  "test_scene_dynamic_sphere_stack",
                                                   "orderNumber":  2
                                               },
                                               {
-                                                  "sceneId":  "scaled_cube",
+                                                  "sceneId":  "cube_test",
                                                   "orderNumber":  3
                                               },
                                               {
-                                                  "sceneId":  "colored_cube_grid",
+                                                  "sceneId":  "scaled_cube",
                                                   "orderNumber":  4
                                               },
                                               {
-                                                  "sceneId":  "textured_cube_grid",
+                                                  "sceneId":  "colored_cube_grid",
                                                   "orderNumber":  5
                                               },
                                               {
-                                                  "sceneId":  "axis_test",
+                                                  "sceneId":  "textured_cube_grid",
                                                   "orderNumber":  6
                                               },
                                               {
-                                                  "sceneId":  "axis_test2",
+                                                  "sceneId":  "axis_test",
                                                   "orderNumber":  7
                                               },
                                               {
-                                                  "sceneId":  "directional_shadow_plaza",
+                                                  "sceneId":  "axis_test2",
                                                   "orderNumber":  8
                                               },
                                               {
-                                                  "sceneId":  "test_scene_dynamic_stack_boxes",
+                                                  "sceneId":  "directional_shadow_plaza",
                                                   "orderNumber":  9
                                               },
                                               {
-                                                  "sceneId":  "test_scene_dynamic_sphere_stack",
+                                                  "sceneId":  "test_scene_dynamic_stack_boxes",
                                                   "orderNumber":  10
                                               },
                                               {
