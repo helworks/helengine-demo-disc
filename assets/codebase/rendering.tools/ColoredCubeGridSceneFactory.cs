@@ -22,6 +22,11 @@ namespace city.rendering.tools {
         const string Ps2MaterialSchemaId = "ps2-simple-lit-textured";
 
         /// <summary>
+        /// Stable GameCube material schema identifier used by the GameCube runtime path.
+        /// </summary>
+        const string GameCubeMaterialSchemaId = "standard-shader";
+
+        /// <summary>
         /// Stable standard shader asset identifier used by compatibility material payloads.
         /// </summary>
         const string StandardShaderAssetId = "ForwardStandardShader";
@@ -91,6 +96,11 @@ namespace city.rendering.tools {
         /// Stable PS2 material field identifier used for vertex-color control.
         /// </summary>
         const string VertexColorModeFieldId = "vertex-color-mode";
+
+        /// <summary>
+        /// Stable GameCube material field identifier used for lighting mode selection.
+        /// </summary>
+        const string LightingModeFieldId = "lighting-mode";
 
         /// <summary>
         /// Relative project folder used for the generated colored cube-grid materials.
@@ -442,6 +452,13 @@ namespace city.rendering.tools {
             ps2Settings.SetFieldValue(Ps2CastShadowsFieldId, "true");
             ps2Settings.SetFieldValue(VertexColorModeFieldId, "ignore");
             ps2Settings.SetFieldValue(BaseColorFieldId, CubeMaterialColors[cubeIndex]);
+
+            GeneratedMaterialPlatformDefinition gameCubeSettings = definition.GetOrCreatePlatform("gamecube");
+            gameCubeSettings.SchemaId = GameCubeMaterialSchemaId;
+            gameCubeSettings.SetFieldValue(DoubleSidedFieldId, "false");
+            gameCubeSettings.SetFieldValue(VertexColorModeFieldId, "ignore");
+            gameCubeSettings.SetFieldValue(BaseColorFieldId, CubeMaterialColors[cubeIndex]);
+            gameCubeSettings.SetFieldValue(LightingModeFieldId, "lit");
 
             GeneratedMaterialPlatformDefinition pspSettings = definition.GetOrCreatePlatform("psp");
             pspSettings.SchemaId = WindowsMaterialSchemaId;

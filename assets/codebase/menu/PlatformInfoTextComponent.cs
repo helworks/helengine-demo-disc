@@ -21,9 +21,17 @@ namespace city.menu {
         /// </summary>
         TextComponent PlatformNameTextComponent;
         /// <summary>
+        /// Cached layout component that anchors the platform name text.
+        /// </summary>
+        LayoutComponent PlatformNameLayoutComponent;
+        /// <summary>
         /// Cached text component that renders the platform version.
         /// </summary>
         TextComponent PlatformVersionTextComponent;
+        /// <summary>
+        /// Cached layout component that anchors the platform version text.
+        /// </summary>
+        LayoutComponent PlatformVersionLayoutComponent;
 
         /// <summary>
         /// Captures the authored local position assigned to the platform-name text entity before runtime layout adjusts it.
@@ -31,9 +39,19 @@ namespace city.menu {
         float3 PlatformNameBaseLocalPosition;
 
         /// <summary>
+        /// Captures the authored layout size assigned to the platform-name text entity before runtime text measurement adjusts it.
+        /// </summary>
+        int2 PlatformNameBaseSize;
+
+        /// <summary>
         /// Captures the authored local position assigned to the platform-version text entity before runtime layout adjusts it.
         /// </summary>
         float3 PlatformVersionBaseLocalPosition;
+
+        /// <summary>
+        /// Captures the authored layout size assigned to the platform-version text entity before runtime text measurement adjusts it.
+        /// </summary>
+        int2 PlatformVersionBaseSize;
 
         /// <summary>
         /// Tracks whether the runtime overlay hierarchy has been bound successfully.
@@ -118,8 +136,8 @@ namespace city.menu {
 
             bool useHorizontalRowLayout = Math.Abs(PlatformNameBaseLocalPosition.Y - PlatformVersionBaseLocalPosition.Y) < 0.01f;
             if (useHorizontalRowLayout) {
-                ApplyHorizontalText(PlatformNameTextEntity, PlatformNameTextComponent, Core.Instance.PlatformInfo.Name, PlatformNameBaseLocalPosition.X, PlatformNameBaseLocalPosition.Y, TextAlignment.Left);
-                ApplyHorizontalText(PlatformVersionTextEntity, PlatformVersionTextComponent, Core.Instance.PlatformInfo.Version, PlatformVersionBaseLocalPosition.X, PlatformVersionBaseLocalPosition.Y, TextAlignment.Right);
+                ApplyHorizontalText(PlatformNameTextEntity, PlatformNameTextComponent, PlatformNameLayoutComponent, Core.Instance.PlatformInfo.Name, PlatformNameBaseLocalPosition.X, PlatformNameBaseLocalPosition.Y, PlatformNameBaseSize, TextAlignment.Left);
+                ApplyHorizontalText(PlatformVersionTextEntity, PlatformVersionTextComponent, PlatformVersionLayoutComponent, Core.Instance.PlatformInfo.Version, PlatformVersionBaseLocalPosition.X, PlatformVersionBaseLocalPosition.Y, PlatformVersionBaseSize, TextAlignment.Right);
                 return;
             }
 
@@ -147,8 +165,12 @@ namespace city.menu {
             PlatformVersionTextEntity = secondTextEntity;
             PlatformNameTextComponent = FindTextComponent(PlatformNameTextEntity);
             PlatformVersionTextComponent = FindTextComponent(PlatformVersionTextEntity);
+            PlatformNameLayoutComponent = FindLayoutComponent(PlatformNameTextEntity);
+            PlatformVersionLayoutComponent = FindLayoutComponent(PlatformVersionTextEntity);
             PlatformNameBaseLocalPosition = PlatformNameTextEntity.LocalPosition;
+            PlatformNameBaseSize = PlatformNameTextComponent.Size;
             PlatformVersionBaseLocalPosition = PlatformVersionTextEntity.LocalPosition;
+            PlatformVersionBaseSize = PlatformVersionTextComponent.Size;
             return true;
         }
 
@@ -197,8 +219,12 @@ namespace city.menu {
             PlatformVersionTextEntity = null;
             PlatformNameTextComponent = null;
             PlatformVersionTextComponent = null;
+            PlatformNameLayoutComponent = null;
+            PlatformVersionLayoutComponent = null;
             PlatformNameBaseLocalPosition = float3.Zero;
+            PlatformNameBaseSize = new int2(0, 0);
             PlatformVersionBaseLocalPosition = float3.Zero;
+            PlatformVersionBaseSize = new int2(0, 0);
         }
 
         /// <summary>
@@ -233,8 +259,9 @@ namespace city.menu {
         /// <param name="text">Text content to display.</param>
         /// <param name="baseX">Authored local X anchor.</param>
         /// <param name="baseY">Authored local Y anchor.</param>
+        /// <param name="baseSize">Authored layout box preserved for anchored horizontal alignment.</param>
         /// <param name="alignment">Requested horizontal text alignment.</param>
-        void ApplyHorizontalText(Entity entity, TextComponent textComponent, string text, float baseX, float baseY, TextAlignment alignment) {
+        void ApplyHorizontalText(Entity entity, TextComponent textComponent, LayoutComponent layoutComponent, string text, float baseX, float baseY, int2 baseSize, TextAlignment alignment) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
             } else if (textComponent == null) {
@@ -246,14 +273,37 @@ namespace city.menu {
             float2 measuredSize = textComponent.Font.MeasureString(text);
             double fontScale = textComponent.FontScale;
             textComponent.Size = new int2(
-                (int)Math.Ceiling(measuredSize.X * fontScale),
-                (int)Math.Ceiling(measuredSize.Y * fontScale));
+                Math.Max(baseSize.X, (int)Math.Ceiling(measuredSize.X * fontScale)),
+                Math.Max(baseSize.Y, (int)Math.Ceiling(measuredSize.Y * fontScale)));
+            if (layoutComponent != null && layoutComponent.IsAnchored) {
+                layoutComponent.RefreshAnchoring();
+                return;
+            }
             if (alignment == TextAlignment.Right) {
                 entity.LocalPosition = new float3(baseX - textComponent.Size.X, baseY, 0f);
                 return;
             }
 
             entity.LocalPosition = new float3(baseX, baseY, 0f);
+        }
+
+        /// <summary>
+        /// Finds the layout component attached to one child entity.
+        /// </summary>
+        /// <param name="entity">Child entity whose layout component should be searched.</param>
+        /// <returns>Resolved layout component.</returns>
+        LayoutComponent FindLayoutComponent(Entity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            for (int index = 0; index < entity.Components.Count; index++) {
+                if (entity.Components[index] is LayoutComponent layoutComponent) {
+                    return layoutComponent;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

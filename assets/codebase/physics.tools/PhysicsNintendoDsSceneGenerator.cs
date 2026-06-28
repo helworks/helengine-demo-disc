@@ -108,7 +108,9 @@ namespace city.physics.tools {
 
             return string.Equals(sceneEntry.SceneId, "test_scene_dynamic_stack_boxes", StringComparison.Ordinal)
                 || string.Equals(sceneEntry.SceneId, "test_scene_dynamic_sphere_stack", StringComparison.Ordinal)
-                || string.Equals(sceneEntry.SceneId, "test_scene_dynamic_mixed_stack", StringComparison.Ordinal);
+                || string.Equals(sceneEntry.SceneId, "test_scene_dynamic_mixed_stack", StringComparison.Ordinal)
+                || string.Equals(sceneEntry.SceneId, "test_scene_static_mesh_showcase", StringComparison.Ordinal)
+                || string.Equals(sceneEntry.SceneId, "test_scene_static_mesh_minimal", StringComparison.Ordinal);
         }
 
         /// <summary>

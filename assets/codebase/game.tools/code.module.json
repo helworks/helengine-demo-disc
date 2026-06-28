@@ -1,0 +1,11 @@
+{
+  "moduleId": "game.tools",
+  "dependencyModuleIds": [
+    "gameplay",
+    "rendering.tools"
+  ],
+  "loadScopes": [
+    "always-loaded"
+  ],
+  "moduleKind": "editor"
+}

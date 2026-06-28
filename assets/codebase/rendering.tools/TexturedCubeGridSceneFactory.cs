@@ -82,6 +82,11 @@ namespace city.rendering.tools {
         const string GameCubeTextureRelativePathFieldId = "texture-relative-path";
 
         /// <summary>
+        /// Stable PS2 material field identifier used for cooked imported texture paths.
+        /// </summary>
+        const string Ps2TextureRelativePathFieldId = "texture-relative-path";
+
+        /// <summary>
         /// Stable DS material field identifier used to select fixed-pipeline lighting behavior.
         /// </summary>
         const string LightingModeFieldId = "lighting-mode";
@@ -421,9 +426,6 @@ namespace city.rendering.tools {
                 FontScale = 2f
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
-            entity.AddComponent(new DemoDiscLightToggleComponent());
-            DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
-            lightIndicatorOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont());
             return entity;
         }
 
@@ -672,6 +674,7 @@ namespace city.rendering.tools {
             GeneratedMaterialPlatformDefinition ps2Settings = definition.GetOrCreatePlatform("ps2");
             ps2Settings.SchemaId = Ps2MaterialSchemaId;
             ps2Settings.SetFieldValue(TextureIdFieldId, CubeTextureAssetIds[cubeIndex]);
+            ps2Settings.SetFieldValue(Ps2TextureRelativePathFieldId, "cooked/imported/" + CubeTextureAssetIds[cubeIndex]);
             ps2Settings.SetFieldValue(AlphaModeFieldId, "opaque");
             ps2Settings.SetFieldValue(DoubleSidedFieldId, "false");
             ps2Settings.SetFieldValue(Ps2CastShadowsFieldId, "true");

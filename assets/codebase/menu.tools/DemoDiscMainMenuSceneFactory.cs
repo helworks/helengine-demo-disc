@@ -56,7 +56,7 @@ namespace city.menu.tools {
         /// <summary>
         /// Fixed Nintendo DS logo width in authored pixels.
         /// </summary>
-        const int NintendoDsLogoWidth = 180;
+        const int NintendoDsLogoWidth = 160;
 
         /// <summary>
         /// Stable save-state slot name used for serialized font references.
@@ -580,7 +580,7 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(overlayImage));
             }
 
-            int displayWidth = NintendoDsLogoWidth;
+            int displayWidth = ResolveNintendoDsLogoWidth(overlayImage);
             int displayHeight = ResolveNintendoDsLogoHeight(overlayImage, displayWidth);
             Entity entity = Core.Instance.EntityFactory.CreateChild(topScreenRootEntity, "DemoDiscOverlayImage");
             entity.LocalPosition = new float3((NintendoDsScreenWidth - displayWidth) * 0.5f, 0f, 0f);
@@ -607,11 +607,20 @@ namespace city.menu.tools {
             }
 
             Entity entity = Core.Instance.EntityFactory.CreateChild(topScreenRootEntity, "DemoDiscPlatformInfoOverlay");
-            entity.LocalPosition = new float3(8f, 148f, 0.1f);
+            entity.LocalPosition = new float3(0f, 0f, 0.1f);
             entity.AddComponent(new PlatformInfoTextComponent());
 
-            CreateNintendoDsTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, null, 0.84f, false);
-            CreateNintendoDsTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(240f, 0f, 0f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(1, 1), 42, null, 0.84f, false);
+            LayoutComponent nameAnchorComponent = new LayoutComponent {
+                LayoutSpace = LayoutComponent.CameraViewportLayoutSpace
+            };
+            nameAnchorComponent.SetAnchorDistances(left: 8f, bottom: 8f);
+            LayoutComponent versionAnchorComponent = new LayoutComponent {
+                LayoutSpace = LayoutComponent.CameraViewportLayoutSpace
+            };
+            versionAnchorComponent.SetAnchorDistances(right: 8f, bottom: 8f);
+
+            CreateNintendoDsTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(8f, 148f, 0f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, nameAnchorComponent, 0.84f, false);
+            CreateNintendoDsTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(176f, 148f, 0f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(72, 1), 42, versionAnchorComponent, 0.84f, false);
         }
 
         /// <summary>

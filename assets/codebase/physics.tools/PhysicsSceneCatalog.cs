@@ -34,6 +34,26 @@ namespace city.physics.tools {
         public const string DynamicSphereStackSceneId = "scenes/physics/test_scene_dynamic_sphere_stack.helen";
 
         /// <summary>
+        /// Relative scene id for the strict rotated-box parity validation scene.
+        /// </summary>
+        public const string StrictRotatedBoxCompareSceneId = "scenes/physics/test_scene_strict_rotated_box_compare.helen";
+
+        /// <summary>
+        /// Relative scene id for the render-only slope validation scene.
+        /// </summary>
+        public const string RenderOnlySlopeSceneId = "scenes/physics/test_scene_render_only_slope.helen";
+
+        /// <summary>
+        /// Relative scene id for the render-only matrix probe validation scene.
+        /// </summary>
+        public const string RenderMatrixProbeSceneId = "scenes/physics/test_scene_render_matrix_probe.helen";
+
+        /// <summary>
+        /// Relative scene id for the render-only motion probe validation scene.
+        /// </summary>
+        public const string RenderMotionProbeSceneId = "scenes/physics/test_scene_render_motion_probe.helen";
+
+        /// <summary>
         /// Relative scene id for the mixed dynamic box and sphere stack validation scene.
         /// </summary>
         public const string DynamicMixedStackSceneId = "scenes/physics/test_scene_dynamic_mixed_stack.helen";
@@ -47,6 +67,16 @@ namespace city.physics.tools {
         /// Relative scene id for the static-mesh ground stability validation scene.
         /// </summary>
         public const string MeshGroundStabilitySceneId = "scenes/physics/test_scene_mesh_ground_stability.helen";
+
+        /// <summary>
+        /// Relative scene id for the playable static-mesh showcase validation scene.
+        /// </summary>
+        public const string StaticMeshShowcaseSceneId = "scenes/physics/test_scene_static_mesh_showcase.helen";
+
+        /// <summary>
+        /// Relative scene id for the minimal playable static-mesh validation scene.
+        /// </summary>
+        public const string StaticMeshMinimalSceneId = "scenes/physics/test_scene_static_mesh_minimal.helen";
 
         /// <summary>
         /// Relative scene id for the trigger-volume validation scene.
@@ -63,9 +93,15 @@ namespace city.physics.tools {
             DynamicStackBoxesSceneId,
             SingleFallingCubeSceneId,
             DynamicSphereStackSceneId,
+            StrictRotatedBoxCompareSceneId,
+            RenderOnlySlopeSceneId,
+            RenderMatrixProbeSceneId,
+            RenderMotionProbeSceneId,
             DynamicMixedStackSceneId,
             KinematicPushSceneId,
             MeshGroundStabilitySceneId,
+            StaticMeshShowcaseSceneId,
+            StaticMeshMinimalSceneId,
             TriggerVolumeSceneId
         };
 

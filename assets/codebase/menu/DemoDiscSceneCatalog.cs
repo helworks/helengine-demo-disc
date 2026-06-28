@@ -40,6 +40,26 @@ namespace city.menu {
         }
 
         /// <summary>
+        /// Builds the ordered game-demo scene menu items shown by the demo-disc menu.
+        /// </summary>
+        /// <returns>Curated game scene menu items.</returns>
+        public MenuItemDefinition[] CreateGameSceneItems() {
+            IReadOnlyList<DemoDiscGameSceneEntry> gameSceneEntries = CreateGameSceneEntries();
+            MenuItemDefinition[] items = new MenuItemDefinition[gameSceneEntries.Count + 1];
+            for (int index = 0; index < gameSceneEntries.Count; index++) {
+                DemoDiscGameSceneEntry sceneEntry = gameSceneEntries[index];
+                items[index] = new MenuItemDefinition(
+                    sceneEntry.MenuItemId,
+                    sceneEntry.DisplayName,
+                    true,
+                    new MenuActionDefinition(MenuActionKind.LoadScene, sceneEntry.SceneId));
+            }
+
+            items[gameSceneEntries.Count] = new MenuItemDefinition("games-back", "Back", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty));
+            return items;
+        }
+
+        /// <summary>
         /// Builds the curated physics scene entry set shared by the demo-disc menu and DS companion scene generators.
         /// </summary>
         /// <returns>Curated physics scene entries.</returns>
@@ -59,7 +79,30 @@ namespace city.menu {
                     "physics-dynamic-mixed-stack",
                     "Mixed Stack",
                     "test_scene_dynamic_mixed_stack",
-                    "test_scene_dynamic_mixed_stack_ds")
+                    "test_scene_dynamic_mixed_stack_ds"),
+                new DemoDiscPhysicsSceneEntry(
+                    "physics-static-mesh-showcase",
+                    "Static Mesh",
+                    "test_scene_static_mesh_showcase",
+                    "test_scene_static_mesh_showcase_ds"),
+                new DemoDiscPhysicsSceneEntry(
+                    "physics-static-mesh-minimal",
+                    "Static Mesh Simple",
+                    "test_scene_static_mesh_minimal",
+                    "test_scene_static_mesh_minimal_ds")
+            ];
+        }
+
+        /// <summary>
+        /// Builds the curated game scene entry set shared by the demo-disc menu and generated gameplay scene pipeline.
+        /// </summary>
+        /// <returns>Curated game scene entries.</returns>
+        public IReadOnlyList<DemoDiscGameSceneEntry> CreateGameSceneEntries() {
+            return [
+                new DemoDiscGameSceneEntry(
+                    "games-tilt-trial",
+                    "Tilt Trial",
+                    "tilt_trial")
             ];
         }
     }

@@ -399,12 +399,24 @@ namespace city.physics.tools {
                 return CreateSingleFallingCubeScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.DynamicSphereStackSceneId, StringComparison.Ordinal)) {
                 return CreateDynamicSphereStackScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.StrictRotatedBoxCompareSceneId, StringComparison.Ordinal)) {
+                return CreateStrictRotatedBoxCompareScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.RenderOnlySlopeSceneId, StringComparison.Ordinal)) {
+                return CreateRenderOnlySlopeScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.RenderMatrixProbeSceneId, StringComparison.Ordinal)) {
+                return CreateRenderMatrixProbeScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.RenderMotionProbeSceneId, StringComparison.Ordinal)) {
+                return CreateRenderMotionProbeScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.DynamicMixedStackSceneId, StringComparison.Ordinal)) {
                 return CreateDynamicMixedStackScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.KinematicPushSceneId, StringComparison.Ordinal)) {
                 return CreateKinematicPushScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.MeshGroundStabilitySceneId, StringComparison.Ordinal)) {
                 return CreateMeshGroundStabilityScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.StaticMeshShowcaseSceneId, StringComparison.Ordinal)) {
+                return CreateStaticMeshShowcaseScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.StaticMeshMinimalSceneId, StringComparison.Ordinal)) {
+                return CreateStaticMeshMinimalScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.TriggerVolumeSceneId, StringComparison.Ordinal)) {
                 return CreateTriggerVolumeScene();
             }
@@ -564,6 +576,114 @@ namespace city.physics.tools {
         }
 
         /// <summary>
+        /// Creates the strict rotated-box parity validation scene.
+        /// </summary>
+        /// <returns>Authored parity scene that compares one render-only rotated box against one physics-backed rotated box.</returns>
+        SceneAsset CreateStrictRotatedBoxCompareScene() {
+            float4 rampOrientation = CreateYawPitchRollDegrees(0.0, 0.0, 18.0);
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "strict_rotated_box_compare.scenario",
+                new[] {
+                    CreatePhysicsBoxMeshEntity("strict_rotated_box_compare.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(24f, 1f, 18f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
+                    CreatePhysicsBoxMeshEntity("strict_rotated_box_compare.flat_box", "PhysicsFlatBox", new float3(0f, 0.5f, -5.5f), new float3(6f, 1f, 4f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath)),
+                    CreateCubeMeshEntity("strict_rotated_box_compare.control_box", "ControlVisualBox", new float3(-5f, 1f, 1.5f), new float3(6f, 1f, 10f), rampOrientation, CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath)),
+                    CreatePhysicsBoxMeshEntity("strict_rotated_box_compare.physics_box", "PhysicsVisualBox", new float3(5f, 1f, 1.5f), new float3(6f, 1f, 10f), rampOrientation, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoMagentaMaterialRelativePath)),
+                    CreatePhysicsSphereMeshEntity("strict_rotated_box_compare.physics_probe", "PhysicsProbe", new float3(5f, 4.5f, -1.25f), float4.Identity, DynamicBodyKindCode, true, CreateSphereStackMaterialReference(0)),
+                    CreateMarkerEntity("strict_rotated_box_compare.control_marker", "ControlMarker", new float3(-5f, 2.5f, 1.5f)),
+                    CreateMarkerEntity("strict_rotated_box_compare.physics_marker", "PhysicsMarker", new float3(5f, 2.5f, 1.5f))
+                });
+            SceneEntityAsset cameraEntity = CreatePhysicsShowcaseCameraEntity("strict_rotated_box_compare.camera", new float3(0f, 7.5f, 15.5f), CreateYawPitchRollDegrees(180.0, -20.0, 0.0), new float3(0f, 1.5f, 0f));
+            return CreatePhysicsShowcaseSceneAsset(PhysicsSceneCatalog.StrictRotatedBoxCompareSceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
+        /// Creates the render-only slope validation scene.
+        /// </summary>
+        /// <returns>Authored slope scene that keeps the same rotated mesh shape while removing BEPU rigid bodies and colliders from the ramp.</returns>
+        SceneAsset CreateRenderOnlySlopeScene() {
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "render_only_slope.scenario",
+                new[] {
+                    CreateCubeMeshEntity("render_only_slope.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(14f, 1f, 14f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
+                    CreateCubeMeshEntity("render_only_slope.ramp", "SlopeRamp", new float3(2.25f, 0.6f, 0f), new float3(5f, 0.6f, 3f), CreateYawPitchRollDegrees(0.0, 0.0, 18.0), CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath)),
+                    CreateMarkerEntity("render_only_slope.spawn", "SlopeStart", new float3(-4f, 0.75f, 0f)),
+                    CreateMarkerEntity("render_only_slope.goal", "SlopeGoal", new float3(4.25f, 1.75f, 0f))
+                });
+            SceneEntityAsset cameraEntity = CreateCameraEntity("render_only_slope.camera", new float3(8.5f, 5f, 7.5f), CreateYawPitchRollDegrees(45.0, -18.0, 0.0));
+            return CreateSceneAsset(PhysicsSceneCatalog.RenderOnlySlopeSceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
+        /// Creates a render-only probe scene that compares flat, rotated, scaled, and rotated-plus-scaled cube transforms without any BEPU components.
+        /// </summary>
+        /// <returns>Authored render-only matrix probe scene.</returns>
+        SceneAsset CreateRenderMatrixProbeScene() {
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "render_matrix_probe.scenario",
+                new[] {
+                    CreateCubeMeshEntity("render_matrix_probe.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(24f, 1f, 14f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
+                    CreateCubeMeshEntity("render_matrix_probe.flat_control", "FlatControlCube", new float3(-6f, 1f, 0f), new float3(2f, 2f, 2f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoNeutralMaterialRelativePath)),
+                    CreateCubeMeshEntity("render_matrix_probe.rotated_only", "RotatedOnlyCube", new float3(-2f, 1f, 0f), new float3(2f, 2f, 2f), CreateYawPitchRollDegrees(0.0, 0.0, 18.0), CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath)),
+                    CreateCubeMeshEntity("render_matrix_probe.scaled_only", "ScaledOnlyCube", new float3(2f, 1f, 0f), new float3(4f, 1f, 2f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
+                    CreateCubeMeshEntity("render_matrix_probe.rotated_scaled", "RotatedScaledCube", new float3(6f, 1f, 0f), new float3(4f, 1f, 2f), CreateYawPitchRollDegrees(0.0, 0.0, 18.0), CreatePhysicsDemoMaterialReference(PhysicsDemoRedMaterialRelativePath))
+                });
+            SceneEntityAsset cameraEntity = CreateCameraEntity("render_matrix_probe.camera", new float3(0f, 6.5f, 14f), CreateYawPitchRollDegrees(0.0, -20.0, 0.0));
+            return CreateSceneAsset(PhysicsSceneCatalog.RenderMatrixProbeSceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
+        /// Creates the render-only motion probe hero cube that animates through each transform combination.
+        /// </summary>
+        /// <returns>Authored hero cube entity with the dedicated render motion probe component.</returns>
+        SceneEntityAsset CreateRenderMotionProbeHeroEntity() {
+            const string EntityId = "render_motion_probe.hero";
+
+            if (string.IsNullOrWhiteSpace(EntityId)) {
+                throw new InvalidOperationException("Render motion probe hero entity id must be provided.");
+            }
+
+            return new SceneEntityAsset {
+                Id = AllocateSceneEntityId(),
+                Name = "HeroMotionCube",
+                LayerMask = EditorLayerMasks.SceneObjects,
+                LocalPosition = new float3(6f, 1f, -3.5f),
+                LocalScale = new float3(2f, 2f, 2f),
+                LocalOrientation = float4.Identity,
+                Components = new[] {
+                    CreateMeshComponentRecord(CreatePhysicsDemoMaterialReference(PhysicsDemoRedMaterialRelativePath)),
+                    CreateAutomaticComponentRecord(new city.rendering.RenderMotionProbeComponent {
+                        BaseLocalPosition = new float3(6f, 1f, -3.5f),
+                        MotionOffset = new float3(0f, 0f, 5f),
+                        BaseLocalScale = new float3(2f, 2f, 2f),
+                        ScaledLocalScale = new float3(4f, 1f, 2f),
+                        RotatedLocalOrientation = CreateYawPitchRollDegrees(0.0, 0.0, 18.0),
+                        PhaseDurationSeconds = 1.5d
+                    }, 1)
+                },
+                Children = Array.Empty<SceneEntityAsset>()
+            };
+        }
+
+        /// <summary>
+        /// Creates a render-only probe scene that animates one hero cube through move, rotate, scale, and all transform combinations beside fixed reference cubes.
+        /// </summary>
+        /// <returns>Authored render-only motion probe scene.</returns>
+        SceneAsset CreateRenderMotionProbeScene() {
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "render_motion_probe.scenario",
+                new[] {
+                    CreateCubeMeshEntity("render_motion_probe.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(28f, 1f, 18f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
+                    CreateCubeMeshEntity("render_motion_probe.flat_control", "FlatControlCube", new float3(-8f, 1f, 0f), new float3(2f, 2f, 2f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoNeutralMaterialRelativePath)),
+                    CreateCubeMeshEntity("render_motion_probe.rotated_only", "RotatedOnlyReferenceCube", new float3(-3f, 1f, 0f), new float3(2f, 2f, 2f), CreateYawPitchRollDegrees(0.0, 0.0, 18.0), CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath)),
+                    CreateCubeMeshEntity("render_motion_probe.scaled_only", "ScaledOnlyReferenceCube", new float3(2f, 1f, 0f), new float3(4f, 1f, 2f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
+                    CreateCubeMeshEntity("render_motion_probe.rotated_scaled_reference", "RotatedScaledReferenceCube", new float3(7f, 1f, 0f), new float3(4f, 1f, 2f), CreateYawPitchRollDegrees(0.0, 0.0, 18.0), CreatePhysicsDemoMaterialReference(PhysicsDemoMagentaMaterialRelativePath)),
+                    CreateRenderMotionProbeHeroEntity()
+                });
+            SceneEntityAsset cameraEntity = CreateCameraEntity("render_motion_probe.camera", new float3(0f, 8f, 18f), CreateYawPitchRollDegrees(0.0, -20.0, 0.0));
+            return CreateSceneAsset(PhysicsSceneCatalog.RenderMotionProbeSceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
         /// Creates the static floor and dynamic sphere tower used by the sphere-stack validation scene.
         /// </summary>
         /// <returns>Scenario children containing a ground body, stacked spheres, and one spawn marker.</returns>
@@ -669,6 +789,60 @@ namespace city.physics.tools {
         }
 
         /// <summary>
+        /// Creates the playable static-mesh showcase validation scene.
+        /// </summary>
+        /// <returns>Authored static-mesh showcase scene asset.</returns>
+        SceneAsset CreateStaticMeshShowcaseScene() {
+            SceneEntityAsset[] scenarioChildren = CreateStaticMeshShowcaseChildren();
+            SceneEntityAsset playerSphereEntity = FindRequiredSceneEntityAssetByName(scenarioChildren, "PlayerSphere");
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "static_mesh_showcase.scenario",
+                scenarioChildren);
+            SceneEntityAsset cameraEntity = CreateStaticMeshShowcaseCameraEntity(
+                "static_mesh_showcase.camera",
+                new float3(12f, 6.5f, 10f),
+                CreateYawPitchRollDegrees(-132.0, -18.0, 0.0),
+                playerSphereEntity.Id);
+            return CreatePhysicsShowcaseSceneAsset(PhysicsSceneCatalog.StaticMeshShowcaseSceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
+        /// Creates the minimal playable static-mesh validation scene.
+        /// </summary>
+        /// <returns>Authored minimal static-mesh playable scene asset.</returns>
+        SceneAsset CreateStaticMeshMinimalScene() {
+            SceneEntityAsset[] scenarioChildren = new[] {
+                CreatePhysicsBoxMeshEntity(
+                    "static_mesh_minimal.ground",
+                    "Ground",
+                    new float3(0f, -0.5f, 0f),
+                    new float3(18f, 1f, 18f),
+                    float4.Identity,
+                    StaticBodyKindCode,
+                    false,
+                    CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
+                CreatePhysicsSphereMeshEntity(
+                    "static_mesh_minimal.player",
+                    "PlayerSphere",
+                    new float3(0f, 0.75f, 0f),
+                    float4.Identity,
+                    DynamicBodyKindCode,
+                    true,
+                    CreateSphereStackMaterialReference(0))
+            };
+            SceneEntityAsset playerSphereEntity = FindRequiredSceneEntityAssetByName(scenarioChildren, "PlayerSphere");
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "static_mesh_minimal.scenario",
+                scenarioChildren);
+            SceneEntityAsset cameraEntity = CreateStaticMeshShowcaseCameraEntity(
+                "static_mesh_minimal.camera",
+                new float3(8f, 5f, 8f),
+                CreateYawPitchRollDegrees(-135.0, -18.0, 0.0),
+                playerSphereEntity.Id);
+            return CreatePhysicsShowcaseSceneAsset(PhysicsSceneCatalog.StaticMeshMinimalSceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
         /// Creates the trigger-volume validation scene.
         /// </summary>
         /// <returns>Authored trigger-volume validation scene asset.</returns>
@@ -761,6 +935,113 @@ namespace city.physics.tools {
                 AssetReferences = assetReferences.ToArray(),
                 RootEntities = rootEntities.ToArray()
             };
+        }
+
+        /// <summary>
+        /// Creates the authored scenario children for the playable static-mesh showcase scene.
+        /// </summary>
+        /// <returns>Scenario children containing visible environment meshes, one hidden static-mesh collider, and one dynamic sphere probe.</returns>
+        SceneEntityAsset[] CreateStaticMeshShowcaseChildren() {
+            List<SceneEntityAsset> children = new List<SceneEntityAsset>();
+            List<float3> collisionVertices = new List<float3>();
+            List<int> collisionIndices = new List<int>();
+
+            AppendStaticMeshShowcaseSection(
+                children,
+                collisionVertices,
+                collisionIndices,
+                "static_mesh_showcase.ground",
+                "Ground",
+                new float3(0f, -0.5f, 0f),
+                new float3(24f, 1f, 18f),
+                float4.Identity,
+                CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath));
+            AppendStaticMeshShowcaseSection(
+                children,
+                collisionVertices,
+                collisionIndices,
+                "static_mesh_showcase.wall_left",
+                "WallLeft",
+                new float3(-11.5f, 1.5f, 0f),
+                new float3(1f, 3f, 18f),
+                float4.Identity,
+                CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath));
+            AppendStaticMeshShowcaseSection(
+                children,
+                collisionVertices,
+                collisionIndices,
+                "static_mesh_showcase.wall_right",
+                "WallRight",
+                new float3(11.5f, 1.5f, 0f),
+                new float3(1f, 3f, 18f),
+                float4.Identity,
+                CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath));
+            AppendStaticMeshShowcaseSection(
+                children,
+                collisionVertices,
+                collisionIndices,
+                "static_mesh_showcase.wall_back",
+                "WallBack",
+                new float3(0f, 1.5f, -8.5f),
+                new float3(24f, 3f, 1f),
+                float4.Identity,
+                CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath));
+            AppendStaticMeshShowcaseSection(
+                children,
+                collisionVertices,
+                collisionIndices,
+                "static_mesh_showcase.wall_front",
+                "WallFront",
+                new float3(0f, 1.5f, 8.5f),
+                new float3(24f, 3f, 1f),
+                float4.Identity,
+                CreatePhysicsDemoMaterialReference(PhysicsDemoCyanMaterialRelativePath));
+            AppendStaticMeshShowcaseSection(
+                children,
+                collisionVertices,
+                collisionIndices,
+                "static_mesh_showcase.ramp_left",
+                "RampLeft",
+                new float3(-4.5f, 0.45f, -1.5f),
+                new float3(6f, 0.5f, 4f),
+                CreateYawPitchRollDegrees(0.0, 0.0, 12.0),
+                CreatePhysicsDemoMaterialReference(PhysicsDemoMagentaMaterialRelativePath));
+            AppendStaticMeshShowcaseSection(
+                children,
+                collisionVertices,
+                collisionIndices,
+                "static_mesh_showcase.platform_center",
+                "PlatformCenter",
+                new float3(2f, 1.25f, -1.5f),
+                new float3(4f, 0.5f, 4f),
+                float4.Identity,
+                CreatePhysicsDemoMaterialReference(PhysicsDemoOrangeMaterialRelativePath));
+            AppendStaticMeshShowcaseSection(
+                children,
+                collisionVertices,
+                collisionIndices,
+                "static_mesh_showcase.ramp_right",
+                "RampRight",
+                new float3(6.25f, 1.65f, 1.5f),
+                new float3(5f, 0.5f, 4f),
+                CreateYawPitchRollDegrees(0.0, 0.0, -10.0),
+                CreatePhysicsDemoMaterialReference(PhysicsDemoSphereStackPurpleMaterialRelativePath));
+
+            children.Add(CreateStaticMeshColliderEntity(
+                "static_mesh_showcase.static_mesh_collider",
+                "StaticMeshCollider",
+                new StaticMeshCollisionData3D(collisionVertices.ToArray(), collisionIndices.ToArray())));
+            children.Add(CreatePhysicsSphereMeshEntity(
+                "static_mesh_showcase.player_sphere",
+                "PlayerSphere",
+                new float3(-8f, 1.1f, 0f),
+                float4.Identity,
+                DynamicBodyKindCode,
+                true,
+                CreateSphereStackMaterialReference(0)));
+            children.Add(CreateMarkerEntity("static_mesh_showcase.spawn", "PlayerSpawn", new float3(-8f, 1.1f, 0f)));
+            children.Add(CreateMarkerEntity("static_mesh_showcase.goal", "ShowcaseGoal", new float3(8f, 2.2f, 1.5f)));
+            return children.ToArray();
         }
 
         /// <summary>
@@ -1002,6 +1283,40 @@ namespace city.physics.tools {
         }
 
         /// <summary>
+        /// Creates one playable static-mesh showcase camera entity that follows the serialized player sphere by scene-entity id.
+        /// </summary>
+        /// <param name="entityId">Stable serialized entity id.</param>
+        /// <param name="position">Camera position.</param>
+        /// <param name="orientation">Camera orientation.</param>
+        /// <param name="targetEntityId">Stable serialized scene-entity id of the followed player sphere.</param>
+        /// <returns>Camera entity with serialized camera and follow-camera components.</returns>
+        SceneEntityAsset CreateStaticMeshShowcaseCameraEntity(string entityId, float3 position, float4 orientation, uint targetEntityId) {
+            if (string.IsNullOrWhiteSpace(entityId)) {
+                throw new ArgumentException("Camera entity id must be provided.", nameof(entityId));
+            } else if (targetEntityId == 0u) {
+                throw new ArgumentOutOfRangeException(nameof(targetEntityId), "Static-mesh showcase cameras require a non-zero followed scene entity id.");
+            }
+
+            return new SceneEntityAsset {
+                Id = AllocateSceneEntityId(),
+                Name = "Camera",
+                LocalPosition = position,
+                LocalScale = float3.One,
+                LocalOrientation = orientation,
+                Components = new[] {
+                    CreateCameraComponentRecord(),
+                    CreateAutomaticComponentRecord(new city.rendering.DemoFollowCameraComponent {
+                        TargetEntityReference = new SceneEntityReference {
+                            EntityId = targetEntityId
+                        },
+                        TargetOffset = new float3(0f, 1.4f, 0f)
+                    }, 1)
+                },
+                Children = Array.Empty<SceneEntityAsset>()
+            };
+        }
+
+        /// <summary>
         /// <summary>
         /// Creates the shared desktop instruction overlay root used by the playable physics showcase scenes.
         /// </summary>
@@ -1061,6 +1376,42 @@ namespace city.physics.tools {
                     CreateMeshComponentRecord(global::helengine.EngineSceneAssetReferenceFactory.CreateSphereModel(), materialReference),
                     CreateRigidBodyComponentRecord(bodyKindCode, useGravity, 1d, 1d, float3.Zero, 1),
                     CreateSphereColliderComponentRecord(0.5f, 2)
+                },
+                Children = Array.Empty<SceneEntityAsset>()
+            };
+        }
+
+        /// <summary>
+        /// Creates one hidden entity that owns the combined static-mesh collider for the playable showcase environment.
+        /// </summary>
+        /// <param name="entityId">Stable serialized entity id.</param>
+        /// <param name="name">Authored entity name.</param>
+        /// <param name="collisionData">Combined authored triangle soup used for static-mesh physics cooking.</param>
+        /// <returns>Entity with one static rigid body and one static-mesh collider component.</returns>
+        SceneEntityAsset CreateStaticMeshColliderEntity(
+            string entityId,
+            string name,
+            StaticMeshCollisionData3D collisionData) {
+            if (string.IsNullOrWhiteSpace(entityId)) {
+                throw new ArgumentException("Static-mesh collider entity id must be provided.", nameof(entityId));
+            }
+            if (string.IsNullOrWhiteSpace(name)) {
+                throw new ArgumentException("Static-mesh collider entity name must be provided.", nameof(name));
+            }
+            if (collisionData == null) {
+                throw new ArgumentNullException(nameof(collisionData));
+            }
+
+            return new SceneEntityAsset {
+                Id = AllocateSceneEntityId(),
+                Name = name,
+                LayerMask = EditorLayerMasks.SceneObjects,
+                LocalPosition = float3.Zero,
+                LocalScale = float3.One,
+                LocalOrientation = float4.Identity,
+                Components = new[] {
+                    CreateRigidBodyComponentRecord(StaticBodyKindCode, false, 1d, 1d, float3.Zero, 1),
+                    CreateStaticMeshColliderComponentRecord(collisionData, 2)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -1167,6 +1518,40 @@ namespace city.physics.tools {
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
+        }
+
+        /// <summary>
+        /// Adds one visible cuboid section to the static-mesh showcase and appends matching authored collision triangles to the shared static-mesh collider.
+        /// </summary>
+        /// <param name="children">Scenario child list receiving the visible mesh entity.</param>
+        /// <param name="collisionVertices">Shared authored collision vertex list.</param>
+        /// <param name="collisionIndices">Shared authored collision index list.</param>
+        /// <param name="entityId">Stable serialized entity id for the visible section.</param>
+        /// <param name="name">Authored entity name for the visible section.</param>
+        /// <param name="position">World-space cuboid center.</param>
+        /// <param name="scale">Full cuboid size.</param>
+        /// <param name="orientation">World-space cuboid orientation.</param>
+        /// <param name="materialReference">Visible material reference.</param>
+        void AppendStaticMeshShowcaseSection(
+            List<SceneEntityAsset> children,
+            List<float3> collisionVertices,
+            List<int> collisionIndices,
+            string entityId,
+            string name,
+            float3 position,
+            float3 scale,
+            float4 orientation,
+            SceneAssetReference materialReference) {
+            if (children == null) {
+                throw new ArgumentNullException(nameof(children));
+            } else if (collisionVertices == null) {
+                throw new ArgumentNullException(nameof(collisionVertices));
+            } else if (collisionIndices == null) {
+                throw new ArgumentNullException(nameof(collisionIndices));
+            }
+
+            children.Add(CreateCubeMeshEntity(entityId, name, position, scale, orientation, materialReference));
+            AppendCuboidCollisionData(collisionVertices, collisionIndices, position, scale, orientation);
         }
 
         /// <summary>
@@ -1342,30 +1727,25 @@ namespace city.physics.tools {
         }
 
         /// <summary>
-        /// Creates one serialized camera component record using the editor scene-object layer mask.
+        /// Creates one serialized camera component record using the shared reflected component serializer.
         /// </summary>
         /// <returns>Serialized camera component record.</returns>
         static SceneComponentAssetRecord CreateCameraComponentRecord() {
-            CameraClearSettings clearSettings = new CameraClearSettings(true, CornflowerBlueClearColor, true, 1f, false, 0);
-            CameraRenderSettings renderSettings = new CameraRenderSettings {
-                DepthPrepassMode = DepthPrepassMode.Disabled,
-                ShadowDistance = 0f,
-                PostProcessTier = PostProcessTier.Disabled
+            CameraComponent component = new CameraComponent {
+                CameraDrawOrder = DefaultCameraDrawOrder,
+                LayerMask = EditorLayerMasks.SceneObjects,
+                Viewport = new float4(0f, 0f, 1f, 1f),
+                NearPlaneDistance = 0.1f,
+                FarPlaneDistance = 100f,
+                ClearSettings = new CameraClearSettings(true, CornflowerBlueClearColor, true, 1f, false, 0),
+                RenderSettings = new CameraRenderSettings {
+                    DepthPrepassMode = DepthPrepassMode.Disabled,
+                    ShadowDistance = 0f,
+                    PostProcessTier = PostProcessTier.Disabled
+                }
             };
-            EditorTaggedSceneComponentFieldWriter writer = new EditorTaggedSceneComponentFieldWriter();
-            writer.WriteField(CameraDrawOrderFieldName, fieldWriter => fieldWriter.WriteByte(DefaultCameraDrawOrder));
-            writer.WriteField(CameraLayerMaskFieldName, fieldWriter => fieldWriter.WriteUInt16(EditorLayerMasks.SceneObjects));
-            writer.WriteField(CameraViewportFieldName, fieldWriter => fieldWriter.WriteFloat4(new float4(0f, 0f, 1f, 1f)));
-            writer.WriteField(CameraNearPlaneDistanceFieldName, fieldWriter => fieldWriter.WriteSingle(0.1f));
-            writer.WriteField(CameraFarPlaneDistanceFieldName, fieldWriter => fieldWriter.WriteSingle(100f));
-            writer.WriteField(CameraClearSettingsFieldName, fieldWriter => SceneComponentBinaryFieldEncoding.WriteCameraClearSettings(fieldWriter, clearSettings));
-            writer.WriteField(CameraRenderSettingsFieldName, fieldWriter => SceneComponentBinaryFieldEncoding.WriteCameraRenderSettings(fieldWriter, renderSettings));
 
-            return new SceneComponentAssetRecord {
-                ComponentTypeId = "helengine.CameraComponent",
-                ComponentIndex = 0,
-                Payload = writer.BuildPayload()
-            };
+            return CreateAutomaticComponentRecord(component, 0);
         }
 
         /// <summary>
@@ -1475,7 +1855,10 @@ namespace city.physics.tools {
             return string.Equals(sceneId, PhysicsSceneCatalog.DynamicStackBoxesSceneId, StringComparison.Ordinal)
                 || string.Equals(sceneId, PhysicsSceneCatalog.SingleFallingCubeSceneId, StringComparison.Ordinal)
                 || string.Equals(sceneId, PhysicsSceneCatalog.DynamicSphereStackSceneId, StringComparison.Ordinal)
-                || string.Equals(sceneId, PhysicsSceneCatalog.DynamicMixedStackSceneId, StringComparison.Ordinal);
+                || string.Equals(sceneId, PhysicsSceneCatalog.StrictRotatedBoxCompareSceneId, StringComparison.Ordinal)
+                || string.Equals(sceneId, PhysicsSceneCatalog.DynamicMixedStackSceneId, StringComparison.Ordinal)
+                || string.Equals(sceneId, PhysicsSceneCatalog.StaticMeshShowcaseSceneId, StringComparison.Ordinal)
+                || string.Equals(sceneId, PhysicsSceneCatalog.StaticMeshMinimalSceneId, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -1531,6 +1914,13 @@ namespace city.physics.tools {
                     new float3(7.75f, 4.75f, 7.5f),
                     CreateYawPitchRollDegrees(-135.0, -18.0, 0.0),
                     new float3(0f, 1.6f, 0f));
+            } else if (string.Equals(normalizedSceneId, PhysicsSceneCatalog.StrictRotatedBoxCompareSceneId, StringComparison.Ordinal)) {
+                authoredSceneAsset = CreateStrictRotatedBoxCompareScene();
+                cameraEntity = CreateLivePhysicsShowcaseCameraEntity(
+                    "StrictRotatedBoxCompareCamera",
+                    new float3(0f, 7.5f, 15.5f),
+                    CreateYawPitchRollDegrees(180.0, -20.0, 0.0),
+                    new float3(0f, 1.5f, 0f));
             } else if (string.Equals(normalizedSceneId, PhysicsSceneCatalog.DynamicMixedStackSceneId, StringComparison.Ordinal)) {
                 authoredSceneAsset = CreateDynamicMixedStackScene();
                 cameraEntity = CreateLivePhysicsShowcaseCameraEntity(
@@ -1538,6 +1928,24 @@ namespace city.physics.tools {
                     new float3(8.5f, 5f, 8.25f),
                     CreateYawPitchRollDegrees(-136.0, -18.0, 0.0),
                     new float3(0f, 1.4f, 0f));
+            } else if (string.Equals(normalizedSceneId, PhysicsSceneCatalog.StaticMeshShowcaseSceneId, StringComparison.Ordinal)) {
+                authoredSceneAsset = CreateStaticMeshShowcaseScene();
+                SceneEntityAsset staticMeshScenarioRoot = ResolveRequiredPlayablePhysicsShowcaseScenarioRoot(authoredSceneAsset);
+                SceneEntityAsset playerSphereEntity = FindRequiredSceneEntityAssetByName(staticMeshScenarioRoot.Children, "PlayerSphere");
+                cameraEntity = CreateLiveStaticMeshShowcaseCameraEntity(
+                    "StaticMeshShowcaseCamera",
+                    new float3(12f, 6.5f, 10f),
+                    CreateYawPitchRollDegrees(-132.0, -18.0, 0.0),
+                    playerSphereEntity.Id);
+            } else if (string.Equals(normalizedSceneId, PhysicsSceneCatalog.StaticMeshMinimalSceneId, StringComparison.Ordinal)) {
+                authoredSceneAsset = CreateStaticMeshMinimalScene();
+                SceneEntityAsset staticMeshScenarioRoot = ResolveRequiredPlayablePhysicsShowcaseScenarioRoot(authoredSceneAsset);
+                SceneEntityAsset playerSphereEntity = FindRequiredSceneEntityAssetByName(staticMeshScenarioRoot.Children, "PlayerSphere");
+                cameraEntity = CreateLiveStaticMeshShowcaseCameraEntity(
+                    "StaticMeshMinimalCamera",
+                    new float3(8f, 5f, 8f),
+                    CreateYawPitchRollDegrees(-135.0, -18.0, 0.0),
+                    playerSphereEntity.Id);
             } else {
                 throw new InvalidOperationException($"Scene '{sceneId}' is not one of the playable physics showcases.");
             }
@@ -1563,6 +1971,10 @@ namespace city.physics.tools {
 
                 AssignFreshGeneratedEditorEntityIds(editorRootEntity);
             }
+            if (string.Equals(normalizedSceneId, PhysicsSceneCatalog.StaticMeshShowcaseSceneId, StringComparison.Ordinal)
+                || string.Equals(normalizedSceneId, PhysicsSceneCatalog.StaticMeshMinimalSceneId, StringComparison.Ordinal)) {
+                RebindStaticMeshShowcaseCameraTarget(cameraEntity, scenarioRoots);
+            }
 
             return new city.rendering.tools.GeneratedAuthoringSceneDefinition {
                 SceneId = normalizedSceneId,
@@ -1587,8 +1999,14 @@ namespace city.physics.tools {
                 return PhysicsSceneCatalog.SingleFallingCubeSceneId;
             } else if (string.Equals(sceneId, "test_scene_dynamic_sphere_stack", StringComparison.Ordinal)) {
                 return PhysicsSceneCatalog.DynamicSphereStackSceneId;
+            } else if (string.Equals(sceneId, "test_scene_strict_rotated_box_compare", StringComparison.Ordinal)) {
+                return PhysicsSceneCatalog.StrictRotatedBoxCompareSceneId;
             } else if (string.Equals(sceneId, "test_scene_dynamic_mixed_stack", StringComparison.Ordinal)) {
                 return PhysicsSceneCatalog.DynamicMixedStackSceneId;
+            } else if (string.Equals(sceneId, "test_scene_static_mesh_showcase", StringComparison.Ordinal)) {
+                return PhysicsSceneCatalog.StaticMeshShowcaseSceneId;
+            } else if (string.Equals(sceneId, "test_scene_static_mesh_minimal", StringComparison.Ordinal)) {
+                return PhysicsSceneCatalog.StaticMeshMinimalSceneId;
             }
 
             return sceneId;
@@ -1685,6 +2103,67 @@ namespace city.physics.tools {
         }
 
         /// <summary>
+        /// Creates one live authored camera entity for the static-mesh showcase that follows the serialized player sphere by scene-entity id.
+        /// </summary>
+        /// <param name="entityName">Human-readable camera entity name.</param>
+        /// <param name="position">Initial camera position.</param>
+        /// <param name="orientation">Initial camera orientation.</param>
+        /// <param name="targetEntityId">Stable serialized scene-entity id of the followed player sphere.</param>
+        /// <returns>Live authored camera entity.</returns>
+        Entity CreateLiveStaticMeshShowcaseCameraEntity(string entityName, float3 position, float4 orientation, uint targetEntityId) {
+            if (string.IsNullOrWhiteSpace(entityName)) {
+                throw new ArgumentException("Camera entity name must be provided.", nameof(entityName));
+            } else if (targetEntityId == 0u) {
+                throw new ArgumentOutOfRangeException(nameof(targetEntityId), "Static-mesh showcase cameras require a non-zero followed scene entity id.");
+            }
+
+            Entity entity = Core.Instance.EntityFactory.Create(entityName);
+            entity.LocalPosition = position;
+            entity.LocalOrientation = orientation;
+
+            entity.AddComponent(new CameraComponent {
+                CameraDrawOrder = DefaultCameraDrawOrder,
+                LayerMask = EditorLayerMasks.SceneObjects,
+                Viewport = new float4(0f, 0f, 1f, 1f),
+                NearPlaneDistance = 0.1f,
+                FarPlaneDistance = 100f,
+                ClearSettings = new CameraClearSettings(true, CornflowerBlueClearColor, true, 1f, false, 0),
+                RenderSettings = new CameraRenderSettings {
+                    DepthPrepassMode = DepthPrepassMode.Disabled,
+                    ShadowDistance = 0f,
+                    PostProcessTier = PostProcessTier.Disabled
+                }
+            });
+            entity.AddComponent(new city.rendering.DemoFollowCameraComponent {
+                TargetEntityReference = new SceneEntityReference {
+                    EntityId = targetEntityId
+                },
+                TargetOffset = new float3(0f, 1.4f, 0f)
+            });
+            return entity;
+        }
+
+        /// <summary>
+        /// Rebinds the static-mesh showcase follow camera so its serialized target reference matches the freshly assigned live player-sphere save id.
+        /// </summary>
+        /// <param name="cameraEntity">Generated camera entity whose follow target should be updated.</param>
+        /// <param name="scenarioRoots">Generated showcase scenario roots that contain the player sphere.</param>
+        void RebindStaticMeshShowcaseCameraTarget(Entity cameraEntity, IReadOnlyList<EditorEntity> scenarioRoots) {
+            if (cameraEntity == null) {
+                throw new ArgumentNullException(nameof(cameraEntity));
+            } else if (scenarioRoots == null) {
+                throw new ArgumentNullException(nameof(scenarioRoots));
+            }
+
+            city.rendering.DemoFollowCameraComponent followCameraComponent = FindRequiredDemoFollowCameraComponent(cameraEntity);
+            EditorEntity playerSphereEntity = FindRequiredEditorEntityByName(scenarioRoots, "PlayerSphere");
+            EntitySaveComponent playerSphereSaveComponent = FindRequiredEntitySaveComponent(playerSphereEntity);
+            followCameraComponent.TargetEntityReference = new SceneEntityReference {
+                EntityId = playerSphereSaveComponent.EntityId
+            };
+        }
+
+        /// <summary>
         /// Creates one live authored UI root that shows FPS diagnostics and owns the playable showcase light-toggle updater.
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
@@ -1705,6 +2184,150 @@ namespace city.physics.tools {
             }
 
             throw new InvalidOperationException("The physics showcase UI root must be authored through editor entities.");
+        }
+
+        /// <summary>
+        /// Finds one serialized scene entity by display name inside the supplied subtree.
+        /// </summary>
+        /// <param name="entities">Serialized scene entities to inspect.</param>
+        /// <param name="entityName">Display name to resolve.</param>
+        /// <returns>Matching serialized scene entity.</returns>
+        SceneEntityAsset FindRequiredSceneEntityAssetByName(SceneEntityAsset[] entities, string entityName) {
+            if (entities == null) {
+                throw new ArgumentNullException(nameof(entities));
+            } else if (string.IsNullOrWhiteSpace(entityName)) {
+                throw new ArgumentException("Entity name must be provided.", nameof(entityName));
+            }
+
+            for (int entityIndex = 0; entityIndex < entities.Length; entityIndex++) {
+                SceneEntityAsset entity = entities[entityIndex];
+                if (entity == null) {
+                    continue;
+                }
+                if (string.Equals(entity.Name, entityName, StringComparison.Ordinal)) {
+                    return entity;
+                }
+
+                SceneEntityAsset nestedMatch = FindSceneEntityAssetByNameOrNull(entity.Children, entityName);
+                if (nestedMatch != null) {
+                    return nestedMatch;
+                }
+            }
+
+            throw new InvalidOperationException($"Expected one serialized scene entity named '{entityName}'.");
+        }
+
+        /// <summary>
+        /// Finds one serialized scene entity by display name inside the supplied subtree when present.
+        /// </summary>
+        /// <param name="entities">Serialized scene entities to inspect.</param>
+        /// <param name="entityName">Display name to resolve.</param>
+        /// <returns>Matching serialized scene entity when present; otherwise <c>null</c>.</returns>
+        SceneEntityAsset FindSceneEntityAssetByNameOrNull(SceneEntityAsset[] entities, string entityName) {
+            if (entities == null) {
+                throw new ArgumentNullException(nameof(entities));
+            } else if (string.IsNullOrWhiteSpace(entityName)) {
+                throw new ArgumentException("Entity name must be provided.", nameof(entityName));
+            }
+
+            for (int entityIndex = 0; entityIndex < entities.Length; entityIndex++) {
+                SceneEntityAsset entity = entities[entityIndex];
+                if (entity == null) {
+                    continue;
+                }
+                if (string.Equals(entity.Name, entityName, StringComparison.Ordinal)) {
+                    return entity;
+                }
+
+                SceneEntityAsset nestedMatch = FindSceneEntityAssetByNameOrNull(entity.Children, entityName);
+                if (nestedMatch != null) {
+                    return nestedMatch;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Finds one generated live editor entity by display name inside the supplied roots.
+        /// </summary>
+        /// <param name="entities">Generated live editor roots to inspect.</param>
+        /// <param name="entityName">Display name to resolve.</param>
+        /// <returns>Matching generated live editor entity.</returns>
+        EditorEntity FindRequiredEditorEntityByName(IReadOnlyList<EditorEntity> entities, string entityName) {
+            if (entities == null) {
+                throw new ArgumentNullException(nameof(entities));
+            } else if (string.IsNullOrWhiteSpace(entityName)) {
+                throw new ArgumentException("Entity name must be provided.", nameof(entityName));
+            }
+
+            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
+                EditorEntity entity = entities[entityIndex];
+                if (entity == null) {
+                    continue;
+                }
+                if (string.Equals(entity.Name, entityName, StringComparison.Ordinal)) {
+                    return entity;
+                }
+
+                EditorEntity nestedMatch = FindEditorEntityByNameOrNull(entity.Children, entityName);
+                if (nestedMatch != null) {
+                    return nestedMatch;
+                }
+            }
+
+            throw new InvalidOperationException($"Expected one generated editor entity named '{entityName}'.");
+        }
+
+        /// <summary>
+        /// Finds one generated live editor entity by display name inside the supplied subtree when present.
+        /// </summary>
+        /// <param name="entities">Generated live editor entities to inspect.</param>
+        /// <param name="entityName">Display name to resolve.</param>
+        /// <returns>Matching generated live editor entity when present; otherwise <c>null</c>.</returns>
+        EditorEntity FindEditorEntityByNameOrNull(List<Entity> entities, string entityName) {
+            if (entities == null) {
+                throw new ArgumentNullException(nameof(entities));
+            } else if (string.IsNullOrWhiteSpace(entityName)) {
+                throw new ArgumentException("Entity name must be provided.", nameof(entityName));
+            }
+
+            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
+                if (entities[entityIndex] is not EditorEntity entity) {
+                    continue;
+                }
+                if (string.Equals(entity.Name, entityName, StringComparison.Ordinal)) {
+                    return entity;
+                }
+
+                EditorEntity nestedMatch = FindEditorEntityByNameOrNull(entity.Children, entityName);
+                if (nestedMatch != null) {
+                    return nestedMatch;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Resolves the generated follow-camera component attached to one camera entity.
+        /// </summary>
+        /// <param name="entity">Camera entity whose follow-camera component should be returned.</param>
+        /// <returns>Attached generated follow-camera component.</returns>
+        city.rendering.DemoFollowCameraComponent FindRequiredDemoFollowCameraComponent(Entity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (entity.Components == null) {
+                throw new InvalidOperationException("Generated camera entities must expose initialized component collections.");
+            }
+
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is city.rendering.DemoFollowCameraComponent followCameraComponent) {
+                    return followCameraComponent;
+                }
+            }
+
+            throw new InvalidOperationException("Generated static-mesh showcase cameras must include DemoFollowCameraComponent.");
         }
         /// <summary>
         /// Stores the generated editor-font reference on the entity save state for the supplied FPS component.
@@ -2255,6 +2878,104 @@ namespace city.physics.tools {
                 StaticFriction = 0.6d
             };
             return CreateAutomaticComponentRecord(component, componentIndex);
+        }
+
+        /// <summary>
+        /// Creates one serialized static-mesh collider component record.
+        /// </summary>
+        /// <param name="collisionData">Authored triangle soup stored on the static-mesh collider component.</param>
+        /// <param name="componentIndex">Entity-local component order index.</param>
+        /// <returns>Serialized static-mesh collider component record.</returns>
+        static SceneComponentAssetRecord CreateStaticMeshColliderComponentRecord(StaticMeshCollisionData3D collisionData, int componentIndex) {
+            if (collisionData == null) {
+                throw new ArgumentNullException(nameof(collisionData));
+            }
+            if (componentIndex < 0) {
+                throw new ArgumentOutOfRangeException(nameof(componentIndex), "Component index must be non-negative.");
+            }
+
+            StaticMeshCollider3DComponent component = new StaticMeshCollider3DComponent {
+                CollisionData = collisionData,
+                CollisionLayer = 1,
+                CollisionMask = ushort.MaxValue,
+                DynamicFriction = 0.4d,
+                IsTrigger = false,
+                Restitution = 0d,
+                StaticFriction = 0.6d
+            };
+            return CreateAutomaticComponentRecord(component, componentIndex);
+        }
+
+        /// <summary>
+        /// Appends one oriented cuboid as authored triangle soup to the supplied static-mesh collision buffers.
+        /// </summary>
+        /// <param name="vertices">Shared authored collision vertex list.</param>
+        /// <param name="indices">Shared authored collision index list.</param>
+        /// <param name="position">World-space cuboid center.</param>
+        /// <param name="scale">Full cuboid size.</param>
+        /// <param name="orientation">World-space cuboid orientation.</param>
+        static void AppendCuboidCollisionData(
+            List<float3> vertices,
+            List<int> indices,
+            float3 position,
+            float3 scale,
+            float4 orientation) {
+            if (vertices == null) {
+                throw new ArgumentNullException(nameof(vertices));
+            } else if (indices == null) {
+                throw new ArgumentNullException(nameof(indices));
+            }
+
+            int vertexStartIndex = vertices.Count;
+            float halfX = scale.X * 0.5f;
+            float halfY = scale.Y * 0.5f;
+            float halfZ = scale.Z * 0.5f;
+            float3[] localVertices = new[] {
+                new float3(-halfX, -halfY, -halfZ),
+                new float3(halfX, -halfY, -halfZ),
+                new float3(halfX, halfY, -halfZ),
+                new float3(-halfX, halfY, -halfZ),
+                new float3(-halfX, -halfY, halfZ),
+                new float3(halfX, -halfY, halfZ),
+                new float3(halfX, halfY, halfZ),
+                new float3(-halfX, halfY, halfZ)
+            };
+            int[] localIndices = new[] {
+                0, 2, 1,
+                0, 3, 2,
+                4, 5, 6,
+                4, 6, 7,
+                0, 1, 5,
+                0, 5, 4,
+                1, 2, 6,
+                1, 6, 5,
+                2, 3, 7,
+                2, 7, 6,
+                3, 0, 4,
+                3, 4, 7
+            };
+
+            for (int index = 0; index < localVertices.Length; index++) {
+                vertices.Add(TransformCollisionVertex(localVertices[index], position, orientation));
+            }
+
+            for (int index = 0; index < localIndices.Length; index++) {
+                indices.Add(vertexStartIndex + localIndices[index]);
+            }
+        }
+
+        /// <summary>
+        /// Transforms one authored local collision vertex into world space.
+        /// </summary>
+        /// <param name="localVertex">Local collision vertex relative to the cuboid origin.</param>
+        /// <param name="position">World-space cuboid center.</param>
+        /// <param name="orientation">World-space cuboid orientation.</param>
+        /// <returns>World-space collision vertex.</returns>
+        static float3 TransformCollisionVertex(float3 localVertex, float3 position, float4 orientation) {
+            System.Numerics.Vector3 source = new System.Numerics.Vector3(localVertex.X, localVertex.Y, localVertex.Z);
+            System.Numerics.Quaternion rotation = new System.Numerics.Quaternion(orientation.X, orientation.Y, orientation.Z, orientation.W);
+            System.Numerics.Vector3 rotated = System.Numerics.Vector3.Transform(source, rotation);
+            return new float3(rotated.X + position.X, rotated.Y + position.Y, rotated.Z + position.Z);
         }
 
         /// <summary>
