@@ -19,6 +19,11 @@ namespace city.rendering.tools {
         const byte RuntimeLayerMask = 0b00000001;
 
         /// <summary>
+        /// Authored editor layer mask required for generated scene entities to persist through the scene save pipeline.
+        /// </summary>
+        const ushort PersistedSceneLayerMask = EditorLayerMasks.SceneObjects;
+
+        /// <summary>
         /// Fixed Nintendo DS screen width used by the default bottom overlay.
         /// </summary>
         const int ScreenWidth = 256;
@@ -32,6 +37,61 @@ namespace city.rendering.tools {
         /// Vertical space reserved by the temporary scaffold-owned bottom text row.
         /// </summary>
         const int DefaultBottomOverlayReservedHeight = 24;
+
+        /// <summary>
+        /// Stable project-relative texture path used by the scaffold-owned Nintendo DS back button body.
+        /// </summary>
+        const string NintendoDsBackButtonTexturePath = "Images/Menu/ds-back-button.png";
+
+        /// <summary>
+        /// Fixed width used by the scaffold-owned Nintendo DS back button body.
+        /// </summary>
+        const int NintendoDsBackButtonWidth = 224;
+
+        /// <summary>
+        /// Fixed height used by the scaffold-owned Nintendo DS back button body.
+        /// </summary>
+        const int NintendoDsBackButtonHeight = 32;
+
+        /// <summary>
+        /// Fixed left offset used by the scaffold-owned Nintendo DS back button so it remains horizontally centered.
+        /// </summary>
+        const int NintendoDsBackButtonLeft = (ScreenWidth - NintendoDsBackButtonWidth) / 2;
+
+        /// <summary>
+        /// Fixed top offset used by the scaffold-owned Nintendo DS back button so it remains pinned near the bottom edge.
+        /// </summary>
+        const int NintendoDsBackButtonTop = ScreenHeight - NintendoDsBackButtonHeight - 8;
+
+        /// <summary>
+        /// Fixed horizontal inset used by the scaffold-owned Nintendo DS back button label.
+        /// </summary>
+        const int NintendoDsBackButtonLabelLeft = 80;
+
+        /// <summary>
+        /// Fixed vertical inset used by the scaffold-owned Nintendo DS back button label.
+        /// </summary>
+        const int NintendoDsBackButtonLabelTop = 6;
+
+        /// <summary>
+        /// Fixed width used by the scaffold-owned Nintendo DS back button label.
+        /// </summary>
+        const int NintendoDsBackButtonLabelWidth = 64;
+
+        /// <summary>
+        /// Fixed height used by the scaffold-owned Nintendo DS back button label.
+        /// </summary>
+        const int NintendoDsBackButtonLabelHeight = 20;
+
+        /// <summary>
+        /// Render order used by the scaffold-owned Nintendo DS back button sprite body.
+        /// </summary>
+        const byte NintendoDsBackButtonSpriteRenderOrder = 210;
+
+        /// <summary>
+        /// Render order used by the scaffold-owned Nintendo DS back button label.
+        /// </summary>
+        const byte NintendoDsBackButtonLabelRenderOrder = 221;
 
         /// <summary>
         /// Creates one dual-screen Nintendo DS root set from top-screen scene content and optional bottom-screen content.
@@ -52,7 +112,7 @@ namespace city.rendering.tools {
             Entity[] filteredTopScreenRoots = FilterTopScreenRoots(topScreenRoots);
             Entity bottomScreenCameraEntity = CreateBottomScreenCameraEntity();
             Entity bottomScreenViewportRoot = Core.Instance.EntityFactory.CreateChild(bottomScreenCameraEntity, "DemoDiscBottomScreenRoot");
-            bottomScreenViewportRoot.LayerMask = RuntimeLayerMask;
+            bottomScreenViewportRoot.LayerMask = PersistedSceneLayerMask;
             bottomScreenViewportRoot.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.AncestorCameraBindingMode,
                 FixedSize = new int2(ScreenWidth, ScreenHeight),
@@ -66,6 +126,8 @@ namespace city.rendering.tools {
             if (useDefaultBottomOverlay) {
                 CreateDefaultBottomOverlay(bottomScreenViewportRoot, bottomOverlayFont);
             }
+
+            CreateBottomScreenBackButton(bottomScreenViewportRoot, bottomOverlayFont);
 
             AttachBottomScreenRoots(bottomScreenViewportRoot, bottomScreenRoots);
             return CombineSceneRoots(filteredTopScreenRoots, bottomScreenCameraEntity);
@@ -266,7 +328,7 @@ namespace city.rendering.tools {
             Entity fpsEntity = fpsIndex == 0
                 ? bottomScreenViewportRoot
                 : Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, BuildBottomScreenFpsEntityName(fpsIndex));
-            fpsEntity.LayerMask = RuntimeLayerMask;
+            fpsEntity.LayerMask = PersistedSceneLayerMask;
             fpsEntity.LocalPosition = float3.Zero;
             fpsEntity.LocalScale = float3.One;
             fpsEntity.LocalOrientation = float4.Identity;
@@ -404,7 +466,7 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates one temporary text-only bottom-screen overlay so DS text rendering can be isolated without extra authored sprites or debug widgets.
+        /// Creates the temporary bottom-screen proof text used while validating DS authored-text behavior.
         /// </summary>
         /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the default overlay.</param>
         /// <param name="bottomOverlayFont">Font used by the isolated bottom-screen test label.</param>
@@ -427,7 +489,56 @@ namespace city.rendering.tools {
                 LayerMask = RuntimeLayerMask
             };
             textEntity.AddComponent(textComponent);
-            ApplyFontReference(textEntity, textComponent, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
+            ApplyFontReference(textEntity, textComponent, DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+        }
+
+        /// <summary>
+        /// Creates the visible scaffold-owned Nintendo DS bottom-screen back button that routes touch interaction back to the demo-disc menu.
+        /// </summary>
+        /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the back button.</param>
+        /// <param name="bottomOverlayFont">Font used by the back-button label.</param>
+        void CreateBottomScreenBackButton(Entity bottomScreenViewportRoot, FontAsset bottomOverlayFont) {
+            if (bottomScreenViewportRoot == null) {
+                throw new ArgumentNullException(nameof(bottomScreenViewportRoot));
+            } else if (bottomOverlayFont == null) {
+                throw new ArgumentNullException(nameof(bottomOverlayFont));
+            }
+
+            Entity backButtonEntity = Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenBackButton");
+            backButtonEntity.LocalPosition = new float3(NintendoDsBackButtonLeft, NintendoDsBackButtonTop, 0f);
+            backButtonEntity.LayerMask = PersistedSceneLayerMask;
+            backButtonEntity.Static = true;
+
+            SpriteComponent spriteComponent = new SpriteComponent {
+                Size = new int2(NintendoDsBackButtonWidth, NintendoDsBackButtonHeight),
+                RenderOrder2D = NintendoDsBackButtonSpriteRenderOrder,
+                LayerMask = RuntimeLayerMask
+            };
+            backButtonEntity.AddComponent(spriteComponent);
+            ApplyTextureReference(backButtonEntity, spriteComponent, NintendoDsBackButtonTexturePath);
+
+            InteractableComponent interactableComponent = new InteractableComponent {
+                Size = new int2(NintendoDsBackButtonWidth, NintendoDsBackButtonHeight)
+            };
+            backButtonEntity.AddComponent(interactableComponent);
+            backButtonEntity.AddComponent(new NintendoDsReturnOverlayComponent());
+
+            Entity backButtonLabelEntity = Core.Instance.EntityFactory.CreateChild(backButtonEntity, "DemoDiscBottomScreenBackButtonLabel");
+            backButtonLabelEntity.LocalPosition = new float3(NintendoDsBackButtonLabelLeft, NintendoDsBackButtonLabelTop, 0f);
+            backButtonLabelEntity.LayerMask = PersistedSceneLayerMask;
+            backButtonLabelEntity.Static = true;
+
+            TextComponent labelComponent = new TextComponent {
+                Text = "BACK",
+                Font = bottomOverlayFont,
+                FontScale = NintendoDsBottomOverlayFontScale,
+                Color = new byte4(255, 255, 255, 255),
+                Size = new int2(NintendoDsBackButtonLabelWidth, NintendoDsBackButtonLabelHeight),
+                RenderOrder2D = NintendoDsBackButtonLabelRenderOrder,
+                LayerMask = RuntimeLayerMask
+            };
+            backButtonLabelEntity.AddComponent(labelComponent);
+            ApplyFontReference(backButtonLabelEntity, labelComponent, DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
         }
 
         /// <summary>
