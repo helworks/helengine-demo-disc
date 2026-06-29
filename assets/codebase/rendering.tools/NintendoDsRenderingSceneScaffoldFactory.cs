@@ -1,5 +1,7 @@
 using city.menu;
+using city.rendering;
 using helengine.editor;
+using System.Globalization;
 
 namespace city.rendering.tools {
     /// <summary>
@@ -25,6 +27,12 @@ namespace city.rendering.tools {
         /// Fixed Nintendo DS screen height used by the default bottom overlay.
         /// </summary>
         const int ScreenHeight = 192;
+
+        /// <summary>
+        /// Vertical space reserved by the temporary scaffold-owned bottom text row.
+        /// </summary>
+        const int DefaultBottomOverlayReservedHeight = 24;
+
         /// <summary>
         /// Creates one dual-screen Nintendo DS root set from top-screen scene content and optional bottom-screen content.
         /// </summary>
@@ -41,9 +49,10 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(bottomOverlayFont));
             }
 
-            ConfigureTopScreenRoots(topScreenRoots);
+            Entity[] filteredTopScreenRoots = FilterTopScreenRoots(topScreenRoots);
             Entity bottomScreenCameraEntity = CreateBottomScreenCameraEntity();
             Entity bottomScreenViewportRoot = Core.Instance.EntityFactory.CreateChild(bottomScreenCameraEntity, "DemoDiscBottomScreenRoot");
+            bottomScreenViewportRoot.LayerMask = RuntimeLayerMask;
             bottomScreenViewportRoot.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.AncestorCameraBindingMode,
                 FixedSize = new int2(ScreenWidth, ScreenHeight),
@@ -51,13 +60,41 @@ namespace city.rendering.tools {
                 ReferenceWidth = ScreenWidth,
                 ReferenceHeight = ScreenHeight
             });
+            RelocateFpsComponentsToBottomScreen(filteredTopScreenRoots, bottomScreenViewportRoot, bottomOverlayFont, useDefaultBottomOverlay);
+            ConfigureTopScreenRoots(filteredTopScreenRoots);
 
             if (useDefaultBottomOverlay) {
                 CreateDefaultBottomOverlay(bottomScreenViewportRoot, bottomOverlayFont);
             }
 
             AttachBottomScreenRoots(bottomScreenViewportRoot, bottomScreenRoots);
-            return CombineSceneRoots(topScreenRoots, bottomScreenCameraEntity);
+            return CombineSceneRoots(filteredTopScreenRoots, bottomScreenCameraEntity);
+        }
+
+        /// <summary>
+        /// Filters the authored top-screen roots so DS companion scenes do not keep desktop-only instruction panels.
+        /// </summary>
+        /// <param name="topScreenRoots">Authored scene roots that may contain desktop-only overlays.</param>
+        /// <returns>Filtered top-screen roots that should remain visible in the DS companion scene.</returns>
+        Entity[] FilterTopScreenRoots(Entity[] topScreenRoots) {
+            if (topScreenRoots == null) {
+                throw new ArgumentNullException(nameof(topScreenRoots));
+            }
+
+            List<Entity> filteredTopScreenRoots = new List<Entity>();
+            for (int index = 0; index < topScreenRoots.Length; index++) {
+                Entity rootEntity = topScreenRoots[index];
+                if (rootEntity == null) {
+                    continue;
+                } else if (rootEntity is EditorEntity editorRoot
+                    && string.Equals(editorRoot.Name, "DemoSceneInstructionViewport", StringComparison.Ordinal)) {
+                    continue;
+                }
+
+                filteredTopScreenRoots.Add(rootEntity);
+            }
+
+            return filteredTopScreenRoots.ToArray();
         }
 
         /// <summary>
@@ -90,8 +127,9 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            RemoveFpsComponents(entity);
             RemoveReturnToMenuComponents(entity);
+            RemoveLightToggleComponents(entity);
+            RemoveLightIndicatorOverlays(entity);
             CameraComponent cameraComponent = FindFirstComponent<CameraComponent>(entity);
             if (cameraComponent != null) {
                 cameraComponent.Viewport = new float4(0f, 0f, 1f, 1f);
@@ -114,22 +152,170 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Removes any FPS overlay components from one subtree so the DS companion scenes keep the top screen focused on 3D content.
+        /// Relocates authored FPS overlay components from the top-screen scene roots into scaffold-owned bottom-screen entities.
         /// </summary>
-        /// <param name="entity">Current subtree entity.</param>
-        void RemoveFpsComponents(Entity entity) {
-            if (entity == null || entity.Components == null) {
-                return;
+        /// <param name="topScreenRoots">Top-screen scene roots that may contain authored FPS overlay components.</param>
+        /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the relocated FPS entities.</param>
+        /// <param name="bottomOverlayFont">Live font asset assigned while the generated DS scene is being saved.</param>
+        /// <param name="useDefaultBottomOverlay">True when the temporary bottom text row is also emitted.</param>
+        void RelocateFpsComponentsToBottomScreen(
+            Entity[] topScreenRoots,
+            Entity bottomScreenViewportRoot,
+            FontAsset bottomOverlayFont,
+            bool useDefaultBottomOverlay) {
+            if (topScreenRoots == null) {
+                throw new ArgumentNullException(nameof(topScreenRoots));
+            } else if (bottomScreenViewportRoot == null) {
+                throw new ArgumentNullException(nameof(bottomScreenViewportRoot));
+            } else if (bottomOverlayFont == null) {
+                throw new ArgumentNullException(nameof(bottomOverlayFont));
             }
 
-            for (int componentIndex = entity.Components.Count - 1; componentIndex >= 0; componentIndex--) {
-                if (entity.Components[componentIndex] is not FPSComponent fpsComponent) {
+            int createdBottomScreenFpsCount = 0;
+            for (int index = 0; index < topScreenRoots.Length; index++) {
+                Entity rootEntity = topScreenRoots[index];
+                if (rootEntity == null) {
                     continue;
                 }
 
-                entity.RemoveComponent(fpsComponent);
-                fpsComponent.Dispose();
+                RelocateFpsComponentsToBottomScreenRecursive(
+                    rootEntity,
+                    bottomScreenViewportRoot,
+                    bottomOverlayFont,
+                    useDefaultBottomOverlay,
+                    ref createdBottomScreenFpsCount);
             }
+        }
+
+        /// <summary>
+        /// Relocates authored FPS overlay components from one subtree into scaffold-owned bottom-screen entities.
+        /// </summary>
+        /// <param name="entity">Current top-screen subtree entity being inspected.</param>
+        /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the relocated FPS entities.</param>
+        /// <param name="bottomOverlayFont">Live font asset assigned while the generated DS scene is being saved.</param>
+        /// <param name="useDefaultBottomOverlay">True when the temporary bottom text row is also emitted.</param>
+        /// <param name="createdBottomScreenFpsCount">Running count used to keep scaffold-owned FPS entity names stable.</param>
+        void RelocateFpsComponentsToBottomScreenRecursive(
+            Entity entity,
+            Entity bottomScreenViewportRoot,
+            FontAsset bottomOverlayFont,
+            bool useDefaultBottomOverlay,
+            ref int createdBottomScreenFpsCount) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (bottomScreenViewportRoot == null) {
+                throw new ArgumentNullException(nameof(bottomScreenViewportRoot));
+            } else if (bottomOverlayFont == null) {
+                throw new ArgumentNullException(nameof(bottomOverlayFont));
+            }
+
+            if (entity.Components != null) {
+                for (int componentIndex = entity.Components.Count - 1; componentIndex >= 0; componentIndex--) {
+                    if (entity.Components[componentIndex] is not FPSComponent fpsComponent) {
+                        continue;
+                    }
+
+                    CreateBottomScreenFpsEntity(
+                        bottomScreenViewportRoot,
+                        bottomOverlayFont,
+                        fpsComponent,
+                        useDefaultBottomOverlay,
+                        createdBottomScreenFpsCount);
+                    createdBottomScreenFpsCount++;
+                    entity.RemoveComponent(fpsComponent);
+                    fpsComponent.Dispose();
+                }
+            }
+
+            if (entity.Children == null) {
+                return;
+            }
+
+            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                RelocateFpsComponentsToBottomScreenRecursive(
+                    entity.Children[childIndex],
+                    bottomScreenViewportRoot,
+                    bottomOverlayFont,
+                    useDefaultBottomOverlay,
+                    ref createdBottomScreenFpsCount);
+            }
+        }
+
+        /// <summary>
+        /// Creates one scaffold-owned bottom-screen FPS entity that preserves the authored FPS overlay behavior.
+        /// </summary>
+        /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the FPS entity.</param>
+        /// <param name="bottomOverlayFont">Live font asset assigned while the generated DS scene is being saved.</param>
+        /// <param name="sourceComponent">Authored top-screen FPS component being relocated.</param>
+        /// <param name="useDefaultBottomOverlay">True when the temporary bottom text row is also emitted.</param>
+        /// <param name="fpsIndex">Zero-based scaffold-owned FPS entity index.</param>
+        void CreateBottomScreenFpsEntity(
+            Entity bottomScreenViewportRoot,
+            FontAsset bottomOverlayFont,
+            FPSComponent sourceComponent,
+            bool useDefaultBottomOverlay,
+            int fpsIndex) {
+            if (bottomScreenViewportRoot == null) {
+                throw new ArgumentNullException(nameof(bottomScreenViewportRoot));
+            } else if (bottomOverlayFont == null) {
+                throw new ArgumentNullException(nameof(bottomOverlayFont));
+            } else if (sourceComponent == null) {
+                throw new ArgumentNullException(nameof(sourceComponent));
+            }
+
+            Entity fpsEntity = fpsIndex == 0
+                ? bottomScreenViewportRoot
+                : Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, BuildBottomScreenFpsEntityName(fpsIndex));
+            fpsEntity.LayerMask = RuntimeLayerMask;
+            fpsEntity.LocalPosition = float3.Zero;
+            fpsEntity.LocalScale = float3.One;
+            fpsEntity.LocalOrientation = float4.Identity;
+
+            FPSComponent bottomScreenFpsComponent = new FPSComponent {
+                Font = bottomOverlayFont,
+                FontScale = sourceComponent.FontScale,
+                AdditionalText = sourceComponent.AdditionalText,
+                RefreshIntervalSeconds = sourceComponent.RefreshIntervalSeconds,
+                Padding = ResolveBottomScreenFpsPadding(sourceComponent, useDefaultBottomOverlay, fpsIndex),
+                RenderOrder2D = sourceComponent.RenderOrder2D
+            };
+            fpsEntity.AddComponent(bottomScreenFpsComponent);
+            ApplyFontReference(fpsEntity, bottomScreenFpsComponent, DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+        }
+
+        /// <summary>
+        /// Builds the stable scaffold-owned bottom-screen FPS entity name for the supplied index.
+        /// </summary>
+        /// <param name="fpsIndex">Zero-based FPS entity index.</param>
+        /// <returns>Stable entity name used by the generated DS scenes.</returns>
+        string BuildBottomScreenFpsEntityName(int fpsIndex) {
+            if (fpsIndex < 0) {
+                throw new ArgumentOutOfRangeException(nameof(fpsIndex), "FPS entity index must be non-negative.");
+            } else if (fpsIndex == 0) {
+                return "DemoDiscBottomScreenFps";
+            }
+
+            return "DemoDiscBottomScreenFps" + fpsIndex.ToString(CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Resolves the bottom-screen padding applied to one relocated FPS overlay.
+        /// </summary>
+        /// <param name="sourceComponent">Authored top-screen FPS component being relocated.</param>
+        /// <param name="useDefaultBottomOverlay">True when the temporary bottom text row is also emitted.</param>
+        /// <param name="fpsIndex">Zero-based scaffold-owned FPS entity index.</param>
+        /// <returns>Bottom-screen padding assigned to the relocated FPS overlay.</returns>
+        int2 ResolveBottomScreenFpsPadding(FPSComponent sourceComponent, bool useDefaultBottomOverlay, int fpsIndex) {
+            if (sourceComponent == null) {
+                throw new ArgumentNullException(nameof(sourceComponent));
+            } else if (fpsIndex < 0) {
+                throw new ArgumentOutOfRangeException(nameof(fpsIndex), "FPS entity index must be non-negative.");
+            }
+
+            int overlayOffsetY = useDefaultBottomOverlay ? DefaultBottomOverlayReservedHeight : 0;
+            int rowOffsetY = fpsIndex * 40;
+            int2 padding = sourceComponent.Padding;
+            return new int2(padding.X, padding.Y + overlayOffsetY + rowOffsetY);
         }
 
         /// <summary>
@@ -148,6 +334,46 @@ namespace city.rendering.tools {
 
                 entity.RemoveComponent(returnToMenuComponent);
                 returnToMenuComponent.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Removes desktop-only light-toggle components from one subtree so DS companion scenes do not require the removed top-screen indicator overlay.
+        /// </summary>
+        /// <param name="entity">Current subtree entity.</param>
+        void RemoveLightToggleComponents(Entity entity) {
+            if (entity == null || entity.Components == null) {
+                return;
+            }
+
+            for (int componentIndex = entity.Components.Count - 1; componentIndex >= 0; componentIndex--) {
+                if (entity.Components[componentIndex] is not DemoDiscLightToggleComponent lightToggleComponent) {
+                    continue;
+                }
+
+                entity.RemoveComponent(lightToggleComponent);
+                lightToggleComponent.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Removes the authored light-indicator viewport subtree from one DS top-screen branch.
+        /// </summary>
+        /// <param name="entity">Current subtree entity.</param>
+        void RemoveLightIndicatorOverlays(Entity entity) {
+            if (entity == null || entity.Children == null) {
+                return;
+            }
+
+            for (int childIndex = entity.Children.Count - 1; childIndex >= 0; childIndex--) {
+                Entity childEntity = entity.Children[childIndex];
+                if (childEntity is EditorEntity editorChild
+                    && string.Equals(editorChild.Name, DemoDiscLightIndicatorOverlayFactory.IndicatorViewportEntityName, StringComparison.Ordinal)) {
+                    entity.RemoveChild(childEntity);
+                    continue;
+                }
+
+                RemoveLightIndicatorOverlays(childEntity);
             }
         }
 
@@ -178,9 +404,10 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates the standard bottom-screen debug and back overlay beneath the supplied viewport root.
+        /// Creates one temporary text-only bottom-screen overlay so DS text rendering can be isolated without extra authored sprites or debug widgets.
         /// </summary>
         /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the default overlay.</param>
+        /// <param name="bottomOverlayFont">Font used by the isolated bottom-screen test label.</param>
         void CreateDefaultBottomOverlay(Entity bottomScreenViewportRoot, FontAsset bottomOverlayFont) {
             if (bottomScreenViewportRoot == null) {
                 throw new ArgumentNullException(nameof(bottomScreenViewportRoot));
@@ -188,39 +415,15 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(bottomOverlayFont));
             }
 
-            Entity debugRootEntity = Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenDebugRoot");
-            DebugComponent debugComponent = new DebugComponent();
-            debugComponent.Font = bottomOverlayFont;
-            debugComponent.FontScale = NintendoDsBottomOverlayFontScale;
-            debugComponent.Padding = new int2(8, 8);
-            debugComponent.RenderOrder2D = 220;
-            debugComponent.RefreshIntervalSeconds = 0.25d;
-            debugRootEntity.AddComponent(debugComponent);
-            ApplyFontReference(debugRootEntity, debugComponent, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
-
-            Entity buttonEntity = Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenBackButton");
-            buttonEntity.LocalPosition = new float3(16f, 144f, 0f);
-            buttonEntity.AddComponent(new InteractableComponent {
-                Size = new int2(224, 32)
-            });
-            buttonEntity.AddComponent(new NintendoDsReturnOverlayComponent());
-            SpriteComponent spriteComponent = new SpriteComponent {
-                Size = new int2(224, 32),
-                RenderOrder2D = 230,
-                LayerMask = RuntimeLayerMask
-            };
-            buttonEntity.AddComponent(spriteComponent);
-            ApplyTextureReference(buttonEntity, spriteComponent, "Images/Menu/ds-back-button.png");
-
-            Entity textEntity = Core.Instance.EntityFactory.CreateChild(buttonEntity, "DemoDiscBottomScreenBackButtonText");
-            textEntity.LocalPosition = new float3(16f, 8f, 0.1f);
+            Entity textEntity = Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenTestText");
+            textEntity.LocalPosition = new float3(8f, 8f, 0f);
             TextComponent textComponent = new TextComponent {
-                Text = "BACK",
+                Text = "BOTTOM TEXT",
                 Font = bottomOverlayFont,
                 FontScale = NintendoDsBottomOverlayFontScale,
                 Color = new byte4(255, 255, 255, 255),
-                Size = new int2(192, 24),
-                RenderOrder2D = 231,
+                Size = new int2(ScreenWidth - 16, 24),
+                RenderOrder2D = 220,
                 LayerMask = RuntimeLayerMask
             };
             textEntity.AddComponent(textComponent);
@@ -275,6 +478,7 @@ namespace city.rendering.tools {
             return combinedRoots;
         }
 
+        /// <summary>
         /// Finds the first component of the requested type on one entity.
         /// </summary>
         /// <typeparam name="TComponent">Component type to resolve.</typeparam>

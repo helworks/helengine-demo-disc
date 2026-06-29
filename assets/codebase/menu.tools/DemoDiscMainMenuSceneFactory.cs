@@ -59,6 +59,41 @@ namespace city.menu.tools {
         const int NintendoDsLogoWidth = 160;
 
         /// <summary>
+        /// Fixed left inset applied to visible Nintendo DS bottom-menu item labels.
+        /// </summary>
+        const int NintendoDsBottomMenuLabelLeft = 8;
+
+        /// <summary>
+        /// Fixed top inset applied to visible Nintendo DS bottom-menu item labels.
+        /// </summary>
+        const int NintendoDsBottomMenuLabelTop = 6;
+
+        /// <summary>
+        /// Fixed width applied to visible Nintendo DS bottom-menu item labels.
+        /// </summary>
+        const int NintendoDsBottomMenuLabelWidth = NintendoDsScreenWidth - 16;
+
+        /// <summary>
+        /// Fixed height applied to visible Nintendo DS bottom-menu item labels.
+        /// </summary>
+        const int NintendoDsBottomMenuLabelHeight = 24;
+
+        /// <summary>
+        /// Fixed font scale applied to visible Nintendo DS bottom-menu item labels.
+        /// </summary>
+        const float NintendoDsBottomMenuLabelFontScale = 1f;
+
+        /// <summary>
+        /// Fixed render order applied to visible Nintendo DS bottom-menu item labels.
+        /// </summary>
+        const byte NintendoDsBottomMenuLabelRenderOrder = 220;
+
+        /// <summary>
+        /// Dedicated authored scene layer used by the Nintendo DS menu metadata subtree so scene save preserves the runtime panel-binding structure.
+        /// </summary>
+        const ushort NintendoDsMenuMetadataLayerMask = EditorLayerMasks.SceneObjects;
+
+        /// <summary>
         /// Stable save-state slot name used for serialized font references.
         /// </summary>
         const string FontReferenceName = "Font";
@@ -624,7 +659,7 @@ namespace city.menu.tools {
         }
 
         /// <summary>
-        /// Creates one Nintendo DS bottom-screen panel subtree.
+        /// Creates one hidden Nintendo DS bottom-screen panel subtree so baked menu metadata remains available to the runtime binder while the item labels remain visible through the stable BG0 text path.
         /// </summary>
         /// <param name="generatedRootEntity">Generated menu subtree root that owns the panel.</param>
         /// <param name="definition">Menu definition that owns the panel.</param>
@@ -639,18 +674,21 @@ namespace city.menu.tools {
             }
 
             Entity panelEntity = Core.Instance.EntityFactory.CreateChild(generatedRootEntity, $"Panel-{panelDefinition.PanelId}");
-            panelEntity.LocalPosition = new float3(0f, 8f, 0f);
+            panelEntity.LayerMask = NintendoDsMenuMetadataLayerMask;
+            panelEntity.LocalPosition = new float3(0f, 0f, 0f);
             panelEntity.AddComponent(new MenuPanelComponent {
                 PanelId = panelDefinition.PanelId
             });
 
             Entity itemsViewportEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, $"Panel-{panelDefinition.PanelId}-ItemsViewport");
-            itemsViewportEntity.LocalPosition = new float3(0f, 12f, 0f);
+            itemsViewportEntity.LayerMask = NintendoDsMenuMetadataLayerMask;
+            itemsViewportEntity.LocalPosition = new float3(0f, 6f, 0f);
             itemsViewportEntity.AddComponent(new ClipRectComponent {
                 Size = BuildNintendoDsItemsViewportSize(panelDefinition)
             });
 
             Entity itemsRootEntity = Core.Instance.EntityFactory.CreateChild(itemsViewportEntity, $"Panel-{panelDefinition.PanelId}-ItemsRoot");
+            itemsRootEntity.LayerMask = NintendoDsMenuMetadataLayerMask;
             itemsRootEntity.AddComponent(new ScrollComponent {
                 Size = BuildNintendoDsItemsViewportSize(panelDefinition),
                 ItemCount = CountEnabledItems(panelDefinition),
@@ -659,11 +697,6 @@ namespace city.menu.tools {
                 WheelNotchSize = 120,
                 RequiresPointerInside = true
             });
-            LayoutComponent itemsRootLayoutComponent = new LayoutComponent {
-                LayoutSpace = LayoutComponent.CameraViewportLayoutSpace
-            };
-            itemsRootLayoutComponent.SetAnchorDistances(left: 0f, top: 0f, bottom: ItemsViewportTop);
-            itemsRootEntity.AddComponent(itemsRootLayoutComponent);
 
             int visibleIndex = 0;
             for (int itemIndex = 0; itemIndex < panelDefinition.Items.Length; itemIndex++) {
@@ -678,7 +711,7 @@ namespace city.menu.tools {
         }
 
         /// <summary>
-        /// Creates one Nintendo DS bottom-screen item row entity.
+        /// Creates one hidden Nintendo DS bottom-screen item row entity so baked menu metadata and hit-test bounds remain available while a visible BG0 text child renders the menu label.
         /// </summary>
         /// <param name="itemsRootEntity">Scrolling item root that owns the row.</param>
         /// <param name="definition">Menu definition that owns the row.</param>
@@ -700,6 +733,7 @@ namespace city.menu.tools {
             byte4 selectedFillColor = definition.SurfaceBorderColor;
 
             Entity itemEntity = Core.Instance.EntityFactory.CreateChild(itemsRootEntity, $"Item-{itemDefinition.ItemId}");
+            itemEntity.LayerMask = NintendoDsMenuMetadataLayerMask;
             itemEntity.LocalPosition = new float3(0f, visibleIndex * (NintendoDsButtonHeight + NintendoDsButtonSpacing), 0f);
             itemEntity.AddComponent(new MenuItemComponent {
                 PanelId = panelDefinition.PanelId,
@@ -720,18 +754,17 @@ namespace city.menu.tools {
                 RenderOrder2D = 33,
                 LayerMask = RuntimeLayerMask
             });
-
             CreateNintendoDsTextEntity(
                 itemEntity,
-                $"item-label-{itemDefinition.ItemId}",
-                new float3(8f, 2f, 0.1f),
+                "Item-" + itemDefinition.ItemId + "-Label",
+                new float3(NintendoDsBottomMenuLabelLeft, NintendoDsBottomMenuLabelTop, 0f),
                 itemDefinition.Label,
                 definition.BodyFontPath,
                 definition.TextColor,
-                new int2(NintendoDsScreenWidth - 16, 14),
-                34,
+                new int2(NintendoDsBottomMenuLabelWidth, NintendoDsBottomMenuLabelHeight),
+                NintendoDsBottomMenuLabelRenderOrder,
                 null,
-                0.75f,
+                NintendoDsBottomMenuLabelFontScale,
                 true);
         }
 
