@@ -14,6 +14,8 @@ namespace city.game.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
+            TiltTrialPlayerSphereWalnutMaterialFactory materialFactory = new TiltTrialPlayerSphereWalnutMaterialFactory();
+            materialFactory.WriteMaterialAsset(projectRootPath);
             RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService();
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(projectRootPath);
             GameSceneFactory factory = new GameSceneFactory(assets);

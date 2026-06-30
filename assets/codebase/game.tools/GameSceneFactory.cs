@@ -8,6 +8,11 @@ namespace city.game.tools {
     /// </summary>
     public sealed class GameSceneFactory {
         /// <summary>
+        /// Stable authored material asset id required by the Tilt Trial player sphere.
+        /// </summary>
+        const string TiltTrialPlayerSphereWalnutMaterialAssetId = "Materials.rendering.tilt_trial.PlayerSphereWalnut";
+
+        /// <summary>
         /// Shared generated cube model used by the authored Tilt Trial course geometry.
         /// </summary>
         readonly RuntimeModel GeneratedCubeModel;
@@ -23,6 +28,11 @@ namespace city.game.tools {
         readonly RuntimeMaterial GeneratedStandardMaterial;
 
         /// <summary>
+        /// Dedicated authored walnut material used only by the Tilt Trial player sphere.
+        /// </summary>
+        readonly RuntimeMaterial TiltTrialPlayerSphereWalnutMaterial;
+
+        /// <summary>
         /// Initializes one game-scene factory backed by the prepared generated runtime assets required by the authored gameplay scenes.
         /// </summary>
         /// <param name="assets">Prepared runtime assets consumed by the generated game scenes.</param>
@@ -35,11 +45,14 @@ namespace city.game.tools {
                 throw new ArgumentException("Game scene generation requires the generated sphere runtime model.", nameof(assets));
             } else if (assets.GeneratedStandardMaterial == null) {
                 throw new ArgumentException("Game scene generation requires the generated standard runtime material.", nameof(assets));
+            } else if (assets.TiltTrialPlayerSphereWalnutMaterial == null) {
+                throw new ArgumentException($"Game scene generation requires authored runtime material '{TiltTrialPlayerSphereWalnutMaterialAssetId}'.", nameof(assets));
             }
 
             GeneratedCubeModel = assets.GeneratedCubeModel;
             GeneratedSphereModel = assets.GeneratedSphereModel;
             GeneratedStandardMaterial = assets.GeneratedStandardMaterial;
+            TiltTrialPlayerSphereWalnutMaterial = assets.TiltTrialPlayerSphereWalnutMaterial;
         }
 
         /// <summary>
@@ -182,7 +195,7 @@ namespace city.game.tools {
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new MeshComponent {
                 Model = GeneratedSphereModel,
-                Materials = new[] { GeneratedStandardMaterial },
+                Materials = new[] { TiltTrialPlayerSphereWalnutMaterial },
                 RenderOrder3D = 0
             });
             entity.AddComponent(new RigidBody3DComponent {

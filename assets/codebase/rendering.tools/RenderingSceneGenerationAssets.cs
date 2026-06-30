@@ -24,6 +24,11 @@ namespace city.rendering.tools {
         public RuntimeMaterial GeneratedStandardMaterial { get; set; }
 
         /// <summary>
+        /// Gets or sets the authored walnut runtime material assigned only to the Tilt Trial player sphere.
+        /// </summary>
+        public RuntimeMaterial TiltTrialPlayerSphereWalnutMaterial { get; set; }
+
+        /// <summary>
         /// Gets or sets the generated shared solid-color runtime material used by the cube-test scene.
         /// </summary>
         public RuntimeMaterial GeneratedCubeTestSolidMaterial { get; set; }

@@ -61,6 +61,7 @@ namespace city.rendering.tools {
             RuntimeModel generatedSphereModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.SphereAssetId);
             RuntimeModel generatedArrowModel = LoadImportedModelRuntime(projectRootPath, "models/rendering/axis_test/directional_light_arrow.obj");
             RuntimeMaterial generatedStandardMaterial = EngineGeneratedMaterialCache.GetRuntimeMaterial(EngineGeneratedMaterialCache.StandardAssetId);
+            RuntimeMaterial tiltTrialPlayerSphereWalnutMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/tilt_trial/PlayerSphereWalnut.hasset");
             RuntimeMaterial generatedCubeTestSolidMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, ForwardSolidColorMaterialFactory.MaterialRelativePath);
             RuntimeMaterial[] axisMaterials = new[] {
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/X.hasset"),
@@ -83,6 +84,7 @@ namespace city.rendering.tools {
                 GeneratedPlaneModel = generatedPlaneModel,
                 GeneratedSphereModel = generatedSphereModel,
                 GeneratedStandardMaterial = generatedStandardMaterial,
+                TiltTrialPlayerSphereWalnutMaterial = tiltTrialPlayerSphereWalnutMaterial,
                 GeneratedCubeTestSolidMaterial = generatedCubeTestSolidMaterial,
                 GeneratedArrowModel = generatedArrowModel,
                 AxisMaterials = axisMaterials,
