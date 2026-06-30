@@ -118,12 +118,72 @@
                       {
                           "platformId":  "psp",
                           "selectedSceneIds":  [
-                                                   "cube_test"
+                                                   "DemoDiscMainMenu",
+                                                   "cube_test",
+                                                   "colored_cube_grid",
+                                                   "textured_cube_grid",
+                                                   "axis_test",
+                                                   "axis_test2",
+                                                   "directional_shadow_plaza",
+                                                   "test_scene_dynamic_stack_boxes",
+                                                   "test_scene_dynamic_sphere_stack",
+                                                   "test_scene_dynamic_mixed_stack",
+                                                   "test_scene_static_mesh_showcase",
+                                                   "test_scene_static_mesh_minimal",
+                                                   "tilt_trial"
                                                ],
                           "sceneOrders":  [
                                               {
-                                                  "sceneId":  "cube_test",
+                                                  "sceneId":  "DemoDiscMainMenu",
                                                   "orderNumber":  1
+                                              },
+                                              {
+                                                  "sceneId":  "cube_test",
+                                                  "orderNumber":  2
+                                              },
+                                              {
+                                                  "sceneId":  "colored_cube_grid",
+                                                  "orderNumber":  3
+                                              },
+                                              {
+                                                  "sceneId":  "textured_cube_grid",
+                                                  "orderNumber":  4
+                                              },
+                                              {
+                                                  "sceneId":  "axis_test",
+                                                  "orderNumber":  5
+                                              },
+                                              {
+                                                  "sceneId":  "axis_test2",
+                                                  "orderNumber":  6
+                                              },
+                                              {
+                                                  "sceneId":  "directional_shadow_plaza",
+                                                  "orderNumber":  7
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_stack_boxes",
+                                                  "orderNumber":  8
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_sphere_stack",
+                                                  "orderNumber":  9
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_dynamic_mixed_stack",
+                                                  "orderNumber":  10
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_static_mesh_showcase",
+                                                  "orderNumber":  11
+                                              },
+                                              {
+                                                  "sceneId":  "test_scene_static_mesh_minimal",
+                                                  "orderNumber":  12
+                                              },
+                                              {
+                                                  "sceneId":  "tilt_trial",
+                                                  "orderNumber":  13
                                               }
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\psp-platform-info-startup",
@@ -647,3 +707,4 @@
 
                    ]
 }
+
