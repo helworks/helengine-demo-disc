@@ -97,7 +97,7 @@ namespace city.rendering.tools {
         /// Creates one dual-screen Nintendo DS root set from top-screen scene content and optional bottom-screen content.
         /// </summary>
         /// <param name="topScreenRoots">Scene roots that should remain on the top screen.</param>
-        /// <param name="useDefaultBottomOverlay">True when the standard bottom debug and back overlay should be emitted.</param>
+        /// <param name="useDefaultBottomOverlay">True when the temporary bottom proof text should be emitted.</param>
         /// <param name="bottomScreenRoots">Optional custom bottom-screen roots supplied by the generator.</param>
         /// <returns>Combined DS companion-scene roots.</returns>
         public Entity[] CreateSceneRoots(Entity[] topScreenRoots, bool useDefaultBottomOverlay, Entity[] bottomScreenRoots, FontAsset bottomOverlayFont) {
@@ -121,16 +121,15 @@ namespace city.rendering.tools {
                 ReferenceHeight = ScreenHeight
             });
             RelocateFpsComponentsToBottomScreen(filteredTopScreenRoots, bottomScreenViewportRoot, bottomOverlayFont, useDefaultBottomOverlay);
-            ConfigureTopScreenRoots(filteredTopScreenRoots);
+            Entity topScreenCameraEntity = ConfigureTopScreenRoots(filteredTopScreenRoots);
+            Entity[] adjustedTopScreenRoots = MoveTopScreen2DRootsUnderViewport(filteredTopScreenRoots, topScreenCameraEntity);
 
             if (useDefaultBottomOverlay) {
                 CreateDefaultBottomOverlay(bottomScreenViewportRoot, bottomOverlayFont);
             }
-
             CreateBottomScreenBackButton(bottomScreenViewportRoot, bottomOverlayFont);
-
             AttachBottomScreenRoots(bottomScreenViewportRoot, bottomScreenRoots);
-            return CombineSceneRoots(filteredTopScreenRoots, bottomScreenCameraEntity);
+            return CombineSceneRoots(adjustedTopScreenRoots, bottomScreenCameraEntity);
         }
 
         /// <summary>
@@ -163,20 +162,28 @@ namespace city.rendering.tools {
         /// Configures the top-screen roots for Nintendo DS presentation.
         /// </summary>
         /// <param name="topScreenRoots">Root entities that should target the top screen.</param>
-        void ConfigureTopScreenRoots(Entity[] topScreenRoots) {
+        Entity ConfigureTopScreenRoots(Entity[] topScreenRoots) {
             if (topScreenRoots == null) {
                 throw new ArgumentNullException(nameof(topScreenRoots));
             }
 
             bool assignedPrimaryCamera = false;
+            CameraComponent primaryTopScreenCamera = null;
+            Entity primaryTopScreenCameraEntity = null;
             for (int index = 0; index < topScreenRoots.Length; index++) {
                 Entity rootEntity = topScreenRoots[index];
                 if (rootEntity == null) {
                     continue;
                 }
 
-                ConfigureTopScreenRootRecursive(rootEntity, ref assignedPrimaryCamera);
+                ConfigureTopScreenRootRecursive(rootEntity, ref assignedPrimaryCamera, ref primaryTopScreenCamera, ref primaryTopScreenCameraEntity);
             }
+
+            if (primaryTopScreenCamera == null || primaryTopScreenCameraEntity == null) {
+                throw new InvalidOperationException("Nintendo DS companion scenes require one top-screen camera root.");
+            }
+
+            return primaryTopScreenCameraEntity;
         }
 
         /// <summary>
@@ -184,7 +191,13 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="entity">Current subtree entity.</param>
         /// <param name="assignedPrimaryCamera">Tracks whether the stable top-screen camera name was already assigned.</param>
-        void ConfigureTopScreenRootRecursive(Entity entity, ref bool assignedPrimaryCamera) {
+        /// <param name="primaryTopScreenCamera">Receives the first configured top-screen camera component.</param>
+        /// <param name="primaryTopScreenCameraEntity">Receives the entity that owns the first configured top-screen camera component.</param>
+        void ConfigureTopScreenRootRecursive(
+            Entity entity,
+            ref bool assignedPrimaryCamera,
+            ref CameraComponent primaryTopScreenCamera,
+            ref Entity primaryTopScreenCameraEntity) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
             }
@@ -195,6 +208,10 @@ namespace city.rendering.tools {
             CameraComponent cameraComponent = FindFirstComponent<CameraComponent>(entity);
             if (cameraComponent != null) {
                 cameraComponent.Viewport = new float4(0f, 0f, 1f, 1f);
+                if (primaryTopScreenCamera == null) {
+                    primaryTopScreenCamera = cameraComponent;
+                    primaryTopScreenCameraEntity = entity;
+                }
                 if (!assignedPrimaryCamera) {
                     if (entity is EditorEntity editorEntity) {
                         editorEntity.Name = "DemoDiscTopScreenCamera";
@@ -209,8 +226,67 @@ namespace city.rendering.tools {
             }
 
             for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
-                ConfigureTopScreenRootRecursive(entity.Children[childIndex], ref assignedPrimaryCamera);
+                ConfigureTopScreenRootRecursive(
+                    entity.Children[childIndex],
+                    ref assignedPrimaryCamera,
+                    ref primaryTopScreenCamera,
+                    ref primaryTopScreenCameraEntity);
             }
+        }
+
+        /// <summary>
+        /// Moves top-screen 2D roots under one viewport root owned by the top-screen camera so ancestor-camera binding survives scene serialization.
+        /// </summary>
+        /// <param name="topScreenRoots">Top-screen roots emitted by the DS scaffold before 2D reparenting.</param>
+        /// <param name="topScreenCameraEntity">Resolved top-screen camera entity that should own the viewport root.</param>
+        /// <returns>Adjusted top-screen roots that should remain as serialized scene roots.</returns>
+        Entity[] MoveTopScreen2DRootsUnderViewport(Entity[] topScreenRoots, Entity topScreenCameraEntity) {
+            if (topScreenRoots == null) {
+                throw new ArgumentNullException(nameof(topScreenRoots));
+            } else if (topScreenCameraEntity == null) {
+                throw new ArgumentNullException(nameof(topScreenCameraEntity));
+            }
+
+            List<Entity> remainingRoots = new List<Entity>();
+            List<Entity> movedRoots = new List<Entity>();
+            for (int index = 0; index < topScreenRoots.Length; index++) {
+                Entity rootEntity = topScreenRoots[index];
+                if (rootEntity == null) {
+                    continue;
+                } else if (ReferenceEquals(rootEntity, topScreenCameraEntity)) {
+                    remainingRoots.Add(rootEntity);
+                    continue;
+                }
+
+                if (ContainsDrawable2DRecursive(rootEntity)) {
+                    movedRoots.Add(rootEntity);
+                    continue;
+                }
+
+                remainingRoots.Add(rootEntity);
+            }
+
+            if (movedRoots.Count < 1) {
+                return topScreenRoots;
+            }
+
+            Entity topScreenViewportRoot = Core.Instance.EntityFactory.CreateChild(topScreenCameraEntity, "DemoDiscTopScreenRoot");
+            topScreenViewportRoot.LayerMask = PersistedSceneLayerMask;
+            topScreenViewportRoot.AddComponent(new ViewportComponent {
+                BindingMode = ViewportComponent.AncestorCameraBindingMode,
+                ScalingMode = ViewportComponent.NoScalingMode
+            });
+
+            for (int index = 0; index < movedRoots.Count; index++) {
+                Entity rootEntity = movedRoots[index];
+                if (rootEntity.Parent != null) {
+                    rootEntity.Parent.RemoveChild(rootEntity);
+                }
+
+                topScreenViewportRoot.AddChild(rootEntity);
+            }
+
+            return remainingRoots.ToArray();
         }
 
         /// <summary>
@@ -480,7 +556,7 @@ namespace city.rendering.tools {
             Entity textEntity = Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenTestText");
             textEntity.LocalPosition = new float3(8f, 8f, 0f);
             TextComponent textComponent = new TextComponent {
-                Text = "BOTTOM TEXT",
+                Text = "DS TEXT",
                 Font = bottomOverlayFont,
                 FontScale = NintendoDsBottomOverlayFontScale,
                 Color = new byte4(255, 255, 255, 255),
@@ -587,6 +663,37 @@ namespace city.rendering.tools {
 
             combinedRoots[topScreenRoots.Length] = bottomScreenCameraEntity;
             return combinedRoots;
+        }
+
+        /// <summary>
+        /// Returns whether the supplied subtree contains any 2D drawable component that should be owned by one screen-specific viewport binding.
+        /// </summary>
+        /// <param name="entity">Subtree root to inspect.</param>
+        /// <returns>True when the subtree contains one 2D drawable component; otherwise false.</returns>
+        bool ContainsDrawable2DRecursive(Entity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            if (entity.Components != null) {
+                for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                    if (entity.Components[componentIndex] is IDrawable2D) {
+                        return true;
+                    }
+                }
+            }
+
+            if (entity.Children == null) {
+                return false;
+            }
+
+            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                if (ContainsDrawable2DRecursive(entity.Children[childIndex])) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

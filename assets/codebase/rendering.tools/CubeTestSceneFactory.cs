@@ -39,6 +39,7 @@ namespace city.rendering.tools {
             DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
             Entity cameraEntity = CreateCameraEntity();
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(instructionFont);
+            Entity topScreenHelloWorldEntity = CreateTopScreenHelloWorldEntity(instructionFont);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -52,6 +53,7 @@ namespace city.rendering.tools {
                     cameraEntity,
                     instructionOverlayEntity,
                     CreateUiEntity(),
+                    topScreenHelloWorldEntity,
                     CreateDirectionalLightEntity(),
                     CreateCubeEntity(cubeModel, solidColorMaterial)
                 }
@@ -147,6 +149,32 @@ namespace city.rendering.tools {
             entity.AddComponent(new DemoDiscLightToggleComponent());
             DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
             lightIndicatorOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont());
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates the authored top-screen hello-world text entity used to prove mixed 3D plus 2D scene authoring on Nintendo DS and 3DS companion scenes.
+        /// </summary>
+        /// <param name="font">Loaded editor font assigned to the authored text component.</param>
+        /// <returns>Live authored top-screen text entity.</returns>
+        Entity CreateTopScreenHelloWorldEntity(FontAsset font) {
+            if (font == null) {
+                throw new ArgumentNullException(nameof(font));
+            }
+
+            Entity entity = Core.Instance.EntityFactory.Create("CubeTestTopScreenHelloWorld");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = new float3(20f, 20f, 0f);
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = float4.Identity;
+            entity.AddComponent(new TextComponent {
+                Text = "Hello World",
+                Font = font,
+                FontScale = 4f,
+                Color = new byte4(255, 255, 255, 255),
+                Size = new int2(320, 48),
+                RenderOrder2D = 180
+            });
             return entity;
         }
 
