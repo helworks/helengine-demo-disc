@@ -1,5 +1,6 @@
 using helengine.editor;
 using System.Reflection;
+using city.menu;
 
 namespace city.rendering.tools {
     /// <summary>
@@ -151,6 +152,7 @@ namespace city.rendering.tools {
             }
 
             string scenePath = Path.Combine(fullProjectRootPath, "assets", sceneId.Replace('/', Path.DirectorySeparatorChar));
+            NormalizeGeneratedMenuRootInitialPanels(generatedRoots);
             EditorEntityLayerMaskSnapshot[] hiddenRootSnapshots = HideNonTargetSceneRoots(generatedRoots);
 
             try {
@@ -158,6 +160,122 @@ namespace city.rendering.tools {
             } finally {
                 RestoreHiddenUserSceneRoots(hiddenRootSnapshots);
             }
+        }
+
+        /// <summary>
+        /// Reapplies the authored initial-panel enabled state to every generated baked menu root before serialization so hidden menu panels never leak into persisted scene output.
+        /// </summary>
+        /// <param name="generatedRoots">Generated scene roots being serialized.</param>
+        void NormalizeGeneratedMenuRootInitialPanels(Entity[] generatedRoots) {
+            if (generatedRoots == null) {
+                throw new ArgumentNullException(nameof(generatedRoots));
+            }
+
+            for (int index = 0; index < generatedRoots.Length; index++) {
+                NormalizeGeneratedMenuRootInitialPanels(generatedRoots[index]);
+            }
+        }
+
+        /// <summary>
+        /// Walks one generated entity subtree and reapplies authored initial-panel visibility to any baked menu hierarchy rooted inside it.
+        /// </summary>
+        /// <param name="entity">Generated entity subtree to inspect.</param>
+        void NormalizeGeneratedMenuRootInitialPanels(Entity entity) {
+            if (entity == null) {
+                return;
+            }
+
+            if (TryFindFirstComponent(entity, out MenuComponent menuComponent)) {
+                ApplyInitialMenuPanelStates(entity, menuComponent.InitialPanelId);
+            }
+
+            if (entity.Children == null) {
+                return;
+            }
+
+            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                NormalizeGeneratedMenuRootInitialPanels(entity.Children[childIndex]);
+            }
+        }
+
+        /// <summary>
+        /// Applies the supplied initial panel id to every baked panel entity under one generated menu root before the hierarchy is serialized.
+        /// </summary>
+        /// <param name="menuRootEntity">Generated menu root whose baked panels should be normalized.</param>
+        /// <param name="initialPanelId">Stable panel id that should remain enabled in the persisted scene.</param>
+        void ApplyInitialMenuPanelStates(Entity menuRootEntity, string initialPanelId) {
+            if (menuRootEntity == null) {
+                throw new ArgumentNullException(nameof(menuRootEntity));
+            }
+            if (string.IsNullOrWhiteSpace(initialPanelId)) {
+                throw new InvalidOperationException("Generated menu roots must define one initial panel id before serialization.");
+            }
+
+            List<Entity> panelEntities = new List<Entity>();
+            CollectEntitiesWithComponent<MenuPanelComponent>(menuRootEntity, panelEntities);
+            for (int panelIndex = 0; panelIndex < panelEntities.Count; panelIndex++) {
+                Entity panelEntity = panelEntities[panelIndex];
+                if (!TryFindFirstComponent(panelEntity, out MenuPanelComponent panelComponent)) {
+                    continue;
+                }
+
+                panelEntity.Enabled = string.Equals(panelComponent.PanelId, initialPanelId, StringComparison.Ordinal);
+            }
+        }
+
+        /// <summary>
+        /// Collects every entity in one subtree that owns the requested component type.
+        /// </summary>
+        /// <typeparam name="TComponent">Component type that should be collected.</typeparam>
+        /// <param name="entity">Entity subtree to inspect.</param>
+        /// <param name="entities">Destination list that receives matching entities.</param>
+        void CollectEntitiesWithComponent<TComponent>(Entity entity, List<Entity> entities) where TComponent : Component {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (entities == null) {
+                throw new ArgumentNullException(nameof(entities));
+            }
+
+            if (TryFindFirstComponent(entity, out TComponent component)) {
+                entities.Add(entity);
+            }
+
+            if (entity.Children == null) {
+                return;
+            }
+
+            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                CollectEntitiesWithComponent<TComponent>(entity.Children[childIndex], entities);
+            }
+        }
+
+        /// <summary>
+        /// Resolves the first component of the requested type on one entity.
+        /// </summary>
+        /// <typeparam name="TComponent">Component type to resolve.</typeparam>
+        /// <param name="entity">Entity whose component list should be scanned.</param>
+        /// <param name="component">Resolved component when present; otherwise null.</param>
+        /// <returns>True when a matching component was found on the entity.</returns>
+        bool TryFindFirstComponent<TComponent>(Entity entity, out TComponent component) where TComponent : Component {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            component = null;
+            if (entity.Components == null) {
+                return false;
+            }
+
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is not TComponent typedComponent) {
+                    continue;
+                }
+
+                component = typedComponent;
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
