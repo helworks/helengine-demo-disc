@@ -1,4 +1,5 @@
 using city.menu;
+using city.rendering;
 using city.rendering.tools;
 using helengine;
 using helengine.editor;
@@ -56,7 +57,17 @@ namespace city.menu.tools {
         /// <summary>
         /// Fixed Nintendo DS logo width in authored pixels.
         /// </summary>
-        const int NintendoDsLogoWidth = 160;
+        const int NintendoDsLogoWidth = 128;
+
+        /// <summary>
+        /// Stable relative animation-clip path used by the rotating demo-disc logo.
+        /// </summary>
+        const string DemoDiscLogoIdleAnimationRelativePath = "Animations/DemoDiscLogoIdle.hanim";
+
+        /// <summary>
+        /// Fixed top inset applied to the Nintendo DS rotating logo so affine OBJ tiles never need negative screen anchors.
+        /// </summary>
+        const int NintendoDsLogoTopInset = 36;
 
         /// <summary>
         /// Fixed left inset applied to visible Nintendo DS bottom-menu item labels.
@@ -97,11 +108,6 @@ namespace city.menu.tools {
         /// Stable save-state slot name used for serialized font references.
         /// </summary>
         const string FontReferenceName = "Font";
-
-        /// <summary>
-        /// Stable project-relative animation path used by the demo-disc logo idle clip.
-        /// </summary>
-        const string DemoDiscLogoIdleAnimationRelativePath = "Animations/DemoDiscLogoIdle.hanim";
 
         /// <summary>
         /// Placeholder font assigned during live authoring before the real file-backed font references are serialized.
@@ -238,6 +244,7 @@ namespace city.menu.tools {
 
             Entity panelEntity = Core.Instance.EntityFactory.CreateChild(generatedRootEntity, $"Panel-{panelDefinition.PanelId}");
             panelEntity.LocalPosition = new float3(0f, 0f, 0f);
+            panelEntity.Enabled = string.Equals(panelDefinition.PanelId, definition.InitialPanelId, StringComparison.Ordinal);
 
             MenuPanelComponent panelComponent = new MenuPanelComponent {
                 PanelId = panelDefinition.PanelId
@@ -618,7 +625,9 @@ namespace city.menu.tools {
             int displayWidth = ResolveNintendoDsLogoWidth(overlayImage);
             int displayHeight = ResolveNintendoDsLogoHeight(overlayImage, displayWidth);
             Entity entity = Core.Instance.EntityFactory.CreateChild(topScreenRootEntity, "DemoDiscOverlayImage");
-            entity.LocalPosition = new float3((NintendoDsScreenWidth - displayWidth) * 0.5f, 0f, 0f);
+            entity.LocalPosition = new float3((NintendoDsScreenWidth - displayWidth) * 0.5f, NintendoDsLogoTopInset, 0f);
+            entity.LocalScale = new float3(1f, 1f, 1f);
+            entity.LocalOrientation = float4.Identity;
 
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = new int2(displayWidth, displayHeight),
@@ -627,6 +636,14 @@ namespace city.menu.tools {
             };
             entity.AddComponent(spriteComponent);
             ApplyTextureReference(entity, spriteComponent, overlayImage.TexturePath);
+
+            AnimationPlayerComponent animationPlayerComponent = new AnimationPlayerComponent {
+                Clip = LoadRequiredAnimationClipAsset(DemoDiscLogoIdleAnimationRelativePath),
+                PlayAutomatically = true,
+                ShouldLoop = true
+            };
+            entity.AddComponent(animationPlayerComponent);
+            ApplyAnimationClipReference(entity, animationPlayerComponent, DemoDiscLogoIdleAnimationRelativePath);
         }
 
         /// <summary>
@@ -676,6 +693,7 @@ namespace city.menu.tools {
             Entity panelEntity = Core.Instance.EntityFactory.CreateChild(generatedRootEntity, $"Panel-{panelDefinition.PanelId}");
             panelEntity.LayerMask = NintendoDsMenuMetadataLayerMask;
             panelEntity.LocalPosition = new float3(0f, 0f, 0f);
+            panelEntity.Enabled = string.Equals(panelDefinition.PanelId, definition.InitialPanelId, StringComparison.Ordinal);
             panelEntity.AddComponent(new MenuPanelComponent {
                 PanelId = panelDefinition.PanelId
             });
@@ -873,19 +891,13 @@ namespace city.menu.tools {
             };
             entity.AddComponent(spriteComponent);
             ApplyTextureReference(entity, spriteComponent, overlayImage.TexturePath);
+            entity.AddComponent(new RotateZComponent());
 
             LayoutComponent anchorComponent = new LayoutComponent {
                 LayoutSpace = LayoutComponent.CameraViewportLayoutSpace
             };
             anchorComponent.SetAnchorDistances(right: overlayImage.RightMargin, bottom: overlayImage.BottomMargin);
             entity.AddComponent(anchorComponent);
-            AnimationPlayerComponent animationPlayerComponent = new AnimationPlayerComponent {
-                Clip = LoadRequiredAnimationClipAsset(DemoDiscLogoIdleAnimationRelativePath),
-                PlayAutomatically = true,
-                ShouldLoop = true
-            };
-            entity.AddComponent(animationPlayerComponent);
-            ApplyAnimationClipReference(entity, animationPlayerComponent, DemoDiscLogoIdleAnimationRelativePath);
         }
 
         /// <summary>
