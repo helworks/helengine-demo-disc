@@ -15,11 +15,6 @@ namespace city.menu.tools {
         public const string SceneId = "Scenes/DemoDiscMainMenu.helen";
 
         /// <summary>
-        /// Stable scene id used by the Nintendo DS companion demo-disc menu scene.
-        /// </summary>
-        public const string NintendoDsSceneId = "scenes/DemoDiscMainMenuDs.helen";
-
-        /// <summary>
         /// Main-console menu panel width expressed as a fraction of the authored canvas width.
         /// </summary>
         const double MainMenuPanelWidthRatio = 0.4d;
@@ -152,7 +147,6 @@ namespace city.menu.tools {
                     }
                 },
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    SceneId = NintendoDsSceneId,
                     RootEntities = CreateNintendoDsSceneRoots(providerTypeName, definition),
                     UseDefaultBottomOverlay = false,
                     BottomScreenRootEntities = Array.Empty<Entity>()
@@ -891,7 +885,14 @@ namespace city.menu.tools {
             };
             entity.AddComponent(spriteComponent);
             ApplyTextureReference(entity, spriteComponent, overlayImage.TexturePath);
-            entity.AddComponent(new RotateZComponent());
+
+            AnimationPlayerComponent animationPlayerComponent = new AnimationPlayerComponent {
+                Clip = LoadRequiredAnimationClipAsset(DemoDiscLogoIdleAnimationRelativePath),
+                PlayAutomatically = true,
+                ShouldLoop = true
+            };
+            entity.AddComponent(animationPlayerComponent);
+            ApplyAnimationClipReference(entity, animationPlayerComponent, DemoDiscLogoIdleAnimationRelativePath);
 
             LayoutComponent anchorComponent = new LayoutComponent {
                 LayoutSpace = LayoutComponent.CameraViewportLayoutSpace
