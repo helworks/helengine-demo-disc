@@ -17,11 +17,18 @@ namespace city.menu.tools {
         readonly DemoDiscMainMenuSceneFactory SceneFactory;
 
         /// <summary>
+        /// Authoring helper used to stamp build-scene-driven platform existence overrides into the canonical generated menu scene.
+        /// </summary>
+        readonly DemoDiscMenuBuildSceneAuthoringService MenuBuildSceneAuthoringService;
+
+        /// <summary>
         /// Initializes one demo-disc scene generator.
         /// </summary>
-        public DemoDiscSceneGenerator() {
-            SceneWriteService = new GeneratedAuthoringSceneWriteService();
+        /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
+        public DemoDiscSceneGenerator(IScriptTypeResolver scriptTypeResolver = null) {
+            SceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver);
             SceneFactory = new DemoDiscMainMenuSceneFactory();
+            MenuBuildSceneAuthoringService = new DemoDiscMenuBuildSceneAuthoringService();
         }
 
         /// <summary>
@@ -33,11 +40,28 @@ namespace city.menu.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
+            DeleteObsoleteNintendoHandheldCompanionScene(projectRootPath);
             DemoDiscMenuDefinitionProvider provider = new DemoDiscMenuDefinitionProvider();
             MenuDefinition definition = provider.CreateMenuDefinition();
             string providerTypeName = BuildProviderTypeName(typeof(DemoDiscMenuDefinitionProvider));
             GeneratedAuthoringSceneDefinition sceneDefinition = SceneFactory.CreateSceneDefinition(providerTypeName, definition);
+            MenuBuildSceneAuthoringService.ApplyBuildSceneAvailability(projectRootPath, sceneDefinition, definition);
             SceneWriteService.WriteScene(projectRootPath, sceneDefinition);
+        }
+
+        /// <summary>
+        /// Deletes the obsolete Nintendo handheld companion menu scene so stale generated output does not remain discoverable in the project scene catalog.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
+        static void DeleteObsoleteNintendoHandheldCompanionScene(string projectRootPath) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            }
+
+            string obsoleteScenePath = Path.Combine(Path.GetFullPath(projectRootPath), "assets", "scenes", "DemoDiscMainMenuDs.helen");
+            if (File.Exists(obsoleteScenePath)) {
+                File.Delete(obsoleteScenePath);
+            }
         }
 
         /// <summary>
