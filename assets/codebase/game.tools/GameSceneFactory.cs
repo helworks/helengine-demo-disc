@@ -10,7 +10,32 @@ namespace city.game.tools {
         /// <summary>
         /// Stable authored material asset id required by the Tilt Trial player sphere.
         /// </summary>
-        const string TiltTrialPlayerSphereWalnutMaterialAssetId = "Materials.rendering.tilt_trial.PlayerSphereWalnut";
+        const string TiltTrialPlayerSphereMarbleMaterialAssetId = "Materials.rendering.tilt_trial.PlayerSphereMarble";
+
+        /// <summary>
+        /// Stable authored material settings path required by the Tilt Trial player sphere.
+        /// </summary>
+        const string TiltTrialPlayerSphereMarbleMaterialRelativePath = "materials/rendering/tilt_trial/PlayerSphereMarble.hasset";
+
+        /// <summary>
+        /// Stable authored material asset id required by the Tilt Trial course geometry.
+        /// </summary>
+        const string TiltTrialCourseMaterialAssetId = "Materials.rendering.tilt_trial.Course";
+
+        /// <summary>
+        /// Stable authored material settings path required by the Tilt Trial course geometry.
+        /// </summary>
+        const string TiltTrialCourseMaterialRelativePath = "materials/rendering/tilt_trial/Course.hasset";
+
+        /// <summary>
+        /// Stable authored source-font path used by the Tilt Trial speed HUD.
+        /// </summary>
+        const string TiltTrialSpeedHudFontRelativePath = "Fonts/Fredoka.ttf";
+
+        /// <summary>
+        /// Stable mesh save-state slot used by the generated player sphere material reference.
+        /// </summary>
+        const string PlayerSphereMaterialReferenceName = "Materials[0]";
 
         /// <summary>
         /// Shared generated cube model used by the authored Tilt Trial course geometry.
@@ -23,14 +48,19 @@ namespace city.game.tools {
         readonly RuntimeModel GeneratedSphereModel;
 
         /// <summary>
-        /// Shared generated standard material used by the authored gameplay geometry.
+        /// Stable mesh save-state slot used by the generated course material reference.
         /// </summary>
-        readonly RuntimeMaterial GeneratedStandardMaterial;
+        const string CourseMaterialReferenceName = "Materials[0]";
 
         /// <summary>
-        /// Dedicated authored walnut material used only by the Tilt Trial player sphere.
+        /// Dedicated authored marble material used only by the Tilt Trial player sphere.
         /// </summary>
-        readonly RuntimeMaterial TiltTrialPlayerSphereWalnutMaterial;
+        readonly RuntimeMaterial TiltTrialPlayerSphereMarbleMaterial;
+
+        /// <summary>
+        /// Dedicated authored course material used by the Tilt Trial stage pieces and catch floor.
+        /// </summary>
+        readonly RuntimeMaterial TiltTrialCourseMaterial;
 
         /// <summary>
         /// Initializes one game-scene factory backed by the prepared generated runtime assets required by the authored gameplay scenes.
@@ -43,16 +73,16 @@ namespace city.game.tools {
                 throw new ArgumentException("Game scene generation requires the generated cube runtime model.", nameof(assets));
             } else if (assets.GeneratedSphereModel == null) {
                 throw new ArgumentException("Game scene generation requires the generated sphere runtime model.", nameof(assets));
-            } else if (assets.GeneratedStandardMaterial == null) {
-                throw new ArgumentException("Game scene generation requires the generated standard runtime material.", nameof(assets));
-            } else if (assets.TiltTrialPlayerSphereWalnutMaterial == null) {
-                throw new ArgumentException($"Game scene generation requires authored runtime material '{TiltTrialPlayerSphereWalnutMaterialAssetId}'.", nameof(assets));
+            } else if (assets.TiltTrialPlayerSphereMarbleMaterial == null) {
+                throw new ArgumentException($"Game scene generation requires authored runtime material '{TiltTrialPlayerSphereMarbleMaterialAssetId}'.", nameof(assets));
+            } else if (assets.TiltTrialCourseMaterial == null) {
+                throw new ArgumentException($"Game scene generation requires authored runtime material '{TiltTrialCourseMaterialAssetId}'.", nameof(assets));
             }
 
             GeneratedCubeModel = assets.GeneratedCubeModel;
             GeneratedSphereModel = assets.GeneratedSphereModel;
-            GeneratedStandardMaterial = assets.GeneratedStandardMaterial;
-            TiltTrialPlayerSphereWalnutMaterial = assets.TiltTrialPlayerSphereWalnutMaterial;
+            TiltTrialPlayerSphereMarbleMaterial = assets.TiltTrialPlayerSphereMarbleMaterial;
+            TiltTrialCourseMaterial = assets.TiltTrialCourseMaterial;
         }
 
         /// <summary>
@@ -63,10 +93,11 @@ namespace city.game.tools {
             EditorEntity cameraEntity = CreateCameraEntity();
             EditorEntity stageRootEntity = CreateStageRootEntity();
             EditorEntity playerSphereEntity = CreatePlayerSphereEntity();
-            Entity uiEntity = CreateUiEntity();
+            EditorEntity uiEntity = CreateUiEntity();
             Entity[] roots = new Entity[] {
                 cameraEntity,
                 CreateDirectionalLightEntity(),
+                CreateDirectionalFillLightEntity(),
                 uiEntity,
                 stageRootEntity,
                 CreateCatchFloorEntity(),
@@ -74,6 +105,7 @@ namespace city.game.tools {
             };
 
             ConfigureTiltTrialCameraTarget(cameraEntity, playerSphereEntity);
+            ConfigureTiltTrialSpeedTextTarget(uiEntity, playerSphereEntity);
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = GameSceneCatalog.TiltTrialSceneId,
                 SceneSettings = new SceneSettingsAsset(),
@@ -91,7 +123,7 @@ namespace city.game.tools {
 
             Entity entity = Core.Instance.EntityFactory.Create("TiltTrialCamera");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.LocalPosition = new float3(0f, 5.5f, 13.5f);
+            entity.LocalPosition = new float3(0f, 2.74425f, -3.08f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = orientation;
             entity.AddComponent(new CameraComponent {
@@ -139,7 +171,7 @@ namespace city.game.tools {
             entity.LocalOrientation = orientation;
             entity.AddComponent(new DirectionalLightComponent {
                 Color = new float4(1f, 0.97f, 0.92f, 1f),
-                Intensity = 1f,
+                Intensity = 1.15f,
                 ShadowsEnabled = true,
                 ShadowMapMode = ShadowMapMode.Forced,
                 ShadowStrength = 0.95f,
@@ -149,14 +181,72 @@ namespace city.game.tools {
         }
 
         /// <summary>
+        /// Creates one weaker directional fill light that lifts the sphere's unlit hemisphere without adding a second shadow pass.
+        /// </summary>
+        /// <returns>Generated fill-light entity.</returns>
+        Entity CreateDirectionalFillLightEntity() {
+            float4 orientation;
+            float4.CreateFromYawPitchRoll(2.45f, -0.32f, 0f, out orientation);
+
+            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialFill");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = new float3(0f, 6f, 0f);
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = orientation;
+            entity.AddComponent(new DirectionalLightComponent {
+                Color = new float4(0.78f, 0.84f, 1f, 1f),
+                Intensity = 0.7f,
+                ShadowsEnabled = false,
+                ShadowMapMode = ShadowMapMode.Disabled,
+                ShadowStrength = 0f,
+                ShadowDistance = 0f
+            });
+            return entity;
+        }
+
+        /// <summary>
         /// Creates the authored UI root that owns the shared return-to-menu input behavior while Tilt Trial is active.
         /// </summary>
         /// <returns>Generated UI root entity.</returns>
-        Entity CreateUiEntity() {
+        EditorEntity CreateUiEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("TiltTrialUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
-            return entity;
+            entity.AddComponent(new ViewportComponent {
+                BindingMode = ViewportComponent.ScreenBindingMode,
+                FixedSize = new int2(1280, 720)
+            });
+            entity.AddComponent(new ReferenceCanvasFitComponent {
+                ReferenceWidth = 1280,
+                ReferenceHeight = 720
+            });
+
+            Entity speedTextEntity = Core.Instance.EntityFactory.CreateChild(entity, "TiltTrialSpeedText");
+            speedTextEntity.LocalPosition = new float3(16f, 600f, 0f);
+            speedTextEntity.Static = false;
+            TextComponent speedTextComponent = new TextComponent {
+                Text = "0\nkm/h",
+                Font = ResolveRequiredEditorFont(),
+                Color = new byte4(255, 255, 255, 255),
+                Size = new int2(320, 224),
+                FontScale = 2.2f,
+                Alignment = TextAlignment.Center,
+                RenderOrder2D = 1,
+                LayerMask = 1
+            };
+            speedTextEntity.AddComponent(speedTextComponent);
+            LayoutComponent speedTextAnchorComponent = new LayoutComponent();
+            speedTextAnchorComponent.LayoutSpace = LayoutComponent.CameraViewportLayoutSpace;
+            speedTextAnchorComponent.SetAnchorDistances(left: 16f, bottom: 16f);
+            speedTextEntity.AddComponent(speedTextAnchorComponent);
+            ApplyFontReference(speedTextEntity, speedTextComponent, TiltTrialSpeedHudFontRelativePath);
+            speedTextEntity.AddComponent(new city.game.DemoTiltSpeedTextComponent());
+
+            if (entity is EditorEntity editorEntity) {
+                return editorEntity;
+            }
+
+            throw new InvalidOperationException("Tilt Trial UI generation requires editor-authored entities.");
         }
 
         /// <summary>
@@ -169,7 +259,10 @@ namespace city.game.tools {
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new city.game.DemoTiltStageComponent());
+            entity.AddComponent(new city.game.DemoTiltStageComponent {
+                MaximumPlanarSpeed = 11.25f,
+                PlanarAccelerationUnitsPerSecond = 4.25f
+            });
             entity.AddChild(CreateStartPadEntity());
             entity.AddChild(CreateRampEntity());
             entity.AddChild(CreateGoalPadEntity());
@@ -193,11 +286,13 @@ namespace city.game.tools {
             entity.LocalPosition = new float3(0f, 1.2f, -7f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new MeshComponent {
+            MeshComponent meshComponent = new MeshComponent {
                 Model = GeneratedSphereModel,
-                Materials = new[] { TiltTrialPlayerSphereWalnutMaterial },
+                Materials = new[] { TiltTrialPlayerSphereMarbleMaterial },
                 RenderOrder3D = 0
-            });
+            };
+            entity.AddComponent(meshComponent);
+            ApplyTiltTrialPlayerSphereMaterialReference(entity, meshComponent);
             entity.AddComponent(new RigidBody3DComponent {
                 BodyKind = BodyKind3D.Dynamic,
                 UseGravity = true,
@@ -220,6 +315,25 @@ namespace city.game.tools {
         }
 
         /// <summary>
+        /// Stores the stable authored walnut material reference required by scene serialization on the generated player sphere mesh.
+        /// </summary>
+        /// <param name="entity">Generated player sphere entity that owns the mesh component.</param>
+        /// <param name="meshComponent">Mesh component assigned to the generated player sphere.</param>
+        void ApplyTiltTrialPlayerSphereMaterialReference(Entity entity, MeshComponent meshComponent) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (meshComponent == null) {
+                throw new ArgumentNullException(nameof(meshComponent));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(
+                meshComponent,
+                PlayerSphereMaterialReferenceName,
+                global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(TiltTrialPlayerSphereMarbleMaterialRelativePath));
+        }
+
+        /// <summary>
         /// Creates the visual-only floor that catches the eye while still allowing the playable sphere to fall through and reset.
         /// </summary>
         /// <returns>Generated floor entity.</returns>
@@ -229,11 +343,13 @@ namespace city.game.tools {
             entity.LocalPosition = new float3(0f, -14f, 0f);
             entity.LocalScale = new float3(24f, 1f, 24f);
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new MeshComponent {
+            MeshComponent meshComponent = new MeshComponent {
                 Model = GeneratedCubeModel,
-                Materials = new[] { GeneratedStandardMaterial },
+                Materials = new[] { TiltTrialCourseMaterial },
                 RenderOrder3D = 0
-            });
+            };
+            entity.AddComponent(meshComponent);
+            ApplyTiltTrialCourseMaterialReference(entity, meshComponent);
             return entity;
         }
 
@@ -297,11 +413,13 @@ namespace city.game.tools {
             entity.LocalPosition = position;
             entity.LocalScale = scale;
             entity.LocalOrientation = orientation;
-            entity.AddComponent(new MeshComponent {
+            MeshComponent meshComponent = new MeshComponent {
                 Model = GeneratedCubeModel,
-                Materials = new[] { GeneratedStandardMaterial },
+                Materials = new[] { TiltTrialCourseMaterial },
                 RenderOrder3D = 0
-            });
+            };
+            entity.AddComponent(meshComponent);
+            ApplyTiltTrialCourseMaterialReference(entity, meshComponent);
             entity.AddComponent(new RigidBody3DComponent {
                 BodyKind = BodyKind3D.Kinematic,
                 UseGravity = false,
@@ -311,6 +429,25 @@ namespace city.game.tools {
                 Size = scale
             });
             return entity;
+        }
+
+        /// <summary>
+        /// Stores the stable authored Tilt Trial course material reference required by scene serialization on one generated course mesh.
+        /// </summary>
+        /// <param name="entity">Generated course entity that owns the mesh component.</param>
+        /// <param name="meshComponent">Mesh component assigned to the generated course entity.</param>
+        void ApplyTiltTrialCourseMaterialReference(Entity entity, MeshComponent meshComponent) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (meshComponent == null) {
+                throw new ArgumentNullException(nameof(meshComponent));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(
+                meshComponent,
+                CourseMaterialReferenceName,
+                global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(TiltTrialCourseMaterialRelativePath));
         }
 
         /// <summary>
@@ -328,6 +465,25 @@ namespace city.game.tools {
             city.game.DemoTiltFollowCameraComponent followCameraComponent = FindRequiredFollowCameraComponent(cameraEntity);
             EntitySaveComponent playerSaveComponent = FindRequiredEntitySaveComponent(playerSphereEntity);
             followCameraComponent.TargetEntityReference = new SceneEntityReference {
+                EntityId = playerSaveComponent.EntityId
+            };
+        }
+
+        /// <summary>
+        /// Wires the generated speed HUD to the generated player sphere after fresh scene ids have been assigned.
+        /// </summary>
+        /// <param name="uiEntity">Generated UI root that owns the speed HUD text entity.</param>
+        /// <param name="playerSphereEntity">Generated player sphere whose live speed should be displayed.</param>
+        void ConfigureTiltTrialSpeedTextTarget(EditorEntity uiEntity, EditorEntity playerSphereEntity) {
+            if (uiEntity == null) {
+                throw new ArgumentNullException(nameof(uiEntity));
+            } else if (playerSphereEntity == null) {
+                throw new ArgumentNullException(nameof(playerSphereEntity));
+            }
+
+            city.game.DemoTiltSpeedTextComponent speedTextComponent = FindRequiredSpeedTextComponent(uiEntity);
+            EntitySaveComponent playerSaveComponent = FindRequiredEntitySaveComponent(playerSphereEntity);
+            speedTextComponent.TargetEntityReference = new SceneEntityReference {
                 EntityId = playerSaveComponent.EntityId
             };
         }
@@ -352,11 +508,68 @@ namespace city.game.tools {
         }
 
         /// <summary>
+        /// Resolves the generated Tilt Trial speed HUD updater nested beneath the supplied UI root.
+        /// </summary>
+        /// <param name="uiEntity">Generated UI root whose HUD updater should be returned.</param>
+        /// <returns>Attached Tilt Trial speed HUD updater.</returns>
+        city.game.DemoTiltSpeedTextComponent FindRequiredSpeedTextComponent(EditorEntity uiEntity) {
+            if (uiEntity == null || uiEntity.Children == null) {
+                throw new ArgumentNullException(nameof(uiEntity));
+            }
+
+            for (int childIndex = 0; childIndex < uiEntity.Children.Count; childIndex++) {
+                Entity child = uiEntity.Children[childIndex];
+                if (child.Components == null) {
+                    continue;
+                }
+
+                for (int componentIndex = 0; componentIndex < child.Components.Count; componentIndex++) {
+                    if (child.Components[componentIndex] is city.game.DemoTiltSpeedTextComponent speedTextComponent) {
+                        return speedTextComponent;
+                    }
+                }
+            }
+
+            throw new InvalidOperationException("Tilt Trial UI generation requires a DemoTiltSpeedTextComponent.");
+        }
+
+        /// <summary>
+        /// Resolves the editor font used by the live Tilt Trial HUD entities.
+        /// </summary>
+        /// <returns>Loaded default editor font.</returns>
+        FontAsset ResolveRequiredEditorFont() {
+            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+                throw new InvalidOperationException("A default editor font must be loaded before the Tilt Trial scene can be generated.");
+            }
+
+            return editorCore.DefaultFontAssetForEditor;
+        }
+
+        /// <summary>
+        /// Stores the supplied file-backed font reference on the entity save state for the supplied text component.
+        /// </summary>
+        /// <param name="entity">Entity that owns the text component.</param>
+        /// <param name="component">Text component whose font reference should be stored.</param>
+        /// <param name="fontPath">Project-relative font path.</param>
+        void ApplyFontReference(Entity entity, TextComponent component, string fontPath) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (component == null) {
+                throw new ArgumentNullException(nameof(component));
+            } else if (string.IsNullOrWhiteSpace(fontPath)) {
+                throw new ArgumentException("Font path must be provided.", nameof(fontPath));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(component, "Font", global::helengine.SceneAssetReferenceFactory.CreateFileSystemFont(fontPath));
+        }
+
+        /// <summary>
         /// Resolves the hidden save component attached to one generated editor entity after ids have been assigned.
         /// </summary>
         /// <param name="entity">Generated editor entity whose save component should be returned.</param>
         /// <returns>Attached entity save component with a non-zero scene id.</returns>
-        EntitySaveComponent FindRequiredEntitySaveComponent(EditorEntity entity) {
+        EntitySaveComponent FindRequiredEntitySaveComponent(Entity entity) {
             if (entity == null || entity.Components == null) {
                 throw new ArgumentNullException(nameof(entity));
             }
