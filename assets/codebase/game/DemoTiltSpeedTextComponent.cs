@@ -4,6 +4,11 @@ namespace city.game {
     /// </summary>
     public sealed class DemoTiltSpeedTextComponent : UpdateComponent {
         /// <summary>
+        /// Gets or sets whether HUD text updates should be skipped for the current frame.
+        /// </summary>
+        public bool UpdatesAreSuppressed { get; set; }
+
+        /// <summary>
         /// Conversion factor from meters per second to kilometers per hour.
         /// </summary>
         const float MetersPerSecondToKilometersPerHour = 3.6f;
@@ -43,6 +48,8 @@ namespace city.game {
 
             if (Parent == null) {
                 throw new InvalidOperationException("DemoTiltSpeedTextComponent requires an attached HUD text entity.");
+            } else if (UpdatesAreSuppressed) {
+                return;
             }
 
             ResolveTextComponentWhenNeeded();

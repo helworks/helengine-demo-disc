@@ -4,6 +4,11 @@ namespace city.game {
     /// </summary>
     public sealed class DemoTiltBallResetComponent : UpdateComponent {
         /// <summary>
+        /// Gets or sets whether reset updates should be skipped for the current frame.
+        /// </summary>
+        public bool UpdatesAreSuppressed { get; set; }
+
+        /// <summary>
         /// Gets or sets the local-space spawn position reapplied when the tracked ball falls out of bounds.
         /// </summary>
         public float3 SpawnPosition { get; set; }
@@ -35,6 +40,8 @@ namespace city.game {
 
             if (Parent == null) {
                 throw new InvalidOperationException("DemoTiltBallResetComponent requires an attached playable ball entity.");
+            } else if (UpdatesAreSuppressed) {
+                return;
             }
 
             if (Parent.Position.Y >= ResetHeight) {
