@@ -239,22 +239,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(font));
             }
 
-            Entity panelEntity = Core.Instance.EntityFactory.Create("DemoSceneNintendoDsInstructionPanel");
-            panelEntity.LocalPosition = new float3(8f, 76f, 0f);
-            panelEntity.LayerMask = NintendoDsOverlayLayerMask;
-            panelEntity.AddComponent(new RoundedRectComponent {
-                Size = new int2(NintendoDsScreenWidth - 16, NintendoDsInstructionPanelHeight),
-                Radius = 0f,
-                BorderThickness = 2f,
-                FillColor = new byte4(20, 24, 32, 224),
-                BorderColor = new byte4(120, 140, 170, 255),
-                RenderOrder2D = 210,
-                LayerMask = OverlayDrawableLayerMask
-            });
-
-            CreateNintendoDsInstructionRow(panelEntity, font, "Rotate Camera", 10f, SwitchDpadTexturePath, new int2(29, 29));
-            CreateNintendoDsInstructionRow(panelEntity, font, "Toggle Light", 40f, SwitchRightShoulderTexturePath, new int2(48, 22));
-            return [panelEntity];
+            return Array.Empty<Entity>();
         }
 
         /// <summary>

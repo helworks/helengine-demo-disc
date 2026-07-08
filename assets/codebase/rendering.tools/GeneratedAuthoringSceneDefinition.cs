@@ -19,7 +19,7 @@ namespace city.rendering.tools {
         public Entity[] RootEntities { get; set; }
 
         /// <summary>
-        /// Gets or sets the optional Nintendo DS companion-scene definition emitted alongside the default generated scene.
+        /// Gets or sets the optional Nintendo handheld scene augmentation merged into the canonical generated scene.
         /// </summary>
         public GeneratedDsSceneDefinition NintendoDsScene { get; set; }
     }

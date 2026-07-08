@@ -175,9 +175,8 @@ namespace city.rendering.tools {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    SceneId = RenderingSceneGenerator.ColoredCubeGridNintendoDsSceneId,
-                    UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont)
+                    UseDefaultBottomOverlay = false,
+                    BottomScreenRootEntities = Array.Empty<Entity>()
                 },
                 RootEntities = rootEntities
             };
@@ -252,7 +251,7 @@ namespace city.rendering.tools {
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.AddComponent(new FPSComponent {
                 Font = ResolveRequiredEditorFont(),
-                FontScale = 2f
+                FontScale = 1f
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             entity.AddComponent(new DemoDiscLightToggleComponent());

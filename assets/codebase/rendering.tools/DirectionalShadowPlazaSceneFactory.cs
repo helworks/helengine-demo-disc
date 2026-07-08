@@ -84,7 +84,6 @@ namespace city.rendering.tools {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    SceneId = RenderingSceneGenerator.DirectionalShadowPlazaNintendoDsSceneId,
                     UseDefaultBottomOverlay = true,
                     BottomScreenRootEntities = instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont)
                 },

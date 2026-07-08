@@ -44,14 +44,9 @@ namespace city.physics.tools {
         public const string RenderOnlySlopeSceneId = "scenes/physics/test_scene_render_only_slope.helen";
 
         /// <summary>
-        /// Relative scene id for the render-only matrix probe validation scene.
+        /// Relative scene id for the render-only matrix render validation scene.
         /// </summary>
-        public const string RenderMatrixProbeSceneId = "scenes/physics/test_scene_render_matrix_probe.helen";
-
-        /// <summary>
-        /// Relative scene id for the render-only motion probe validation scene.
-        /// </summary>
-        public const string RenderMotionProbeSceneId = "scenes/physics/test_scene_render_motion_probe.helen";
+        public const string MatrixRenderSceneId = "scenes/physics/test_scene_matrix_render.helen";
 
         /// <summary>
         /// Relative scene id for the mixed dynamic box and sphere stack validation scene.
@@ -95,8 +90,7 @@ namespace city.physics.tools {
             DynamicSphereStackSceneId,
             StrictRotatedBoxCompareSceneId,
             RenderOnlySlopeSceneId,
-            RenderMatrixProbeSceneId,
-            RenderMotionProbeSceneId,
+            MatrixRenderSceneId,
             DynamicMixedStackSceneId,
             KinematicPushSceneId,
             MeshGroundStabilitySceneId,

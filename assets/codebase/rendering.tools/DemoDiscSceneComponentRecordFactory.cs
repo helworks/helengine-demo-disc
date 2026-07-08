@@ -1,3 +1,4 @@
+using city.menu;
 using helengine.editor;
 
 namespace city.rendering.tools {
@@ -5,11 +6,6 @@ namespace city.rendering.tools {
     /// Creates shared scripted scene component records used across the rendering showcase scenes.
     /// </summary>
     public static class DemoDiscSceneComponentRecordFactory {
-        /// <summary>
-        /// Stable runtime component type id for the demo-disc return-to-menu behavior.
-        /// </summary>
-        const string ReturnToMainMenuComponentTypeId = "city.menu.DemoDiscReturnToMenuComponent, gameplay";
-
         /// <summary>
         /// Stable project-relative body-font path used by the demo-disc showcase overlays and labels.
         /// </summary>
@@ -35,18 +31,9 @@ namespace city.rendering.tools {
             if (componentIndex < 0) {
                 throw new ArgumentOutOfRangeException(nameof(componentIndex), "Component index must be non-negative.");
             }
-
-            using MemoryStream stream = new MemoryStream();
-            using EngineBinaryWriter writer = EngineBinaryWriter.Create(stream, EngineBinaryEndianness.LittleEndian);
-            writer.WriteByte(AutomaticScriptComponentRuntimeDeserializer.CurrentVersion);
-            writer.WriteInt32(1);
-            writer.WriteByte(0);
-
-            return new SceneComponentAssetRecord {
-                ComponentTypeId = ReturnToMainMenuComponentTypeId,
-                ComponentIndex = componentIndex,
-                Payload = stream.ToArray()
-            };
+            
+            DemoDiscReturnToMenuComponent returnToMainMenuComponent = new DemoDiscReturnToMenuComponent();
+            return AutomaticDescriptor.SerializeComponent(returnToMainMenuComponent, componentIndex, null);
         }
 
         /// <summary>

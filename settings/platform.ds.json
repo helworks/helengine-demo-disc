@@ -1,27 +1,27 @@
 {
   "platformId": "ds",
   "build": {
-    "selectedBuildProfileId": "ds-default",
+    "selectedBuildProfileId": "debug",
     "textureScalePercent": 100,
     "shaderVariantPruningEnabled": true,
-    "selectedOptionValues": {}
-  },
-  "graphics": {
-    "selectedGraphicsProfileId": "ds-main-2d",
-    "defaultWidth": 256,
-    "defaultHeight": 192,
-    "vSyncEnabled": true,
-    "fullscreenEnabled": true,
-    "rendererDepthPrepassMode": 0,
-    "rendererShadowQualityTier": "disabled",
-    "rendererHdrEnabled": false,
-    "rendererPostProcessTier": 0,
     "selectedOptionValues": {
-      "screen-layout": "main-top-sub-bottom"
+      "enable-native-runtime-diagnostics": "true"
     }
   },
+  "graphics": {
+    "selectedGraphicsProfileId": "",
+    "defaultWidth": 1280,
+    "defaultHeight": 720,
+    "vSyncEnabled": true,
+    "fullscreenEnabled": false,
+    "rendererDepthPrepassMode": 0,
+    "rendererShadowQualityTier": "medium",
+    "rendererHdrEnabled": true,
+    "rendererPostProcessTier": 2,
+    "selectedOptionValues": {}
+  },
   "codegen": {
-    "selectedCodegenProfileId": "default",
+    "selectedCodegenProfileId": "",
     "selectedOptionValues": {}
   },
   "input": {

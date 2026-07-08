@@ -3,3 +3,31 @@ cache/
 output/
 user_settings/
 .worktrees/
+
+# Generated/cooked artifacts
+assets/.generated-build/
+
+# Local platform builds
+3ds-build/
+ds-build/
+ds-build-*/
+ds-generic-feature-overrides/
+ds-runtime-feature-manifest-pass*/
+ds-size-*/
+gamecube-build/
+ps2-build/
+psp-build/
+psvita-build/
+vita-build/
+wii-build/
+wiiu-build/
+wiiu-build-fixcheck/
+windows-build/
+windows-build-*/
+
+# Local build logs
+*.log
+
+# Local .NET build output
+bin/
+obj/

@@ -122,7 +122,6 @@ namespace city.rendering.tools {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    SceneId = RenderingSceneGenerator.AxisTest2NintendoDsSceneId,
                     UseDefaultBottomOverlay = true,
                     BottomScreenRootEntities = instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont)
                 },
@@ -261,6 +260,10 @@ namespace city.rendering.tools {
                 ShadowMapMode = ShadowMapMode.Forced,
                 ShadowStrength = 1f,
                 ShadowDistance = 32f
+            });
+            entity.AddComponent(new gameplay.rendering.AxisRotationComponent {
+                Axis = new float3(1f, 0f, 0f),
+                AngularSpeedRadiansPerSecond = ArrowAngularSpeedRadians
             });
             return entity;
         }

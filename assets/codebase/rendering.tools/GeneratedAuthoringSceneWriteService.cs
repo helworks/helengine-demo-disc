@@ -8,15 +8,39 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class GeneratedAuthoringSceneWriteService {
         /// <summary>
+        /// Stable platform identifiers used by the Nintendo handheld scene augmentation path.
+        /// </summary>
+        static readonly string[] NintendoHandheldPlatformIds = ["ds", "3ds"];
+
+        /// <summary>
         /// Shared Nintendo DS scaffold builder used to derive companion scenes from generated showcase roots.
         /// </summary>
         readonly NintendoDsRenderingSceneScaffoldFactory NintendoDsRenderingSceneScaffoldFactoryValue;
 
         /// <summary>
+        /// High-level editor helper used to author platform-exclusive entity subtrees without touching low-level save metadata directly.
+        /// </summary>
+        readonly PlatformSceneAuthoringHelperService PlatformSceneAuthoringHelperServiceValue;
+
+        /// <summary>
+        /// In-memory generated scene clone service used to duplicate top-screen roots before the handheld scaffold mutates them.
+        /// </summary>
+        readonly GeneratedSceneEntityCloneService GeneratedSceneEntityCloneServiceValue;
+
+        /// <summary>
+        /// Resolver backed by the currently loaded city gameplay assemblies so temporary clone round-trips can restore project-authored components.
+        /// </summary>
+        readonly IScriptTypeResolver ScriptTypeResolverValue;
+
+        /// <summary>
         /// Initializes one generated authored-scene writer.
         /// </summary>
-        public GeneratedAuthoringSceneWriteService() {
+        /// <param name="scriptTypeResolver">Optional resolver used to restore project-authored components during temporary clone loads.</param>
+        public GeneratedAuthoringSceneWriteService(IScriptTypeResolver scriptTypeResolver = null) {
             NintendoDsRenderingSceneScaffoldFactoryValue = new NintendoDsRenderingSceneScaffoldFactory();
+            PlatformSceneAuthoringHelperServiceValue = new PlatformSceneAuthoringHelperService();
+            GeneratedSceneEntityCloneServiceValue = new GeneratedSceneEntityCloneService();
+            ScriptTypeResolverValue = scriptTypeResolver;
         }
 
         /// <summary>
@@ -42,69 +66,62 @@ namespace city.rendering.tools {
 
             try {
                 AddUniqueRoots(rootsToDispose, sceneDefinition.RootEntities);
-                SaveSceneAsset(fullProjectRootPath, saveService, sceneDefinition.SceneId, sceneDefinition.SceneSettings, sceneDefinition.RootEntities);
+                Entity[] rootsToWrite = sceneDefinition.RootEntities;
                 if (sceneDefinition.NintendoDsScene != null) {
-                    FontAsset bottomOverlayFont = ResolveRequiredNintendoDsDebugFont();
-                    Entity[] nintendoDsSceneRoots = sceneDefinition.NintendoDsScene.RootEntities;
-                    if (nintendoDsSceneRoots == null || nintendoDsSceneRoots.Length < 1) {
-                        nintendoDsSceneRoots = NintendoDsRenderingSceneScaffoldFactoryValue.CreateSceneRoots(
-                            sceneDefinition.RootEntities,
-                            sceneDefinition.NintendoDsScene.UseDefaultBottomOverlay,
-                            sceneDefinition.NintendoDsScene.BottomScreenRootEntities ?? Array.Empty<Entity>(),
-                            bottomOverlayFont);
-                    }
-
+                    Entity[] nintendoDsSceneRoots = BuildNintendoHandheldSceneRoots(
+                        fullProjectRootPath,
+                        saveService,
+                        sceneDefinition);
                     AddUniqueRoots(rootsToDispose, nintendoDsSceneRoots);
-                    SaveSceneAsset(fullProjectRootPath, saveService, sceneDefinition.NintendoDsScene.SceneId, sceneDefinition.SceneSettings, nintendoDsSceneRoots);
+                    ExcludeRootsFromNintendoHandheldPlatforms(fullProjectRootPath, sceneDefinition.RootEntities);
+                    RestrictRootsToNintendoHandheldPlatforms(fullProjectRootPath, nintendoDsSceneRoots);
+                    rootsToWrite = CombineRootSets(sceneDefinition.RootEntities, nintendoDsSceneRoots);
                 }
+
+                SaveSceneAsset(fullProjectRootPath, saveService, sceneDefinition.SceneId, sceneDefinition.SceneSettings, rootsToWrite);
             } finally {
                 DisposeGeneratedRoots(rootsToDispose);
             }
         }
 
         /// <summary>
-        /// Writes one Nintendo DS companion scene from already-authored top-screen roots through the shared DS scaffold path.
+        /// Builds the Nintendo handheld root augmentation that should be merged into the canonical scene asset before it is saved.
         /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        /// <param name="sceneId">Project-relative Nintendo DS scene id to persist.</param>
-        /// <param name="sceneSettings">Scene-level settings copied from the authored source scene.</param>
-        /// <param name="topScreenRoots">Live authored roots that should remain on the top screen.</param>
-        /// <param name="useDefaultBottomOverlay">True when the standard bottom return overlay should be emitted.</param>
-        /// <param name="bottomScreenRootEntities">Optional custom bottom-screen roots that should be attached beneath the bottom viewport root.</param>
-        public void WriteNintendoDsCompanionScene(
-            string projectRootPath,
-            string sceneId,
-            SceneSettingsAsset sceneSettings,
-            Entity[] topScreenRoots,
-            bool useDefaultBottomOverlay,
-            Entity[] bottomScreenRootEntities) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            } else if (string.IsNullOrWhiteSpace(sceneId)) {
-                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
-            } else if (topScreenRoots == null) {
-                throw new ArgumentNullException(nameof(topScreenRoots));
-            } else if (bottomScreenRootEntities == null) {
-                throw new ArgumentNullException(nameof(bottomScreenRootEntities));
+        /// <param name="fullProjectRootPath">Absolute project root path.</param>
+        /// <param name="saveService">Scene save service used to materialize clone roots when the scaffold needs to mutate them.</param>
+        /// <param name="sceneDefinition">Generated scene definition being persisted.</param>
+        /// <returns>Nintendo handheld-only roots that should be appended to the canonical scene.</returns>
+        Entity[] BuildNintendoHandheldSceneRoots(
+            string fullProjectRootPath,
+            SceneSaveService saveService,
+            GeneratedAuthoringSceneDefinition sceneDefinition) {
+            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
+            } else if (saveService == null) {
+                throw new ArgumentNullException(nameof(saveService));
+            } else if (sceneDefinition == null) {
+                throw new ArgumentNullException(nameof(sceneDefinition));
+            } else if (sceneDefinition.NintendoDsScene == null) {
+                throw new InvalidOperationException("Nintendo handheld scene roots require a Nintendo DS scene definition.");
             }
 
-            string fullProjectRootPath = Path.GetFullPath(projectRootPath);
-            ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create();
-            SceneSaveService saveService = new SceneSaveService(fullProjectRootPath, persistenceRegistry);
+            Entity[] authoredNintendoHandheldRoots = sceneDefinition.NintendoDsScene.RootEntities;
+            if (authoredNintendoHandheldRoots != null && authoredNintendoHandheldRoots.Length > 0) {
+                return authoredNintendoHandheldRoots;
+            }
+
             FontAsset bottomOverlayFont = ResolveRequiredNintendoDsDebugFont();
-            Entity[] nintendoDsSceneRoots = NintendoDsRenderingSceneScaffoldFactoryValue.CreateSceneRoots(
-                topScreenRoots,
-                useDefaultBottomOverlay,
-                bottomScreenRootEntities,
+            Entity[] clonedTopScreenRoots = CloneSceneRoots(
+                fullProjectRootPath,
+                saveService,
+                sceneDefinition.SceneId,
+                sceneDefinition.SceneSettings,
+                sceneDefinition.RootEntities);
+            return NintendoDsRenderingSceneScaffoldFactoryValue.CreateSceneRoots(
+                clonedTopScreenRoots,
+                sceneDefinition.NintendoDsScene.UseDefaultBottomOverlay,
+                sceneDefinition.NintendoDsScene.BottomScreenRootEntities ?? Array.Empty<Entity>(),
                 bottomOverlayFont);
-            List<Entity> rootsToDispose = new List<Entity>();
-
-            try {
-                AddUniqueRootsExcept(rootsToDispose, nintendoDsSceneRoots, topScreenRoots);
-                SaveSceneAsset(fullProjectRootPath, saveService, sceneId, sceneSettings, nintendoDsSceneRoots);
-            } finally {
-                DisposeGeneratedRoots(rootsToDispose);
-            }
         }
 
         /// <summary>
@@ -160,6 +177,278 @@ namespace city.rendering.tools {
             } finally {
                 RestoreHiddenUserSceneRoots(hiddenRootSnapshots);
             }
+        }
+
+        /// <summary>
+        /// Clones one generated scene root set through the editor serialization pipeline so Nintendo handheld scaffolding may mutate copies without rewriting the common authored roots.
+        /// </summary>
+        /// <param name="fullProjectRootPath">Absolute project root path.</param>
+        /// <param name="saveService">Scene save service used to serialize the supplied roots.</param>
+        /// <param name="sceneId">Stable scene id being cloned.</param>
+        /// <param name="sceneSettings">Scene settings persisted alongside the cloned roots.</param>
+        /// <param name="sourceRoots">Root entities that should be cloned.</param>
+        /// <returns>Cloned editor roots loaded back from the temporary scene asset.</returns>
+        EditorEntity[] CloneSceneRoots(
+            string fullProjectRootPath,
+            SceneSaveService saveService,
+            string sceneId,
+            SceneSettingsAsset sceneSettings,
+            Entity[] sourceRoots) {
+            if (sourceRoots == null) {
+                throw new ArgumentNullException(nameof(sourceRoots));
+            }
+            _ = fullProjectRootPath;
+            _ = saveService;
+            _ = sceneId;
+            _ = sceneSettings;
+
+            EditorEntity[] clonedRoots = GeneratedSceneEntityCloneServiceValue.CloneRoots(sourceRoots);
+            AssignFreshGeneratedEntityIds(clonedRoots);
+            return clonedRoots;
+        }
+
+        /// <summary>
+        /// Builds the temporary project-relative clone path used by the handheld authoring clone pass.
+        /// </summary>
+        /// <param name="sceneId">Stable scene id being cloned.</param>
+        /// <returns>Project-relative temporary scene path used for the clone pass.</returns>
+        static string BuildTemporaryCloneSceneRelativePath(string sceneId) {
+            if (string.IsNullOrWhiteSpace(sceneId)) {
+                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            }
+
+            string sceneFileName = Path.GetFileNameWithoutExtension(sceneId.Replace('\\', '/'));
+            if (string.IsNullOrWhiteSpace(sceneFileName)) {
+                sceneFileName = "scene";
+            }
+
+            return ".generated-build/scene-clones/" + sceneFileName + "_" + Guid.NewGuid().ToString("N") + ".helen";
+        }
+
+        /// <summary>
+        /// Creates the scene-file load service used by generated-scene clone and rewrite flows, including project script and file-backed asset resolution.
+        /// </summary>
+        /// <param name="fullProjectRootPath">Absolute city project root path.</param>
+        /// <returns>Configured scene-file load service.</returns>
+        SceneFileLoadService CreateSceneFileLoadService(string fullProjectRootPath) {
+            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
+            } else if (Core.Instance == null) {
+                throw new InvalidOperationException("Creating a generated-scene load service requires an active editor core.");
+            }
+
+            ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create(ScriptTypeResolverValue);
+            AssetImportManager assetImportManager = CreateGeneratedSceneAssetImportManager(fullProjectRootPath);
+            EditorFileSystemModelResolver fileSystemModelResolver = new EditorFileSystemModelResolver(assetImportManager);
+            EditorFileSystemFontResolver fileSystemFontResolver = new EditorFileSystemFontResolver(assetImportManager);
+            EditorFileSystemTextureResolver fileSystemTextureResolver = new EditorFileSystemTextureResolver(assetImportManager);
+            EditorSceneAssetReferenceResolver referenceResolver = new EditorSceneAssetReferenceResolver(
+                assetImportManager.ContentManager,
+                fullProjectRootPath,
+                fileSystemModelResolver,
+                fileSystemFontResolver,
+                fileSystemTextureResolver);
+            return new SceneFileLoadService(fullProjectRootPath, persistenceRegistry, referenceResolver);
+        }
+
+        /// <summary>
+        /// Creates the asset import manager used by generated-scene rewrite flows so temporary scene loads can resolve file-backed model, font, and texture references.
+        /// </summary>
+        /// <param name="fullProjectRootPath">Absolute city project root path.</param>
+        /// <returns>Configured asset import manager with the editor host's default importer registrations.</returns>
+        public static AssetImportManager CreateGeneratedSceneAssetImportManager(string fullProjectRootPath) {
+            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
+            }
+
+            string fullAssetsRootPath = Path.Combine(Path.GetFullPath(fullProjectRootPath), "assets");
+            ContentManager assetContentManager = new ContentManager(new HostFileSystemContentStreamSource(fullAssetsRootPath));
+            EditorContentManagerConfiguration.ConfigureEditorContentManager(assetContentManager);
+            AssetImportManager assetImportManager = new AssetImportManager(fullProjectRootPath, assetContentManager);
+            IReadOnlyList<IAssetImporterRegistration> importerRegistrations = ResolveDefaultEditorImporterRegistrations();
+            for (int index = 0; index < importerRegistrations.Count; index++) {
+                IAssetImporterRegistration importerRegistration = importerRegistrations[index];
+                if (importerRegistration == null) {
+                    throw new InvalidOperationException("Default editor importer registrations must not contain null entries.");
+                }
+
+                importerRegistration.Register(assetImportManager);
+            }
+
+            return assetImportManager;
+        }
+
+        /// <summary>
+        /// Resolves the editor host's default importer registration set through reflection so generated scene tooling can share the same importer coverage in headless command mode.
+        /// </summary>
+        /// <returns>Default importer registrations exposed by the editor host.</returns>
+        static IReadOnlyList<IAssetImporterRegistration> ResolveDefaultEditorImporterRegistrations() {
+            Assembly appAssembly = Assembly.Load("helengine.editor.app");
+            Type importerFactoryType = appAssembly.GetType("helengine.editor.app.EditorHostImporterFactory", throwOnError: true);
+            MethodInfo createDefaultMethod = importerFactoryType.GetMethod("CreateDefault", BindingFlags.Public | BindingFlags.Static);
+            if (createDefaultMethod == null) {
+                throw new InvalidOperationException("EditorHostImporterFactory.CreateDefault was not found.");
+            }
+
+            object result = createDefaultMethod.Invoke(null, Array.Empty<object>());
+            if (result is IReadOnlyList<IAssetImporterRegistration> importerRegistrations) {
+                return importerRegistrations;
+            }
+
+            throw new InvalidOperationException("EditorHostImporterFactory.CreateDefault did not return importer registrations.");
+        }
+
+        /// <summary>
+        /// Excludes the common root set from Nintendo handheld builds so only the handheld augmentation remains after platform pruning.
+        /// </summary>
+        /// <param name="fullProjectRootPath">Absolute project root path.</param>
+        /// <param name="roots">Common scene roots that should not survive on Nintendo handheld builds.</param>
+        void ExcludeRootsFromNintendoHandheldPlatforms(string fullProjectRootPath, Entity[] roots) {
+            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
+            } else if (roots == null) {
+                throw new ArgumentNullException(nameof(roots));
+            }
+
+            for (int index = 0; index < roots.Length; index++) {
+                if (roots[index] == null) {
+                    continue;
+                }
+
+                EditorEntity editorRootEntity = roots[index] as EditorEntity;
+                if (editorRootEntity == null) {
+                    throw new InvalidOperationException("Generated scene roots must be editor entities before platform-exclusive authoring can be applied.");
+                }
+
+                PlatformSceneAuthoringHelperServiceValue.ExcludeEntitySubtreeFromPlatforms(
+                    fullProjectRootPath,
+                    editorRootEntity,
+                    NintendoHandheldPlatformIds);
+            }
+        }
+
+        /// <summary>
+        /// Restricts the Nintendo handheld augmentation roots so they only survive on DS and 3DS builds.
+        /// </summary>
+        /// <param name="fullProjectRootPath">Absolute project root path.</param>
+        /// <param name="roots">Nintendo handheld augmentation roots.</param>
+        void RestrictRootsToNintendoHandheldPlatforms(string fullProjectRootPath, Entity[] roots) {
+            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
+            } else if (roots == null) {
+                throw new ArgumentNullException(nameof(roots));
+            }
+
+            for (int index = 0; index < roots.Length; index++) {
+                if (roots[index] == null) {
+                    continue;
+                }
+
+                EditorEntity editorRootEntity = roots[index] as EditorEntity;
+                if (editorRootEntity == null) {
+                    throw new InvalidOperationException("Nintendo handheld augmentation roots must be editor entities before platform-exclusive authoring can be applied.");
+                }
+
+                PlatformSceneAuthoringHelperServiceValue.RestrictEntitySubtreeToPlatforms(
+                    fullProjectRootPath,
+                    editorRootEntity,
+                    NintendoHandheldPlatformIds);
+            }
+        }
+
+        /// <summary>
+        /// Combines two root arrays into one deterministic root set while preserving the original order inside each source array.
+        /// </summary>
+        /// <param name="commonRoots">Common scene roots written for every non-handheld platform.</param>
+        /// <param name="nintendoHandheldRoots">Nintendo handheld-only roots appended to the canonical scene.</param>
+        /// <returns>Combined root array written to the canonical scene asset.</returns>
+        static Entity[] CombineRootSets(Entity[] commonRoots, Entity[] nintendoHandheldRoots) {
+            if (commonRoots == null) {
+                throw new ArgumentNullException(nameof(commonRoots));
+            } else if (nintendoHandheldRoots == null) {
+                throw new ArgumentNullException(nameof(nintendoHandheldRoots));
+            }
+
+            Entity[] combinedRoots = new Entity[commonRoots.Length + nintendoHandheldRoots.Length];
+            Array.Copy(commonRoots, 0, combinedRoots, 0, commonRoots.Length);
+            Array.Copy(nintendoHandheldRoots, 0, combinedRoots, commonRoots.Length, nintendoHandheldRoots.Length);
+            return combinedRoots;
+        }
+
+        /// <summary>
+        /// Assigns fresh non-zero scene entity ids across one cloned root set so the handheld augmentation can coexist with the common roots inside one canonical scene asset.
+        /// </summary>
+        /// <param name="roots">Cloned root entities that should receive fresh ids.</param>
+        void AssignFreshGeneratedEntityIds(IReadOnlyList<EditorEntity> roots) {
+            if (roots == null) {
+                throw new ArgumentNullException(nameof(roots));
+            }
+
+            EditorSceneEntityIdAllocator entityIdAllocator = ResolveRequiredSceneEntityIdAllocator();
+            for (int index = 0; index < roots.Count; index++) {
+                if (roots[index] == null) {
+                    continue;
+                }
+
+                AssignFreshGeneratedEntityIds(roots[index], entityIdAllocator);
+            }
+        }
+
+        /// <summary>
+        /// Assigns fresh non-zero scene entity ids throughout one cloned editor subtree.
+        /// </summary>
+        /// <param name="entity">Cloned editor subtree root that should receive fresh ids.</param>
+        /// <param name="entityIdAllocator">Allocator that owns numeric scene entity ids for the active editor host.</param>
+        void AssignFreshGeneratedEntityIds(EditorEntity entity, EditorSceneEntityIdAllocator entityIdAllocator) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (entityIdAllocator == null) {
+                throw new ArgumentNullException(nameof(entityIdAllocator));
+            }
+
+            FindRequiredEntitySaveComponent(entity).EntityId = entityIdAllocator.Allocate();
+            if (entity.Children == null) {
+                return;
+            }
+
+            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                if (entity.Children[childIndex] is EditorEntity childEntity) {
+                    AssignFreshGeneratedEntityIds(childEntity, entityIdAllocator);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Resolves the active editor-owned scene entity id allocator required for cloned handheld augmentation roots.
+        /// </summary>
+        /// <returns>Active editor-owned scene entity id allocator.</returns>
+        static EditorSceneEntityIdAllocator ResolveRequiredSceneEntityIdAllocator() {
+            if (Core.Instance is not EditorCore editorCore) {
+                throw new InvalidOperationException("Cloning generated handheld scene roots requires an active EditorCore.");
+            } else if (editorCore.SceneEntityIdAllocator == null) {
+                throw new InvalidOperationException("Cloning generated handheld scene roots requires EditorCore.SceneEntityIdAllocator.");
+            }
+
+            return editorCore.SceneEntityIdAllocator;
+        }
+
+        /// <summary>
+        /// Resolves the hidden save component attached to one cloned editor entity.
+        /// </summary>
+        /// <param name="entity">Editor entity whose save component should be returned.</param>
+        /// <returns>Attached hidden save component.</returns>
+        static EntitySaveComponent FindRequiredEntitySaveComponent(EditorEntity entity) {
+            if (entity == null || entity.Components == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is EntitySaveComponent saveComponent) {
+                    return saveComponent;
+                }
+            }
+
+            throw new InvalidOperationException("Generated handheld scene roots must carry one EntitySaveComponent before they can be cloned.");
         }
 
         /// <summary>
@@ -369,29 +658,5 @@ namespace city.rendering.tools {
             }
         }
 
-        /// <summary>
-        /// Adds one root-entity set to the pending disposal list while excluding caller-owned shared roots that should remain under external ownership.
-        /// </summary>
-        /// <param name="pendingRoots">Accumulated root entities that should be disposed.</param>
-        /// <param name="candidateRoots">Root entities produced by the current scene-generation step.</param>
-        /// <param name="excludedRoots">Caller-owned root entities that must not be disposed by this service.</param>
-        void AddUniqueRootsExcept(List<Entity> pendingRoots, Entity[] candidateRoots, Entity[] excludedRoots) {
-            if (pendingRoots == null) {
-                throw new ArgumentNullException(nameof(pendingRoots));
-            } else if (candidateRoots == null) {
-                return;
-            } else if (excludedRoots == null) {
-                throw new ArgumentNullException(nameof(excludedRoots));
-            }
-
-            for (int index = 0; index < candidateRoots.Length; index++) {
-                Entity rootEntity = candidateRoots[index];
-                if (rootEntity == null || pendingRoots.Contains(rootEntity) || Array.IndexOf(excludedRoots, rootEntity) >= 0) {
-                    continue;
-                }
-
-                pendingRoots.Add(rootEntity);
-            }
-        }
     }
 }

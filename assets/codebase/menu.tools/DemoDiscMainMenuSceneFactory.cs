@@ -630,14 +630,6 @@ namespace city.menu.tools {
             };
             entity.AddComponent(spriteComponent);
             ApplyTextureReference(entity, spriteComponent, overlayImage.TexturePath);
-
-            AnimationPlayerComponent animationPlayerComponent = new AnimationPlayerComponent {
-                Clip = LoadRequiredAnimationClipAsset(DemoDiscLogoIdleAnimationRelativePath),
-                PlayAutomatically = true,
-                ShouldLoop = true
-            };
-            entity.AddComponent(animationPlayerComponent);
-            ApplyAnimationClipReference(entity, animationPlayerComponent, DemoDiscLogoIdleAnimationRelativePath);
         }
 
         /// <summary>

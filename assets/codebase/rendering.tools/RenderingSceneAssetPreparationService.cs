@@ -55,13 +55,16 @@ namespace city.rendering.tools {
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             EditorProjectBootstrapContext bootstrap = EditorProjectBootstrapper.Create(fullProjectRootPath);
             ForwardSolidColorMaterialFactory forwardSolidColorMaterialFactory = new ForwardSolidColorMaterialFactory();
+            TiltTrialCourseMaterialFactory tiltTrialCourseMaterialFactory = new TiltTrialCourseMaterialFactory();
             forwardSolidColorMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
+            tiltTrialCourseMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             RuntimeModel generatedCubeModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.CubeAssetId);
             RuntimeModel generatedPlaneModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.PlaneAssetId);
             RuntimeModel generatedSphereModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.SphereAssetId);
             RuntimeModel generatedArrowModel = LoadImportedModelRuntime(projectRootPath, "models/rendering/axis_test/directional_light_arrow.obj");
             RuntimeMaterial generatedStandardMaterial = EngineGeneratedMaterialCache.GetRuntimeMaterial(EngineGeneratedMaterialCache.StandardAssetId);
-            RuntimeMaterial tiltTrialPlayerSphereWalnutMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/tilt_trial/PlayerSphereWalnut.hasset");
+            RuntimeMaterial tiltTrialPlayerSphereMarbleMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/tilt_trial/PlayerSphereMarble.hasset");
+            RuntimeMaterial tiltTrialCourseMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, TiltTrialCourseMaterialFactory.MaterialRelativePath);
             RuntimeMaterial generatedCubeTestSolidMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, ForwardSolidColorMaterialFactory.MaterialRelativePath);
             RuntimeMaterial[] axisMaterials = new[] {
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/X.hasset"),
@@ -84,7 +87,8 @@ namespace city.rendering.tools {
                 GeneratedPlaneModel = generatedPlaneModel,
                 GeneratedSphereModel = generatedSphereModel,
                 GeneratedStandardMaterial = generatedStandardMaterial,
-                TiltTrialPlayerSphereWalnutMaterial = tiltTrialPlayerSphereWalnutMaterial,
+                TiltTrialPlayerSphereMarbleMaterial = tiltTrialPlayerSphereMarbleMaterial,
+                TiltTrialCourseMaterial = tiltTrialCourseMaterial,
                 GeneratedCubeTestSolidMaterial = generatedCubeTestSolidMaterial,
                 GeneratedArrowModel = generatedArrowModel,
                 AxisMaterials = axisMaterials,
@@ -284,7 +288,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Assets root path must be provided.", nameof(assetsRootPath));
             }
 
-            ContentManager contentManager = new ContentManager(assetsRootPath);
+            ContentManager contentManager = new ContentManager(new HostFileSystemContentStreamSource(assetsRootPath));
             AssetImportManager importManager = new AssetImportManager(projectRootPath, contentManager);
             IReadOnlyList<IAssetImporterRegistration> importers = CreateDefaultImporters();
             for (int index = 0; index < importers.Count; index++) {

@@ -1,6 +1,6 @@
 namespace city.game {
     /// <summary>
-    /// Rotates the authored Tilt Trial course as one kinematic group so the player sphere moves through normal rigid-body contact instead of scripted translation.
+    /// Drives the playable Tilt Trial sphere with camera-relative planar velocity steering while leaving the authored course fixed in place.
     /// </summary>
     public sealed class DemoTiltStageComponent : UpdateComponent {
         /// <summary>
@@ -9,58 +9,66 @@ namespace city.game {
         const double GamepadDeadzone = 0.18d;
 
         /// <summary>
-        /// Gets or sets the maximum absolute stage tilt applied on each driven axis in radians.
+        /// Smallest planar vector length treated as valid when deriving camera-relative movement directions.
         /// </summary>
-        public float MaxTiltRadians { get; set; }
+        const double MinimumPlanarLengthSquared = 0.0000000001d;
 
         /// <summary>
-        /// Gets or sets the angular response speed used to ease the stage toward the requested tilt target.
+        /// Canonical local forward axis used to derive one camera-relative planar forward vector from the orbit-camera orientation.
         /// </summary>
-        public float TiltResponseRadiansPerSecond { get; set; }
+        static readonly float3 CameraForwardAxis = new float3(0f, 0f, -1f);
 
         /// <summary>
-        /// Stores the direct stage child entities that carry kinematic rigid bodies.
+        /// Canonical local right axis used to derive one camera-relative planar right vector from the orbit-camera orientation.
         /// </summary>
-        List<Entity> StagePieceEntities;
+        static readonly float3 CameraRightAxis = new float3(1f, 0f, 0f);
 
         /// <summary>
-        /// Stores the authored local positions for the tracked stage pieces before runtime tilt is applied.
+        /// Stores the resolved runtime playable sphere entity once scene lookup succeeds.
         /// </summary>
-        List<float3> RestLocalPositions;
+        Entity PlayerSphereEntity;
 
         /// <summary>
-        /// Stores the authored local orientations for the tracked stage pieces before runtime tilt is applied.
+        /// Stores the authored rigid-body component that backs the playable sphere.
         /// </summary>
-        List<float4> RestLocalOrientations;
+        RigidBody3DComponent PlayerSphereRigidBody;
 
         /// <summary>
-        /// Stores the current stage pitch in radians.
+        /// Stores the resolved runtime orbit-camera entity once scene lookup succeeds.
         /// </summary>
-        float CurrentPitchRadians;
+        Entity OrbitCameraEntity;
 
         /// <summary>
-        /// Stores the current stage roll in radians.
+        /// Stores the resolved follow-camera component that owns the active Tilt Trial orbit state.
         /// </summary>
-        float CurrentRollRadians;
+        DemoTiltFollowCameraComponent FollowCameraComponent;
 
         /// <summary>
-        /// Tracks whether the supported kinematic stage pieces have already been gathered from the parent entity.
+        /// Gets or sets the maximum planar speed applied to the driven sphere while input is held.
         /// </summary>
-        bool IsStageBound;
+        public float MaximumPlanarSpeed { get; set; }
 
         /// <summary>
-        /// Initializes one Tilt Trial stage controller with a modest responsive tilt envelope.
+        /// Gets or sets the maximum planar acceleration used to approach the requested target velocity.
+        /// </summary>
+        public float PlanarAccelerationUnitsPerSecond { get; set; }
+
+        /// <summary>
+        /// Gets or sets the normalized stick threshold used to ignore left-stick drift during gameplay.
+        /// </summary>
+        public float GamepadDeadzoneThreshold { get; set; }
+
+        /// <summary>
+        /// Initializes one Tilt Trial ball-drive controller with moderated planar movement defaults tuned for the close follow camera.
         /// </summary>
         public DemoTiltStageComponent() {
-            MaxTiltRadians = 0.2617994f;
-            TiltResponseRadiansPerSecond = 1.75f;
-            StagePieceEntities = new List<Entity>();
-            RestLocalPositions = new List<float3>();
-            RestLocalOrientations = new List<float4>();
+            MaximumPlanarSpeed = 11.25f;
+            PlanarAccelerationUnitsPerSecond = 4.25f;
+            GamepadDeadzoneThreshold = (float)GamepadDeadzone;
         }
 
         /// <summary>
-        /// Advances the requested stage tilt from player input and pushes the resulting kinematic transforms back into BEPU before the next simulation step.
+        /// Resolves the active Tilt Trial runtime wiring, reads movement input, and steers the playable sphere without moving stage geometry.
         /// </summary>
         public override void Update() {
             base.Update();
@@ -69,149 +77,175 @@ namespace city.game {
                 throw new InvalidOperationException("DemoTiltStageComponent requires an attached stage root entity.");
             }
 
-            EnsureStageBound();
+            ResolveRuntimeDependenciesWhenNeeded();
 
-            Core core = Core.Instance ?? throw new InvalidOperationException("A core instance must exist before Tilt Trial stage updates can run.");
+            Core core = Core.Instance ?? throw new InvalidOperationException("A core instance must exist before Tilt Trial updates can run.");
             double elapsedSeconds = core.FrameDeltaSeconds;
-            double pitchInput = ResolvePitchInput(core.Input);
-            double rollInput = ResolveRollInput(core.Input);
-            float desiredPitchRadians = (float)(-pitchInput * MaxTiltRadians);
-            float desiredRollRadians = (float)(-rollInput * MaxTiltRadians);
-            CurrentPitchRadians = MoveToward(CurrentPitchRadians, desiredPitchRadians, TiltResponseRadiansPerSecond * (float)elapsedSeconds);
-            CurrentRollRadians = MoveToward(CurrentRollRadians, desiredRollRadians, TiltResponseRadiansPerSecond * (float)elapsedSeconds);
-            ApplyTiltToTrackedPieces(ResolveRequiredPhysicsWorld());
+            if (double.IsNaN(elapsedSeconds) || double.IsInfinity(elapsedSeconds) || elapsedSeconds < 0d) {
+                throw new ArgumentOutOfRangeException(nameof(core.FrameDeltaSeconds), "Tilt Trial updates require a finite non-negative frame delta.");
+            } else if (elapsedSeconds == 0d) {
+                return;
+            }
+
+            float2 inputAxes = ResolveMovementInput(core.Input);
+            if (inputAxes.X == 0f && inputAxes.Y == 0f) {
+                return;
+            }
+
+            PlayerSphereRigidBody.SetLinearVelocity(ResolveDrivenLinearVelocity(
+                PlayerSphereRigidBody.GetLinearVelocity(),
+                OrbitCameraEntity.Orientation,
+                inputAxes,
+                MaximumPlanarSpeed,
+                PlanarAccelerationUnitsPerSecond,
+                elapsedSeconds));
+            ResolveRequiredPhysicsWorld().SynchronizeDynamicBodyVelocity(PlayerSphereEntity);
         }
 
         /// <summary>
-        /// Gathers the direct child entities that participate in the Tilt Trial course as kinematic support geometry.
+        /// Resolves the world-space driven sphere velocity for one frame of camera-relative planar input while preserving the incoming vertical velocity.
         /// </summary>
-        void EnsureStageBound() {
-            if (IsStageBound) {
-                return;
-            } else if (Parent.Children == null) {
-                throw new InvalidOperationException("DemoTiltStageComponent requires an initialized child-entity list on the stage root.");
+        /// <param name="currentVelocity">Current rigid-body velocity before steering.</param>
+        /// <param name="cameraOrientation">Current orbit-camera orientation that defines movement heading.</param>
+        /// <param name="inputAxes">Raw horizontal and forward movement axes before diagonal normalization.</param>
+        /// <param name="maximumPlanarSpeed">Maximum requested planar speed in world units per second.</param>
+        /// <param name="planarAccelerationUnitsPerSecond">Maximum planar acceleration in world units per second squared.</param>
+        /// <param name="elapsedSeconds">Elapsed frame time in seconds.</param>
+        /// <returns>Driven world-space velocity after planar steering for the current frame.</returns>
+        public static float3 ResolveDrivenLinearVelocity(float3 currentVelocity, float4 cameraOrientation, float2 inputAxes, double maximumPlanarSpeed, double planarAccelerationUnitsPerSecond, double elapsedSeconds) {
+            if (double.IsNaN(maximumPlanarSpeed) || double.IsInfinity(maximumPlanarSpeed) || maximumPlanarSpeed < 0d) {
+                throw new ArgumentOutOfRangeException(nameof(maximumPlanarSpeed), "Maximum planar speed must be finite and non-negative.");
+            } else if (double.IsNaN(planarAccelerationUnitsPerSecond) || double.IsInfinity(planarAccelerationUnitsPerSecond) || planarAccelerationUnitsPerSecond < 0d) {
+                throw new ArgumentOutOfRangeException(nameof(planarAccelerationUnitsPerSecond), "Planar acceleration must be finite and non-negative.");
+            } else if (double.IsNaN(elapsedSeconds) || double.IsInfinity(elapsedSeconds) || elapsedSeconds < 0d) {
+                throw new ArgumentOutOfRangeException(nameof(elapsedSeconds), "Tilt Trial updates require a finite non-negative elapsed time.");
+            } else if (elapsedSeconds == 0d) {
+                return currentVelocity;
             }
 
-            StagePieceEntities.Clear();
-            RestLocalPositions.Clear();
-            RestLocalOrientations.Clear();
-            for (int childIndex = 0; childIndex < Parent.Children.Count; childIndex++) {
-                Entity child = Parent.Children[childIndex];
-                if (!IsKinematicStagePiece(child)) {
+            float3 targetPlanarVelocity = float3.Zero;
+            if (!(inputAxes.X == 0f && inputAxes.Y == 0f)) {
+                float3 planarForward = ResolveFlattenedPlanarAxis(float4.RotateVector(CameraForwardAxis, cameraOrientation), "forward");
+                float3 planarRight = ResolveFlattenedPlanarAxis(float4.RotateVector(CameraRightAxis, cameraOrientation), "right");
+                float3 rawMove = (planarRight * inputAxes.X) + (planarForward * inputAxes.Y);
+                float3 moveDirection = NormalizePlanarOrThrow(rawMove, "combined movement");
+                targetPlanarVelocity = moveDirection * (float)maximumPlanarSpeed;
+            }
+
+            float3 currentPlanarVelocity = new float3(currentVelocity.X, 0f, currentVelocity.Z);
+            float3 drivenPlanarVelocity = MovePlanarVelocityTowardTarget(
+                currentPlanarVelocity,
+                targetPlanarVelocity,
+                planarAccelerationUnitsPerSecond * elapsedSeconds);
+            return new float3(drivenPlanarVelocity.X, currentVelocity.Y, drivenPlanarVelocity.Z);
+        }
+
+        /// <summary>
+        /// Resolves the cached follow camera, followed sphere, and sphere rigid body required by the Tilt Trial controller.
+        /// </summary>
+        void ResolveRuntimeDependenciesWhenNeeded() {
+            ResolveFollowCameraWhenNeeded();
+            ResolvePlayerSphereWhenNeeded();
+
+            if (PlayerSphereRigidBody != null) {
+                return;
+            }
+
+            PlayerSphereRigidBody = FindRequiredRigidBodyComponent(PlayerSphereEntity);
+        }
+
+        /// <summary>
+        /// Resolves the active Tilt Trial follow-camera component and its owning camera entity from the live scene.
+        /// </summary>
+        void ResolveFollowCameraWhenNeeded() {
+            if (FollowCameraComponent != null && OrbitCameraEntity != null) {
+                return;
+            } else if (Core.Instance == null) {
+                throw new InvalidOperationException("A core instance must exist before Tilt Trial camera resolution can run.");
+            }
+
+            List<Entity> entities = Core.Instance.ObjectManager.Entities;
+            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
+                Entity entity = entities[entityIndex];
+                DemoTiltFollowCameraComponent component = FindFollowCameraComponentOrNull(entity);
+                if (component == null) {
                     continue;
                 }
 
-                StagePieceEntities.Add(child);
-                RestLocalPositions.Add(child.LocalPosition);
-                RestLocalOrientations.Add(child.LocalOrientation);
+                OrbitCameraEntity = entity;
+                FollowCameraComponent = component;
+                return;
             }
 
-            if (StagePieceEntities.Count < 1) {
-                throw new InvalidOperationException("DemoTiltStageComponent requires at least one direct kinematic stage child.");
-            }
-
-            IsStageBound = true;
+            throw new InvalidOperationException("DemoTiltStageComponent could not resolve the active DemoTiltFollowCameraComponent.");
         }
 
         /// <summary>
-        /// Returns whether one direct stage child is driven by the Tilt Trial controller.
+        /// Resolves the playable sphere entity from the serialized target reference owned by the active follow camera.
         /// </summary>
-        /// <param name="entity">Direct stage child under evaluation.</param>
-        /// <returns>True when the child carries a rigid body and therefore participates in stage motion.</returns>
-        bool IsKinematicStagePiece(Entity entity) {
-            if (entity == null || entity.Components == null) {
-                return false;
+        void ResolvePlayerSphereWhenNeeded() {
+            if (PlayerSphereEntity != null) {
+                return;
+            } else if (FollowCameraComponent == null) {
+                throw new InvalidOperationException("DemoTiltStageComponent requires a resolved follow camera before player resolution can run.");
+            } else if (FollowCameraComponent.TargetEntityReference == null) {
+                throw new InvalidOperationException("DemoTiltStageComponent requires the Tilt Trial follow camera to expose a serialized player target reference.");
+            } else if (FollowCameraComponent.TargetEntityReference.EntityId == 0u) {
+                throw new InvalidOperationException("DemoTiltStageComponent requires the Tilt Trial follow camera to reference a non-zero scene entity id.");
+            } else if (Core.Instance == null) {
+                throw new InvalidOperationException("A core instance must exist before Tilt Trial player resolution can run.");
             }
 
-            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                if (entity.Components[componentIndex] is RigidBody3DComponent) {
-                    return true;
+            uint targetSceneEntityId = FollowCameraComponent.TargetEntityReference.EntityId;
+            List<Entity> entities = Core.Instance.ObjectManager.Entities;
+            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
+                Entity entity = entities[entityIndex];
+                if (FindSceneEntityRuntimeIdOrZero(entity) != targetSceneEntityId) {
+                    continue;
                 }
+
+                PlayerSphereEntity = entity;
+                return;
             }
 
-            return false;
+            throw new InvalidOperationException($"DemoTiltStageComponent could not resolve the Tilt Trial player sphere for scene entity id {targetSceneEntityId}.");
         }
 
         /// <summary>
-        /// Applies the resolved stage tilt to every tracked kinematic piece and synchronizes the resulting transforms into the BEPU simulation.
+        /// Resolves the keyboard and left-stick movement axes for the current frame.
         /// </summary>
-        /// <param name="physicsWorld">Active BEPU world receiving the updated kinematic poses.</param>
-        void ApplyTiltToTrackedPieces(IPhysicsBodySynchronizationRuntime3D physicsWorld) {
-            if (physicsWorld == null) {
-                throw new ArgumentNullException(nameof(physicsWorld));
-            }
-
-            float4 stageRotation;
-            float4.CreateFromYawPitchRoll(0f, CurrentPitchRadians, CurrentRollRadians, out stageRotation);
-            stageRotation.Normalize();
-
-            for (int pieceIndex = 0; pieceIndex < StagePieceEntities.Count; pieceIndex++) {
-                Entity stagePiece = StagePieceEntities[pieceIndex];
-                stagePiece.LocalPosition = float4.RotateVector(RestLocalPositions[pieceIndex], stageRotation);
-
-                float4 desiredOrientation;
-                float4 restLocalOrientation = RestLocalOrientations[pieceIndex];
-                float4.Concatenate(ref restLocalOrientation, ref stageRotation, out desiredOrientation);
-                desiredOrientation.Normalize();
-                stagePiece.LocalOrientation = desiredOrientation;
-
-                FindRequiredRigidBodyComponent(stagePiece);
-                physicsWorld.SynchronizeKinematicBody(stagePiece);
-            }
-        }
-
-        /// <summary>
-        /// Resolves normalized requested stage pitch from keyboard and left-stick vertical input.
-        /// </summary>
-        /// <param name="inputSystem">Input system supplying the current frame state.</param>
-        /// <returns>Normalized pitch input in the range [-1, 1].</returns>
-        double ResolvePitchInput(InputSystem inputSystem) {
+        /// <param name="inputSystem">Input system supplying keyboard and gamepad state.</param>
+        /// <returns>Combined horizontal and forward movement axes before diagonal normalization.</returns>
+        float2 ResolveMovementInput(InputSystem inputSystem) {
             if (inputSystem == null) {
                 throw new ArgumentNullException(nameof(inputSystem));
             }
 
-            double keyboardPitch = 0d;
-            if (inputSystem.IsKeyDown(Keys.W)) {
-                keyboardPitch += 1d;
-            }
-            if (inputSystem.IsKeyDown(Keys.S)) {
-                keyboardPitch -= 1d;
-            }
-
-            InputGamepadState gamepadState = inputSystem.GetGamepadState(0);
-            double gamepadPitch = 0d;
-            if (gamepadState.Connected) {
-                gamepadPitch += -NormalizeStickAxis(gamepadState.LeftStickY);
-            }
-
-            return Math.Clamp(keyboardPitch + gamepadPitch, -1d, 1d);
-        }
-
-        /// <summary>
-        /// Resolves normalized requested stage roll from keyboard and left-stick horizontal input.
-        /// </summary>
-        /// <param name="inputSystem">Input system supplying the current frame state.</param>
-        /// <returns>Normalized roll input in the range [-1, 1].</returns>
-        double ResolveRollInput(InputSystem inputSystem) {
-            if (inputSystem == null) {
-                throw new ArgumentNullException(nameof(inputSystem));
-            }
-
-            double keyboardRoll = 0d;
+            double horizontal = 0d;
             if (inputSystem.IsKeyDown(Keys.A)) {
-                keyboardRoll -= 1d;
+                horizontal -= 1d;
             }
             if (inputSystem.IsKeyDown(Keys.D)) {
-                keyboardRoll += 1d;
+                horizontal += 1d;
+            }
+
+            double forward = 0d;
+            if (inputSystem.IsKeyDown(Keys.W)) {
+                forward += 1d;
+            }
+            if (inputSystem.IsKeyDown(Keys.S)) {
+                forward -= 1d;
             }
 
             InputGamepadState gamepadState = inputSystem.GetGamepadState(0);
-            double gamepadRoll = 0d;
             if (gamepadState.Connected) {
-                gamepadRoll += NormalizeStickAxis(gamepadState.LeftStickX);
+                horizontal += NormalizeStickAxis(gamepadState.LeftStickX);
+                forward += -NormalizeStickAxis(gamepadState.LeftStickY);
             }
 
-            return Math.Clamp(keyboardRoll + gamepadRoll, -1d, 1d);
+            return new float2(
+                (float)Math.Clamp(horizontal, -1d, 1d),
+                (float)Math.Clamp(forward, -1d, 1d));
         }
 
         /// <summary>
@@ -221,7 +255,7 @@ namespace city.game {
         /// <returns>Normalized analog input in the range [-1, 1].</returns>
         double NormalizeStickAxis(short axisValue) {
             double normalized = axisValue / 32767d;
-            if (Math.Abs(normalized) < GamepadDeadzone) {
+            if (Math.Abs(normalized) < GamepadDeadzoneThreshold) {
                 return 0d;
             }
 
@@ -229,15 +263,15 @@ namespace city.game {
         }
 
         /// <summary>
-        /// Resolves the authored rigid-body component attached to one tracked stage piece.
+        /// Resolves the authored rigid-body component attached to the playable sphere.
         /// </summary>
-        /// <param name="entity">Tracked stage piece whose rigid body should be returned.</param>
+        /// <param name="entity">Playable sphere entity whose rigid body should be returned.</param>
         /// <returns>Attached rigid-body component.</returns>
         RigidBody3DComponent FindRequiredRigidBodyComponent(Entity entity) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
             } else if (entity.Components == null) {
-                throw new InvalidOperationException("Tilt Trial stage pieces must expose initialized component collections.");
+                throw new InvalidOperationException("DemoTiltStageComponent requires the playable sphere to expose an initialized component list.");
             }
 
             for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
@@ -246,48 +280,121 @@ namespace city.game {
                 }
             }
 
-            throw new InvalidOperationException("Tilt Trial stage pieces must include a RigidBody3DComponent.");
+            throw new InvalidOperationException("DemoTiltStageComponent requires a RigidBody3DComponent on the playable sphere.");
         }
 
         /// <summary>
-        /// Resolves the active BEPU world required to synchronize updated kinematic stage transforms.
+        /// Resolves the follow-camera component attached to one candidate entity when present.
         /// </summary>
-        /// <returns>Active BEPU-backed physics world.</returns>
+        /// <param name="entity">Candidate runtime entity.</param>
+        /// <returns>Attached follow-camera component when present; otherwise <c>null</c>.</returns>
+        DemoTiltFollowCameraComponent FindFollowCameraComponentOrNull(Entity entity) {
+            if (entity == null || entity.Components == null) {
+                return null;
+            }
+
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is DemoTiltFollowCameraComponent followCameraComponent) {
+                    return followCameraComponent;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Finds the runtime authored scene id attached to one candidate entity when present.
+        /// </summary>
+        /// <param name="entity">Candidate runtime entity.</param>
+        /// <returns>Resolved authored scene entity id when present; otherwise <c>0</c>.</returns>
+        uint FindSceneEntityRuntimeIdOrZero(Entity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (entity.Components == null) {
+                return 0u;
+            }
+
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is SceneEntityRuntimeIdComponent runtimeIdComponent) {
+                    return runtimeIdComponent.SceneEntityId;
+                }
+            }
+
+            return 0u;
+        }
+
+        /// <summary>
+        /// Resolves the active BEPU runtime required to synchronize updated dynamic-body velocity state.
+        /// </summary>
+        /// <returns>Active BEPU-backed physics runtime.</returns>
         IPhysicsBodySynchronizationRuntime3D ResolveRequiredPhysicsWorld() {
             if (Core.Instance == null) {
-                throw new InvalidOperationException("A core instance must exist before Tilt Trial stage updates can run.");
+                throw new InvalidOperationException("A core instance must exist before Tilt Trial updates can run.");
             }
 
             IPhysicsBodySynchronizationRuntime3D physicsWorld = Core.Instance.PhysicsRuntime as IPhysicsBodySynchronizationRuntime3D;
             if (physicsWorld == null) {
-                throw new InvalidOperationException("DemoTiltStageComponent requires a physics runtime that supports kinematic body synchronization.");
+                throw new InvalidOperationException("DemoTiltStageComponent requires a physics runtime that supports dynamic-body velocity synchronization.");
             }
 
             return physicsWorld;
         }
 
         /// <summary>
-        /// Moves one angular value toward a target by the supplied maximum step without overshooting.
+        /// Removes vertical influence from one camera-derived axis and normalizes the remaining planar direction.
         /// </summary>
-        /// <param name="currentValue">Current value.</param>
-        /// <param name="targetValue">Requested target value.</param>
-        /// <param name="maximumStep">Maximum absolute movement allowed this frame.</param>
-        /// <returns>New value moved toward the target.</returns>
-        float MoveToward(float currentValue, float targetValue, float maximumStep) {
-            if (maximumStep <= 0f) {
-                return currentValue;
+        /// <param name="axis">Camera-derived axis to flatten onto the gameplay plane.</param>
+        /// <param name="axisName">Axis label used when reporting invalid basis failures.</param>
+        /// <returns>Normalized planar axis.</returns>
+        static float3 ResolveFlattenedPlanarAxis(float3 axis, string axisName) {
+            float3 flattenedAxis = new float3(axis.X, 0f, axis.Z);
+            return NormalizePlanarOrThrow(flattenedAxis, axisName);
+        }
+
+        /// <summary>
+        /// Normalizes one planar vector and throws when the vector is too small to define a stable gameplay direction.
+        /// </summary>
+        /// <param name="value">Planar vector to normalize.</param>
+        /// <param name="vectorName">Vector label used when reporting invalid direction failures.</param>
+        /// <returns>Normalized planar vector.</returns>
+        static float3 NormalizePlanarOrThrow(float3 value, string vectorName) {
+            double lengthSquared = (value.X * value.X) + (value.Z * value.Z);
+            if (lengthSquared <= MinimumPlanarLengthSquared) {
+                throw new InvalidOperationException($"DemoTiltStageComponent could not derive a valid planar {vectorName} direction from the active camera orientation.");
             }
 
-            float delta = targetValue - currentValue;
-            if (Math.Abs(delta) <= maximumStep) {
-                return targetValue;
+            double inverseLength = 1d / Math.Sqrt(lengthSquared);
+            return new float3((float)(value.X * inverseLength), 0f, (float)(value.Z * inverseLength));
+        }
+
+        /// <summary>
+        /// Moves the current planar velocity toward the requested target velocity by the supplied acceleration-limited step.
+        /// </summary>
+        /// <param name="currentPlanarVelocity">Current planar velocity before steering.</param>
+        /// <param name="targetPlanarVelocity">Requested planar velocity after steering.</param>
+        /// <param name="maximumPlanarStep">Maximum planar speed delta that may be applied this frame.</param>
+        /// <returns>Planar velocity moved toward the target without overshooting.</returns>
+        static float3 MovePlanarVelocityTowardTarget(float3 currentPlanarVelocity, float3 targetPlanarVelocity, double maximumPlanarStep) {
+            if (double.IsNaN(maximumPlanarStep) || double.IsInfinity(maximumPlanarStep) || maximumPlanarStep < 0d) {
+                throw new ArgumentOutOfRangeException(nameof(maximumPlanarStep), "Tilt Trial planar steering requires a finite non-negative step.");
             }
 
-            if (delta > 0f) {
-                return currentValue + maximumStep;
+            float3 velocityDelta = targetPlanarVelocity - currentPlanarVelocity;
+            double deltaLengthSquared = (velocityDelta.X * velocityDelta.X) + (velocityDelta.Z * velocityDelta.Z);
+            if (deltaLengthSquared <= MinimumPlanarLengthSquared || maximumPlanarStep == 0d) {
+                return currentPlanarVelocity;
             }
 
-            return currentValue - maximumStep;
+            double deltaLength = Math.Sqrt(deltaLengthSquared);
+            if (deltaLength <= maximumPlanarStep) {
+                return targetPlanarVelocity;
+            }
+
+            double scale = maximumPlanarStep / deltaLength;
+            return new float3(
+                (float)(currentPlanarVelocity.X + (velocityDelta.X * scale)),
+                0f,
+                (float)(currentPlanarVelocity.Z + (velocityDelta.Z * scale)));
         }
     }
 }

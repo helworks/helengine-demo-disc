@@ -110,7 +110,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Stable authored base color that keeps the walnut bitmap readable without flattening it.
         /// </summary>
-        const string WalnutBaseColor = "#FFF0E2CE";
+        const string WalnutBaseColor = "#F0E2CEFF";
 
         /// <summary>
         /// Shared generated material writer used to persist the authored walnut material settings.
@@ -166,14 +166,18 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Texture asset id must be provided.", nameof(textureAssetId));
             }
 
-         GeneratedMaterialAssetDefinition definition = new GeneratedMaterialAssetDefinition();
-         definition.MaterialAsset = new ShaderMaterialAsset {
-             Id = MaterialAssetId,
-             DiffuseTextureAssetId = textureAssetId,
-             RenderState = new MaterialRenderState(),
-             CastsShadows = true,
-             ReceivesShadows = true
-         };
+            GeneratedMaterialAssetDefinition definition = new GeneratedMaterialAssetDefinition();
+            definition.MaterialAsset = new ShaderMaterialAsset {
+                Id = MaterialAssetId,
+                DiffuseTextureAssetId = textureAssetId,
+                RenderState = new MaterialRenderState {
+                    // The rolling player sphere can expose backface artifacts with photo textures;
+                    // keep the authored ball material double-sided so it presents solid from every angle.
+                    CullMode = MaterialCullMode.None
+                },
+                CastsShadows = true,
+                ReceivesShadows = true
+            };
 
             ConfigureWindowsPlatform(definition.GetOrCreatePlatform("windows"), textureAssetId);
             ConfigurePs2Platform(definition.GetOrCreatePlatform("ps2"), textureAssetId);
@@ -199,6 +203,8 @@ namespace city.rendering.tools {
             platformDefinition.SetFieldValue(UseCustomShaderFieldId, "false");
             platformDefinition.SetFieldValue(ShaderAssetIdFieldId, StandardShaderAssetId);
             platformDefinition.SetFieldValue(TextureIdFieldId, textureAssetId);
+            platformDefinition.SetFieldValue(AlphaModeFieldId, "opaque");
+            platformDefinition.SetFieldValue(DoubleSidedFieldId, "true");
             platformDefinition.SetFieldValue(CastsShadowFieldId, "true");
             platformDefinition.SetFieldValue(ReceivesShadowFieldId, "true");
             platformDefinition.SetFieldValue(BaseColorFieldId, WalnutBaseColor);
@@ -281,7 +287,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Assets root path must be provided.", nameof(assetsRootPath));
             }
 
-            ContentManager contentManager = new ContentManager(assetsRootPath);
+            ContentManager contentManager = new ContentManager(new HostFileSystemContentStreamSource(assetsRootPath));
             AssetImportManager importManager = new AssetImportManager(projectRootPath, contentManager);
             IReadOnlyList<IAssetImporterRegistration> importers = CreateDefaultImporters();
             for (int index = 0; index < importers.Count; index++) {

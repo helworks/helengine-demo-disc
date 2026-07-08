@@ -6,6 +6,11 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class GeneratedMaterialAssetWriteService {
         /// <summary>
+        /// Stable importer identifier used for generated material settings sidecars.
+        /// </summary>
+        const string MaterialImporterId = "helengine.material";
+
+        /// <summary>
         /// Shared settings service used to seed and persist material sidecars.
         /// </summary>
         readonly MaterialAssetSettingsService SettingsService;
@@ -44,59 +49,56 @@ namespace city.rendering.tools {
                 Directory.CreateDirectory(directoryPath);
             }
 
-            using (FileStream stream = new FileStream(fullMaterialPath, FileMode.Create, FileAccess.Write, FileShare.None)) {
-                global::helengine.editor.AssetSerializer.Serialize(stream, definition.MaterialAsset);
-            }
-
-            EditorProjectBootstrapContext bootstrap = EditorProjectBootstrapper.Create(fullProjectRootPath);
-            MaterialAssetImportSettings settings = SettingsService.LoadOrCreate(
-                fullMaterialPath,
-                definition.MaterialAsset,
-                bootstrap.SupportedPlatforms,
-                bootstrap.ResolveSelectionModel);
-            ApplyPlatforms(settings, definition);
+            MaterialAssetImportSettings settings = BuildImportSettings(definition);
             SettingsService.Save(fullMaterialPath, settings);
         }
 
         /// <summary>
-        /// Copies one generated material definition's platform settings into the persisted sidecar payload.
+        /// Converts one generated material definition into the shared material-settings import document shape.
         /// </summary>
-        /// <param name="settings">Material settings sidecar to update.</param>
-        /// <param name="definition">Generated material definition that supplies authored platform values.</param>
-        void ApplyPlatforms(MaterialAssetImportSettings settings, GeneratedMaterialAssetDefinition definition) {
-            if (settings == null) {
-                throw new ArgumentNullException(nameof(settings));
-            } else if (settings.Processor == null) {
-                throw new InvalidOperationException("Material settings must include processor settings.");
-            } else if (settings.Processor.Platforms == null) {
-                throw new InvalidOperationException("Material settings must include processor platform settings.");
-            } else if (definition == null) {
+        /// <param name="definition">Generated material definition to translate.</param>
+        /// <returns>Shared material-settings import document.</returns>
+        MaterialAssetImportSettings BuildImportSettings(GeneratedMaterialAssetDefinition definition) {
+            if (definition == null) {
                 throw new ArgumentNullException(nameof(definition));
+            } else if (definition.MaterialAsset == null) {
+                throw new InvalidOperationException("Generated material definitions must provide a material asset.");
             }
+
+            MaterialAssetImportSettings settings = new MaterialAssetImportSettings();
+            settings.Importer.ImporterId = MaterialImporterId;
+            settings.Importer.SourceChecksum = string.Empty;
+            settings.Importer.AssetId = definition.MaterialAsset.Id ?? string.Empty;
 
             foreach (KeyValuePair<string, GeneratedMaterialPlatformDefinition> entry in definition.Platforms) {
-                if (string.IsNullOrWhiteSpace(entry.Key) || entry.Value == null) {
-                    continue;
-                }
-
-                if (!settings.Processor.Platforms.TryGetValue(entry.Key, out MaterialAssetProcessorSettings platformSettings) || platformSettings == null) {
-                    platformSettings = new MaterialAssetProcessorSettings();
-                    settings.Processor.Platforms[entry.Key] = platformSettings;
-                }
-                if (platformSettings.FieldValues == null) {
-                    platformSettings.FieldValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                }
-
-                platformSettings.SchemaId = entry.Value.SchemaId ?? string.Empty;
-                platformSettings.FieldValues.Clear();
-                foreach (KeyValuePair<string, string> fieldEntry in entry.Value.FieldValues) {
-                    if (string.IsNullOrWhiteSpace(fieldEntry.Key)) {
-                        continue;
-                    }
-
-                    platformSettings.FieldValues[fieldEntry.Key] = fieldEntry.Value ?? string.Empty;
-                }
+                settings.Processor.Platforms[entry.Key] = BuildPlatformSettings(entry.Key, entry.Value);
             }
+
+            return settings;
+        }
+
+        /// <summary>
+        /// Converts one generated per-platform material definition into the shared processor-settings payload.
+        /// </summary>
+        /// <param name="platformId">Platform id that owns the generated material schema values.</param>
+        /// <param name="definition">Generated per-platform material definition to translate.</param>
+        /// <returns>Shared material processor settings payload.</returns>
+        MaterialAssetProcessorSettings BuildPlatformSettings(string platformId, GeneratedMaterialPlatformDefinition definition) {
+            if (string.IsNullOrWhiteSpace(platformId)) {
+                throw new ArgumentException("Platform id must be provided.", nameof(platformId));
+            } else if (definition == null) {
+                throw new InvalidOperationException($"Generated material platform '{platformId}' is missing its definition.");
+            } else if (string.IsNullOrWhiteSpace(definition.SchemaId)) {
+                throw new InvalidOperationException($"Generated material platform '{platformId}' must specify a schema id.");
+            }
+
+            MaterialAssetProcessorSettings settings = new MaterialAssetProcessorSettings();
+            settings.SchemaId = definition.SchemaId;
+            foreach (KeyValuePair<string, string> fieldEntry in definition.FieldValues) {
+                settings.FieldValues[fieldEntry.Key] = fieldEntry.Value ?? string.Empty;
+            }
+
+            return settings;
         }
     }
 }

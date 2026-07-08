@@ -21,6 +21,11 @@ namespace city.rendering.tools {
         const string StandardShaderSchemaId = "standard-shader";
 
         /// <summary>
+        /// Stable PlayStation 2 material schema identifier used by the shared PS2 material pipeline.
+        /// </summary>
+        const string Ps2MaterialSchemaId = "ps2-simple-lit-textured";
+
+        /// <summary>
         /// Stable built-in forward standard shader asset identifier used by the shared shader pipeline.
         /// </summary>
         const string SolidColorShaderAssetId = "ForwardStandardShader";
@@ -81,6 +86,26 @@ namespace city.rendering.tools {
         const string CastsShadowFieldId = "casts-shadow";
 
         /// <summary>
+        /// Stable field identifier used to store the imported texture-relative path required by the PS2 material pipeline.
+        /// </summary>
+        const string Ps2TextureRelativePathFieldId = "texture-relative-path";
+
+        /// <summary>
+        /// Stable field identifier used to store the alpha mode required by the PS2 material pipeline.
+        /// </summary>
+        const string AlphaModeFieldId = "alpha-mode";
+
+        /// <summary>
+        /// Stable field identifier used to store the double-sided flag required by the PS2 material pipeline.
+        /// </summary>
+        const string DoubleSidedFieldId = "double-sided";
+
+        /// <summary>
+        /// Stable field identifier used to store the vertex-color behavior required by the PS2 material pipeline.
+        /// </summary>
+        const string VertexColorModeFieldId = "vertex-color-mode";
+
+        /// <summary>
         /// Stable field identifier used to store the authored shadow-receiving flag in generated material settings.
         /// </summary>
         const string ReceivesShadowFieldId = "receives-shadow";
@@ -133,17 +158,27 @@ namespace city.rendering.tools {
             windowsSettings.SetFieldValue(CastsShadowFieldId, "false");
             windowsSettings.SetFieldValue(ReceivesShadowFieldId, "false");
 
-            GeneratedMaterialPlatformDefinition psVitaSettings = definition.GetOrCreatePlatform("psvita");
-            psVitaSettings.SchemaId = StandardShaderSchemaId;
-            psVitaSettings.SetFieldValue(UseCustomShaderFieldId, "false");
-            psVitaSettings.SetFieldValue(ShaderAssetIdFieldId, SolidColorShaderAssetId);
-            psVitaSettings.SetFieldValue(VertexProgramFieldId, SolidColorVertexProgramName);
+        GeneratedMaterialPlatformDefinition psVitaSettings = definition.GetOrCreatePlatform("psvita");
+        psVitaSettings.SchemaId = StandardShaderSchemaId;
+        psVitaSettings.SetFieldValue(UseCustomShaderFieldId, "false");
+        psVitaSettings.SetFieldValue(ShaderAssetIdFieldId, SolidColorShaderAssetId);
+        psVitaSettings.SetFieldValue(VertexProgramFieldId, SolidColorVertexProgramName);
             psVitaSettings.SetFieldValue(PixelProgramFieldId, SolidColorPixelProgramName);
             psVitaSettings.SetFieldValue(VariantFieldId, MeshVariantName);
-            psVitaSettings.SetFieldValue(BaseColorFieldId, CubeBaseColor);
-            psVitaSettings.SetFieldValue(CastsShadowFieldId, "false");
-            psVitaSettings.SetFieldValue(ReceivesShadowFieldId, "false");
-            return definition;
-        }
+        psVitaSettings.SetFieldValue(BaseColorFieldId, CubeBaseColor);
+        psVitaSettings.SetFieldValue(CastsShadowFieldId, "false");
+        psVitaSettings.SetFieldValue(ReceivesShadowFieldId, "false");
+
+        GeneratedMaterialPlatformDefinition ps2Settings = definition.GetOrCreatePlatform("ps2");
+        ps2Settings.SchemaId = Ps2MaterialSchemaId;
+        ps2Settings.SetFieldValue(Ps2TextureRelativePathFieldId, string.Empty);
+        ps2Settings.SetFieldValue(AlphaModeFieldId, "opaque");
+        ps2Settings.SetFieldValue(DoubleSidedFieldId, "false");
+        ps2Settings.SetFieldValue(CastsShadowFieldId, "false");
+        ps2Settings.SetFieldValue(VertexColorModeFieldId, "ignore");
+        ps2Settings.SetFieldValue(BaseColorFieldId, CubeBaseColor);
+
+        return definition;
     }
+}
 }

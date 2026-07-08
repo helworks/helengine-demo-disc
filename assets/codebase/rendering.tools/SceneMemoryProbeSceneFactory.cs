@@ -48,11 +48,6 @@ namespace city.rendering.tools {
                 SceneSettings = new SceneSettingsAsset {
                     DontUnload = true
                 },
-                NintendoDsScene = new GeneratedDsSceneDefinition {
-                    SceneId = RenderingSceneGenerator.SceneMemoryProbeNintendoDsSceneId,
-                    UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = Array.Empty<Entity>()
-                },
                 RootEntities = new[] {
                     CreateProbeRootEntity()
                 }

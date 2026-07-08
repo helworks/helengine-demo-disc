@@ -51,7 +51,9 @@ namespace city.game {
             IPhysicsBodySynchronizationRuntime3D physicsWorld = ResolveRequiredPhysicsWorld();
             Parent.LocalPosition = SpawnPosition;
             Parent.LocalOrientation = SpawnOrientation;
-            FindRequiredRigidBodyComponent();
+            RigidBody3DComponent rigidBody = FindRequiredRigidBodyComponent();
+            rigidBody.SetLinearVelocity(float3.Zero);
+            rigidBody.SetAngularVelocity(float3.Zero);
             physicsWorld.SynchronizeDynamicBody(Parent);
         }
 

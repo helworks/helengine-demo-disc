@@ -22,7 +22,7 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            DemoDiscSceneGenerator generator = new DemoDiscSceneGenerator();
+            DemoDiscSceneGenerator generator = new DemoDiscSceneGenerator(context.ScriptTypeResolver);
             generator.Generate(context.ProjectRootPath);
         }
     }

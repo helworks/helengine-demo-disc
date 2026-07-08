@@ -106,11 +106,6 @@ namespace city.rendering.tools {
         public const string SceneMemoryProbeNintendoDsSceneId = "scenes/rendering/ds/scene_memory_probe_ds.helen";
 
         /// <summary>
-        /// Writer used to persist generated scene assets into the active city project.
-        /// </summary>
-        readonly GeneratedSceneWriteService SceneWriteService;
-
-        /// <summary>
         /// Writer used to persist generated live-authored scenes through the editor save pipeline.
         /// </summary>
         readonly GeneratedAuthoringSceneWriteService AuthoringSceneWriteService;
@@ -168,9 +163,9 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one city rendering scene generator.
         /// </summary>
-        public RenderingSceneGenerator() {
-            SceneWriteService = new GeneratedSceneWriteService();
-            AuthoringSceneWriteService = new GeneratedAuthoringSceneWriteService();
+        /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
+        public RenderingSceneGenerator(IScriptTypeResolver scriptTypeResolver = null) {
+            AuthoringSceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver);
             DirectionalShadowPlazaFactory = new DirectionalShadowPlazaSceneFactory();
             SpotlightStreetSliceFactory = new SpotlightStreetSliceSceneFactory();
             CubeTestFactory = new CubeTestSceneFactory();
@@ -215,6 +210,8 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(assets));
             }
 
+            DeleteObsoleteRenderMatrixProbeScene(projectRootPath);
+            DeleteObsoleteNintendoHandheldCompanionScenes(projectRootPath);
             GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedCubeTestSolidMaterial);
             GeneratedAuthoringSceneDefinition groundCubeProbeSceneDefinition = GroundCubeProbeFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition scaledCubeSceneDefinition = ScaledCubeFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
@@ -239,6 +236,52 @@ namespace city.rendering.tools {
             AuthoringSceneWriteService.WriteScene(projectRootPath, sceneMemoryProbeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, directionalShadowPlazaSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, spotlightStreetSliceSceneDefinition);
+        }
+
+        /// <summary>
+        /// Deletes the obsolete generated Matrix Probe scene so stale authored output cannot be packaged after the feature removal.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
+        static void DeleteObsoleteRenderMatrixProbeScene(string projectRootPath) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            }
+
+            string obsoleteScenePath = Path.Combine(Path.GetFullPath(projectRootPath), "assets", "scenes", "rendering", "test_scene_render_matrix_probe.helen");
+            if (File.Exists(obsoleteScenePath)) {
+                File.Delete(obsoleteScenePath);
+            }
+        }
+
+        /// <summary>
+        /// Deletes the obsolete Nintendo handheld companion rendering scenes so stale generated output does not remain discoverable in the project scene catalog.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
+        static void DeleteObsoleteNintendoHandheldCompanionScenes(string projectRootPath) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            }
+
+            string fullProjectRootPath = Path.GetFullPath(projectRootPath);
+            string[] obsoleteRelativePaths = [
+                CubeTestNintendoDsSceneId,
+                ColoredCubeGridNintendoDsSceneId,
+                ScaledCubeNintendoDsSceneId,
+                DirectionalShadowPlazaNintendoDsSceneId,
+                GroundCubeProbeNintendoDsSceneId,
+                TexturedCubeGridNintendoDsSceneId,
+                SpotlightStreetSliceNintendoDsSceneId,
+                AxisTestNintendoDsSceneId,
+                AxisTest2NintendoDsSceneId,
+                SceneMemoryProbeNintendoDsSceneId
+            ];
+
+            for (int index = 0; index < obsoleteRelativePaths.Length; index++) {
+                string obsoleteScenePath = Path.Combine(fullProjectRootPath, "assets", obsoleteRelativePaths[index].Replace('/', Path.DirectorySeparatorChar));
+                if (File.Exists(obsoleteScenePath)) {
+                    File.Delete(obsoleteScenePath);
+                }
+            }
         }
     }
 }

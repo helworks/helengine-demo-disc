@@ -21,5 +21,21 @@
   "codegen": {
     "selectedCodegenProfileId": "",
     "selectedOptionValues": {}
+  },
+  "input": {
+    "standardActions": {
+      "accept": {
+        "deviceKind": 0,
+        "controlKind": 0,
+        "deviceIndex": 0,
+        "controlIndex": 0
+      },
+      "return": {
+        "deviceKind": 0,
+        "controlKind": 0,
+        "deviceIndex": 0,
+        "controlIndex": 1
+      }
+    }
   }
 }

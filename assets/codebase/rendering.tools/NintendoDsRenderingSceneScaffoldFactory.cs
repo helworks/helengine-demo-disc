@@ -34,11 +34,6 @@ namespace city.rendering.tools {
         const int ScreenHeight = 192;
 
         /// <summary>
-        /// Vertical space reserved by the temporary scaffold-owned bottom text row.
-        /// </summary>
-        const int DefaultBottomOverlayReservedHeight = 24;
-
-        /// <summary>
         /// Stable project-relative texture path used by the scaffold-owned Nintendo DS back button body.
         /// </summary>
         const string NintendoDsBackButtonTexturePath = "Images/Menu/ds-back-button.png";
@@ -61,7 +56,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Fixed top offset used by the scaffold-owned Nintendo DS back button so it remains pinned near the bottom edge.
         /// </summary>
-        const int NintendoDsBackButtonTop = ScreenHeight - NintendoDsBackButtonHeight - 8;
+        const int NintendoDsBackButtonTop = ScreenHeight - NintendoDsBackButtonHeight - 6;
 
         /// <summary>
         /// Fixed horizontal inset used by the scaffold-owned Nintendo DS back button label.
@@ -82,6 +77,56 @@ namespace city.rendering.tools {
         /// Fixed height used by the scaffold-owned Nintendo DS back button label.
         /// </summary>
         const int NintendoDsBackButtonLabelHeight = 20;
+
+        /// <summary>
+        /// Fixed top offset used by the scaffold-owned Nintendo DS light button so it remains stacked above the back button.
+        /// </summary>
+        const int NintendoDsLightButtonTop = NintendoDsBackButtonTop - NintendoDsBackButtonHeight - 8;
+
+        /// <summary>
+        /// Fixed horizontal inset used by the scaffold-owned Nintendo DS light button label.
+        /// </summary>
+        const int NintendoDsLightButtonLabelLeft = 64;
+
+        /// <summary>
+        /// Fixed vertical inset used by the scaffold-owned Nintendo DS light button label.
+        /// </summary>
+        const int NintendoDsLightButtonLabelTop = 6;
+
+        /// <summary>
+        /// Fixed width used by the scaffold-owned Nintendo DS light button label.
+        /// </summary>
+        const int NintendoDsLightButtonLabelWidth = 80;
+
+        /// <summary>
+        /// Fixed height used by the scaffold-owned Nintendo DS light button label.
+        /// </summary>
+        const int NintendoDsLightButtonLabelHeight = 20;
+
+        /// <summary>
+        /// Exact demo-disc lilac clear color reused by the shared Nintendo DS bottom-screen scaffold camera.
+        /// </summary>
+        static readonly float4 NintendoDsBottomScreenClearColor = new float4(30f / 255f, 17f / 255f, 41f / 255f, 1f);
+
+        /// <summary>
+        /// Fixed left offset used by the scaffold-owned Nintendo DS light swatch.
+        /// </summary>
+        const int NintendoDsLightSwatchLeft = 148;
+
+        /// <summary>
+        /// Fixed top offset used by the scaffold-owned Nintendo DS light swatch.
+        /// </summary>
+        const int NintendoDsLightSwatchTop = 4;
+
+        /// <summary>
+        /// Fixed square size used by the scaffold-owned Nintendo DS light swatch.
+        /// </summary>
+        const int NintendoDsLightSwatchSize = 20;
+
+        /// <summary>
+        /// Render order used by the scaffold-owned Nintendo DS light swatch so the DS OBJ pass submits it before the button body.
+        /// </summary>
+        const byte NintendoDsLightSwatchRenderOrder = 209;
 
         /// <summary>
         /// Render order used by the scaffold-owned Nintendo DS back button sprite body.
@@ -120,13 +165,11 @@ namespace city.rendering.tools {
                 ReferenceWidth = ScreenWidth,
                 ReferenceHeight = ScreenHeight
             });
-            RelocateFpsComponentsToBottomScreen(filteredTopScreenRoots, bottomScreenViewportRoot, bottomOverlayFont, useDefaultBottomOverlay);
+            RelocateFpsComponentsToBottomScreen(filteredTopScreenRoots, bottomScreenViewportRoot, bottomOverlayFont);
             Entity topScreenCameraEntity = ConfigureTopScreenRoots(filteredTopScreenRoots);
             Entity[] adjustedTopScreenRoots = MoveTopScreen2DRootsUnderViewport(filteredTopScreenRoots, topScreenCameraEntity);
 
-            if (useDefaultBottomOverlay) {
-                CreateDefaultBottomOverlay(bottomScreenViewportRoot, bottomOverlayFont);
-            }
+            CreateBottomScreenLightButton(bottomScreenViewportRoot, bottomOverlayFont);
             CreateBottomScreenBackButton(bottomScreenViewportRoot, bottomOverlayFont);
             AttachBottomScreenRoots(bottomScreenViewportRoot, bottomScreenRoots);
             return CombineSceneRoots(adjustedTopScreenRoots, bottomScreenCameraEntity);
@@ -295,12 +338,10 @@ namespace city.rendering.tools {
         /// <param name="topScreenRoots">Top-screen scene roots that may contain authored FPS overlay components.</param>
         /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the relocated FPS entities.</param>
         /// <param name="bottomOverlayFont">Live font asset assigned while the generated DS scene is being saved.</param>
-        /// <param name="useDefaultBottomOverlay">True when the temporary bottom text row is also emitted.</param>
         void RelocateFpsComponentsToBottomScreen(
             Entity[] topScreenRoots,
             Entity bottomScreenViewportRoot,
-            FontAsset bottomOverlayFont,
-            bool useDefaultBottomOverlay) {
+            FontAsset bottomOverlayFont) {
             if (topScreenRoots == null) {
                 throw new ArgumentNullException(nameof(topScreenRoots));
             } else if (bottomScreenViewportRoot == null) {
@@ -320,8 +361,11 @@ namespace city.rendering.tools {
                     rootEntity,
                     bottomScreenViewportRoot,
                     bottomOverlayFont,
-                    useDefaultBottomOverlay,
                     ref createdBottomScreenFpsCount);
+            }
+
+            if (createdBottomScreenFpsCount == 0) {
+                CreateDefaultBottomScreenFpsEntity(bottomScreenViewportRoot, bottomOverlayFont);
             }
         }
 
@@ -331,13 +375,11 @@ namespace city.rendering.tools {
         /// <param name="entity">Current top-screen subtree entity being inspected.</param>
         /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the relocated FPS entities.</param>
         /// <param name="bottomOverlayFont">Live font asset assigned while the generated DS scene is being saved.</param>
-        /// <param name="useDefaultBottomOverlay">True when the temporary bottom text row is also emitted.</param>
         /// <param name="createdBottomScreenFpsCount">Running count used to keep scaffold-owned FPS entity names stable.</param>
         void RelocateFpsComponentsToBottomScreenRecursive(
             Entity entity,
             Entity bottomScreenViewportRoot,
             FontAsset bottomOverlayFont,
-            bool useDefaultBottomOverlay,
             ref int createdBottomScreenFpsCount) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
@@ -357,7 +399,6 @@ namespace city.rendering.tools {
                         bottomScreenViewportRoot,
                         bottomOverlayFont,
                         fpsComponent,
-                        useDefaultBottomOverlay,
                         createdBottomScreenFpsCount);
                     createdBottomScreenFpsCount++;
                     entity.RemoveComponent(fpsComponent);
@@ -374,7 +415,6 @@ namespace city.rendering.tools {
                     entity.Children[childIndex],
                     bottomScreenViewportRoot,
                     bottomOverlayFont,
-                    useDefaultBottomOverlay,
                     ref createdBottomScreenFpsCount);
             }
         }
@@ -385,13 +425,11 @@ namespace city.rendering.tools {
         /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the FPS entity.</param>
         /// <param name="bottomOverlayFont">Live font asset assigned while the generated DS scene is being saved.</param>
         /// <param name="sourceComponent">Authored top-screen FPS component being relocated.</param>
-        /// <param name="useDefaultBottomOverlay">True when the temporary bottom text row is also emitted.</param>
         /// <param name="fpsIndex">Zero-based scaffold-owned FPS entity index.</param>
         void CreateBottomScreenFpsEntity(
             Entity bottomScreenViewportRoot,
             FontAsset bottomOverlayFont,
             FPSComponent sourceComponent,
-            bool useDefaultBottomOverlay,
             int fpsIndex) {
             if (bottomScreenViewportRoot == null) {
                 throw new ArgumentNullException(nameof(bottomScreenViewportRoot));
@@ -411,11 +449,37 @@ namespace city.rendering.tools {
 
             FPSComponent bottomScreenFpsComponent = new FPSComponent {
                 Font = bottomOverlayFont,
-                FontScale = sourceComponent.FontScale,
+                FontScale = NintendoDsBottomOverlayFontScale,
                 AdditionalText = sourceComponent.AdditionalText,
                 RefreshIntervalSeconds = sourceComponent.RefreshIntervalSeconds,
-                Padding = ResolveBottomScreenFpsPadding(sourceComponent, useDefaultBottomOverlay, fpsIndex),
+                Padding = ResolveBottomScreenFpsPadding(sourceComponent, fpsIndex),
                 RenderOrder2D = sourceComponent.RenderOrder2D
+            };
+            fpsEntity.AddComponent(bottomScreenFpsComponent);
+            ApplyFontReference(fpsEntity, bottomScreenFpsComponent, DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+        }
+
+        /// <summary>
+        /// Creates one scaffold-owned bottom-screen FPS entity when the authored scene does not provide any FPS overlay to relocate.
+        /// </summary>
+        /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the fallback FPS entity.</param>
+        /// <param name="bottomOverlayFont">Live font asset assigned while the generated DS scene is being saved.</param>
+        void CreateDefaultBottomScreenFpsEntity(Entity bottomScreenViewportRoot, FontAsset bottomOverlayFont) {
+            if (bottomScreenViewportRoot == null) {
+                throw new ArgumentNullException(nameof(bottomScreenViewportRoot));
+            } else if (bottomOverlayFont == null) {
+                throw new ArgumentNullException(nameof(bottomOverlayFont));
+            }
+
+            Entity fpsEntity = bottomScreenViewportRoot;
+            fpsEntity.LayerMask = PersistedSceneLayerMask;
+            fpsEntity.LocalPosition = float3.Zero;
+            fpsEntity.LocalScale = float3.One;
+            fpsEntity.LocalOrientation = float4.Identity;
+
+            FPSComponent bottomScreenFpsComponent = new FPSComponent {
+                Font = bottomOverlayFont,
+                FontScale = NintendoDsBottomOverlayFontScale
             };
             fpsEntity.AddComponent(bottomScreenFpsComponent);
             ApplyFontReference(fpsEntity, bottomScreenFpsComponent, DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
@@ -440,20 +504,18 @@ namespace city.rendering.tools {
         /// Resolves the bottom-screen padding applied to one relocated FPS overlay.
         /// </summary>
         /// <param name="sourceComponent">Authored top-screen FPS component being relocated.</param>
-        /// <param name="useDefaultBottomOverlay">True when the temporary bottom text row is also emitted.</param>
         /// <param name="fpsIndex">Zero-based scaffold-owned FPS entity index.</param>
         /// <returns>Bottom-screen padding assigned to the relocated FPS overlay.</returns>
-        int2 ResolveBottomScreenFpsPadding(FPSComponent sourceComponent, bool useDefaultBottomOverlay, int fpsIndex) {
+        int2 ResolveBottomScreenFpsPadding(FPSComponent sourceComponent, int fpsIndex) {
             if (sourceComponent == null) {
                 throw new ArgumentNullException(nameof(sourceComponent));
             } else if (fpsIndex < 0) {
                 throw new ArgumentOutOfRangeException(nameof(fpsIndex), "FPS entity index must be non-negative.");
             }
 
-            int overlayOffsetY = useDefaultBottomOverlay ? DefaultBottomOverlayReservedHeight : 0;
             int rowOffsetY = fpsIndex * 40;
             int2 padding = sourceComponent.Padding;
-            return new int2(padding.X, padding.Y + overlayOffsetY + rowOffsetY);
+            return new int2(padding.X, padding.Y + rowOffsetY);
         }
 
         /// <summary>
@@ -527,7 +589,7 @@ namespace city.rendering.tools {
                 Viewport = new float4(0f, 1f, 1f, 1f),
                 ClearSettings = new CameraClearSettings(
                     true,
-                    new float4(0f, 0f, 0f, 1f),
+                    NintendoDsBottomScreenClearColor,
                     true,
                     1f,
                     false,
@@ -542,30 +604,66 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates the temporary bottom-screen proof text used while validating DS authored-text behavior.
+        /// Creates the visible scaffold-owned Nintendo DS bottom-screen light button that routes touch interaction and shoulder input through the shared handheld light cycle.
         /// </summary>
-        /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the default overlay.</param>
-        /// <param name="bottomOverlayFont">Font used by the isolated bottom-screen test label.</param>
-        void CreateDefaultBottomOverlay(Entity bottomScreenViewportRoot, FontAsset bottomOverlayFont) {
+        /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the light button.</param>
+        /// <param name="bottomOverlayFont">Font used by the light-button label.</param>
+        void CreateBottomScreenLightButton(Entity bottomScreenViewportRoot, FontAsset bottomOverlayFont) {
             if (bottomScreenViewportRoot == null) {
                 throw new ArgumentNullException(nameof(bottomScreenViewportRoot));
             } else if (bottomOverlayFont == null) {
                 throw new ArgumentNullException(nameof(bottomOverlayFont));
             }
 
-            Entity textEntity = Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenTestText");
-            textEntity.LocalPosition = new float3(8f, 8f, 0f);
-            TextComponent textComponent = new TextComponent {
-                Text = "DS TEXT",
+            Entity lightButtonEntity = Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenLightButton");
+            lightButtonEntity.LocalPosition = new float3(NintendoDsBackButtonLeft, NintendoDsLightButtonTop, 0f);
+            lightButtonEntity.LayerMask = PersistedSceneLayerMask;
+            lightButtonEntity.Static = true;
+
+            SpriteComponent spriteComponent = new SpriteComponent {
+                Size = new int2(NintendoDsBackButtonWidth, NintendoDsBackButtonHeight),
+                RenderOrder2D = NintendoDsBackButtonSpriteRenderOrder,
+                LayerMask = RuntimeLayerMask
+            };
+            lightButtonEntity.AddComponent(spriteComponent);
+            ApplyTextureReference(lightButtonEntity, spriteComponent, NintendoDsBackButtonTexturePath);
+
+            InteractableComponent interactableComponent = new InteractableComponent {
+                Size = new int2(NintendoDsBackButtonWidth, NintendoDsBackButtonHeight)
+            };
+            lightButtonEntity.AddComponent(interactableComponent);
+            lightButtonEntity.AddComponent(new NintendoDsLightToggleOverlayComponent());
+
+            Entity lightButtonLabelEntity = Core.Instance.EntityFactory.CreateChild(lightButtonEntity, "DemoDiscBottomScreenLightButtonLabel");
+            lightButtonLabelEntity.LocalPosition = new float3(NintendoDsLightButtonLabelLeft, NintendoDsLightButtonLabelTop, 0f);
+            lightButtonLabelEntity.LayerMask = PersistedSceneLayerMask;
+            lightButtonLabelEntity.Static = true;
+
+            TextComponent labelComponent = new TextComponent {
+                Text = "LIGHT",
                 Font = bottomOverlayFont,
                 FontScale = NintendoDsBottomOverlayFontScale,
                 Color = new byte4(255, 255, 255, 255),
-                Size = new int2(ScreenWidth - 16, 24),
-                RenderOrder2D = 220,
+                Size = new int2(NintendoDsLightButtonLabelWidth, NintendoDsLightButtonLabelHeight),
+                RenderOrder2D = NintendoDsBackButtonLabelRenderOrder,
                 LayerMask = RuntimeLayerMask
             };
-            textEntity.AddComponent(textComponent);
-            ApplyFontReference(textEntity, textComponent, DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+            lightButtonLabelEntity.AddComponent(labelComponent);
+            ApplyFontReference(lightButtonLabelEntity, labelComponent, DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+
+            Entity lightSwatchEntity = Core.Instance.EntityFactory.CreateChild(lightButtonEntity, "DemoDiscBottomScreenLightSwatch");
+            lightSwatchEntity.LocalPosition = new float3(NintendoDsLightSwatchLeft, NintendoDsLightSwatchTop, 0.1f);
+            lightSwatchEntity.LayerMask = PersistedSceneLayerMask;
+            lightSwatchEntity.Static = true;
+            lightSwatchEntity.AddComponent(new RoundedRectComponent {
+                Size = new int2(NintendoDsLightSwatchSize, NintendoDsLightSwatchSize),
+                Radius = 2f,
+                BorderThickness = 1f,
+                FillColor = new byte4(255, 255, 255, 255),
+                BorderColor = new byte4(30, 30, 30, 255),
+                RenderOrder2D = NintendoDsLightSwatchRenderOrder,
+                LayerMask = RuntimeLayerMask
+            });
         }
 
         /// <summary>

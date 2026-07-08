@@ -6,6 +6,19 @@ namespace city.game.tools {
     /// </summary>
     public sealed class GameSceneGenerator {
         /// <summary>
+        /// Resolver used to restore project-authored components during temporary handheld clone loads.
+        /// </summary>
+        readonly IScriptTypeResolver ScriptTypeResolverValue;
+
+        /// <summary>
+        /// Initializes one gameplay scene generator.
+        /// </summary>
+        /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
+        public GameSceneGenerator(IScriptTypeResolver scriptTypeResolver = null) {
+            ScriptTypeResolverValue = scriptTypeResolver;
+        }
+
+        /// <summary>
         /// Writes the current authored city gameplay scenes into the supplied city project.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
@@ -14,12 +27,12 @@ namespace city.game.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            TiltTrialPlayerSphereWalnutMaterialFactory materialFactory = new TiltTrialPlayerSphereWalnutMaterialFactory();
+            TiltTrialPlayerSphereMarbleMaterialFactory materialFactory = new TiltTrialPlayerSphereMarbleMaterialFactory();
             materialFactory.WriteMaterialAsset(projectRootPath);
             RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService();
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(projectRootPath);
             GameSceneFactory factory = new GameSceneFactory(assets);
-            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService();
+            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue);
             sceneWriteService.WriteScene(projectRootPath, factory.CreateTiltTrialScene());
         }
     }

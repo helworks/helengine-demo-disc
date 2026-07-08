@@ -49,6 +49,11 @@ namespace city.game {
         Entity TargetEntity;
 
         /// <summary>
+        /// Stores the authored rigid body attached to the tracked ball so the camera can predict the imminent post-physics center.
+        /// </summary>
+        RigidBody3DComponent TargetRigidBody;
+
+        /// <summary>
         /// Stores the current orbit yaw in radians.
         /// </summary>
         float CurrentYawRadians;
@@ -72,6 +77,7 @@ namespace city.game {
         /// Initializes one Tilt Trial follow camera with Super Monkey Ball-style orbit defaults.
         /// </summary>
         public DemoTiltFollowCameraComponent() {
+            UpdateOrder = 1;
             ManualYawSpeedRadians = 1.9f;
             ManualPitchSpeedRadians = 1.35f;
             MinimumPitchRadians = -1.2f;
@@ -90,6 +96,7 @@ namespace city.game {
             }
 
             ResolveTargetEntityWhenNeeded();
+            ResolveTargetRigidBodyWhenNeeded();
             EnsureOrbitInitialized();
 
             Core core = Core.Instance ?? throw new InvalidOperationException("A core instance must exist before Tilt Trial follow camera updates can run.");
@@ -101,6 +108,22 @@ namespace city.game {
             CurrentPitchRadians -= (float)(pitchInput * ManualPitchSpeedRadians * elapsedSeconds);
             CurrentPitchRadians = ClampPitch(CurrentPitchRadians);
             ApplyOrbitPose();
+        }
+
+        /// <summary>
+        /// Resolves the orbit center from the imminent tracked target position predicted one frame ahead from the current rigid-body velocity.
+        /// </summary>
+        /// <param name="targetPosition">Current tracked target position before the physics step.</param>
+        /// <param name="targetOffset">Camera target offset applied on top of the tracked target.</param>
+        /// <param name="targetLinearVelocity">Current authored target linear velocity.</param>
+        /// <param name="elapsedSeconds">Current frame delta in seconds.</param>
+        /// <returns>Predicted orbit center for the current frame render.</returns>
+        public static float3 ResolvePredictedOrbitCenter(float3 targetPosition, float3 targetOffset, float3 targetLinearVelocity, double elapsedSeconds) {
+            if (double.IsNaN(elapsedSeconds) || double.IsInfinity(elapsedSeconds) || elapsedSeconds < 0d) {
+                throw new ArgumentOutOfRangeException(nameof(elapsedSeconds), "Tilt Trial follow camera prediction requires a finite non-negative elapsed time.");
+            }
+
+            return targetPosition + targetOffset + (targetLinearVelocity * (float)elapsedSeconds);
         }
 
         /// <summary>
@@ -128,6 +151,22 @@ namespace city.game {
             }
 
             throw new InvalidOperationException($"DemoTiltFollowCameraComponent could not resolve target scene entity id {TargetEntityReference.EntityId}.");
+        }
+
+        /// <summary>
+        /// Resolves the authored rigid body attached to the tracked ball when available.
+        /// </summary>
+        void ResolveTargetRigidBodyWhenNeeded() {
+            if (TargetRigidBody != null || TargetEntity == null || TargetEntity.Components == null) {
+                return;
+            }
+
+            for (int componentIndex = 0; componentIndex < TargetEntity.Components.Count; componentIndex++) {
+                if (TargetEntity.Components[componentIndex] is RigidBody3DComponent rigidBody) {
+                    TargetRigidBody = rigidBody;
+                    return;
+                }
+            }
         }
 
         /// <summary>
@@ -184,7 +223,10 @@ namespace city.game {
                 throw new InvalidOperationException("DemoTiltFollowCameraComponent requires a resolved target entity before orbit evaluation.");
             }
 
-            return TargetEntity.Position + TargetOffset;
+            Core core = Core.Instance;
+            double elapsedSeconds = core != null ? core.PredictedPhysicsStepSeconds : 0d;
+            float3 targetLinearVelocity = TargetRigidBody != null ? TargetRigidBody.GetLinearVelocity() : float3.Zero;
+            return ResolvePredictedOrbitCenter(TargetEntity.Position, TargetOffset, targetLinearVelocity, elapsedSeconds);
         }
 
         /// <summary>

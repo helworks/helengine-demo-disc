@@ -403,10 +403,8 @@ namespace city.physics.tools {
                 return CreateStrictRotatedBoxCompareScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.RenderOnlySlopeSceneId, StringComparison.Ordinal)) {
                 return CreateRenderOnlySlopeScene();
-            } else if (string.Equals(sceneId, PhysicsSceneCatalog.RenderMatrixProbeSceneId, StringComparison.Ordinal)) {
-                return CreateRenderMatrixProbeScene();
-            } else if (string.Equals(sceneId, PhysicsSceneCatalog.RenderMotionProbeSceneId, StringComparison.Ordinal)) {
-                return CreateRenderMotionProbeScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.MatrixRenderSceneId, StringComparison.Ordinal)) {
+                return CreateMatrixRenderScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.DynamicMixedStackSceneId, StringComparison.Ordinal)) {
                 return CreateDynamicMixedStackScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.KinematicPushSceneId, StringComparison.Ordinal)) {
@@ -614,45 +612,27 @@ namespace city.physics.tools {
         }
 
         /// <summary>
-        /// Creates a render-only probe scene that compares flat, rotated, scaled, and rotated-plus-scaled cube transforms without any BEPU components.
+        /// Creates the matrix render hero cube that animates through each transform combination.
         /// </summary>
-        /// <returns>Authored render-only matrix probe scene.</returns>
-        SceneAsset CreateRenderMatrixProbeScene() {
-            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
-                "render_matrix_probe.scenario",
-                new[] {
-                    CreateCubeMeshEntity("render_matrix_probe.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(24f, 1f, 14f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
-                    CreateCubeMeshEntity("render_matrix_probe.flat_control", "FlatControlCube", new float3(-6f, 1f, 0f), new float3(2f, 2f, 2f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoNeutralMaterialRelativePath)),
-                    CreateCubeMeshEntity("render_matrix_probe.rotated_only", "RotatedOnlyCube", new float3(-2f, 1f, 0f), new float3(2f, 2f, 2f), CreateYawPitchRollDegrees(0.0, 0.0, 18.0), CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath)),
-                    CreateCubeMeshEntity("render_matrix_probe.scaled_only", "ScaledOnlyCube", new float3(2f, 1f, 0f), new float3(4f, 1f, 2f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
-                    CreateCubeMeshEntity("render_matrix_probe.rotated_scaled", "RotatedScaledCube", new float3(6f, 1f, 0f), new float3(4f, 1f, 2f), CreateYawPitchRollDegrees(0.0, 0.0, 18.0), CreatePhysicsDemoMaterialReference(PhysicsDemoRedMaterialRelativePath))
-                });
-            SceneEntityAsset cameraEntity = CreateCameraEntity("render_matrix_probe.camera", new float3(0f, 6.5f, 14f), CreateYawPitchRollDegrees(0.0, -20.0, 0.0));
-            return CreateSceneAsset(PhysicsSceneCatalog.RenderMatrixProbeSceneId, cameraEntity, scenarioEntity);
-        }
-
-        /// <summary>
-        /// Creates the render-only motion probe hero cube that animates through each transform combination.
-        /// </summary>
-        /// <returns>Authored hero cube entity with the dedicated render motion probe component.</returns>
-        SceneEntityAsset CreateRenderMotionProbeHeroEntity() {
-            const string EntityId = "render_motion_probe.hero";
+        /// <returns>Authored hero cube entity with the dedicated matrix render component.</returns>
+        SceneEntityAsset CreateMatrixRenderHeroEntity() {
+            const string EntityId = "matrix_render.hero";
 
             if (string.IsNullOrWhiteSpace(EntityId)) {
-                throw new InvalidOperationException("Render motion probe hero entity id must be provided.");
+                throw new InvalidOperationException("Matrix render hero entity id must be provided.");
             }
 
             return new SceneEntityAsset {
                 Id = AllocateSceneEntityId(),
                 Name = "HeroMotionCube",
                 LayerMask = EditorLayerMasks.SceneObjects,
-                LocalPosition = new float3(6f, 1f, -3.5f),
+                LocalPosition = float3.Zero,
                 LocalScale = new float3(2f, 2f, 2f),
                 LocalOrientation = float4.Identity,
                 Components = new[] {
                     CreateMeshComponentRecord(CreatePhysicsDemoMaterialReference(PhysicsDemoRedMaterialRelativePath)),
-                    CreateAutomaticComponentRecord(new city.rendering.RenderMotionProbeComponent {
-                        BaseLocalPosition = new float3(6f, 1f, -3.5f),
+                    CreateAutomaticComponentRecord(new city.rendering.MatrixRenderComponent {
+                        BaseLocalPosition = float3.Zero,
                         MotionOffset = new float3(0f, 0f, 5f),
                         BaseLocalScale = new float3(2f, 2f, 2f),
                         ScaledLocalScale = new float3(4f, 1f, 2f),
@@ -665,22 +645,75 @@ namespace city.physics.tools {
         }
 
         /// <summary>
-        /// Creates a render-only probe scene that animates one hero cube through move, rotate, scale, and all transform combinations beside fixed reference cubes.
+        /// Creates the orbit camera used by the matrix render scene so the animated cube can be inspected from every side.
         /// </summary>
-        /// <returns>Authored render-only motion probe scene.</returns>
-        SceneAsset CreateRenderMotionProbeScene() {
-            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
-                "render_motion_probe.scenario",
-                new[] {
-                    CreateCubeMeshEntity("render_motion_probe.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(28f, 1f, 18f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
-                    CreateCubeMeshEntity("render_motion_probe.flat_control", "FlatControlCube", new float3(-8f, 1f, 0f), new float3(2f, 2f, 2f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoNeutralMaterialRelativePath)),
-                    CreateCubeMeshEntity("render_motion_probe.rotated_only", "RotatedOnlyReferenceCube", new float3(-3f, 1f, 0f), new float3(2f, 2f, 2f), CreateYawPitchRollDegrees(0.0, 0.0, 18.0), CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath)),
-                    CreateCubeMeshEntity("render_motion_probe.scaled_only", "ScaledOnlyReferenceCube", new float3(2f, 1f, 0f), new float3(4f, 1f, 2f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
-                    CreateCubeMeshEntity("render_motion_probe.rotated_scaled_reference", "RotatedScaledReferenceCube", new float3(7f, 1f, 0f), new float3(4f, 1f, 2f), CreateYawPitchRollDegrees(0.0, 0.0, 18.0), CreatePhysicsDemoMaterialReference(PhysicsDemoMagentaMaterialRelativePath)),
-                    CreateRenderMotionProbeHeroEntity()
-                });
-            SceneEntityAsset cameraEntity = CreateCameraEntity("render_motion_probe.camera", new float3(0f, 8f, 18f), CreateYawPitchRollDegrees(0.0, -20.0, 0.0));
-            return CreateSceneAsset(PhysicsSceneCatalog.RenderMotionProbeSceneId, cameraEntity, scenarioEntity);
+        /// <returns>Authored orbit camera entity centered on the matrix render motion path.</returns>
+        SceneEntityAsset CreateMatrixRenderCameraEntity() {
+            float3 orbitCenter = new float3(0f, 0f, 2.5f);
+            return new SceneEntityAsset {
+                Id = AllocateSceneEntityId(),
+                Name = "Camera",
+                LayerMask = EditorLayerMasks.SceneObjects,
+                LocalPosition = new float3(0f, 3.5f, 10.5f),
+                LocalScale = float3.One,
+                LocalOrientation = CreateYawPitchRollDegrees(0.0, -18.0, 0.0),
+                Components = new[] {
+                    CreateCameraComponentRecord(),
+                    CreateAutomaticComponentRecord(new city.rendering.DemoDiscOrbitCameraComponent {
+                        OrbitCenter = orbitCenter,
+                        AutoYawSpeedRadians = 0.08f
+                    }, 1)
+                },
+                Children = Array.Empty<SceneEntityAsset>()
+            };
+        }
+
+        /// <summary>
+        /// Creates a matrix render scene that isolates one animated hero cube and an orbit camera for transform inspection.
+        /// </summary>
+        /// <returns>Authored matrix render scene.</returns>
+        SceneAsset CreateMatrixRenderScene() {
+            SceneEntityAsset scenarioEntity = CreateMatrixRenderScenarioRoot();
+            SceneEntityAsset cameraEntity = CreateMatrixRenderCameraEntity();
+            return CreateMatrixRenderSceneAsset(PhysicsSceneCatalog.MatrixRenderSceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
+        /// Creates the Matrix Render scenario root with its hero cube and a scene-specific key light tuned for clearer shape readback.
+        /// </summary>
+        /// <returns>Authored Matrix Render scenario root.</returns>
+        SceneEntityAsset CreateMatrixRenderScenarioRoot() {
+            SceneEntityAsset[] sceneChildren = new[] {
+                CreateMatrixRenderHeroEntity(),
+                CreateMatrixRenderKeyLightEntity()
+            };
+            return new SceneEntityAsset {
+                Id = AllocateSceneEntityId(),
+                Name = "Scenario",
+                LayerMask = EditorLayerMasks.SceneObjects,
+                LocalPosition = float3.Zero,
+                LocalScale = float3.One,
+                LocalOrientation = float4.Identity,
+                Components = Array.Empty<SceneComponentAssetRecord>(),
+                Children = sceneChildren
+            };
+        }
+
+        /// <summary>
+        /// Creates the dedicated Matrix Render key light so the animated cube reads clearly from a front-left three-quarter angle.
+        /// </summary>
+        /// <returns>Directional light entity authored only for the Matrix Render scene.</returns>
+        SceneEntityAsset CreateMatrixRenderKeyLightEntity() {
+            return new SceneEntityAsset {
+                Id = AllocateSceneEntityId(),
+                Name = "KeyLight",
+                LayerMask = EditorLayerMasks.SceneObjects,
+                LocalPosition = new float3(-3f, 5f, 4f),
+                LocalScale = float3.One,
+                LocalOrientation = CreateYawPitchRollDegrees(26.0, -28.0, 0.0),
+                Components = new[] { CreateDirectionalLightComponentRecord() },
+                Children = Array.Empty<SceneEntityAsset>()
+            };
         }
 
         /// <summary>
@@ -930,6 +963,49 @@ namespace city.physics.tools {
             }
             rootEntities.Add(scenarioEntity);
 
+            return new SceneAsset {
+                Id = sceneId,
+                AssetReferences = assetReferences.ToArray(),
+                RootEntities = rootEntities.ToArray()
+            };
+        }
+
+        /// <summary>
+        /// Creates the matrix-render scene asset with one generated UI root that provides FPS diagnostics and return-to-menu support.
+        /// </summary>
+        /// <param name="sceneId">Stable relative scene id.</param>
+        /// <param name="cameraEntity">Root camera entity.</param>
+        /// <param name="scenarioEntity">Root scenario entity.</param>
+        /// <returns>Matrix-render scene asset ready for serialization.</returns>
+        SceneAsset CreateMatrixRenderSceneAsset(
+            string sceneId,
+            SceneEntityAsset cameraEntity,
+            SceneEntityAsset scenarioEntity) {
+            if (string.IsNullOrWhiteSpace(sceneId)) {
+                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            }
+            if (cameraEntity == null) {
+                throw new ArgumentNullException(nameof(cameraEntity));
+            }
+            if (scenarioEntity == null) {
+                throw new ArgumentNullException(nameof(scenarioEntity));
+            }
+
+            List<SceneAssetReference> assetReferences = CreateSceneAssetReferenceList();
+            HashSet<string> assetReferenceKeys = CreateSceneAssetReferenceKeySet(assetReferences);
+            List<SceneEntityAsset> rootEntities = new List<SceneEntityAsset> {
+                cameraEntity
+            };
+
+            EditorEntity matrixRenderUiEntity = CreateLiveMatrixRenderUiEntity();
+            try {
+                ReassignGeneratedEditorEntityIds(matrixRenderUiEntity);
+                rootEntities.Add(SerializeGeneratedEditorEntity(matrixRenderUiEntity, assetReferences, assetReferenceKeys));
+            } finally {
+                matrixRenderUiEntity.Dispose();
+            }
+
+            rootEntities.Add(scenarioEntity);
             return new SceneAsset {
                 Id = sceneId,
                 AssetReferences = assetReferences.ToArray(),
@@ -2027,7 +2103,7 @@ namespace city.physics.tools {
 
             SceneEntityAsset scenarioRootEntity = ResolveRequiredPlayablePhysicsShowcaseScenarioRoot(authoredSceneAsset);
             ComponentPersistenceRegistry persistenceRegistry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
-            ContentManager assetContentManager = new ContentManager(Path.Combine(projectRootPath, "assets"));
+            ContentManager assetContentManager = new ContentManager(new HostFileSystemContentStreamSource(Path.Combine(projectRootPath, "assets")));
             EditorContentManagerConfiguration.ConfigureSharedAssetContentManager(assetContentManager);
             EditorSceneAssetReferenceResolver referenceResolver = new EditorSceneAssetReferenceResolver(assetContentManager, projectRootPath);
             SceneLoadService sceneLoadService = new SceneLoadService(persistenceRegistry, referenceResolver);
@@ -2187,6 +2263,41 @@ namespace city.physics.tools {
         }
 
         /// <summary>
+        /// Creates one live authored UI root for the render-motion-probe scene so desktop and DS builds share FPS and return-to-menu behavior.
+        /// </summary>
+        /// <returns>Live authored UI entity for the render-motion-probe scene.</returns>
+        EditorEntity CreateLiveMatrixRenderUiEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("MatrixRenderUi");
+            FPSComponent fpsComponent = new FPSComponent {
+                Font = ResolveRequiredEditorFont(),
+                FontScale = 2f
+            };
+            entity.AddComponent(fpsComponent);
+            ApplyEditorFontReference(entity, fpsComponent);
+            entity.AddComponent(new city.menu.DemoDiscReturnToMenuComponent());
+            Entity phaseStatusEntity = Core.Instance.EntityFactory.CreateChild(entity, "MatrixRenderPhaseStatus");
+            phaseStatusEntity.LocalPosition = new float3(16f, 392f, 0f);
+            phaseStatusEntity.Static = false;
+            TextComponent phaseStatusTextComponent = new TextComponent {
+                Text = "Operation: Translation",
+                Font = ResolveRequiredEditorFont(),
+                Color = new byte4(255, 255, 255, 255),
+                Size = new int2(1024, 56),
+                FontScale = 1.5f,
+                RenderOrder2D = 1,
+                LayerMask = 1
+            };
+            phaseStatusEntity.AddComponent(phaseStatusTextComponent);
+            ApplyEditorFontReference(phaseStatusEntity, phaseStatusTextComponent);
+            phaseStatusEntity.AddComponent(new city.rendering.MatrixRenderPhaseStatusTextComponent());
+            if (entity is EditorEntity editorEntity) {
+                return editorEntity;
+            }
+
+            throw new InvalidOperationException("The render-motion-probe UI root must be authored through editor entities.");
+        }
+
+        /// <summary>
         /// Finds one serialized scene entity by display name inside the supplied subtree.
         /// </summary>
         /// <param name="entities">Serialized scene entities to inspect.</param>
@@ -2335,6 +2446,22 @@ namespace city.physics.tools {
         /// <param name="entity">Entity that owns the FPS component.</param>
         /// <param name="component">FPS component whose font reference should be stored.</param>
         void ApplyEditorFontReference(Entity entity, FPSComponent component) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (component == null) {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+        }
+
+        /// <summary>
+        /// Stores the generated editor-font reference on the entity save state for the supplied text component.
+        /// </summary>
+        /// <param name="entity">Entity that owns the text component.</param>
+        /// <param name="component">Text component whose font reference should be stored.</param>
+        void ApplyEditorFontReference(Entity entity, TextComponent component) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
             } else if (component == null) {

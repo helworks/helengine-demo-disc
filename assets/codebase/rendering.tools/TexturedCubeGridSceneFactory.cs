@@ -355,7 +355,6 @@ namespace city.rendering.tools {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    SceneId = RenderingSceneGenerator.TexturedCubeGridNintendoDsSceneId,
                     UseDefaultBottomOverlay = true,
                     BottomScreenRootEntities = instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont)
                 },
@@ -594,7 +593,13 @@ namespace city.rendering.tools {
         ShaderMaterialAsset CreateAuthoredMaterialAsset(int cubeIndex) {
             return new ShaderMaterialAsset {
                 Id = CreateMaterialAssetId(cubeIndex),
+                ShaderAssetId = StandardShaderAssetId,
+                VertexProgram = StandardVertexProgramName,
+                PixelProgram = StandardPixelProgramName,
+                Variant = MeshVariantName,
+                DiffuseTextureAssetId = CubeTextureAssetIds[cubeIndex],
                 RenderState = new MaterialRenderState(),
+                ConstantBuffers = Array.Empty<MaterialConstantBufferAsset>(),
                 CastsShadows = true,
                 ReceivesShadows = true
             };
@@ -662,15 +667,6 @@ namespace city.rendering.tools {
             GeneratedMaterialAssetDefinition definition = new GeneratedMaterialAssetDefinition();
             definition.MaterialAsset = CreateAuthoredMaterialAsset(cubeIndex);
 
-            GeneratedMaterialPlatformDefinition windowsSettings = definition.GetOrCreatePlatform("windows");
-            windowsSettings.SchemaId = WindowsMaterialSchemaId;
-            windowsSettings.SetFieldValue(UseCustomShaderFieldId, "false");
-            windowsSettings.SetFieldValue(ShaderAssetIdFieldId, StandardShaderAssetId);
-            windowsSettings.SetFieldValue(TextureIdFieldId, CubeTextureAssetIds[cubeIndex]);
-            windowsSettings.SetFieldValue(CastsShadowFieldId, "true");
-            windowsSettings.SetFieldValue(ReceivesShadowFieldId, "true");
-            windowsSettings.SetFieldValue(BaseColorFieldId, "#FFFFFFFF");
-
             GeneratedMaterialPlatformDefinition ps2Settings = definition.GetOrCreatePlatform("ps2");
             ps2Settings.SchemaId = Ps2MaterialSchemaId;
             ps2Settings.SetFieldValue(TextureIdFieldId, CubeTextureAssetIds[cubeIndex]);
@@ -707,6 +703,16 @@ namespace city.rendering.tools {
             dsSettings.SetFieldValue(VertexColorModeFieldId, "ignore");
             dsSettings.SetFieldValue(BaseColorFieldId, "#FFFFFFFF");
             dsSettings.SetFieldValue(LightingModeFieldId, "lit");
+
+            GeneratedMaterialPlatformDefinition windowsSettings = definition.GetOrCreatePlatform("windows");
+            windowsSettings.SchemaId = WindowsMaterialSchemaId;
+            windowsSettings.SetFieldValue(UseCustomShaderFieldId, "false");
+            windowsSettings.SetFieldValue(ShaderAssetIdFieldId, StandardShaderAssetId);
+            windowsSettings.SetFieldValue(TextureIdFieldId, CubeTextureAssetIds[cubeIndex]);
+            windowsSettings.SetFieldValue(Ps2TextureRelativePathFieldId, "cooked/imported/" + CubeTextureAssetIds[cubeIndex]);
+            windowsSettings.SetFieldValue(CastsShadowFieldId, "true");
+            windowsSettings.SetFieldValue(ReceivesShadowFieldId, "true");
+            windowsSettings.SetFieldValue(BaseColorFieldId, "#FFFFFFFF");
             return definition;
         }
 

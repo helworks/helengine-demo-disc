@@ -29,8 +29,8 @@ namespace city.menu.tools {
             CubeTestSceneFactory factory = new CubeTestSceneFactory();
             GeneratedAuthoringSceneDefinition sceneDefinition = factory.CreateSceneDefinition(
                 assets.GeneratedCubeModel,
-                assets.GeneratedStandardMaterial);
-            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService();
+                assets.GeneratedCubeTestSolidMaterial);
+            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(context.ScriptTypeResolver);
             sceneWriteService.WriteScene(context.ProjectRootPath, sceneDefinition);
         }
     }

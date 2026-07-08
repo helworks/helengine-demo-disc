@@ -126,11 +126,8 @@ namespace city.menu {
             if (inputSystem == null) {
                 throw new ArgumentNullException(nameof(inputSystem));
             }
-            if (Core.Instance == null) {
-                throw new InvalidOperationException("A core instance must exist before querying the standard platform return action.");
-            }
 
-            return Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Return);
+            return DemoDiscReturnInputUtils.WasReturnPressed(inputSystem);
         }
 
         /// <summary>

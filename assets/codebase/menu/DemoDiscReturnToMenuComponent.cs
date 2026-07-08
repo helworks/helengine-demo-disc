@@ -104,11 +104,8 @@ namespace city.menu {
             if (inputSystem == null) {
                 throw new ArgumentNullException(nameof(inputSystem));
             }
-            if (Core.Instance == null) {
-                throw new InvalidOperationException("A core instance must exist before querying the standard platform return action.");
-            }
 
-            return Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Return);
+            return DemoDiscReturnInputUtils.WasReturnPressed(inputSystem);
         }
 
         /// <summary>
@@ -226,17 +223,6 @@ namespace city.menu {
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Returns whether one gamepad button transitioned from up to down during the current frame.
-        /// </summary>
-        /// <param name="currentState">Current frame gamepad state.</param>
-        /// <param name="previousState">Previous frame gamepad state.</param>
-        /// <param name="button">Button to test for a press transition.</param>
-        /// <returns>True when the button was pressed this frame.</returns>
-        static bool WasGamepadButtonPressed(InputGamepadState currentState, InputGamepadState previousState, InputGamepadButton button) {
-            return currentState.IsButtonDown(button) && !previousState.IsButtonDown(button);
         }
     }
 }

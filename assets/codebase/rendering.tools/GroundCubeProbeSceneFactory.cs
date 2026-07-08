@@ -1,3 +1,5 @@
+using city.menu;
+
 namespace city.rendering.tools {
     /// <summary>
     /// Builds the canonical live-authored scene definition for the minimal ground-and-cube probe scene.
@@ -30,11 +32,11 @@ namespace city.rendering.tools {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    SceneId = RenderingSceneGenerator.GroundCubeProbeNintendoDsSceneId,
                     UseDefaultBottomOverlay = true
                 },
                 RootEntities = new[] {
                     CreateCameraEntity(),
+                    CreateUiEntity(),
                     CreateDirectionalLightEntity(),
                     CreateGroundEntity(cubeModel, standardMaterial),
                     CreateCubeEntity(cubeModel, standardMaterial)
@@ -73,6 +75,24 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates the authored UI root entity for the ground-cube probe scene so every render probe exposes the shared FPS and return controls.
+        /// </summary>
+        /// <returns>Live authored UI root entity.</returns>
+        Entity CreateUiEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("GroundCubeProbeUi");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = float3.Zero;
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = float4.Identity;
+            entity.AddComponent(new FPSComponent {
+                Font = ResolveRequiredEditorFont(),
+                FontScale = 1f
+            });
+            entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;
         }
 
@@ -177,6 +197,18 @@ namespace city.rendering.tools {
             return new BoxCollider3DComponent {
                 Size = size
             };
+        }
+
+        /// <summary>
+        /// Resolves the editor font used by the live UI root entity.
+        /// </summary>
+        /// <returns>Loaded default editor font.</returns>
+        FontAsset ResolveRequiredEditorFont() {
+            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+                throw new InvalidOperationException("A default editor font must be loaded before the ground-cube probe scene can be generated.");
+            }
+
+            return editorCore.DefaultFontAssetForEditor;
         }
     }
 }
