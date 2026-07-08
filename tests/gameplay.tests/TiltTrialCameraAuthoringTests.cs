@@ -17,11 +17,11 @@ namespace city.tests {
         }
 
         /// <summary>
-        /// Ensures the serialized Tilt Trial gameplay scene carries the current tighter camera pose instead of a stale farther view.
+        /// Ensures the serialized first Tilt Trial gameplay scene carries the current tighter camera pose instead of a stale farther view.
         /// </summary>
         [Fact]
         public void Tilt_trial_scene_asset_camera_uses_the_current_close_view_pose() {
-            string sceneAssetPath = @"C:\dev\helprojs\city\assets\scenes\games\tilt_trial.helen";
+            string sceneAssetPath = @"C:\dev\helprojs\city\assets\scenes\games\tilt_trial_level_01.helen";
             string bytes = BitConverter.ToString(File.ReadAllBytes(sceneAssetPath));
 
             Assert.Contains("54-69-6C-74-54-72-69-61-6C-43-61-6D-65-72-61-00-01-00-40-00-00-00-00-CB-A1-2F-40-B8-1E-45-C0", bytes, StringComparison.Ordinal);
