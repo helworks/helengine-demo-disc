@@ -4,9 +4,7 @@
     "selectedBuildProfileId": "debug",
     "textureScalePercent": 100,
     "shaderVariantPruningEnabled": true,
-    "selectedOptionValues": {
-      "enable-native-runtime-diagnostics": "true"
-    }
+    "selectedOptionValues": {}
   },
   "graphics": {
     "selectedGraphicsProfileId": "",

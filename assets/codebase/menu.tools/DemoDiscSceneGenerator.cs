@@ -44,9 +44,12 @@ namespace city.menu.tools {
             DemoDiscMenuDefinitionProvider provider = new DemoDiscMenuDefinitionProvider();
             MenuDefinition definition = provider.CreateMenuDefinition();
             string providerTypeName = BuildProviderTypeName(typeof(DemoDiscMenuDefinitionProvider));
-            GeneratedAuthoringSceneDefinition sceneDefinition = SceneFactory.CreateSceneDefinition(providerTypeName, definition);
-            MenuBuildSceneAuthoringService.ApplyBuildSceneAvailability(projectRootPath, sceneDefinition, definition);
-            SceneWriteService.WriteScene(projectRootPath, sceneDefinition);
+            GeneratedAuthoringSceneDefinition standardSceneDefinition = SceneFactory.CreateStandardSceneDefinition(providerTypeName, definition);
+            MenuBuildSceneAuthoringService.ApplyBuildSceneAvailability(projectRootPath, standardSceneDefinition, definition);
+            SceneWriteService.WriteScene(projectRootPath, standardSceneDefinition);
+
+            GeneratedAuthoringSceneDefinition handheldSceneDefinition = SceneFactory.CreateHandheldSceneDefinition(providerTypeName, definition);
+            SceneWriteService.WriteScene(projectRootPath, handheldSceneDefinition);
         }
 
         /// <summary>

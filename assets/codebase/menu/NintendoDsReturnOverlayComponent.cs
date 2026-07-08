@@ -4,11 +4,6 @@ namespace city.menu {
     /// </summary>
     public sealed class NintendoDsReturnOverlayComponent : UpdateComponent {
         /// <summary>
-        /// Stable logical scene id used by the demo-disc main menu.
-        /// </summary>
-        public const string MainMenuSceneId = "DemoDiscMainMenu";
-
-        /// <summary>
         /// Interactable host used by the bottom-screen back button.
         /// </summary>
         InteractableComponent BoundInteractable;
@@ -137,14 +132,8 @@ namespace city.menu {
             if (SceneLoadWasRequested) {
                 return;
             }
-            if (Core.Instance == null) {
-                throw new InvalidOperationException("A core instance must exist before returning to the main menu.");
-            }
-            if (Core.Instance.SceneManager == null) {
-                throw new InvalidOperationException("Core scene manager must be initialized before runtime menu scene loading can occur.");
-            }
 
-            string resolvedSceneId = SceneMapComponent.ResolveSceneId(MainMenuSceneId);
+            string resolvedSceneId = DemoDiscMainMenuSceneResolver.ResolveRuntimeSceneId();
             SceneLoadWasRequested = true;
             Core.Instance.SceneManager.LoadScene(resolvedSceneId, SceneLoadMode.Single);
         }

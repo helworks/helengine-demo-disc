@@ -544,8 +544,7 @@
       "selectedGraphicsProfileId": "ds-main-2d",
       "selectedBuildOptionValues": {
         "startup-top-screen-color": "#FF0000",
-        "startup-bottom-screen-color": "#0000FF",
-        "enable-native-runtime-diagnostics": "true"
+        "startup-bottom-screen-color": "#0000FF"
       },
       "selectedGraphicsOptionValues": {},
       "selectedCodegenProfileId": "default",
