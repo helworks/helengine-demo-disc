@@ -4,6 +4,11 @@ namespace city.game {
     /// </summary>
     public sealed class DemoTiltStageComponent : UpdateComponent {
         /// <summary>
+        /// Gets or sets whether stage movement updates should be skipped for the current frame.
+        /// </summary>
+        public bool UpdatesAreSuppressed { get; set; }
+
+        /// <summary>
         /// Normalized analog threshold used to ignore left-stick drift.
         /// </summary>
         const double GamepadDeadzone = 0.18d;
@@ -75,6 +80,8 @@ namespace city.game {
 
             if (Parent == null) {
                 throw new InvalidOperationException("DemoTiltStageComponent requires an attached stage root entity.");
+            } else if (UpdatesAreSuppressed) {
+                return;
             }
 
             ResolveRuntimeDependenciesWhenNeeded();

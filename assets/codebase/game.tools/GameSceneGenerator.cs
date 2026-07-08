@@ -33,7 +33,13 @@ namespace city.game.tools {
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(projectRootPath);
             GameSceneFactory factory = new GameSceneFactory(assets);
             GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue);
-            sceneWriteService.WriteScene(projectRootPath, factory.CreateTiltTrialScene());
+            GeneratedAuthoringSceneDefinition tiltTrialLevelSelectScene = factory.CreateTiltTrialLevelSelectScene();
+            sceneWriteService.WriteScene(projectRootPath, tiltTrialLevelSelectScene);
+
+            IReadOnlyList<GeneratedAuthoringSceneDefinition> tiltTrialLevelScenes = factory.CreateTiltTrialLevelScenes();
+            for (int index = 0; index < tiltTrialLevelScenes.Count; index++) {
+                sceneWriteService.WriteScene(projectRootPath, tiltTrialLevelScenes[index]);
+            }
         }
     }
 }

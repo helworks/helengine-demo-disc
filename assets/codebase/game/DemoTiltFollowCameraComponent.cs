@@ -4,6 +4,11 @@ namespace city.game {
     /// </summary>
     public sealed class DemoTiltFollowCameraComponent : UpdateComponent {
         /// <summary>
+        /// Gets or sets whether follow-camera updates should be skipped for the current frame.
+        /// </summary>
+        public bool UpdatesAreSuppressed { get; set; }
+
+        /// <summary>
         /// Normalized analog threshold used to ignore right-stick drift.
         /// </summary>
         const double GamepadDeadzone = 0.18d;
@@ -93,6 +98,8 @@ namespace city.game {
 
             if (Parent == null) {
                 throw new InvalidOperationException("DemoTiltFollowCameraComponent requires an attached parent camera entity.");
+            } else if (UpdatesAreSuppressed) {
+                return;
             }
 
             ResolveTargetEntityWhenNeeded();
