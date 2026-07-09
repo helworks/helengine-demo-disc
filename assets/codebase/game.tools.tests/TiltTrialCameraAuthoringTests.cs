@@ -35,6 +35,11 @@ namespace city.tests {
         public void Tilt_trial_speed_hud_uses_fredoka_with_a_larger_layout() {
             string gameSceneSourcePath = @"C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneFactory.cs";
             string source = File.ReadAllText(gameSceneSourcePath);
+            int speedTextComponentStart = source.IndexOf("TextComponent speedTextComponent = new TextComponent {", StringComparison.Ordinal);
+            int speedTextComponentEnd = source.IndexOf("speedTextEntity.AddComponent(speedTextComponent);", StringComparison.Ordinal);
+            Assert.True(speedTextComponentStart >= 0);
+            Assert.True(speedTextComponentEnd > speedTextComponentStart);
+            string speedTextComponentBlock = source.Substring(speedTextComponentStart, speedTextComponentEnd - speedTextComponentStart);
 
             Assert.Contains("const string TiltTrialSpeedHudFontRelativePath = \"Fonts/Fredoka.ttf\";", source, StringComparison.Ordinal);
             Assert.Contains("FixedSize = new int2(1280, 720)", source, StringComparison.Ordinal);
@@ -50,7 +55,7 @@ namespace city.tests {
             Assert.Contains("ApplyFontReference(speedTextEntity, speedTextComponent, TiltTrialSpeedHudFontRelativePath);", source, StringComparison.Ordinal);
             Assert.DoesNotContain("Text = \"0 km/h\",", source, StringComparison.Ordinal);
             Assert.DoesNotContain("Size = new int2(320, 104),", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("Alignment = TextAlignment.Left,", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("Alignment = TextAlignment.Left,", speedTextComponentBlock, StringComparison.Ordinal);
         }
     }
 }
