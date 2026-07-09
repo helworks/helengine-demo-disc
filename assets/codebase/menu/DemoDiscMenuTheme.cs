@@ -16,7 +16,7 @@ namespace city.menu {
         /// <summary>
         /// Gets the decorative logo texture path.
         /// </summary>
-        public string LogoTexturePath => "Images/Menu/helengine-logo.png";
+        public string LogoTexturePath => "images/menu/helengine-logo.png";
 
         /// <summary>
         /// Gets the decorative logo width in authored canvas pixels.

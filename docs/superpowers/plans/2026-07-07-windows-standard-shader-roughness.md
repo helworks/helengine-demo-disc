@@ -170,7 +170,7 @@ public void CookMaterial_preserves_standard_shader_roughness_fields() {
             ["pixel-program"] = "ForwardStandardShader.ps",
             ["variant"] = "Mesh",
             ["roughness"] = "0.35",
-            ["roughness-texture-id"] = "Textures/MarbleRoughness"
+            ["roughness-texture-id"] = "textures/MarbleRoughness"
         }));
 
     ShaderMaterialAsset materialAsset = Assert.IsType<ShaderMaterialAsset>(
@@ -179,7 +179,7 @@ public void CookMaterial_preserves_standard_shader_roughness_fields() {
         materialAsset.ConstantBuffers,
         buffer => buffer.Name == StandardMaterialRoughnessDefaults.RoughnessBufferName);
 
-    Assert.Equal("Textures/MarbleRoughness", materialAsset.RoughnessTextureAssetId);
+    Assert.Equal("textures/MarbleRoughness", materialAsset.RoughnessTextureAssetId);
     Assert.Equal(StandardMaterialRoughnessDefaults.CreateConstantBufferData(0.35f), roughnessBuffer.Data);
 }
 ```
@@ -673,8 +673,8 @@ Expected: FAIL because the marble material factory and authored material do not 
 public sealed class TiltTrialPlayerSphereMarbleMaterialFactory {
     public const string MaterialRelativePath = "materials/rendering/tilt_trial/PlayerSphereMarble.hasset";
     public const string MaterialAssetId = "Materials.rendering.tilt_trial.PlayerSphereMarble";
-    public const string DiffuseTextureRelativePath = "Textures/rendering/tilt_trial/PlayerSphereMarble.jpg";
-    public const string RoughnessTextureRelativePath = "Textures/rendering/tilt_trial/PlayerSphereMarbleRoughness.jpg";
+    public const string DiffuseTextureRelativePath = "textures/rendering/tilt_trial/PlayerSphereMarble.jpg";
+    public const string RoughnessTextureRelativePath = "textures/rendering/tilt_trial/PlayerSphereMarbleRoughness.jpg";
 
     void ConfigureWindowsPlatform(GeneratedMaterialPlatformDefinition platformDefinition, string diffuseTextureAssetId, string roughnessTextureAssetId) {
         platformDefinition.SchemaId = "standard-shader";

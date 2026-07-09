@@ -5,7 +5,7 @@ namespace city.rendering.tools {
     /// Loads and validates the generated control-icon manifest.
     /// </summary>
     public sealed class GeneratedControlIconCatalog {
-        const string ManifestRelativePath = "assets/Images/Instructions/Controls/generated/manifest.json";
+        const string ManifestRelativePath = "assets/images/instructions/controls/generated/manifest.json";
 
         readonly Dictionary<string, HashSet<string>> ControlIdsByFamilyId;
 
@@ -62,7 +62,7 @@ namespace city.rendering.tools {
                 throw new InvalidOperationException($"Generated control icon '{normalizedFamilyId}/{normalizedControlId}' was not found in the manifest.");
             }
 
-            return "Images/Instructions/Controls/generated/" + normalizedFamilyId + "/" + normalizedControlId + ".png";
+            return "images/instructions/controls/generated/" + normalizedFamilyId + "/" + normalizedControlId + ".png";
         }
     }
 }

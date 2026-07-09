@@ -20,12 +20,12 @@ namespace city.rendering.tools {
         /// <summary>
         /// Stable project-relative marble albedo source texture path.
         /// </summary>
-        public const string DiffuseTextureRelativePath = "Textures/rendering/tilt_trial/PlayerSphereMarble.jpg";
+        public const string DiffuseTextureRelativePath = "textures/rendering/tilt_trial/PlayerSphereMarble.jpg";
 
         /// <summary>
         /// Stable project-relative marble roughness source texture path.
         /// </summary>
-        public const string RoughnessTextureRelativePath = "Textures/rendering/tilt_trial/PlayerSphereMarbleRoughness.jpg";
+        public const string RoughnessTextureRelativePath = "textures/rendering/tilt_trial/PlayerSphereMarbleRoughness.jpg";
 
         /// <summary>
         /// Stable Windows and PSP schema identifier used by the standard shader material path.

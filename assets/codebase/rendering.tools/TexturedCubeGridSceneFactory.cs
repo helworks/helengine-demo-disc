@@ -139,7 +139,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Relative project folder used for the generated textured cube-grid texture sources.
         /// </summary>
-        const string TextureRootRelativePath = "Textures/rendering/textured_cube_grid";
+        const string TextureRootRelativePath = "textures/rendering/textured_cube_grid";
 
         /// <summary>
         /// Enumerates the generated realistic surface families used by the textured cube-grid scene.

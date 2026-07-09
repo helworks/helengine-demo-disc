@@ -36,7 +36,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Stable project-relative texture path used by the scaffold-owned Nintendo DS back button body.
         /// </summary>
-        const string NintendoDsBackButtonTexturePath = "Images/Menu/ds-back-button.png";
+        const string NintendoDsBackButtonTexturePath = "images/menu/ds-back-button.png";
 
         /// <summary>
         /// Fixed width used by the scaffold-owned Nintendo DS back button body.

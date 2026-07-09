@@ -57,7 +57,7 @@ namespace city.menu.tools {
         /// <summary>
         /// Stable relative animation-clip path used by the rotating demo-disc logo.
         /// </summary>
-        const string DemoDiscLogoIdleAnimationRelativePath = "Animations/DemoDiscLogoIdle.hanim";
+        const string DemoDiscLogoIdleAnimationRelativePath = "animations/DemoDiscLogoIdle.hanim";
 
         /// <summary>
         /// Fixed top inset applied to the Nintendo DS rotating logo so affine OBJ tiles never need negative screen anchors.

@@ -35,21 +35,21 @@ namespace city.rendering.tools {
         /// <summary>
         /// Stable project-relative path to the imported lamppost model source.
         /// </summary>
-        const string LamppostModelRelativePath = "models/Riemers/lamppost.x";
+        const string LamppostModelRelativePath = "models/riemers/lamppost.x";
 
         /// <summary>
         /// Stable project-relative path to the imported racer model source.
         /// </summary>
-        const string RacerModelRelativePath = "models/Riemers/racer.x";
+        const string RacerModelRelativePath = "models/riemers/racer.x";
 
         /// <summary>
         /// Stable project-relative material paths used by the imported racer model.
         /// </summary>
         static readonly string[] RacerMaterialRelativePaths = {
-            "models/Riemers/racer/x3ds_mat_ruedas.hasset",
-            "models/Riemers/racer/x3ds_mat_Material__0_3.hasset",
-            "models/Riemers/racer/x3ds_mat_Material_1_2.hasset",
-            "models/Riemers/racer/x3ds_mat_Material_2_1.hasset"
+            "models/riemers/racer/x3ds_mat_ruedas.hasset",
+            "models/riemers/racer/x3ds_mat_Material__0_3.hasset",
+            "models/riemers/racer/x3ds_mat_Material_1_2.hasset",
+            "models/riemers/racer/x3ds_mat_Material_2_1.hasset"
         };
 
         /// <summary>

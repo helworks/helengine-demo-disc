@@ -74,13 +74,13 @@ namespace city.rendering.tools {
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/Marker.hasset")
             };
             RuntimeMaterial[] racerMaterials = new[] {
-                LoadRuntimeMaterial(bootstrap, projectRootPath, "models/Riemers/racer/x3ds_mat_ruedas.hasset"),
-                LoadRuntimeMaterial(bootstrap, projectRootPath, "models/Riemers/racer/x3ds_mat_Material__0_3.hasset"),
-                LoadRuntimeMaterial(bootstrap, projectRootPath, "models/Riemers/racer/x3ds_mat_Material_1_2.hasset"),
-                LoadRuntimeMaterial(bootstrap, projectRootPath, "models/Riemers/racer/x3ds_mat_Material_2_1.hasset")
+                LoadRuntimeMaterial(bootstrap, projectRootPath, "models/riemers/racer/x3ds_mat_ruedas.hasset"),
+                LoadRuntimeMaterial(bootstrap, projectRootPath, "models/riemers/racer/x3ds_mat_Material__0_3.hasset"),
+                LoadRuntimeMaterial(bootstrap, projectRootPath, "models/riemers/racer/x3ds_mat_Material_1_2.hasset"),
+                LoadRuntimeMaterial(bootstrap, projectRootPath, "models/riemers/racer/x3ds_mat_Material_2_1.hasset")
             };
-            RuntimeModel lamppostModel = LoadImportedModelRuntime(projectRootPath, "models/Riemers/lamppost.x");
-            RuntimeModel racerModel = LoadImportedModelRuntime(projectRootPath, "models/Riemers/racer.x");
+            RuntimeModel lamppostModel = LoadImportedModelRuntime(projectRootPath, "models/riemers/lamppost.x");
+            RuntimeModel racerModel = LoadImportedModelRuntime(projectRootPath, "models/riemers/racer.x");
 
             return new RenderingSceneGenerationAssets {
                 GeneratedCubeModel = generatedCubeModel,

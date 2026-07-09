@@ -6,7 +6,7 @@ Add one shared authoring utility that resolves generated control-icon PNGs into 
 
 ## Problem
 
-The project now has a generated control-icon pack under `assets/Images/Instructions/Controls/generated`, with one folder per platform family and one PNG per control name. Rendering and physics scene generators do not currently have a reusable way to consume those assets.
+The project now has a generated control-icon pack under `assets/images/instructions/controls/generated`, with one folder per platform family and one PNG per control name. Rendering and physics scene generators do not currently have a reusable way to consume those assets.
 
 Today:
 
@@ -71,7 +71,7 @@ Loads and validates the generated control-pack manifest.
 
 Responsibilities:
 
-- load `assets/Images/Instructions/Controls/generated/manifest.json`
+- load `assets/images/instructions/controls/generated/manifest.json`
 - validate that the manifest exists and contains the requested family
 - validate that the requested raw control ID exists in that family
 - construct the generated PNG relative path for the resolved family/control pair

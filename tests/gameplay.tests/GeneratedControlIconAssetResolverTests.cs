@@ -16,7 +16,7 @@ namespace city.tests {
 
             string relativePath = catalog.RequireControlPath("keyboard", "wasd");
 
-            Assert.Equal("Images/Instructions/Controls/generated/keyboard/wasd.png", relativePath);
+            Assert.Equal("images/instructions/controls/generated/keyboard/wasd.png", relativePath);
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace city.tests {
             Assert.Equal("ps2", resolved.PlatformId);
             Assert.Equal("ps2", resolved.FamilyId);
             Assert.Equal("r1", resolved.ControlId);
-            Assert.Equal("Images/Instructions/Controls/generated/ps2/r1.png", resolved.SourcePngRelativePath);
+            Assert.Equal("images/instructions/controls/generated/ps2/r1.png", resolved.SourcePngRelativePath);
             Assert.False(string.IsNullOrWhiteSpace(resolved.ImportedTextureAssetId));
         }
 

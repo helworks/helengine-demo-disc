@@ -163,7 +163,7 @@ namespace city.physics.tools {
         /// <summary>
         /// Relative project asset path for the shared sphere-stack tile texture.
         /// </summary>
-        const string PhysicsDemoSphereTileTextureRelativePath = "Images/physics/PhysicsDemoSphereTile.bmp";
+        const string PhysicsDemoSphereTileTextureRelativePath = "images/physics/PhysicsDemoSphereTile.bmp";
 
         /// <summary>
         /// Relative project asset path for the blue sphere-stack material.

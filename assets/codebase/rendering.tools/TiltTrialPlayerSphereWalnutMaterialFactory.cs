@@ -20,7 +20,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Stable project-relative walnut source texture path.
         /// </summary>
-        public const string TextureRelativePath = "Textures/rendering/tilt_trial/PlayerSphereWalnut.bmp";
+        public const string TextureRelativePath = "textures/rendering/tilt_trial/PlayerSphereWalnut.bmp";
 
         /// <summary>
         /// Stable Windows and PSP schema identifier used by the standard shader material path.
