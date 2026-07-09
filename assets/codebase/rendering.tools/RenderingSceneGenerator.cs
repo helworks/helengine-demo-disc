@@ -212,20 +212,20 @@ namespace city.rendering.tools {
 
             DeleteObsoleteRenderMatrixProbeScene(projectRootPath);
             DeleteObsoleteNintendoHandheldCompanionScenes(projectRootPath);
-            GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedCubeTestSolidMaterial);
+            GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedCubeTestSolidMaterial);
             GeneratedAuthoringSceneDefinition groundCubeProbeSceneDefinition = GroundCubeProbeFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
-            GeneratedAuthoringSceneDefinition scaledCubeSceneDefinition = ScaledCubeFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
+            GeneratedAuthoringSceneDefinition scaledCubeSceneDefinition = ScaledCubeFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition coloredCubeGridSceneDefinition;
             GeneratedAuthoringSceneDefinition texturedCubeGridSceneDefinition;
-            GeneratedAuthoringSceneDefinition axisTestSceneDefinition = AxisTestFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
-            GeneratedAuthoringSceneDefinition axisTest2SceneDefinition = AxisTest2Factory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
+            GeneratedAuthoringSceneDefinition axisTestSceneDefinition = AxisTestFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
+            GeneratedAuthoringSceneDefinition axisTest2SceneDefinition = AxisTest2Factory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
             GeneratedAuthoringSceneDefinition sceneMemoryProbeSceneDefinition = SceneMemoryProbeFactory.CreateSceneDefinition();
-            GeneratedAuthoringSceneDefinition directionalShadowPlazaSceneDefinition = DirectionalShadowPlazaFactory.CreateSceneDefinition(assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial);
+            GeneratedAuthoringSceneDefinition directionalShadowPlazaSceneDefinition = DirectionalShadowPlazaFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition spotlightStreetSliceSceneDefinition = SpotlightStreetSliceFactory.CreateSceneDefinition(assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial, assets.LamppostModel, assets.RacerModel, assets.RacerMaterials);
             ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
             TexturedCubeGridFactory.WriteAssets(projectRootPath);
-            coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(assets.GeneratedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
-            texturedCubeGridSceneDefinition = TexturedCubeGridFactory.CreateSceneDefinition(assets.GeneratedCubeModel, TexturedCubeGridFactory.CreateRuntimeMaterials(assets.GeneratedStandardMaterial));
+            coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
+            texturedCubeGridSceneDefinition = TexturedCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, TexturedCubeGridFactory.CreateRuntimeMaterials(assets.GeneratedStandardMaterial));
             AuthoringSceneWriteService.WriteScene(projectRootPath, cubeTestSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, groundCubeProbeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, scaledCubeSceneDefinition);

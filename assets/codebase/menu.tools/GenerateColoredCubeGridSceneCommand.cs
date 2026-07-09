@@ -29,6 +29,7 @@ namespace city.menu.tools {
             ColoredCubeGridSceneFactory factory = new ColoredCubeGridSceneFactory();
             factory.WriteMaterialAssets(context.ProjectRootPath);
             GeneratedAuthoringSceneDefinition sceneDefinition = factory.CreateSceneDefinition(
+                context.ProjectRootPath,
                 assets.GeneratedCubeModel,
                 factory.CreateRuntimeMaterials());
             GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(context.ScriptTypeResolver);

@@ -28,6 +28,7 @@ namespace city.menu.tools {
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(context.ProjectRootPath);
             CubeTestSceneFactory factory = new CubeTestSceneFactory();
             GeneratedAuthoringSceneDefinition sceneDefinition = factory.CreateSceneDefinition(
+                context.ProjectRootPath,
                 assets.GeneratedCubeModel,
                 assets.GeneratedCubeTestSolidMaterial);
             GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(context.ScriptTypeResolver);

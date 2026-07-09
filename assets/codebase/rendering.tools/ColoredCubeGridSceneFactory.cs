@@ -147,11 +147,14 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates the canonical colored cube-grid live-authored scene definition.
         /// </summary>
+        /// <param name="projectRootPath">Absolute or relative project root path used to resolve generated prompt icons.</param>
         /// <param name="cubeModel">Generated cube runtime model assigned to every cube.</param>
         /// <param name="coloredMaterials">Generated runtime materials assigned to the sixteen cubes.</param>
         /// <returns>Live-authored scene definition for the sixteen-cube color grid.</returns>
-        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(RuntimeModel cubeModel, RuntimeMaterial[] coloredMaterials) {
-            if (cubeModel == null) {
+        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(string projectRootPath, RuntimeModel cubeModel, RuntimeMaterial[] coloredMaterials) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (cubeModel == null) {
                 throw new ArgumentNullException(nameof(cubeModel));
             } else if (coloredMaterials == null) {
                 throw new ArgumentNullException(nameof(coloredMaterials));
@@ -164,7 +167,7 @@ namespace city.rendering.tools {
             Entity[] cubeEntities = CreateCubeEntities(cubeModel, coloredMaterials);
             Entity[] rootEntities = new Entity[cubeEntities.Length + 4];
             Entity cameraEntity = CreateCameraEntity();
-            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(instructionFont);
+            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             rootEntities[0] = cameraEntity;
             rootEntities[1] = instructionOverlayEntity;
             rootEntities[2] = CreateUiEntity();

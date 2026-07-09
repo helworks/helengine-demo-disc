@@ -6,6 +6,11 @@ namespace city.physics.tools {
     /// </summary>
     public sealed class PhysicsSceneFactory {
         /// <summary>
+        /// Active project root used while authoring playable showcase overlays.
+        /// </summary>
+        string CurrentProjectRootPath = string.Empty;
+
+        /// <summary>
         /// Stable generated provider identifier used for built-in primitive assets.
         /// </summary>
         const string GeneratedProviderId = EngineGeneratedAssetProvider.ProviderIdValue;
@@ -431,6 +436,7 @@ namespace city.physics.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
+            CurrentProjectRootPath = Path.GetFullPath(projectRootPath);
             string assetsRootPath = Path.Combine(projectRootPath, "assets");
             if (!Directory.Exists(assetsRootPath)) {
                 throw new DirectoryNotFoundException($"Physics validation scene export requires an assets directory at '{assetsRootPath}'.");
@@ -1400,10 +1406,12 @@ namespace city.physics.tools {
         EditorEntity CreatePhysicsShowcaseDesktopInstructionOverlayRoot() {
             if (Core.Instance == null || Core.Instance.EntityFactory == null) {
                 throw new InvalidOperationException("Creating the physics showcase instruction overlay requires an active editor entity factory.");
+            } else if (string.IsNullOrWhiteSpace(CurrentProjectRootPath)) {
+                throw new InvalidOperationException("Creating the physics showcase instruction overlay requires an active project root path.");
             }
 
             city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory();
-            Entity overlayRootEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(ResolveRequiredEditorFont());
+            Entity overlayRootEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(CurrentProjectRootPath, ResolveRequiredEditorFont());
             if (overlayRootEntity is not EditorEntity editorOverlayRootEntity) {
                 throw new InvalidOperationException("The physics showcase instruction overlay must be authored through editor entities.");
             }
@@ -2033,7 +2041,7 @@ namespace city.physics.tools {
             if (includeDesktopInstructionOverlay) {
                 city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory();
                 FontAsset instructionFont = ResolveRequiredEditorFont();
-                rootEntities.Insert(1, instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(instructionFont));
+                rootEntities.Insert(1, instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont));
             }
 
             IReadOnlyList<EditorEntity> scenarioRoots = LoadPlayablePhysicsShowcaseScenarioRoots(projectRootPath, authoredSceneAsset);

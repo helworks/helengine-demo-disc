@@ -327,11 +327,14 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates the canonical textured cube-grid live-authored scene definition.
         /// </summary>
+        /// <param name="projectRootPath">Absolute or relative project root path used to resolve generated prompt icons.</param>
         /// <param name="cubeModel">Generated cube runtime model assigned to every cube.</param>
         /// <param name="texturedMaterials">Generated runtime materials assigned to the sixteen cubes.</param>
         /// <returns>Live-authored scene definition for the sixteen-cube textured grid.</returns>
-        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(RuntimeModel cubeModel, RuntimeMaterial[] texturedMaterials) {
-            if (cubeModel == null) {
+        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(string projectRootPath, RuntimeModel cubeModel, RuntimeMaterial[] texturedMaterials) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (cubeModel == null) {
                 throw new ArgumentNullException(nameof(cubeModel));
             } else if (texturedMaterials == null) {
                 throw new ArgumentNullException(nameof(texturedMaterials));
@@ -344,7 +347,7 @@ namespace city.rendering.tools {
             Entity[] cubeEntities = CreateCubeEntities(cubeModel, texturedMaterials);
             Entity[] rootEntities = new Entity[cubeEntities.Length + 4];
             Entity cameraEntity = CreateCameraEntity();
-            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(instructionFont);
+            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             rootEntities[0] = cameraEntity;
             rootEntities[1] = instructionOverlayEntity;
             rootEntities[2] = CreateUiEntity();

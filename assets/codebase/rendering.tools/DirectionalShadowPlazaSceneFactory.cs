@@ -55,17 +55,21 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates the live-authored directional-shadow plaza scene definition that the editor save pipeline will serialize.
         /// </summary>
+        /// <param name="projectRootPath">Absolute or relative project root path used to resolve generated prompt icons.</param>
         /// <param name="planeModel">Generated plane runtime model used by the ground mesh.</param>
         /// <param name="cubeModel">Generated cube runtime model used by the buildings and shadow mast.</param>
         /// <param name="sphereModel">Generated sphere runtime model used by the orbiting hero landmark.</param>
         /// <param name="standardMaterial">Runtime standard material assigned to every plaza mesh.</param>
         /// <returns>Live-authored scene definition for the directional-shadow plaza showcase.</returns>
         public GeneratedAuthoringSceneDefinition CreateSceneDefinition(
+            string projectRootPath,
             RuntimeModel planeModel,
             RuntimeModel cubeModel,
             RuntimeModel sphereModel,
             RuntimeMaterial standardMaterial) {
-            if (planeModel == null) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (planeModel == null) {
                 throw new ArgumentNullException(nameof(planeModel));
             } else if (cubeModel == null) {
                 throw new ArgumentNullException(nameof(cubeModel));
@@ -78,7 +82,7 @@ namespace city.rendering.tools {
             FontAsset instructionFont = ResolveRequiredEditorFont();
             DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
             Entity cameraEntity = CreateCameraEntity();
-            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(instructionFont);
+            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,

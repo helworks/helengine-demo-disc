@@ -98,12 +98,15 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates the live-authored axis-test scene definition.
         /// </summary>
+        /// <param name="projectRootPath">Absolute or relative project root path used to resolve generated prompt icons.</param>
         /// <param name="cubeModel">Generated cube runtime model assigned to the authored mesh entities.</param>
         /// <param name="arrowModel">Runtime model used by the directional-light arrow.</param>
         /// <param name="axisMaterials">Loaded runtime materials ordered as X, Y, Z, ground, and marker.</param>
         /// <returns>Live-authored scene definition for the axis-test showcase.</returns>
-        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(RuntimeModel cubeModel, RuntimeModel arrowModel, RuntimeMaterial[] axisMaterials) {
-            if (cubeModel == null) {
+        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(string projectRootPath, RuntimeModel cubeModel, RuntimeModel arrowModel, RuntimeMaterial[] axisMaterials) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (cubeModel == null) {
                 throw new ArgumentNullException(nameof(cubeModel));
             } else if (arrowModel == null) {
                 throw new ArgumentNullException(nameof(arrowModel));
@@ -116,7 +119,7 @@ namespace city.rendering.tools {
             FontAsset instructionFont = ResolveRequiredEditorFont();
             DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
             Entity cameraEntity = CreateCameraEntity();
-            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(instructionFont);
+            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,

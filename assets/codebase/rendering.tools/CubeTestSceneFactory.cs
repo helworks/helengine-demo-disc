@@ -25,11 +25,14 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates the canonical cube-test live scene definition.
         /// </summary>
+        /// <param name="projectRootPath">Absolute or relative project root path used to resolve generated prompt icons.</param>
         /// <param name="cubeModel">Generated cube runtime model assigned to the authored mesh.</param>
         /// <param name="solidColorMaterial">Generated shared solid-color runtime material assigned to the authored mesh.</param>
         /// <returns>Live-authored cube-test scene definition.</returns>
-        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(RuntimeModel cubeModel, RuntimeMaterial solidColorMaterial) {
-            if (cubeModel == null) {
+        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(string projectRootPath, RuntimeModel cubeModel, RuntimeMaterial solidColorMaterial) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (cubeModel == null) {
                 throw new ArgumentNullException(nameof(cubeModel));
             } else if (solidColorMaterial == null) {
                 throw new ArgumentNullException(nameof(solidColorMaterial));
@@ -38,7 +41,7 @@ namespace city.rendering.tools {
             FontAsset instructionFont = ResolveRequiredEditorFont();
             DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
             Entity cameraEntity = CreateCameraEntity();
-            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(instructionFont);
+            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,

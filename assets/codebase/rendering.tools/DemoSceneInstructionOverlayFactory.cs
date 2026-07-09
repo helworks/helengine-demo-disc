@@ -162,42 +162,86 @@ namespace city.rendering.tools {
         const int NintendoDsInstructionTextHeight = 22;
 
         /// <summary>
-        /// Stable project-relative texture path used for the Xbox 360 D-pad instruction icon.
+        /// Shared generated control-icon resolver used by desktop instruction rows.
         /// </summary>
-        const string Xbox360DpadTexturePath = "Images/Instructions/Controls/xbox360_dpad.png";
+        readonly GeneratedControlIconAssetResolver ControlIconResolver = new GeneratedControlIconAssetResolver();
 
         /// <summary>
-        /// Stable project-relative texture path used for the Xbox 360 right-shoulder instruction icon.
+        /// Editor API used to author per-platform sprite overrides on one shared icon entity.
         /// </summary>
-        const string Xbox360RightShoulderTexturePath = "Images/Instructions/Controls/xbox360_rb.png";
+        readonly ComponentPlatformEditingService PlatformEditingService = new ComponentPlatformEditingService();
 
         /// <summary>
-        /// Stable project-relative texture path used for the PS2 D-pad instruction icon.
+        /// Raw generated control-icon binding plus the authored icon size used for one platform.
         /// </summary>
-        const string Ps2DpadTexturePath = "Images/Instructions/Controls/ps2_dpad.png";
+        readonly struct DesktopInstructionPlatformIconSpec {
+            public DesktopInstructionPlatformIconSpec(string platformId, string controlId, int2 size) {
+                PlatformId = platformId;
+                ControlId = controlId;
+                Size = size;
+            }
+
+            public string PlatformId { get; }
+            public string ControlId { get; }
+            public int2 Size { get; }
+        }
 
         /// <summary>
-        /// Stable project-relative texture path used for the PS2 right-shoulder instruction icon.
+        /// Shared rotate-row icon bindings keyed by runtime platform.
         /// </summary>
-        const string Ps2RightShoulderTexturePath = "Images/Instructions/Controls/ps2_r1.png";
+        static readonly DesktopInstructionPlatformIconSpec[] RotateIconSpecs = new[] {
+            new DesktopInstructionPlatformIconSpec("windows", "wasd", new int2(76, 52)),
+            new DesktopInstructionPlatformIconSpec("win32", "wasd", new int2(76, 52)),
+            new DesktopInstructionPlatformIconSpec("xbox360", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("switch", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("gamecube", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("wii", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("ds", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("3ds", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("psp", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("ps2", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("psvita", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("n64", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("dreamcast", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("ps1", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("ps3", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("xbox", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("steamdeck", "dpad", new int2(48, 48))
+        };
 
         /// <summary>
-        /// Stable project-relative texture path used for the Switch D-pad instruction icon.
+        /// Shared light-toggle-row icon bindings keyed by runtime platform.
         /// </summary>
-        const string SwitchDpadTexturePath = "Images/Instructions/Controls/switch_dpad.png";
-
-        /// <summary>
-        /// Stable project-relative texture path used for the Switch right-shoulder instruction icon.
-        /// </summary>
-        const string SwitchRightShoulderTexturePath = "Images/Instructions/Controls/switch_r.png";
+        static readonly DesktopInstructionPlatformIconSpec[] LightIconSpecs = new[] {
+            new DesktopInstructionPlatformIconSpec("windows", "key_l", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("win32", "key_l", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("xbox360", "rb", new int2(78, 45)),
+            new DesktopInstructionPlatformIconSpec("switch", "r", new int2(89, 41)),
+            new DesktopInstructionPlatformIconSpec("gamecube", "r", new int2(82, 43)),
+            new DesktopInstructionPlatformIconSpec("wii", "b", new int2(58, 46)),
+            new DesktopInstructionPlatformIconSpec("ds", "r", new int2(74, 42)),
+            new DesktopInstructionPlatformIconSpec("3ds", "r", new int2(74, 42)),
+            new DesktopInstructionPlatformIconSpec("psp", "r1", new int2(74, 42)),
+            new DesktopInstructionPlatformIconSpec("ps2", "r1", new int2(65, 48)),
+            new DesktopInstructionPlatformIconSpec("psvita", "r1", new int2(74, 42)),
+            new DesktopInstructionPlatformIconSpec("n64", "r", new int2(70, 42)),
+            new DesktopInstructionPlatformIconSpec("dreamcast", "r", new int2(70, 42)),
+            new DesktopInstructionPlatformIconSpec("ps1", "r1", new int2(65, 48)),
+            new DesktopInstructionPlatformIconSpec("ps3", "r1", new int2(65, 48)),
+            new DesktopInstructionPlatformIconSpec("xbox", "rb", new int2(78, 45)),
+            new DesktopInstructionPlatformIconSpec("steamdeck", "r1", new int2(78, 45))
+        };
 
         /// <summary>
         /// Creates the shared desktop and console instruction overlay as one screen-bound root entity.
         /// </summary>
+        /// <param name="projectRootPath">Absolute or relative project root path used to resolve generated icon assets.</param>
         /// <param name="font">Font used for the rendered instruction labels.</param>
         /// <returns>Screen-bound overlay root entity.</returns>
-        public Entity CreateDesktopInstructionOverlayRoot(FontAsset font) {
-            if (font == null) {
+        public Entity CreateDesktopInstructionOverlayRoot(string projectRootPath, FontAsset font) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (font == null) {
                 throw new ArgumentNullException(nameof(font));
             }
 
@@ -224,8 +268,8 @@ namespace city.rendering.tools {
                 LayerMask = OverlayDrawableLayerMask
             });
 
-            CreateDesktopInstructionRow(panelEntity, font, "RotateIconSet", "Rotate", DesktopInstructionFirstRowTop, DesktopInstructionRotateTextTopAdjustment, Xbox360DpadTexturePath, DesktopInstructionDpadIconSize, Ps2DpadTexturePath, DesktopInstructionDpadIconSize, SwitchDpadTexturePath, DesktopInstructionDpadIconSize);
-            CreateDesktopInstructionRow(panelEntity, font, "ToggleIconSet", "Light", DesktopInstructionSecondRowTop, DesktopInstructionToggleTextTopAdjustment, Xbox360RightShoulderTexturePath, DesktopInstructionXbox360ShoulderIconSize, Ps2RightShoulderTexturePath, DesktopInstructionPs2ShoulderIconSize, SwitchRightShoulderTexturePath, DesktopInstructionSwitchShoulderIconSize);
+            CreateDesktopInstructionRow(panelEntity, projectRootPath, font, "RotateIcon", "Rotate", DesktopInstructionFirstRowTop, DesktopInstructionRotateTextTopAdjustment, RotateIconSpecs);
+            CreateDesktopInstructionRow(panelEntity, projectRootPath, font, "LightIcon", "Light", DesktopInstructionSecondRowTop, DesktopInstructionToggleTextTopAdjustment, LightIconSpecs);
             return viewportRootEntity;
         }
 
@@ -243,52 +287,42 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates one desktop or console instruction row with platform-specific icon groups and one shared label.
+        /// Creates one desktop or console instruction row with one shared icon entity and per-platform overrides.
         /// </summary>
         /// <param name="panelEntity">Instruction panel that should own the row.</param>
+        /// <param name="projectRootPath">Absolute or relative project root path used to resolve generated icon assets.</param>
         /// <param name="font">Font used for the row label.</param>
-        /// <param name="iconSetEntityName">Stable entity name assigned to the icon-set host.</param>
+        /// <param name="iconEntityName">Stable entity name assigned to the icon host.</param>
         /// <param name="text">Row label text.</param>
         /// <param name="topOffset">Vertical offset within the panel.</param>
         /// <param name="textTopAdjustment">Desktop/shared vertical text adjustment for the row label.</param>
-        /// <param name="xbox360TexturePath">Xbox 360 icon texture path.</param>
-        /// <param name="xbox360Size">Xbox 360 icon size.</param>
-        /// <param name="ps2TexturePath">PS2 icon texture path.</param>
-        /// <param name="ps2Size">PS2 icon size.</param>
-        /// <param name="switchTexturePath">Switch icon texture path.</param>
-        /// <param name="switchSize">Switch icon size.</param>
+        /// <param name="specs">Per-platform raw icon bindings used by the row.</param>
         void CreateDesktopInstructionRow(
             Entity panelEntity,
+            string projectRootPath,
             FontAsset font,
-            string iconSetEntityName,
+            string iconEntityName,
             string text,
             float topOffset,
             float textTopAdjustment,
-            string xbox360TexturePath,
-            int2 xbox360Size,
-            string ps2TexturePath,
-            int2 ps2Size,
-            string switchTexturePath,
-            int2 switchSize) {
+            DesktopInstructionPlatformIconSpec[] specs) {
             if (panelEntity == null) {
                 throw new ArgumentNullException(nameof(panelEntity));
+            } else if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             } else if (font == null) {
                 throw new ArgumentNullException(nameof(font));
-            } else if (string.IsNullOrWhiteSpace(iconSetEntityName)) {
-                throw new ArgumentException("Icon-set entity name must be provided.", nameof(iconSetEntityName));
+            } else if (string.IsNullOrWhiteSpace(iconEntityName)) {
+                throw new ArgumentException("Icon entity name must be provided.", nameof(iconEntityName));
             } else if (string.IsNullOrWhiteSpace(text)) {
                 throw new ArgumentException("Instruction text must be provided.", nameof(text));
+            } else if (specs == null || specs.Length == 0) {
+                throw new ArgumentException("Desktop instruction icon specs must be provided.", nameof(specs));
             }
 
-            Entity iconSetEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, iconSetEntityName);
-            iconSetEntity.LocalPosition = new float3(DesktopInstructionIconLeft, topOffset, 0.1f);
-            iconSetEntity.LayerMask = DesktopOverlayLayerMask;
-            iconSetEntity.AddComponent(new DemoScenePlatformInstructionIconSetComponent());
-            CreatePlatformIconEntity(iconSetEntity, "Xbox360", xbox360TexturePath, xbox360Size, 201);
-            CreatePlatformIconEntity(iconSetEntity, "Ps2", ps2TexturePath, ps2Size, 201);
-            CreatePlatformIconEntity(iconSetEntity, "Switch", switchTexturePath, switchSize, 201);
+            CreateInstructionIconEntity(projectRootPath, panelEntity, iconEntityName, topOffset, specs, 201);
 
-            Entity textEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, iconSetEntityName + "Text");
+            Entity textEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, iconEntityName + "Text");
             textEntity.LocalPosition = new float3(DesktopInstructionTextLeft, topOffset + textTopAdjustment, 0.1f);
             textEntity.LayerMask = DesktopOverlayLayerMask;
             TextComponent textComponent = new TextComponent {
@@ -350,31 +384,106 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates one platform-specific icon group entity that contains one instruction sprite.
+        /// Creates the shared desktop instruction icon entity and persists per-platform sprite overrides.
         /// </summary>
-        /// <param name="iconSetEntity">Icon-set host that should own the group.</param>
-        /// <param name="entityName">Stable entity name assigned to the icon group.</param>
-        /// <param name="texturePath">Project-relative icon texture path.</param>
-        /// <param name="size">Rendered icon size.</param>
+        /// <param name="projectRootPath">Absolute or relative project root path used to resolve generated icon assets.</param>
+        /// <param name="panelEntity">Instruction panel that should own the icon entity.</param>
+        /// <param name="entityName">Stable entity name assigned to the icon entity.</param>
+        /// <param name="topOffset">Vertical offset within the panel.</param>
+        /// <param name="specs">Per-platform raw icon bindings used by the row.</param>
         /// <param name="renderOrder2D">Render order assigned to the icon sprite.</param>
-        void CreatePlatformIconEntity(Entity iconSetEntity, string entityName, string texturePath, int2 size, byte renderOrder2D) {
-            if (iconSetEntity == null) {
-                throw new ArgumentNullException(nameof(iconSetEntity));
+        void CreateInstructionIconEntity(
+            string projectRootPath,
+            Entity panelEntity,
+            string entityName,
+            float topOffset,
+            DesktopInstructionPlatformIconSpec[] specs,
+            byte renderOrder2D) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (panelEntity == null) {
+                throw new ArgumentNullException(nameof(panelEntity));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
                 throw new ArgumentException("Entity name must be provided.", nameof(entityName));
-            } else if (string.IsNullOrWhiteSpace(texturePath)) {
-                throw new ArgumentException("Texture path must be provided.", nameof(texturePath));
+            } else if (specs == null || specs.Length == 0) {
+                throw new ArgumentException("Desktop instruction icon specs must be provided.", nameof(specs));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(iconSetEntity, entityName);
+            Entity entity = Core.Instance.EntityFactory.CreateChild(panelEntity, entityName);
+            entity.LocalPosition = new float3(DesktopInstructionIconLeft, topOffset, 0.1f);
             entity.LayerMask = DesktopOverlayLayerMask;
+            DesktopInstructionPlatformIconSpec commonSpec = FindRequiredCommonSpec(specs, "windows");
             SpriteComponent spriteComponent = new SpriteComponent {
-                Size = size,
+                Size = commonSpec.Size,
                 RenderOrder2D = renderOrder2D,
                 LayerMask = OverlayDrawableLayerMask
             };
             entity.AddComponent(spriteComponent);
-            ApplyTextureReference(entity, spriteComponent, texturePath);
+            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(projectRootPath, commonSpec.PlatformId, commonSpec.ControlId);
+            ApplyTextureReference(entity, spriteComponent, commonIcon.SourcePngRelativePath);
+
+            for (int index = 0; index < specs.Length; index++) {
+                DesktopInstructionPlatformIconSpec spec = specs[index];
+                if (string.Equals(spec.PlatformId, commonSpec.PlatformId, StringComparison.OrdinalIgnoreCase)) {
+                    continue;
+                }
+
+                ApplyPlatformSpriteOverride(projectRootPath, entity, spriteComponent, spec);
+            }
+        }
+
+        /// <summary>
+        /// Persists one platform-specific sprite override for the shared instruction icon entity.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute or relative project root path used to resolve generated icon assets.</param>
+        /// <param name="entity">Icon entity that owns the shared sprite component.</param>
+        /// <param name="commonComponent">Common shared sprite component.</param>
+        /// <param name="spec">Platform-specific raw icon binding plus authored size.</param>
+        void ApplyPlatformSpriteOverride(string projectRootPath, Entity entity, SpriteComponent commonComponent, DesktopInstructionPlatformIconSpec spec) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (commonComponent == null) {
+                throw new ArgumentNullException(nameof(commonComponent));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            SpriteComponent overrideComponent = (SpriteComponent)PlatformEditingService.EnsurePlatformOverrideComponent(commonComponent, saveComponent, spec.PlatformId);
+            overrideComponent.Size = spec.Size;
+            PlatformEditingService.MarkPropertyOverride(commonComponent, saveComponent, spec.PlatformId, nameof(SpriteComponent.Size));
+
+            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(projectRootPath, spec.PlatformId, spec.ControlId);
+            PlatformEditingService.StoreAssetReference(
+                commonComponent,
+                overrideComponent,
+                saveComponent,
+                spec.PlatformId,
+                TextureAssetScenePersistenceSupport.TextureReferenceName,
+                BuildFileReference(resolvedIcon.SourcePngRelativePath));
+            PlatformEditingService.PersistPlatformOverride(commonComponent, overrideComponent, saveComponent, spec.PlatformId);
+        }
+
+        /// <summary>
+        /// Resolves the common authored icon binding used as the shared component baseline.
+        /// </summary>
+        /// <param name="specs">Per-platform row bindings.</param>
+        /// <param name="platformId">Platform id that should supply the shared common baseline.</param>
+        /// <returns>Matching platform icon spec.</returns>
+        static DesktopInstructionPlatformIconSpec FindRequiredCommonSpec(DesktopInstructionPlatformIconSpec[] specs, string platformId) {
+            if (specs == null || specs.Length == 0) {
+                throw new ArgumentException("Desktop instruction icon specs must be provided.", nameof(specs));
+            } else if (string.IsNullOrWhiteSpace(platformId)) {
+                throw new ArgumentException("Platform id must be provided.", nameof(platformId));
+            }
+
+            for (int index = 0; index < specs.Length; index++) {
+                if (string.Equals(specs[index].PlatformId, platformId, StringComparison.OrdinalIgnoreCase)) {
+                    return specs[index];
+                }
+            }
+
+            throw new InvalidOperationException($"Common prompt icon spec '{platformId}' was not found.");
         }
 
         /// <summary>
