@@ -19,6 +19,13 @@ namespace city.tests {
             Assert.Contains("new city.game.TiltTrialLevelSettingsComponent", source, StringComparison.Ordinal);
             Assert.Contains("new city.game.TiltTrialSessionComponent", source, StringComparison.Ordinal);
             Assert.Contains("new city.game.TiltTrialLevelSelectComponent", source, StringComparison.Ordinal);
+            Assert.Contains("new global::helengine.SceneEntityTriggerObserverComponent()", source, StringComparison.Ordinal);
+            Assert.Contains("\"TiltTrialCoinText\"", source, StringComparison.Ordinal);
+            Assert.Contains("\"Coins 0/0\"", source, StringComparison.Ordinal);
+            Assert.Contains("FindRequiredBoxColliderComponent(entity).IsTrigger = true;", source, StringComparison.Ordinal);
+            Assert.Contains("ConfigureTiltTrialGoalTarget(stageRootEntity, playerSphereEntity);", source, StringComparison.Ordinal);
+            Assert.Contains("if (parent.Children[childIndex] is EditorEntity childEntity", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("child?.Name", source, StringComparison.Ordinal);
         }
     }
 }

@@ -14,6 +14,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rendering.tools", "user_set
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "scene.tools", "user_settings/generated_code/projects/scene.tools/scene.tools.csproj", "{FBA313E4-E43F-56BC-B800-1740CF4F87D0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "game.tools.tests", "user_settings/generated_code/projects/game.tools.tests/game.tools.tests.csproj", "{59C14CC7-A534-58A7-8C77-C15D965385F4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gameplay.tests", "user_settings/generated_code/projects/gameplay.tests/gameplay.tests.csproj", "{C1336154-7D4F-5969-A9B5-EBE5A056DE72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rendering.tools.tests", "user_settings/generated_code/projects/rendering.tools.tests/rendering.tools.tests.csproj", "{D6A8A8C6-CC6D-5D70-9735-1372A24ED1C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +50,17 @@ Global
 		{FBA313E4-E43F-56BC-B800-1740CF4F87D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBA313E4-E43F-56BC-B800-1740CF4F87D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBA313E4-E43F-56BC-B800-1740CF4F87D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59C14CC7-A534-58A7-8C77-C15D965385F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59C14CC7-A534-58A7-8C77-C15D965385F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59C14CC7-A534-58A7-8C77-C15D965385F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59C14CC7-A534-58A7-8C77-C15D965385F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1336154-7D4F-5969-A9B5-EBE5A056DE72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1336154-7D4F-5969-A9B5-EBE5A056DE72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1336154-7D4F-5969-A9B5-EBE5A056DE72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1336154-7D4F-5969-A9B5-EBE5A056DE72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6A8A8C6-CC6D-5D70-9735-1372A24ED1C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6A8A8C6-CC6D-5D70-9735-1372A24ED1C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6A8A8C6-CC6D-5D70-9735-1372A24ED1C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6A8A8C6-CC6D-5D70-9735-1372A24ED1C2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

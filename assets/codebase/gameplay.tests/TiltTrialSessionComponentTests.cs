@@ -38,5 +38,12 @@ namespace city.tests {
             Assert.True(changed);
             Assert.Equal(city.game.TiltTrialSessionState.Failed, machine.CurrentState);
         }
+
+        [Fact]
+        public void Format_coin_progress_returns_expected_hud_label() {
+            string label = city.game.TiltTrialSessionComponent.FormatCoinProgress(3, 7);
+
+            Assert.Equal("Coins 3/7", label);
+        }
     }
 }
