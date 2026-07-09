@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<circle cx="76.0" cy="128.0" r="36.0" fill="rgba(240,196,71,1.000)" stroke="rgba(17,24,39,1.000)" stroke-width="4" />
+<circle cx="128.0" cy="76.0" r="36.0" fill="rgba(240,196,71,1.000)" stroke="rgba(17,24,39,1.000)" stroke-width="4" />
+<circle cx="128.0" cy="180.0" r="36.0" fill="rgba(240,196,71,1.000)" stroke="rgba(17,24,39,1.000)" stroke-width="4" />
+<circle cx="180.0" cy="128.0" r="36.0" fill="rgba(240,196,71,1.000)" stroke="rgba(17,24,39,1.000)" stroke-width="4" />
+<text x="128.0" y="128.0" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="28" text-anchor="middle" dominant-baseline="middle" fill="rgba(91,73,16,1.000)">C</text>
+<polygon points="128.0,202.0 116.0,174.0 140.0,174.0" fill="rgba(198,162,56,1.000)" />
+</svg>

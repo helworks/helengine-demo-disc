@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<rect x="46.0" y="106.0" width="76.0" height="44.0" rx="18.0" fill="rgba(190,199,211,1.000)" stroke="rgba(34,48,65,1.000)" stroke-width="4" />
+<text x="84.0" y="128.0" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="rgba(34,48,65,1.000)">L</text>
+<rect x="134.0" y="106.0" width="76.0" height="44.0" rx="18.0" fill="rgba(190,199,211,1.000)" stroke="rgba(34,48,65,1.000)" stroke-width="4" />
+<text x="172.0" y="128.0" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="rgba(34,48,65,1.000)">R</text>
+</svg>

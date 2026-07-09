@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<circle cx="76.0" cy="128.0" r="36.0" fill="rgba(36,42,51,1.000)" stroke="rgba(15,20,27,1.000)" stroke-width="4" />
+<rect x="67.2" y="119.2" width="17.7" height="17.7" rx="4.0" fill="rgba(242,154,241,0.000)" stroke="rgba(242,154,241,1.000)" stroke-width="6" />
+<circle cx="128.0" cy="76.0" r="36.0" fill="rgba(36,42,51,1.000)" stroke="rgba(15,20,27,1.000)" stroke-width="4" />
+<polygon points="128.0,65.1 117.8,83.5 138.2,83.5" fill="rgba(101,208,122,0.000)" stroke="rgba(101,208,122,1.000)" stroke-width="6" />
+<circle cx="128.0" cy="180.0" r="36.0" fill="rgba(36,42,51,1.000)" stroke="rgba(15,20,27,1.000)" stroke-width="4" />
+<polyline points="119.8,171.8 136.2,188.2" fill="none" stroke="rgba(94,168,255,1.000)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="119.8,188.2 136.2,171.8" fill="none" stroke="rgba(94,168,255,1.000)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="180.0" cy="128.0" r="36.0" fill="rgba(36,42,51,1.000)" stroke="rgba(15,20,27,1.000)" stroke-width="4" />
+<circle cx="180.0" cy="128.0" r="9.5" fill="rgba(240,91,91,0.000)" stroke="rgba(240,91,91,1.000)" stroke-width="6" />
+</svg>

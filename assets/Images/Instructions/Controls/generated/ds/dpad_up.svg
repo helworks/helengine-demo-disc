@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<rect x="96.0" y="36.0" width="64.0" height="184.0" rx="24.0" fill="rgba(34,48,66,1.000)" />
+<rect x="36.0" y="96.0" width="184.0" height="64.0" rx="24.0" fill="rgba(34,48,66,1.000)" />
+<rect x="101.0" y="41.0" width="54.0" height="174.0" rx="19.0" fill="rgba(232,238,245,1.000)" />
+<rect x="41.0" y="101.0" width="174.0" height="54.0" rx="19.0" fill="rgba(232,238,245,1.000)" />
+<polygon points="128.0,52.0 112.6,78.4 123.6,78.4 123.6,96.0 132.4,96.0 132.4,78.4 143.4,78.4" fill="rgba(34,48,66,1.000)" />
+</svg>

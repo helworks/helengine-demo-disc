@@ -31,3 +31,7 @@ windows-build-*/
 # Local .NET build output
 bin/
 obj/
+
+# Python cache artifacts
+__pycache__/
+*.pyc

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<circle cx="62.0" cy="140.0" r="36.0" fill="rgba(213,92,82,1.000)" stroke="rgba(17,24,39,1.000)" stroke-width="4" />
+<text x="62.0" y="140.0" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="20" text-anchor="middle" dominant-baseline="middle" fill="rgba(255,255,255,1.000)">B</text>
+<circle cx="128.0" cy="70.0" r="36.0" fill="rgba(197,204,214,1.000)" stroke="rgba(34,48,65,1.000)" stroke-width="4" />
+<text x="128.0" y="70.0" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="20" text-anchor="middle" dominant-baseline="middle" fill="rgba(34,48,65,1.000)">X</text>
+<circle cx="136.0" cy="150.0" r="36.0" fill="rgba(71,179,96,1.000)" stroke="rgba(17,24,39,1.000)" stroke-width="4" />
+<text x="136.0" y="150.0" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="20" text-anchor="middle" dominant-baseline="middle" fill="rgba(255,255,255,1.000)">A</text>
+<circle cx="210.0" cy="128.0" r="36.0" fill="rgba(216,221,229,1.000)" stroke="rgba(34,48,65,1.000)" stroke-width="4" />
+<text x="210.0" y="128.0" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="20" text-anchor="middle" dominant-baseline="middle" fill="rgba(34,48,65,1.000)">Y</text>
+</svg>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<rect x="44.0" y="70.0" width="168.0" height="116.0" rx="24.0" fill="rgba(244,246,248,1.000)" stroke="rgba(83,93,106,1.000)" stroke-width="5" />
+<rect x="52.0" y="78.0" width="152.0" height="100.0" rx="18.0" fill="rgba(255,255,255,0.235)" stroke="rgba(83,93,106,0.275)" stroke-width="2" />
+<text x="128.0" y="132.0" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="44" text-anchor="middle" dominant-baseline="middle" fill="rgba(23,33,43,1.000)">G</text>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<circle cx="88.0" cy="88.0" r="36.0" fill="rgba(83,189,99,1.000)" stroke="rgba(17,24,39,1.000)" stroke-width="4" />
+<text x="88.0" y="88.0" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="20" text-anchor="middle" dominant-baseline="middle" fill="rgba(255,255,255,1.000)">B</text>
+<circle cx="168.0" cy="168.0" r="36.0" fill="rgba(45,127,232,1.000)" stroke="rgba(17,24,39,1.000)" stroke-width="4" />
+<text x="168.0" y="168.0" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="20" text-anchor="middle" dominant-baseline="middle" fill="rgba(255,255,255,1.000)">A</text>
+</svg>
