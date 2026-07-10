@@ -111,6 +111,11 @@ namespace city.rendering.tools {
         readonly GeneratedAuthoringSceneWriteService AuthoringSceneWriteService;
 
         /// <summary>
+        /// Shared scene-music authoring service used to append one looping music root to every generated showcase scene.
+        /// </summary>
+        readonly GeneratedSceneMusicAuthoringService SceneMusicAuthoringService;
+
+        /// <summary>
         /// Factory used to author the directional-shadow plaza scene.
         /// </summary>
         readonly DirectionalShadowPlazaSceneFactory DirectionalShadowPlazaFactory;
@@ -166,6 +171,7 @@ namespace city.rendering.tools {
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
         public RenderingSceneGenerator(IScriptTypeResolver scriptTypeResolver = null) {
             AuthoringSceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver);
+            SceneMusicAuthoringService = new GeneratedSceneMusicAuthoringService();
             DirectionalShadowPlazaFactory = new DirectionalShadowPlazaSceneFactory();
             SpotlightStreetSliceFactory = new SpotlightStreetSliceSceneFactory();
             CubeTestFactory = new CubeTestSceneFactory();
@@ -222,10 +228,20 @@ namespace city.rendering.tools {
             GeneratedAuthoringSceneDefinition sceneMemoryProbeSceneDefinition = SceneMemoryProbeFactory.CreateSceneDefinition();
             GeneratedAuthoringSceneDefinition directionalShadowPlazaSceneDefinition = DirectionalShadowPlazaFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition spotlightStreetSliceSceneDefinition = SpotlightStreetSliceFactory.CreateSceneDefinition(assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial, assets.LamppostModel, assets.RacerModel, assets.RacerMaterials);
+            AppendSharedSceneMusic(cubeTestSceneDefinition);
+            AppendSharedSceneMusic(groundCubeProbeSceneDefinition);
+            AppendSharedSceneMusic(scaledCubeSceneDefinition);
+            AppendSharedSceneMusic(axisTestSceneDefinition);
+            AppendSharedSceneMusic(axisTest2SceneDefinition);
+            AppendSharedSceneMusic(sceneMemoryProbeSceneDefinition);
+            AppendSharedSceneMusic(directionalShadowPlazaSceneDefinition);
+            AppendSharedSceneMusic(spotlightStreetSliceSceneDefinition);
             ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
             TexturedCubeGridFactory.WriteAssets(projectRootPath);
             coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
             texturedCubeGridSceneDefinition = TexturedCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, TexturedCubeGridFactory.CreateRuntimeMaterials(assets.GeneratedStandardMaterial));
+            AppendSharedSceneMusic(coloredCubeGridSceneDefinition);
+            AppendSharedSceneMusic(texturedCubeGridSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, cubeTestSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, groundCubeProbeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, scaledCubeSceneDefinition);
@@ -236,6 +252,23 @@ namespace city.rendering.tools {
             AuthoringSceneWriteService.WriteScene(projectRootPath, sceneMemoryProbeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, directionalShadowPlazaSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, spotlightStreetSliceSceneDefinition);
+        }
+
+        /// <summary>
+        /// Appends the shared looping music root to one generated showcase scene definition.
+        /// </summary>
+        /// <param name="sceneDefinition">Generated scene definition that should receive the shared music root.</param>
+        void AppendSharedSceneMusic(GeneratedAuthoringSceneDefinition sceneDefinition) {
+            if (sceneDefinition == null) {
+                throw new ArgumentNullException(nameof(sceneDefinition));
+            } else if (sceneDefinition.RootEntities == null) {
+                throw new InvalidOperationException("Generated scene definitions must define root entities before shared music can be appended.");
+            }
+
+            Entity[] rootEntities = new Entity[sceneDefinition.RootEntities.Length + 1];
+            Array.Copy(sceneDefinition.RootEntities, rootEntities, sceneDefinition.RootEntities.Length);
+            rootEntities[rootEntities.Length - 1] = SceneMusicAuthoringService.CreateRenderingAndPhysicsMusicEntity();
+            sceneDefinition.RootEntities = rootEntities;
         }
 
         /// <summary>

@@ -22,12 +22,18 @@ namespace city.physics.tools {
         readonly IScriptTypeResolver ScriptTypeResolver;
 
         /// <summary>
+        /// Shared scene-music authoring service used to reattach the looping showcase track after raw scene loads strip the unsupported audio root.
+        /// </summary>
+        readonly city.scene.tools.GeneratedSceneMusicAuthoringService SceneMusicAuthoringService;
+
+        /// <summary>
         /// Initializes one Nintendo handheld physics scene generator.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to load authored gameplay components from the generated physics scenes.</param>
         public PhysicsNintendoDsSceneGenerator(IScriptTypeResolver scriptTypeResolver) {
             ScriptTypeResolver = scriptTypeResolver ?? throw new ArgumentNullException(nameof(scriptTypeResolver));
             SceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolver);
+            SceneMusicAuthoringService = new city.scene.tools.GeneratedSceneMusicAuthoringService();
         }
 
         /// <summary>
@@ -109,26 +115,32 @@ namespace city.physics.tools {
                 fileSystemModelResolver,
                 fileSystemFontResolver,
                 fileSystemTextureResolver);
-            SceneFileLoadService sceneLoadService = new SceneFileLoadService(fullProjectRootPath, persistenceRegistry, referenceResolver);
             string authoredScenePath = Path.Combine(
                 fullProjectRootPath,
                 "assets",
                 PhysicsSceneFolderRelativePath.Replace('/', Path.DirectorySeparatorChar),
                 sceneEntry.SceneId + ".helen");
-            LoadedEditorSceneDocument loadedScene = sceneLoadService.Load(authoredScenePath);
+            SceneAsset authoredSceneAsset = LoadSceneAssetWithoutSharedMusic(authoredScenePath);
+            SceneLoadService sceneLoadService = new SceneLoadService(fullProjectRootPath, persistenceRegistry, referenceResolver);
+            IReadOnlyList<EditorEntity> loadedRoots = sceneLoadService.Load(authoredSceneAsset);
+            Entity[] rootEntities = new Entity[loadedRoots.Count + 1];
+            for (int index = 0; index < loadedRoots.Count; index++) {
+                rootEntities[index] = loadedRoots[index];
+            }
+            rootEntities[rootEntities.Length - 1] = SceneMusicAuthoringService.CreateRenderingAndPhysicsMusicEntity();
 
             try {
                 SceneWriteService.WriteScene(fullProjectRootPath, new GeneratedAuthoringSceneDefinition {
                     SceneId = BuildPhysicsSceneAssetId(sceneEntry.SceneId),
-                    SceneSettings = loadedScene.SceneSettings,
-                    RootEntities = loadedScene.RootEntities,
+                    SceneSettings = authoredSceneAsset.SceneSettings,
+                    RootEntities = rootEntities,
                     NintendoDsScene = new GeneratedDsSceneDefinition {
-                        UseDefaultBottomOverlay = false,
+                        UseDefaultBottomOverlay = true,
                         BottomScreenRootEntities = Array.Empty<Entity>()
                     }
                 });
             } finally {
-                DisposeRoots(loadedScene.RootEntities);
+                DisposeRoots(rootEntities);
             }
         }
 
@@ -188,6 +200,62 @@ namespace city.physics.tools {
             }
 
             return PhysicsSceneFolderRelativePath + "/" + sceneId + ".helen";
+        }
+
+        /// <summary>
+        /// Loads one serialized physics scene asset and strips the shared generated music root so the editor scene loader never has to deserialize unsupported audio-backed component members.
+        /// </summary>
+        /// <param name="authoredScenePath">Absolute path to the serialized physics scene asset.</param>
+        /// <returns>Deserialized scene asset with the shared generated music root removed.</returns>
+        static SceneAsset LoadSceneAssetWithoutSharedMusic(string authoredScenePath) {
+            if (string.IsNullOrWhiteSpace(authoredScenePath)) {
+                throw new ArgumentException("Scene path must be provided.", nameof(authoredScenePath));
+            }
+
+            using FileStream stream = File.OpenRead(authoredScenePath);
+            SceneAsset sceneAsset = global::helengine.editor.AssetSerializer.Deserialize(stream) as SceneAsset
+                ?? throw new InvalidOperationException($"Expected '{authoredScenePath}' to contain a SceneAsset payload.");
+            StripSharedSceneMusic(sceneAsset);
+            return sceneAsset;
+        }
+
+        /// <summary>
+        /// Removes the shared generated scene-music root and its file-backed audio reference from one serialized scene asset before editor scene load materializes the remaining roots.
+        /// </summary>
+        /// <param name="sceneAsset">Scene asset whose shared music payload should be removed.</param>
+        static void StripSharedSceneMusic(SceneAsset sceneAsset) {
+            if (sceneAsset == null) {
+                throw new ArgumentNullException(nameof(sceneAsset));
+            }
+
+            SceneEntityAsset[] existingRootEntities = sceneAsset.RootEntities ?? Array.Empty<SceneEntityAsset>();
+            List<SceneEntityAsset> filteredRootEntities = new List<SceneEntityAsset>(existingRootEntities.Length);
+            for (int index = 0; index < existingRootEntities.Length; index++) {
+                SceneEntityAsset rootEntity = existingRootEntities[index];
+                if (rootEntity == null) {
+                    continue;
+                } else if (string.Equals(rootEntity.Name, "SceneMusic", StringComparison.Ordinal)) {
+                    continue;
+                }
+
+                filteredRootEntities.Add(rootEntity);
+            }
+
+            SceneAssetReference[] existingAssetReferences = sceneAsset.AssetReferences ?? Array.Empty<SceneAssetReference>();
+            List<SceneAssetReference> filteredAssetReferences = new List<SceneAssetReference>(existingAssetReferences.Length);
+            for (int index = 0; index < existingAssetReferences.Length; index++) {
+                SceneAssetReference reference = existingAssetReferences[index];
+                if (reference == null) {
+                    continue;
+                } else if (string.Equals(reference.RelativePath, city.scene.tools.GeneratedSceneMusicAuthoringService.RenderingAndPhysicsMusicAudioPath, StringComparison.Ordinal)) {
+                    continue;
+                }
+
+                filteredAssetReferences.Add(reference);
+            }
+
+            sceneAsset.RootEntities = filteredRootEntities.ToArray();
+            sceneAsset.AssetReferences = filteredAssetReferences.ToArray();
         }
 
         /// <summary>

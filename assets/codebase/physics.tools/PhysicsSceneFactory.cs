@@ -371,6 +371,11 @@ namespace city.physics.tools {
         readonly city.rendering.tools.GeneratedAuthoringSceneWriteService AuthoringSceneWriteService;
 
         /// <summary>
+        /// Shared scene-music authoring service used by both serialized and live-authored physics scenes.
+        /// </summary>
+        readonly city.scene.tools.GeneratedSceneMusicAuthoringService SceneMusicAuthoringService;
+
+        /// <summary>
         /// Initializes the validation-scene factory with a fresh scene-local entity id allocator.
         /// </summary>
         public PhysicsSceneFactory() {
@@ -378,6 +383,7 @@ namespace city.physics.tools {
             PersistenceRegistry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
             OverridePayloadService = new ComponentPlatformOverridePayloadService();
             AuthoringSceneWriteService = new city.rendering.tools.GeneratedAuthoringSceneWriteService();
+            SceneMusicAuthoringService = new city.scene.tools.GeneratedSceneMusicAuthoringService();
         }
 
         /// <summary>
@@ -391,40 +397,42 @@ namespace city.physics.tools {
             }
 
             SceneEntityIdAllocator.Reset();
-
+            SceneAsset sceneAsset;
             if (string.Equals(sceneId, PhysicsSceneCatalog.CharacterSlopeSceneId, StringComparison.Ordinal)) {
-                return CreateCharacterSlopeScene();
+                sceneAsset = CreateCharacterSlopeScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.CharacterStepsSceneId, StringComparison.Ordinal)) {
-                return CreateCharacterStepsScene();
+                sceneAsset = CreateCharacterStepsScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.CharacterMovingPlatformSceneId, StringComparison.Ordinal)) {
-                return CreateCharacterMovingPlatformScene();
+                sceneAsset = CreateCharacterMovingPlatformScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.DynamicStackBoxesSceneId, StringComparison.Ordinal)) {
-                return CreateDynamicStackBoxesScene();
+                sceneAsset = CreateDynamicStackBoxesScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.SingleFallingCubeSceneId, StringComparison.Ordinal)) {
-                return CreateSingleFallingCubeScene();
+                sceneAsset = CreateSingleFallingCubeScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.DynamicSphereStackSceneId, StringComparison.Ordinal)) {
-                return CreateDynamicSphereStackScene();
+                sceneAsset = CreateDynamicSphereStackScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.StrictRotatedBoxCompareSceneId, StringComparison.Ordinal)) {
-                return CreateStrictRotatedBoxCompareScene();
+                sceneAsset = CreateStrictRotatedBoxCompareScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.RenderOnlySlopeSceneId, StringComparison.Ordinal)) {
-                return CreateRenderOnlySlopeScene();
+                sceneAsset = CreateRenderOnlySlopeScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.MatrixRenderSceneId, StringComparison.Ordinal)) {
-                return CreateMatrixRenderScene();
+                sceneAsset = CreateMatrixRenderScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.DynamicMixedStackSceneId, StringComparison.Ordinal)) {
-                return CreateDynamicMixedStackScene();
+                sceneAsset = CreateDynamicMixedStackScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.KinematicPushSceneId, StringComparison.Ordinal)) {
-                return CreateKinematicPushScene();
+                sceneAsset = CreateKinematicPushScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.MeshGroundStabilitySceneId, StringComparison.Ordinal)) {
-                return CreateMeshGroundStabilityScene();
+                sceneAsset = CreateMeshGroundStabilityScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.StaticMeshShowcaseSceneId, StringComparison.Ordinal)) {
-                return CreateStaticMeshShowcaseScene();
+                sceneAsset = CreateStaticMeshShowcaseScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.StaticMeshMinimalSceneId, StringComparison.Ordinal)) {
-                return CreateStaticMeshMinimalScene();
+                sceneAsset = CreateStaticMeshMinimalScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.TriggerVolumeSceneId, StringComparison.Ordinal)) {
-                return CreateTriggerVolumeScene();
+                sceneAsset = CreateTriggerVolumeScene();
+            } else {
+                throw new InvalidOperationException($"Unsupported physics validation scene id '{sceneId}'.");
             }
 
-            throw new InvalidOperationException($"Unsupported physics validation scene id '{sceneId}'.");
+            return AppendSharedSceneMusic(sceneAsset);
         }
 
         /// <summary>
@@ -1974,6 +1982,7 @@ namespace city.physics.tools {
                 throw new InvalidOperationException("Writing playable physics showcase scenes requires an active editor content manager.");
             }
 
+            CurrentProjectRootPath = Path.GetFullPath(projectRootPath);
             string normalizedSceneId = NormalizePlayablePhysicsShowcaseSceneId(sceneId);
             SceneAsset authoredSceneAsset;
             Entity cameraEntity;
@@ -2048,6 +2057,7 @@ namespace city.physics.tools {
             for (int index = 0; index < scenarioRoots.Count; index++) {
                 rootEntities.Add(scenarioRoots[index]);
             }
+            rootEntities.Add(SceneMusicAuthoringService.CreateRenderingAndPhysicsMusicEntity());
             for (int index = 0; index < rootEntities.Count; index++) {
                 if (rootEntities[index] is not EditorEntity editorRootEntity) {
                     throw new InvalidOperationException("Playable physics showcase roots must be editor entities before they can be saved.");
@@ -2065,6 +2075,34 @@ namespace city.physics.tools {
                 SceneSettings = authoredSceneAsset.SceneSettings,
                 RootEntities = rootEntities.ToArray()
             };
+        }
+
+        /// <summary>
+        /// Appends the shared looping music root to one serialized physics scene asset while preserving deduplicated scene-level asset references.
+        /// </summary>
+        /// <param name="sceneAsset">Serialized physics scene asset that should receive the shared music root.</param>
+        /// <returns>Updated scene asset with one shared music root appended.</returns>
+        SceneAsset AppendSharedSceneMusic(SceneAsset sceneAsset) {
+            if (sceneAsset == null) {
+                throw new ArgumentNullException(nameof(sceneAsset));
+            }
+
+            List<SceneAssetReference> assetReferences = sceneAsset.AssetReferences?.ToList() ?? new List<SceneAssetReference>();
+            HashSet<string> assetReferenceKeys = CreateSceneAssetReferenceKeySet(assetReferences);
+            EditorEntity musicEntity = SceneMusicAuthoringService.CreateRenderingAndPhysicsMusicEntity();
+            try {
+                ReassignGeneratedEditorEntityIds(musicEntity);
+                SceneEntityAsset serializedMusicEntity = SerializeGeneratedEditorEntity(musicEntity, assetReferences, assetReferenceKeys);
+                SceneEntityAsset[] existingRootEntities = sceneAsset.RootEntities ?? Array.Empty<SceneEntityAsset>();
+                SceneEntityAsset[] rootEntities = new SceneEntityAsset[existingRootEntities.Length + 1];
+                Array.Copy(existingRootEntities, rootEntities, existingRootEntities.Length);
+                rootEntities[rootEntities.Length - 1] = serializedMusicEntity;
+                sceneAsset.AssetReferences = assetReferences.ToArray();
+                sceneAsset.RootEntities = rootEntities;
+                return sceneAsset;
+            } finally {
+                musicEntity.Dispose();
+            }
         }
 
         /// <summary>
