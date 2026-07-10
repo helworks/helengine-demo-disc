@@ -6,32 +6,37 @@ namespace city.game.tools {
         /// <summary>
         /// Stable scene id used by the generated Tilt Trial gameplay scene.
         /// </summary>
-        public const string TiltTrialSceneId = "scenes/games/tilt_trial.helen";
+        public const string TiltTrialSceneId = global::city.game.TiltTrialSceneIds.LevelSelectSceneId;
 
         /// <summary>
         /// Stable scene id used by the first generated Tilt Trial gameplay level.
         /// </summary>
-        public const string TiltTrialLevel01SceneId = "scenes/games/tilt_trial_level_01.helen";
+        public const string TiltTrialLevel01SceneId = global::city.game.TiltTrialSceneIds.Level01SceneId;
 
         /// <summary>
         /// Stable scene id used by the second generated Tilt Trial gameplay level.
         /// </summary>
-        public const string TiltTrialLevel02SceneId = "scenes/games/tilt_trial_level_02.helen";
+        public const string TiltTrialLevel02SceneId = global::city.game.TiltTrialSceneIds.Level02SceneId;
 
         /// <summary>
         /// Stable scene id used by the third generated Tilt Trial gameplay level.
         /// </summary>
-        public const string TiltTrialLevel03SceneId = "scenes/games/tilt_trial_level_03.helen";
+        public const string TiltTrialLevel03SceneId = global::city.game.TiltTrialSceneIds.Level03SceneId;
 
         /// <summary>
         /// Stable scene id used by the fourth generated Tilt Trial gameplay level.
         /// </summary>
-        public const string TiltTrialLevel04SceneId = "scenes/games/tilt_trial_level_04.helen";
+        public const string TiltTrialLevel04SceneId = global::city.game.TiltTrialSceneIds.Level04SceneId;
 
         /// <summary>
         /// Stable scene id used by the fifth generated Tilt Trial gameplay level.
         /// </summary>
-        public const string TiltTrialLevel05SceneId = "scenes/games/tilt_trial_level_05.helen";
+        public const string TiltTrialLevel05SceneId = global::city.game.TiltTrialSceneIds.Level05SceneId;
+
+        /// <summary>
+        /// Stable scene id used by the generated Zombislayer gameplay scene.
+        /// </summary>
+        public const string ZombislayerSceneId = global::city.game.ZombislayerSceneIds.GameplaySceneId;
 
         /// <summary>
         /// Returns the complete generated game-scene id set currently emitted by the city project.
@@ -45,6 +50,7 @@ namespace city.game.tools {
                 TiltTrialLevel03SceneId,
                 TiltTrialLevel04SceneId,
                 TiltTrialLevel05SceneId,
+                ZombislayerSceneId,
             ];
         }
     }

@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "game.tools.tests", "user_se
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gameplay.tests", "user_settings/generated_code/projects/gameplay.tests/gameplay.tests.csproj", "{C1336154-7D4F-5969-A9B5-EBE5A056DE72}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "menu.tools.tests", "user_settings/generated_code/projects/menu.tools.tests/menu.tools.tests.csproj", "{F7A4FC12-4F15-5C01-AD01-2C654CA72EAC}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rendering.tools.tests", "user_settings/generated_code/projects/rendering.tools.tests/rendering.tools.tests.csproj", "{D6A8A8C6-CC6D-5D70-9735-1372A24ED1C2}"
 EndProject
 Global
@@ -58,6 +60,10 @@ Global
 		{C1336154-7D4F-5969-A9B5-EBE5A056DE72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1336154-7D4F-5969-A9B5-EBE5A056DE72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1336154-7D4F-5969-A9B5-EBE5A056DE72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7A4FC12-4F15-5C01-AD01-2C654CA72EAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7A4FC12-4F15-5C01-AD01-2C654CA72EAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7A4FC12-4F15-5C01-AD01-2C654CA72EAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7A4FC12-4F15-5C01-AD01-2C654CA72EAC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D6A8A8C6-CC6D-5D70-9735-1372A24ED1C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D6A8A8C6-CC6D-5D70-9735-1372A24ED1C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6A8A8C6-CC6D-5D70-9735-1372A24ED1C2}.Release|Any CPU.ActiveCfg = Release|Any CPU

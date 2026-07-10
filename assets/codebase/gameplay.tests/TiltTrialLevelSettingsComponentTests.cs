@@ -24,7 +24,7 @@ namespace city.tests {
             city.game.TiltTrialLevelSettingsComponent component = new city.game.TiltTrialLevelSettingsComponent {
                 LevelId = "tilt-trial-01",
                 DisplayName = "Level 1",
-                SceneId = "scenes/games/tilt_trial_level_01.helen",
+                SceneId = city.game.TiltTrialSceneIds.Level01SceneId,
                 StartTimeSeconds = 99f,
                 GoldTimeSeconds = 40f,
                 SilverTimeSeconds = 30f,

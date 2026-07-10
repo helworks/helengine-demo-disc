@@ -27,6 +27,12 @@ namespace city.game.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
+            SplitPlayGoalFlagAssetGenerator splitPlayGoalFlagAssetGenerator = new SplitPlayGoalFlagAssetGenerator();
+            splitPlayGoalFlagAssetGenerator.Generate(projectRootPath);
+
+            SplitPlayGoldenCoinAssetGenerator splitPlayGoldenCoinAssetGenerator = new SplitPlayGoldenCoinAssetGenerator();
+            splitPlayGoldenCoinAssetGenerator.Generate(projectRootPath);
+
             TiltTrialPlayerSphereMarbleMaterialFactory materialFactory = new TiltTrialPlayerSphereMarbleMaterialFactory();
             materialFactory.WriteMaterialAsset(projectRootPath);
             RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService();
@@ -40,6 +46,12 @@ namespace city.game.tools {
             for (int index = 0; index < tiltTrialLevelScenes.Count; index++) {
                 sceneWriteService.WriteScene(projectRootPath, tiltTrialLevelScenes[index]);
             }
+
+            ZombislayerAssetPreparationService zombislayerAssetPreparationService = new ZombislayerAssetPreparationService();
+            ZombislayerGenerationAssets zombislayerAssets = zombislayerAssetPreparationService.Prepare(projectRootPath);
+            ZombislayerSceneFactory zombislayerSceneFactory = new ZombislayerSceneFactory(zombislayerAssets);
+            GeneratedAuthoringSceneDefinition zombislayerScene = zombislayerSceneFactory.CreateGameplayScene();
+            sceneWriteService.WriteScene(projectRootPath, zombislayerScene);
         }
     }
 }

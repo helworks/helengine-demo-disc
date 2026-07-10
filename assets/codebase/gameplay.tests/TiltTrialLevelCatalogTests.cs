@@ -12,6 +12,8 @@ namespace city.tests {
 
             Assert.Equal(5, entries.Count);
             Assert.Equal("tilt-trial-01", entries[0].LevelId);
+            Assert.Equal("Level 1", entries[0].DisplayName);
+            Assert.Equal(city.game.TiltTrialSceneIds.Level01SceneId, entries[0].SceneId);
             Assert.Equal("tilt-trial-05", entries[4].LevelId);
         }
 

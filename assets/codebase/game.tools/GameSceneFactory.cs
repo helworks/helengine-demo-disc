@@ -133,7 +133,7 @@ namespace city.game.tools {
             }
 
             EditorEntity cameraEntity = CreateCameraEntity();
-            EditorEntity stageRootEntity = CreateStageRootEntity();
+            EditorEntity stageRootEntity = CreateStageRootEntity(levelEntry);
             EditorEntity playerSphereEntity = CreatePlayerSphereEntity();
             EditorEntity uiEntity = CreateGameplayUiEntity(levelEntry);
             Entity[] roots = new Entity[] {
@@ -149,6 +149,8 @@ namespace city.game.tools {
 
             ConfigureTiltTrialCameraTarget(cameraEntity, playerSphereEntity);
             ConfigureTiltTrialSpeedTextTarget(uiEntity, playerSphereEntity);
+            ConfigureTiltTrialGoalTarget(stageRootEntity, playerSphereEntity);
+            ConfigureTiltTrialCoinTargets(stageRootEntity, playerSphereEntity);
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = levelEntry.SceneId,
                 SceneSettings = new SceneSettingsAsset(),
@@ -297,8 +299,8 @@ namespace city.game.tools {
                 ReferenceHeight = 720
             });
 
-            Entity listPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectListPanel", new float3(40f, 52f, 0f), new int2(420, 616), 28f, 3f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
-            Entity detailsPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectDetailsPanel", new float3(500f, 52f, 0f), new int2(740, 616), 28f, 3f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
+            Entity listPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectListPanel", new float3(40f, 92f, 0f), new int2(420, 596), 28f, 3f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
+            Entity detailsPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectDetailsPanel", new float3(500f, 72f, 0f), new int2(740, 596), 28f, 3f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
 
             CreateUiTextEntity(entity, "TiltTrialLevelSelectTitle", new float3(52f, 18f, 0.1f), "Tilt Trial", new int2(420, 48), 2.5f, 2, new byte4(247, 248, 252, 255), TextAlignment.Left);
             CreateUiTextEntity(entity, "TiltTrialLevelSelectHint", new float3(500f, 18f, 0.1f), "Enter Play   Esc Menu", new int2(460, 40), 1.25f, 2, new byte4(196, 210, 226, 255), TextAlignment.Left);
@@ -307,14 +309,14 @@ namespace city.game.tools {
             CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectMedals", new float3(28f, 132f, 0.1f), "Gold  18.00\nSilver 28.00\nBronze 40.00", new int2(260, 120), 1.2f, 3, new byte4(223, 230, 239, 255), TextAlignment.Left);
 
             Entity previewPanelEntity = CreateRoundedPanelEntity(detailsPanelEntity, "TiltTrialLevelSelectPreviewPanel", new float3(390f, 24f, 0f), new int2(300, 300), 24f, 2f, new byte4(39, 57, 84, 255), new byte4(122, 147, 182, 255), 2);
-            CreateUiTextEntity(previewPanelEntity, "TiltTrialLevelSelectPreviewPlaceholder", new float3(28f, 118f, 0.1f), "Preview Coming Soon", new int2(244, 64), 1.25f, 3, new byte4(223, 230, 239, 255), TextAlignment.Center);
+            CreateUiTextEntity(previewPanelEntity, "TiltTrialLevelSelectPreviewPlaceholder", new float3(28f, 118f, 0.1f), "Preview", new int2(244, 64), 1.25f, 3, new byte4(223, 230, 239, 255), TextAlignment.Center);
 
             IReadOnlyList<global::city.game.TiltTrialLevelCatalogEntry> levelEntries = global::city.game.TiltTrialLevelCatalog.CreateEntries();
             for (int index = 0; index < levelEntries.Count; index++) {
-                float top = 28f + (index * 108f);
+                float top = 22f + (index * 94f);
                 int oneBasedIndex = index + 1;
-                Entity rowEntity = CreateRoundedPanelEntity(listPanelEntity, $"TiltTrialLevelRow{oneBasedIndex:00}", new float3(24f, top, 0f), new int2(372, 88), 18f, 2f, new byte4(40, 58, 87, 255), new byte4(109, 138, 170, 255), 2);
-                CreateUiTextEntity(rowEntity, $"TiltTrialLevelRow{oneBasedIndex:00}Label", new float3(20f, 24f, 0.1f), levelEntries[index].DisplayName, new int2(320, 40), 1.55f, 3, new byte4(247, 248, 252, 255), TextAlignment.Left);
+                Entity rowEntity = CreateRoundedPanelEntity(listPanelEntity, $"TiltTrialLevelRow{oneBasedIndex:00}", new float3(24f, top, 0f), new int2(372, 76), 18f, 2f, new byte4(40, 58, 87, 255), new byte4(109, 138, 170, 255), 2);
+                CreateUiTextEntity(rowEntity, $"TiltTrialLevelRow{oneBasedIndex:00}Label", new float3(20f, 18f, 0.1f), levelEntries[index].DisplayName, new int2(320, 40), 1.55f, 3, new byte4(247, 248, 252, 255), TextAlignment.Left);
             }
 
             if (entity is EditorEntity editorEntity) {
@@ -399,6 +401,25 @@ namespace city.game.tools {
             CreateUiTextEntity(failOverlayEntity, "TiltTrialFailTitleText", new float3(36f, 28f, 0.1f), "Time Up", new int2(280, 42), 2f, 5, new byte4(255, 223, 223, 255), TextAlignment.Left);
             CreateUiTextEntity(failOverlayEntity, "TiltTrialFailBodyText", new float3(36f, 86f, 0.1f), "Retry", new int2(320, 96), 1.35f, 5, new byte4(247, 248, 252, 255), TextAlignment.Left);
 
+            Entity coinTextEntity = Core.Instance.EntityFactory.CreateChild(entity, "TiltTrialCoinText");
+            coinTextEntity.LocalPosition = new float3(16f, 16f, 0f);
+            coinTextEntity.Static = false;
+            TextComponent coinTextComponent = new TextComponent {
+                Text = "Coins 0/0",
+                Font = ResolveRequiredEditorFont(),
+                Color = new byte4(255, 246, 223, 255),
+                Size = new int2(280, 44),
+                FontScale = 1.45f,
+                Alignment = TextAlignment.Left,
+                RenderOrder2D = 1,
+                LayerMask = 1
+            };
+            coinTextEntity.AddComponent(coinTextComponent);
+            LayoutComponent coinTextAnchorComponent = new LayoutComponent();
+            coinTextAnchorComponent.LayoutSpace = LayoutComponent.CameraViewportLayoutSpace;
+            coinTextAnchorComponent.SetAnchorDistances(left: 16f, top: 16f);
+            coinTextEntity.AddComponent(coinTextAnchorComponent);
+
             if (entity is EditorEntity editorEntity) {
                 return editorEntity;
             }
@@ -408,6 +429,22 @@ namespace city.game.tools {
 
         /// <summary>
         /// Creates the authored stage root that owns the runtime tilt controller and the kinematic support geometry it manipulates.
+        /// </summary>
+        /// <returns>Generated editor stage root.</returns>
+        EditorEntity CreateStageRootEntity(global::city.game.TiltTrialLevelCatalogEntry levelEntry) {
+            if (levelEntry == null) {
+                throw new ArgumentNullException(nameof(levelEntry));
+            }
+
+            if (string.Equals(levelEntry.LevelId, "tilt-trial-01", StringComparison.Ordinal)) {
+                return CreateTiltTrialLevel01StageRootEntity();
+            }
+
+            return CreateStageRootEntity();
+        }
+
+        /// <summary>
+        /// Creates the default authored stage root used by non-specialized Tilt Trial levels.
         /// </summary>
         /// <returns>Generated editor stage root.</returns>
         EditorEntity CreateStageRootEntity() {
@@ -425,6 +462,43 @@ namespace city.game.tools {
             entity.AddChild(CreateGoalPadEntity());
             entity.AddChild(CreateLeftWallEntity());
             entity.AddChild(CreateRightWallEntity());
+
+            if (entity is EditorEntity editorEntity) {
+                return editorEntity;
+            }
+
+            throw new InvalidOperationException("Tilt Trial stage generation requires editor-authored entities.");
+        }
+
+        /// <summary>
+        /// Creates the dedicated beginner layout used by the first Tilt Trial level.
+        /// </summary>
+        /// <returns>Generated editor stage root for level 1.</returns>
+        EditorEntity CreateTiltTrialLevel01StageRootEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("StageRoot");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = float3.Zero;
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = float4.Identity;
+            entity.AddComponent(new city.game.DemoTiltStageComponent {
+                MaximumPlanarSpeed = 11.25f,
+                PlanarAccelerationUnitsPerSecond = 4.25f
+            });
+            entity.AddChild(CreateLevel01StartPadEntity());
+            entity.AddChild(CreateLevel01RampEntity());
+            entity.AddChild(CreateLevel01BridgeEntity());
+            entity.AddChild(CreateLevel01BlockerLeftEntity());
+            entity.AddChild(CreateLevel01BlockerRightEntity());
+            entity.AddChild(CreateLevel01FinalPlatformEntity());
+            entity.AddChild(CreateGoalPadEntity(new float3(1.35f, 1.05f, 15.7f), new float3(4.4f, 1.4f, 3.4f)));
+            entity.AddChild(CreateGoalFlagEntity());
+            entity.AddChild(CreateCollectibleCoinEntity("Coin01", new float3(0f, 1.35f, -2.2f)));
+            entity.AddChild(CreateCollectibleCoinEntity("Coin02", new float3(-0.8f, 1.9f, 4.6f)));
+            entity.AddChild(CreateCollectibleCoinEntity("Coin03", new float3(1.35f, 1.9f, 13.8f)));
+            entity.AddChild(CreateLevel01LeftWallEntity());
+            entity.AddChild(CreateLevel01RightWallEntity());
+            entity.AddChild(CreateLevel01FinalLeftGuardEntity());
+            entity.AddChild(CreateLevel01FinalRightGuardEntity());
 
             if (entity is EditorEntity editorEntity) {
                 return editorEntity;
@@ -519,6 +593,14 @@ namespace city.game.tools {
         }
 
         /// <summary>
+        /// Creates the larger beginner starting platform used by level 1.
+        /// </summary>
+        /// <returns>Generated kinematic stage piece.</returns>
+        Entity CreateLevel01StartPadEntity() {
+            return CreateKinematicCourseBoxEntity("StartPad", new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity);
+        }
+
+        /// <summary>
         /// Creates the central ramp that accelerates the player sphere through the middle of the course.
         /// </summary>
         /// <returns>Generated kinematic stage piece.</returns>
@@ -529,12 +611,78 @@ namespace city.game.tools {
         }
 
         /// <summary>
+        /// Creates the gentle tutorial ramp that introduces forward carry in level 1.
+        /// </summary>
+        /// <returns>Generated kinematic stage piece.</returns>
+        Entity CreateLevel01RampEntity() {
+            float4 orientation;
+            float4.CreateFromYawPitchRoll(0f, -0.14f, 0f, out orientation);
+            return CreateKinematicCourseBoxEntity("Ramp", new float3(0f, -0.05f, -0.1f), new float3(6f, 0.9f, 8f), orientation);
+        }
+
+        /// <summary>
+        /// Creates the narrow bridge that gently introduces steering precision in level 1.
+        /// </summary>
+        /// <returns>Generated kinematic stage piece.</returns>
+        Entity CreateLevel01BridgeEntity() {
+            return CreateKinematicCourseBoxEntity("Bridge", new float3(0f, 0.5f, 5.8f), new float3(4.2f, 0.8f, 8.4f), float4.Identity);
+        }
+
+        /// <summary>
+        /// Creates the first low blocker on the beginner bridge.
+        /// </summary>
+        /// <returns>Generated kinematic stage piece.</returns>
+        Entity CreateLevel01BlockerLeftEntity() {
+            return CreateKinematicCourseBoxEntity("BridgeBlockerLeft", new float3(-0.95f, 1.25f, 3.2f), new float3(1.1f, 1.5f, 1.1f), float4.Identity);
+        }
+
+        /// <summary>
+        /// Creates the second low blocker on the beginner bridge.
+        /// </summary>
+        /// <returns>Generated kinematic stage piece.</returns>
+        Entity CreateLevel01BlockerRightEntity() {
+            return CreateKinematicCourseBoxEntity("BridgeBlockerRight", new float3(0.95f, 1.25f, 7.3f), new float3(1.1f, 1.5f, 1.1f), float4.Identity);
+        }
+
+        /// <summary>
+        /// Creates the final wide landing platform used by level 1.
+        /// </summary>
+        /// <returns>Generated kinematic stage piece.</returns>
+        Entity CreateLevel01FinalPlatformEntity() {
+            return CreateKinematicCourseBoxEntity("FinalPlatform", new float3(1.35f, 0.2f, 13.8f), new float3(8.4f, 0.9f, 8.8f), float4.Identity);
+        }
+
+        /// <summary>
         /// Creates the finish platform at the far end of the Tilt Trial course.
         /// </summary>
         /// <returns>Generated kinematic stage piece.</returns>
         Entity CreateGoalPadEntity() {
-            Entity entity = CreateKinematicCourseBoxEntity("GoalPad", new float3(0f, -2.2f, 10.5f), new float3(7f, 1f, 6f), float4.Identity);
+            return CreateGoalPadEntity(new float3(0f, -2.2f, 10.5f), new float3(7f, 1f, 6f));
+        }
+
+        /// <summary>
+        /// Creates the finish trigger volume used by Tilt Trial.
+        /// </summary>
+        /// <param name="position">Local trigger position.</param>
+        /// <param name="size">Full trigger size.</param>
+        /// <returns>Generated trigger entity.</returns>
+        Entity CreateGoalPadEntity(float3 position, float3 size) {
+            Entity entity = Core.Instance.EntityFactory.Create("GoalPad");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = position;
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new global::city.game.TiltTrialGoalComponent());
+            entity.AddComponent(new global::helengine.SceneEntityTriggerObserverComponent());
+            entity.AddComponent(new RigidBody3DComponent {
+                BodyKind = BodyKind3D.Kinematic,
+                UseGravity = false,
+                Mass = 1d
+            });
+            entity.AddComponent(new BoxCollider3DComponent {
+                Size = size
+            });
+            FindRequiredBoxColliderComponent(entity).IsTrigger = true;
             return entity;
         }
 
@@ -547,11 +695,92 @@ namespace city.game.tools {
         }
 
         /// <summary>
+        /// Creates the long left guide wall used by the first Tilt Trial level.
+        /// </summary>
+        /// <returns>Generated kinematic stage piece.</returns>
+        Entity CreateLevel01LeftWallEntity() {
+            return CreateKinematicCourseBoxEntity("LeftWall", new float3(-3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity);
+        }
+
+        /// <summary>
         /// Creates the right guide wall that keeps the player sphere on the authored course.
         /// </summary>
         /// <returns>Generated kinematic stage piece.</returns>
         Entity CreateRightWallEntity() {
             return CreateKinematicCourseBoxEntity("RightWall", new float3(3.75f, 0.9f, 1.8f), new float3(1f, 2.5f, 24f), float4.Identity);
+        }
+
+        /// <summary>
+        /// Creates the long right guide wall used by the first Tilt Trial level.
+        /// </summary>
+        /// <returns>Generated kinematic stage piece.</returns>
+        Entity CreateLevel01RightWallEntity() {
+            return CreateKinematicCourseBoxEntity("RightWall", new float3(3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity);
+        }
+
+        /// <summary>
+        /// Creates the left-side final guard near the finish platform on level 1.
+        /// </summary>
+        /// <returns>Generated kinematic stage piece.</returns>
+        Entity CreateLevel01FinalLeftGuardEntity() {
+            return CreateKinematicCourseBoxEntity("FinalLeftGuard", new float3(-2.5f, 1.25f, 14.2f), new float3(0.8f, 2.8f, 7.4f), float4.Identity);
+        }
+
+        /// <summary>
+        /// Creates the right-side final guard near the finish platform on level 1.
+        /// </summary>
+        /// <returns>Generated kinematic stage piece.</returns>
+        Entity CreateLevel01FinalRightGuardEntity() {
+            return CreateKinematicCourseBoxEntity("FinalRightGuard", new float3(5.2f, 1.25f, 14.2f), new float3(0.8f, 2.8f, 7.4f), float4.Identity);
+        }
+
+        /// <summary>
+        /// Creates one collectible coin blueprint instance with a trigger observer bound later to the player sphere.
+        /// </summary>
+        /// <param name="name">Stable entity name.</param>
+        /// <param name="position">Local scene position.</param>
+        /// <returns>Generated collectible coin entity.</returns>
+        Entity CreateCollectibleCoinEntity(string name, float3 position) {
+            if (string.IsNullOrWhiteSpace(name)) {
+                throw new ArgumentException("Collectible coin name must be provided.", nameof(name));
+            }
+
+            Entity entity = Core.Instance.EntityFactory.Create(name);
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = position;
+            entity.LocalScale = new float3(0.85f, 0.85f, 0.85f);
+            entity.LocalOrientation = float4.Identity;
+            entity.AddComponent(new BlueprintInstanceComponent {
+                BlueprintAssetPath = SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath
+            });
+            entity.AddComponent(new city.game.TiltTrialCollectibleCoinComponent());
+            entity.AddComponent(new global::helengine.SceneEntityTriggerObserverComponent());
+            entity.AddComponent(new RigidBody3DComponent {
+                BodyKind = BodyKind3D.Kinematic,
+                UseGravity = false,
+                Mass = 1d
+            });
+            entity.AddComponent(new SphereCollider3DComponent {
+                Radius = 0.75f,
+                IsTrigger = true
+            });
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates the visual finish flag blueprint instance used by the beginner first level.
+        /// </summary>
+        /// <returns>Generated finish flag entity.</returns>
+        Entity CreateGoalFlagEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("GoalFlag");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = new float3(1.35f, 0.65f, 16.6f);
+            entity.LocalScale = new float3(1.2f, 1.2f, 1.2f);
+            entity.LocalOrientation = float4.Identity;
+            entity.AddComponent(new BlueprintInstanceComponent {
+                BlueprintAssetPath = SplitPlayAssetCatalog.GoalFlagBlueprintRelativePath
+            });
+            return entity;
         }
 
         /// <summary>
@@ -648,6 +877,55 @@ namespace city.game.tools {
         }
 
         /// <summary>
+        /// Wires the generated goal trigger observer to the generated player sphere after fresh scene ids have been assigned.
+        /// </summary>
+        /// <param name="stageRootEntity">Generated stage root that owns the goal trigger entity.</param>
+        /// <param name="playerSphereEntity">Generated player sphere whose overlap should complete the level.</param>
+        void ConfigureTiltTrialGoalTarget(EditorEntity stageRootEntity, EditorEntity playerSphereEntity) {
+            if (stageRootEntity == null) {
+                throw new ArgumentNullException(nameof(stageRootEntity));
+            } else if (playerSphereEntity == null) {
+                throw new ArgumentNullException(nameof(playerSphereEntity));
+            }
+
+            global::helengine.SceneEntityTriggerObserverComponent goalTriggerObserver = FindRequiredGoalTriggerObserverComponent(stageRootEntity);
+            EntitySaveComponent playerSaveComponent = FindRequiredEntitySaveComponent(playerSphereEntity);
+            goalTriggerObserver.TargetEntityReference = new SceneEntityReference {
+                EntityId = playerSaveComponent.EntityId
+            };
+        }
+
+        /// <summary>
+        /// Wires all generated collectible-coin trigger observers to the generated player sphere after fresh scene ids have been assigned.
+        /// </summary>
+        /// <param name="stageRootEntity">Generated stage root that owns the collectible coin entities.</param>
+        /// <param name="playerSphereEntity">Generated player sphere whose overlap should collect the coins.</param>
+        void ConfigureTiltTrialCoinTargets(EditorEntity stageRootEntity, EditorEntity playerSphereEntity) {
+            if (stageRootEntity == null) {
+                throw new ArgumentNullException(nameof(stageRootEntity));
+            } else if (playerSphereEntity == null) {
+                throw new ArgumentNullException(nameof(playerSphereEntity));
+            }
+
+            EntitySaveComponent playerSaveComponent = FindRequiredEntitySaveComponent(playerSphereEntity);
+            if (stageRootEntity.Children == null) {
+                return;
+            }
+
+            for (int childIndex = 0; childIndex < stageRootEntity.Children.Count; childIndex++) {
+                Entity child = stageRootEntity.Children[childIndex];
+                if (!TryFindComponent<city.game.TiltTrialCollectibleCoinComponent>(child, out _) ||
+                    !TryFindComponent<global::helengine.SceneEntityTriggerObserverComponent>(child, out global::helengine.SceneEntityTriggerObserverComponent triggerObserver)) {
+                    continue;
+                }
+
+                triggerObserver.TargetEntityReference = new SceneEntityReference {
+                    EntityId = playerSaveComponent.EntityId
+                };
+            }
+        }
+
+        /// <summary>
         /// Resolves the generated Tilt Trial follow camera attached to the supplied camera root.
         /// </summary>
         /// <param name="cameraEntity">Generated camera entity whose follow-camera component should be returned.</param>
@@ -690,6 +968,96 @@ namespace city.game.tools {
             }
 
             throw new InvalidOperationException("Tilt Trial UI generation requires a DemoTiltSpeedTextComponent.");
+        }
+
+        /// <summary>
+        /// Resolves the generated goal trigger observer nested beneath the supplied stage root.
+        /// </summary>
+        /// <param name="stageRootEntity">Generated stage root whose goal trigger observer should be returned.</param>
+        /// <returns>Attached goal trigger observer component.</returns>
+        global::helengine.SceneEntityTriggerObserverComponent FindRequiredGoalTriggerObserverComponent(EditorEntity stageRootEntity) {
+            if (stageRootEntity == null) {
+                throw new ArgumentNullException(nameof(stageRootEntity));
+            }
+
+            Entity goalEntity = FindRequiredChildEntityByName(stageRootEntity, "GoalPad");
+            if (goalEntity.Components == null) {
+                throw new InvalidOperationException("Tilt Trial goal generation requires the goal entity to expose initialized components.");
+            }
+
+            for (int componentIndex = 0; componentIndex < goalEntity.Components.Count; componentIndex++) {
+                if (goalEntity.Components[componentIndex] is global::helengine.SceneEntityTriggerObserverComponent goalTriggerObserver) {
+                    return goalTriggerObserver;
+                }
+            }
+
+            throw new InvalidOperationException("Tilt Trial goal generation requires a SceneEntityTriggerObserverComponent.");
+        }
+
+        /// <summary>
+        /// Finds one required direct child entity by authored name.
+        /// </summary>
+        /// <param name="parent">Parent entity whose direct children should be searched.</param>
+        /// <param name="name">Required direct child entity name.</param>
+        /// <returns>Matching direct child entity.</returns>
+        EditorEntity FindRequiredChildEntityByName(EditorEntity parent, string name) {
+            if (parent == null) {
+                throw new ArgumentNullException(nameof(parent));
+            } else if (string.IsNullOrWhiteSpace(name)) {
+                throw new ArgumentException("A child entity name must be provided.", nameof(name));
+            } else if (parent.Children == null) {
+                throw new InvalidOperationException($"Tilt Trial generation requires child entity '{name}'.");
+            }
+
+            for (int childIndex = 0; childIndex < parent.Children.Count; childIndex++) {
+                if (parent.Children[childIndex] is EditorEntity childEntity && string.Equals(childEntity.Name, name, StringComparison.Ordinal)) {
+                    return childEntity;
+                }
+            }
+
+            throw new InvalidOperationException($"Tilt Trial generation requires child entity '{name}'.");
+        }
+
+        /// <summary>
+        /// Resolves the direct box collider attached to the supplied entity.
+        /// </summary>
+        /// <param name="entity">Entity whose box collider should be returned.</param>
+        /// <returns>Attached box collider component.</returns>
+        BoxCollider3DComponent FindRequiredBoxColliderComponent(Entity entity) {
+            if (entity == null || entity.Components == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is BoxCollider3DComponent boxCollider) {
+                    return boxCollider;
+                }
+            }
+
+            throw new InvalidOperationException("Tilt Trial generation requires a BoxCollider3DComponent.");
+        }
+
+        /// <summary>
+        /// Resolves one component from the supplied entity when present.
+        /// </summary>
+        /// <typeparam name="TComponent">Requested component type.</typeparam>
+        /// <param name="entity">Entity whose components should be searched.</param>
+        /// <param name="component">Resolved component instance when present.</param>
+        /// <returns>True when the component was found.</returns>
+        bool TryFindComponent<TComponent>(Entity entity, out TComponent component) where TComponent : Component {
+            component = null;
+            if (entity == null || entity.Components == null) {
+                return false;
+            }
+
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is TComponent typedComponent) {
+                    component = typedComponent;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -761,7 +1129,6 @@ namespace city.game.tools {
                 LayerMask = 1
             };
             entity.AddComponent(textComponent);
-            ApplyFontReference(entity, textComponent, TiltTrialSpeedHudFontRelativePath);
             return entity;
         }
 

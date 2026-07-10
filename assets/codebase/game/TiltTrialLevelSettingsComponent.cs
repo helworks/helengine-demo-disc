@@ -49,17 +49,21 @@ namespace city.game {
         /// Validates the current level settings before selector or session code consumes them.
         /// </summary>
         public void Validate() {
-            if (string.IsNullOrWhiteSpace(LevelId)) {
+            if (IsMissingRequiredText(LevelId)) {
                 throw new InvalidOperationException("Tilt Trial level settings require a level id.");
-            } else if (string.IsNullOrWhiteSpace(DisplayName)) {
+            } else if (IsMissingRequiredText(DisplayName)) {
                 throw new InvalidOperationException("Tilt Trial level settings require a display name.");
-            } else if (string.IsNullOrWhiteSpace(SceneId)) {
+            } else if (IsMissingRequiredText(SceneId)) {
                 throw new InvalidOperationException("Tilt Trial level settings require a scene id.");
             } else if (StartTimeSeconds <= 0f) {
                 throw new InvalidOperationException("Tilt Trial level settings require a positive start time.");
             } else if (GoldTimeSeconds <= 0f || SilverTimeSeconds < GoldTimeSeconds || BronzeTimeSeconds < SilverTimeSeconds) {
                 throw new InvalidOperationException("Tilt Trial level settings require ascending gold, silver, and bronze medal times.");
             }
+        }
+
+        static bool IsMissingRequiredText(string value) {
+            return value == null || value.Length == 0;
         }
     }
 }

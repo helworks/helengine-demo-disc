@@ -116,7 +116,11 @@ namespace city.menu {
                 new DemoDiscGameSceneEntry(
                     "games-tilt-trial",
                     "Tilt Trial",
-                    "tilt_trial")
+                    "tilt_trial"),
+                new DemoDiscGameSceneEntry(
+                    "games-zombislayer",
+                    "Zombislayer",
+                    "zombislayer")
             ];
         }
     }
