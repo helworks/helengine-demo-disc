@@ -13,7 +13,7 @@ namespace city.scene.tools {
         /// <summary>
         /// Stable authored gain used by the shared showcase background-music source.
         /// </summary>
-        public const float RenderingAndPhysicsMusicGain = 1f;
+        public const float RenderingAndPhysicsMusicGain = 0.3f;
 
         /// <summary>
         /// Creates the shared looping showcase-music root as one live editor entity with a file-backed audio reference.

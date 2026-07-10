@@ -6,7 +6,7 @@ namespace city.tests {
     /// Verifies the generated rendering and physics showcase scenes all carry the shared looping background-music track.
     /// </summary>
     public sealed class RenderingAndPhysicsSceneAudioSourceTests {
-        const string ProjectRootPath = @"C:\dev\helprojs\city";
+        const string ProjectRootPath = @"C:\dev\helprojs\demodisc";
         const string SceneAudioRelativePath = "audio/scenes/helen_of_code_compling_v2.wav";
 
         static readonly string[] RenderingSceneRelativePaths = {
@@ -50,10 +50,10 @@ namespace city.tests {
 
         [Fact]
         public void Shared_scene_music_authoring_service_and_generators_use_the_shared_music_contract() {
-            string sceneMusicSource = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\scene.tools\GeneratedSceneMusicAuthoringService.cs");
-            string renderingSource = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\rendering.tools\RenderingSceneGenerator.cs");
-            string physicsSource = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneFactory.cs");
-            string physicsNintendoDsSource = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsNintendoDsSceneGenerator.cs");
+            string sceneMusicSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\scene.tools\GeneratedSceneMusicAuthoringService.cs");
+            string renderingSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingSceneGenerator.cs");
+            string physicsSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs");
+            string physicsNintendoDsSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsNintendoDsSceneGenerator.cs");
 
             Assert.Contains("RenderingAndPhysicsMusicAudioPath", sceneMusicSource, StringComparison.Ordinal);
             Assert.Contains(SceneAudioRelativePath, sceneMusicSource, StringComparison.Ordinal);
@@ -61,6 +61,8 @@ namespace city.tests {
             Assert.Contains("PlayOnStart = true", sceneMusicSource, StringComparison.Ordinal);
             Assert.Contains("Loop = true", sceneMusicSource, StringComparison.Ordinal);
             Assert.Contains("BusId = \"music\"", sceneMusicSource, StringComparison.Ordinal);
+            Assert.Contains("RenderingAndPhysicsMusicGain = 0.3f", sceneMusicSource, StringComparison.Ordinal);
+            Assert.Contains("Gain = RenderingAndPhysicsMusicGain", sceneMusicSource, StringComparison.Ordinal);
             Assert.Contains("CreateFileSystemAudio", sceneMusicSource, StringComparison.Ordinal);
             Assert.Contains("GeneratedSceneMusicAuthoringService", renderingSource, StringComparison.Ordinal);
             Assert.Contains("AppendSharedSceneMusic", renderingSource, StringComparison.Ordinal);
