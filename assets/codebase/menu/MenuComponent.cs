@@ -660,8 +660,19 @@ namespace city.menu {
         /// <param name="rootEntity">Owning menu root entity.</param>
         /// <returns>Generated menu subtree root.</returns>
         Entity FindGeneratedRootEntity(Entity rootEntity) {
+            if (rootEntity == null) {
+                throw new ArgumentNullException(nameof(rootEntity));
+            }
             if (rootEntity.Children == null) {
                 return null;
+            }
+
+            for (int childIndex = 0; childIndex < rootEntity.Children.Count; childIndex++) {
+                Entity childEntity = rootEntity.Children[childIndex];
+                if (childEntity != null
+                    && ContainsComponentInSubtree<MenuPanelComponent>(childEntity)) {
+                    return childEntity;
+                }
             }
 
             if (rootEntity.Children.Count == 1) {
@@ -669,6 +680,34 @@ namespace city.menu {
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Returns whether the supplied entity subtree contains at least one component of the requested type.
+        /// </summary>
+        /// <typeparam name="TComponent">Component type being searched for.</typeparam>
+        /// <param name="entity">Entity subtree root being inspected.</param>
+        /// <returns>True when the subtree contains the requested component type.</returns>
+        bool ContainsComponentInSubtree<TComponent>(Entity entity) where TComponent : Component {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            if (FindFirstComponent<TComponent>(entity) != null) {
+                return true;
+            }
+            if (entity.Children == null) {
+                return false;
+            }
+
+            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                Entity childEntity = entity.Children[childIndex];
+                if (childEntity != null && ContainsComponentInSubtree<TComponent>(childEntity)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

@@ -19,6 +19,16 @@ namespace city.menu {
         public string LogoTexturePath => "images/menu/helengine-logo.png";
 
         /// <summary>
+        /// Gets the shared looping theme-music source path used by the authored demo-disc main menu scenes.
+        /// </summary>
+        public string ThemeMusicAudioPath => "audio/menu/helen_of_code_high_code_v2.wav";
+
+        /// <summary>
+        /// Gets the authored per-track gain applied to the shared demo-disc menu music source.
+        /// </summary>
+        public float ThemeMusicGain => 0.3f;
+
+        /// <summary>
         /// Gets the decorative logo width in authored canvas pixels.
         /// </summary>
         public int LogoWidth => 440;
