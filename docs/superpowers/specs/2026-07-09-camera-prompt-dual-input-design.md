@@ -72,17 +72,17 @@ The `Camera` row should use these raw controls:
 - `dreamcast`: `dpad` and `analog`
 - `xbox360`: `dpad` and `left_stick`
 - `switch`: `dpad` and `left_stick`
-- `gamecube`: `dpad` and `left_stick`
-- `wii`: `dpad` and `left_stick`
+- `gamecube`: `dpad` and `control_stick`
+- `wii`: `dpad` and `stick`
 - `ps2`: `dpad` and `left_stick`
 - `psvita`: `dpad` and `left_stick`
 - `ps1`: `dpad` and `left_stick`
 - `ps3`: `dpad` and `left_stick`
 - `xbox`: `dpad` and `left_stick`
 - `steamdeck`: `dpad` and `left_stick`
-- `n64`: `dpad`
+- `n64`: `dpad` and `control_stick`
 
-`n64` stays single-input because the current request specifically distinguishes left-stick availability. The N64 family does not expose a generated `left_stick` icon in the current raw-control naming set used by the other dual-input platforms, so the prompt should remain conservative and accurate rather than inventing a new combined representation.
+`gamecube`, `wii`, and `n64` should use their platform-authentic stick-style raw controls instead of a literal `left_stick` id. That still satisfies the user requirement because those icons are the functional left-stick approximants exported by the generated pack.
 
 If any listed raw control is missing from the generated manifest for its platform family, scene generation must fail hard.
 

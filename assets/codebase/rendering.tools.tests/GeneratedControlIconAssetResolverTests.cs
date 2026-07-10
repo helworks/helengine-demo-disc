@@ -20,6 +20,18 @@ namespace city.tests {
         }
 
         [Fact]
+        public void Catalog_returns_generated_png_paths_for_camera_stick_equivalents() {
+            city.rendering.tools.GeneratedControlIconCatalog catalog = city.rendering.tools.GeneratedControlIconCatalog.Load(
+                @"C:\dev\helprojs\city");
+
+            Assert.Equal("images/instructions/controls/generated/3ds/circle_pad.png", catalog.RequireControlPath("3ds", "circle_pad"));
+            Assert.Equal("images/instructions/controls/generated/psp/analog.png", catalog.RequireControlPath("psp", "analog"));
+            Assert.Equal("images/instructions/controls/generated/gamecube/control_stick.png", catalog.RequireControlPath("gamecube", "control_stick"));
+            Assert.Equal("images/instructions/controls/generated/wii/stick.png", catalog.RequireControlPath("wii", "stick"));
+            Assert.Equal("images/instructions/controls/generated/n64/control_stick.png", catalog.RequireControlPath("n64", "control_stick"));
+        }
+
+        [Fact]
         public void Catalog_throws_for_missing_control() {
             city.rendering.tools.GeneratedControlIconCatalog catalog = city.rendering.tools.GeneratedControlIconCatalog.Load(
                 @"C:\dev\helprojs\city");
@@ -47,6 +59,22 @@ namespace city.tests {
             Assert.Equal("r1", resolved.ControlId);
             Assert.Equal("images/instructions/controls/generated/ps2/r1.png", resolved.SourcePngRelativePath);
             Assert.False(string.IsNullOrWhiteSpace(resolved.ImportedTextureAssetId));
+        }
+
+        [Fact]
+        public void Resolver_returns_trimmed_source_rect_and_aspect_fit_size_for_wide_icons() {
+            city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
+
+            city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
+                @"C:\dev\helprojs\city",
+                "xbox360",
+                "rb");
+
+            Assert.Equal(32f / 256f, resolved.SourceRect.X, 3);
+            Assert.Equal(82f / 256f, resolved.SourceRect.Y, 3);
+            Assert.Equal(193f / 256f, resolved.SourceRect.Z, 3);
+            Assert.Equal(93f / 256f, resolved.SourceRect.W, 3);
+            Assert.Equal(new int2(78, 38), resolved.FitDisplaySizeWithin(new int2(78, 45)));
         }
 
         [Fact]
