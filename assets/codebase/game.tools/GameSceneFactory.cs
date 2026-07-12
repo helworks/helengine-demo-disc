@@ -33,6 +33,16 @@ namespace city.game.tools {
         const string TiltTrialSpeedHudFontRelativePath = "Fonts/Fredoka.ttf";
 
         /// <summary>
+        /// Stable authored asset path used by the generated Tilt Trial level-select scene.
+        /// </summary>
+        const string TiltTrialLevelSelectSceneAssetRelativePath = "scenes/games/tilt/tilt_trial.helen";
+
+        /// <summary>
+        /// Stable authored asset path prefix used by the generated Tilt Trial gameplay scenes.
+        /// </summary>
+        const string TiltTrialGameplaySceneAssetDirectoryRelativePath = "scenes/games/tilt";
+
+        /// <summary>
         /// Stable mesh save-state slot used by the generated player sphere material reference.
         /// </summary>
         const string PlayerSphereMaterialReferenceName = "Materials[0]";
@@ -100,6 +110,7 @@ namespace city.game.tools {
         public GeneratedAuthoringSceneDefinition CreateTiltTrialLevelSelectScene() {
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = GameSceneCatalog.TiltTrialSceneId,
+                SceneAssetRelativePath = TiltTrialLevelSelectSceneAssetRelativePath,
                 SceneSettings = new SceneSettingsAsset(),
                 RootEntities = [
                     CreateLevelSelectCameraEntity(),
@@ -141,6 +152,8 @@ namespace city.game.tools {
                 cameraEntity,
                 CreateDirectionalLightEntity(),
                 CreateDirectionalFillLightEntity(),
+                CreateAmbientLightEntity(),
+                CreatePhysicsBoundsDebugEntity(),
                 uiEntity,
                 stageRootEntity,
                 CreateCatchFloorEntity(),
@@ -153,9 +166,23 @@ namespace city.game.tools {
             ConfigureTiltTrialCoinTargets(stageRootEntity, playerSphereEntity);
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = levelEntry.SceneId,
+                SceneAssetRelativePath = BuildTiltTrialGameplaySceneAssetRelativePath(levelEntry.SceneId),
                 SceneSettings = new SceneSettingsAsset(),
                 RootEntities = roots
             };
+        }
+
+        /// <summary>
+        /// Builds the authored project-relative scene path used by one Tilt Trial gameplay scene while preserving its runtime scene id.
+        /// </summary>
+        /// <param name="sceneId">Stable runtime scene id for the Tilt Trial gameplay scene.</param>
+        /// <returns>Project-relative authored scene asset path.</returns>
+        static string BuildTiltTrialGameplaySceneAssetRelativePath(string sceneId) {
+            if (string.IsNullOrWhiteSpace(sceneId)) {
+                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            }
+
+            return TiltTrialGameplaySceneAssetDirectoryRelativePath + "/" + sceneId + ".helen";
         }
 
         /// <summary>
@@ -196,11 +223,11 @@ namespace city.game.tools {
         /// <returns>Generated editor camera entity.</returns>
         EditorEntity CreateCameraEntity() {
             float4 orientation;
-            float4.CreateFromYawPitchRoll(0f, -0.42f, 0f, out orientation);
+            float4.CreateFromYawPitchRoll(MathF.PI, -0.42f, 0f, out orientation);
 
             Entity entity = Core.Instance.EntityFactory.Create("TiltTrialCamera");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.LocalPosition = new float3(0f, 2.74425f, -3.08f);
+            entity.LocalPosition = new float3(0f, 2.74425f, -10.92f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = orientation;
             entity.AddComponent(new CameraComponent {
@@ -277,6 +304,26 @@ namespace city.game.tools {
                 ShadowMapMode = ShadowMapMode.Disabled,
                 ShadowStrength = 0f,
                 ShadowDistance = 0f
+            });
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates one low-intensity ambient light so small collectibles do not collapse to flat black or gray when they rotate away from the key lights.
+        /// </summary>
+        /// <returns>Generated ambient-light entity.</returns>
+        Entity CreateAmbientLightEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialAmbient");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = float3.Zero;
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = float4.Identity;
+            entity.AddComponent(new AmbientLightComponent {
+                Color = new float4(1f, 0.95f, 0.82f, 1f),
+                Intensity = 0.18f,
+                ShadowsEnabled = false,
+                ShadowMapMode = ShadowMapMode.Disabled,
+                ShadowStrength = 0f
             });
             return entity;
         }
@@ -419,12 +466,48 @@ namespace city.game.tools {
             coinTextAnchorComponent.LayoutSpace = LayoutComponent.CameraViewportLayoutSpace;
             coinTextAnchorComponent.SetAnchorDistances(left: 16f, top: 16f);
             coinTextEntity.AddComponent(coinTextAnchorComponent);
+            ApplyFontReference(coinTextEntity, coinTextComponent, TiltTrialSpeedHudFontRelativePath);
+
+            Entity physicsBoundsStatusTextEntity = Core.Instance.EntityFactory.CreateChild(entity, "TiltTrialPhysicsBoundsStatusText");
+            physicsBoundsStatusTextEntity.LocalPosition = new float3(16f, 56f, 0f);
+            physicsBoundsStatusTextEntity.Static = false;
+            TextComponent physicsBoundsStatusTextComponent = new TextComponent {
+                Text = "F3 Bounds Off",
+                Font = ResolveRequiredEditorFont(),
+                Color = new byte4(196, 210, 226, 255),
+                Size = new int2(280, 36),
+                FontScale = 1.1f,
+                Alignment = TextAlignment.Left,
+                RenderOrder2D = 1,
+                LayerMask = 1
+            };
+            physicsBoundsStatusTextEntity.AddComponent(physicsBoundsStatusTextComponent);
+            LayoutComponent physicsBoundsStatusAnchorComponent = new LayoutComponent();
+            physicsBoundsStatusAnchorComponent.LayoutSpace = LayoutComponent.CameraViewportLayoutSpace;
+            physicsBoundsStatusAnchorComponent.SetAnchorDistances(left: 16f, top: 56f);
+            physicsBoundsStatusTextEntity.AddComponent(physicsBoundsStatusAnchorComponent);
+            ApplyFontReference(physicsBoundsStatusTextEntity, physicsBoundsStatusTextComponent, TiltTrialSpeedHudFontRelativePath);
+            physicsBoundsStatusTextEntity.AddComponent(new city.game.TiltTrialPhysicsBoundsStatusTextComponent());
 
             if (entity is EditorEntity editorEntity) {
                 return editorEntity;
             }
 
             throw new InvalidOperationException("Tilt Trial UI generation requires editor-authored entities.");
+        }
+
+        /// <summary>
+        /// Creates the Windows-only runtime physics-bounds debug host used by Tilt Trial gameplay scenes.
+        /// </summary>
+        /// <returns>Generated debug-root entity.</returns>
+        Entity CreatePhysicsBoundsDebugEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialPhysicsBoundsDebug");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = float3.Zero;
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = float4.Identity;
+            entity.AddComponent(new global::city.game.TiltTrialPhysicsBoundsDebugDrawComponent());
+            return entity;
         }
 
         /// <summary>
@@ -490,7 +573,7 @@ namespace city.game.tools {
             entity.AddChild(CreateLevel01BlockerLeftEntity());
             entity.AddChild(CreateLevel01BlockerRightEntity());
             entity.AddChild(CreateLevel01FinalPlatformEntity());
-            entity.AddChild(CreateGoalPadEntity(new float3(1.35f, 1.05f, 15.7f), new float3(4.4f, 1.4f, 3.4f)));
+            entity.AddChild(CreateLevel01GoalPadEntity());
             entity.AddChild(CreateGoalFlagEntity());
             entity.AddChild(CreateCollectibleCoinEntity("Coin01", new float3(0f, 1.35f, -2.2f)));
             entity.AddChild(CreateCollectibleCoinEntity("Coin02", new float3(-0.8f, 1.9f, 4.6f)));
@@ -530,6 +613,9 @@ namespace city.game.tools {
                 Mass = 1d
             });
             entity.AddComponent(new SphereCollider3DComponent {
+                Radius = 0.5f
+            });
+            entity.AddComponent(new global::city.game.TiltTrialPhysicsDebugSphereBoundsComponent {
                 Radius = 0.5f
             });
             entity.AddComponent(new city.game.DemoTiltBallResetComponent {
@@ -661,6 +747,14 @@ namespace city.game.tools {
         }
 
         /// <summary>
+        /// Creates the tighter finish trigger used by the beginner first level.
+        /// </summary>
+        /// <returns>Generated trigger entity.</returns>
+        Entity CreateLevel01GoalPadEntity() {
+            return CreateGoalPadEntity(new float3(1.35f, 1.05f, 16.95f), new float3(2f, 2f, 2f));
+        }
+
+        /// <summary>
         /// Creates the finish trigger volume used by Tilt Trial.
         /// </summary>
         /// <param name="position">Local trigger position.</param>
@@ -680,6 +774,9 @@ namespace city.game.tools {
                 Mass = 1d
             });
             entity.AddComponent(new BoxCollider3DComponent {
+                Size = size
+            });
+            entity.AddComponent(new global::city.game.TiltTrialPhysicsDebugBoxBoundsComponent {
                 Size = size
             });
             FindRequiredBoxColliderComponent(entity).IsTrigger = true;
@@ -748,12 +845,11 @@ namespace city.game.tools {
             Entity entity = Core.Instance.EntityFactory.Create(name);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = position;
-            entity.LocalScale = new float3(0.85f, 0.85f, 0.85f);
+            entity.LocalScale = new float3(0.51f, 0.51f, 0.51f);
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new BlueprintInstanceComponent {
                 BlueprintAssetPath = SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath
             });
-            entity.AddComponent(new city.game.TiltTrialCollectibleCoinComponent());
             entity.AddComponent(new global::helengine.SceneEntityTriggerObserverComponent());
             entity.AddComponent(new RigidBody3DComponent {
                 BodyKind = BodyKind3D.Kinematic,
@@ -763,6 +859,9 @@ namespace city.game.tools {
             entity.AddComponent(new SphereCollider3DComponent {
                 Radius = 0.75f,
                 IsTrigger = true
+            });
+            entity.AddComponent(new global::city.game.TiltTrialPhysicsDebugSphereBoundsComponent {
+                Radius = 0.75f
             });
             return entity;
         }
@@ -784,7 +883,7 @@ namespace city.game.tools {
         }
 
         /// <summary>
-        /// Creates one mesh-backed kinematic stage box used by the Tilt Trial course.
+        /// Creates one mesh-backed static stage box used by the Tilt Trial course.
         /// </summary>
         /// <param name="name">Authored entity name.</param>
         /// <param name="position">Local stage position.</param>
@@ -809,11 +908,15 @@ namespace city.game.tools {
             entity.AddComponent(meshComponent);
             ApplyTiltTrialCourseMaterialReference(entity, meshComponent);
             entity.AddComponent(new RigidBody3DComponent {
-                BodyKind = BodyKind3D.Kinematic,
+                BodyKind = BodyKind3D.Static,
                 UseGravity = false,
                 Mass = 1d
             });
             entity.AddComponent(new BoxCollider3DComponent {
+                // The Windows BEPU backend uses collider dimensions directly.
+                Size = scale
+            });
+            entity.AddComponent(new global::city.game.TiltTrialPhysicsDebugBoxBoundsComponent {
                 Size = scale
             });
             return entity;
@@ -914,7 +1017,8 @@ namespace city.game.tools {
 
             for (int childIndex = 0; childIndex < stageRootEntity.Children.Count; childIndex++) {
                 Entity child = stageRootEntity.Children[childIndex];
-                if (!TryFindComponent<city.game.TiltTrialCollectibleCoinComponent>(child, out _) ||
+                if (!TryFindComponent<BlueprintInstanceComponent>(child, out BlueprintInstanceComponent blueprintInstance) ||
+                    !string.Equals(blueprintInstance.BlueprintAssetPath, SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath, StringComparison.Ordinal) ||
                     !TryFindComponent<global::helengine.SceneEntityTriggerObserverComponent>(child, out global::helengine.SceneEntityTriggerObserverComponent triggerObserver)) {
                     continue;
                 }
