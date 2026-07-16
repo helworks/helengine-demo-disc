@@ -24,6 +24,16 @@ namespace city.game {
         public SceneEntityReference TargetEntityReference { get; set; }
 
         /// <summary>
+        /// Gets or sets the stable authored entity name used to resolve the followed player across Blueprint boundaries.
+        /// </summary>
+        public string TargetEntityName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the serialized gameplay role used to resolve the followed entity at runtime.
+        /// </summary>
+        public string TargetEntityRole { get; set; }
+
+        /// <summary>
         /// Gets or sets the world-space offset applied on top of the followed player position before orbit math is evaluated.
         /// </summary>
         public float3 TargetOffset { get; set; }
@@ -82,6 +92,16 @@ namespace city.game {
         /// Initializes one Tilt Trial follow camera with Super Monkey Ball-style orbit defaults.
         /// </summary>
         public DemoTiltFollowCameraComponent() {
+            UpdatesAreSuppressed = false;
+            TargetEntityReference = null;
+            TargetEntityName = string.Empty;
+            TargetEntityRole = string.Empty;
+            TargetEntity = null;
+            TargetRigidBody = null;
+            CurrentYawRadians = 0f;
+            CurrentPitchRadians = 0f;
+            CurrentOrbitRadius = 0f;
+            IsOrbitInitialized = false;
             UpdateOrder = 1;
             ManualYawSpeedRadians = 1.9f;
             ManualPitchSpeedRadians = 1.35f;
@@ -161,6 +181,74 @@ namespace city.game {
         }
 
         /// <summary>
+        /// Finds one runtime entity by its stable authored name.
+        /// </summary>
+        /// <param name="name">Entity name to resolve.</param>
+        /// <returns>Matching runtime entity, or null when it is not loaded yet.</returns>
+        Entity FindEntityByName(string name) {
+            return FindEntityByRole(name);
+        }
+
+        /// <summary>
+        /// Finds one runtime entity carrying the requested serialized gameplay role.
+        /// </summary>
+        /// <param name="role">Gameplay role to resolve.</param>
+        /// <returns>Matching runtime entity, or null when it is not loaded yet.</returns>
+        Entity FindEntityByRole(string role) {
+            List<Entity> entities = Core.Instance.ObjectManager.Entities;
+            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
+                Entity match = FindEntityByRoleRecursive(entities[entityIndex], role);
+                if (match != null) {
+                    return match;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Recursively searches one entity hierarchy for a serialized gameplay role.
+        /// </summary>
+        /// <param name="entity">Current hierarchy entity.</param>
+        /// <param name="role">Gameplay role to resolve.</param>
+        /// <returns>Matching entity, or null when the subtree does not contain it.</returns>
+        static Entity FindEntityByRoleRecursive(Entity entity, string role) {
+            if (entity == null) {
+                return null;
+            }
+            if (entity.Components != null) {
+                for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                    if (entity.Components[componentIndex] is TiltTrialEntityRoleComponent roleComponent
+                        && string.Equals(roleComponent.Role, role, StringComparison.Ordinal)) {
+                        return entity;
+                    }
+                }
+            }
+            if (entity.Children == null) {
+                return null;
+            }
+
+            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                Entity match = FindEntityByRoleRecursive(entity.Children[childIndex], role);
+                if (match != null) {
+                    return match;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Recursively searches one entity hierarchy for a stable authored name.
+        /// </summary>
+        /// <param name="entity">Current hierarchy entity.</param>
+        /// <param name="name">Entity name to resolve.</param>
+        /// <returns>Matching entity, or null when the subtree does not contain it.</returns>
+        static Entity FindEntityByNameRecursive(Entity entity, string name) {
+            return FindEntityByRoleRecursive(entity, name);
+        }
+
+        /// <summary>
         /// Resolves the authored rigid body attached to the tracked ball when available.
         /// </summary>
         void ResolveTargetRigidBodyWhenNeeded() {
@@ -237,7 +325,7 @@ namespace city.game {
         }
 
         /// <summary>
-        /// Resolves normalized camera yaw input from arrow keys, d-pad, and the right-stick horizontal axis.
+        /// Resolves normalized camera yaw input from keyboard arrows, shoulder buttons, and the right-stick horizontal axis.
         /// </summary>
         /// <param name="inputSystem">Input system supplying the current frame state.</param>
         /// <returns>Normalized yaw input in the range [-1, 1].</returns>
@@ -257,10 +345,10 @@ namespace city.game {
             InputGamepadState gamepadState = inputSystem.GetGamepadState(0);
             double gamepadYaw = 0d;
             if (gamepadState.Connected) {
-                if (gamepadState.IsButtonDown(InputGamepadButton.DPadLeft)) {
+                if (gamepadState.IsButtonDown(InputGamepadButton.LeftShoulder)) {
                     gamepadYaw -= 1d;
                 }
-                if (gamepadState.IsButtonDown(InputGamepadButton.DPadRight)) {
+                if (gamepadState.IsButtonDown(InputGamepadButton.RightShoulder)) {
                     gamepadYaw += 1d;
                 }
 
@@ -271,7 +359,7 @@ namespace city.game {
         }
 
         /// <summary>
-        /// Resolves normalized camera pitch input from arrow keys, d-pad, and the right-stick vertical axis.
+        /// Resolves normalized camera pitch input from keyboard arrows and the right-stick vertical axis.
         /// </summary>
         /// <param name="inputSystem">Input system supplying the current frame state.</param>
         /// <returns>Normalized pitch input in the range [-1, 1].</returns>
@@ -291,13 +379,6 @@ namespace city.game {
             InputGamepadState gamepadState = inputSystem.GetGamepadState(0);
             double gamepadPitch = 0d;
             if (gamepadState.Connected) {
-                if (gamepadState.IsButtonDown(InputGamepadButton.DPadUp)) {
-                    gamepadPitch += 1d;
-                }
-                if (gamepadState.IsButtonDown(InputGamepadButton.DPadDown)) {
-                    gamepadPitch -= 1d;
-                }
-
                 gamepadPitch += -NormalizeStickAxis(gamepadState.RightStickY);
             }
 

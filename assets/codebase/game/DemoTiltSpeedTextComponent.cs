@@ -19,6 +19,16 @@ namespace city.game {
         public SceneEntityReference TargetEntityReference { get; set; }
 
         /// <summary>
+        /// Gets or sets the stable authored entity name used to resolve the tracked player across Blueprint boundaries.
+        /// </summary>
+        public string TargetEntityName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the serialized gameplay role used to resolve the tracked entity at runtime.
+        /// </summary>
+        public string TargetEntityRole { get; set; }
+
+        /// <summary>
         /// Cached live runtime entity resolved from the serialized target reference.
         /// </summary>
         Entity TargetEntity;
@@ -37,6 +47,13 @@ namespace city.game {
         /// Initializes one Tilt Trial speed HUD updater.
         /// </summary>
         public DemoTiltSpeedTextComponent() {
+            UpdatesAreSuppressed = false;
+            TargetEntityReference = null;
+            TargetEntityName = string.Empty;
+            TargetEntityRole = string.Empty;
+            TargetEntity = null;
+            TargetRigidBody = null;
+            SpeedTextComponent = null;
             UpdateOrder = 2;
         }
 
@@ -129,6 +146,74 @@ namespace city.game {
             }
 
             throw new InvalidOperationException($"DemoTiltSpeedTextComponent could not resolve target scene entity id {TargetEntityReference.EntityId}.");
+        }
+
+        /// <summary>
+        /// Finds one runtime entity by its stable authored name.
+        /// </summary>
+        /// <param name="name">Entity name to resolve.</param>
+        /// <returns>Matching runtime entity, or null when it is not loaded yet.</returns>
+        Entity FindEntityByName(string name) {
+            return FindEntityByRole(name);
+        }
+
+        /// <summary>
+        /// Finds one runtime entity carrying the requested serialized gameplay role.
+        /// </summary>
+        /// <param name="role">Gameplay role to resolve.</param>
+        /// <returns>Matching runtime entity, or null when it is not loaded yet.</returns>
+        Entity FindEntityByRole(string role) {
+            List<Entity> entities = Core.Instance.ObjectManager.Entities;
+            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
+                Entity match = FindEntityByRoleRecursive(entities[entityIndex], role);
+                if (match != null) {
+                    return match;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Recursively searches one entity hierarchy for a serialized gameplay role.
+        /// </summary>
+        /// <param name="entity">Current hierarchy entity.</param>
+        /// <param name="role">Gameplay role to resolve.</param>
+        /// <returns>Matching entity, or null when the subtree does not contain it.</returns>
+        static Entity FindEntityByRoleRecursive(Entity entity, string role) {
+            if (entity == null) {
+                return null;
+            }
+            if (entity.Components != null) {
+                for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                    if (entity.Components[componentIndex] is TiltTrialEntityRoleComponent roleComponent
+                        && string.Equals(roleComponent.Role, role, StringComparison.Ordinal)) {
+                        return entity;
+                    }
+                }
+            }
+            if (entity.Children == null) {
+                return null;
+            }
+
+            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                Entity match = FindEntityByRoleRecursive(entity.Children[childIndex], role);
+                if (match != null) {
+                    return match;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Recursively searches one entity hierarchy for a stable authored name.
+        /// </summary>
+        /// <param name="entity">Current hierarchy entity.</param>
+        /// <param name="name">Entity name to resolve.</param>
+        /// <returns>Matching entity, or null when the subtree does not contain it.</returns>
+        static Entity FindEntityByNameRecursive(Entity entity, string name) {
+            return FindEntityByRoleRecursive(entity, name);
         }
 
         /// <summary>

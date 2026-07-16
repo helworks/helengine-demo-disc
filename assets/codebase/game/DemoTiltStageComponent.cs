@@ -67,6 +67,11 @@ namespace city.game {
         /// Initializes one Tilt Trial ball-drive controller with moderated planar movement defaults tuned for the close follow camera.
         /// </summary>
         public DemoTiltStageComponent() {
+            UpdatesAreSuppressed = false;
+            PlayerSphereEntity = null;
+            PlayerSphereRigidBody = null;
+            OrbitCameraEntity = null;
+            FollowCameraComponent = null;
             MaximumPlanarSpeed = 11.25f;
             PlanarAccelerationUnitsPerSecond = 4.25f;
             GamepadDeadzoneThreshold = (float)GamepadDeadzone;
@@ -246,6 +251,19 @@ namespace city.game {
 
             InputGamepadState gamepadState = inputSystem.GetGamepadState(0);
             if (gamepadState.Connected) {
+                if (gamepadState.IsButtonDown(InputGamepadButton.DPadLeft)) {
+                    horizontal -= 1d;
+                }
+                if (gamepadState.IsButtonDown(InputGamepadButton.DPadRight)) {
+                    horizontal += 1d;
+                }
+                if (gamepadState.IsButtonDown(InputGamepadButton.DPadUp)) {
+                    forward += 1d;
+                }
+                if (gamepadState.IsButtonDown(InputGamepadButton.DPadDown)) {
+                    forward -= 1d;
+                }
+
                 horizontal += NormalizeStickAxis(gamepadState.LeftStickX);
                 forward += -NormalizeStickAxis(gamepadState.LeftStickY);
             }
