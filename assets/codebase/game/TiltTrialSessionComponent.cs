@@ -12,7 +12,7 @@ namespace city.game {
         /// Backing state machine used by the active gameplay session.
         /// </summary>
         readonly FiniteStateMachine<TiltTrialSessionState> SessionStateMachine;
-        TiltTrialLevelSettingsComponent LevelSettings;
+        TiltTrialLevelCatalogEntry CurrentLevel;
         Entity PlayerSphereEntity;
         RigidBody3DComponent PlayerRigidBody;
         Entity GoalEntity;
@@ -23,9 +23,34 @@ namespace city.game {
         DemoTiltSpeedTextComponent SpeedTextComponent;
         TextComponent TimerTextComponent;
         TextComponent CoinTextComponent;
+        TextComponent TargetTimesTextComponent;
         Entity ResultsOverlayEntity;
         TextComponent ResultsTitleTextComponent;
         TextComponent ResultsBodyTextComponent;
+        /// <summary>
+        /// Handheld Retry result button entity resolved from the presentation hierarchy.
+        /// </summary>
+        Entity ResultsRetryButtonEntity;
+        /// <summary>
+        /// Handheld Exit result button entity resolved from the presentation hierarchy.
+        /// </summary>
+        Entity ResultsExitButtonEntity;
+        /// <summary>
+        /// Handheld Next result button entity resolved from the presentation hierarchy.
+        /// </summary>
+        Entity ResultsNextButtonEntity;
+        /// <summary>
+        /// Background used to present the selected state of the handheld Retry button.
+        /// </summary>
+        RoundedRectComponent ResultsRetryButtonBackground;
+        /// <summary>
+        /// Background used to present the selected state of the handheld Exit button.
+        /// </summary>
+        RoundedRectComponent ResultsExitButtonBackground;
+        /// <summary>
+        /// Background used to present the selected state of the handheld Next button.
+        /// </summary>
+        RoundedRectComponent ResultsNextButtonBackground;
         Entity FailOverlayEntity;
         TextComponent FailTitleTextComponent;
         TextComponent FailBodyTextComponent;
@@ -46,6 +71,43 @@ namespace city.game {
         /// </summary>
         public TiltTrialSessionComponent() {
             SessionStateMachine = CreateStateMachine();
+            // Native builds do not zero-initialize C# instance fields automatically.
+            // Keep every runtime-only dependency in a known state until it is resolved.
+            CurrentLevel = null;
+            PlayerSphereEntity = null;
+            PlayerRigidBody = null;
+            GoalEntity = null;
+            GoalTriggerObserver = null;
+            StageComponent = null;
+            FollowCameraComponent = null;
+            BallResetComponent = null;
+            SpeedTextComponent = null;
+            TimerTextComponent = null;
+            CoinTextComponent = null;
+            TargetTimesTextComponent = null;
+            ResultsOverlayEntity = null;
+            ResultsTitleTextComponent = null;
+            ResultsBodyTextComponent = null;
+            ResultsRetryButtonEntity = null;
+            ResultsExitButtonEntity = null;
+            ResultsNextButtonEntity = null;
+            ResultsRetryButtonBackground = null;
+            ResultsExitButtonBackground = null;
+            ResultsNextButtonBackground = null;
+            FailOverlayEntity = null;
+            FailTitleTextComponent = null;
+            FailBodyTextComponent = null;
+            CollectibleCoinComponents = null;
+            IsSessionStateInitialized = false;
+            RemainingTimeSeconds = 0f;
+            ElapsedTimeSeconds = 0f;
+            FinalTimeSeconds = 0f;
+            AwardedMedal = TiltTrialMedal.None;
+            OverlaySelectionIndex = 0;
+            DeferredDependencyResolutionFrameCount = 0;
+            FrozenPlayerPosition = float3.Zero;
+            FrozenPlayerOrientation = new float4(0f, 0f, 0f, 1f);
+            HasFrozenPlayerPose = false;
             UpdateOrder = 1;
         }
 
@@ -54,27 +116,38 @@ namespace city.game {
         /// </summary>
         public override void Update() {
             base.Update();
+            ReportStage("TiltTrialSession:Update:Begin");
 
             if (Parent == null) {
                 throw new InvalidOperationException("TiltTrialSessionComponent requires an attached gameplay UI root entity.");
             }
 
+            ReportStage("TiltTrialSession:Update:ResolveDependencies");
             if (!TryResolveRuntimeDependenciesWhenNeeded()) {
                 return;
             }
 
+            ReportStage("TiltTrialSession:Update:EnsureSessionState");
             EnsureSessionStateInitialized();
 
+            ReportStage("TiltTrialSession:Update:AfterEnsureSessionState");
             if (SessionStateMachine.CurrentState == TiltTrialSessionState.Playing) {
+                ReportStage("TiltTrialSession:Update:Playing");
                 UpdatePlayingState();
                 return;
             }
 
+            ReportStage("TiltTrialSession:Update:FrozenPose");
             MaintainFrozenPlayerPose();
+            ReportStage("TiltTrialSession:Update:RefreshOverlay");
             RefreshOverlayPresentation();
-            if (SessionStateMachine.CurrentState == TiltTrialSessionState.Results) {
+            if (SessionStateMachine.CurrentState == TiltTrialSessionState.Paused) {
+                return;
+            } else if (SessionStateMachine.CurrentState == TiltTrialSessionState.Results) {
+                ReportStage("TiltTrialSession:Update:ResultsOverlay");
                 UpdateResultsOverlay();
             } else if (SessionStateMachine.CurrentState == TiltTrialSessionState.Failed) {
+                ReportStage("TiltTrialSession:Update:FailedOverlay");
                 UpdateFailedOverlay();
             }
         }
@@ -96,6 +169,22 @@ namespace city.game {
             } else if (clearTimeSeconds <= settings.SilverTimeSeconds) {
                 return TiltTrialMedal.Silver;
             } else if (clearTimeSeconds <= settings.BronzeTimeSeconds) {
+                return TiltTrialMedal.Bronze;
+            }
+
+            return TiltTrialMedal.None;
+        }
+
+        public static TiltTrialMedal ResolveMedal(TiltTrialLevelCatalogEntry level, float clearTimeSeconds) {
+            if (level == null) {
+                throw new ArgumentNullException(nameof(level));
+            }
+
+            if (clearTimeSeconds <= level.GoldTimeSeconds) {
+                return TiltTrialMedal.Gold;
+            } else if (clearTimeSeconds <= level.SilverTimeSeconds) {
+                return TiltTrialMedal.Silver;
+            } else if (clearTimeSeconds <= level.BronzeTimeSeconds) {
                 return TiltTrialMedal.Bronze;
             }
 
@@ -126,6 +215,25 @@ namespace city.game {
         }
 
         /// <summary>
+        /// Resolves the trigger observer used by one collectible coin, walking up authored wrapper entities when needed.
+        /// </summary>
+        /// <param name="entity">Coin entity or wrapper entity whose trigger should be resolved.</param>
+        /// <returns>First trigger observer found on the supplied entity or one ancestor; otherwise null.</returns>
+        public static global::helengine.SceneEntityTriggerObserverComponent ResolveCoinTriggerObserver(Entity entity) {
+            Entity current = entity;
+            while (current != null) {
+                global::helengine.SceneEntityTriggerObserverComponent triggerObserver = TryFindTriggerObserverComponent(current);
+                if (triggerObserver != null) {
+                    return triggerObserver;
+                }
+
+                current = current.Parent;
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Formats one collectible coin progress label for the Tilt Trial gameplay HUD.
         /// </summary>
         /// <param name="collectedCoinCount">Number of coins collected so far.</param>
@@ -144,15 +252,124 @@ namespace city.game {
         }
 
         /// <summary>
+        /// Resolves whether one runtime scene load should be treated as a reload because the same scene is already active.
+        /// </summary>
+        /// <param name="sceneId">Requested target scene id.</param>
+        /// <param name="loadedSceneIds">Currently loaded runtime scene ids.</param>
+        /// <returns>True when the target scene is already loaded and should be explicitly unloaded before reloading.</returns>
+        public static bool RequiresExplicitSceneReload(string sceneId, IReadOnlyList<string> loadedSceneIds) {
+            if (string.IsNullOrWhiteSpace(sceneId)) {
+                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            }
+            if (loadedSceneIds == null) {
+                throw new ArgumentNullException(nameof(loadedSceneIds));
+            }
+
+            for (int index = 0; index < loadedSceneIds.Count; index++) {
+                if (string.Equals(loadedSceneIds[index], sceneId, StringComparison.Ordinal)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Creates one uninitialized session-state machine used by runtime and unit tests.
         /// </summary>
         /// <returns>Uninitialized Tilt Trial state machine with registered states.</returns>
         public static FiniteStateMachine<TiltTrialSessionState> CreateStateMachine() {
             FiniteStateMachine<TiltTrialSessionState> machine = new FiniteStateMachine<TiltTrialSessionState>();
             machine.RegisterState(TiltTrialSessionState.Playing, new FiniteStateDefinition<TiltTrialSessionState>());
+            machine.RegisterState(TiltTrialSessionState.Paused, new FiniteStateDefinition<TiltTrialSessionState>());
             machine.RegisterState(TiltTrialSessionState.Results, new FiniteStateDefinition<TiltTrialSessionState>());
             machine.RegisterState(TiltTrialSessionState.Failed, new FiniteStateDefinition<TiltTrialSessionState>());
             return machine;
+        }
+
+        /// <summary>
+        /// Applies one presentation-independent action to the active session.
+        /// </summary>
+        /// <param name="action">Semantic action requested by a physical or platform-specific presentation control.</param>
+        public void RequestAction(TiltTrialSessionAction action) {
+            if (!IsSessionStateInitialized) {
+                return;
+            }
+
+            if (action == TiltTrialSessionAction.TogglePause) {
+                if (SessionStateMachine.CurrentState == TiltTrialSessionState.Playing) {
+                    CaptureFrozenPlayerPose();
+                    SetGameplayUpdatesSuppressed(true);
+                    SessionStateMachine.TryChangeState(TiltTrialSessionState.Paused);
+                } else if (SessionStateMachine.CurrentState == TiltTrialSessionState.Paused) {
+                    HasFrozenPlayerPose = false;
+                    SetGameplayUpdatesSuppressed(false);
+                    SessionStateMachine.TryChangeState(TiltTrialSessionState.Playing);
+                }
+                return;
+            }
+
+            if (SessionStateMachine.CurrentState == TiltTrialSessionState.Results) {
+                RequestResultsAction(action);
+            } else if (SessionStateMachine.CurrentState == TiltTrialSessionState.Failed) {
+                RequestFailedAction(action);
+            }
+        }
+
+        /// <summary>
+        /// Applies one action to the result overlay selection and navigation.
+        /// </summary>
+        /// <param name="action">Requested result overlay action.</param>
+        void RequestResultsAction(TiltTrialSessionAction action) {
+            if (action == TiltTrialSessionAction.NavigatePrevious) {
+                OverlaySelectionIndex = OverlaySelectionIndex <= 0 ? 2 : OverlaySelectionIndex - 1;
+            } else if (action == TiltTrialSessionAction.NavigateNext) {
+                OverlaySelectionIndex = OverlaySelectionIndex >= 2 ? 0 : OverlaySelectionIndex + 1;
+            } else if (action == TiltTrialSessionAction.Retry) {
+                LoadScene(CurrentLevel.SceneId);
+            } else if (action == TiltTrialSessionAction.Next) {
+                LoadScene(ResolveNextSceneId(CurrentLevel.LevelId, TiltTrialSceneIds.ResolveLevelSelectSceneId()));
+            } else if (action == TiltTrialSessionAction.LevelSelect || action == TiltTrialSessionAction.Accept) {
+                LoadScene(ResolveResultAcceptSceneId());
+            }
+        }
+
+        /// <summary>
+        /// Applies one action to the failed-level overlay selection and navigation.
+        /// </summary>
+        /// <param name="action">Requested failed overlay action.</param>
+        void RequestFailedAction(TiltTrialSessionAction action) {
+            if (action == TiltTrialSessionAction.NavigatePrevious) {
+                OverlaySelectionIndex = OverlaySelectionIndex <= 0 ? 1 : OverlaySelectionIndex - 1;
+            } else if (action == TiltTrialSessionAction.NavigateNext) {
+                OverlaySelectionIndex = OverlaySelectionIndex >= 1 ? 0 : OverlaySelectionIndex + 1;
+            } else if (action == TiltTrialSessionAction.Retry) {
+                LoadScene(CurrentLevel.SceneId);
+            } else if (action == TiltTrialSessionAction.LevelSelect || action == TiltTrialSessionAction.Accept) {
+                LoadScene(ResolveFailedAcceptSceneId());
+            }
+        }
+
+        /// <summary>
+        /// Resolves the result overlay destination for the current selection.
+        /// </summary>
+        /// <returns>Selected retry, next-level, or level-select scene id.</returns>
+        string ResolveResultAcceptSceneId() {
+            if (OverlaySelectionIndex == 0) {
+                return CurrentLevel.SceneId;
+            } else if (OverlaySelectionIndex == 1) {
+                return ResolveNextSceneId(CurrentLevel.LevelId, TiltTrialSceneIds.ResolveLevelSelectSceneId());
+            }
+
+            return TiltTrialSceneIds.ResolveLevelSelectSceneId();
+        }
+
+        /// <summary>
+        /// Resolves the failed overlay destination for the current selection.
+        /// </summary>
+        /// <returns>Selected retry or level-select scene id.</returns>
+        string ResolveFailedAcceptSceneId() {
+            return OverlaySelectionIndex == 0 ? CurrentLevel.SceneId : TiltTrialSceneIds.ResolveLevelSelectSceneId();
         }
 
         void EnsureSessionStateInitialized() {
@@ -160,23 +377,30 @@ namespace city.game {
                 return;
             }
 
-            LevelSettings.Validate();
-            RemainingTimeSeconds = LevelSettings.StartTimeSeconds;
+            ReportStage("TiltTrialSession:EnsureSessionState:Validate");
+            if (CurrentLevel == null) {
+                throw new InvalidOperationException("Tilt Trial session requires a resolvable current level catalog entry.");
+            }
+            ReportStage("TiltTrialSession:EnsureSessionState:ApplyInitialState");
+            RemainingTimeSeconds = CurrentLevel.StartTimeSeconds;
             ElapsedTimeSeconds = 0f;
             FinalTimeSeconds = 0f;
             AwardedMedal = TiltTrialMedal.None;
             OverlaySelectionIndex = 0;
             SessionStateMachine.Initialize(TiltTrialSessionState.Playing);
             SetGameplayUpdatesSuppressed(false);
+            ReportStage("TiltTrialSession:EnsureSessionState:RefreshOverlay");
             RefreshOverlayPresentation();
             IsSessionStateInitialized = true;
         }
 
         void UpdatePlayingState() {
+            ReportStage("TiltTrialSession:UpdatePlayingState:RefreshTimerStart");
             RefreshTimerText(RemainingTimeSeconds);
+            ReportStage("TiltTrialSession:UpdatePlayingState:RefreshCoinStart");
             RefreshCoinText();
             if (WasReturnPressed()) {
-                LoadScene(TiltTrialSceneIds.LevelSelectSceneId);
+                LoadScene(TiltTrialSceneIds.ResolveLevelSelectSceneId());
                 return;
             }
 
@@ -199,13 +423,16 @@ namespace city.game {
                 return;
             }
 
+            ReportStage("TiltTrialSession:UpdatePlayingState:RefreshTimerEnd");
             RefreshTimerText(RemainingTimeSeconds);
+            ReportStage("TiltTrialSession:UpdatePlayingState:RefreshCoinEnd");
             RefreshCoinText();
         }
 
         void EnterResultsState() {
+            ReportStage("TiltTrialSession:EnterResultsState");
             FinalTimeSeconds = ElapsedTimeSeconds;
-            AwardedMedal = ResolveMedal(LevelSettings, FinalTimeSeconds);
+            AwardedMedal = ResolveMedal(CurrentLevel, FinalTimeSeconds);
             OverlaySelectionIndex = 0;
             CaptureFrozenPlayerPose();
             SetGameplayUpdatesSuppressed(true);
@@ -214,6 +441,7 @@ namespace city.game {
         }
 
         void EnterFailedState() {
+            ReportStage("TiltTrialSession:EnterFailedState");
             FinalTimeSeconds = ElapsedTimeSeconds;
             AwardedMedal = TiltTrialMedal.None;
             OverlaySelectionIndex = 0;
@@ -230,20 +458,68 @@ namespace city.game {
                 OverlaySelectionIndex = OverlaySelectionIndex >= 2 ? 0 : OverlaySelectionIndex + 1;
             } else if (WasAcceptPressed()) {
                 if (OverlaySelectionIndex == 0) {
-                    LoadScene(LevelSettings.SceneId);
+                    LoadScene(CurrentLevel.SceneId);
                 } else if (OverlaySelectionIndex == 1) {
-                    LoadScene(ResolveNextSceneId(LevelSettings.LevelId, TiltTrialSceneIds.LevelSelectSceneId));
+                    LoadScene(ResolveNextSceneId(CurrentLevel.LevelId, TiltTrialSceneIds.ResolveLevelSelectSceneId()));
                 } else {
-                    LoadScene(TiltTrialSceneIds.LevelSelectSceneId);
+                    LoadScene(TiltTrialSceneIds.ResolveLevelSelectSceneId());
                 }
                 return;
             } else if (WasReturnPressed()) {
-                LoadScene(TiltTrialSceneIds.LevelSelectSceneId);
+                LoadScene(TiltTrialSceneIds.ResolveLevelSelectSceneId());
+                return;
+            }
+
+            if (ResultsTitleTextComponent == null || ResultsBodyTextComponent == null) {
                 return;
             }
 
             ResultsTitleTextComponent.Text = $"Clear - {AwardedMedal}";
-            ResultsBodyTextComponent.Text = $"Time {TiltTrialLevelSelectComponent.FormatTimerSeconds(FinalTimeSeconds)}\n\n{BuildResultsOptionLine(0, "Retry")}\n{BuildResultsOptionLine(1, "Next")}\n{BuildResultsOptionLine(2, "Level Select")}";
+            ResultsBodyTextComponent.Text = HasResultActionButtons()
+                ? $"Time {TiltTrialLevelSelectComponent.FormatTimerSeconds(FinalTimeSeconds)}"
+                : $"Time {TiltTrialLevelSelectComponent.FormatTimerSeconds(FinalTimeSeconds)}\n\n{BuildResultsOptionLine(0, "Retry")}\n{BuildResultsOptionLine(1, "Next")}\n{BuildResultsOptionLine(2, "Level Select")}";
+            ApplyResultButtonSelection();
+        }
+
+        /// <summary>
+        /// Returns whether the active presentation provides all three handheld result controls.
+        /// </summary>
+        /// <returns>True when Retry, Exit, and Next button backgrounds are all available.</returns>
+        bool HasResultActionButtons() {
+            return ResultsRetryButtonBackground != null
+                && ResultsExitButtonBackground != null
+                && ResultsNextButtonBackground != null;
+        }
+
+        /// <summary>
+        /// Applies the current result selection to the handheld result button backgrounds when present.
+        /// </summary>
+        void ApplyResultButtonSelection() {
+            if (!HasResultActionButtons()) {
+                return;
+            }
+
+            ApplyResultButtonSelection(ResultsRetryButtonBackground, OverlaySelectionIndex == 0);
+            ApplyResultButtonSelection(ResultsExitButtonBackground, OverlaySelectionIndex == 1);
+            ApplyResultButtonSelection(ResultsNextButtonBackground, OverlaySelectionIndex == 2);
+        }
+
+        /// <summary>
+        /// Applies selected or idle colors to one result button background.
+        /// </summary>
+        /// <param name="background">Button background to update.</param>
+        /// <param name="isSelected">Whether the button is currently selected.</param>
+        static void ApplyResultButtonSelection(RoundedRectComponent background, bool isSelected) {
+            if (background == null) {
+                return;
+            }
+
+            background.FillColor = isSelected
+                ? new byte4(255, 193, 94, 255)
+                : new byte4(40, 58, 87, 255);
+            background.BorderColor = isSelected
+                ? new byte4(255, 237, 196, 255)
+                : new byte4(0, 0, 0, 0);
         }
 
         void UpdateFailedOverlay() {
@@ -253,13 +529,17 @@ namespace city.game {
                 OverlaySelectionIndex = OverlaySelectionIndex >= 1 ? 0 : OverlaySelectionIndex + 1;
             } else if (WasAcceptPressed()) {
                 if (OverlaySelectionIndex == 0) {
-                    LoadScene(LevelSettings.SceneId);
+                    LoadScene(CurrentLevel.SceneId);
                 } else {
-                    LoadScene(TiltTrialSceneIds.LevelSelectSceneId);
+                    LoadScene(TiltTrialSceneIds.ResolveLevelSelectSceneId());
                 }
                 return;
             } else if (WasReturnPressed()) {
-                LoadScene(TiltTrialSceneIds.LevelSelectSceneId);
+                LoadScene(TiltTrialSceneIds.ResolveLevelSelectSceneId());
+                return;
+            }
+
+            if (FailTitleTextComponent == null || FailBodyTextComponent == null) {
                 return;
             }
 
@@ -278,20 +558,49 @@ namespace city.game {
             if (CoinTextComponent != null) {
                 RefreshCoinText();
             }
+            if (TargetTimesTextComponent != null && CurrentLevel != null) {
+                RefreshTargetTimesText();
+            }
             if (ResultsOverlayEntity != null) {
                 ResultsOverlayEntity.Enabled = SessionStateMachine.CurrentState == TiltTrialSessionState.Results;
             }
             if (FailOverlayEntity != null) {
                 FailOverlayEntity.Enabled = SessionStateMachine.CurrentState == TiltTrialSessionState.Failed;
             }
+            ApplyResultButtonSelection();
         }
 
         void RefreshTimerText(float remainingTimeSeconds) {
+            ReportStage("TiltTrialSession:RefreshTimerText:Format");
+            if (TimerTextComponent == null) {
+                return;
+            }
+
             TimerTextComponent.Text = TiltTrialLevelSelectComponent.FormatTimerSeconds(remainingTimeSeconds);
         }
 
         void RefreshCoinText() {
+            ReportStage("TiltTrialSession:RefreshCoinText:Format");
+            if (CoinTextComponent == null) {
+                return;
+            }
+
             CoinTextComponent.Text = FormatCoinProgress(ResolveCollectedCoinCount(), ResolveTotalCoinCount());
+        }
+
+        /// <summary>
+        /// Applies the current level's medal target times to the handheld gameplay HUD.
+        /// </summary>
+        void RefreshTargetTimesText() {
+            ReportStage("TiltTrialSession:RefreshTargetTimesText:Format");
+            TargetTimesTextComponent.Text = $"Targets G{TiltTrialLevelSelectComponent.FormatTimerSeconds(CurrentLevel.GoldTimeSeconds)} S{TiltTrialLevelSelectComponent.FormatTimerSeconds(CurrentLevel.SilverTimeSeconds)} B{TiltTrialLevelSelectComponent.FormatTimerSeconds(CurrentLevel.BronzeTimeSeconds)}";
+        }
+
+        void ReportStage(string stage) {
+            Core core = Core.Instance;
+            if (core != null) {
+                core.ReportSceneTransitionStage(stage);
+            }
         }
 
         void CaptureFrozenPlayerPose() {
@@ -320,11 +629,12 @@ namespace city.game {
         }
 
         bool IsGoalReached() {
-            if (GoalEntity == null || GoalTriggerObserver == null || PlayerSphereEntity == null) {
+            if (GoalTriggerObserver == null) {
                 return false;
             }
 
-            return GoalTriggerObserver.GetIsTriggered();
+            return GoalTriggerObserver.GetWasEnteredThisFrame()
+                || GoalTriggerObserver.GetIsTriggered();
         }
 
         void CollectCoinsIfNeeded() {
@@ -335,8 +645,8 @@ namespace city.game {
                     continue;
                 }
 
-                global::helengine.SceneEntityTriggerObserverComponent triggerObserver = FindRequiredComponent<global::helengine.SceneEntityTriggerObserverComponent>(coinComponent.Parent);
-                if (triggerObserver.GetWasEnteredThisFrame()) {
+                global::helengine.SceneEntityTriggerObserverComponent triggerObserver = ResolveCoinTriggerObserver(coinComponent.Parent);
+                if (triggerObserver != null && triggerObserver.GetWasEnteredThisFrame()) {
                     coinComponent.Collect();
                 }
             }
@@ -375,104 +685,90 @@ namespace city.game {
 
         bool TryResolveRuntimeDependenciesWhenNeeded() {
             List<string> missingDependencies = new List<string>();
-            if (LevelSettings == null) {
-                LevelSettings = FindOptionalComponentAcrossScene<TiltTrialLevelSettingsComponent>();
-                if (LevelSettings == null) {
-                    missingDependencies.Add("level settings");
+            if (CurrentLevel == null) {
+                CurrentLevel = ResolveCurrentLevel();
+                if (CurrentLevel == null) {
+                    missingDependencies.Add("current level");
                 }
             }
             if (PlayerSphereEntity == null) {
-                PlayerSphereEntity = FindOptionalEntityWithComponentsAcrossScene<RigidBody3DComponent, SphereCollider3DComponent>();
+                PlayerSphereEntity = FindPlayerSphereEntityAcrossScene();
                 if (PlayerSphereEntity == null) {
                     missingDependencies.Add("player sphere");
                 }
             }
             if (PlayerRigidBody == null && PlayerSphereEntity != null) {
-                PlayerRigidBody = TryFindComponent<RigidBody3DComponent>(PlayerSphereEntity);
+                PlayerRigidBody = TryFindRigidBodyComponent(PlayerSphereEntity);
             }
             if (PlayerRigidBody == null) {
                 missingDependencies.Add("player rigid body");
             }
             if (GoalEntity == null) {
-                GoalEntity = FindOptionalEntityWithComponentAcrossScene<TiltTrialGoalComponent>();
+                GoalEntity = FindGoalEntityAcrossScene();
                 if (GoalEntity == null) {
                     missingDependencies.Add("goal entity");
                 }
             }
             if (GoalTriggerObserver == null && GoalEntity != null) {
-                GoalTriggerObserver = TryFindComponent<global::helengine.SceneEntityTriggerObserverComponent>(GoalEntity);
+                GoalTriggerObserver = TryFindTriggerObserverComponent(GoalEntity);
             }
             if (GoalTriggerObserver == null) {
                 missingDependencies.Add("goal trigger observer");
             }
-            if (StageComponent == null) {
-                StageComponent = FindOptionalComponentAcrossScene<DemoTiltStageComponent>();
-            }
-            if (FollowCameraComponent == null) {
-                FollowCameraComponent = FindOptionalComponentAcrossScene<DemoTiltFollowCameraComponent>();
-            }
-            if (BallResetComponent == null) {
-                BallResetComponent = FindOptionalComponentAcrossScene<DemoTiltBallResetComponent>();
-            }
-            if (SpeedTextComponent == null) {
-                SpeedTextComponent = FindOptionalComponentAcrossScene<DemoTiltSpeedTextComponent>();
-            }
             if (TimerTextComponent == null) {
-                Entity timerTextEntity = TryFindChildEntity(Parent, 0);
-                TimerTextComponent = TryFindComponent<TextComponent>(timerTextEntity);
-            }
-            if (TimerTextComponent == null) {
-                missingDependencies.Add("timer text");
+                Entity timerTextEntity = TryFindNamedEntity(Parent, "TiltTrialTimerText");
+                TimerTextComponent = TryFindTextComponent(timerTextEntity);
             }
             if (CoinTextComponent == null) {
-                Entity coinTextEntity = TryFindChildEntity(Parent, 4);
-                CoinTextComponent = TryFindComponent<TextComponent>(coinTextEntity);
+                Entity coinTextEntity = TryFindNamedEntity(Parent, "TiltTrialCoinText");
+                CoinTextComponent = TryFindTextComponent(coinTextEntity);
             }
-            if (CoinTextComponent == null) {
-                missingDependencies.Add("coin text");
-            }
-            if (ResultsOverlayEntity == null) {
-                ResultsOverlayEntity = TryFindChildEntity(Parent, 2);
+            if (TargetTimesTextComponent == null) {
+                Entity targetTimesTextEntity = TryFindNamedEntity(Parent, "TiltTrialTargetTimesText");
+                TargetTimesTextComponent = TryFindTextComponent(targetTimesTextEntity);
             }
             if (ResultsOverlayEntity == null) {
-                missingDependencies.Add("results overlay");
+                ResultsOverlayEntity = TryFindNamedEntity(Parent, "TiltTrialResultsOverlay");
             }
             if (ResultsTitleTextComponent == null) {
-                Entity resultsTitleEntity = TryFindChildEntity(ResultsOverlayEntity, 0);
-                ResultsTitleTextComponent = TryFindComponent<TextComponent>(resultsTitleEntity);
-            }
-            if (ResultsTitleTextComponent == null) {
-                missingDependencies.Add("results title text");
+                Entity resultsTitleEntity = TryFindNamedEntity(ResultsOverlayEntity, "TiltTrialResultsTitleText");
+                ResultsTitleTextComponent = TryFindTextComponent(resultsTitleEntity);
             }
             if (ResultsBodyTextComponent == null) {
-                Entity resultsBodyEntity = TryFindChildEntity(ResultsOverlayEntity, 1);
-                ResultsBodyTextComponent = TryFindComponent<TextComponent>(resultsBodyEntity);
+                Entity resultsBodyEntity = TryFindNamedEntity(ResultsOverlayEntity, "TiltTrialResultsBodyText");
+                ResultsBodyTextComponent = TryFindTextComponent(resultsBodyEntity);
             }
-            if (ResultsBodyTextComponent == null) {
-                missingDependencies.Add("results body text");
+            if (ResultsRetryButtonEntity == null) {
+                ResultsRetryButtonEntity = TryFindNamedEntity(ResultsOverlayEntity, "TiltTrialResultRetryButton");
+            }
+            if (ResultsExitButtonEntity == null) {
+                ResultsExitButtonEntity = TryFindNamedEntity(ResultsOverlayEntity, "TiltTrialResultExitButton");
+            }
+            if (ResultsNextButtonEntity == null) {
+                ResultsNextButtonEntity = TryFindNamedEntity(ResultsOverlayEntity, "TiltTrialResultNextButton");
+            }
+            if (ResultsRetryButtonBackground == null) {
+                ResultsRetryButtonBackground = TryFindRoundedRectComponent(ResultsRetryButtonEntity);
+            }
+            if (ResultsExitButtonBackground == null) {
+                ResultsExitButtonBackground = TryFindRoundedRectComponent(ResultsExitButtonEntity);
+            }
+            if (ResultsNextButtonBackground == null) {
+                ResultsNextButtonBackground = TryFindRoundedRectComponent(ResultsNextButtonEntity);
             }
             if (FailOverlayEntity == null) {
-                FailOverlayEntity = TryFindChildEntity(Parent, 3);
-            }
-            if (FailOverlayEntity == null) {
-                missingDependencies.Add("fail overlay");
+                FailOverlayEntity = TryFindNamedEntity(Parent, "TiltTrialFailOverlay");
             }
             if (FailTitleTextComponent == null) {
-                Entity failTitleEntity = TryFindChildEntity(FailOverlayEntity, 0);
-                FailTitleTextComponent = TryFindComponent<TextComponent>(failTitleEntity);
-            }
-            if (FailTitleTextComponent == null) {
-                missingDependencies.Add("fail title text");
+                Entity failTitleEntity = TryFindNamedEntity(FailOverlayEntity, "TiltTrialFailTitleText");
+                FailTitleTextComponent = TryFindTextComponent(failTitleEntity);
             }
             if (FailBodyTextComponent == null) {
-                Entity failBodyEntity = TryFindChildEntity(FailOverlayEntity, 1);
-                FailBodyTextComponent = TryFindComponent<TextComponent>(failBodyEntity);
-            }
-            if (FailBodyTextComponent == null) {
-                missingDependencies.Add("fail body text");
+                Entity failBodyEntity = TryFindNamedEntity(FailOverlayEntity, "TiltTrialFailBodyText");
+                FailBodyTextComponent = TryFindTextComponent(failBodyEntity);
             }
             if (CollectibleCoinComponents == null) {
-                CollectibleCoinComponents = FindComponentsAcrossScene<TiltTrialCollectibleCoinComponent>();
+                CollectibleCoinComponents = FindCollectibleCoinComponentsAcrossScene();
             }
 
             if (missingDependencies.Count == 0) {
@@ -530,22 +826,50 @@ namespace city.game {
                 throw new InvalidOperationException("Tilt Trial session scene loads require a valid target scene id.");
             }
 
-            Core.Instance.SceneManager.LoadScene(sceneId, SceneLoadMode.Single);
-        }
-
-        TComponent FindRequiredComponentAcrossScene<TComponent>() where TComponent : Component {
-            TComponent component = FindOptionalComponentAcrossScene<TComponent>();
-            if (component != null) {
-                return component;
+            SceneManager sceneManager = Core.Instance.SceneManager;
+            if (RequiresExplicitSceneReload(sceneId, sceneManager.GetLoadedSceneIds())) {
+                sceneManager.UnloadScene(sceneId);
             }
 
-            throw new InvalidOperationException($"Tilt Trial session could not resolve required component '{typeof(TComponent).Name}'.");
+            sceneManager.LoadScene(sceneId, SceneLoadMode.Single);
         }
 
-        TComponent FindOptionalComponentAcrossScene<TComponent>() where TComponent : Component {
+        TiltTrialLevelCatalogEntry ResolveCurrentLevel() {
+            Core core = Core.Instance;
+            if (core == null) {
+                return null;
+            }
+
+            List<string> loadedSceneIds = core.SceneManager.GetLoadedSceneIds();
+            for (int index = loadedSceneIds.Count - 1; index >= 0; index--) {
+                TiltTrialLevelCatalogEntry entry = TryFindLevelEntryBySceneId(loadedSceneIds[index]);
+                if (entry != null) {
+                    return entry;
+                }
+            }
+
+            return null;
+        }
+
+        static TiltTrialLevelCatalogEntry TryFindLevelEntryBySceneId(string sceneId) {
+            if (string.IsNullOrWhiteSpace(sceneId)) {
+                return null;
+            }
+
+            IReadOnlyList<TiltTrialLevelCatalogEntry> entries = TiltTrialLevelCatalog.CreateEntries();
+            for (int index = 0; index < entries.Count; index++) {
+                if (string.Equals(entries[index].SceneId, sceneId, StringComparison.Ordinal)) {
+                    return entries[index];
+                }
+            }
+
+            return null;
+        }
+
+        Entity FindPlayerSphereEntityAcrossScene() {
             List<Entity> entities = Core.Instance.ObjectManager.Entities;
             for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                TComponent match = TryFindComponentRecursive<TComponent>(entities[entityIndex]);
+                Entity match = FindPlayerSphereEntityRecursive(entities[entityIndex]);
                 if (match != null) {
                     return match;
                 }
@@ -554,159 +878,184 @@ namespace city.game {
             return null;
         }
 
-        List<TComponent> FindComponentsAcrossScene<TComponent>() where TComponent : Component {
-            List<TComponent> matches = new List<TComponent>();
+        Entity FindGoalEntityAcrossScene() {
             List<Entity> entities = Core.Instance.ObjectManager.Entities;
             for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                CollectComponentsRecursive(entities[entityIndex], matches);
+                Entity match = FindGoalEntityRecursive(entities[entityIndex]);
+                if (match != null) {
+                    return match;
+                }
+            }
+
+            return null;
+        }
+
+        static Entity FindPlayerSphereEntityRecursive(Entity entity) {
+            if (entity == null) {
+                return null;
+            }
+            RigidBody3DComponent rigidBody = TryFindRigidBodyComponent(entity);
+            if (rigidBody != null
+                && TryFindBallResetComponent(entity) != null
+                && TryFindSphereColliderComponent(entity) != null) {
+                return entity;
+            }
+            if (entity.Children != null) {
+                for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                    Entity match = FindPlayerSphereEntityRecursive(entity.Children[childIndex]);
+                    if (match != null) {
+                        return match;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        static Entity FindGoalEntityRecursive(Entity entity) {
+            if (entity == null) {
+                return null;
+            }
+            if (TryFindGoalComponent(entity) != null) {
+                return entity;
+            }
+            if (entity.Children != null) {
+                for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                    Entity match = FindGoalEntityRecursive(entity.Children[childIndex]);
+                    if (match != null) {
+                        return match;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        static TextComponent TryFindTextComponent(Entity entity) {
+            if (entity == null || entity.Components == null) {
+                return null;
+            }
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is TextComponent component) {
+                    return component;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Finds the rounded rectangle background directly attached to one presentation button.
+        /// </summary>
+        /// <param name="entity">Button entity whose visual background should be inspected.</param>
+        /// <returns>Button background component, or null when the entity does not own one.</returns>
+        static RoundedRectComponent TryFindRoundedRectComponent(Entity entity) {
+            if (entity == null || entity.Components == null) {
+                return null;
+            }
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is RoundedRectComponent component) {
+                    return component;
+                }
+            }
+
+            return null;
+        }
+
+        static RigidBody3DComponent TryFindRigidBodyComponent(Entity entity) {
+            if (entity == null || entity.Components == null) {
+                return null;
+            }
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is RigidBody3DComponent component) {
+                    return component;
+                }
+            }
+
+            return null;
+        }
+
+        static DemoTiltBallResetComponent TryFindBallResetComponent(Entity entity) {
+            if (entity == null || entity.Components == null) {
+                return null;
+            }
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is DemoTiltBallResetComponent component) {
+                    return component;
+                }
+            }
+
+            return null;
+        }
+
+        static SphereCollider3DComponent TryFindSphereColliderComponent(Entity entity) {
+            if (entity == null || entity.Components == null) {
+                return null;
+            }
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is SphereCollider3DComponent component) {
+                    return component;
+                }
+            }
+
+            return null;
+        }
+
+        static TiltTrialGoalComponent TryFindGoalComponent(Entity entity) {
+            if (entity == null || entity.Components == null) {
+                return null;
+            }
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is TiltTrialGoalComponent component) {
+                    return component;
+                }
+            }
+
+            return null;
+        }
+
+        static global::helengine.SceneEntityTriggerObserverComponent TryFindTriggerObserverComponent(Entity entity) {
+            if (entity == null || entity.Components == null) {
+                return null;
+            }
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is global::helengine.SceneEntityTriggerObserverComponent component) {
+                    return component;
+                }
+            }
+
+            return null;
+        }
+
+        List<TiltTrialCollectibleCoinComponent> FindCollectibleCoinComponentsAcrossScene() {
+            List<TiltTrialCollectibleCoinComponent> matches = new List<TiltTrialCollectibleCoinComponent>();
+            List<Entity> entities = Core.Instance.ObjectManager.Entities;
+            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
+                CollectCoinComponentsRecursive(entities[entityIndex], matches);
             }
 
             return matches;
         }
 
-        Entity FindRequiredEntityWithComponentAcrossScene<TComponent>() where TComponent : Component {
-            Entity entity = FindOptionalEntityWithComponentAcrossScene<TComponent>();
-            if (entity != null) {
-                return entity;
-            }
-
-            throw new InvalidOperationException($"Tilt Trial session could not resolve required entity with component '{typeof(TComponent).Name}'.");
-        }
-
-        Entity FindOptionalEntityWithComponentAcrossScene<TComponent>() where TComponent : Component {
-            List<Entity> entities = Core.Instance.ObjectManager.Entities;
-            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                Entity match = TryFindEntityWithComponentRecursive<TComponent>(entities[entityIndex]);
-                if (match != null) {
-                    return match;
-                }
-            }
-
-            return null;
-        }
-
-        Entity FindRequiredEntityWithComponentsAcrossScene<TFirstComponent, TSecondComponent>()
-            where TFirstComponent : Component
-            where TSecondComponent : Component {
-            Entity entity = FindOptionalEntityWithComponentsAcrossScene<TFirstComponent, TSecondComponent>();
-            if (entity != null) {
-                return entity;
-            }
-
-            throw new InvalidOperationException($"Tilt Trial session could not resolve required entity with components '{typeof(TFirstComponent).Name}' and '{typeof(TSecondComponent).Name}'.");
-        }
-
-        Entity FindOptionalEntityWithComponentsAcrossScene<TFirstComponent, TSecondComponent>()
-            where TFirstComponent : Component
-            where TSecondComponent : Component {
-            List<Entity> entities = Core.Instance.ObjectManager.Entities;
-            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                Entity match = TryFindEntityWithComponentsRecursive<TFirstComponent, TSecondComponent>(entities[entityIndex]);
-                if (match != null) {
-                    return match;
-                }
-            }
-
-            return null;
-        }
-
-        static TComponent FindRequiredComponent<TComponent>(Entity entity) where TComponent : Component {
-            TComponent component = TryFindComponent<TComponent>(entity);
-            if (component != null) {
-                return component;
-            }
-
-            throw new InvalidOperationException($"Tilt Trial session could not resolve component '{typeof(TComponent).Name}'.");
-        }
-
-        static TComponent TryFindComponent<TComponent>(Entity entity) where TComponent : Component {
-            if (entity == null || entity.Components == null) {
-                return null;
-            }
-
-            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                Component candidateComponent = entity.Components[componentIndex];
-                if (candidateComponent is TComponent) {
-                    return (TComponent)candidateComponent;
-                }
-            }
-
-            return null;
-        }
-
-        static TComponent TryFindComponentRecursive<TComponent>(Entity entity) where TComponent : Component {
-            if (entity == null) {
-                return null;
-            }
-            if (entity.Components != null) {
-                for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                    Component candidateComponent = entity.Components[componentIndex];
-                    if (candidateComponent is TComponent) {
-                        return (TComponent)candidateComponent;
-                    }
-                }
-            }
-            if (entity.Children == null) {
-                return null;
-            }
-
-            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
-                TComponent match = TryFindComponentRecursive<TComponent>(entity.Children[childIndex]);
-                if (match != null) {
-                    return match;
-                }
-            }
-
-            return null;
-        }
-
-        static void CollectComponentsRecursive<TComponent>(Entity entity, List<TComponent> matches) where TComponent : Component {
+        static void CollectCoinComponentsRecursive(Entity entity, List<TiltTrialCollectibleCoinComponent> matches) {
             if (entity == null) {
                 return;
-            } else if (matches == null) {
-                throw new ArgumentNullException(nameof(matches));
             }
 
             if (entity.Components != null) {
                 for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                    Component candidateComponent = entity.Components[componentIndex];
-                    if (candidateComponent is TComponent) {
-                        matches.Add((TComponent)candidateComponent);
+                    if (entity.Components[componentIndex] is TiltTrialCollectibleCoinComponent coinComponent) {
+                        if (!matches.Contains(coinComponent)) {
+                            matches.Add(coinComponent);
+                        }
                     }
                 }
             }
-            if (entity.Children == null) {
-                return;
-            }
-
-            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
-                CollectComponentsRecursive(entity.Children[childIndex], matches);
-            }
-        }
-
-        static Entity TryFindEntityWithComponentRecursive<TComponent>(Entity entity) where TComponent : Component {
-            if (entity == null) {
-                return null;
-            }
-            if (entity.Components != null) {
-                for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                    if (entity.Components[componentIndex] is TComponent) {
-                        return entity;
-                    }
+            if (entity.Children != null) {
+                for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                    CollectCoinComponentsRecursive(entity.Children[childIndex], matches);
                 }
             }
-            if (entity.Children == null) {
-                return null;
-            }
-
-            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
-                Entity match = TryFindEntityWithComponentRecursive<TComponent>(entity.Children[childIndex]);
-                if (match != null) {
-                    return match;
-                }
-            }
-
-            return null;
         }
 
         /// <summary>
@@ -737,6 +1086,38 @@ namespace city.game {
             }
 
             return entity.Children[childIndex];
+        }
+
+        /// <summary>
+        /// Finds one named entity beneath a hierarchy without depending on authoring child order.
+        /// </summary>
+        /// <param name="root">Hierarchy root to search.</param>
+        /// <param name="name">Exact entity name to find.</param>
+        /// <returns>First matching entity, or null when no matching entity exists.</returns>
+        static Entity TryFindNamedEntity(Entity root, string name) {
+            if (root == null || string.IsNullOrWhiteSpace(name)) {
+                return null;
+            }
+            if (root.Components != null) {
+                for (int componentIndex = 0; componentIndex < root.Components.Count; componentIndex++) {
+                    if (root.Components[componentIndex] is TiltTrialPresentationRoleComponent roleComponent
+                        && string.Equals(roleComponent.Role, name, StringComparison.Ordinal)) {
+                        return root;
+                    }
+                }
+            }
+            if (root.Children == null) {
+                return null;
+            }
+
+            for (int childIndex = 0; childIndex < root.Children.Count; childIndex++) {
+                Entity match = TryFindNamedEntity(root.Children[childIndex], name);
+                if (match != null) {
+                    return match;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

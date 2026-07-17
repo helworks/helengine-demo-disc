@@ -114,9 +114,155 @@ namespace city.game.tools {
                 SceneSettings = new SceneSettingsAsset(),
                 RootEntities = [
                     CreateLevelSelectCameraEntity(),
-                    CreateLevelSelectUiEntity()
+                    CreateLevelSelectUiEntity(),
+                    CreatePs2LevelSelectUiEntity()
                 ]
             };
+        }
+
+        /// <summary>
+        /// Creates the separate DS and 3DS level selector while leaving the authored gameplay levels shared.
+        /// </summary>
+        /// <returns>Generated handheld selector scene definition with a game-owned top screen and empty bottom screen.</returns>
+        public GeneratedAuthoringSceneDefinition CreateTiltTrialHandheldLevelSelectScene() {
+            return new GeneratedAuthoringSceneDefinition {
+                SceneId = global::city.game.TiltTrialSceneIds.HandheldLevelSelectSceneId,
+                SceneAssetRelativePath = "scenes/games/tilt/tilt_trial_ds.helen",
+                SceneSettings = new SceneSettingsAsset(),
+                RootEntities = [],
+                NintendoDsScene = new GeneratedDsSceneDefinition {
+                    RootEntities = CreateTiltTrialHandheldLevelSelectSceneRoots()
+                }
+            };
+        }
+
+        /// <summary>
+        /// Creates the complete game-owned DS and 3DS level-selector root set without using the shared rendering showcase scaffold.
+        /// </summary>
+        /// <returns>Top camera, top-screen title root, and empty bottom-screen camera hierarchy.</returns>
+        Entity[] CreateTiltTrialHandheldLevelSelectSceneRoots() {
+            Entity topCameraEntity = CreateTiltTrialHandheldLevelSelectTopCameraEntity();
+            return [
+                topCameraEntity,
+                CreateHandheldLevelSelectTopInfoEntity(topCameraEntity),
+                CreateTiltTrialHandheldLevelSelectBottomScreenCameraEntity()
+            ];
+        }
+
+        /// <summary>
+        /// Creates the game-owned top-screen camera for the handheld level selector.
+        /// </summary>
+        /// <returns>Handheld selector top-screen camera.</returns>
+        Entity CreateTiltTrialHandheldLevelSelectTopCameraEntity() {
+            return CreateLevelSelectCameraEntity();
+        }
+
+        /// <summary>
+        /// Creates the game-owned bottom-screen camera and selector viewport for the handheld selector.
+        /// </summary>
+        /// <returns>Bottom-screen camera containing the game-owned selector viewport.</returns>
+        Entity CreateTiltTrialHandheldLevelSelectBottomScreenCameraEntity() {
+            Entity cameraEntity = Core.Instance.EntityFactory.Create("TiltTrialHandheldLevelSelectBottomScreenCamera");
+            cameraEntity.LayerMask = EditorLayerMasks.SceneObjects;
+            cameraEntity.AddComponent(new CameraComponent {
+                CameraDrawOrder = 1,
+                LayerMask = 0b00000001,
+                Viewport = new float4(0f, 1f, 1f, 1f),
+                ClearSettings = new CameraClearSettings(
+                    true,
+                    new float4(18f / 255f, 27f / 255f, 43f / 255f, 1f),
+                    true,
+                    1f,
+                    false,
+                    0),
+                RenderSettings = new CameraRenderSettings {
+                    DepthPrepassMode = DepthPrepassMode.Disabled,
+                    ShadowDistance = 0f,
+                    PostProcessTier = PostProcessTier.Disabled
+                }
+            });
+
+            Entity viewportRoot = Core.Instance.EntityFactory.CreateChild(cameraEntity, "TiltTrialHandheldLevelSelectBottomScreenRoot");
+            viewportRoot.LayerMask = EditorLayerMasks.SceneObjects;
+            viewportRoot.AddComponent(new ViewportComponent {
+                BindingMode = ViewportComponent.AncestorCameraBindingMode,
+                FixedSize = new int2(256, 192),
+                ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
+                ReferenceWidth = 256,
+                ReferenceHeight = 192
+            });
+            viewportRoot.AddChild(CreateHandheldLevelSelectUiEntity());
+            return cameraEntity;
+        }
+
+        /// <summary>
+        /// Creates the isolated handheld menu top-screen title without adding the instruction text yet.
+        /// </summary>
+        /// <param name="parent">Top-screen camera that owns and routes the title subtree.</param>
+        /// <returns>Top-screen title root.</returns>
+        EditorEntity CreateHandheldLevelSelectTopInfoEntity(Entity parent) {
+            if (parent == null) {
+                throw new ArgumentNullException(nameof(parent));
+            }
+
+            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, "TiltTrialHandheldLevelSelectTopInfo");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.AddComponent(new ViewportComponent {
+                BindingMode = ViewportComponent.AncestorCameraBindingMode,
+                FixedSize = new int2(256, 192)
+            });
+            entity.AddComponent(new ReferenceCanvasFitComponent {
+                ReferenceWidth = 256,
+                ReferenceHeight = 192
+            });
+            CreateUiTextEntity(entity, "TiltTrialHandheldLevelSelectTitle", new float3(20f, 28f, 0.1f), "TILT TRIAL", new int2(216, 34), 1.35f, 2, new byte4(247, 248, 252, 255), TextAlignment.Center);
+            Entity previewPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialHandheldLevelSelectPreviewPanel", new float3(72f, 67f, 0f), new int2(112, 112), 8f, 2f, new byte4(26, 40, 61, 255), new byte4(122, 147, 182, 255), 2);
+            CreateUiTextEntity(previewPanelEntity, "TiltTrialHandheldLevelSelectPreviewText", new float3(8f, 42f, 0.1f), "Preview", new int2(96, 28), 0.85f, 3, new byte4(223, 230, 239, 255), TextAlignment.Center);
+            return (EditorEntity)entity;
+        }
+
+        /// <summary>
+        /// Creates the bottom-screen level selector using the existing selector component contract.
+        /// </summary>
+        /// <returns>Bottom-screen selector root.</returns>
+        EditorEntity CreateHandheldLevelSelectUiEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialHandheldLevelSelectUi");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.AddComponent(new city.game.TiltTrialLevelSelectComponent {
+                UseDetailsStage = true
+            });
+            entity.AddComponent(new ViewportComponent {
+                BindingMode = ViewportComponent.AncestorCameraBindingMode,
+                FixedSize = new int2(256, 192),
+                ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
+                ReferenceWidth = 256,
+                ReferenceHeight = 192
+            });
+
+            Entity listPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectListPanel", new float3(6f, 8f, 0f), new int2(244, 176), 5f, 0f, new byte4(0, 0, 0, 0), new byte4(0, 0, 0, 0), 1);
+            Entity detailsPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectDetailsPanel", new float3(6f, 8f, 0f), new int2(244, 176), 5f, 0f, new byte4(0, 0, 0, 0), new byte4(0, 0, 0, 0), 1);
+            detailsPanelEntity.Enabled = false;
+            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectName", new float3(12f, 10f, 0.1f), "Level 1", new int2(220, 22), 0.85f, 3, new byte4(247, 248, 252, 255), TextAlignment.Left);
+            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTimer", new float3(12f, 40f, 0.1f), "Start 99.00", new int2(220, 18), 0.65f, 3, new byte4(255, 214, 138, 255), TextAlignment.Left);
+            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTargetTimes", new float3(12f, 64f, 0.1f), "Targets G18.00 S28.00 B40.00", new int2(220, 18), 0.7f, 3, new byte4(223, 230, 239, 255), TextAlignment.Left);
+            IReadOnlyList<global::city.game.TiltTrialLevelCatalogEntry> levelEntries = global::city.game.TiltTrialLevelCatalog.CreateEntries();
+            for (int index = 0; index < levelEntries.Count; index++) {
+                int oneBasedIndex = index + 1;
+                CreateLevelSelectActionButton(
+                    listPanelEntity,
+                    $"TiltTrialLevelRow{oneBasedIndex:00}",
+                    new float3(0f, 3f + (index * 32f), 0f), new int2(244, 30),
+                    levelEntries[index].DisplayName,
+                    city.game.TiltTrialLevelSelectAction.SelectStage,
+                    index);
+            }
+
+            Entity backButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectBackButton", new float3(6f, 116f, 0f), new int2(232, 28), "BACK", city.game.TiltTrialLevelSelectAction.BackToStages, -1);
+            Entity playButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectPlayButton", new float3(6f, 150f, 0f), new int2(232, 34), "PLAY", city.game.TiltTrialLevelSelectAction.PlaySelectedStage, -1);
+            backButtonEntity.Enabled = false;
+            playButtonEntity.Enabled = false;
+
+            return (EditorEntity)entity;
         }
 
         /// <summary>
@@ -131,6 +277,257 @@ namespace city.game.tools {
             }
 
             return scenes;
+        }
+
+        /// <summary>
+        /// Creates the console presentation hierarchy that is saved into the reusable gameplay Blueprint.
+        /// </summary>
+        /// <returns>Single editor root containing the console camera, lighting, and HUD.</returns>
+        public EditorEntity CreateTiltTrialConsolePresentationRoot() {
+            global::city.game.TiltTrialLevelCatalogEntry levelEntry = global::city.game.TiltTrialLevelCatalog.CreateEntries()[0];
+            EditorEntity root = CreatePresentationRoot("TiltTrialConsolePresentationRoot");
+            root.AddChild(CreateCameraEntity());
+            root.AddChild(CreateDirectionalLightEntity());
+            root.AddChild(CreateDirectionalFillLightEntity());
+            root.AddChild(CreateAmbientLightEntity());
+            root.AddChild(CreateGameplayUiEntity(levelEntry));
+            return root;
+        }
+
+        /// <summary>
+        /// Creates the DS and 3DS presentation hierarchy that is saved into the reusable gameplay Blueprint.
+        /// </summary>
+        /// <returns>Single editor root containing the top-screen camera, lighting, and bottom-screen HUD.</returns>
+        public EditorEntity CreateTiltTrialHandheldPresentationRoot() {
+            EditorEntity root = CreatePresentationRoot("TiltTrialHandheldPresentationRoot");
+            root.AddChild(CreateCameraEntity());
+            root.AddChild(CreateDirectionalLightEntity());
+            root.AddChild(CreateDirectionalFillLightEntity());
+            root.AddChild(CreateAmbientLightEntity());
+            global::city.game.TiltTrialLevelCatalogEntry levelEntry = global::city.game.TiltTrialLevelCatalog.CreateEntries()[0];
+            root.AddChild(CreateHandheldGameplayControllerEntity(levelEntry));
+            return root;
+        }
+
+        /// <summary>
+        /// Creates a presentation Blueprint root that keeps generated child ids isolated from authored level entities.
+        /// </summary>
+        /// <param name="name">Stable presentation root name.</param>
+        /// <returns>Empty editor presentation root.</returns>
+        EditorEntity CreatePresentationRoot(string name) {
+            Entity entity = Core.Instance.EntityFactory.Create(name);
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = float3.Zero;
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = float4.Identity;
+            if (entity is EditorEntity editorEntity) {
+                return editorEntity;
+            }
+
+            throw new InvalidOperationException("Tilt Trial presentation generation requires editor-authored roots.");
+        }
+
+        /// <summary>
+        /// Creates the handheld gameplay controller and its game-owned bottom-screen presentation.
+        /// </summary>
+        /// <param name="levelEntry">Shared level metadata used to seed the bottom-screen HUD.</param>
+        /// <returns>Gameplay controller containing the bottom-screen camera and HUD hierarchy.</returns>
+        EditorEntity CreateHandheldGameplayControllerEntity(global::city.game.TiltTrialLevelCatalogEntry levelEntry) {
+            if (levelEntry == null) {
+                throw new ArgumentNullException(nameof(levelEntry));
+            }
+
+            Entity controllerEntity = Core.Instance.EntityFactory.Create("TiltTrialHandheldGameplayController");
+            controllerEntity.LayerMask = EditorLayerMasks.SceneObjects;
+            controllerEntity.AddComponent(new city.game.TiltTrialSessionComponent());
+            controllerEntity.AddChild(CreateHandheldGameplayBottomScreenCameraEntity(levelEntry));
+            if (controllerEntity is EditorEntity editorEntity) {
+                return editorEntity;
+            }
+
+            throw new InvalidOperationException("Tilt Trial handheld gameplay generation requires editor-authored entities.");
+        }
+
+        /// <summary>
+        /// Creates the game-owned DS and 3DS bottom-screen camera and HUD hierarchy for active gameplay.
+        /// </summary>
+        /// <param name="levelEntry">Shared level metadata used to seed the HUD values.</param>
+        /// <returns>Bottom-screen camera containing the gameplay HUD.</returns>
+        EditorEntity CreateHandheldGameplayBottomScreenCameraEntity(global::city.game.TiltTrialLevelCatalogEntry levelEntry) {
+            if (levelEntry == null) {
+                throw new ArgumentNullException(nameof(levelEntry));
+            }
+
+            Entity cameraEntity = Core.Instance.EntityFactory.Create("TiltTrialHandheldGameplayBottomScreenCamera");
+            cameraEntity.LayerMask = EditorLayerMasks.SceneObjects;
+            cameraEntity.AddComponent(new CameraComponent {
+                CameraDrawOrder = 1,
+                LayerMask = 0b00000001,
+                Viewport = new float4(0f, 1f, 1f, 1f),
+                ClearSettings = new CameraClearSettings(
+                    true,
+                    new float4(18f / 255f, 27f / 255f, 43f / 255f, 1f),
+                    true,
+                    1f,
+                    false,
+                    0),
+                RenderSettings = new CameraRenderSettings {
+                    DepthPrepassMode = DepthPrepassMode.Disabled,
+                    ShadowDistance = 0f,
+                    PostProcessTier = PostProcessTier.Disabled
+                }
+            });
+
+            Entity viewportRoot = Core.Instance.EntityFactory.CreateChild(cameraEntity, "TiltTrialHandheldGameplayBottomScreenRoot");
+            viewportRoot.LayerMask = EditorLayerMasks.SceneObjects;
+            viewportRoot.AddComponent(new ViewportComponent {
+                BindingMode = ViewportComponent.AncestorCameraBindingMode,
+                FixedSize = new int2(256, 192),
+                ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
+                ReferenceWidth = 256,
+                ReferenceHeight = 192
+            });
+            viewportRoot.AddChild(CreateHandheldGameplayUiEntity(levelEntry));
+
+            if (cameraEntity is EditorEntity editorEntity) {
+                return editorEntity;
+            }
+
+            throw new InvalidOperationException("Tilt Trial handheld gameplay generation requires an editor-authored bottom-screen camera.");
+        }
+
+        /// <summary>
+        /// Creates the compact bottom-screen HUD used during handheld Tilt Trial gameplay.
+        /// </summary>
+        /// <param name="levelEntry">Shared level metadata used to seed the HUD values.</param>
+        /// <returns>Bottom-screen HUD root with the names consumed by the gameplay session.</returns>
+        EditorEntity CreateHandheldGameplayUiEntity(global::city.game.TiltTrialLevelCatalogEntry levelEntry) {
+            if (levelEntry == null) {
+                throw new ArgumentNullException(nameof(levelEntry));
+            }
+
+            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialHandheldGameplayUi");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.AddComponent(new ViewportComponent {
+                BindingMode = ViewportComponent.AncestorCameraBindingMode,
+                FixedSize = new int2(256, 192),
+                ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
+                ReferenceWidth = 256,
+                ReferenceHeight = 192
+            });
+
+            Entity panelEntity = CreateRoundedPanelEntity(entity, "TiltTrialHandheldGameplayPanel", new float3(6f, 6f, 0f), new int2(244, 180), 6f, 2f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
+            CreateUiTextEntity(panelEntity, "TiltTrialTimerText", new float3(12f, 10f, 0.1f), global::city.game.TiltTrialLevelSelectComponent.FormatTimerSeconds(levelEntry.StartTimeSeconds), new int2(104, 26), 0.8f, 2, new byte4(255, 246, 223, 255), TextAlignment.Left);
+            CreateUiTextEntity(panelEntity, "TiltTrialCoinText", new float3(124f, 10f, 0.1f), "Coins 0/0", new int2(106, 26), 0.65f, 2, new byte4(255, 246, 223, 255), TextAlignment.Right);
+            CreateUiTextEntity(panelEntity, "TiltTrialTargetTimesText", new float3(12f, 40f, 0.1f), "Targets G00.00 S00.00 B00.00", new int2(220, 18), 0.48f, 2, new byte4(223, 230, 239, 255), TextAlignment.Left);
+
+            Entity speedTextEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, "TiltTrialSpeedText");
+            speedTextEntity.LocalPosition = new float3(12f, 66f, 0.1f);
+            speedTextEntity.Static = false;
+            TextComponent speedTextComponent = new TextComponent {
+                Text = "0\nkm/h",
+                Font = ResolveRequiredEditorFont(),
+                Color = new byte4(255, 255, 255, 255),
+                Size = new int2(220, 58),
+                FontScale = 0.9f,
+                Alignment = TextAlignment.Center,
+                RenderOrder2D = 2,
+                LayerMask = 1
+            };
+            speedTextEntity.AddComponent(speedTextComponent);
+            ApplyFontReference(speedTextEntity, speedTextComponent, TiltTrialSpeedHudFontRelativePath);
+            speedTextEntity.AddComponent(new city.game.DemoTiltSpeedTextComponent {
+                TargetEntityName = "PlayerSphere",
+                TargetEntityRole = "PlayerSphere"
+            });
+
+            CreateUiTextEntity(panelEntity, "TiltTrialHandheldGameplayHint", new float3(12f, 145f, 0.1f), "D-PAD MOVE   L/R CAMERA", new int2(220, 20), 0.5f, 2, new byte4(196, 210, 226, 255), TextAlignment.Center);
+
+            Entity resultsOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialResultsOverlay", new float3(16f, 8f, 0f), new int2(224, 176), 6f, 2f, new byte4(18, 27, 43, 245), new byte4(255, 214, 138, 255), 4);
+            resultsOverlayEntity.Enabled = false;
+            CreateUiTextEntity(resultsOverlayEntity, "TiltTrialResultsTitleText", new float3(12f, 8f, 0.1f), "Clear", new int2(200, 20), 0.82f, 5, new byte4(255, 236, 196, 255), TextAlignment.Center);
+            CreateUiTextEntity(resultsOverlayEntity, "TiltTrialResultsBodyText", new float3(12f, 29f, 0.1f), "Time 00.00", new int2(200, 18), 0.58f, 5, new byte4(247, 248, 252, 255), TextAlignment.Center);
+            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultRetryButton", new float3(12f, 56f, 0.1f), new int2(200, 30), "RETRY", city.game.TiltTrialSessionAction.Retry);
+            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultExitButton", new float3(12f, 91f, 0.1f), new int2(200, 30), "EXIT", city.game.TiltTrialSessionAction.LevelSelect);
+            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultNextButton", new float3(12f, 126f, 0.1f), new int2(200, 30), "NEXT", city.game.TiltTrialSessionAction.Next);
+
+            Entity failOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialFailOverlay", new float3(16f, 26f, 0f), new int2(224, 140), 6f, 2f, new byte4(43, 23, 28, 245), new byte4(214, 112, 112, 255), 4);
+            failOverlayEntity.Enabled = false;
+            CreateUiTextEntity(failOverlayEntity, "TiltTrialFailTitleText", new float3(12f, 12f, 0.1f), "Time Up", new int2(200, 22), 0.9f, 5, new byte4(255, 223, 223, 255), TextAlignment.Center);
+            CreateUiTextEntity(failOverlayEntity, "TiltTrialFailBodyText", new float3(12f, 48f, 0.1f), "> Retry\n  Level Select", new int2(200, 72), 0.65f, 5, new byte4(247, 248, 252, 255), TextAlignment.Center);
+
+            if (entity is EditorEntity editorEntity) {
+                return editorEntity;
+            }
+
+            throw new InvalidOperationException("Tilt Trial handheld gameplay generation requires an editor-authored HUD root.");
+        }
+
+        /// <summary>
+        /// Creates one full-width handheld selector button and its semantic selector action bridge.
+        /// </summary>
+        /// <param name="parent">Selector panel that owns the button.</param>
+        /// <param name="name">Stable button entity name.</param>
+        /// <param name="position">Button position in the bottom-screen reference canvas.</param>
+        /// <param name="size">Button dimensions.</param>
+        /// <param name="label">Visible button label.</param>
+        /// <param name="action">Semantic selector action emitted on release.</param>
+        /// <param name="stageIndex">Zero-based stage index for stage selection, or -1 for non-stage actions.</param>
+        Entity CreateLevelSelectActionButton(Entity parent, string name, float3 position, int2 size, string label, city.game.TiltTrialLevelSelectAction action, int stageIndex) {
+            Entity buttonEntity = CreateRoundedPanelEntity(parent, name, position, size, 5f, 0f, new byte4(40, 58, 87, 255), new byte4(0, 0, 0, 0), 1);
+            buttonEntity.AddComponent(new InteractableComponent {
+                Size = size
+            });
+            buttonEntity.AddComponent(new city.game.TiltTrialLevelSelectActionComponent {
+                Action = action,
+                StageIndex = stageIndex
+            });
+            CreateUiTextEntity(buttonEntity, name + "Label", new float3(8f, 5f, 0.1f), label, new int2(size.X - 16, size.Y - 8), 0.7f, 3, new byte4(247, 248, 252, 255), TextAlignment.Center);
+            return buttonEntity;
+        }
+
+        /// <summary>
+        /// Removes a handheld-only selector action entity from every non-handheld platform cook while retaining the authored DS and 3DS version.
+        /// </summary>
+        /// <param name="entity">Handheld-only selector action entity to exclude from non-handheld cooks.</param>
+        void ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(Entity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            string[] nonHandheldPlatformIds = ["windows", "ps2", "psp", "psvita", "gamecube", "wii", "switch", "wiiu"];
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            for (int index = 0; index < nonHandheldPlatformIds.Length; index++) {
+                saveComponent.GetOrCreateExistencePlatformOverride(nonHandheldPlatformIds[index]).Exists = false;
+            }
+        }
+
+        /// <summary>
+        /// Creates one handheld Tilt Trial result button backed by a presentation-independent session action.
+        /// </summary>
+        /// <param name="parent">Results panel that owns the button.</param>
+        /// <param name="name">Stable result button presentation role.</param>
+        /// <param name="position">Button position in the handheld reference canvas.</param>
+        /// <param name="size">Button dimensions in authored pixels.</param>
+        /// <param name="label">Visible button label.</param>
+        /// <param name="action">Semantic action emitted by the button.</param>
+        void CreateTiltTrialResultActionButton(Entity parent, string name, float3 position, int2 size, string label, city.game.TiltTrialSessionAction action) {
+            if (parent == null) {
+                throw new ArgumentNullException(nameof(parent));
+            } else if (string.IsNullOrWhiteSpace(name)) {
+                throw new ArgumentException("Result button role must be provided.", nameof(name));
+            } else if (string.IsNullOrWhiteSpace(label)) {
+                throw new ArgumentException("Result button label must be provided.", nameof(label));
+            }
+
+            Entity buttonEntity = CreateRoundedPanelEntity(parent, name, position, size, 4f, 0f, new byte4(40, 58, 87, 255), new byte4(0, 0, 0, 0), 5);
+            buttonEntity.AddComponent(new InteractableComponent {
+                Size = size
+            });
+            buttonEntity.AddComponent(new city.game.TiltTrialPresentationActionComponent {
+                Action = action
+            });
+            CreateUiTextEntity(buttonEntity, name + "Label", new float3(8f, 4f, 0.1f), label, new int2(size.X - 16, size.Y - 8), 0.62f, 6, new byte4(247, 248, 252, 255), TextAlignment.Center);
         }
 
         /// <summary>
@@ -250,6 +647,8 @@ namespace city.game.tools {
                 }
             });
             entity.AddComponent(new city.game.DemoTiltFollowCameraComponent {
+                TargetEntityName = "PlayerSphere",
+                TargetEntityRole = "PlayerSphere",
                 TargetOffset = new float3(0f, 0.65f, 0f)
             });
 
@@ -336,7 +735,9 @@ namespace city.game.tools {
             Entity entity = Core.Instance.EntityFactory.Create("TiltTrialLevelSelectUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
-            entity.AddComponent(new city.game.TiltTrialLevelSelectComponent());
+            entity.AddComponent(new city.game.TiltTrialLevelSelectComponent {
+                UseDetailsStage = false
+            });
             entity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
                 FixedSize = new int2(1280, 720)
@@ -354,9 +755,26 @@ namespace city.game.tools {
             CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectName", new float3(28f, 24f, 0.1f), "Level 1", new int2(420, 56), 2.2f, 3, new byte4(247, 248, 252, 255), TextAlignment.Left);
             CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTimer", new float3(28f, 86f, 0.1f), "Start 99.00", new int2(220, 36), 1.4f, 3, new byte4(255, 214, 138, 255), TextAlignment.Left);
             CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectMedals", new float3(28f, 132f, 0.1f), "Gold  18.00\nSilver 28.00\nBronze 40.00", new int2(260, 120), 1.2f, 3, new byte4(223, 230, 239, 255), TextAlignment.Left);
-
-            Entity previewPanelEntity = CreateRoundedPanelEntity(detailsPanelEntity, "TiltTrialLevelSelectPreviewPanel", new float3(390f, 24f, 0f), new int2(300, 300), 24f, 2f, new byte4(39, 57, 84, 255), new byte4(122, 147, 182, 255), 2);
-            CreateUiTextEntity(previewPanelEntity, "TiltTrialLevelSelectPreviewPlaceholder", new float3(28f, 118f, 0.1f), "Preview", new int2(244, 64), 1.25f, 3, new byte4(223, 230, 239, 255), TextAlignment.Center);
+            Entity previewPanelEntity = CreateRoundedPanelEntity(
+                detailsPanelEntity,
+                "TiltTrialLevelSelectPreviewPanel",
+                new float3(380f, 108f, 0f),
+                new int2(320, 260),
+                18f,
+                2f,
+                new byte4(18, 29, 45, 255),
+                new byte4(109, 138, 170, 255),
+                3);
+            CreateUiTextEntity(
+                previewPanelEntity,
+                "TiltTrialLevelSelectPreviewText",
+                new float3(20f, 108f, 0.1f),
+                "Preview",
+                new int2(280, 40),
+                1.2f,
+                4,
+                new byte4(223, 230, 239, 255),
+                TextAlignment.Center);
 
             IReadOnlyList<global::city.game.TiltTrialLevelCatalogEntry> levelEntries = global::city.game.TiltTrialLevelCatalog.CreateEntries();
             for (int index = 0; index < levelEntries.Count; index++) {
@@ -366,11 +784,101 @@ namespace city.game.tools {
                 CreateUiTextEntity(rowEntity, $"TiltTrialLevelRow{oneBasedIndex:00}Label", new float3(20f, 18f, 0.1f), levelEntries[index].DisplayName, new int2(320, 40), 1.55f, 3, new byte4(247, 248, 252, 255), TextAlignment.Left);
             }
 
+            Entity backButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectBackButton", new float3(28f, 430f, 0f), new int2(320, 56), "BACK", city.game.TiltTrialLevelSelectAction.BackToStages, -1);
+            Entity playButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectPlayButton", new float3(28f, 500f, 0f), new int2(320, 56), "PLAY", city.game.TiltTrialLevelSelectAction.PlaySelectedStage, -1);
+            ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(backButtonEntity);
+            ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(playButtonEntity);
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.GetOrCreateExistencePlatformOverride("ps2").Exists = false;
+            saveComponent.GetOrCreateExistencePlatformOverride("ds").Exists = false;
+            saveComponent.GetOrCreateExistencePlatformOverride("3ds").Exists = false;
+
             if (entity is EditorEntity editorEntity) {
                 return editorEntity;
             }
 
             throw new InvalidOperationException("Tilt Trial selector generation requires editor-authored entities.");
+        }
+
+        /// <summary>
+        /// Creates the compact 4:3 Tilt Trial selector authored specifically for the PS2 target resolution.
+        /// </summary>
+        /// <returns>Generated PS2 selector UI root entity.</returns>
+        EditorEntity CreatePs2LevelSelectUiEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialPs2LevelSelectUi");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.AddComponent(new DemoDiscReturnToMenuComponent());
+            entity.AddComponent(new city.game.TiltTrialLevelSelectComponent {
+                UseDetailsStage = false
+            });
+            entity.AddComponent(new ViewportComponent {
+                BindingMode = ViewportComponent.ScreenBindingMode,
+                FixedSize = new int2(640, 448)
+            });
+            entity.AddComponent(new ReferenceCanvasFitComponent {
+                ReferenceWidth = 640,
+                ReferenceHeight = 448
+            });
+
+            Entity listPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectListPanel", new float3(20f, 58f, 0f), new int2(260, 370), 18f, 2f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
+            Entity detailsPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectDetailsPanel", new float3(296f, 58f, 0f), new int2(324, 370), 18f, 2f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
+
+            CreateUiTextEntity(entity, "TiltTrialLevelSelectTitle", new float3(24f, 12f, 0.1f), "TILT TRIAL", new int2(280, 34), 1.45f, 2, new byte4(247, 248, 252, 255), TextAlignment.Left);
+            CreateUiTextEntity(entity, "TiltTrialLevelSelectHint", new float3(350f, 14f, 0.1f), "X PLAY  O BACK", new int2(266, 28), 0.72f, 2, new byte4(196, 210, 226, 255), TextAlignment.Right);
+            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectName", new float3(20f, 20f, 0.1f), "LEVEL 1", new int2(284, 34), 1.35f, 3, new byte4(247, 248, 252, 255), TextAlignment.Left);
+            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTimer", new float3(20f, 64f, 0.1f), "START 99.00", new int2(284, 24), 0.88f, 3, new byte4(255, 214, 138, 255), TextAlignment.Left);
+            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTargetTimes", new float3(20f, 96f, 0.1f), "TARGETS G18.00 S28.00 B40.00", new int2(284, 24), 0.62f, 3, new byte4(223, 230, 239, 255), TextAlignment.Left);
+            Entity previewPanelEntity = CreateRoundedPanelEntity(
+                detailsPanelEntity,
+                "TiltTrialLevelSelectPreviewPanel",
+                new float3(20f, 132f, 0f),
+                new int2(284, 94),
+                10f,
+                1f,
+                new byte4(18, 29, 45, 255),
+                new byte4(109, 138, 170, 255),
+                3);
+            CreateUiTextEntity(
+                previewPanelEntity,
+                "TiltTrialLevelSelectPreviewText",
+                new float3(12f, 32f, 0.1f),
+                "Preview",
+                new int2(260, 28),
+                0.9f,
+                4,
+                new byte4(223, 230, 239, 255),
+                TextAlignment.Center);
+
+            IReadOnlyList<global::city.game.TiltTrialLevelCatalogEntry> levelEntries = global::city.game.TiltTrialLevelCatalog.CreateEntries();
+            for (int index = 0; index < levelEntries.Count; index++) {
+                int oneBasedIndex = index + 1;
+                CreateLevelSelectActionButton(
+                    listPanelEntity,
+                    $"TiltTrialPs2LevelRow{oneBasedIndex:00}",
+                    new float3(12f, 10f + (index * 68f), 0f), new int2(236, 54),
+                    levelEntries[index].DisplayName,
+                    city.game.TiltTrialLevelSelectAction.SelectStage,
+                    index);
+            }
+
+            Entity backButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectBackButton", new float3(20f, 250f, 0f), new int2(284, 36), "BACK", city.game.TiltTrialLevelSelectAction.BackToStages, -1);
+            Entity playButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectPlayButton", new float3(20f, 300f, 0f), new int2(284, 42), "PLAY", city.game.TiltTrialLevelSelectAction.PlaySelectedStage, -1);
+            ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(backButtonEntity);
+            ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(playButtonEntity);
+
+            string[] excludedPlatformIds = ["windows", "psp", "psvita", "ds", "3ds", "wii", "switch", "wiiu"];
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.GetOrCreateExistencePlatformOverride("ps2").Exists = true;
+            for (int index = 0; index < excludedPlatformIds.Length; index++) {
+                saveComponent.GetOrCreateExistencePlatformOverride(excludedPlatformIds[index]).Exists = false;
+            }
+
+            if (entity is EditorEntity editorEntity) {
+                return editorEntity;
+            }
+
+            throw new InvalidOperationException("PS2 Tilt Trial selector generation requires editor-authored entities.");
         }
 
         /// <summary>
@@ -436,12 +944,15 @@ namespace city.game.tools {
             speedTextAnchorComponent.SetAnchorDistances(left: 16f, bottom: 16f);
             speedTextEntity.AddComponent(speedTextAnchorComponent);
             ApplyFontReference(speedTextEntity, speedTextComponent, TiltTrialSpeedHudFontRelativePath);
-            speedTextEntity.AddComponent(new city.game.DemoTiltSpeedTextComponent());
+            speedTextEntity.AddComponent(new city.game.DemoTiltSpeedTextComponent {
+                TargetEntityName = "PlayerSphere",
+                TargetEntityRole = "PlayerSphere"
+            });
 
-            Entity resultsOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialResultsOverlay", new float3(320f, 170f, 0f), new int2(640, 280), 28f, 3f, new byte4(18, 27, 43, 238), new byte4(255, 214, 138, 255), 4);
+            Entity resultsOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialResultsOverlay", new float3(320f, 130f, 0f), new int2(640, 380), 28f, 3f, new byte4(18, 27, 43, 238), new byte4(255, 214, 138, 255), 4);
             resultsOverlayEntity.Enabled = false;
             CreateUiTextEntity(resultsOverlayEntity, "TiltTrialResultsTitleText", new float3(36f, 28f, 0.1f), "Clear", new int2(360, 42), 2f, 5, new byte4(255, 236, 196, 255), TextAlignment.Left);
-            CreateUiTextEntity(resultsOverlayEntity, "TiltTrialResultsBodyText", new float3(36f, 86f, 0.1f), "Time 00.00", new int2(420, 152), 1.35f, 5, new byte4(247, 248, 252, 255), TextAlignment.Left);
+            CreateUiTextEntity(resultsOverlayEntity, "TiltTrialResultsBodyText", new float3(36f, 86f, 0.1f), "Time 00.00", new int2(420, 220), 1.35f, 5, new byte4(247, 248, 252, 255), TextAlignment.Left);
 
             Entity failOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialFailOverlay", new float3(360f, 210f, 0f), new int2(560, 220), 28f, 3f, new byte4(43, 23, 28, 238), new byte4(214, 112, 112, 255), 4);
             failOverlayEntity.Enabled = false;
@@ -606,6 +1117,9 @@ namespace city.game.tools {
                 RenderOrder3D = 0
             };
             entity.AddComponent(meshComponent);
+            entity.AddComponent(new city.game.TiltTrialEntityRoleComponent {
+                Role = "PlayerSphere"
+            });
             ApplyTiltTrialPlayerSphereMaterialReference(entity, meshComponent);
             entity.AddComponent(new RigidBody3DComponent {
                 BodyKind = BodyKind3D.Dynamic,
@@ -1196,6 +1710,9 @@ namespace city.game.tools {
                 RenderOrder2D = renderOrder2D,
                 LayerMask = 1
             });
+            entity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+                Role = entityName
+            });
             return entity;
         }
 
@@ -1233,6 +1750,10 @@ namespace city.game.tools {
                 LayerMask = 1
             };
             entity.AddComponent(textComponent);
+            ApplyFontReference(entity, textComponent, TiltTrialSpeedHudFontRelativePath);
+            entity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+                Role = entityName
+            });
             return entity;
         }
 

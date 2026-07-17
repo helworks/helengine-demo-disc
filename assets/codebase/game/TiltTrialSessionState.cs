@@ -4,7 +4,8 @@ namespace city.game {
     /// </summary>
     public enum TiltTrialSessionState {
         Playing = 0,
-        Results = 1,
-        Failed = 2
+        Paused = 1,
+        Results = 2,
+        Failed = 3
     }
 }

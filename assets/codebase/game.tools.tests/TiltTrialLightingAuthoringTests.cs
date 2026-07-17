@@ -8,7 +8,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Tilt_trial_scene_source_authors_stronger_key_and_shadowless_fill_light() {
-            string sourcePath = @"C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneFactory.cs";
+            string sourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs";
             string source = File.ReadAllText(sourcePath);
 
             Assert.Contains("Entity entity = Core.Instance.EntityFactory.Create(\"TiltTrialSun\");", source, StringComparison.Ordinal);

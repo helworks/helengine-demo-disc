@@ -5,13 +5,42 @@ namespace city.game {
     /// Drives the dedicated Tilt Trial level-select scene.
     /// </summary>
     public sealed class TiltTrialLevelSelectComponent : UpdateComponent {
+        /// <summary>Raw left-stick axis magnitude required to produce one directional navigation event.</summary>
+        const short GamepadStickNavigationThreshold = 16384;
+        /// <summary>Stores the generated stage button backgrounds used for selection feedback.</summary>
         readonly List<RoundedRectComponent> RowBackgrounds;
+        /// <summary>Stores the generated stage button labels used for selection feedback.</summary>
         readonly List<TextComponent> RowLabels;
+        /// <summary>Stores the immutable stage catalog reused by every selector update and pointer action.</summary>
+        readonly IReadOnlyList<TiltTrialLevelCatalogEntry> LevelEntries;
 
+        /// <summary>Generated panel containing the stage list buttons.</summary>
+        Entity ListPanelEntity;
+        /// <summary>Generated panel containing the selected stage details and actions.</summary>
+        Entity DetailsPanelEntity;
+        /// <summary>Generated Back action entity whose visibility follows the details stage.</summary>
+        Entity DetailBackButtonEntity;
+        /// <summary>Generated Play action entity whose visibility follows the details stage.</summary>
+        Entity DetailPlayButtonEntity;
+        /// <summary>Indicates whether the detail screen is currently visible.</summary>
+        bool IsDetailsVisible;
+        /// <summary>Stores the focused detail action, where zero is Back and one is Play.</summary>
+        int DetailActionIndex;
+
+        /// <summary>Text displaying the selected stage name.</summary>
         TextComponent LevelNameTextComponent;
+        /// <summary>Text displaying the selected stage start time.</summary>
         TextComponent LevelTimerTextComponent;
-        TextComponent LevelMedalTextComponent;
-        TextComponent PreviewPlaceholderTextComponent;
+        /// <summary>Text displaying the selected stage target times.</summary>
+        TextComponent LevelTargetTimesTextComponent;
+        /// <summary>Background used to show the focused Back action.</summary>
+        RoundedRectComponent DetailBackButtonBackground;
+        /// <summary>Background used to show the focused Play action.</summary>
+        RoundedRectComponent DetailPlayButtonBackground;
+        /// <summary>Label whose color reflects Back action focus.</summary>
+        TextComponent DetailBackButtonLabel;
+        /// <summary>Label whose color reflects Play action focus.</summary>
+        TextComponent DetailPlayButtonLabel;
 
         /// <summary>
         /// Gets the zero-based selected level index.
@@ -19,15 +48,21 @@ namespace city.game {
         public int SelectedIndex { get; private set; }
 
         /// <summary>
+        /// Gets or sets whether accepting a level opens a separate details stage before play.
+        /// </summary>
+        public bool UseDetailsStage { get; set; }
+
+        /// <summary>
         /// Initializes one level-select controller.
         /// </summary>
         public TiltTrialLevelSelectComponent() {
             RowBackgrounds = new List<RoundedRectComponent>();
             RowLabels = new List<TextComponent>();
+            LevelEntries = TiltTrialLevelCatalog.CreateEntries();
         }
 
         /// <summary>
-        /// Processes selector navigation and applies the current level details to the authored UI.
+        /// Processes selector navigation, detail navigation, and stage activation.
         /// </summary>
         public override void Update() {
             base.Update();
@@ -36,19 +71,138 @@ namespace city.game {
                 throw new InvalidOperationException("TiltTrialLevelSelectComponent requires an attached selector root entity.");
             }
 
-            IReadOnlyList<TiltTrialLevelCatalogEntry> levels = TiltTrialLevelCatalog.CreateEntries();
+            IReadOnlyList<TiltTrialLevelCatalogEntry> levels = LevelEntries;
             ResolveUiBindingsWhenNeeded(levels.Count);
 
-            if (WasNavigatePreviousPressed()) {
-                SelectedIndex = SelectedIndex <= 0 ? levels.Count - 1 : SelectedIndex - 1;
-            } else if (WasNavigateNextPressed()) {
-                SelectedIndex = SelectedIndex >= levels.Count - 1 ? 0 : SelectedIndex + 1;
-            } else if (WasAcceptPressed()) {
-                Core.Instance.SceneManager.LoadScene(levels[SelectedIndex].SceneId, SceneLoadMode.Single);
-                return;
+            if (UseDetailsStage) {
+                if (IsDetailsVisible) {
+                    if (WasBackPressed()) {
+                        ShowStageList();
+                    } else if (WasNavigatePreviousPressed() || WasNavigateNextPressed()) {
+                        DetailActionIndex = DetailActionIndex == 0 ? 1 : 0;
+                        ApplyDetailActionSelection();
+                    } else if (WasAcceptPressed()) {
+                        if (DetailActionIndex == 0) {
+                            ShowStageList();
+                        } else {
+                            PlaySelectedStage();
+                        }
+                    }
+                } else if (WasNavigatePreviousPressed()) {
+                    SelectedIndex = SelectedIndex <= 0 ? levels.Count - 1 : SelectedIndex - 1;
+                } else if (WasNavigateNextPressed()) {
+                    SelectedIndex = SelectedIndex >= levels.Count - 1 ? 0 : SelectedIndex + 1;
+                } else if (WasAcceptPressed()) {
+                    ShowDetails();
+                }
+            } else {
+                if (WasNavigatePreviousPressed()) {
+                    SelectedIndex = SelectedIndex <= 0 ? levels.Count - 1 : SelectedIndex - 1;
+                } else if (WasNavigateNextPressed()) {
+                    SelectedIndex = SelectedIndex >= levels.Count - 1 ? 0 : SelectedIndex + 1;
+                } else if (WasAcceptPressed()) {
+                    PlaySelectedStage();
+                }
             }
 
             ApplySelectionToUi(levels[SelectedIndex]);
+        }
+
+        /// <summary>
+        /// Handles a pointer action emitted by a generated selector button.
+        /// </summary>
+        /// <param name="action">Selector action to execute.</param>
+        /// <param name="stageIndex">Zero-based stage index for stage selection.</param>
+        public void HandleAction(TiltTrialLevelSelectAction action, int stageIndex) {
+            IReadOnlyList<TiltTrialLevelCatalogEntry> levels = LevelEntries;
+            ResolveUiBindingsWhenNeeded(levels.Count);
+            switch (action) {
+                case TiltTrialLevelSelectAction.SelectStage:
+                    if (stageIndex < 0 || stageIndex >= levels.Count) {
+                        throw new ArgumentOutOfRangeException(nameof(stageIndex));
+                    }
+
+                    SelectedIndex = stageIndex;
+                    if (UseDetailsStage) {
+                        ShowDetails();
+                    } else {
+                        ShowCombinedView();
+                    }
+                    break;
+                case TiltTrialLevelSelectAction.BackToStages:
+                    if (UseDetailsStage) {
+                        ShowStageList();
+                    } else {
+                        ShowCombinedView();
+                    }
+                    break;
+                case TiltTrialLevelSelectAction.PlaySelectedStage:
+                    PlaySelectedStage();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(action));
+            }
+
+            ApplySelectionToUi(levels[SelectedIndex]);
+        }
+
+        /// <summary>
+        /// Shows the selected stage details and hides the stage list.
+        /// </summary>
+        public void ShowDetails() {
+            if (ListPanelEntity == null || DetailsPanelEntity == null) {
+                throw new InvalidOperationException("Tilt Trial selector panels are not resolved.");
+            }
+
+            IsDetailsVisible = true;
+            DetailActionIndex = 1;
+            ListPanelEntity.Enabled = false;
+            DetailsPanelEntity.Enabled = true;
+            DetailBackButtonEntity.Enabled = true;
+            DetailPlayButtonEntity.Enabled = true;
+            ApplyDetailActionSelection();
+        }
+
+        /// <summary>
+        /// Shows the stage list and hides the selected stage details.
+        /// </summary>
+        public void ShowStageList() {
+            if (ListPanelEntity == null || DetailsPanelEntity == null) {
+                throw new InvalidOperationException("Tilt Trial selector panels are not resolved.");
+            }
+
+            IsDetailsVisible = false;
+            DetailActionIndex = 0;
+            ListPanelEntity.Enabled = true;
+            DetailsPanelEntity.Enabled = false;
+            DetailBackButtonEntity.Enabled = false;
+            DetailPlayButtonEntity.Enabled = false;
+        }
+
+        /// <summary>
+        /// Keeps the level list and selected-level details visible together for non-handheld selectors.
+        /// </summary>
+        void ShowCombinedView() {
+            if (ListPanelEntity == null || DetailsPanelEntity == null) {
+                throw new InvalidOperationException("Tilt Trial selector panels are not resolved.");
+            }
+
+            IsDetailsVisible = false;
+            DetailActionIndex = 1;
+            ListPanelEntity.Enabled = true;
+            DetailsPanelEntity.Enabled = true;
+        }
+
+        /// <summary>
+        /// Loads the selected stage through the normal single-scene transition.
+        /// </summary>
+        public void PlaySelectedStage() {
+            IReadOnlyList<TiltTrialLevelCatalogEntry> levels = LevelEntries;
+            if (SelectedIndex < 0 || SelectedIndex >= levels.Count) {
+                throw new InvalidOperationException("Tilt Trial selector has no valid selected stage.");
+            }
+
+            Core.Instance.SceneManager.LoadScene(levels[SelectedIndex].SceneId, SceneLoadMode.Single);
         }
 
         /// <summary>
@@ -62,8 +216,7 @@ namespace city.game {
 
             ApplyLevelNameText(selectedLevel.DisplayName);
             ApplyLevelTimerText(selectedLevel.StartTimeSeconds);
-            ApplyLevelMedalText(selectedLevel.GoldTimeSeconds, selectedLevel.SilverTimeSeconds, selectedLevel.BronzeTimeSeconds);
-            ApplyPreviewState(selectedLevel.PreviewTexturePath);
+            ApplyLevelTargetTimesText(selectedLevel.GoldTimeSeconds, selectedLevel.SilverTimeSeconds, selectedLevel.BronzeTimeSeconds);
             ApplyRowSelectionState(selectedLevel.LevelId);
         }
 
@@ -79,19 +232,31 @@ namespace city.game {
             RowBackgrounds.Clear();
             RowLabels.Clear();
 
-            Entity listPanelEntity = FindRequiredChildEntity(Parent, 0, "Tilt Trial selector list panel");
-            Entity detailsPanelEntity = FindRequiredChildEntity(Parent, 1, "Tilt Trial selector details panel");
-            Entity previewPanelEntity = FindRequiredChildEntity(detailsPanelEntity, 3, "Tilt Trial selector preview panel");
+            ListPanelEntity = FindRequiredChildEntity(Parent, 0, "Tilt Trial selector list panel");
+            DetailsPanelEntity = FindRequiredChildEntity(Parent, 1, "Tilt Trial selector details panel");
 
-            LevelNameTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(detailsPanelEntity, 0, "Tilt Trial selector level name text"));
-            LevelTimerTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(detailsPanelEntity, 1, "Tilt Trial selector level timer text"));
-            LevelMedalTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(detailsPanelEntity, 2, "Tilt Trial selector level medal text"));
-            PreviewPlaceholderTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(previewPanelEntity, 0, "Tilt Trial selector preview placeholder text"));
+            LevelNameTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(DetailsPanelEntity, 0, "Tilt Trial selector level name text"));
+            LevelTimerTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(DetailsPanelEntity, 1, "Tilt Trial selector level timer text"));
+            LevelTargetTimesTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(DetailsPanelEntity, 2, "Tilt Trial selector target times text"));
+            if (UseDetailsStage) {
+                DetailBackButtonEntity = FindRequiredChildEntity(DetailsPanelEntity, 3, "Tilt Trial selector Back button");
+                DetailPlayButtonEntity = FindRequiredChildEntity(DetailsPanelEntity, 4, "Tilt Trial selector Play button");
+                DetailBackButtonBackground = FindRequiredComponent<RoundedRectComponent>(DetailBackButtonEntity);
+                DetailPlayButtonBackground = FindRequiredComponent<RoundedRectComponent>(DetailPlayButtonEntity);
+                DetailBackButtonLabel = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(DetailBackButtonEntity, 0, "Tilt Trial selector Back button label"));
+                DetailPlayButtonLabel = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(DetailPlayButtonEntity, 0, "Tilt Trial selector Play button label"));
+            }
 
             for (int rowIndex = 0; rowIndex < expectedRowCount; rowIndex++) {
-                Entity rowEntity = FindRequiredChildEntity(listPanelEntity, rowIndex, $"Tilt Trial selector row {rowIndex + 1}");
+                Entity rowEntity = FindRequiredChildEntity(ListPanelEntity, rowIndex, $"Tilt Trial selector row {rowIndex + 1}");
                 RowBackgrounds.Add(FindRequiredComponent<RoundedRectComponent>(rowEntity));
                 RowLabels.Add(FindRequiredComponent<TextComponent>(FindRequiredChildEntity(rowEntity, 0, $"Tilt Trial selector row {rowIndex + 1} label")));
+            }
+
+            if (UseDetailsStage) {
+                ShowStageList();
+            } else {
+                ShowCombinedView();
             }
         }
 
@@ -100,7 +265,7 @@ namespace city.game {
         /// </summary>
         /// <param name="selectedLevelId">Stable selected level id.</param>
         void ApplyRowSelectionState(string selectedLevelId) {
-            IReadOnlyList<TiltTrialLevelCatalogEntry> levels = TiltTrialLevelCatalog.CreateEntries();
+            IReadOnlyList<TiltTrialLevelCatalogEntry> levels = LevelEntries;
             for (int rowIndex = 0; rowIndex < levels.Count; rowIndex++) {
                 bool isSelected = string.Equals(levels[rowIndex].LevelId, selectedLevelId, StringComparison.Ordinal);
                 RowBackgrounds[rowIndex].FillColor = isSelected
@@ -114,6 +279,32 @@ namespace city.game {
                     ? new byte4(28, 18, 14, 255)
                     : new byte4(247, 248, 252, 255);
             }
+        }
+
+        /// <summary>
+        /// Updates detail action backgrounds and labels to identify the focused action.
+        /// </summary>
+        void ApplyDetailActionSelection() {
+            bool isBackSelected = DetailActionIndex == 0;
+            DetailBackButtonBackground.FillColor = isBackSelected
+                ? new byte4(255, 193, 94, 255)
+                : new byte4(40, 58, 87, 255);
+            DetailBackButtonBackground.BorderColor = isBackSelected
+                ? new byte4(255, 237, 196, 255)
+                : new byte4(0, 0, 0, 0);
+            DetailBackButtonLabel.Color = isBackSelected
+                ? new byte4(28, 18, 14, 255)
+                : new byte4(247, 248, 252, 255);
+
+            DetailPlayButtonBackground.FillColor = isBackSelected
+                ? new byte4(40, 58, 87, 255)
+                : new byte4(255, 193, 94, 255);
+            DetailPlayButtonBackground.BorderColor = isBackSelected
+                ? new byte4(0, 0, 0, 0)
+                : new byte4(255, 237, 196, 255);
+            DetailPlayButtonLabel.Color = isBackSelected
+                ? new byte4(247, 248, 252, 255)
+                : new byte4(28, 18, 14, 255);
         }
 
         /// <summary>
@@ -133,19 +324,11 @@ namespace city.game {
         /// <summary>
         /// Applies the selected level medal thresholds to the details panel.
         /// </summary>
-        void ApplyLevelMedalText(float goldTimeSeconds, float silverTimeSeconds, float bronzeTimeSeconds) {
-            LevelMedalTextComponent.Text = $"Gold  {FormatTimerSeconds(goldTimeSeconds)}\nSilver {FormatTimerSeconds(silverTimeSeconds)}\nBronze {FormatTimerSeconds(bronzeTimeSeconds)}";
+        void ApplyLevelTargetTimesText(float goldTimeSeconds, float silverTimeSeconds, float bronzeTimeSeconds) {
+            LevelTargetTimesTextComponent.Text = $"Targets G{FormatTimerSeconds(goldTimeSeconds)} S{FormatTimerSeconds(silverTimeSeconds)} B{FormatTimerSeconds(bronzeTimeSeconds)}";
         }
 
         /// <summary>
-        /// Applies preview fallback presentation for the selected level.
-        /// </summary>
-        void ApplyPreviewState(string previewTexturePath) {
-            PreviewPlaceholderTextComponent.Text = string.IsNullOrWhiteSpace(previewTexturePath)
-                ? "Preview Coming Soon"
-                : previewTexturePath;
-        }
-
         /// <summary>
         /// Formats one seconds value as `99.00`.
         /// </summary>
@@ -172,7 +355,8 @@ namespace city.game {
             InputSystem inputSystem = Core.Instance.Input;
             return inputSystem.WasKeyPressed(Keys.Up)
                 || inputSystem.WasKeyPressed(Keys.W)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.DPadUp);
+                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.DPadUp)
+                || WasLeftStickUpPressed();
         }
 
         /// <summary>
@@ -182,7 +366,38 @@ namespace city.game {
             InputSystem inputSystem = Core.Instance.Input;
             return inputSystem.WasKeyPressed(Keys.Down)
                 || inputSystem.WasKeyPressed(Keys.S)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.DPadDown);
+                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.DPadDown)
+                || WasLeftStickDownPressed();
+        }
+
+        /// <summary>
+        /// Returns whether the left stick crossed into its upward navigation zone this frame.
+        /// </summary>
+        bool WasLeftStickUpPressed() {
+            InputSystem inputSystem = Core.Instance.Input;
+            InputGamepadState currentState = inputSystem.GetGamepadState(0);
+            if (!currentState.Connected) {
+                return false;
+            }
+
+            InputGamepadState previousState = inputSystem.GetPreviousGamepadState(0);
+            return currentState.LeftStickY <= -GamepadStickNavigationThreshold
+                && previousState.LeftStickY > -GamepadStickNavigationThreshold;
+        }
+
+        /// <summary>
+        /// Returns whether the left stick crossed into its downward navigation zone this frame.
+        /// </summary>
+        bool WasLeftStickDownPressed() {
+            InputSystem inputSystem = Core.Instance.Input;
+            InputGamepadState currentState = inputSystem.GetGamepadState(0);
+            if (!currentState.Connected) {
+                return false;
+            }
+
+            InputGamepadState previousState = inputSystem.GetPreviousGamepadState(0);
+            return currentState.LeftStickY >= GamepadStickNavigationThreshold
+                && previousState.LeftStickY < GamepadStickNavigationThreshold;
         }
 
         /// <summary>
@@ -193,6 +408,15 @@ namespace city.game {
             return inputSystem.WasKeyPressed(Keys.Enter)
                 || inputSystem.WasKeyPressed(Keys.Space)
                 || Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept);
+        }
+
+        /// <summary>
+        /// Returns whether the current frame requested the detail screen to close.
+        /// </summary>
+        bool WasBackPressed() {
+            InputSystem inputSystem = Core.Instance.Input;
+            return inputSystem.WasKeyPressed(Keys.Escape)
+                || inputSystem.WasKeyPressed(Keys.Back);
         }
 
         /// <summary>

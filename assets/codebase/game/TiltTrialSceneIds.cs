@@ -9,6 +9,25 @@ namespace city.game {
         public const string LevelSelectSceneId = "tilt_trial";
 
         /// <summary>
+        /// Stable scene id used by the DS and 3DS-specific Tilt Trial level selector.
+        /// </summary>
+        public const string HandheldLevelSelectSceneId = "tilt_trial_ds";
+
+        /// <summary>
+        /// Resolves the selector scene id appropriate for the active runtime platform.
+        /// </summary>
+        /// <returns>Handheld selector id on DS and 3DS, otherwise the console selector id.</returns>
+        public static string ResolveLevelSelectSceneId() {
+            PlatformInfo platformInfo = Core.Instance?.PlatformInfo;
+            if (platformInfo != null && (string.Equals(platformInfo.Name, "ds", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(platformInfo.Name, "3ds", StringComparison.OrdinalIgnoreCase))) {
+                return HandheldLevelSelectSceneId;
+            }
+
+            return LevelSelectSceneId;
+        }
+
+        /// <summary>
         /// Stable scene id used by the first Tilt Trial gameplay level.
         /// </summary>
         public const string Level01SceneId = "tilt_trial_level_01";

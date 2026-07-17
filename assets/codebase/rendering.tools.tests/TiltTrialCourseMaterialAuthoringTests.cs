@@ -8,9 +8,9 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Tilt_trial_scene_source_authors_one_dedicated_course_material() {
-            string assetsSourcePath = @"C:\dev\helprojs\city\assets\codebase\rendering.tools\RenderingSceneGenerationAssets.cs";
-            string preparationSourcePath = @"C:\dev\helprojs\city\assets\codebase\rendering.tools\RenderingSceneAssetPreparationService.cs";
-            string gameSceneSourcePath = @"C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneFactory.cs";
+            string assetsSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingSceneGenerationAssets.cs";
+            string preparationSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingSceneAssetPreparationService.cs";
+            string gameSceneSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs";
 
             string assetsSource = File.ReadAllText(assetsSourcePath);
             string preparationSource = File.ReadAllText(preparationSourcePath);

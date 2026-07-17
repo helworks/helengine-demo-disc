@@ -2,7 +2,7 @@ using helengine;
 
 namespace city.rendering.tools {
     /// <summary>
-    /// Writes the authored solid-color material assigned to the Tilt Trial course geometry.
+    /// Writes the authored textured material assigned to the Tilt Trial course geometry.
     /// </summary>
     public sealed class TiltTrialCourseMaterialFactory {
         /// <summary>
@@ -46,9 +46,9 @@ namespace city.rendering.tools {
         const string MeshVariantName = "Mesh";
 
         /// <summary>
-        /// Stable authored base color that keeps the course warm and readable instead of neutral gray.
+        /// Stable authored base color that preserves the generated texture colors without tinting them.
         /// </summary>
-        const string CourseBaseColor = "#F4E8D8FF";
+        const string CourseBaseColor = "#FFFFFFFF";
 
         /// <summary>
         /// Stable authored roughness scalar that keeps the stage slightly matte without flattening it.
@@ -94,6 +94,11 @@ namespace city.rendering.tools {
         /// Stable field identifier used to store the authored base color in generated material settings.
         /// </summary>
         const string BaseColorFieldId = "base-color";
+
+        /// <summary>
+        /// Stable field identifier used to store imported texture bindings on textured material paths.
+        /// </summary>
+        const string TextureIdFieldId = "texture-id";
 
         /// <summary>
         /// Stable field identifier used to store the authored roughness scalar.
@@ -161,25 +166,32 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            MaterialWriteService.WriteMaterial(projectRootPath, MaterialRelativePath, CreateGeneratedMaterialDefinition());
+            TiltTrialCourseTextureFactory textureFactory = new TiltTrialCourseTextureFactory();
+            string textureAssetId = textureFactory.WriteTextureAsset(projectRootPath);
+            MaterialWriteService.WriteMaterial(projectRootPath, MaterialRelativePath, CreateGeneratedMaterialDefinition(textureAssetId));
         }
 
         /// <summary>
         /// Builds the generated material definition that routes the Tilt Trial course through the shared lit forward shader with authored color and PBR overrides.
         /// </summary>
         /// <returns>Generated material definition for the Tilt Trial course material.</returns>
-        GeneratedMaterialAssetDefinition CreateGeneratedMaterialDefinition() {
+        GeneratedMaterialAssetDefinition CreateGeneratedMaterialDefinition(string textureAssetId) {
+            if (string.IsNullOrWhiteSpace(textureAssetId)) {
+                throw new ArgumentException("Texture asset id must be provided.", nameof(textureAssetId));
+            }
+
             GeneratedMaterialAssetDefinition definition = new GeneratedMaterialAssetDefinition();
             definition.MaterialAsset = new ShaderMaterialAsset {
                 Id = MaterialAssetId,
+                DiffuseTextureAssetId = textureAssetId,
                 RenderState = new MaterialRenderState(),
                 CastsShadows = true,
                 ReceivesShadows = true
             };
 
-            ConfigureWindowsPlatform(definition.GetOrCreatePlatform("windows"));
-            ConfigureWindowsPlatform(definition.GetOrCreatePlatform("psp"));
-            ConfigurePs2Platform(definition.GetOrCreatePlatform("ps2"));
+            ConfigureWindowsPlatform(definition.GetOrCreatePlatform("windows"), textureAssetId);
+            ConfigureWindowsPlatform(definition.GetOrCreatePlatform("psp"), textureAssetId);
+            ConfigurePs2Platform(definition.GetOrCreatePlatform("ps2"), textureAssetId);
             return definition;
         }
 
@@ -187,9 +199,11 @@ namespace city.rendering.tools {
         /// Populates the shared Windows and PSP standard-shader settings.
         /// </summary>
         /// <param name="platformDefinition">Generated platform definition to populate.</param>
-        void ConfigureWindowsPlatform(GeneratedMaterialPlatformDefinition platformDefinition) {
+        void ConfigureWindowsPlatform(GeneratedMaterialPlatformDefinition platformDefinition, string textureAssetId) {
             if (platformDefinition == null) {
                 throw new ArgumentNullException(nameof(platformDefinition));
+            } else if (string.IsNullOrWhiteSpace(textureAssetId)) {
+                throw new ArgumentException("Texture asset id must be provided.", nameof(textureAssetId));
             }
 
             platformDefinition.SchemaId = StandardShaderSchemaId;
@@ -198,6 +212,7 @@ namespace city.rendering.tools {
             platformDefinition.SetFieldValue(VertexProgramFieldId, StandardVertexProgramName);
             platformDefinition.SetFieldValue(PixelProgramFieldId, StandardPixelProgramName);
             platformDefinition.SetFieldValue(VariantFieldId, MeshVariantName);
+            platformDefinition.SetFieldValue(TextureIdFieldId, textureAssetId);
             platformDefinition.SetFieldValue(BaseColorFieldId, CourseBaseColor);
             platformDefinition.SetFieldValue(RoughnessFieldId, CourseRoughness);
             platformDefinition.SetFieldValue(MetallicFieldId, CourseMetallic);
@@ -212,13 +227,16 @@ namespace city.rendering.tools {
         /// Populates the PS2 fixed-pipeline solid-color material settings.
         /// </summary>
         /// <param name="platformDefinition">Generated platform definition to populate.</param>
-        void ConfigurePs2Platform(GeneratedMaterialPlatformDefinition platformDefinition) {
+        void ConfigurePs2Platform(GeneratedMaterialPlatformDefinition platformDefinition, string textureAssetId) {
             if (platformDefinition == null) {
                 throw new ArgumentNullException(nameof(platformDefinition));
+            } else if (string.IsNullOrWhiteSpace(textureAssetId)) {
+                throw new ArgumentException("Texture asset id must be provided.", nameof(textureAssetId));
             }
 
             platformDefinition.SchemaId = Ps2MaterialSchemaId;
-            platformDefinition.SetFieldValue(Ps2TextureRelativePathFieldId, string.Empty);
+            platformDefinition.SetFieldValue(TextureIdFieldId, textureAssetId);
+            platformDefinition.SetFieldValue(Ps2TextureRelativePathFieldId, "cooked/imported/" + textureAssetId);
             platformDefinition.SetFieldValue(AlphaModeFieldId, "opaque");
             platformDefinition.SetFieldValue(DoubleSidedFieldId, "false");
             platformDefinition.SetFieldValue(CastsShadowFieldId, "true");
