@@ -9,6 +9,11 @@ namespace city.rendering.tools {
         public string SceneId { get; set; }
 
         /// <summary>
+        /// Gets or sets the optional project-relative asset path used when the authored scene file should live at a different location than its runtime scene id.
+        /// </summary>
+        public string SceneAssetRelativePath { get; set; }
+
+        /// <summary>
         /// Gets or sets the scene-level settings persisted with the generated scene.
         /// </summary>
         public SceneSettingsAsset SceneSettings { get; set; }

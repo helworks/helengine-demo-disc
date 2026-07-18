@@ -32,7 +32,7 @@ public sealed class CityWiiUBuildConfigSourceTests {
     /// </summary>
     [Fact]
     public void City_wiiu_build_config_includes_demo_disc_main_menu_scene_set() {
-        string sourcePath = @"C:\dev\helprojs\city\user_settings\build_config.json";
+        string sourcePath = @"C:\dev\helprojs\demodisc\user_settings\build_config.json";
         string source = File.ReadAllText(sourcePath);
         using JsonDocument document = JsonDocument.Parse(source);
         JsonElement platforms = document.RootElement.GetProperty("platforms");
@@ -90,7 +90,7 @@ git -C C:\dev\helworks\helengine commit -m "test: lock city wiiu demo-disc scene
 ### Task 2: Update The City Wii U Build Configuration
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\user_settings\build_config.json`
+- Modify: `C:\dev\helprojs\demodisc\user_settings\build_config.json`
 
 - [ ] **Step 1: Replace the `wiiu` scene list and order with the full menu-backed set**
 
@@ -149,15 +149,15 @@ Expected: PASS with `1` test passed and `0` failed.
 - [ ] **Step 3: Commit the config change**
 
 ```bash
-git -C C:\dev\helprojs\city add -- user_settings/build_config.json
-git -C C:\dev\helprojs\city commit -m "feat: expand city wiiu menu scene set"
+git -C C:\dev\helprojs\demodisc add -- user_settings/build_config.json
+git -C C:\dev\helprojs\demodisc commit -m "feat: expand city wiiu menu scene set"
 ```
 
 ### Task 3: Verify The Wii U Build Output
 
 **Files:**
 - Verify: `C:\dev\helworks\helengine\artifacts\build-platform.ps1`
-- Verify: `C:\dev\helprojs\city\project.heproj`
+- Verify: `C:\dev\helprojs\demodisc\project.heproj`
 - Verify: `C:\dev\helprojs\output\wiiu`
 
 - [ ] **Step 1: Build the city Wii U package through the shared wrapper**
@@ -166,7 +166,7 @@ Run:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helworks\helengine\artifacts\build-platform.ps1 `
-  -Project C:\dev\helprojs\city\project.heproj `
+  -Project C:\dev\helprojs\demodisc\project.heproj `
   -Platform wiiu `
   -Output C:\dev\helprojs\output\wiiu
 ```
@@ -204,5 +204,5 @@ tilt_trial
 
 ```bash
 git -C C:\dev\helworks\helengine status --short
-git -C C:\dev\helprojs\city status --short
+git -C C:\dev\helprojs\demodisc status --short
 ```

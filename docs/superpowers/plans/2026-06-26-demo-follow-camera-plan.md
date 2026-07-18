@@ -106,7 +106,7 @@ git commit -m "feat: restore runtime scene entity ids"
 ### Task 2: Add The City Follow Camera Component
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering\DemoFollowCameraComponent.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering\DemoFollowCameraComponent.cs`
 - Test: `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityPhysicsSceneSourceTests.cs`
 
 - [ ] **Step 1: Write the failing source test for the new component contract**
@@ -114,7 +114,7 @@ git commit -m "feat: restore runtime scene entity ids"
 ```csharp
 [Fact]
 public void City_static_mesh_follow_camera_source_uses_scene_entity_reference_and_runtime_id_lookup() {
-    string sourcePath = @"C:\dev\helprojs\city\assets\codebase\rendering\DemoFollowCameraComponent.cs";
+    string sourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering\DemoFollowCameraComponent.cs";
     string source = File.ReadAllText(sourcePath);
 
     Assert.Contains("public SceneEntityReference TargetEntityReference { get; set; }", source, StringComparison.Ordinal);
@@ -166,14 +166,14 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add C:/dev/helprojs/city/assets/codebase/rendering/DemoFollowCameraComponent.cs C:/dev/helworks/helengine/engine/helengine.editor.tests/CityPhysicsSceneSourceTests.cs
+git add C:/dev/helprojs/demodisc/assets/codebase/rendering/DemoFollowCameraComponent.cs C:/dev/helworks/helengine/engine/helengine.editor.tests/CityPhysicsSceneSourceTests.cs
 git commit -m "feat: add static mesh demo follow camera"
 ```
 
 ### Task 3: Rewire Static-Mesh Showcase Camera Authoring
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs`
 - Test: `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityPhysicsSceneSourceTests.cs`
 
 - [ ] **Step 1: Write the failing source test for static-mesh showcase camera wiring**
@@ -181,7 +181,7 @@ git commit -m "feat: add static mesh demo follow camera"
 ```csharp
 [Fact]
 public void City_static_mesh_showcase_source_uses_demo_follow_camera_for_packaged_and_live_paths() {
-    string sourcePath = @"C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneFactory.cs";
+    string sourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs";
     string source = File.ReadAllText(sourcePath);
 
     Assert.Contains("CreateStaticMeshShowcaseCameraEntity(", source, StringComparison.Ordinal);
@@ -227,7 +227,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add C:/dev/helprojs/city/assets/codebase/physics.tools/PhysicsSceneFactory.cs C:/dev/helworks/helengine/engine/helengine.editor.tests/CityPhysicsSceneSourceTests.cs
+git add C:/dev/helprojs/demodisc/assets/codebase/physics.tools/PhysicsSceneFactory.cs C:/dev/helworks/helengine/engine/helengine.editor.tests/CityPhysicsSceneSourceTests.cs
 git commit -m "feat: wire static mesh showcase follow camera"
 ```
 

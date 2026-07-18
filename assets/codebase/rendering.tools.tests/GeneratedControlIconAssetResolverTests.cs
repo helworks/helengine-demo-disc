@@ -10,9 +10,14 @@ namespace city.tests {
         }
 
         [Fact]
+        public void Platform_map_uses_wii_family_for_wiiu_fallback() {
+            Assert.Equal("wii", city.rendering.tools.GeneratedControlIconPlatformMap.ResolveFamilyId("wiiu"));
+        }
+
+        [Fact]
         public void Catalog_returns_generated_png_path_for_known_family_and_control() {
             city.rendering.tools.GeneratedControlIconCatalog catalog = city.rendering.tools.GeneratedControlIconCatalog.Load(
-                @"C:\dev\helprojs\city");
+                @"C:\dev\helprojs\demodisc");
 
             string relativePath = catalog.RequireControlPath("keyboard", "wasd");
 
@@ -22,7 +27,7 @@ namespace city.tests {
         [Fact]
         public void Catalog_returns_generated_png_paths_for_camera_stick_equivalents() {
             city.rendering.tools.GeneratedControlIconCatalog catalog = city.rendering.tools.GeneratedControlIconCatalog.Load(
-                @"C:\dev\helprojs\city");
+                @"C:\dev\helprojs\demodisc");
 
             Assert.Equal("images/instructions/controls/generated/3ds/circle_pad.png", catalog.RequireControlPath("3ds", "circle_pad"));
             Assert.Equal("images/instructions/controls/generated/psp/analog.png", catalog.RequireControlPath("psp", "analog"));
@@ -34,7 +39,7 @@ namespace city.tests {
         [Fact]
         public void Catalog_throws_for_missing_control() {
             city.rendering.tools.GeneratedControlIconCatalog catalog = city.rendering.tools.GeneratedControlIconCatalog.Load(
-                @"C:\dev\helprojs\city");
+                @"C:\dev\helprojs\demodisc");
 
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
                 () => {
@@ -50,7 +55,7 @@ namespace city.tests {
             city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
 
             city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
-                @"C:\dev\helprojs\city",
+                @"C:\dev\helprojs\demodisc",
                 "ps2",
                 "r1");
 
@@ -66,7 +71,7 @@ namespace city.tests {
             city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
 
             city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
-                @"C:\dev\helprojs\city",
+                @"C:\dev\helprojs\demodisc",
                 "xbox360",
                 "rb");
 
@@ -83,7 +88,7 @@ namespace city.tests {
 
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
                 () => {
-                    resolver.RequireIcon(@"C:\dev\helprojs\city", "saturn", "a");
+                    resolver.RequireIcon(@"C:\dev\helprojs\demodisc", "saturn", "a");
                 });
 
             Assert.Contains("saturn", exception.Message, StringComparison.OrdinalIgnoreCase);

@@ -8,7 +8,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Scene_catalog_reuses_runtime_zombislayer_scene_id() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneCatalog.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneCatalog.cs");
 
             Assert.Contains("global::city.game.ZombislayerSceneIds.GameplaySceneId", source, StringComparison.Ordinal);
         }

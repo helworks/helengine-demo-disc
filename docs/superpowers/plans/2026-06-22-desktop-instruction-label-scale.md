@@ -24,7 +24,7 @@
     /// </summary>
     [Fact]
     public void City_demo_scene_instruction_overlay_source_uses_smaller_desktop_only_labels() {
-        string sourcePath = @"C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs";
+        string sourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs";
         string source = File.ReadAllText(sourcePath);
 
         Assert.Contains("const float DesktopInstructionLabelFontScale = 1.73f;", source, StringComparison.Ordinal);
@@ -56,7 +56,7 @@ rtk git -C C:\dev\helworks\helengine commit -m "Add desktop instruction overlay 
 ### Task 2: Retune the Desktop Instruction Label Constants
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs`
 - Test: `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityMenuSourceTests.cs`
 
 - [ ] **Step 1: Write the minimal constant-only implementation**
@@ -104,30 +104,30 @@ Expected: `PASS`.
 - [ ] **Step 4: Commit**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add -- assets/codebase/rendering.tools/DemoSceneInstructionOverlayFactory.cs
-rtk git -C C:\dev\helprojs\city commit -m "Reduce desktop instruction overlay label size"
+rtk git -C C:\dev\helprojs\demodisc add -- assets/codebase/rendering.tools/DemoSceneInstructionOverlayFactory.cs
+rtk git -C C:\dev\helprojs\demodisc commit -m "Reduce desktop instruction overlay label size"
 ```
 
 ### Task 3: Regenerate Scenes, Rebuild Windows, and Verify Runtime Output
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\cube_test.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\scaled_cube.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\colored_cube_grid.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\textured_cube_grid.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\axis_test.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\axis_test2.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\directional_shadow_plaza.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\ground_cube_probe.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\scene_memory_probe.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\spotlight_street_slice.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\cube_test.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\scaled_cube.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\colored_cube_grid.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\textured_cube_grid.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\axis_test.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\axis_test2.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\directional_shadow_plaza.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\ground_cube_probe.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\scene_memory_probe.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\spotlight_street_slice.helen`
 
 - [ ] **Step 1: Regenerate the rendering scenes that consume the shared desktop overlay**
 
 Run:
 
 ```bash
-rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\city\project.heproj --editor-command menu.generate-rendering-scenes
+rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc\project.heproj --editor-command menu.generate-rendering-scenes
 ```
 
 Expected: `Editor command 'menu.generate-rendering-scenes' executed successfully.`
@@ -137,17 +137,17 @@ Expected: `Editor command 'menu.generate-rendering-scenes' executed successfully
 Run:
 
 ```bash
-rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\city\project.heproj --build windows --output C:\dev\helprojs\city\output\windows
+rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc\project.heproj --build windows --output C:\dev\helprojs\demodisc\output\windows
 ```
 
-Expected: `Build completed for platform 'windows': C:\dev\helprojs\city\output\windows`
+Expected: `Build completed for platform 'windows': C:\dev\helprojs\demodisc\output\windows`
 
 - [ ] **Step 3: Launch the rebuilt Windows output**
 
 Run:
 
 ```bash
-rtk powershell -NoProfile -Command "Start-Process -FilePath 'C:\dev\helprojs\city\output\windows\helengine_windows.exe'"
+rtk powershell -NoProfile -Command "Start-Process -FilePath 'C:\dev\helprojs\demodisc\output\windows\helengine_windows.exe'"
 ```
 
 Expected: the application starts normally and loads the configured startup scene.
@@ -157,7 +157,7 @@ Expected: the application starts normally and loads the configured startup scene
 Run:
 
 ```bash
-rtk powershell -NoProfile -Command "Start-Sleep -Seconds 8; Get-Content -Path 'C:\dev\helprojs\city\output\windows\helengine_windows.startup.log' -Tail 20; Get-Content -Path 'C:\dev\helprojs\city\output\windows\helengine_windows.render.log' -Tail 40"
+rtk powershell -NoProfile -Command "Start-Sleep -Seconds 8; Get-Content -Path 'C:\dev\helprojs\demodisc\output\windows\helengine_windows.startup.log' -Tail 20; Get-Content -Path 'C:\dev\helprojs\demodisc\output\windows\helengine_windows.render.log' -Tail 40"
 ```
 
 Expected:
@@ -169,6 +169,6 @@ Expected:
 - [ ] **Step 5: Commit regenerated scene outputs**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add -- assets/scenes/rendering
-rtk git -C C:\dev\helprojs\city commit -m "Regenerate rendering scenes with smaller instruction labels"
+rtk git -C C:\dev\helprojs\demodisc add -- assets/scenes/rendering
+rtk git -C C:\dev\helprojs\demodisc commit -m "Regenerate rendering scenes with smaller instruction labels"
 ```

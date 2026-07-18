@@ -37,14 +37,14 @@ Expected: `FAIL` because the current city worktree deleted the DS generator file
 ### Task 2: Restore DS Menu Generation And Runtime Remap Wiring
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\menu\MenuComponent.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\menu\DemoDiscReturnToMenuComponent.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\menu\NintendoDsReturnOverlayComponent.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\menu.tools\DemoDiscMainMenuSceneFactory.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\menu.tools\DemoDiscSceneGenerator.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\menu.tools\RegenerateDemoDiscMainMenuCommand.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\GeneratedAuthoringSceneWriteService.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering.tools\NintendoDsRenderingSceneScaffoldFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\menu\MenuComponent.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\menu\DemoDiscReturnToMenuComponent.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\menu\NintendoDsReturnOverlayComponent.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\menu.tools\DemoDiscMainMenuSceneFactory.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\menu.tools\DemoDiscSceneGenerator.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\menu.tools\RegenerateDemoDiscMainMenuCommand.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\GeneratedAuthoringSceneWriteService.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\NintendoDsRenderingSceneScaffoldFactory.cs`
 
 - [ ] **Step 1: Restore the scene-map runtime calls**
 
@@ -61,8 +61,8 @@ Recreate the deleted menu-tool generator files and ensure `DemoDiscMainMenuScene
 ### Task 3: Restore DS Assets And Boot Mapping Coverage
 
 **Files:**
-- Restore: `C:\dev\helprojs\city\assets\scenes\DemoDiscMainMenuDs.helen`
-- Restore or update: `C:\dev\helprojs\city\assets\scenes\GeneratedBootScene.helen`
+- Restore: `C:\dev\helprojs\demodisc\assets\scenes\DemoDiscMainMenuDs.helen`
+- Restore or update: `C:\dev\helprojs\demodisc\assets\scenes\GeneratedBootScene.helen`
 
 - [ ] **Step 1: Restore the committed DS menu asset**
 
@@ -76,7 +76,7 @@ Ensure `GeneratedBootScene.helen` contains the DS scene-map entries required for
 
 **Files:**
 - Test: `C:\dev\helworks\helengine-ds\builder.tests\helengine.ds.builder.tests.csproj`
-- Build: `C:\dev\helprojs\city\city.sln`
+- Build: `C:\dev\helprojs\demodisc\city.sln`
 
 - [ ] **Step 1: Re-run the focused audit test**
 
@@ -93,7 +93,7 @@ Expected: `PASS`
 Run:
 
 ```powershell
-rtk dotnet build C:\dev\helprojs\city\city.sln --no-restore -v minimal
+rtk dotnet build C:\dev\helprojs\demodisc\city.sln --no-restore -v minimal
 ```
 
 Expected: `Build succeeded.`

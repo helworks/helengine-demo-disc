@@ -5,7 +5,7 @@ namespace city.tests {
     public sealed class PromptIconOverlaySourceTests {
         [Fact]
         public void Demo_scene_instruction_overlay_source_uses_shared_resolver_and_editor_platform_overrides() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
 
             Assert.Contains("GeneratedControlIconAssetResolver", source, StringComparison.Ordinal);
             Assert.Contains("ComponentPlatformEditingService", source, StringComparison.Ordinal);
@@ -19,7 +19,7 @@ namespace city.tests {
 
         [Fact]
         public void Demo_scene_instruction_overlay_source_uses_raw_control_ids_for_keyboard_and_console_rows() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
 
             Assert.Contains("\"wasd\"", source, StringComparison.Ordinal);
             Assert.Contains("\"key_l\"", source, StringComparison.Ordinal);
@@ -31,7 +31,7 @@ namespace city.tests {
 
         [Fact]
         public void Demo_scene_instruction_overlay_source_authors_dual_input_camera_row_specs() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
 
             Assert.Contains("CameraIconSpecs", source, StringComparison.Ordinal);
             Assert.Contains("\"3ds\", \"circle_pad\"", source, StringComparison.Ordinal);
@@ -45,7 +45,7 @@ namespace city.tests {
 
         [Fact]
         public void Demo_scene_instruction_overlay_source_authors_two_camera_icon_slots() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
 
             Assert.Contains("CameraIconPrimary", source, StringComparison.Ordinal);
             Assert.Contains("CameraIconSecondary", source, StringComparison.Ordinal);
@@ -54,7 +54,7 @@ namespace city.tests {
 
         [Fact]
         public void Demo_scene_instruction_overlay_source_persists_sprite_source_rect_overrides_for_generated_icons() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
 
             Assert.Contains("SourceRect", source, StringComparison.Ordinal);
             Assert.Contains("nameof(SpriteComponent.SourceRect)", source, StringComparison.Ordinal);
@@ -62,7 +62,7 @@ namespace city.tests {
 
         [Fact]
         public void Physics_scene_factory_source_still_delegates_instruction_overlay_to_shared_rendering_factory() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneFactory.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs");
 
             Assert.Contains("instructionOverlayFactory.CreateDesktopInstructionOverlayRoot", source, StringComparison.Ordinal);
             Assert.DoesNotContain("images/instructions/controls/xbox360_dpad.png", source, StringComparison.Ordinal);

@@ -57,9 +57,14 @@ namespace city.rendering.tools {
         const float DesktopInstructionPanelTop = 528f;
 
         /// <summary>
-        /// Fixed desktop and console panel width used by the shared instruction overlay after the readability scale-up pass.
+        /// Fixed shared panel width used by desktop and console instruction overlays after the readability scale-up pass.
         /// </summary>
-        const int DesktopInstructionPanelWidth = 300;
+        const int DesktopInstructionPanelWidth = 345;
+
+        /// <summary>
+        /// Fixed console instruction panel width, expanded by fifteen percent while preserving the shared panel position.
+        /// </summary>
+        const int ConsoleInstructionPanelWidth = 345;
 
         /// <summary>
         /// Fixed desktop and console panel height used by the shared instruction overlay after the readability scale-up pass.
@@ -89,7 +94,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Fixed desktop and console horizontal offset used for the shared instruction label after the readability scale-up pass.
         /// </summary>
-        const float DesktopInstructionTextLeft = 112f;
+        const float DesktopInstructionLabelLeft = 130f;
 
         /// <summary>
         /// Fixed desktop and console horizontal offset used for the primary camera icon slot.
@@ -100,11 +105,6 @@ namespace city.rendering.tools {
         /// Fixed desktop and console horizontal offset used for the secondary camera icon slot.
         /// </summary>
         const float DesktopInstructionCameraSecondaryIconLeft = 72f;
-
-        /// <summary>
-        /// Fixed desktop and console horizontal offset used for the shared camera-row label.
-        /// </summary>
-        const float DesktopInstructionCameraTextLeft = 150f;
 
         /// <summary>
         /// Fixed desktop and console vertical nudge used to visually center the larger labels against the shared icon rows.
@@ -205,25 +205,29 @@ namespace city.rendering.tools {
         /// Raw generated control-icon binding plus the authored icon size and slot used for one camera row platform.
         /// </summary>
         readonly struct DesktopInstructionPlatformIconSlotSpec {
-            public DesktopInstructionPlatformIconSlotSpec(string platformId, string controlId, int2 size, int slotIndex) {
+            public DesktopInstructionPlatformIconSlotSpec(string platformId, string controlId, int2 size, int slotIndex, string sourcePlatformId = null) {
                 PlatformId = platformId;
                 ControlId = controlId;
                 Size = size;
                 SlotIndex = slotIndex;
+                SourcePlatformId = string.IsNullOrWhiteSpace(sourcePlatformId) ? platformId : sourcePlatformId;
             }
 
             public string PlatformId { get; }
             public string ControlId { get; }
             public int2 Size { get; }
             public int SlotIndex { get; }
+            public string SourcePlatformId { get; }
         }
 
         /// <summary>
         /// Shared camera-row icon bindings keyed by runtime platform and icon slot.
         /// </summary>
         static readonly DesktopInstructionPlatformIconSlotSpec[] CameraIconSpecs = new[] {
-            new DesktopInstructionPlatformIconSlotSpec("windows", "wasd", new int2(76, 52), 0),
-            new DesktopInstructionPlatformIconSlotSpec("win32", "wasd", new int2(76, 52), 0),
+            new DesktopInstructionPlatformIconSlotSpec("windows", "dpad", new int2(48, 48), 0, "xbox360"),
+            new DesktopInstructionPlatformIconSlotSpec("windows", "left_stick", new int2(48, 48), 1, "xbox360"),
+            new DesktopInstructionPlatformIconSlotSpec("win32", "dpad", new int2(48, 48), 0, "xbox360"),
+            new DesktopInstructionPlatformIconSlotSpec("win32", "left_stick", new int2(48, 48), 1, "xbox360"),
             new DesktopInstructionPlatformIconSlotSpec("xbox360", "dpad", new int2(48, 48), 0),
             new DesktopInstructionPlatformIconSlotSpec("xbox360", "left_stick", new int2(48, 48), 1),
             new DesktopInstructionPlatformIconSlotSpec("switch", "dpad", new int2(48, 48), 0),
@@ -279,6 +283,28 @@ namespace city.rendering.tools {
         };
 
         /// <summary>
+        /// Console-only camera D-pad bindings used by the reusable camera/light Blueprint.
+        /// </summary>
+        static readonly DesktopInstructionPlatformIconSpec[] ConsoleCameraIconSpecs = new[] {
+            new DesktopInstructionPlatformIconSpec("ps2", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("gamecube", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("wii", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("switch", "dpad", new int2(48, 48)),
+            new DesktopInstructionPlatformIconSpec("wiiu", "dpad", new int2(48, 48))
+        };
+
+        /// <summary>
+        /// Console-only light-toggle bindings used by the reusable camera/light Blueprint.
+        /// </summary>
+        static readonly DesktopInstructionPlatformIconSpec[] ConsoleLightIconSpecs = new[] {
+            new DesktopInstructionPlatformIconSpec("ps2", "r1", new int2(65, 48)),
+            new DesktopInstructionPlatformIconSpec("gamecube", "r", new int2(82, 43)),
+            new DesktopInstructionPlatformIconSpec("wii", "b", new int2(58, 46)),
+            new DesktopInstructionPlatformIconSpec("switch", "r", new int2(89, 41)),
+            new DesktopInstructionPlatformIconSpec("wiiu", "b", new int2(58, 46))
+        };
+
+        /// <summary>
         /// Creates the shared desktop and console instruction overlay as one screen-bound root entity.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative project root path used to resolve generated icon assets.</param>
@@ -291,7 +317,74 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(font));
             }
 
-            Entity viewportRootEntity = Core.Instance.EntityFactory.Create("DemoSceneInstructionViewport");
+            Entity viewportRootEntity = CreateInstructionViewportRoot("DemoSceneInstructionViewport", "DemoSceneInstructionPanel", out Entity panelEntity);
+
+            CreateDesktopInstructionCameraRow(panelEntity, projectRootPath, font, "Camera", DesktopInstructionFirstRowTop, DesktopInstructionRotateTextTopAdjustment);
+            CreateDesktopInstructionRow(panelEntity, projectRootPath, font, "LightIcon", "Light", DesktopInstructionSecondRowTop, DesktopInstructionToggleTextTopAdjustment, LightIconSpecs);
+            return viewportRootEntity;
+        }
+
+        /// <summary>
+        /// Creates the console-only instruction panel that is serialized into the shared Blueprint.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute or relative project root path used to resolve generated icon assets.</param>
+        /// <param name="font">Font used for the rendered instruction labels.</param>
+        /// <returns>Console camera/light instruction root entity.</returns>
+        public Entity CreateConsoleCameraLightInstructionsRoot(string projectRootPath, FontAsset font) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (font == null) {
+                throw new ArgumentNullException(nameof(font));
+            }
+
+            Entity viewportRootEntity = CreateInstructionViewportRoot(
+                "ConsoleCameraLightInstructions",
+                "ConsoleCameraLightInstructionsPanel",
+                out Entity panelEntity,
+                panelWidth: ConsoleInstructionPanelWidth);
+            CreateDesktopInstructionCameraRow(
+                panelEntity,
+                projectRootPath,
+                font,
+                "Camera",
+                DesktopInstructionFirstRowTop,
+                DesktopInstructionRotateTextTopAdjustment,
+                "ps2",
+                ConsoleCameraIconSpecs);
+            CreateDesktopInstructionRow(
+                panelEntity,
+                projectRootPath,
+                font,
+                "LightIcon",
+                "Light",
+                DesktopInstructionSecondRowTop,
+                DesktopInstructionToggleTextTopAdjustment,
+                ConsoleLightIconSpecs,
+                "ps2");
+            return viewportRootEntity;
+        }
+
+        /// <summary>
+        /// Creates a screen-bound reference viewport and its shared rounded instruction panel.
+        /// </summary>
+        /// <param name="viewportName">Stable viewport entity name.</param>
+        /// <param name="panelName">Stable panel entity name.</param>
+        /// <param name="panelEntity">Created panel entity.</param>
+        /// <returns>Created viewport root entity.</returns>
+        Entity CreateInstructionViewportRoot(
+            string viewportName,
+            string panelName,
+            out Entity panelEntity,
+            int panelWidth = DesktopInstructionPanelWidth) {
+            if (string.IsNullOrWhiteSpace(viewportName)) {
+                throw new ArgumentException("Viewport name must be provided.", nameof(viewportName));
+            } else if (string.IsNullOrWhiteSpace(panelName)) {
+                throw new ArgumentException("Panel name must be provided.", nameof(panelName));
+            } else if (panelWidth <= 0) {
+                throw new ArgumentOutOfRangeException(nameof(panelWidth));
+            }
+
+            Entity viewportRootEntity = Core.Instance.EntityFactory.Create(viewportName);
             viewportRootEntity.LayerMask = DesktopOverlayLayerMask;
             viewportRootEntity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
@@ -301,11 +394,11 @@ namespace city.rendering.tools {
                 ReferenceHeight = DesktopViewportHeight
             });
 
-            Entity panelEntity = Core.Instance.EntityFactory.CreateChild(viewportRootEntity, "DemoSceneInstructionPanel");
+            panelEntity = Core.Instance.EntityFactory.CreateChild(viewportRootEntity, panelName);
             panelEntity.LocalPosition = new float3(DesktopInstructionPanelLeft, DesktopInstructionPanelTop, 0f);
             panelEntity.LayerMask = DesktopOverlayLayerMask;
             panelEntity.AddComponent(new RoundedRectComponent {
-                Size = new int2(DesktopInstructionPanelWidth, DesktopInstructionPanelHeight),
+                Size = new int2(panelWidth, DesktopInstructionPanelHeight),
                 Radius = 8f,
                 BorderThickness = 2f,
                 FillColor = new byte4(20, 24, 32, 224),
@@ -314,8 +407,6 @@ namespace city.rendering.tools {
                 LayerMask = OverlayDrawableLayerMask
             });
 
-            CreateDesktopInstructionCameraRow(panelEntity, projectRootPath, font, "Camera", DesktopInstructionFirstRowTop, DesktopInstructionRotateTextTopAdjustment);
-            CreateDesktopInstructionRow(panelEntity, projectRootPath, font, "LightIcon", "Light", DesktopInstructionSecondRowTop, DesktopInstructionToggleTextTopAdjustment, LightIconSpecs);
             return viewportRootEntity;
         }
 
@@ -347,7 +438,9 @@ namespace city.rendering.tools {
             FontAsset font,
             string text,
             float topOffset,
-            float textTopAdjustment) {
+            float textTopAdjustment,
+            string commonPlatformId = "windows",
+            DesktopInstructionPlatformIconSpec[] cameraIconSpecs = null) {
             if (panelEntity == null) {
                 throw new ArgumentNullException(nameof(panelEntity));
             } else if (string.IsNullOrWhiteSpace(projectRootPath)) {
@@ -358,11 +451,17 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Instruction text must be provided.", nameof(text));
             }
 
-            CreateInstructionIconEntity(projectRootPath, panelEntity, "CameraIconPrimary", DesktopInstructionCameraPrimaryIconLeft, topOffset, CameraIconSpecs, 0, 201);
-            CreateInstructionIconEntity(projectRootPath, panelEntity, "CameraIconSecondary", DesktopInstructionCameraSecondaryIconLeft, topOffset, CameraIconSpecs, 1, 201);
+            DesktopInstructionPlatformIconSlotSpec[] cameraSlotSpecs = cameraIconSpecs == null
+                ? CameraIconSpecs
+                : CreateSingleCameraSlotSpecs(cameraIconSpecs);
+
+            CreateInstructionIconEntity(projectRootPath, panelEntity, "CameraIconPrimary", DesktopInstructionCameraPrimaryIconLeft, topOffset, cameraSlotSpecs, 0, 201, commonPlatformId);
+            if (cameraIconSpecs == null) {
+                CreateInstructionIconEntity(projectRootPath, panelEntity, "CameraIconSecondary", DesktopInstructionCameraSecondaryIconLeft, topOffset, cameraSlotSpecs, 1, 201, commonPlatformId);
+            }
 
             Entity textEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, "CameraText");
-            textEntity.LocalPosition = new float3(DesktopInstructionCameraTextLeft, topOffset + textTopAdjustment, 0.1f);
+            textEntity.LocalPosition = new float3(DesktopInstructionLabelLeft, topOffset + textTopAdjustment, 0.1f);
             textEntity.LayerMask = DesktopOverlayLayerMask;
             TextComponent textComponent = new TextComponent {
                 Text = text,
@@ -375,6 +474,28 @@ namespace city.rendering.tools {
             };
             textEntity.AddComponent(textComponent);
             ApplyFontReference(textEntity, textComponent);
+        }
+
+        /// <summary>
+        /// Converts one console camera icon per platform into the slot representation used by the shared sprite authoring helper.
+        /// </summary>
+        /// <param name="specs">Single-slot console camera icon specifications.</param>
+        /// <returns>Slot specifications with every icon assigned to slot zero.</returns>
+        static DesktopInstructionPlatformIconSlotSpec[] CreateSingleCameraSlotSpecs(DesktopInstructionPlatformIconSpec[] specs) {
+            if (specs == null || specs.Length == 0) {
+                throw new ArgumentException("Console camera icon specs must be provided.", nameof(specs));
+            }
+
+            DesktopInstructionPlatformIconSlotSpec[] slotSpecs = new DesktopInstructionPlatformIconSlotSpec[specs.Length];
+            for (int index = 0; index < specs.Length; index++) {
+                slotSpecs[index] = new DesktopInstructionPlatformIconSlotSpec(
+                    specs[index].PlatformId,
+                    specs[index].ControlId,
+                    specs[index].Size,
+                    0);
+            }
+
+            return slotSpecs;
         }
 
         /// <summary>
@@ -396,7 +517,8 @@ namespace city.rendering.tools {
             string text,
             float topOffset,
             float textTopAdjustment,
-            DesktopInstructionPlatformIconSpec[] specs) {
+            DesktopInstructionPlatformIconSpec[] specs,
+            string commonPlatformId = "windows") {
             if (panelEntity == null) {
                 throw new ArgumentNullException(nameof(panelEntity));
             } else if (string.IsNullOrWhiteSpace(projectRootPath)) {
@@ -411,10 +533,10 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Desktop instruction icon specs must be provided.", nameof(specs));
             }
 
-            CreateInstructionIconEntity(projectRootPath, panelEntity, iconEntityName, DesktopInstructionIconLeft, topOffset, specs, 201);
+            CreateInstructionIconEntity(projectRootPath, panelEntity, iconEntityName, DesktopInstructionIconLeft, topOffset, specs, 201, commonPlatformId);
 
             Entity textEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, iconEntityName + "Text");
-            textEntity.LocalPosition = new float3(DesktopInstructionTextLeft, topOffset + textTopAdjustment, 0.1f);
+            textEntity.LocalPosition = new float3(DesktopInstructionLabelLeft, topOffset + textTopAdjustment, 0.1f);
             textEntity.LayerMask = DesktopOverlayLayerMask;
             TextComponent textComponent = new TextComponent {
                 Text = text,
@@ -490,7 +612,8 @@ namespace city.rendering.tools {
             float leftOffset,
             float topOffset,
             DesktopInstructionPlatformIconSpec[] specs,
-            byte renderOrder2D) {
+            byte renderOrder2D,
+            string commonPlatformId = "windows") {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             } else if (panelEntity == null) {
@@ -504,7 +627,7 @@ namespace city.rendering.tools {
             Entity entity = Core.Instance.EntityFactory.CreateChild(panelEntity, entityName);
             entity.LocalPosition = new float3(leftOffset, topOffset, 0.1f);
             entity.LayerMask = DesktopOverlayLayerMask;
-            DesktopInstructionPlatformIconSpec commonSpec = FindRequiredCommonSpec(specs, "windows");
+            DesktopInstructionPlatformIconSpec commonSpec = FindRequiredCommonSpec(specs, commonPlatformId);
             ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(projectRootPath, commonSpec.PlatformId, commonSpec.ControlId);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = commonIcon.FitDisplaySizeWithin(commonSpec.Size),
@@ -544,7 +667,8 @@ namespace city.rendering.tools {
             float topOffset,
             DesktopInstructionPlatformIconSlotSpec[] specs,
             int slotIndex,
-            byte renderOrder2D) {
+            byte renderOrder2D,
+            string commonPlatformId = "windows") {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             } else if (panelEntity == null) {
@@ -561,13 +685,13 @@ namespace city.rendering.tools {
             entity.LocalPosition = new float3(leftOffset, topOffset, 0.1f);
             entity.LayerMask = DesktopOverlayLayerMask;
 
-            bool hasWindowsCommonSpec = TryFindPlatformSlotSpec(specs, "windows", slotIndex, out DesktopInstructionPlatformIconSlotSpec commonSpec);
-            if (!hasWindowsCommonSpec) {
+            bool hasCommonSpec = TryFindPlatformSlotSpec(specs, commonPlatformId, slotIndex, out DesktopInstructionPlatformIconSlotSpec commonSpec);
+            if (!hasCommonSpec) {
                 commonSpec = FindRequiredSlotSpec(specs, slotIndex);
             }
 
-            bool hideByDefault = !hasWindowsCommonSpec;
-            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(projectRootPath, commonSpec.PlatformId, commonSpec.ControlId);
+            bool hideByDefault = !hasCommonSpec;
+            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(projectRootPath, commonSpec.SourcePlatformId, commonSpec.ControlId);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = commonIcon.FitDisplaySizeWithin(commonSpec.Size),
                 SourceRect = commonIcon.SourceRect,
@@ -642,7 +766,7 @@ namespace city.rendering.tools {
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             SpriteComponent overrideComponent = (SpriteComponent)PlatformEditingService.EnsurePlatformOverrideComponent(commonComponent, saveComponent, spec.PlatformId);
-            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(projectRootPath, spec.PlatformId, spec.ControlId);
+            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(projectRootPath, spec.SourcePlatformId, spec.ControlId);
             overrideComponent.Size = resolvedIcon.FitDisplaySizeWithin(spec.Size);
             PlatformEditingService.MarkPropertyOverride(commonComponent, saveComponent, spec.PlatformId, nameof(SpriteComponent.Size));
             overrideComponent.SourceRect = resolvedIcon.SourceRect;

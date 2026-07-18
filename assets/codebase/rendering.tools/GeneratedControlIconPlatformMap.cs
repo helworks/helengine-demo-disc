@@ -10,6 +10,7 @@ namespace city.rendering.tools {
             ["switch"] = "switch",
             ["gamecube"] = "gamecube",
             ["wii"] = "wii",
+            ["wiiu"] = "wii",
             ["ds"] = "ds",
             ["3ds"] = "3ds",
             ["psp"] = "psp",

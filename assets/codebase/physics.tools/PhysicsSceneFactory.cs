@@ -371,11 +371,6 @@ namespace city.physics.tools {
         readonly city.rendering.tools.GeneratedAuthoringSceneWriteService AuthoringSceneWriteService;
 
         /// <summary>
-        /// Shared scene-music authoring service used by both serialized and live-authored physics scenes.
-        /// </summary>
-        readonly city.scene.tools.GeneratedSceneMusicAuthoringService SceneMusicAuthoringService;
-
-        /// <summary>
         /// Initializes the validation-scene factory with a fresh scene-local entity id allocator.
         /// </summary>
         public PhysicsSceneFactory() {
@@ -383,7 +378,6 @@ namespace city.physics.tools {
             PersistenceRegistry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
             OverridePayloadService = new ComponentPlatformOverridePayloadService();
             AuthoringSceneWriteService = new city.rendering.tools.GeneratedAuthoringSceneWriteService();
-            SceneMusicAuthoringService = new city.scene.tools.GeneratedSceneMusicAuthoringService();
         }
 
         /// <summary>
@@ -432,7 +426,7 @@ namespace city.physics.tools {
                 throw new InvalidOperationException($"Unsupported physics validation scene id '{sceneId}'.");
             }
 
-            return AppendSharedSceneMusic(sceneAsset);
+            return sceneAsset;
         }
 
         /// <summary>
@@ -1332,6 +1326,8 @@ namespace city.physics.tools {
                 Id = saveComponent.EntityId,
                 Name = entity.Name,
                 IsStatic = entity.Static,
+                Enabled = entity.Enabled,
+                LayerMask = entity.LayerMask,
                 LocalPosition = entity.LocalPosition,
                 LocalScale = entity.LocalScale,
                 LocalOrientation = entity.LocalOrientation,
@@ -2050,14 +2046,17 @@ namespace city.physics.tools {
             if (includeDesktopInstructionOverlay) {
                 city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory();
                 FontAsset instructionFont = ResolveRequiredEditorFont();
-                rootEntities.Insert(1, instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont));
+                Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
+                city.rendering.tools.ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new city.rendering.tools.ConsoleCameraLightInstructionsSceneAttachmentService();
+                consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
+                rootEntities.Insert(1, instructionOverlayEntity);
+                rootEntities.Insert(2, consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath));
             }
 
             IReadOnlyList<EditorEntity> scenarioRoots = LoadPlayablePhysicsShowcaseScenarioRoots(projectRootPath, authoredSceneAsset);
             for (int index = 0; index < scenarioRoots.Count; index++) {
                 rootEntities.Add(scenarioRoots[index]);
             }
-            rootEntities.Add(SceneMusicAuthoringService.CreateRenderingAndPhysicsMusicEntity());
             for (int index = 0; index < rootEntities.Count; index++) {
                 if (rootEntities[index] is not EditorEntity editorRootEntity) {
                     throw new InvalidOperationException("Playable physics showcase roots must be editor entities before they can be saved.");
@@ -2075,34 +2074,6 @@ namespace city.physics.tools {
                 SceneSettings = authoredSceneAsset.SceneSettings,
                 RootEntities = rootEntities.ToArray()
             };
-        }
-
-        /// <summary>
-        /// Appends the shared looping music root to one serialized physics scene asset while preserving deduplicated scene-level asset references.
-        /// </summary>
-        /// <param name="sceneAsset">Serialized physics scene asset that should receive the shared music root.</param>
-        /// <returns>Updated scene asset with one shared music root appended.</returns>
-        SceneAsset AppendSharedSceneMusic(SceneAsset sceneAsset) {
-            if (sceneAsset == null) {
-                throw new ArgumentNullException(nameof(sceneAsset));
-            }
-
-            List<SceneAssetReference> assetReferences = sceneAsset.AssetReferences?.ToList() ?? new List<SceneAssetReference>();
-            HashSet<string> assetReferenceKeys = CreateSceneAssetReferenceKeySet(assetReferences);
-            EditorEntity musicEntity = SceneMusicAuthoringService.CreateRenderingAndPhysicsMusicEntity();
-            try {
-                ReassignGeneratedEditorEntityIds(musicEntity);
-                SceneEntityAsset serializedMusicEntity = SerializeGeneratedEditorEntity(musicEntity, assetReferences, assetReferenceKeys);
-                SceneEntityAsset[] existingRootEntities = sceneAsset.RootEntities ?? Array.Empty<SceneEntityAsset>();
-                SceneEntityAsset[] rootEntities = new SceneEntityAsset[existingRootEntities.Length + 1];
-                Array.Copy(existingRootEntities, rootEntities, existingRootEntities.Length);
-                rootEntities[rootEntities.Length - 1] = serializedMusicEntity;
-                sceneAsset.AssetReferences = assetReferences.ToArray();
-                sceneAsset.RootEntities = rootEntities;
-                return sceneAsset;
-            } finally {
-                musicEntity.Dispose();
-            }
         }
 
         /// <summary>
@@ -2487,7 +2458,7 @@ namespace city.physics.tools {
             throw new InvalidOperationException("Generated static-mesh showcase cameras must include DemoFollowCameraComponent.");
         }
         /// <summary>
-        /// Stores the generated editor-font reference on the entity save state for the supplied FPS component.
+        /// Stores the shared generated UI-font reference on the entity save state for the supplied FPS component.
         /// </summary>
         /// <param name="entity">Entity that owns the FPS component.</param>
         /// <param name="component">FPS component whose font reference should be stored.</param>
@@ -2503,7 +2474,7 @@ namespace city.physics.tools {
         }
 
         /// <summary>
-        /// Stores the generated editor-font reference on the entity save state for the supplied text component.
+        /// Stores the shared authored body-font reference on the entity save state for the supplied text component.
         /// </summary>
         /// <param name="entity">Entity that owns the text component.</param>
         /// <param name="component">Text component whose font reference should be stored.</param>
@@ -2515,11 +2486,11 @@ namespace city.physics.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
         }
 
         /// <summary>
-        /// Rewrites any stale generated-editor font save reference before one generated overlay component is serialized through the manual physics showcase scene path.
+        /// Rewrites any stale generated-overlay font save reference before one generated overlay component is serialized through the manual physics showcase scene path.
         /// </summary>
         /// <param name="component">Generated overlay component currently being serialized.</param>
         /// <param name="saveState">Save metadata that should carry the normalized font reference.</param>
@@ -2531,20 +2502,20 @@ namespace city.physics.tools {
             }
 
             if (component is FPSComponent fpsComponent) {
-                NormalizeGeneratedEditorFontReference(fpsComponent.Font, saveState);
+                NormalizeGeneratedEditorFontReference(fpsComponent.Font, saveState, true);
             } else if (component is DebugComponent debugComponent) {
-                NormalizeGeneratedEditorFontReference(debugComponent.Font, saveState);
+                NormalizeGeneratedEditorFontReference(debugComponent.Font, saveState, false);
             } else if (component is TextComponent textComponent) {
-                NormalizeGeneratedEditorFontReference(textComponent.Font, saveState);
+                NormalizeGeneratedEditorFontReference(textComponent.Font, saveState, false);
             }
         }
 
         /// <summary>
-        /// Stores the stable generated editor UI-font reference when one generated overlay component uses the active editor font instance.
+        /// Stores the shared authored body-font reference when one generated overlay component uses the active editor font instance.
         /// </summary>
         /// <param name="font">Runtime font assigned to the generated overlay component.</param>
         /// <param name="saveState">Save metadata that should carry the normalized font reference.</param>
-        void NormalizeGeneratedEditorFontReference(FontAsset font, EntityComponentSaveState saveState) {
+        void NormalizeGeneratedEditorFontReference(FontAsset font, EntityComponentSaveState saveState, bool useEditorUiFont) {
             if (saveState == null) {
                 throw new ArgumentNullException(nameof(saveState));
             } else if (font == null) {
@@ -2555,7 +2526,11 @@ namespace city.physics.tools {
                 return;
             }
 
-            saveState.SetAssetReference("Font", DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+            saveState.SetAssetReference(
+                "Font",
+                useEditorUiFont
+                    ? DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference()
+                    : DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
         }
 
         /// <summary>

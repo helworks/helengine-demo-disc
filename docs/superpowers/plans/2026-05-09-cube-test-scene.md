@@ -13,8 +13,8 @@
 ### Task 1: Add a Generated Cube-Test Scene Factory
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering.tools\CubeTestSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\RenderingSceneGenerator.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\CubeTestSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingSceneGenerator.cs`
 - Test: `C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\engine\helengine.editor.tests\GeneratedRuntimeSceneViewportSourceTests.cs`
 
 - [ ] **Step 1: Write the failing test**
@@ -27,7 +27,7 @@ Add this test to `GeneratedRuntimeSceneViewportSourceTests.cs`:
         /// </summary>
         [Fact]
         public void Cube_test_scene_source_uses_fullscreen_camera_and_no_runtime_motion_scripts() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\rendering.tools\CubeTestSceneFactory.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\CubeTestSceneFactory.cs");
 
             Assert.Contains("public const string SceneId = RenderingSceneGenerator.CubeTestSceneId;", source, StringComparison.Ordinal);
             Assert.Contains("writer.WriteField(\"Viewport\", fieldWriter => fieldWriter.WriteFloat4(new float4(0f, 0f, 1f, 1f)));", source, StringComparison.Ordinal);
@@ -180,15 +180,15 @@ Expected: `PASS`
 - [ ] **Step 6: Commit the scene factory task**
 
 ```powershell
-rtk git -C "C:\dev\helprojs\city" add -- "assets/codebase/rendering.tools/CubeTestSceneFactory.cs" "assets/codebase/rendering.tools/RenderingSceneGenerator.cs"
-rtk git -C "C:\dev\helprojs\city" commit -m "feat: add cube test rendering scene"
+rtk git -C "C:\dev\helprojs\demodisc" add -- "assets/codebase/rendering.tools/CubeTestSceneFactory.cs" "assets/codebase/rendering.tools/RenderingSceneGenerator.cs"
+rtk git -C "C:\dev\helprojs\demodisc" commit -m "feat: add cube test rendering scene"
 ```
 
 ### Task 2: Reduce the Generated Rendering Export Set to the Cube Scene
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\menu\DemoDiscSceneCatalog.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\RenderingSceneGenerator.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\menu\DemoDiscSceneCatalog.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingSceneGenerator.cs`
 - Test: `C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\engine\helengine.editor.tests\tools\DemoDiscSceneWriterTests.cs`
 
 - [ ] **Step 1: Write the failing test**
@@ -201,7 +201,7 @@ Add this test to `DemoDiscSceneWriterTests.cs`:
         /// </summary>
         [Fact]
         public void Demo_disc_scene_catalog_source_lists_only_cube_test_scene() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\menu\DemoDiscSceneCatalog.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\menu\DemoDiscSceneCatalog.cs");
 
             Assert.Contains("scenes/rendering/cube_test.helen", source, StringComparison.Ordinal);
             Assert.DoesNotContain("scenes/rendering/directional_shadow_plaza.helen", source, StringComparison.Ordinal);
@@ -242,14 +242,14 @@ Expected: `PASS`
 - [ ] **Step 5: Commit the reduced export/list task**
 
 ```powershell
-rtk git -C "C:\dev\helprojs\city" add -- "assets/codebase/menu/DemoDiscSceneCatalog.cs"
-rtk git -C "C:\dev\helprojs\city" commit -m "feat: point demo scene catalog to cube test"
+rtk git -C "C:\dev\helprojs\demodisc" add -- "assets/codebase/menu/DemoDiscSceneCatalog.cs"
+rtk git -C "C:\dev\helprojs\demodisc" commit -m "feat: point demo scene catalog to cube test"
 ```
 
 ### Task 3: Make the Cube Scene the Active Startup Target and Verify Export
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\project.heproj`
+- Modify: `C:\dev\helprojs\demodisc\project.heproj`
 - Use: `C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll`
 - Output: `C:\dev\helprojs\output\ps2-cube-test`
 
@@ -263,7 +263,7 @@ Add this test to `DemoDiscSceneWriterTests.cs`:
         /// </summary>
         [Fact]
         public void City_project_startup_scene_points_to_cube_test_scene() {
-            string projectSource = File.ReadAllText(@"C:\dev\helprojs\city\project.heproj");
+            string projectSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\project.heproj");
 
             Assert.Contains("scenes/rendering/cube_test.helen", projectSource, StringComparison.Ordinal);
         }
@@ -304,7 +304,7 @@ Expected: `PASS`
 Run:
 
 ```powershell
-rtk proxy powershell.exe -NoProfile -Command "dotnet 'C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll' --build ps2 --project 'C:\dev\helprojs\city\project.heproj' --output 'C:\dev\helprojs\output\ps2-cube-test'"
+rtk proxy powershell.exe -NoProfile -Command "dotnet 'C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll' --build ps2 --project 'C:\dev\helprojs\demodisc\project.heproj' --output 'C:\dev\helprojs\output\ps2-cube-test'"
 ```
 
 Expected:
@@ -335,6 +335,6 @@ Manual checks:
 - [ ] **Step 8: Commit the startup/export task**
 
 ```powershell
-rtk git -C "C:\dev\helprojs\city" add -- "project.heproj"
-rtk git -C "C:\dev\helprojs\city" commit -m "feat: boot city into cube test scene"
+rtk git -C "C:\dev\helprojs\demodisc" add -- "project.heproj"
+rtk git -C "C:\dev\helprojs\demodisc" commit -m "feat: boot city into cube test scene"
 ```

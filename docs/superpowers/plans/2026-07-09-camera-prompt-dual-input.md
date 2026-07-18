@@ -23,7 +23,7 @@
 [Fact]
 public void Demo_scene_instruction_overlay_source_authors_dual_input_camera_row_specs() {
     string source = File.ReadAllText(
-        @"C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
+        @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
 
     Assert.Contains("CameraIconSpecs", source, StringComparison.Ordinal);
     Assert.Contains("\"3ds\", \"dpad\"", source, StringComparison.Ordinal);
@@ -36,7 +36,7 @@ public void Demo_scene_instruction_overlay_source_authors_dual_input_camera_row_
 [Fact]
 public void Demo_scene_instruction_overlay_source_authors_two_camera_icon_slots() {
     string source = File.ReadAllText(
-        @"C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
+        @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
 
     Assert.Contains("CameraIconPrimary", source, StringComparison.Ordinal);
     Assert.Contains("CameraIconSecondary", source, StringComparison.Ordinal);
@@ -48,7 +48,7 @@ public void Demo_scene_instruction_overlay_source_authors_two_camera_icon_slots(
 [Fact]
 public void Catalog_returns_generated_png_paths_for_circle_pad_and_analog_controls() {
     city.rendering.tools.GeneratedControlIconCatalog catalog =
-        city.rendering.tools.GeneratedControlIconCatalog.Load(@"C:\dev\helprojs\city");
+        city.rendering.tools.GeneratedControlIconCatalog.Load(@"C:\dev\helprojs\demodisc");
 
     Assert.Equal(
         "images/instructions/controls/generated/3ds/circle_pad.png",
@@ -64,7 +64,7 @@ public void Catalog_returns_generated_png_paths_for_circle_pad_and_analog_contro
 Run:
 
 ```powershell
-rtk powershell -NoProfile -Command "dotnet test 'C:\dev\helprojs\city\user_settings\generated_code\projects\rendering.tools.tests\rendering.tools.tests.csproj' --filter 'PromptIconOverlaySourceTests|GeneratedControlIconAssetResolverTests' -v minimal"
+rtk powershell -NoProfile -Command "dotnet test 'C:\dev\helprojs\demodisc\user_settings\generated_code\projects\rendering.tools.tests\rendering.tools.tests.csproj' --filter 'PromptIconOverlaySourceTests|GeneratedControlIconAssetResolverTests' -v minimal"
 ```
 
 Expected:
@@ -202,7 +202,7 @@ Update `CreateInstructionIconEntity(...)` so it accepts a `slotIndex`, selects t
 Run:
 
 ```powershell
-rtk powershell -NoProfile -Command "dotnet test 'C:\dev\helprojs\city\user_settings\generated_code\projects\rendering.tools.tests\rendering.tools.tests.csproj' --filter 'PromptIconOverlaySourceTests|GeneratedControlIconAssetResolverTests' -v minimal"
+rtk powershell -NoProfile -Command "dotnet test 'C:\dev\helprojs\demodisc\user_settings\generated_code\projects\rendering.tools.tests\rendering.tools.tests.csproj' --filter 'PromptIconOverlaySourceTests|GeneratedControlIconAssetResolverTests' -v minimal"
 ```
 
 Expected:
@@ -215,7 +215,7 @@ Expected:
 Run:
 
 ```powershell
-rtk powershell -NoProfile -Command "dotnet test 'C:\dev\helprojs\city\user_settings\generated_code\projects\rendering.tools.tests\rendering.tools.tests.csproj' -v minimal"
+rtk powershell -NoProfile -Command "dotnet test 'C:\dev\helprojs\demodisc\user_settings\generated_code\projects\rendering.tools.tests\rendering.tools.tests.csproj' -v minimal"
 ```
 
 Expected:
@@ -242,7 +242,7 @@ git commit -m "feat: add dual-input camera prompt row"
 Run:
 
 ```powershell
-rtk powershell -NoProfile -Command "dotnet run --project 'C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj' -- --project 'C:\dev\helprojs\city\project.heproj' --editor-command menu.generate-rendering-scenes"
+rtk powershell -NoProfile -Command "dotnet run --project 'C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj' -- --project 'C:\dev\helprojs\demodisc\project.heproj' --editor-command menu.generate-rendering-scenes"
 ```
 
 Expected:
@@ -254,7 +254,7 @@ Expected:
 Run:
 
 ```powershell
-rtk powershell -NoProfile -Command "dotnet run --project 'C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj' -- --project 'C:\dev\helprojs\city\project.heproj' --editor-command menu.generate-physics-scenes"
+rtk powershell -NoProfile -Command "dotnet run --project 'C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj' -- --project 'C:\dev\helprojs\demodisc\project.heproj' --editor-command menu.generate-physics-scenes"
 ```
 
 Expected:
@@ -293,7 +293,7 @@ git commit -m "chore: regenerate dual-input camera prompt scenes"
 Run:
 
 ```powershell
-rtk powershell -NoProfile -Command "dotnet test 'C:\dev\helprojs\city\user_settings\generated_code\projects\rendering.tools.tests\rendering.tools.tests.csproj' -v minimal"
+rtk powershell -NoProfile -Command "dotnet test 'C:\dev\helprojs\demodisc\user_settings\generated_code\projects\rendering.tools.tests\rendering.tools.tests.csproj' -v minimal"
 rtk powershell -NoProfile -Command "git status --short"
 ```
 

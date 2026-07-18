@@ -99,7 +99,7 @@ namespace city.tests {
     public sealed class SplitPlayGoldenCoinSourceTests {
         [Fact]
         public void Game_scene_generator_invokes_split_play_coin_generation() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneGenerator.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
 
             Assert.Contains("SplitPlayGoldenCoinAssetGenerator", source, StringComparison.Ordinal);
             Assert.Contains("splitPlayGoldenCoinAssetGenerator.Generate(projectRootPath);", source, StringComparison.Ordinal);
@@ -113,7 +113,7 @@ namespace city.tests {
 Run:
 
 ```powershell
-dotnet test C:\dev\helprojs\city\assets\codebase\game.tools.tests --filter "FullyQualifiedName~SplitPlayGoldenCoin"
+dotnet test C:\dev\helprojs\demodisc\assets\codebase\game.tools.tests --filter "FullyQualifiedName~SplitPlayGoldenCoin"
 ```
 
 Expected:
@@ -124,10 +124,10 @@ Expected:
 - [ ] **Step 4: Commit the failing tests**
 
 ```bash
-git -C C:\dev\helprojs\city add ^
+git -C C:\dev\helprojs\demodisc add ^
   assets/codebase/game.tools.tests/SplitPlayGoldenCoinAssetGenerationTests.cs ^
   assets/codebase/game.tools.tests/SplitPlayGoldenCoinSourceTests.cs
-git -C C:\dev\helprojs\city commit -m "test: define Split Play coin asset generation contract"
+git -C C:\dev\helprojs\demodisc commit -m "test: define Split Play coin asset generation contract"
 ```
 
 ### Task 2: Add generated model and blueprint write services
@@ -223,7 +223,7 @@ namespace city.game.tools {
 Run:
 
 ```powershell
-dotnet test C:\dev\helprojs\city\assets\codebase\game.tools.tests --filter "FullyQualifiedName~SplitPlayGoldenCoin"
+dotnet test C:\dev\helprojs\demodisc\assets\codebase\game.tools.tests --filter "FullyQualifiedName~SplitPlayGoldenCoin"
 ```
 
 Expected:
@@ -234,11 +234,11 @@ Expected:
 - [ ] **Step 5: Commit the shared writers**
 
 ```bash
-git -C C:\dev\helprojs\city add ^
+git -C C:\dev\helprojs\demodisc add ^
   assets/codebase/game.tools/SplitPlayAssetCatalog.cs ^
   assets/codebase/game.tools/SplitPlayGeneratedModelAssetWriteService.cs ^
   assets/codebase/game.tools/SplitPlayGeneratedBlueprintAssetWriteService.cs
-git -C C:\dev\helprojs\city commit -m "feat: add Split Play generated asset writers"
+git -C C:\dev\helprojs\demodisc commit -m "feat: add Split Play generated asset writers"
 ```
 
 ### Task 3: Implement the gold material definition and coin geometry factory
@@ -381,7 +381,7 @@ GeneratedMaterialAssetDefinition CreateMaterialDefinition() {
 Run:
 
 ```powershell
-dotnet test C:\dev\helprojs\city\assets\codebase\game.tools.tests --filter "FullyQualifiedName~SplitPlayGoldenCoinAssetGenerationTests"
+dotnet test C:\dev\helprojs\demodisc\assets\codebase\game.tools.tests --filter "FullyQualifiedName~SplitPlayGoldenCoinAssetGenerationTests"
 ```
 
 Expected:
@@ -392,8 +392,8 @@ Expected:
 - [ ] **Step 6: Commit the geometry and material work**
 
 ```bash
-git -C C:\dev\helprojs\city add assets/codebase/game.tools/SplitPlayGoldenCoinAssetGenerator.cs
-git -C C:\dev\helprojs\city commit -m "feat: generate Split Play coin geometry and material"
+git -C C:\dev\helprojs\demodisc add assets/codebase/game.tools/SplitPlayGoldenCoinAssetGenerator.cs
+git -C C:\dev\helprojs\demodisc commit -m "feat: generate Split Play coin geometry and material"
 ```
 
 ### Task 4: Implement the blueprint payload and DS mesh override
@@ -451,7 +451,7 @@ Assert.DoesNotContain(dsOverride.AssetReferences, entry => entry.Name == "Materi
 Run:
 
 ```powershell
-dotnet test C:\dev\helprojs\city\assets\codebase\game.tools.tests --filter "FullyQualifiedName~SplitPlayGoldenCoinAssetGenerationTests"
+dotnet test C:\dev\helprojs\demodisc\assets\codebase\game.tools.tests --filter "FullyQualifiedName~SplitPlayGoldenCoinAssetGenerationTests"
 ```
 
 Expected:
@@ -461,10 +461,10 @@ Expected:
 - [ ] **Step 4: Commit the blueprint authoring**
 
 ```bash
-git -C C:\dev\helprojs\city add ^
+git -C C:\dev\helprojs\demodisc add ^
   assets/codebase/game.tools/SplitPlayGoldenCoinAssetGenerator.cs ^
   assets/codebase/game.tools.tests/SplitPlayGoldenCoinAssetGenerationTests.cs
-git -C C:\dev\helprojs\city commit -m "feat: generate Split Play coin blueprint"
+git -C C:\dev\helprojs\demodisc commit -m "feat: generate Split Play coin blueprint"
 ```
 
 ### Task 5: Wire gameplay generation to emit the coin assets
@@ -506,7 +506,7 @@ public void Generate(string projectRootPath) {
 Run:
 
 ```powershell
-dotnet test C:\dev\helprojs\city\assets\codebase\game.tools.tests --filter "FullyQualifiedName~SplitPlayGoldenCoinSourceTests"
+dotnet test C:\dev\helprojs\demodisc\assets\codebase\game.tools.tests --filter "FullyQualifiedName~SplitPlayGoldenCoinSourceTests"
 ```
 
 Expected:
@@ -516,10 +516,10 @@ Expected:
 - [ ] **Step 3: Commit the generator wiring**
 
 ```bash
-git -C C:\dev\helprojs\city add ^
+git -C C:\dev\helprojs\demodisc add ^
   assets/codebase/game.tools/GameSceneGenerator.cs ^
   assets/codebase/game.tools.tests/SplitPlayGoldenCoinSourceTests.cs
-git -C C:\dev\helprojs\city commit -m "feat: wire Split Play coin asset generation into gameplay output"
+git -C C:\dev\helprojs\demodisc commit -m "feat: wire Split Play coin asset generation into gameplay output"
 ```
 
 ### Task 6: Run the final verification slice and inspect authored outputs
@@ -533,7 +533,7 @@ git -C C:\dev\helprojs\city commit -m "feat: wire Split Play coin asset generati
 Run:
 
 ```powershell
-dotnet test C:\dev\helprojs\city\assets\codebase\game.tools.tests --filter "FullyQualifiedName~SplitPlayGoldenCoin" -v minimal
+dotnet test C:\dev\helprojs\demodisc\assets\codebase\game.tools.tests --filter "FullyQualifiedName~SplitPlayGoldenCoin" -v minimal
 ```
 
 Expected:
@@ -545,17 +545,17 @@ Expected:
 Run:
 
 ```powershell
-dotnet run --project C:\dev\helprojs\city\assets\codebase\game.tools -- generate-game-scenes
+dotnet run --project C:\dev\helprojs\demodisc\assets\codebase\game.tools -- generate-game-scenes
 ```
 
 Expected:
 
 - command completes successfully
 - the following assets exist:
-  - `C:\dev\helprojs\city\assets\models\games\split_play\golden_coin.hasset`
-  - `C:\dev\helprojs\city\assets\models\games\split_play\golden_coin_ds.hasset`
-  - `C:\dev\helprojs\city\assets\materials\games\split_play\GoldenCoin.hasset`
-  - `C:\dev\helprojs\city\assets\blueprints\games\split_play\GoldenCoin.hblueprint`
+  - `C:\dev\helprojs\demodisc\assets\models\games\split_play\golden_coin.hasset`
+  - `C:\dev\helprojs\demodisc\assets\models\games\split_play\golden_coin_ds.hasset`
+  - `C:\dev\helprojs\demodisc\assets\materials\games\split_play\GoldenCoin.hasset`
+  - `C:\dev\helprojs\demodisc\assets\blueprints\games\split_play\GoldenCoin.hblueprint`
 
 - [ ] **Step 3: Spot-check the generated blueprint asset**
 
@@ -567,7 +567,7 @@ using System;
 using System.IO;
 using helengine;
 
-using FileStream stream = File.OpenRead(@"C:\dev\helprojs\city\assets\blueprints\games\split_play\GoldenCoin.hblueprint");
+using FileStream stream = File.OpenRead(@"C:\dev\helprojs\demodisc\assets\blueprints\games\split_play\GoldenCoin.hblueprint");
 BlueprintAsset blueprint = (BlueprintAsset)AssetSerializer.Deserialize(stream);
 Console.WriteLine(blueprint.Id);
 Console.WriteLine(blueprint.AssetReferences.Length);
@@ -584,12 +584,12 @@ Expected:
 - [ ] **Step 4: Commit the generated outputs if this repo tracks them**
 
 ```bash
-git -C C:\dev\helprojs\city add ^
+git -C C:\dev\helprojs\demodisc add ^
   assets/models/games/split_play/golden_coin.hasset ^
   assets/models/games/split_play/golden_coin_ds.hasset ^
   assets/materials/games/split_play/GoldenCoin.hasset ^
   assets/blueprints/games/split_play/GoldenCoin.hblueprint
-git -C C:\dev\helprojs\city commit -m "feat: add generated Split Play coin assets"
+git -C C:\dev\helprojs\demodisc commit -m "feat: add generated Split Play coin assets"
 ```
 
 ## Self-Review

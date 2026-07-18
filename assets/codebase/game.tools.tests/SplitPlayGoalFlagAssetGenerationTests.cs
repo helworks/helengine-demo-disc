@@ -1,6 +1,7 @@
 using helengine;
 using helengine.editor;
 using city.game.tools;
+using city.rendering.tools;
 using System.Linq;
 
 namespace city.tests {
@@ -72,11 +73,19 @@ namespace city.tests {
             ComponentPlatformOverridePayloadService overridePayloadService = new ComponentPlatformOverridePayloadService();
             IReadOnlyList<EntityComponentPlatformOverrideState> overrideStates = overridePayloadService.ReadOverrideStates(meshComponent);
             EntityComponentPlatformOverrideState dsOverride = Assert.Single(overrideStates, state => state.PlatformId == "ds");
+            SceneComponentAssetRecord unwrappedMeshComponent = overridePayloadService.UnwrapBaseRecord(meshComponent);
+            ComponentPersistenceRegistry registry = GeneratedScenePersistenceRegistryFactory.Create();
+            MeshComponent restoredMeshComponent = Assert.IsType<MeshComponent>(
+                registry.GetDescriptor(unwrappedMeshComponent.ComponentTypeId).DeserializeComponent(
+                    unwrappedMeshComponent,
+                    new EntitySaveComponent(),
+                    null));
 
             Assert.True(dsOverride.TryGetAssetReference("Model", out SceneAssetReference dsModelReference));
             Assert.Equal("models/games/split_play/goal_flag_ds.hasset", dsModelReference.RelativePath);
             Assert.False(dsOverride.TryGetAssetReference("Materials[0]", out _));
             Assert.False(dsOverride.TryGetAssetReference("Materials[1]", out _));
+            Assert.Equal(2, restoredMeshComponent.Materials.Length);
         }
     }
 }

@@ -26,13 +26,13 @@
   Purpose: append inferred test projects after production projects are built.
 - Modify: `C:\dev\helworks\helengine\engine\helengine.editor\managers\project\EditorGameSolutionService.cs`
   Purpose: emit test-specific `.csproj` contents, write all generated project files, and keep strict one-to-one production references.
-- Create: `C:\dev\helprojs\city\assets\codebase\gameplay.tests\*.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\gameplay.tests\*.cs`
   Purpose: runtime/component tests for the fallback `gameplay` surface.
-- Create: `C:\dev\helprojs\city\assets\codebase\game.tools.tests\*.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\game.tools.tests\*.cs`
   Purpose: source-authoring tests for the `game.tools` editor surface.
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering.tools.tests\*.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools.tests\*.cs`
   Purpose: source-authoring and catalog tests for the `rendering.tools` editor surface.
-- Delete: `C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj`
+- Delete: `C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj`
   Purpose: remove the legacy repo-owned test project after generated test projects exist.
 
 ## Constraints To Preserve
@@ -41,8 +41,8 @@
 - `assets/codebase/gameplay.tests` is valid even though the matching production surface is the fallback module `gameplay` rooted at `assets`.
 - Generated test projects may reference only their matching generated production project; no “reference every module” fallback is allowed.
 - Keep engine assembly references available in generated test projects so direct engine-type assertions still compile when they are already reachable in the current suite.
-- Do not mass-edit historical files under `C:\dev\helprojs\city\docs\superpowers\plans\`; they are historical artifacts, not active workflow configuration.
-- Do not delete `C:\dev\helprojs\city\tests\gameplay.tests\` wholesale if untracked local experiments still live there. Remove only tracked legacy files in this migration.
+- Do not mass-edit historical files under `C:\dev\helprojs\demodisc\docs\superpowers\plans\`; they are historical artifacts, not active workflow configuration.
+- Do not delete `C:\dev\helprojs\demodisc\tests\gameplay.tests\` wholesale if untracked local experiments still live there. Remove only tracked legacy files in this migration.
 
 ### Task 1: Lock Engine Behavior With Failing Tests
 
@@ -466,41 +466,41 @@ rtk git -C C:\dev\helworks\helengine commit -m "feat: emit generated xunit proje
 ### Task 4: Migrate Tracked City Tests Into Asset-Owned Raw Test Folders
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\codebase\gameplay.tests\DemoDiscReturnInputUtilsTests.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\gameplay.tests\DemoTiltStageComponentTests.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\gameplay.tests\TiltTrialLevelCatalogTests.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\gameplay.tests\TiltTrialLevelSettingsComponentTests.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\gameplay.tests\TiltTrialSessionComponentTests.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\game.tools.tests\TiltTrialCameraAuthoringTests.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\game.tools.tests\TiltTrialLightingAuthoringTests.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\game.tools.tests\TiltTrialSceneGenerationSourceTests.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering.tools.tests\TiltTrialCourseMaterialAuthoringTests.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering.tools.tests\TiltTrialMaterialColorAuthoringTests.cs`
-- Delete: `C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj`
-- Verify against: `C:\dev\helprojs\city\user_settings\generated_code\projects\gameplay.tests\gameplay.tests.csproj`
-- Verify against: `C:\dev\helprojs\city\user_settings\generated_code\projects\game.tools.tests\game.tools.tests.csproj`
-- Verify against: `C:\dev\helprojs\city\user_settings\generated_code\projects\rendering.tools.tests\rendering.tools.tests.csproj`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\gameplay.tests\DemoDiscReturnInputUtilsTests.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\gameplay.tests\DemoTiltStageComponentTests.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\gameplay.tests\TiltTrialLevelCatalogTests.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\gameplay.tests\TiltTrialLevelSettingsComponentTests.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\gameplay.tests\TiltTrialSessionComponentTests.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\game.tools.tests\TiltTrialCameraAuthoringTests.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\game.tools.tests\TiltTrialLightingAuthoringTests.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\game.tools.tests\TiltTrialSceneGenerationSourceTests.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools.tests\TiltTrialCourseMaterialAuthoringTests.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools.tests\TiltTrialMaterialColorAuthoringTests.cs`
+- Delete: `C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj`
+- Verify against: `C:\dev\helprojs\demodisc\user_settings\generated_code\projects\gameplay.tests\gameplay.tests.csproj`
+- Verify against: `C:\dev\helprojs\demodisc\user_settings\generated_code\projects\game.tools.tests\game.tools.tests.csproj`
+- Verify against: `C:\dev\helprojs\demodisc\user_settings\generated_code\projects\rendering.tools.tests\rendering.tools.tests.csproj`
 
 - [ ] **Step 1: Create the destination raw test folders**
 
 ```bash
-rtk powershell -NoProfile -Command "New-Item -ItemType Directory -Force 'C:\dev\helprojs\city\assets\codebase\gameplay.tests','C:\dev\helprojs\city\assets\codebase\game.tools.tests','C:\dev\helprojs\city\assets\codebase\rendering.tools.tests' | Out-Null"
+rtk powershell -NoProfile -Command "New-Item -ItemType Directory -Force 'C:\dev\helprojs\demodisc\assets\codebase\gameplay.tests','C:\dev\helprojs\demodisc\assets\codebase\game.tools.tests','C:\dev\helprojs\demodisc\assets\codebase\rendering.tools.tests' | Out-Null"
 ```
 
 - [ ] **Step 2: Move the tracked runtime and authoring tests into their generated surfaces**
 
 ```bash
-rtk git -C C:\dev\helprojs\city mv tests/gameplay.tests/DemoDiscReturnInputUtilsTests.cs assets/codebase/gameplay.tests/DemoDiscReturnInputUtilsTests.cs
-rtk git -C C:\dev\helprojs\city mv tests/gameplay.tests/DemoTiltStageComponentTests.cs assets/codebase/gameplay.tests/DemoTiltStageComponentTests.cs
-rtk git -C C:\dev\helprojs\city mv tests/gameplay.tests/TiltTrialLevelCatalogTests.cs assets/codebase/gameplay.tests/TiltTrialLevelCatalogTests.cs
-rtk git -C C:\dev\helprojs\city mv tests/gameplay.tests/TiltTrialLevelSettingsComponentTests.cs assets/codebase/gameplay.tests/TiltTrialLevelSettingsComponentTests.cs
-rtk git -C C:\dev\helprojs\city mv tests/gameplay.tests/TiltTrialSessionComponentTests.cs assets/codebase/gameplay.tests/TiltTrialSessionComponentTests.cs
-rtk git -C C:\dev\helprojs\city mv tests/gameplay.tests/TiltTrialCameraAuthoringTests.cs assets/codebase/game.tools.tests/TiltTrialCameraAuthoringTests.cs
-rtk git -C C:\dev\helprojs\city mv tests/gameplay.tests/TiltTrialLightingAuthoringTests.cs assets/codebase/game.tools.tests/TiltTrialLightingAuthoringTests.cs
-rtk git -C C:\dev\helprojs\city mv tests/gameplay.tests/TiltTrialSceneGenerationSourceTests.cs assets/codebase/game.tools.tests/TiltTrialSceneGenerationSourceTests.cs
-rtk git -C C:\dev\helprojs\city mv tests/gameplay.tests/TiltTrialCourseMaterialAuthoringTests.cs assets/codebase/rendering.tools.tests/TiltTrialCourseMaterialAuthoringTests.cs
-rtk git -C C:\dev\helprojs\city mv tests/gameplay.tests/TiltTrialMaterialColorAuthoringTests.cs assets/codebase/rendering.tools.tests/TiltTrialMaterialColorAuthoringTests.cs
-rtk git -C C:\dev\helprojs\city rm tests/gameplay.tests/gameplay.tests.csproj
+rtk git -C C:\dev\helprojs\demodisc mv tests/gameplay.tests/DemoDiscReturnInputUtilsTests.cs assets/codebase/gameplay.tests/DemoDiscReturnInputUtilsTests.cs
+rtk git -C C:\dev\helprojs\demodisc mv tests/gameplay.tests/DemoTiltStageComponentTests.cs assets/codebase/gameplay.tests/DemoTiltStageComponentTests.cs
+rtk git -C C:\dev\helprojs\demodisc mv tests/gameplay.tests/TiltTrialLevelCatalogTests.cs assets/codebase/gameplay.tests/TiltTrialLevelCatalogTests.cs
+rtk git -C C:\dev\helprojs\demodisc mv tests/gameplay.tests/TiltTrialLevelSettingsComponentTests.cs assets/codebase/gameplay.tests/TiltTrialLevelSettingsComponentTests.cs
+rtk git -C C:\dev\helprojs\demodisc mv tests/gameplay.tests/TiltTrialSessionComponentTests.cs assets/codebase/gameplay.tests/TiltTrialSessionComponentTests.cs
+rtk git -C C:\dev\helprojs\demodisc mv tests/gameplay.tests/TiltTrialCameraAuthoringTests.cs assets/codebase/game.tools.tests/TiltTrialCameraAuthoringTests.cs
+rtk git -C C:\dev\helprojs\demodisc mv tests/gameplay.tests/TiltTrialLightingAuthoringTests.cs assets/codebase/game.tools.tests/TiltTrialLightingAuthoringTests.cs
+rtk git -C C:\dev\helprojs\demodisc mv tests/gameplay.tests/TiltTrialSceneGenerationSourceTests.cs assets/codebase/game.tools.tests/TiltTrialSceneGenerationSourceTests.cs
+rtk git -C C:\dev\helprojs\demodisc mv tests/gameplay.tests/TiltTrialCourseMaterialAuthoringTests.cs assets/codebase/rendering.tools.tests/TiltTrialCourseMaterialAuthoringTests.cs
+rtk git -C C:\dev\helprojs\demodisc mv tests/gameplay.tests/TiltTrialMaterialColorAuthoringTests.cs assets/codebase/rendering.tools.tests/TiltTrialMaterialColorAuthoringTests.cs
+rtk git -C C:\dev\helprojs\demodisc rm tests/gameplay.tests/gameplay.tests.csproj
 ```
 
 Expected: only the tracked files above move. Do not delete `tests/gameplay.tests\` itself if `GeneratedControlIconAssetResolverTests.cs` or `SceneEntityTriggerObserverComponentTests.cs` still exist locally as untracked experiments.
@@ -526,34 +526,34 @@ No namespace rewrite is required. The migration is file-placement only.
 - [ ] **Step 4: Commit the city test-file migration**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add assets/codebase/gameplay.tests assets/codebase/game.tools.tests assets/codebase/rendering.tools.tests tests/gameplay.tests/gameplay.tests.csproj
-rtk git -C C:\dev\helprojs\city commit -m "refactor: move city tests into generated surfaces"
+rtk git -C C:\dev\helprojs\demodisc add assets/codebase/gameplay.tests assets/codebase/game.tools.tests assets/codebase/rendering.tools.tests tests/gameplay.tests/gameplay.tests.csproj
+rtk git -C C:\dev\helprojs\demodisc commit -m "refactor: move city tests into generated surfaces"
 ```
 
 ### Task 5: Regenerate City Projects Through The Editor CLI And Run The New Generated Test Projects
 
 **Files:**
 - Verify: `C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj`
-- Verify: `C:\dev\helprojs\city\user_settings\generated_code\projects\gameplay.tests\gameplay.tests.csproj`
-- Verify: `C:\dev\helprojs\city\user_settings\generated_code\projects\game.tools.tests\game.tools.tests.csproj`
-- Verify: `C:\dev\helprojs\city\user_settings\generated_code\projects\rendering.tools.tests\rendering.tools.tests.csproj`
+- Verify: `C:\dev\helprojs\demodisc\user_settings\generated_code\projects\gameplay.tests\gameplay.tests.csproj`
+- Verify: `C:\dev\helprojs\demodisc\user_settings\generated_code\projects\game.tools.tests\game.tools.tests.csproj`
+- Verify: `C:\dev\helprojs\demodisc\user_settings\generated_code\projects\rendering.tools.tests\rendering.tools.tests.csproj`
 
 - [ ] **Step 1: Force regeneration through the headless editor build path**
 
 Run:
 
 ```bash
-rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\city --build windows --output C:\dev\helprojs\output\windows-generated-test-projects-smoke
+rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc --build windows --output C:\dev\helprojs\output\windows-generated-test-projects-smoke
 ```
 
-Expected: PASS. The headless build path calls `EditorGameSolutionService` during script build/reload and rewrites generated projects under `C:\dev\helprojs\city\user_settings\generated_code\projects\`.
+Expected: PASS. The headless build path calls `EditorGameSolutionService` during script build/reload and rewrites generated projects under `C:\dev\helprojs\demodisc\user_settings\generated_code\projects\`.
 
 - [ ] **Step 2: Run the generated runtime test project**
 
 Run:
 
 ```bash
-rtk dotnet test C:\dev\helprojs\city\user_settings\generated_code\projects\gameplay.tests\gameplay.tests.csproj --filter "TiltTrialLevelCatalogTests|TiltTrialLevelSettingsComponentTests|TiltTrialSessionComponentTests|DemoTiltStageComponentTests|DemoDiscReturnInputUtilsTests" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\user_settings\generated_code\projects\gameplay.tests\gameplay.tests.csproj --filter "TiltTrialLevelCatalogTests|TiltTrialLevelSettingsComponentTests|TiltTrialSessionComponentTests|DemoTiltStageComponentTests|DemoDiscReturnInputUtilsTests" -v minimal
 ```
 
 Expected: PASS.
@@ -563,8 +563,8 @@ Expected: PASS.
 Run:
 
 ```bash
-rtk dotnet test C:\dev\helprojs\city\user_settings\generated_code\projects\game.tools.tests\game.tools.tests.csproj --filter "TiltTrialCameraAuthoringTests|TiltTrialLightingAuthoringTests|TiltTrialSceneGenerationSourceTests" -v minimal
-rtk dotnet test C:\dev\helprojs\city\user_settings\generated_code\projects\rendering.tools.tests\rendering.tools.tests.csproj --filter "TiltTrialCourseMaterialAuthoringTests|TiltTrialMaterialColorAuthoringTests" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\user_settings\generated_code\projects\game.tools.tests\game.tools.tests.csproj --filter "TiltTrialCameraAuthoringTests|TiltTrialLightingAuthoringTests|TiltTrialSceneGenerationSourceTests" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\user_settings\generated_code\projects\rendering.tools.tests\rendering.tools.tests.csproj --filter "TiltTrialCourseMaterialAuthoringTests|TiltTrialMaterialColorAuthoringTests" -v minimal
 ```
 
 Expected: PASS.
@@ -574,7 +574,7 @@ Expected: PASS.
 Run:
 
 ```bash
-rtk powershell -NoProfile -Command "Get-Content -Raw 'C:\dev\helprojs\city\city.sln'"
+rtk powershell -NoProfile -Command "Get-Content -Raw 'C:\dev\helprojs\demodisc\city.sln'"
 ```
 
 Expected to contain:
@@ -588,9 +588,9 @@ user_settings/generated_code/projects/rendering.tools.tests/rendering.tools.test
 - [ ] **Step 5: Commit the final verification state if the regeneration changed tracked generated outputs**
 
 ```bash
-rtk git -C C:\dev\helprojs\city status --short
-rtk git -C C:\dev\helprojs\city add city.sln user_settings/generated_code/projects
-rtk git -C C:\dev\helprojs\city commit -m "test: verify generated city test projects"
+rtk git -C C:\dev\helprojs\demodisc status --short
+rtk git -C C:\dev\helprojs\demodisc add city.sln user_settings/generated_code/projects
+rtk git -C C:\dev\helprojs\demodisc commit -m "test: verify generated city test projects"
 ```
 
 ## Self-Review

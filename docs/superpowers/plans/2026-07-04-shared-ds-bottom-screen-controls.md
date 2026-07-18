@@ -32,7 +32,7 @@ public sealed class CityNintendoDsBottomScreenControlsSourceTests {
     /// </summary>
     [Fact]
     public void City_ds_scaffold_source_authors_canonical_bottom_screen_controls() {
-        string sourcePath = @"C:\dev\helprojs\city\assets\codebase\rendering.tools\NintendoDsRenderingSceneScaffoldFactory.cs";
+        string sourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\NintendoDsRenderingSceneScaffoldFactory.cs";
         string source = File.ReadAllText(sourcePath);
 
         Assert.Contains("FontScale = 1f", source, StringComparison.Ordinal);
@@ -49,7 +49,7 @@ public sealed class CityNintendoDsBottomScreenControlsSourceTests {
     /// </summary>
     [Fact]
     public void City_handheld_light_controller_source_responds_to_pointer_and_r_input() {
-        string sourcePath = @"C:\dev\helprojs\city\assets\codebase\rendering\NintendoDsLightToggleOverlayComponent.cs";
+        string sourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering\NintendoDsLightToggleOverlayComponent.cs";
         string source = File.ReadAllText(sourcePath);
 
         Assert.Contains("BoundInteractable.CursorEvent += HandleCursorEvent;", source, StringComparison.Ordinal);
@@ -64,7 +64,7 @@ public sealed class CityNintendoDsBottomScreenControlsSourceTests {
     /// </summary>
     [Fact]
     public void City_handheld_light_controller_source_uses_demo_disc_cycle_order() {
-        string sourcePath = @"C:\dev\helprojs\city\assets\codebase\rendering\NintendoDsLightToggleOverlayComponent.cs";
+        string sourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering\NintendoDsLightToggleOverlayComponent.cs";
         string source = File.ReadAllText(sourcePath);
 
         Assert.Contains("WhiteLightColor", source, StringComparison.Ordinal);
@@ -93,7 +93,7 @@ Extend the same test file with one more test that locks the physics path onto th
     /// </summary>
     [Fact]
     public void City_physics_ds_generator_source_uses_canonical_scaffold_bottom_controls() {
-        string sourcePath = @"C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsNintendoDsSceneGenerator.cs";
+        string sourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsNintendoDsSceneGenerator.cs";
         string source = File.ReadAllText(sourcePath);
 
         Assert.DoesNotContain("useDefaultBottomOverlay", source, StringComparison.Ordinal);
@@ -118,8 +118,8 @@ rtk git -C C:\dev\helworks\helengine commit -m "test: define shared DS bottom-sc
 ### Task 2: Implement The Shared Handheld Light Controller
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering\NintendoDsLightToggleOverlayComponent.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering\DemoDiscLightToggleComponent.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering\NintendoDsLightToggleOverlayComponent.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering\DemoDiscLightToggleComponent.cs`
 - Modify: `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityNintendoDsBottomScreenControlsSourceTests.cs`
 - Test: `C:\dev\helworks\helengine\engine\helengine.editor.tests\helengine.editor.tests.csproj`
 
@@ -249,15 +249,15 @@ Expected: PASS
 - [ ] **Step 4: Commit**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add assets/codebase/rendering/NintendoDsLightToggleOverlayComponent.cs assets/codebase/rendering/DemoDiscLightToggleComponent.cs
-rtk git -C C:\dev\helprojs\city commit -m "feat: add handheld DS light toggle controller"
+rtk git -C C:\dev\helprojs\demodisc add assets/codebase/rendering/NintendoDsLightToggleOverlayComponent.cs assets/codebase/rendering/DemoDiscLightToggleComponent.cs
+rtk git -C C:\dev\helprojs\demodisc commit -m "feat: add handheld DS light toggle controller"
 ```
 
 ### Task 3: Replace The Legacy Scaffold Overlay With Canonical Controls
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\NintendoDsRenderingSceneScaffoldFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoDiscSceneComponentRecordFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\NintendoDsRenderingSceneScaffoldFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoDiscSceneComponentRecordFactory.cs`
 - Modify: `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityNintendoDsBottomScreenControlsSourceTests.cs`
 - Test: `C:\dev\helworks\helengine\engine\helengine.editor.tests\helengine.editor.tests.csproj`
 
@@ -369,14 +369,14 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add assets/codebase/rendering.tools/NintendoDsRenderingSceneScaffoldFactory.cs assets/codebase/rendering.tools/DemoDiscSceneComponentRecordFactory.cs
-rtk git -C C:\dev\helprojs\city commit -m "feat: standardize DS bottom-screen controls"
+rtk git -C C:\dev\helprojs\demodisc add assets/codebase/rendering.tools/NintendoDsRenderingSceneScaffoldFactory.cs assets/codebase/rendering.tools/DemoDiscSceneComponentRecordFactory.cs
+rtk git -C C:\dev\helprojs\demodisc commit -m "feat: standardize DS bottom-screen controls"
 ```
 
 ### Task 4: Put Physics On The Same Canonical Scaffold Contract
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsNintendoDsSceneGenerator.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsNintendoDsSceneGenerator.cs`
 - Modify: `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityNintendoDsBottomScreenControlsSourceTests.cs`
 - Test: `C:\dev\helworks\helengine\engine\helengine.editor.tests\helengine.editor.tests.csproj`
 
@@ -419,17 +419,17 @@ Expected: PASS
 - [ ] **Step 4: Commit**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add assets/codebase/physics.tools/PhysicsNintendoDsSceneGenerator.cs
-rtk git -C C:\dev\helprojs\city commit -m "refactor: share DS bottom controls with physics scenes"
+rtk git -C C:\dev\helprojs\demodisc add assets/codebase/physics.tools/PhysicsNintendoDsSceneGenerator.cs
+rtk git -C C:\dev\helprojs\demodisc commit -m "refactor: share DS bottom controls with physics scenes"
 ```
 
 ### Task 5: Regenerate Representative Scenes And Audit Generated Output
 
 **Files:**
 - Modify: `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityNintendo3DsCubeTestPackagedSceneRuntimeTests.cs`
-- Generated output: `C:\dev\helprojs\city\assets\scenes\rendering\ds\cube_test_ds.helen`
-- Generated output: `C:\dev\helprojs\city\assets\scenes\rendering\ds\colored_cube_grid_ds.helen`
-- Generated output: `C:\dev\helprojs\city\assets\scenes\physics\test_scene_dynamic_stack_boxes_ds.helen`
+- Generated output: `C:\dev\helprojs\demodisc\assets\scenes\rendering\ds\cube_test_ds.helen`
+- Generated output: `C:\dev\helprojs\demodisc\assets\scenes\rendering\ds\colored_cube_grid_ds.helen`
+- Generated output: `C:\dev\helprojs\demodisc\assets\scenes\physics\test_scene_dynamic_stack_boxes_ds.helen`
 - Test: `C:\dev\helworks\helengine\engine\helengine.editor.tests\helengine.editor.tests.csproj`
 
 - [ ] **Step 1: Add one generated-scene audit for the canonical handheld controls**
@@ -440,9 +440,9 @@ Extend `CityNintendo3DsCubeTestPackagedSceneRuntimeTests.cs` with a raw-scene au
 [Fact]
 public void Nintendo3Ds_generated_ds_scenes_include_canonical_bottom_screen_controls() {
     string[] scenePaths = {
-        @"C:\dev\helprojs\city\assets\scenes\rendering\ds\cube_test_ds.helen",
-        @"C:\dev\helprojs\city\assets\scenes\rendering\ds\colored_cube_grid_ds.helen",
-        @"C:\dev\helprojs\city\assets\scenes\physics\test_scene_dynamic_stack_boxes_ds.helen"
+        @"C:\dev\helprojs\demodisc\assets\scenes\rendering\ds\cube_test_ds.helen",
+        @"C:\dev\helprojs\demodisc\assets\scenes\rendering\ds\colored_cube_grid_ds.helen",
+        @"C:\dev\helprojs\demodisc\assets\scenes\physics\test_scene_dynamic_stack_boxes_ds.helen"
     };
 
     for (int index = 0; index < scenePaths.Length; index++) {
@@ -457,13 +457,13 @@ public void Nintendo3Ds_generated_ds_scenes_include_canonical_bottom_screen_cont
 
 - [ ] **Step 2: Regenerate the rendering scenes**
 
-Run: `rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\city\project.heproj --editor-command menu.generate-rendering-scenes`
+Run: `rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc\project.heproj --editor-command menu.generate-rendering-scenes`
 
 Expected: `Editor command 'menu.generate-rendering-scenes' executed successfully.`
 
 - [ ] **Step 3: Regenerate the physics DS scenes**
 
-Run: `rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\city\project.heproj --editor-command menu.generate-physics-nintendo-ds-scenes`
+Run: `rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc\project.heproj --editor-command menu.generate-physics-nintendo-ds-scenes`
 
 Expected: `Editor command 'menu.generate-physics-nintendo-ds-scenes' executed successfully.`
 
@@ -477,26 +477,26 @@ Expected: PASS
 
 ```bash
 rtk git -C C:\dev\helworks\helengine add engine/helengine.editor.tests/CityNintendo3DsCubeTestPackagedSceneRuntimeTests.cs
-rtk git -C C:\dev\helprojs\city add assets/scenes/rendering/ds/cube_test_ds.helen assets/scenes/rendering/ds/colored_cube_grid_ds.helen assets/scenes/physics/test_scene_dynamic_stack_boxes_ds.helen
+rtk git -C C:\dev\helprojs\demodisc add assets/scenes/rendering/ds/cube_test_ds.helen assets/scenes/rendering/ds/colored_cube_grid_ds.helen assets/scenes/physics/test_scene_dynamic_stack_boxes_ds.helen
 rtk git -C C:\dev\helworks\helengine commit -m "test: audit generated DS bottom controls"
-rtk git -C C:\dev\helprojs\city commit -m "chore: regenerate DS scenes with shared bottom controls"
+rtk git -C C:\dev\helprojs\demodisc commit -m "chore: regenerate DS scenes with shared bottom controls"
 ```
 
 ### Task 6: Rebuild And Verify On 3DS
 
 **Files:**
-- Build output: `C:\dev\helprojs\city\3ds-build\helengine_3ds.3dsx`
+- Build output: `C:\dev\helprojs\demodisc\3ds-build\helengine_3ds.3dsx`
 - Runtime verification: `C:\dev\helworks\helengine-3ds\scripts\launch_in_emulator.ps1`
 
 - [ ] **Step 1: Rebuild the 3DS artifact**
 
-Run: `rtk powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helworks\helengine\artifacts\build-platform.ps1 -Project C:\dev\helprojs\city\project.heproj -Platform 3ds -Output C:\dev\helprojs\city\3ds-build`
+Run: `rtk powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helworks\helengine\artifacts\build-platform.ps1 -Project C:\dev\helprojs\demodisc\project.heproj -Platform 3ds -Output C:\dev\helprojs\demodisc\3ds-build`
 
-Expected: `Build completed for platform '3ds': C:\dev\helprojs\city\3ds-build`
+Expected: `Build completed for platform '3ds': C:\dev\helprojs\demodisc\3ds-build`
 
 - [ ] **Step 2: Launch Azahar with the fresh artifact**
 
-Run: `rtk powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helworks\helengine-3ds\scripts\launch_in_emulator.ps1 -ArtifactPath C:\dev\helprojs\city\3ds-build\helengine_3ds.3dsx`
+Run: `rtk powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helworks\helengine-3ds\scripts\launch_in_emulator.ps1 -ArtifactPath C:\dev\helprojs\demodisc\3ds-build\helengine_3ds.3dsx`
 
 Expected: output reports `ARTIFACT=...helengine_3ds.3dsx`, `EMULATOR=...azahar.exe`, and a new `PROCESS_ID=...`.
 
@@ -525,6 +525,6 @@ BACK still returns to the menu.
 - [ ] **Step 4: Commit**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add assets/codebase/rendering.tools/NintendoDsRenderingSceneScaffoldFactory.cs assets/codebase/physics.tools/PhysicsNintendoDsSceneGenerator.cs assets/codebase/rendering/NintendoDsLightToggleOverlayComponent.cs assets/scenes/rendering/ds assets/scenes/physics
-rtk git -C C:\dev\helprojs\city commit -m "feat: share DS bottom-screen controls across scenes"
+rtk git -C C:\dev\helprojs\demodisc add assets/codebase/rendering.tools/NintendoDsRenderingSceneScaffoldFactory.cs assets/codebase/physics.tools/PhysicsNintendoDsSceneGenerator.cs assets/codebase/rendering/NintendoDsLightToggleOverlayComponent.cs assets/scenes/rendering/ds assets/scenes/physics
+rtk git -C C:\dev\helprojs\demodisc commit -m "feat: share DS bottom-screen controls across scenes"
 ```

@@ -29,7 +29,7 @@ Expected: FAIL because the committed DS rendering scene assets do not yet contai
 ### Task 2: Move Generated DS FPS Into The Bottom Viewport
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\NintendoDsRenderingSceneScaffoldFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\NintendoDsRenderingSceneScaffoldFactory.cs`
 - Modify: `C:\dev\helworks\helengine-ds\builder.tests\CityNintendoDsSceneSourceAuditTests.cs`
 
 - [ ] **Step 1: Relocate FPS in the shared scaffold**
@@ -38,7 +38,7 @@ Update `NintendoDsRenderingSceneScaffoldFactory` so it creates scaffold-owned bo
 
 - [ ] **Step 2: Regenerate the rendering scenes**
 
-Run: `dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\city\project.heproj --editor-command menu.generate-rendering-scenes`
+Run: `dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc\project.heproj --editor-command menu.generate-rendering-scenes`
 
 Expected: `Editor command 'menu.generate-rendering-scenes' executed successfully.`
 
@@ -51,16 +51,16 @@ Expected: PASS
 ### Task 3: Rebuild And Launch DS
 
 **Files:**
-- Build output: `C:\dev\helprojs\city\output\ds`
+- Build output: `C:\dev\helprojs\demodisc\output\ds`
 
 - [ ] **Step 1: Rebuild the DS artifact**
 
-Run: `powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helworks\helengine\artifacts\build-platform.ps1 -Project C:\dev\helprojs\city\project.heproj -Platform ds -Output C:\dev\helprojs\city\output\ds`
+Run: `powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helworks\helengine\artifacts\build-platform.ps1 -Project C:\dev\helprojs\demodisc\project.heproj -Platform ds -Output C:\dev\helprojs\demodisc\output\ds`
 
-Expected: `Build completed for platform 'ds': C:\dev\helprojs\city\output\ds`
+Expected: `Build completed for platform 'ds': C:\dev\helprojs\demodisc\output\ds`
 
 - [ ] **Step 2: Launch melonDS with the fresh ROM**
 
-Run: `powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helworks\helengine-ds\scripts\launch_in_emulator.ps1 -ArtifactPath C:\dev\helprojs\city\output\ds\helengine_ds.nds`
+Run: `powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helworks\helengine-ds\scripts\launch_in_emulator.ps1 -ArtifactPath C:\dev\helprojs\demodisc\output\ds\helengine_ds.nds`
 
 Expected: output reports the ROM path, last-write time, emulator path, and process id.

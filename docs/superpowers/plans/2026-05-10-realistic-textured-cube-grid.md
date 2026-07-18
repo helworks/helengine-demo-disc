@@ -24,7 +24,7 @@
 /// </summary>
 [Fact]
 public void Textured_cube_grid_scene_factory_uses_realistic_sixty_four_pixel_surface_textures() {
-    string factorySource = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\rendering.tools\TexturedCubeGridSceneFactory.cs");
+    string factorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TexturedCubeGridSceneFactory.cs");
 
     Assert.Contains("const int TextureWidth = 64;", factorySource, StringComparison.Ordinal);
     Assert.Contains("const int TextureHeight = 64;", factorySource, StringComparison.Ordinal);
@@ -71,15 +71,15 @@ Expected: `PASS`
 - [ ] **Step 5: Commit**
 
 ```bash
-git -C C:\dev\helprojs\city add assets/codebase/rendering.tools/TexturedCubeGridSceneFactory.cs
+git -C C:\dev\helprojs\demodisc add assets/codebase/rendering.tools/TexturedCubeGridSceneFactory.cs
 git -C C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core add engine/helengine.editor.tests/CityCubeTestSceneSourceTests.cs
-git -C C:\dev\helprojs\city commit -m "test: lock realistic textured cube grid requirements"
+git -C C:\dev\helprojs\demodisc commit -m "test: lock realistic textured cube grid requirements"
 ```
 
 ### Task 2: Replace the placeholder texture generator with realistic 64x64 surface generation
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\TexturedCubeGridSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TexturedCubeGridSceneFactory.cs`
 - Test: `C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\engine\helengine.editor.tests\CityCubeTestSceneSourceTests.cs`
 
 - [ ] **Step 1: Add explicit texture-surface definitions and remove the old flat-color palette**
@@ -249,18 +249,18 @@ Expected: `PASS`
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C C:\dev\helprojs\city add assets/codebase/rendering.tools/TexturedCubeGridSceneFactory.cs
+git -C C:\dev\helprojs\demodisc add assets/codebase/rendering.tools/TexturedCubeGridSceneFactory.cs
 git -C C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core add engine/helengine.editor.tests/CityCubeTestSceneSourceTests.cs
-git -C C:\dev\helprojs\city commit -m "feat: generate realistic textured cube grid surfaces"
+git -C C:\dev\helprojs\demodisc commit -m "feat: generate realistic textured cube grid surfaces"
 ```
 
 ### Task 3: Regenerate the city textured scene assets from the updated generator
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\textured_cube_grid.helen`
-- Modify: `C:\dev\helprojs\city\assets\materials\rendering\textured_cube_grid\*.helmat`
-- Modify: `C:\dev\helprojs\city\assets\textures\rendering\textured_cube_grid\*.bmp`
-- Modify: `C:\dev\helprojs\city\cache\*`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\textured_cube_grid.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\materials\rendering\textured_cube_grid\*.helmat`
+- Modify: `C:\dev\helprojs\demodisc\assets\textures\rendering\textured_cube_grid\*.bmp`
+- Modify: `C:\dev\helprojs\demodisc\cache\*`
 - Test: `C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\engine\helengine.editor.tests\CityCubeTestSceneSourceTests.cs`
 
 - [ ] **Step 1: Regenerate the rendering scenes from the city project command**
@@ -268,7 +268,7 @@ git -C C:\dev\helprojs\city commit -m "feat: generate realistic textured cube gr
 Run:
 
 ```powershell
-rtk dotnet C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\city\project.heproj --editor-command menu.generate-rendering-scenes
+rtk dotnet C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\demodisc\project.heproj --editor-command menu.generate-rendering-scenes
 ```
 
 Expected: successful command completion and rewritten `textured_cube_grid.helen`, generated materials, generated textures, and cache assets under the city project.
@@ -278,7 +278,7 @@ Expected: successful command completion and rewritten `textured_cube_grid.helen`
 Run:
 
 ```powershell
-rtk proxy powershell.exe -NoProfile -Command "Get-Item 'C:\dev\helprojs\city\assets\scenes\rendering\textured_cube_grid.helen','C:\dev\helprojs\city\assets\textures\rendering\textured_cube_grid\Cube00.bmp','C:\dev\helprojs\city\assets\materials\rendering\textured_cube_grid\Cube00.helmat' | Select-Object FullName,LastWriteTime,Length"
+rtk proxy powershell.exe -NoProfile -Command "Get-Item 'C:\dev\helprojs\demodisc\assets\scenes\rendering\textured_cube_grid.helen','C:\dev\helprojs\demodisc\assets\textures\rendering\textured_cube_grid\Cube00.bmp','C:\dev\helprojs\demodisc\assets\materials\rendering\textured_cube_grid\Cube00.helmat' | Select-Object FullName,LastWriteTime,Length"
 ```
 
 Expected: fresh timestamps for the scene, texture, and material outputs.
@@ -296,8 +296,8 @@ Expected: `PASS`
 - [ ] **Step 4: Commit**
 
 ```bash
-git -C C:\dev\helprojs\city add assets/scenes/rendering/textured_cube_grid.helen assets/materials/rendering/textured_cube_grid assets/textures/rendering/textured_cube_grid cache
-git -C C:\dev\helprojs\city commit -m "chore: regenerate realistic textured cube grid assets"
+git -C C:\dev\helprojs\demodisc add assets/scenes/rendering/textured_cube_grid.helen assets/materials/rendering/textured_cube_grid assets/textures/rendering/textured_cube_grid cache
+git -C C:\dev\helprojs\demodisc commit -m "chore: regenerate realistic textured cube grid assets"
 ```
 
 ### Task 4: Rebuild and export the PS2 textured grid to verify runtime behavior
@@ -339,7 +339,7 @@ Expected: `0 errors`
 Run:
 
 ```powershell
-$env:HELENGINE_ROOT='C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core'; & 'C:\Program Files\dotnet\dotnet.exe' 'C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll' --project 'C:\dev\helprojs\city\project.heproj' --build ps2 --output 'C:\dev\helprojs\output\ps2-textured-cube-grid-realistic'
+$env:HELENGINE_ROOT='C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core'; & 'C:\Program Files\dotnet\dotnet.exe' 'C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll' --project 'C:\dev\helprojs\demodisc\project.heproj' --build ps2 --output 'C:\dev\helprojs\output\ps2-textured-cube-grid-realistic'
 ```
 
 Expected: `Build completed for platform 'ps2'`

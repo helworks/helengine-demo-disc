@@ -24,7 +24,7 @@
 /// </summary>
 [Fact]
 public void City_ds_scaffold_source_uses_demo_disc_lilac_bottom_screen_clear() {
-    string sourcePath = @"C:\dev\helprojs\city\assets\codebase\rendering.tools\NintendoDsRenderingSceneScaffoldFactory.cs";
+    string sourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\NintendoDsRenderingSceneScaffoldFactory.cs";
     Assert.True(File.Exists(sourcePath), $"Expected source file '{sourcePath}' to exist.");
 
     string source = File.ReadAllText(sourcePath);
@@ -49,7 +49,7 @@ git -C C:\dev\helworks\helengine commit -m "Add DS bottom screen lilac clear aud
 ### Task 2: Apply The Shared Lilac Clear In The DS Scaffold
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\NintendoDsRenderingSceneScaffoldFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\NintendoDsRenderingSceneScaffoldFactory.cs`
 - Test: `C:\dev\helworks\helengine\engine\helengine.editor.tests\helengine.editor.tests.csproj`
 - Verify: `C:\dev\helworks\helengine\artifacts\build-platform.ps1`
 - Launch: `C:\dev\helworks\helengine-3ds\scripts\launch_in_emulator.ps1`
@@ -76,20 +76,20 @@ Expected: `PASS` with the DS bottom-screen controls source-audit suite green.
 
 - [ ] **Step 3: Rebuild the 3DS artifact**
 
-Run: `rtk powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helworks\helengine\artifacts\build-platform.ps1 -Project C:\dev\helprojs\city\project.heproj -Platform 3ds -Output C:\dev\helprojs\city\3ds-build 2>&1 | Out-String`
+Run: `rtk powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helworks\helengine\artifacts\build-platform.ps1 -Project C:\dev\helprojs\demodisc\project.heproj -Platform 3ds -Output C:\dev\helprojs\demodisc\3ds-build 2>&1 | Out-String`
 
-Expected: `Build completed for platform '3ds': C:\dev\helprojs\city\3ds-build`
+Expected: `Build completed for platform '3ds': C:\dev\helprojs\demodisc\3ds-build`
 
 - [ ] **Step 4: Relaunch Azahar on the rebuilt artifact**
 
-Run: `rtk powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helworks\helengine-3ds\scripts\launch_in_emulator.ps1 -ArtifactPath C:\dev\helprojs\city\3ds-build\helengine_3ds.3dsx -EmulatorPath C:\dev\helworks\emus\azahar-windows-msvc-2125.1.1\azahar.exe 2>&1 | Out-String`
+Run: `rtk powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helworks\helengine-3ds\scripts\launch_in_emulator.ps1 -ArtifactPath C:\dev\helprojs\demodisc\3ds-build\helengine_3ds.3dsx -EmulatorPath C:\dev\helworks\emus\azahar-windows-msvc-2125.1.1\azahar.exe 2>&1 | Out-String`
 
-Expected: output includes `ARTIFACT=C:\dev\helprojs\city\3ds-build\helengine_3ds.3dsx` and a fresh `PROCESS_ID=...`
+Expected: output includes `ARTIFACT=C:\dev\helprojs\demodisc\3ds-build\helengine_3ds.3dsx` and a fresh `PROCESS_ID=...`
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git -C C:\dev\helprojs\city add assets/codebase/rendering.tools/NintendoDsRenderingSceneScaffoldFactory.cs
+git -C C:\dev\helprojs\demodisc add assets/codebase/rendering.tools/NintendoDsRenderingSceneScaffoldFactory.cs
 git -C C:\dev\helworks\helengine add engine/helengine.editor.tests/CityNintendoDsBottomScreenControlsSourceTests.cs
-git -C C:\dev\helprojs\city commit -m "Set DS bottom screen clear to demo disc lilac"
+git -C C:\dev\helprojs\demodisc commit -m "Set DS bottom screen clear to demo disc lilac"
 ```

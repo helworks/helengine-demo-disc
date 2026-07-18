@@ -13,9 +13,9 @@
 ### Task 1: Add Failing Level Catalog And Settings Tests
 
 **Files:**
-- Create: `C:\dev\helprojs\city\tests\gameplay.tests\TiltTrialLevelCatalogTests.cs`
-- Create: `C:\dev\helprojs\city\tests\gameplay.tests\TiltTrialLevelSettingsComponentTests.cs`
-- Verify against: `C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj`
+- Create: `C:\dev\helprojs\demodisc\tests\gameplay.tests\TiltTrialLevelCatalogTests.cs`
+- Create: `C:\dev\helprojs\demodisc\tests\gameplay.tests\TiltTrialLevelSettingsComponentTests.cs`
+- Verify against: `C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj`
 
 - [ ] **Step 1: Write the failing level catalog tests**
 
@@ -108,7 +108,7 @@ namespace city.tests {
 Run:
 
 ```bash
-rtk dotnet test C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj --filter "TiltTrialLevelCatalogTests|TiltTrialLevelSettingsComponentTests" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj --filter "TiltTrialLevelCatalogTests|TiltTrialLevelSettingsComponentTests" -v minimal
 ```
 
 Expected: `FAIL` because `TiltTrialLevelCatalogEntry`, `TiltTrialLevelCatalog`, `TiltTrialLevelSettingsComponent`, and `Validate()` do not exist yet.
@@ -116,17 +116,17 @@ Expected: `FAIL` because `TiltTrialLevelCatalogEntry`, `TiltTrialLevelCatalog`, 
 - [ ] **Step 4: Commit the failing-test checkpoint**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add tests/gameplay.tests/TiltTrialLevelCatalogTests.cs tests/gameplay.tests/TiltTrialLevelSettingsComponentTests.cs
-rtk git -C C:\dev\helprojs\city commit -m "test: cover tilt trial level metadata foundation"
+rtk git -C C:\dev\helprojs\demodisc add tests/gameplay.tests/TiltTrialLevelCatalogTests.cs tests/gameplay.tests/TiltTrialLevelSettingsComponentTests.cs
+rtk git -C C:\dev\helprojs\demodisc commit -m "test: cover tilt trial level metadata foundation"
 ```
 
 ### Task 2: Implement The Shared Level Catalog And Settings Component
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\codebase\game\TiltTrialLevelCatalogEntry.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\game\TiltTrialLevelCatalog.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\game\TiltTrialLevelSettingsComponent.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneCatalog.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelCatalogEntry.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelCatalog.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelSettingsComponent.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneCatalog.cs`
 
 - [ ] **Step 1: Add the immutable catalog entry type**
 
@@ -260,7 +260,7 @@ namespace city.game {
 Run:
 
 ```bash
-rtk dotnet test C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj --filter "TiltTrialLevelCatalogTests|TiltTrialLevelSettingsComponentTests" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj --filter "TiltTrialLevelCatalogTests|TiltTrialLevelSettingsComponentTests" -v minimal
 ```
 
 Expected: `PASS`
@@ -268,14 +268,14 @@ Expected: `PASS`
 - [ ] **Step 5: Commit the metadata implementation checkpoint**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add assets/codebase/game/TiltTrialLevelCatalogEntry.cs assets/codebase/game/TiltTrialLevelCatalog.cs assets/codebase/game/TiltTrialLevelSettingsComponent.cs assets/codebase/game.tools/GameSceneCatalog.cs
-rtk git -C C:\dev\helprojs\city commit -m "feat: add tilt trial level metadata foundation"
+rtk git -C C:\dev\helprojs\demodisc add assets/codebase/game/TiltTrialLevelCatalogEntry.cs assets/codebase/game/TiltTrialLevelCatalog.cs assets/codebase/game/TiltTrialLevelSettingsComponent.cs assets/codebase/game.tools/GameSceneCatalog.cs
+rtk git -C C:\dev\helprojs\demodisc commit -m "feat: add tilt trial level metadata foundation"
 ```
 
 ### Task 3: Add Failing Session-State Tests For Timer, Results, And Next Progression
 
 **Files:**
-- Create: `C:\dev\helprojs\city\tests\gameplay.tests\TiltTrialSessionComponentTests.cs`
+- Create: `C:\dev\helprojs\demodisc\tests\gameplay.tests\TiltTrialSessionComponentTests.cs`
 
 - [ ] **Step 1: Write the failing FSM/session tests**
 
@@ -331,7 +331,7 @@ namespace city.tests {
 Run:
 
 ```bash
-rtk dotnet test C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj --filter "TiltTrialSessionComponentTests" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj --filter "TiltTrialSessionComponentTests" -v minimal
 ```
 
 Expected: `FAIL` because `TiltTrialSessionComponent`, `TiltTrialSessionState`, `TiltTrialMedal`, and `CreateStateMachine()` do not exist yet.
@@ -339,18 +339,18 @@ Expected: `FAIL` because `TiltTrialSessionComponent`, `TiltTrialSessionState`, `
 - [ ] **Step 3: Commit the failing session-test checkpoint**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add tests/gameplay.tests/TiltTrialSessionComponentTests.cs
-rtk git -C C:\dev\helprojs\city commit -m "test: cover tilt trial session state flow"
+rtk git -C C:\dev\helprojs\demodisc add tests/gameplay.tests/TiltTrialSessionComponentTests.cs
+rtk git -C C:\dev\helprojs\demodisc commit -m "test: cover tilt trial session state flow"
 ```
 
 ### Task 4: Implement The FSM-Backed Session Controller
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\codebase\game\TiltTrialSessionState.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\game\TiltTrialMedal.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\game\TiltTrialSessionComponent.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\game\DemoTiltBallResetComponent.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\game\DemoTiltSpeedTextComponent.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialSessionState.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialMedal.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialSessionComponent.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\game\DemoTiltBallResetComponent.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\game\DemoTiltSpeedTextComponent.cs`
 
 - [ ] **Step 1: Add the gameplay session enums**
 
@@ -451,7 +451,7 @@ public override void Update() {
 Run:
 
 ```bash
-rtk dotnet test C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj --filter "TiltTrialSessionComponentTests" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj --filter "TiltTrialSessionComponentTests" -v minimal
 ```
 
 Expected: `PASS`
@@ -459,15 +459,15 @@ Expected: `PASS`
 - [ ] **Step 5: Commit the session-flow implementation checkpoint**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add assets/codebase/game/TiltTrialSessionState.cs assets/codebase/game/TiltTrialMedal.cs assets/codebase/game/TiltTrialSessionComponent.cs assets/codebase/game/DemoTiltBallResetComponent.cs assets/codebase/game/DemoTiltSpeedTextComponent.cs
-rtk git -C C:\dev\helprojs\city commit -m "feat: add tilt trial session state flow"
+rtk git -C C:\dev\helprojs\demodisc add assets/codebase/game/TiltTrialSessionState.cs assets/codebase/game/TiltTrialMedal.cs assets/codebase/game/TiltTrialSessionComponent.cs assets/codebase/game/DemoTiltBallResetComponent.cs assets/codebase/game/DemoTiltSpeedTextComponent.cs
+rtk git -C C:\dev\helprojs\demodisc commit -m "feat: add tilt trial session state flow"
 ```
 
 ### Task 5: Add Failing Source Tests For Selector Scene And Multi-Scene Generation
 
 **Files:**
 - Modify: `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityGameSceneSourceTests.cs`
-- Create: `C:\dev\helprojs\city\tests\gameplay.tests\TiltTrialSceneGenerationSourceTests.cs`
+- Create: `C:\dev\helprojs\demodisc\tests\gameplay.tests\TiltTrialSceneGenerationSourceTests.cs`
 
 - [ ] **Step 1: Extend the existing source audit in helengine**
 
@@ -479,7 +479,7 @@ Add one new test to `CityGameSceneSourceTests.cs` so the cross-repo source audit
     /// </summary>
     [Fact]
     public void City_tilt_trial_source_exports_selector_scene_and_five_level_scene_ids() {
-        string sourcePath = @"C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneCatalog.cs";
+        string sourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneCatalog.cs";
         string source = File.ReadAllText(sourcePath);
 
         Assert.Contains("public const string TiltTrialSceneId = \"scenes/games/tilt_trial.helen\";", source, StringComparison.Ordinal);
@@ -500,7 +500,7 @@ namespace city.tests {
     public sealed class TiltTrialSceneGenerationSourceTests {
         [Fact]
         public void Game_scene_generator_writes_selector_and_all_five_levels() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneGenerator.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
 
             Assert.Contains("CreateTiltTrialLevelSelectScene()", source, StringComparison.Ordinal);
             Assert.Contains("CreateTiltTrialLevelScenes()", source, StringComparison.Ordinal);
@@ -509,7 +509,7 @@ namespace city.tests {
 
         [Fact]
         public void Game_scene_factory_authors_level_settings_and_session_components() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneFactory.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
 
             Assert.Contains("new city.game.TiltTrialLevelSettingsComponent", source, StringComparison.Ordinal);
             Assert.Contains("new city.game.TiltTrialSessionComponent", source, StringComparison.Ordinal);
@@ -525,7 +525,7 @@ Run:
 
 ```bash
 rtk dotnet test C:\dev\helworks\helengine\engine\helengine.editor.tests\helengine.editor.tests.csproj --filter "City_tilt_trial_source_exports_selector_scene_and_five_level_scene_ids" -v minimal
-rtk dotnet test C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj --filter "TiltTrialSceneGenerationSourceTests" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj --filter "TiltTrialSceneGenerationSourceTests" -v minimal
 ```
 
 Expected: `FAIL` because the generator/factory still only emits one gameplay scene and none of the selector/session types exist.
@@ -534,18 +534,18 @@ Expected: `FAIL` because the generator/factory still only emits one gameplay sce
 
 ```bash
 rtk git -C C:\dev\helworks\helengine add engine/helengine.editor.tests/CityGameSceneSourceTests.cs
-rtk git -C C:\dev\helprojs\city add tests/gameplay.tests/TiltTrialSceneGenerationSourceTests.cs
+rtk git -C C:\dev\helprojs\demodisc add tests/gameplay.tests/TiltTrialSceneGenerationSourceTests.cs
 rtk git -C C:\dev\helworks\helengine commit -m "test: cover tilt trial selector scene ids"
-rtk git -C C:\dev\helprojs\city commit -m "test: cover tilt trial scene generation layout"
+rtk git -C C:\dev\helprojs\demodisc commit -m "test: cover tilt trial scene generation layout"
 ```
 
 ### Task 6: Author The Selector Scene And Five Scaffolded Gameplay Levels
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\codebase\game\TiltTrialLevelSelectComponent.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneGenerator.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\menu\DemoDiscSceneCatalog.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelSelectComponent.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\menu\DemoDiscSceneCatalog.cs`
 
 - [ ] **Step 1: Add the selector controller component**
 
@@ -650,7 +650,7 @@ Run:
 
 ```bash
 rtk dotnet test C:\dev\helworks\helengine\engine\helengine.editor.tests\helengine.editor.tests.csproj --filter "City_tilt_trial_source_exports_selector_scene_and_five_level_scene_ids" -v minimal
-rtk dotnet test C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj --filter "TiltTrialSceneGenerationSourceTests" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj --filter "TiltTrialSceneGenerationSourceTests" -v minimal
 ```
 
 Expected: `PASS`
@@ -658,34 +658,34 @@ Expected: `PASS`
 - [ ] **Step 6: Commit the selector/generation checkpoint**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add assets/codebase/game/TiltTrialLevelSelectComponent.cs assets/codebase/game.tools/GameSceneFactory.cs assets/codebase/game.tools/GameSceneGenerator.cs assets/codebase/menu/DemoDiscSceneCatalog.cs
-rtk git -C C:\dev\helprojs\city commit -m "feat: author tilt trial selector and scaffolded levels"
+rtk git -C C:\dev\helprojs\demodisc add assets/codebase/game/TiltTrialLevelSelectComponent.cs assets/codebase/game.tools/GameSceneFactory.cs assets/codebase/game.tools/GameSceneGenerator.cs assets/codebase/menu/DemoDiscSceneCatalog.cs
+rtk git -C C:\dev\helprojs\demodisc commit -m "feat: author tilt trial selector and scaffolded levels"
 ```
 
 ### Task 7: Regenerate Scenes And Verify Authored Outputs
 
 **Files:**
-- Verify output: `C:\dev\helprojs\city\assets\scenes\games\tilt_trial.helen`
-- Verify output: `C:\dev\helprojs\city\assets\scenes\games\tilt_trial_level_01.helen`
-- Verify output: `C:\dev\helprojs\city\assets\scenes\games\tilt_trial_level_05.helen`
+- Verify output: `C:\dev\helprojs\demodisc\assets\scenes\games\tilt_trial.helen`
+- Verify output: `C:\dev\helprojs\demodisc\assets\scenes\games\tilt_trial_level_01.helen`
+- Verify output: `C:\dev\helprojs\demodisc\assets\scenes\games\tilt_trial_level_05.helen`
 
 - [ ] **Step 1: Regenerate the game scenes through the editor command**
 
 Run:
 
 ```bash
-rtk proxy dotnet C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\city\project.heproj --editor-command menu.generate-game-scenes
+rtk proxy dotnet C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\demodisc\project.heproj --editor-command menu.generate-game-scenes
 ```
 
 Expected: command exits successfully and rewrites:
 
 ```text
-C:\dev\helprojs\city\assets\scenes\games\tilt_trial.helen
-C:\dev\helprojs\city\assets\scenes\games\tilt_trial_level_01.helen
-C:\dev\helprojs\city\assets\scenes\games\tilt_trial_level_02.helen
-C:\dev\helprojs\city\assets\scenes\games\tilt_trial_level_03.helen
-C:\dev\helprojs\city\assets\scenes\games\tilt_trial_level_04.helen
-C:\dev\helprojs\city\assets\scenes\games\tilt_trial_level_05.helen
+C:\dev\helprojs\demodisc\assets\scenes\games\tilt_trial.helen
+C:\dev\helprojs\demodisc\assets\scenes\games\tilt_trial_level_01.helen
+C:\dev\helprojs\demodisc\assets\scenes\games\tilt_trial_level_02.helen
+C:\dev\helprojs\demodisc\assets\scenes\games\tilt_trial_level_03.helen
+C:\dev\helprojs\demodisc\assets\scenes\games\tilt_trial_level_04.helen
+C:\dev\helprojs\demodisc\assets\scenes\games\tilt_trial_level_05.helen
 ```
 
 - [ ] **Step 2: Verify the scene files exist**
@@ -693,7 +693,7 @@ C:\dev\helprojs\city\assets\scenes\games\tilt_trial_level_05.helen
 Run:
 
 ```bash
-rtk powershell -NoProfile -Command "Get-ChildItem 'C:\dev\helprojs\city\assets\scenes\games' | Where-Object { $_.Name -like 'tilt_trial*' } | Select-Object -ExpandProperty Name"
+rtk powershell -NoProfile -Command "Get-ChildItem 'C:\dev\helprojs\demodisc\assets\scenes\games' | Where-Object { $_.Name -like 'tilt_trial*' } | Select-Object -ExpandProperty Name"
 ```
 
 Expected:
@@ -710,22 +710,22 @@ tilt_trial_level_05.helen
 - [ ] **Step 3: Commit the regenerated authored scenes**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add assets/scenes/games/tilt_trial.helen assets/scenes/games/tilt_trial_level_01.helen assets/scenes/games/tilt_trial_level_02.helen assets/scenes/games/tilt_trial_level_03.helen assets/scenes/games/tilt_trial_level_04.helen assets/scenes/games/tilt_trial_level_05.helen
-rtk git -C C:\dev\helprojs\city commit -m "feat: regenerate tilt trial selector and level scenes"
+rtk git -C C:\dev\helprojs\demodisc add assets/scenes/games/tilt_trial.helen assets/scenes/games/tilt_trial_level_01.helen assets/scenes/games/tilt_trial_level_02.helen assets/scenes/games/tilt_trial_level_03.helen assets/scenes/games/tilt_trial_level_04.helen assets/scenes/games/tilt_trial_level_05.helen
+rtk git -C C:\dev\helprojs\demodisc commit -m "feat: regenerate tilt trial selector and level scenes"
 ```
 
 ### Task 8: Full Verification And Windows Runtime Smoke
 
 **Files:**
-- Verify build output: `C:\dev\helprojs\city\windows-build\helengine_windows.exe`
-- Verify log: `C:\dev\helprojs\city\windows-build\helengine_windows.startup.log`
+- Verify build output: `C:\dev\helprojs\demodisc\windows-build\helengine_windows.exe`
+- Verify log: `C:\dev\helprojs\demodisc\windows-build\helengine_windows.startup.log`
 
 - [ ] **Step 1: Run the focused city tests**
 
 Run:
 
 ```bash
-rtk dotnet test C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj --filter "TiltTrial" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj --filter "TiltTrial" -v minimal
 ```
 
 Expected: `PASS`
@@ -745,17 +745,17 @@ Expected: `PASS`
 Run:
 
 ```bash
-rtk powershell -NoProfile -ExecutionPolicy Bypass -Command "& 'C:\dev\helworks\helengine\artifacts\build-platform.ps1' -Project 'C:\dev\helprojs\city\project.heproj' -Platform 'windows' -Output 'C:\dev\helprojs\city\windows-build'"
+rtk powershell -NoProfile -ExecutionPolicy Bypass -Command "& 'C:\dev\helworks\helengine\artifacts\build-platform.ps1' -Project 'C:\dev\helprojs\demodisc\project.heproj' -Platform 'windows' -Output 'C:\dev\helprojs\demodisc\windows-build'"
 ```
 
-Expected: command exits successfully and refreshes `C:\dev\helprojs\city\windows-build\helengine_windows.exe`
+Expected: command exits successfully and refreshes `C:\dev\helprojs\demodisc\windows-build\helengine_windows.exe`
 
 - [ ] **Step 4: Launch the Windows build**
 
 Run:
 
 ```bash
-rtk powershell -NoProfile -Command "Start-Process -FilePath 'C:\dev\helprojs\city\windows-build\helengine_windows.exe' -WorkingDirectory 'C:\dev\helprojs\city\windows-build'"
+rtk powershell -NoProfile -Command "Start-Process -FilePath 'C:\dev\helprojs\demodisc\windows-build\helengine_windows.exe' -WorkingDirectory 'C:\dev\helprojs\demodisc\windows-build'"
 ```
 
 Expected: the Windows player launches into the demo-disc flow and `Tilt Trial` opens the new level selector.
@@ -765,7 +765,7 @@ Expected: the Windows player launches into the demo-disc flow and `Tilt Trial` o
 Run:
 
 ```bash
-rtk powershell -NoProfile -Command "Start-Sleep -Seconds 5; Get-Content 'C:\dev\helprojs\city\windows-build\helengine_windows.startup.log' -Tail 60"
+rtk powershell -NoProfile -Command "Start-Sleep -Seconds 5; Get-Content 'C:\dev\helprojs\demodisc\windows-build\helengine_windows.startup.log' -Tail 60"
 ```
 
 Expected:
@@ -794,6 +794,6 @@ Manual checklist:
 - [ ] **Step 7: Commit the final verification-backed implementation**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add assets/codebase/game assets/codebase/game.tools assets/codebase/menu assets/scenes/games tests/gameplay.tests docs/superpowers/plans/2026-07-08-tilt-trial-level-select-foundation.md
-rtk git -C C:\dev\helprojs\city commit -m "feat: add tilt trial level select foundation"
+rtk git -C C:\dev\helprojs\demodisc add assets/codebase/game assets/codebase/game.tools assets/codebase/menu assets/scenes/games tests/gameplay.tests docs/superpowers/plans/2026-07-08-tilt-trial-level-select-foundation.md
+rtk git -C C:\dev\helprojs\demodisc commit -m "feat: add tilt trial level select foundation"
 ```

@@ -55,6 +55,8 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(sceneDefinition));
             } else if (string.IsNullOrWhiteSpace(sceneDefinition.SceneId)) {
                 throw new ArgumentException("Scene id must be provided.", nameof(sceneDefinition));
+            } else if (!string.IsNullOrWhiteSpace(sceneDefinition.SceneAssetRelativePath) && Path.IsPathRooted(sceneDefinition.SceneAssetRelativePath)) {
+                throw new ArgumentException("Scene asset relative path must be project-relative when provided.", nameof(sceneDefinition));
             } else if (sceneDefinition.RootEntities == null) {
                 throw new ArgumentNullException(nameof(sceneDefinition));
             }
@@ -78,7 +80,13 @@ namespace city.rendering.tools {
                     rootsToWrite = CombineRootSets(sceneDefinition.RootEntities, nintendoDsSceneRoots);
                 }
 
-                SaveSceneAsset(fullProjectRootPath, saveService, sceneDefinition.SceneId, sceneDefinition.SceneSettings, rootsToWrite);
+                SaveSceneAsset(
+                    fullProjectRootPath,
+                    saveService,
+                    sceneDefinition.SceneId,
+                    sceneDefinition.SceneAssetRelativePath,
+                    sceneDefinition.SceneSettings,
+                    rootsToWrite);
             } finally {
                 DisposeGeneratedRoots(rootsToDispose);
             }
@@ -110,7 +118,7 @@ namespace city.rendering.tools {
                 return authoredNintendoHandheldRoots;
             }
 
-            FontAsset bottomOverlayFont = ResolveRequiredNintendoDsDebugFont();
+            FontAsset bottomOverlayFont = ResolveRequiredBottomOverlayFont(fullProjectRootPath);
             Entity[] clonedTopScreenRoots = CloneSceneRoots(
                 fullProjectRootPath,
                 saveService,
@@ -120,28 +128,30 @@ namespace city.rendering.tools {
             return NintendoDsRenderingSceneScaffoldFactoryValue.CreateSceneRoots(
                 clonedTopScreenRoots,
                 sceneDefinition.NintendoDsScene.UseDefaultBottomOverlay,
+                sceneDefinition.NintendoDsScene.MoveTopScreen2DRootsToBottomScreen,
                 sceneDefinition.NintendoDsScene.BottomScreenRootEntities ?? Array.Empty<Entity>(),
                 bottomOverlayFont);
         }
 
         /// <summary>
-        /// Loads the dedicated project font used by the Nintendo DS bottom overlay.
+        /// Loads the dedicated project body font used by the Nintendo DS bottom overlay through the normal authored source-font import pipeline.
         /// </summary>
-        /// <returns>Generated Nintendo DS debug font asset.</returns>
-        static FontAsset ResolveRequiredNintendoDsDebugFont() {
-            Assembly appAssembly = Assembly.Load("helengine.editor.app");
-            Type debugFontFactoryType = appAssembly.GetType("helengine.editor.app.NintendoDsDebugFontFactory", throwOnError: true);
-            MethodInfo createFontMethod = debugFontFactoryType.GetMethod("CreateBottomOverlayFont", BindingFlags.Public | BindingFlags.Static);
-            if (createFontMethod == null) {
-                throw new InvalidOperationException("NintendoDsDebugFontFactory.CreateBottomOverlayFont was not found.");
+        /// <param name="fullProjectRootPath">Absolute project root path that owns the authored body font source.</param>
+        /// <returns>Imported project body font asset.</returns>
+        static FontAsset ResolveRequiredBottomOverlayFont(string fullProjectRootPath) {
+            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
             }
 
-            object result = createFontMethod.Invoke(null, Array.Empty<object>());
-            if (result is not FontAsset fontAsset) {
-                throw new InvalidOperationException("Nintendo DS debug font factory did not return a FontAsset.");
+            SceneAssetReference fontReference = DemoDiscSceneComponentRecordFactory.CreateEditorFontReference();
+            if (fontReference == null || fontReference.SourceKind != SceneAssetReferenceSourceKind.FileSystem || string.IsNullOrWhiteSpace(fontReference.RelativePath)) {
+                throw new InvalidOperationException("The demo-disc body font reference must resolve to one file-backed source font path.");
             }
 
-            return fontAsset;
+            AssetImportManager assetImportManager = CreateGeneratedSceneAssetImportManager(fullProjectRootPath);
+            EditorFileSystemFontResolver fontResolver = new EditorFileSystemFontResolver(assetImportManager);
+            string fullSourcePath = Path.Combine(fullProjectRootPath, "assets", fontReference.RelativePath.Replace('/', Path.DirectorySeparatorChar));
+            return fontResolver.ResolveFontAsset(fullSourcePath);
         }
 
         /// <summary>
@@ -156,6 +166,7 @@ namespace city.rendering.tools {
             string fullProjectRootPath,
             SceneSaveService saveService,
             string sceneId,
+            string sceneAssetRelativePath,
             SceneSettingsAsset sceneSettings,
             Entity[] generatedRoots) {
             if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
@@ -164,11 +175,16 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(saveService));
             } else if (string.IsNullOrWhiteSpace(sceneId)) {
                 throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            } else if (!string.IsNullOrWhiteSpace(sceneAssetRelativePath) && Path.IsPathRooted(sceneAssetRelativePath)) {
+                throw new ArgumentException("Scene asset relative path must be project-relative when provided.", nameof(sceneAssetRelativePath));
             } else if (generatedRoots == null) {
                 throw new ArgumentNullException(nameof(generatedRoots));
             }
 
-            string scenePath = Path.Combine(fullProjectRootPath, "assets", sceneId.Replace('/', Path.DirectorySeparatorChar));
+            string sceneRelativePathToSave = string.IsNullOrWhiteSpace(sceneAssetRelativePath)
+                ? sceneId
+                : sceneAssetRelativePath;
+            string scenePath = Path.Combine(fullProjectRootPath, "assets", sceneRelativePathToSave.Replace('/', Path.DirectorySeparatorChar));
             NormalizeGeneratedMenuRootInitialPanels(generatedRoots);
             EditorEntityLayerMaskSnapshot[] hiddenRootSnapshots = HideNonTargetSceneRoots(generatedRoots);
 
@@ -315,6 +331,10 @@ namespace city.rendering.tools {
                     continue;
                 }
 
+                if (IsConsoleCameraLightInstructionsBlueprintRoot(roots[index])) {
+                    continue;
+                }
+
                 EditorEntity editorRootEntity = roots[index] as EditorEntity;
                 if (editorRootEntity == null) {
                     throw new InvalidOperationException("Generated scene roots must be editor entities before platform-exclusive authoring can be applied.");
@@ -324,7 +344,35 @@ namespace city.rendering.tools {
                     fullProjectRootPath,
                     editorRootEntity,
                     NintendoHandheldPlatformIds);
+
+                if (string.Equals(editorRootEntity.Name, "DemoSceneInstructionViewport", StringComparison.Ordinal)) {
+                    ConsoleCameraLightInstructionsSceneAttachmentService attachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
+                    attachmentService.ExcludeLegacyOverlayFromConsoles(fullProjectRootPath, editorRootEntity);
+                }
             }
+        }
+
+        /// <summary>
+        /// Identifies the console-only instruction Blueprint root whose explicit platform rules must survive handheld augmentation.
+        /// </summary>
+        /// <param name="rootEntity">Generated root being considered for handheld exclusion.</param>
+        /// <returns>True when the root is the console camera/light Blueprint instance.</returns>
+        static bool IsConsoleCameraLightInstructionsBlueprintRoot(Entity rootEntity) {
+            if (rootEntity == null || rootEntity.Components == null) {
+                return false;
+            }
+
+            for (int index = 0; index < rootEntity.Components.Count; index++) {
+                if (rootEntity.Components[index] is BlueprintInstanceComponent blueprintInstance
+                    && string.Equals(
+                        blueprintInstance.BlueprintAssetPath,
+                        ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath,
+                        StringComparison.Ordinal)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

@@ -251,8 +251,7 @@ namespace city.menu.tools {
 
             return [
                 CreateNintendoDsTopScreenCameraEntity(definition),
-                CreateNintendoDsBottomScreenCameraEntity(providerTypeName, definition),
-                CreateMenuAudioEntity()
+                CreateNintendoDsBottomScreenCameraEntity(providerTypeName, definition)
             ];
         }
 
@@ -332,25 +331,6 @@ namespace city.menu.tools {
                 CreateNintendoDsPanelEntity(generatedRootEntity, definition, definition.Panels[panelIndex]);
             }
 
-            return entity;
-        }
-
-        /// <summary>
-        /// Creates the hidden looping music audio source attached to the handheld menu root so the shared menu scene contract stays aligned with the standard menu scene.
-        /// </summary>
-        /// <returns>Standalone authored menu music entity.</returns>
-        Entity CreateMenuAudioEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("DemoDiscMenuMusic");
-            entity.LayerMask = NintendoDsMenuMetadataLayerMask;
-            AudioSourceComponent audioSource = new AudioSourceComponent {
-                Clip = new AudioAsset(),
-                PlayOnStart = true,
-                Loop = true,
-                BusId = "music",
-                Gain = Theme.ThemeMusicGain
-            };
-            entity.AddComponent(audioSource);
-            ApplyAudioReference(entity, audioSource, Theme.ThemeMusicAudioPath);
             return entity;
         }
 
@@ -687,28 +667,6 @@ namespace city.menu.tools {
                 component,
                 AutomaticComponentAssetReferenceSupport.BuildReferenceName(nameof(AnimationPlayerComponent.Clip)),
                 global::helengine.SceneAssetReferenceFactory.CreateFileSystemAnimationClip(animationClipPath));
-        }
-
-        /// <summary>
-        /// Stores the supplied file-backed audio reference on the entity save state for the given audio source component.
-        /// </summary>
-        /// <param name="entity">Entity that owns the component.</param>
-        /// <param name="audioSourceComponent">Audio source component whose clip reference should be stored.</param>
-        /// <param name="audioPath">Project-relative audio asset path.</param>
-        void ApplyAudioReference(Entity entity, AudioSourceComponent audioSourceComponent, string audioPath) {
-            if (entity == null) {
-                throw new ArgumentNullException(nameof(entity));
-            } else if (audioSourceComponent == null) {
-                throw new ArgumentNullException(nameof(audioSourceComponent));
-            } else if (string.IsNullOrWhiteSpace(audioPath)) {
-                throw new ArgumentException("Audio path must be provided.", nameof(audioPath));
-            }
-
-            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(
-                audioSourceComponent,
-                AutomaticComponentAssetReferenceSupport.BuildReferenceName(nameof(AudioSourceComponent.Clip)),
-                global::helengine.SceneAssetReferenceFactory.CreateFileSystemAudio(audioPath));
         }
 
         /// <summary>

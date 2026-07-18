@@ -3,7 +3,7 @@ namespace city.tests {
     /// Verifies the runtime menu binder resolves the generated menu subtree by its runtime panel-component subtree instead of assuming the menu root has exactly one child.
     /// </summary>
     public sealed class MenuComponentGeneratedRootResolutionSourceTests {
-        const string MenuComponentSourcePath = @"C:\dev\helprojs\city\assets\codebase\menu\MenuComponent.cs";
+        const string MenuComponentSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\menu\MenuComponent.cs";
 
         /// <summary>
         /// Ensures menu runtime binding remains compatible with additional menu-root helper children such as the shared looping music entity.
