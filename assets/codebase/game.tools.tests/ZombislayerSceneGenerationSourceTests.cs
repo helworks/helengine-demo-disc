@@ -8,7 +8,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Game_scene_generator_writes_zombislayer_gameplay_scene() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneGenerator.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
 
             Assert.Contains("ZombislayerAssetPreparationService zombislayerAssetPreparationService = new ZombislayerAssetPreparationService();", source, StringComparison.Ordinal);
             Assert.Contains("ZombislayerGenerationAssets zombislayerAssets = zombislayerAssetPreparationService.Prepare(projectRootPath);", source, StringComparison.Ordinal);
@@ -22,7 +22,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Zombislayer_scene_factory_authors_imported_models_session_and_fps_controller() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\game.tools\ZombislayerSceneFactory.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\ZombislayerSceneFactory.cs");
 
             Assert.Contains("using city.rendering.tools;", source, StringComparison.Ordinal);
             Assert.Contains("new city.game.ZombislayerSessionComponent()", source, StringComparison.Ordinal);

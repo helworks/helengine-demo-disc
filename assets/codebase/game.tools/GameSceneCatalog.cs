@@ -9,6 +9,11 @@ namespace city.game.tools {
         public const string TiltTrialSceneId = global::city.game.TiltTrialSceneIds.LevelSelectSceneId;
 
         /// <summary>
+        /// Stable scene id used by the generated DS and 3DS level selector.
+        /// </summary>
+        public const string TiltTrialHandheldLevelSelectSceneId = global::city.game.TiltTrialSceneIds.HandheldLevelSelectSceneId;
+
+        /// <summary>
         /// Stable scene id used by the first generated Tilt Trial gameplay level.
         /// </summary>
         public const string TiltTrialLevel01SceneId = global::city.game.TiltTrialSceneIds.Level01SceneId;
@@ -45,6 +50,7 @@ namespace city.game.tools {
         public static IReadOnlyList<string> GetSceneIds() {
             return [
                 TiltTrialSceneId,
+                TiltTrialHandheldLevelSelectSceneId,
                 TiltTrialLevel01SceneId,
                 TiltTrialLevel02SceneId,
                 TiltTrialLevel03SceneId,

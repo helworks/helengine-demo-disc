@@ -79,11 +79,11 @@
 
 ### City Validation Slice
 
-- Create: `C:\dev\helprojs\city\assets\audio\menu\helen_of_code_high_code_v2.wav`
-- Modify: `C:\dev\helprojs\city\assets\codebase\menu\DemoDiscMenuTheme.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\menu.tools\DemoDiscStandardMainMenuSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\menu.tools\DemoDiscHandheldMainMenuSceneFactory.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\menu.tools.tests\DemoDiscMainMenuAudioSourceTests.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\audio\menu\helen_of_code_high_code_v2.wav`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\menu\DemoDiscMenuTheme.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\menu.tools\DemoDiscStandardMainMenuSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\menu.tools\DemoDiscHandheldMainMenuSceneFactory.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\menu.tools.tests\DemoDiscMainMenuAudioSourceTests.cs`
 
 ## Task 1: Add Shared Audio Asset Types and Binary Serialization
 
@@ -943,15 +943,15 @@ rtk git commit -m "feat: add windows runtime audio backend"
 ## Task 7: Add the City Main Menu Music Vertical Slice
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\audio\menu\helen_of_code_high_code_v2.wav`
-- Modify: `C:\dev\helprojs\city\assets\codebase\menu\DemoDiscMenuTheme.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\menu.tools\DemoDiscStandardMainMenuSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\menu.tools\DemoDiscHandheldMainMenuSceneFactory.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\menu.tools.tests\DemoDiscMainMenuAudioSourceTests.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\audio\menu\helen_of_code_high_code_v2.wav`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\menu\DemoDiscMenuTheme.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\menu.tools\DemoDiscStandardMainMenuSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\menu.tools\DemoDiscHandheldMainMenuSceneFactory.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\menu.tools.tests\DemoDiscMainMenuAudioSourceTests.cs`
 
 - [ ] **Step 1: Copy the canonical WAV source into the project and write the failing city test**
 
-Run: `rtk powershell -NoProfile -Command "New-Item -ItemType Directory -Force 'C:\dev\helprojs\city\assets\audio\menu' | Out-Null; Copy-Item 'F:\dev\youtube\projects\v1_unity\audio\Helen of Code - High Code v2.wav' 'C:\dev\helprojs\city\assets\audio\menu\helen_of_code_high_code_v2.wav' -Force"`
+Run: `rtk powershell -NoProfile -Command "New-Item -ItemType Directory -Force 'C:\dev\helprojs\demodisc\assets\audio\menu' | Out-Null; Copy-Item 'F:\dev\youtube\projects\v1_unity\audio\Helen of Code - High Code v2.wav' 'C:\dev\helprojs\demodisc\assets\audio\menu\helen_of_code_high_code_v2.wav' -Force"`
 
 ```csharp
 namespace city.menu.tools.tests {
@@ -973,7 +973,7 @@ namespace city.menu.tools.tests {
 
 - [ ] **Step 2: Run the generated city menu-tools test project**
 
-Run: `rtk dotnet test C:\dev\helprojs\city\user_settings\generated_code\projects\menu.tools.tests\menu.tools.tests.csproj --filter FullyQualifiedName~DemoDiscMainMenuAudioSourceTests`
+Run: `rtk dotnet test C:\dev\helprojs\demodisc\user_settings\generated_code\projects\menu.tools.tests\menu.tools.tests.csproj --filter FullyQualifiedName~DemoDiscMainMenuAudioSourceTests`
 
 Expected: FAIL because the menu scenes do not author `AudioSourceComponent`.
 
@@ -1016,7 +1016,7 @@ CreateMenuAudioEntity(menuRootEntity);
 
 - [ ] **Step 4: Regenerate the menu scenes and run the city test**
 
-Run: `rtk dotnet test C:\dev\helprojs\city\user_settings\generated_code\projects\menu.tools.tests\menu.tools.tests.csproj --filter FullyQualifiedName~DemoDiscMainMenuAudioSourceTests`
+Run: `rtk dotnet test C:\dev\helprojs\demodisc\user_settings\generated_code\projects\menu.tools.tests\menu.tools.tests.csproj --filter FullyQualifiedName~DemoDiscMainMenuAudioSourceTests`
 
 Expected: PASS
 
@@ -1027,7 +1027,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-rtk git add C:\dev\helprojs\city\assets\audio\menu\helen_of_code_high_code_v2.wav C:\dev\helprojs\city\assets\codebase\menu\DemoDiscMenuTheme.cs C:\dev\helprojs\city\assets\codebase\menu.tools\DemoDiscStandardMainMenuSceneFactory.cs C:\dev\helprojs\city\assets\codebase\menu.tools\DemoDiscHandheldMainMenuSceneFactory.cs C:\dev\helprojs\city\assets\codebase\menu.tools.tests\DemoDiscMainMenuAudioSourceTests.cs
+rtk git add C:\dev\helprojs\demodisc\assets\audio\menu\helen_of_code_high_code_v2.wav C:\dev\helprojs\demodisc\assets\codebase\menu\DemoDiscMenuTheme.cs C:\dev\helprojs\demodisc\assets\codebase\menu.tools\DemoDiscStandardMainMenuSceneFactory.cs C:\dev\helprojs\demodisc\assets\codebase\menu.tools\DemoDiscHandheldMainMenuSceneFactory.cs C:\dev\helprojs\demodisc\assets\codebase\menu.tools.tests\DemoDiscMainMenuAudioSourceTests.cs
 rtk git commit -m "feat: add looping menu music through shared audio system"
 ```
 

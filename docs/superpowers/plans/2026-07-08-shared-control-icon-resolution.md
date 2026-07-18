@@ -13,8 +13,8 @@
 ### Task 1: Lock The Shared Raw Resolver Contract In Failing Tests
 
 **Files:**
-- Create: `C:\dev\helprojs\city\tests\gameplay.tests\GeneratedControlIconAssetResolverTests.cs`
-- Test: `C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj`
+- Create: `C:\dev\helprojs\demodisc\tests\gameplay.tests\GeneratedControlIconAssetResolverTests.cs`
+- Test: `C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj`
 
 - [ ] **Step 1: Write the failing platform-map and manifest tests**
 
@@ -35,7 +35,7 @@ namespace city.tests {
         [Fact]
         public void Catalog_returns_generated_png_path_for_known_family_and_control() {
             city.rendering.tools.GeneratedControlIconCatalog catalog = city.rendering.tools.GeneratedControlIconCatalog.Load(
-                @"C:\dev\helprojs\city");
+                @"C:\dev\helprojs\demodisc");
 
             string relativePath = catalog.RequireControlPath("keyboard", "wasd");
 
@@ -45,7 +45,7 @@ namespace city.tests {
         [Fact]
         public void Catalog_throws_for_missing_control() {
             city.rendering.tools.GeneratedControlIconCatalog catalog = city.rendering.tools.GeneratedControlIconCatalog.Load(
-                @"C:\dev\helprojs\city");
+                @"C:\dev\helprojs\demodisc");
 
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
                 () => catalog.RequireControlPath("ps2", "not-a-real-control"));
@@ -67,7 +67,7 @@ Extend the same file with behavior tests for the shared resolver entry point.
             city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
 
             city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
-                @"C:\dev\helprojs\city",
+                @"C:\dev\helprojs\demodisc",
                 "ps2",
                 "r1");
 
@@ -83,7 +83,7 @@ Extend the same file with behavior tests for the shared resolver entry point.
             city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
 
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
-                () => resolver.RequireIcon(@"C:\dev\helprojs\city", "saturn", "a"));
+                () => resolver.RequireIcon(@"C:\dev\helprojs\demodisc", "saturn", "a"));
 
             Assert.Contains("saturn", exception.Message, StringComparison.OrdinalIgnoreCase);
         }
@@ -94,7 +94,7 @@ Extend the same file with behavior tests for the shared resolver entry point.
 Run:
 
 ```bash
-rtk dotnet test C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj --filter "GeneratedControlIconAssetResolverTests" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj --filter "GeneratedControlIconAssetResolverTests" -v minimal
 ```
 
 Expected: `FAIL` because `GeneratedControlIconPlatformMap`, `GeneratedControlIconCatalog`, `GeneratedControlIconAssetResolver`, and `ResolvedControlIcon` do not exist yet.
@@ -102,18 +102,18 @@ Expected: `FAIL` because `GeneratedControlIconPlatformMap`, `GeneratedControlIco
 - [ ] **Step 4: Commit the failing-test checkpoint**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add tests/gameplay.tests/GeneratedControlIconAssetResolverTests.cs
-rtk git -C C:\dev\helprojs\city commit -m "test: define generated control icon resolver contract"
+rtk git -C C:\dev\helprojs\demodisc add tests/gameplay.tests/GeneratedControlIconAssetResolverTests.cs
+rtk git -C C:\dev\helprojs\demodisc commit -m "test: define generated control icon resolver contract"
 ```
 
 ### Task 2: Implement The Shared Manifest-Driven Resolver
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering.tools\ResolvedControlIcon.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering.tools\GeneratedControlIconPlatformMap.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering.tools\GeneratedControlIconCatalog.cs`
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering.tools\GeneratedControlIconAssetResolver.cs`
-- Modify: `C:\dev\helprojs\city\tests\gameplay.tests\GeneratedControlIconAssetResolverTests.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\ResolvedControlIcon.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\GeneratedControlIconPlatformMap.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\GeneratedControlIconCatalog.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\GeneratedControlIconAssetResolver.cs`
+- Modify: `C:\dev\helprojs\demodisc\tests\gameplay.tests\GeneratedControlIconAssetResolverTests.cs`
 
 - [ ] **Step 1: Add the resolved-icon DTO and strict platform map**
 
@@ -285,7 +285,7 @@ namespace city.rendering.tools {
 Run:
 
 ```bash
-rtk dotnet test C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj --filter "GeneratedControlIconAssetResolverTests" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj --filter "GeneratedControlIconAssetResolverTests" -v minimal
 ```
 
 Expected: `PASS`
@@ -293,15 +293,15 @@ Expected: `PASS`
 - [ ] **Step 5: Commit the shared resolver implementation**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add assets/codebase/rendering.tools/ResolvedControlIcon.cs assets/codebase/rendering.tools/GeneratedControlIconPlatformMap.cs assets/codebase/rendering.tools/GeneratedControlIconCatalog.cs assets/codebase/rendering.tools/GeneratedControlIconAssetResolver.cs tests/gameplay.tests/GeneratedControlIconAssetResolverTests.cs
-rtk git -C C:\dev\helprojs\city commit -m "feat: add generated control icon resolver"
+rtk git -C C:\dev\helprojs\demodisc add assets/codebase/rendering.tools/ResolvedControlIcon.cs assets/codebase/rendering.tools/GeneratedControlIconPlatformMap.cs assets/codebase/rendering.tools/GeneratedControlIconCatalog.cs assets/codebase/rendering.tools/GeneratedControlIconAssetResolver.cs tests/gameplay.tests/GeneratedControlIconAssetResolverTests.cs
+rtk git -C C:\dev\helprojs\demodisc commit -m "feat: add generated control icon resolver"
 ```
 
 ### Task 3: Add Failing Source Audits For The Shared Overlay Migration
 
 **Files:**
-- Create: `C:\dev\helprojs\city\tests\gameplay.tests\PromptIconOverlaySourceTests.cs`
-- Test: `C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj`
+- Create: `C:\dev\helprojs\demodisc\tests\gameplay.tests\PromptIconOverlaySourceTests.cs`
+- Test: `C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj`
 
 - [ ] **Step 1: Write the failing rendering-overlay source audit**
 
@@ -315,7 +315,7 @@ namespace city.tests {
     public sealed class PromptIconOverlaySourceTests {
         [Fact]
         public void Demo_scene_instruction_overlay_source_uses_shared_resolver_and_editor_platform_overrides() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
 
             Assert.Contains("GeneratedControlIconAssetResolver", source, StringComparison.Ordinal);
             Assert.Contains("ComponentPlatformEditingService", source, StringComparison.Ordinal);
@@ -329,7 +329,7 @@ namespace city.tests {
 
         [Fact]
         public void Demo_scene_instruction_overlay_source_uses_raw_control_ids_for_keyboard_and_console_rows() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
 
             Assert.Contains("\"wasd\"", source, StringComparison.Ordinal);
             Assert.Contains("\"key_l\"", source, StringComparison.Ordinal);
@@ -347,7 +347,7 @@ Extend the same file with a guardrail around the shared physics consumer.
 ```csharp
         [Fact]
         public void Physics_scene_factory_source_still_delegates_instruction_overlay_to_shared_rendering_factory() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneFactory.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs");
 
             Assert.Contains("instructionOverlayFactory.CreateDesktopInstructionOverlayRoot", source, StringComparison.Ordinal);
             Assert.DoesNotContain("images/instructions/controls/xbox360_dpad.png", source, StringComparison.Ordinal);
@@ -362,7 +362,7 @@ Extend the same file with a guardrail around the shared physics consumer.
 Run:
 
 ```bash
-rtk dotnet test C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj --filter "PromptIconOverlaySourceTests" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj --filter "PromptIconOverlaySourceTests" -v minimal
 ```
 
 Expected: `FAIL` because the overlay still hard-codes legacy controller PNG paths and still uses `DemoScenePlatformInstructionIconSetComponent`.
@@ -370,26 +370,26 @@ Expected: `FAIL` because the overlay still hard-codes legacy controller PNG path
 - [ ] **Step 4: Commit the failing source-audit checkpoint**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add tests/gameplay.tests/PromptIconOverlaySourceTests.cs
-rtk git -C C:\dev\helprojs\city commit -m "test: lock shared prompt icon overlay migration"
+rtk git -C C:\dev\helprojs\demodisc add tests/gameplay.tests/PromptIconOverlaySourceTests.cs
+rtk git -C C:\dev\helprojs\demodisc commit -m "test: lock shared prompt icon overlay migration"
 ```
 
 ### Task 4: Migrate The Shared Rendering/Physics Overlay To Per-Platform Scene Overrides
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\CubeTestSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\ScaledCubeSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\ColoredCubeGridSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\DirectionalShadowPlazaSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\TexturedCubeGridSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\SpotlightStreetSliceSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\AxisTestSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\AxisTest2SceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\RenderingSceneGenerator.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneFactory.cs`
-- Delete: `C:\dev\helprojs\city\assets\codebase\rendering\DemoScenePlatformInstructionIconSetComponent.cs`
-- Modify: `C:\dev\helprojs\city\tests\gameplay.tests\PromptIconOverlaySourceTests.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\CubeTestSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\ScaledCubeSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\ColoredCubeGridSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DirectionalShadowPlazaSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TexturedCubeGridSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\SpotlightStreetSliceSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\AxisTestSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\AxisTest2SceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingSceneGenerator.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs`
+- Delete: `C:\dev\helprojs\demodisc\assets\codebase\rendering\DemoScenePlatformInstructionIconSetComponent.cs`
+- Modify: `C:\dev\helprojs\demodisc\tests\gameplay.tests\PromptIconOverlaySourceTests.cs`
 
 - [ ] **Step 1: Replace hard-coded path constants with raw row definitions**
 
@@ -605,7 +605,7 @@ Also delete `DemoScenePlatformInstructionIconSetComponent.cs`, because the runti
 Run:
 
 ```bash
-rtk dotnet test C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj --filter "PromptIconOverlaySourceTests" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj --filter "PromptIconOverlaySourceTests" -v minimal
 ```
 
 Expected: `PASS`
@@ -613,24 +613,24 @@ Expected: `PASS`
 - [ ] **Step 6: Commit the overlay migration**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add assets/codebase/rendering.tools/DemoSceneInstructionOverlayFactory.cs assets/codebase/rendering.tools/CubeTestSceneFactory.cs assets/codebase/rendering.tools/ScaledCubeSceneFactory.cs assets/codebase/rendering.tools/ColoredCubeGridSceneFactory.cs assets/codebase/rendering.tools/DirectionalShadowPlazaSceneFactory.cs assets/codebase/rendering.tools/TexturedCubeGridSceneFactory.cs assets/codebase/rendering.tools/SpotlightStreetSliceSceneFactory.cs assets/codebase/rendering.tools/AxisTestSceneFactory.cs assets/codebase/rendering.tools/AxisTest2SceneFactory.cs assets/codebase/rendering.tools/RenderingSceneGenerator.cs assets/codebase/physics.tools/PhysicsSceneFactory.cs tests/gameplay.tests/PromptIconOverlaySourceTests.cs
-rtk git -C C:\dev\helprojs\city rm assets/codebase/rendering/DemoScenePlatformInstructionIconSetComponent.cs
-rtk git -C C:\dev\helprojs\city commit -m "feat: author shared prompt icons with platform scene overrides"
+rtk git -C C:\dev\helprojs\demodisc add assets/codebase/rendering.tools/DemoSceneInstructionOverlayFactory.cs assets/codebase/rendering.tools/CubeTestSceneFactory.cs assets/codebase/rendering.tools/ScaledCubeSceneFactory.cs assets/codebase/rendering.tools/ColoredCubeGridSceneFactory.cs assets/codebase/rendering.tools/DirectionalShadowPlazaSceneFactory.cs assets/codebase/rendering.tools/TexturedCubeGridSceneFactory.cs assets/codebase/rendering.tools/SpotlightStreetSliceSceneFactory.cs assets/codebase/rendering.tools/AxisTestSceneFactory.cs assets/codebase/rendering.tools/AxisTest2SceneFactory.cs assets/codebase/rendering.tools/RenderingSceneGenerator.cs assets/codebase/physics.tools/PhysicsSceneFactory.cs tests/gameplay.tests/PromptIconOverlaySourceTests.cs
+rtk git -C C:\dev\helprojs\demodisc rm assets/codebase/rendering/DemoScenePlatformInstructionIconSetComponent.cs
+rtk git -C C:\dev\helprojs\demodisc commit -m "feat: author shared prompt icons with platform scene overrides"
 ```
 
 ### Task 5: Regenerate Rendering And Physics Scenes And Verify The New Prompt Paths
 
 **Files:**
-- Generated output: `C:\dev\helprojs\city\assets\scenes\rendering\`
-- Generated output: `C:\dev\helprojs\city\assets\scenes\physics\`
-- Verify against: `C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj`
+- Generated output: `C:\dev\helprojs\demodisc\assets\scenes\rendering\`
+- Generated output: `C:\dev\helprojs\demodisc\assets\scenes\physics\`
+- Verify against: `C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj`
 
 - [ ] **Step 1: Run the focused city tests**
 
 Run:
 
 ```bash
-rtk dotnet test C:\dev\helprojs\city\tests\gameplay.tests\gameplay.tests.csproj --filter "GeneratedControlIconAssetResolverTests|PromptIconOverlaySourceTests" -v minimal
+rtk dotnet test C:\dev\helprojs\demodisc\tests\gameplay.tests\gameplay.tests.csproj --filter "GeneratedControlIconAssetResolverTests|PromptIconOverlaySourceTests" -v minimal
 ```
 
 Expected: `PASS`
@@ -640,7 +640,7 @@ Expected: `PASS`
 Run:
 
 ```bash
-rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\city\project.heproj --editor-command menu.generate-rendering-scenes
+rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc\project.heproj --editor-command menu.generate-rendering-scenes
 ```
 
 Expected: the editor command exits successfully after rewriting the rendering scene assets.
@@ -650,7 +650,7 @@ Expected: the editor command exits successfully after rewriting the rendering sc
 Run:
 
 ```bash
-rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\city\project.heproj --editor-command menu.generate-physics-scenes
+rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc\project.heproj --editor-command menu.generate-physics-scenes
 ```
 
 Expected: the editor command exits successfully after rewriting the physics scene assets.
@@ -660,8 +660,8 @@ Expected: the editor command exits successfully after rewriting the physics scen
 Run:
 
 ```bash
-rtk powershell -NoProfile -Command "& { rg -a 'images/instructions/controls/(xbox360_|ps2_|switch_)' 'C:\dev\helprojs\city\assets\scenes\rendering' 'C:\dev\helprojs\city\assets\scenes\physics'; if ($LASTEXITCODE -eq 0) { throw 'Legacy control prompt paths are still present in generated scenes.' } }"
-rtk powershell -NoProfile -Command "& { rg -a 'images/instructions/controls/generated/' 'C:\dev\helprojs\city\assets\scenes\rendering' 'C:\dev\helprojs\city\assets\scenes\physics' }"
+rtk powershell -NoProfile -Command "& { rg -a 'images/instructions/controls/(xbox360_|ps2_|switch_)' 'C:\dev\helprojs\demodisc\assets\scenes\rendering' 'C:\dev\helprojs\demodisc\assets\scenes\physics'; if ($LASTEXITCODE -eq 0) { throw 'Legacy control prompt paths are still present in generated scenes.' } }"
+rtk powershell -NoProfile -Command "& { rg -a 'images/instructions/controls/generated/' 'C:\dev\helprojs\demodisc\assets\scenes\rendering' 'C:\dev\helprojs\demodisc\assets\scenes\physics' }"
 ```
 
 Expected:
@@ -674,6 +674,6 @@ second command: matches under rendering and physics scene assets
 - [ ] **Step 5: Commit the regenerated scenes and final implementation**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add assets/codebase/rendering.tools/ResolvedControlIcon.cs assets/codebase/rendering.tools/GeneratedControlIconPlatformMap.cs assets/codebase/rendering.tools/GeneratedControlIconCatalog.cs assets/codebase/rendering.tools/GeneratedControlIconAssetResolver.cs assets/codebase/rendering.tools/DemoSceneInstructionOverlayFactory.cs tests/gameplay.tests/GeneratedControlIconAssetResolverTests.cs tests/gameplay.tests/PromptIconOverlaySourceTests.cs assets/scenes/rendering assets/scenes/physics docs/superpowers/plans/2026-07-08-shared-control-icon-resolution.md
-rtk git -C C:\dev\helprojs\city commit -m "feat: migrate shared prompt icons to generated control assets"
+rtk git -C C:\dev\helprojs\demodisc add assets/codebase/rendering.tools/ResolvedControlIcon.cs assets/codebase/rendering.tools/GeneratedControlIconPlatformMap.cs assets/codebase/rendering.tools/GeneratedControlIconCatalog.cs assets/codebase/rendering.tools/GeneratedControlIconAssetResolver.cs assets/codebase/rendering.tools/DemoSceneInstructionOverlayFactory.cs tests/gameplay.tests/GeneratedControlIconAssetResolverTests.cs tests/gameplay.tests/PromptIconOverlaySourceTests.cs assets/scenes/rendering assets/scenes/physics docs/superpowers/plans/2026-07-08-shared-control-icon-resolution.md
+rtk git -C C:\dev\helprojs\demodisc commit -m "feat: migrate shared prompt icons to generated control assets"
 ```

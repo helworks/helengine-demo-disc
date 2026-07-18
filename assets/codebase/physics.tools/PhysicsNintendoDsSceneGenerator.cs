@@ -12,6 +12,11 @@ namespace city.physics.tools {
         const string PhysicsSceneFolderRelativePath = "scenes/physics";
 
         /// <summary>
+        /// Platform identifiers that represent the Nintendo handheld build family.
+        /// </summary>
+        static readonly string[] NintendoHandheldPlatformIds = ["ds", "3ds"];
+
+        /// <summary>
         /// Writer used to persist canonical scenes through the shared generated authored-scene pipeline.
         /// </summary>
         readonly GeneratedAuthoringSceneWriteService SceneWriteService;
@@ -22,18 +27,12 @@ namespace city.physics.tools {
         readonly IScriptTypeResolver ScriptTypeResolver;
 
         /// <summary>
-        /// Shared scene-music authoring service used to reattach the looping showcase track after raw scene loads strip the unsupported audio root.
-        /// </summary>
-        readonly city.scene.tools.GeneratedSceneMusicAuthoringService SceneMusicAuthoringService;
-
-        /// <summary>
         /// Initializes one Nintendo handheld physics scene generator.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to load authored gameplay components from the generated physics scenes.</param>
         public PhysicsNintendoDsSceneGenerator(IScriptTypeResolver scriptTypeResolver) {
             ScriptTypeResolver = scriptTypeResolver ?? throw new ArgumentNullException(nameof(scriptTypeResolver));
             SceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolver);
-            SceneMusicAuthoringService = new city.scene.tools.GeneratedSceneMusicAuthoringService();
         }
 
         /// <summary>
@@ -120,14 +119,20 @@ namespace city.physics.tools {
                 "assets",
                 PhysicsSceneFolderRelativePath.Replace('/', Path.DirectorySeparatorChar),
                 sceneEntry.SceneId + ".helen");
-            SceneAsset authoredSceneAsset = LoadSceneAssetWithoutSharedMusic(authoredScenePath);
+            IReadOnlyList<string> supportedPlatformIds = new EditorProjectPlatformsService(fullProjectRootPath).Load().SupportedPlatforms;
+            SceneAsset authoredSceneAsset;
+            if (string.Equals(sceneEntry.SceneId, PhysicsSceneCatalog.MatrixRenderSceneId, StringComparison.Ordinal)) {
+                authoredSceneAsset = CreateFreshPhysicsSceneAssetWithoutSharedMusic(sceneEntry.SceneId);
+            } else {
+                authoredSceneAsset = LoadSceneAssetWithoutSharedMusic(authoredScenePath);
+                authoredSceneAsset.RootEntities = RemoveNintendoHandheldOnlyEntities(authoredSceneAsset.RootEntities, supportedPlatformIds);
+            }
             SceneLoadService sceneLoadService = new SceneLoadService(fullProjectRootPath, persistenceRegistry, referenceResolver);
             IReadOnlyList<EditorEntity> loadedRoots = sceneLoadService.Load(authoredSceneAsset);
-            Entity[] rootEntities = new Entity[loadedRoots.Count + 1];
+            Entity[] rootEntities = new Entity[loadedRoots.Count];
             for (int index = 0; index < loadedRoots.Count; index++) {
                 rootEntities[index] = loadedRoots[index];
             }
-            rootEntities[rootEntities.Length - 1] = SceneMusicAuthoringService.CreateRenderingAndPhysicsMusicEntity();
 
             try {
                 SceneWriteService.WriteScene(fullProjectRootPath, new GeneratedAuthoringSceneDefinition {
@@ -142,6 +147,130 @@ namespace city.physics.tools {
             } finally {
                 DisposeRoots(rootEntities);
             }
+        }
+
+        /// <summary>
+        /// Removes previously generated Nintendo handheld-only entity subtrees from one serialized canonical scene so the next handheld augmentation pass does not accumulate duplicate overlays.
+        /// </summary>
+        /// <param name="entities">Serialized entities that may include stale handheld-only augmentation subtrees.</param>
+        /// <param name="supportedPlatformIds">Project-supported platform identifiers.</param>
+        /// <returns>Serialized entities that should remain as the common scene root set.</returns>
+        SceneEntityAsset[] RemoveNintendoHandheldOnlyEntities(SceneEntityAsset[] entities, IReadOnlyList<string> supportedPlatformIds) {
+            if (entities == null) {
+                throw new ArgumentNullException(nameof(entities));
+            } else if (supportedPlatformIds == null) {
+                throw new ArgumentNullException(nameof(supportedPlatformIds));
+            }
+
+            List<SceneEntityAsset> filteredEntities = new List<SceneEntityAsset>(entities.Length);
+            for (int index = 0; index < entities.Length; index++) {
+                SceneEntityAsset filteredEntity = RemoveNintendoHandheldOnlyEntity(entities[index], supportedPlatformIds);
+                if (filteredEntity != null) {
+                    filteredEntities.Add(filteredEntity);
+                }
+            }
+
+            return filteredEntities.ToArray();
+        }
+
+        /// <summary>
+        /// Removes previously generated Nintendo handheld-only entity subtrees from one serialized scene entity.
+        /// </summary>
+        /// <param name="entity">Serialized scene entity that may include stale handheld-only augmentation children.</param>
+        /// <param name="supportedPlatformIds">Project-supported platform identifiers.</param>
+        /// <returns>Serialized entity without stale handheld-only descendants, or null when the entity itself is handheld-only.</returns>
+        SceneEntityAsset RemoveNintendoHandheldOnlyEntity(SceneEntityAsset entity, IReadOnlyList<string> supportedPlatformIds) {
+            if (supportedPlatformIds == null) {
+                throw new ArgumentNullException(nameof(supportedPlatformIds));
+            } else if (entity == null) {
+                return null;
+            }
+
+            if (IsNintendoHandheldOnlyEntity(entity, supportedPlatformIds)) {
+                return null;
+            }
+
+            entity.Children = RemoveNintendoHandheldOnlyEntities(entity.Children ?? Array.Empty<SceneEntityAsset>(), supportedPlatformIds);
+            return entity;
+        }
+
+        /// <summary>
+        /// Returns whether one serialized canonical scene entity exists only on Nintendo handheld platforms.
+        /// </summary>
+        /// <param name="entity">Serialized canonical scene entity under evaluation.</param>
+        /// <param name="supportedPlatformIds">Project-supported platform identifiers.</param>
+        /// <returns>True when the entity exists on Nintendo handheld platforms and is removed from every non-handheld platform.</returns>
+        bool IsNintendoHandheldOnlyEntity(SceneEntityAsset entity, IReadOnlyList<string> supportedPlatformIds) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (supportedPlatformIds == null) {
+                throw new ArgumentNullException(nameof(supportedPlatformIds));
+            }
+
+            bool existsOnNintendoHandheld = false;
+            bool existsOnNonHandheld = false;
+            for (int index = 0; index < supportedPlatformIds.Count; index++) {
+                string supportedPlatformId = supportedPlatformIds[index];
+                if (string.IsNullOrWhiteSpace(supportedPlatformId)) {
+                    continue;
+                }
+
+                bool existsOnPlatform = ResolveEntityExists(entity, supportedPlatformId);
+                if (IsNintendoHandheldPlatformId(supportedPlatformId)) {
+                    existsOnNintendoHandheld |= existsOnPlatform;
+                } else {
+                    existsOnNonHandheld |= existsOnPlatform;
+                }
+            }
+
+            return existsOnNintendoHandheld && !existsOnNonHandheld;
+        }
+
+        /// <summary>
+        /// Returns whether the supplied platform id belongs to the Nintendo handheld platform family.
+        /// </summary>
+        /// <param name="platformId">Platform identifier under evaluation.</param>
+        /// <returns>True when the platform id is `ds` or `3ds`.</returns>
+        static bool IsNintendoHandheldPlatformId(string platformId) {
+            if (string.IsNullOrWhiteSpace(platformId)) {
+                return false;
+            }
+
+            for (int index = 0; index < NintendoHandheldPlatformIds.Length; index++) {
+                if (string.Equals(platformId, NintendoHandheldPlatformIds[index], StringComparison.OrdinalIgnoreCase)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Resolves whether one serialized entity should exist on the supplied platform by applying its authored existence overrides.
+        /// </summary>
+        /// <param name="entity">Serialized entity under evaluation.</param>
+        /// <param name="platformId">Platform identifier whose effective entity existence should be resolved.</param>
+        /// <returns>True when the entity should exist on the supplied platform.</returns>
+        static bool ResolveEntityExists(SceneEntityAsset entity, string platformId) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (string.IsNullOrWhiteSpace(platformId)) {
+                throw new ArgumentException("Platform id must be provided.", nameof(platformId));
+            }
+
+            SceneEntityPlatformExistenceOverrideAsset[] overrides = entity.PlatformExistenceOverrides ?? Array.Empty<SceneEntityPlatformExistenceOverrideAsset>();
+            for (int index = 0; index < overrides.Length; index++) {
+                SceneEntityPlatformExistenceOverrideAsset overrideAsset = overrides[index];
+                if (overrideAsset == null || string.IsNullOrWhiteSpace(overrideAsset.PlatformId)) {
+                    continue;
+                }
+
+                if (string.Equals(overrideAsset.PlatformId, platformId, StringComparison.OrdinalIgnoreCase)) {
+                    return overrideAsset.Exists;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -179,7 +308,7 @@ namespace city.physics.tools {
                 sceneEntry.SceneId,
                 true);
             sceneDefinition.NintendoDsScene = new GeneratedDsSceneDefinition {
-                UseDefaultBottomOverlay = false,
+                UseDefaultBottomOverlay = true,
                 BottomScreenRootEntities = Array.Empty<Entity>()
             };
             try {
@@ -200,6 +329,22 @@ namespace city.physics.tools {
             }
 
             return PhysicsSceneFolderRelativePath + "/" + sceneId + ".helen";
+        }
+
+        /// <summary>
+        /// Builds one fresh generated physics scene asset directly from the current scene factory definitions and strips the shared generated music root before editor scene load materializes the remaining roots.
+        /// </summary>
+        /// <param name="sceneId">Stable physics scene id that should be rebuilt from the live factory definition.</param>
+        /// <returns>Fresh generated physics scene asset without the shared generated music root.</returns>
+        static SceneAsset CreateFreshPhysicsSceneAssetWithoutSharedMusic(string sceneId) {
+            if (string.IsNullOrWhiteSpace(sceneId)) {
+                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            }
+
+            PhysicsSceneFactory physicsSceneFactory = new PhysicsSceneFactory();
+            SceneAsset sceneAsset = physicsSceneFactory.CreateSceneAsset(sceneId);
+            StripSharedSceneMusic(sceneAsset);
+            return sceneAsset;
         }
 
         /// <summary>

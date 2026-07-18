@@ -95,11 +95,11 @@ That means:
 
 Expected implementation areas:
 
-- `C:\dev\helprojs\city\assets\codebase\menu\DemoDiscSceneCatalog.cs`
-- `C:\dev\helprojs\city\assets\codebase\scene.tools\...` or `physics.tools\...`
-- `C:\dev\helprojs\city\assets\codebase\rendering.tools\GeneratedAuthoringSceneWriteService.cs`
-- `C:\dev\helprojs\city\user_settings\build_config.json`
-- generated outputs under `C:\dev\helprojs\city\assets\scenes\physics\`
+- `C:\dev\helprojs\demodisc\assets\codebase\menu\DemoDiscSceneCatalog.cs`
+- `C:\dev\helprojs\demodisc\assets\codebase\scene.tools\...` or `physics.tools\...`
+- `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\GeneratedAuthoringSceneWriteService.cs`
+- `C:\dev\helprojs\demodisc\user_settings\build_config.json`
+- generated outputs under `C:\dev\helprojs\demodisc\assets\scenes\physics\`
 
 The exact generator class placement should follow the existing city generator layout and avoid duplicating DS scaffold logic.
 

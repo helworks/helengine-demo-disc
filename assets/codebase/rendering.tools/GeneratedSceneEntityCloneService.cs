@@ -25,10 +25,37 @@ namespace city.rendering.tools {
                     throw new InvalidOperationException("Generated scene roots must be editor entities.");
                 }
 
+                if (IsConsoleCameraLightInstructionsBlueprintRoot(sourceRootEntity)) {
+                    continue;
+                }
+
                 clonedRoots.Add(CloneEntityRecursive(sourceRootEntity));
             }
 
             return clonedRoots.ToArray();
+        }
+
+        /// <summary>
+        /// Identifies the console-only instruction Blueprint root that must not be copied into Nintendo DS companion roots.
+        /// </summary>
+        /// <param name="rootEntity">Generated root being considered for a handheld clone.</param>
+        /// <returns>True when the root is the console camera/light Blueprint instance.</returns>
+        static bool IsConsoleCameraLightInstructionsBlueprintRoot(EditorEntity rootEntity) {
+            if (rootEntity == null || rootEntity.Components == null) {
+                return false;
+            }
+
+            for (int index = 0; index < rootEntity.Components.Count; index++) {
+                if (rootEntity.Components[index] is BlueprintInstanceComponent blueprintInstance
+                    && string.Equals(
+                        blueprintInstance.BlueprintAssetPath,
+                        ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath,
+                        StringComparison.Ordinal)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

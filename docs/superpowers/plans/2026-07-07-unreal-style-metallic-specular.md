@@ -704,10 +704,10 @@ rtk git -C C:\dev\helworks\helengine-windows commit -m "feat: add metallic and s
 ### Task 5: Author the Tilt Trial Marble Material for the New Workflow and Validate the Windows Build
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\TiltTrialPlayerSphereMarbleMaterialFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialPlayerSphereMarbleMaterialFactory.cs`
 - Modify: `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityTiltTrialMarbleMaterialTests.cs`
-- Regenerate: `C:\dev\helprojs\city\assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset`
-- Rebuild output: `C:\dev\helprojs\city\windows-build`
+- Regenerate: `C:\dev\helprojs\demodisc\assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset`
+- Rebuild output: `C:\dev\helprojs\demodisc\windows-build`
 - Test: `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityTiltTrialMarbleMaterialTests.cs`
 
 - [ ] **Step 1: Write the failing test**
@@ -758,8 +758,8 @@ platformDefinition.SetFieldValue(BaseColorFieldId, "#FFFFFFFF");
 ```
 
 ```bash
-rtk dotnet build C:\dev\helprojs\city\user_settings\generated_code\projects\game.tools\game.tools.csproj -c Debug
-rtk proxy dotnet C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\city\project.heproj --editor-command menu.generate-game-scenes
+rtk dotnet build C:\dev\helprojs\demodisc\user_settings\generated_code\projects\game.tools\game.tools.csproj -c Debug
+rtk proxy dotnet C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\demodisc\project.heproj --editor-command menu.generate-game-scenes
 ```
 
 - [ ] **Step 4: Run tests and package validation**
@@ -768,17 +768,17 @@ Run: `rtk dotnet test C:\dev\helworks\helengine\engine\helengine.editor.tests\he
 
 Expected: PASS
 
-Run: `rtk proxy dotnet C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\city\project.heproj --build windows --output C:\dev\helprojs\city\windows-build`
+Run: `rtk proxy dotnet C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\demodisc\project.heproj --build windows --output C:\dev\helprojs\demodisc\windows-build`
 
-Expected: build completes and refreshes `C:\dev\helprojs\city\windows-build`
+Expected: build completes and refreshes `C:\dev\helprojs\demodisc\windows-build`
 
-Run: `rtk proxy powershell -NoProfile -Command "Get-Process helengine_windows -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Process -FilePath 'C:\dev\helprojs\city\windows-build\helengine_windows.exe' -WorkingDirectory 'C:\dev\helprojs\city\windows-build'"`
+Run: `rtk proxy powershell -NoProfile -Command "Get-Process helengine_windows -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Process -FilePath 'C:\dev\helprojs\demodisc\windows-build\helengine_windows.exe' -WorkingDirectory 'C:\dev\helprojs\demodisc\windows-build'"`
 
 Expected: the Windows player launches from the rebuilt package
 
 - [ ] **Step 5: Commit**
 
 ```bash
-rtk git -C C:\dev\helprojs\city add assets/codebase/rendering.tools/TiltTrialPlayerSphereMarbleMaterialFactory.cs assets/materials/rendering/tilt_trial/PlayerSphereMarble.hasset
-rtk git -C C:\dev\helprojs\city commit -m "feat: author marble metallic and specular defaults"
+rtk git -C C:\dev\helprojs\demodisc add assets/codebase/rendering.tools/TiltTrialPlayerSphereMarbleMaterialFactory.cs assets/materials/rendering/tilt_trial/PlayerSphereMarble.hasset
+rtk git -C C:\dev\helprojs\demodisc commit -m "feat: author marble metallic and specular defaults"
 ```

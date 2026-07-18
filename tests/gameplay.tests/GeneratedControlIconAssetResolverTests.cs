@@ -12,7 +12,7 @@ namespace city.tests {
         [Fact]
         public void Catalog_returns_generated_png_path_for_known_family_and_control() {
             city.rendering.tools.GeneratedControlIconCatalog catalog = city.rendering.tools.GeneratedControlIconCatalog.Load(
-                @"C:\dev\helprojs\city");
+                @"C:\dev\helprojs\demodisc");
 
             string relativePath = catalog.RequireControlPath("keyboard", "wasd");
 
@@ -22,7 +22,7 @@ namespace city.tests {
         [Fact]
         public void Catalog_throws_for_missing_control() {
             city.rendering.tools.GeneratedControlIconCatalog catalog = city.rendering.tools.GeneratedControlIconCatalog.Load(
-                @"C:\dev\helprojs\city");
+                @"C:\dev\helprojs\demodisc");
 
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
                 () => catalog.RequireControlPath("ps2", "not-a-real-control"));
@@ -36,7 +36,7 @@ namespace city.tests {
             city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
 
             city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
-                @"C:\dev\helprojs\city",
+                @"C:\dev\helprojs\demodisc",
                 "ps2",
                 "r1");
 
@@ -52,7 +52,7 @@ namespace city.tests {
             city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
 
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
-                () => resolver.RequireIcon(@"C:\dev\helprojs\city", "saturn", "a"));
+                () => resolver.RequireIcon(@"C:\dev\helprojs\demodisc", "saturn", "a"));
 
             Assert.Contains("saturn", exception.Message, StringComparison.OrdinalIgnoreCase);
         }

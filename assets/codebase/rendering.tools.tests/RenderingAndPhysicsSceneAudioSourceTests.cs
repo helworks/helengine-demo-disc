@@ -3,12 +3,10 @@ using helengine.editor;
 
 namespace city.tests {
     /// <summary>
-    /// Verifies the generated rendering and physics showcase scenes all carry the shared looping background-music track.
+    /// Verifies the generated rendering and physics showcase scenes remain silent until music is intentionally reintroduced.
     /// </summary>
     public sealed class RenderingAndPhysicsSceneAudioSourceTests {
         const string ProjectRootPath = @"C:\dev\helprojs\demodisc";
-        const string SceneAudioRelativePath = "audio/scenes/helen_of_code_compling_v2.wav";
-
         static readonly string[] RenderingSceneRelativePaths = {
             @"assets\scenes\rendering\axis_test.helen",
             @"assets\scenes\rendering\axis_test2.helen",
@@ -41,44 +39,32 @@ namespace city.tests {
         };
 
         [Fact]
-        public void Generated_rendering_and_physics_scenes_include_shared_music_audio_reference_and_audio_source_component() {
+        public void Generated_rendering_and_physics_scenes_are_silent() {
             string audioSourceComponentTypeId = AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(AudioSourceComponent));
 
-            AssertAllScenesContainSharedMusic(RenderingSceneRelativePaths, audioSourceComponentTypeId);
-            AssertAllScenesContainSharedMusic(PhysicsSceneRelativePaths, audioSourceComponentTypeId);
+            AssertAllScenesAreSilent(RenderingSceneRelativePaths, audioSourceComponentTypeId);
+            AssertAllScenesAreSilent(PhysicsSceneRelativePaths, audioSourceComponentTypeId);
         }
 
         [Fact]
-        public void Shared_scene_music_authoring_service_and_generators_use_the_shared_music_contract() {
-            string sceneMusicSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\scene.tools\GeneratedSceneMusicAuthoringService.cs");
+        public void Rendering_and_physics_generators_do_not_author_shared_music() {
             string renderingSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingSceneGenerator.cs");
             string physicsSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs");
             string physicsNintendoDsSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsNintendoDsSceneGenerator.cs");
 
-            Assert.Contains("RenderingAndPhysicsMusicAudioPath", sceneMusicSource, StringComparison.Ordinal);
-            Assert.Contains(SceneAudioRelativePath, sceneMusicSource, StringComparison.Ordinal);
-            Assert.Contains("new AudioSourceComponent", sceneMusicSource, StringComparison.Ordinal);
-            Assert.Contains("PlayOnStart = true", sceneMusicSource, StringComparison.Ordinal);
-            Assert.Contains("Loop = true", sceneMusicSource, StringComparison.Ordinal);
-            Assert.Contains("BusId = \"music\"", sceneMusicSource, StringComparison.Ordinal);
-            Assert.Contains("RenderingAndPhysicsMusicGain = 0.3f", sceneMusicSource, StringComparison.Ordinal);
-            Assert.Contains("Gain = RenderingAndPhysicsMusicGain", sceneMusicSource, StringComparison.Ordinal);
-            Assert.Contains("CreateFileSystemAudio", sceneMusicSource, StringComparison.Ordinal);
-            Assert.Contains("GeneratedSceneMusicAuthoringService", renderingSource, StringComparison.Ordinal);
-            Assert.Contains("AppendSharedSceneMusic", renderingSource, StringComparison.Ordinal);
-            Assert.Contains("GeneratedSceneMusicAuthoringService", physicsSource, StringComparison.Ordinal);
-            Assert.Contains("AppendSharedSceneMusic", physicsSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("CreateRenderingAndPhysicsMusicEntity", renderingSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("CreateRenderingAndPhysicsMusicEntity", physicsSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("CreateRenderingAndPhysicsMusicEntity", physicsNintendoDsSource, StringComparison.Ordinal);
             Assert.Contains("LoadSceneAssetWithoutSharedMusic", physicsNintendoDsSource, StringComparison.Ordinal);
             Assert.Contains("StripSharedSceneMusic", physicsNintendoDsSource, StringComparison.Ordinal);
-            Assert.Contains("GeneratedSceneMusicAuthoringService", physicsNintendoDsSource, StringComparison.Ordinal);
         }
 
-        static void AssertAllScenesContainSharedMusic(IEnumerable<string> relativePaths, string audioSourceComponentTypeId) {
+        static void AssertAllScenesAreSilent(IEnumerable<string> relativePaths, string audioSourceComponentTypeId) {
             foreach (string relativePath in relativePaths) {
                 SceneAsset scene = LoadSceneAsset(relativePath);
 
-                Assert.Contains(scene.AssetReferences, reference => string.Equals(reference.RelativePath, SceneAudioRelativePath, StringComparison.Ordinal));
-                Assert.Contains(FlattenComponents(scene.RootEntities), component => string.Equals(component.ComponentTypeId, audioSourceComponentTypeId, StringComparison.Ordinal));
+                Assert.DoesNotContain(scene.AssetReferences, reference => reference != null && reference.RelativePath.Contains("audio/", StringComparison.Ordinal));
+                Assert.DoesNotContain(FlattenComponents(scene.RootEntities), component => string.Equals(component.ComponentTypeId, audioSourceComponentTypeId, StringComparison.Ordinal));
             }
         }
 

@@ -165,20 +165,24 @@ namespace city.rendering.tools {
             FontAsset instructionFont = ResolveRequiredEditorFont();
             DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
             Entity[] cubeEntities = CreateCubeEntities(cubeModel, coloredMaterials);
-            Entity[] rootEntities = new Entity[cubeEntities.Length + 4];
+            Entity[] rootEntities = new Entity[cubeEntities.Length + 5];
             Entity cameraEntity = CreateCameraEntity();
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
+            ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
+            consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
             rootEntities[0] = cameraEntity;
             rootEntities[1] = instructionOverlayEntity;
-            rootEntities[2] = CreateUiEntity();
-            rootEntities[3] = CreateDirectionalLightEntity();
-            Array.Copy(cubeEntities, 0, rootEntities, 4, cubeEntities.Length);
+            rootEntities[2] = consoleInstructionBlueprintEntity;
+            rootEntities[3] = CreateUiEntity();
+            rootEntities[4] = CreateDirectionalLightEntity();
+            Array.Copy(cubeEntities, 0, rootEntities, 5, cubeEntities.Length);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    UseDefaultBottomOverlay = false,
+                    UseDefaultBottomOverlay = true,
                     BottomScreenRootEntities = Array.Empty<Entity>()
                 },
                 RootEntities = rootEntities
@@ -254,7 +258,7 @@ namespace city.rendering.tools {
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.AddComponent(new FPSComponent {
                 Font = ResolveRequiredEditorFont(),
-                FontScale = 1f
+                FontScale = 2f
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             entity.AddComponent(new DemoDiscLightToggleComponent());

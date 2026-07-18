@@ -25,7 +25,7 @@ Add one new xUnit test to `CityGameSceneSourceTests.cs` that asserts the Tilt Tr
     /// </summary>
     [Fact]
     public void City_tilt_trial_player_sphere_source_uses_marble_material() {
-        string sourcePath = @"C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneFactory.cs";
+        string sourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs";
         string source = File.ReadAllText(sourcePath);
 
         Assert.Contains("Materials.rendering.tilt_trial.PlayerSphereMarble", source, StringComparison.Ordinal);
@@ -48,9 +48,9 @@ git -C C:\dev\helworks\helengine commit -m "test: cover tilt trial marble sphere
 ### Task 2: Add The Tilt Trial Marble Assets
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\textures\rendering\tilt_trial\PlayerSphereMarble.bmp`
-- Create: `C:\dev\helprojs\city\assets\textures\rendering\tilt_trial\PlayerSphereMarble.bmp.hasset`
-- Create: `C:\dev\helprojs\city\assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset`
+- Create: `C:\dev\helprojs\demodisc\assets\textures\rendering\tilt_trial\PlayerSphereMarble.bmp`
+- Create: `C:\dev\helprojs\demodisc\assets\textures\rendering\tilt_trial\PlayerSphereMarble.bmp.hasset`
+- Create: `C:\dev\helprojs\demodisc\assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset`
 
 - [ ] **Step 1: Create the marble texture source**
 
@@ -71,7 +71,7 @@ Required visual direction:
 Create `PlayerSphereMarble.bmp.hasset` alongside the texture using the same import-file placement pattern already used by:
 
 ```text
-C:\dev\helprojs\city\assets\textures\rendering\textured_cube_grid\Cube00.bmp.hasset
+C:\dev\helprojs\demodisc\assets\textures\rendering\textured_cube_grid\Cube00.bmp.hasset
 ```
 
 The implementation should mirror the existing project texture-import pattern rather than inventing a new metadata shape.
@@ -81,7 +81,7 @@ The implementation should mirror the existing project texture-import pattern rat
 Create `assets/materials/rendering/tilt_trial/PlayerSphereMarble.hasset` using the same `ds-standard-textured` schema already used by:
 
 ```text
-C:\dev\helprojs\city\assets\materials\rendering\textured_cube_grid\Cube00.hasset
+C:\dev\helprojs\demodisc\assets\materials\rendering\textured_cube_grid\Cube00.hasset
 ```
 
 Material requirements:
@@ -98,7 +98,7 @@ lighting-mode: lit
 
 - [ ] **Step 4: Verify the assets exist in the expected project paths**
 
-Run: `Get-ChildItem C:\dev\helprojs\city\assets\textures\rendering\tilt_trial, C:\dev\helprojs\city\assets\materials\rendering\tilt_trial`
+Run: `Get-ChildItem C:\dev\helprojs\demodisc\assets\textures\rendering\tilt_trial, C:\dev\helprojs\demodisc\assets\materials\rendering\tilt_trial`
 
 Expected: output includes:
 
@@ -111,15 +111,15 @@ PlayerSphereMarble.hasset
 - [ ] **Step 5: Commit the asset checkpoint**
 
 ```bash
-git -C C:\dev\helprojs\city add assets/textures/rendering/tilt_trial/PlayerSphereMarble.bmp assets/textures/rendering/tilt_trial/PlayerSphereMarble.bmp.hasset assets/materials/rendering/tilt_trial/PlayerSphereMarble.hasset
-git -C C:\dev\helprojs\city commit -m "feat: add tilt trial marble sphere assets"
+git -C C:\dev\helprojs\demodisc add assets/textures/rendering/tilt_trial/PlayerSphereMarble.bmp assets/textures/rendering/tilt_trial/PlayerSphereMarble.bmp.hasset assets/materials/rendering/tilt_trial/PlayerSphereMarble.hasset
+git -C C:\dev\helprojs\demodisc commit -m "feat: add tilt trial marble sphere assets"
 ```
 
 ### Task 3: Wire The Sphere To The Marble Material
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneFactory.cs`
-- Verify against: `C:\dev\helprojs\city\assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs`
+- Verify against: `C:\dev\helprojs\demodisc\assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset`
 
 - [ ] **Step 1: Replace the player sphere material assignment**
 
@@ -152,32 +152,32 @@ Expected: `PASS`
 - [ ] **Step 4: Commit the scene wiring checkpoint**
 
 ```bash
-git -C C:\dev\helprojs\city add assets/codebase/game.tools/GameSceneFactory.cs
-git -C C:\dev\helprojs\city commit -m "feat: wire tilt trial sphere to marble material"
+git -C C:\dev\helprojs\demodisc add assets/codebase/game.tools/GameSceneFactory.cs
+git -C C:\dev\helprojs\demodisc commit -m "feat: wire tilt trial sphere to marble material"
 ```
 
 ### Task 4: Rebuild Windows And Verify Runtime Output
 
 **Files:**
-- Verify output: `C:\dev\helprojs\city\windows-build\helengine_windows.exe`
-- Verify log: `C:\dev\helprojs\city\windows-build\helengine_windows.startup.log`
+- Verify output: `C:\dev\helprojs\demodisc\windows-build\helengine_windows.exe`
+- Verify log: `C:\dev\helprojs\demodisc\windows-build\helengine_windows.startup.log`
 
 - [ ] **Step 1: Rebuild the Windows package**
 
 Run:
 
 ```bash
-powershell -NoProfile -ExecutionPolicy Bypass -Command "& 'C:\dev\helworks\helengine\artifacts\build-platform.ps1' -Project 'C:\dev\helprojs\city\project.heproj' -Platform 'windows' -Output 'C:\dev\helprojs\city\windows-build'"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "& 'C:\dev\helworks\helengine\artifacts\build-platform.ps1' -Project 'C:\dev\helprojs\demodisc\project.heproj' -Platform 'windows' -Output 'C:\dev\helprojs\demodisc\windows-build'"
 ```
 
-Expected: command exits successfully and refreshes `C:\dev\helprojs\city\windows-build\helengine_windows.exe`
+Expected: command exits successfully and refreshes `C:\dev\helprojs\demodisc\windows-build\helengine_windows.exe`
 
 - [ ] **Step 2: Launch directly into Tilt Trial**
 
 Run:
 
 ```bash
-Start-Process -FilePath 'C:\dev\helprojs\city\windows-build\helengine_windows.exe' -WorkingDirectory 'C:\dev\helprojs\city\windows-build'
+Start-Process -FilePath 'C:\dev\helprojs\demodisc\windows-build\helengine_windows.exe' -WorkingDirectory 'C:\dev\helprojs\demodisc\windows-build'
 ```
 
 Expected: the Windows player opens and loads `tilt_trial`
@@ -188,7 +188,7 @@ Run:
 
 ```bash
 Start-Sleep -Seconds 5
-Get-Content 'C:\dev\helprojs\city\windows-build\helengine_windows.startup.log' -Tail 40
+Get-Content 'C:\dev\helprojs\demodisc\windows-build\helengine_windows.startup.log' -Tail 40
 ```
 
 Expected: log includes:
@@ -213,6 +213,6 @@ Manual checklist:
 - [ ] **Step 5: Commit the final packaged-change checkpoint**
 
 ```bash
-git -C C:\dev\helprojs\city add docs/superpowers/specs/2026-06-28-tilt-trial-marble-sphere-design.md docs/superpowers/plans/2026-06-28-tilt-trial-marble-sphere.md
-git -C C:\dev\helprojs\city commit -m "docs: add tilt trial marble sphere design and plan"
+git -C C:\dev\helprojs\demodisc add docs/superpowers/specs/2026-06-28-tilt-trial-marble-sphere-design.md docs/superpowers/plans/2026-06-28-tilt-trial-marble-sphere.md
+git -C C:\dev\helprojs\demodisc commit -m "docs: add tilt trial marble sphere design and plan"
 ```

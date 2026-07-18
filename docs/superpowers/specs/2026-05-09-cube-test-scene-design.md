@@ -45,12 +45,12 @@ Follow the same generated-scene pattern already used by the rendering showcase s
 
 Add one new factory alongside:
 
-- [DirectionalShadowPlazaSceneFactory.cs](/C:/dev/helprojs/city/assets/codebase/rendering.tools/DirectionalShadowPlazaSceneFactory.cs)
-- [SpotlightStreetSliceSceneFactory.cs](/C:/dev/helprojs/city/assets/codebase/rendering.tools/SpotlightStreetSliceSceneFactory.cs)
+- [DirectionalShadowPlazaSceneFactory.cs](/C:/dev/helprojs/demodisc/assets/codebase/rendering.tools/DirectionalShadowPlazaSceneFactory.cs)
+- [SpotlightStreetSliceSceneFactory.cs](/C:/dev/helprojs/demodisc/assets/codebase/rendering.tools/SpotlightStreetSliceSceneFactory.cs)
 
 Then update:
 
-- [RenderingSceneGenerator.cs](/C:/dev/helprojs/city/assets/codebase/rendering.tools/RenderingSceneGenerator.cs)
+- [RenderingSceneGenerator.cs](/C:/dev/helprojs/demodisc/assets/codebase/rendering.tools/RenderingSceneGenerator.cs)
 
 so it writes only the cube-test scene for now.
 

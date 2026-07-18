@@ -14,7 +14,7 @@
 
 ### New files
 
-- `C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoDiscLightIndicatorOverlayFactory.cs`
+- `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoDiscLightIndicatorOverlayFactory.cs`
   Creates the top-left screen-bound indicator row, including the `Light` label and the preview square, and stores the required font asset reference on the generated text entity.
 
 - `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityDemoDiscLightIndicatorSourceTests.cs`
@@ -22,19 +22,19 @@
 
 ### Modified files
 
-- `C:\dev\helprojs\city\assets\codebase\rendering\DemoDiscLightToggleComponent.cs`
+- `C:\dev\helprojs\demodisc\assets\codebase\rendering\DemoDiscLightToggleComponent.cs`
   Replace the boolean on/off model with a fixed six-state cycle, normalize startup to white, cache the preview-square component, and update the square when state changes.
 
-- `C:\dev\helprojs\city\assets\codebase\rendering\DemoDiscDirectionalLightToggleState.cs`
+- `C:\dev\helprojs\demodisc\assets\codebase\rendering\DemoDiscDirectionalLightToggleState.cs`
   Keep the per-light restore state explicit and clear for non-off states.
 
-- `C:\dev\helprojs\city\assets\codebase\rendering.tools\AxisTestSceneFactory.cs`
-- `C:\dev\helprojs\city\assets\codebase\rendering.tools\AxisTest2SceneFactory.cs`
-- `C:\dev\helprojs\city\assets\codebase\rendering.tools\ColoredCubeGridSceneFactory.cs`
-- `C:\dev\helprojs\city\assets\codebase\rendering.tools\CubeTestSceneFactory.cs`
-- `C:\dev\helprojs\city\assets\codebase\rendering.tools\DirectionalShadowPlazaSceneFactory.cs`
-- `C:\dev\helprojs\city\assets\codebase\rendering.tools\ScaledCubeSceneFactory.cs`
-- `C:\dev\helprojs\city\assets\codebase\rendering.tools\TexturedCubeGridSceneFactory.cs`
+- `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\AxisTestSceneFactory.cs`
+- `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\AxisTest2SceneFactory.cs`
+- `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\ColoredCubeGridSceneFactory.cs`
+- `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\CubeTestSceneFactory.cs`
+- `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DirectionalShadowPlazaSceneFactory.cs`
+- `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\ScaledCubeSceneFactory.cs`
+- `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TexturedCubeGridSceneFactory.cs`
   Call the shared indicator-overlay helper from each scene UI root that already hosts `FPSComponent`, `DemoDiscReturnToMenuComponent`, and `DemoDiscLightToggleComponent`.
 
 - `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityCubeTestSceneSourceTests.cs`
@@ -84,7 +84,7 @@ public sealed class CityDemoDiscLightIndicatorSourceTests {
     /// </summary>
     [Fact]
     public void City_light_indicator_overlay_factory_authors_label_and_preview_square() {
-        string sourcePath = @"C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoDiscLightIndicatorOverlayFactory.cs";
+        string sourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoDiscLightIndicatorOverlayFactory.cs";
         string source = File.ReadAllText(sourcePath);
 
         Assert.Contains("Text = \"Light\"", source, StringComparison.Ordinal);
@@ -97,7 +97,7 @@ public sealed class CityDemoDiscLightIndicatorSourceTests {
     /// </summary>
     [Fact]
     public void City_light_toggle_source_uses_requested_cycle_order() {
-        string sourcePath = @"C:\dev\helprojs\city\assets\codebase\rendering\DemoDiscLightToggleComponent.cs";
+        string sourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering\DemoDiscLightToggleComponent.cs";
         string source = File.ReadAllText(sourcePath);
 
         Assert.Contains("CurrentLightStateIndex = 0", source, StringComparison.Ordinal);
@@ -141,14 +141,14 @@ git -C C:\dev\helworks\helengine commit -m "test: lock city light indicator sour
 ### Task 2: Add The Shared Top-Left Indicator Authoring Helper
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering.tools\DemoDiscLightIndicatorOverlayFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\AxisTestSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\AxisTest2SceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\ColoredCubeGridSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\CubeTestSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\DirectionalShadowPlazaSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\ScaledCubeSceneFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\TexturedCubeGridSceneFactory.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoDiscLightIndicatorOverlayFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\AxisTestSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\AxisTest2SceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\ColoredCubeGridSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\CubeTestSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DirectionalShadowPlazaSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\ScaledCubeSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TexturedCubeGridSceneFactory.cs`
 
 - [ ] **Step 1: Create the helper with stable entity names and font-reference persistence**
 
@@ -284,15 +284,15 @@ Expected:
 - [ ] **Step 4: Commit the helper and scene-wiring change**
 
 ```bash
-git -C C:\dev\helprojs\city add assets/codebase/rendering.tools/DemoDiscLightIndicatorOverlayFactory.cs assets/codebase/rendering.tools/AxisTestSceneFactory.cs assets/codebase/rendering.tools/AxisTest2SceneFactory.cs assets/codebase/rendering.tools/ColoredCubeGridSceneFactory.cs assets/codebase/rendering.tools/CubeTestSceneFactory.cs assets/codebase/rendering.tools/DirectionalShadowPlazaSceneFactory.cs assets/codebase/rendering.tools/ScaledCubeSceneFactory.cs assets/codebase/rendering.tools/TexturedCubeGridSceneFactory.cs
-git -C C:\dev\helprojs\city commit -m "feat: author demo-disc light indicator overlay"
+git -C C:\dev\helprojs\demodisc add assets/codebase/rendering.tools/DemoDiscLightIndicatorOverlayFactory.cs assets/codebase/rendering.tools/AxisTestSceneFactory.cs assets/codebase/rendering.tools/AxisTest2SceneFactory.cs assets/codebase/rendering.tools/ColoredCubeGridSceneFactory.cs assets/codebase/rendering.tools/CubeTestSceneFactory.cs assets/codebase/rendering.tools/DirectionalShadowPlazaSceneFactory.cs assets/codebase/rendering.tools/ScaledCubeSceneFactory.cs assets/codebase/rendering.tools/TexturedCubeGridSceneFactory.cs
+git -C C:\dev\helprojs\demodisc commit -m "feat: author demo-disc light indicator overlay"
 ```
 
 ### Task 3: Replace The Boolean Toggle With The Requested Six-State Cycle
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering\DemoDiscLightToggleComponent.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering\DemoDiscDirectionalLightToggleState.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering\DemoDiscLightToggleComponent.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering\DemoDiscDirectionalLightToggleState.cs`
 - Test: `C:\dev\helworks\helengine\engine\helengine.editor.tests\helengine.editor.tests.csproj`
 
 - [ ] **Step 1: Extend the per-light restore state to stay explicit**
@@ -437,28 +437,28 @@ Expected:
 - [ ] **Step 4: Commit the runtime light-cycle change**
 
 ```bash
-git -C C:\dev\helprojs\city add assets/codebase/rendering/DemoDiscLightToggleComponent.cs assets/codebase/rendering/DemoDiscDirectionalLightToggleState.cs
-git -C C:\dev\helprojs\city commit -m "feat: add demo-disc light color cycle"
+git -C C:\dev\helprojs\demodisc add assets/codebase/rendering/DemoDiscLightToggleComponent.cs assets/codebase/rendering/DemoDiscDirectionalLightToggleState.cs
+git -C C:\dev\helprojs\demodisc commit -m "feat: add demo-disc light color cycle"
 ```
 
 ### Task 4: Rebuild, Verify In Windows, And Commit The Regenerated Assets
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\axis_test.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\axis_test2.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\colored_cube_grid.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\cube_test.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\directional_shadow_plaza.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\scaled_cube.helen`
-- Modify: `C:\dev\helprojs\city\assets\scenes\rendering\textured_cube_grid.helen`
-- Modify: generated/cooked output under `C:\dev\helprojs\city\output\windows`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\axis_test.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\axis_test2.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\colored_cube_grid.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\cube_test.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\directional_shadow_plaza.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\scaled_cube.helen`
+- Modify: `C:\dev\helprojs\demodisc\assets\scenes\rendering\textured_cube_grid.helen`
+- Modify: generated/cooked output under `C:\dev\helprojs\demodisc\output\windows`
 
 - [ ] **Step 1: Regenerate the rendering scenes so the authored assets capture the new UI row**
 
 Run:
 
 ```bash
-rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\city\project.heproj --editor-command menu.generate-rendering-scenes
+rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc\project.heproj --editor-command menu.generate-rendering-scenes
 ```
 
 Expected:
@@ -470,19 +470,19 @@ Expected:
 Run:
 
 ```bash
-rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\city\project.heproj --build windows --output C:\dev\helprojs\city\output\windows
+rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc\project.heproj --build windows --output C:\dev\helprojs\demodisc\output\windows
 ```
 
 Expected:
 
-- `Build completed for platform 'windows': C:\dev\helprojs\city\output\windows`
+- `Build completed for platform 'windows': C:\dev\helprojs\demodisc\output\windows`
 
 - [ ] **Step 3: Launch the build and manually verify the cycle**
 
 Run:
 
 ```bash
-rtk powershell -NoProfile -Command "Start-Process -FilePath 'C:\dev\helprojs\city\output\windows\helengine_windows.exe' -WorkingDirectory 'C:\dev\helprojs\city\output\windows'"
+rtk powershell -NoProfile -Command "Start-Process -FilePath 'C:\dev\helprojs\demodisc\output\windows\helengine_windows.exe' -WorkingDirectory 'C:\dev\helprojs\demodisc\output\windows'"
 ```
 
 Manual verification checklist:
@@ -502,8 +502,8 @@ Manual verification checklist:
 - [ ] **Step 4: Commit the authored scene regeneration and final feature**
 
 ```bash
-git -C C:\dev\helprojs\city add assets/codebase/rendering.tools/DemoDiscLightIndicatorOverlayFactory.cs assets/codebase/rendering/DemoDiscLightToggleComponent.cs assets/codebase/rendering/DemoDiscDirectionalLightToggleState.cs assets/codebase/rendering.tools/AxisTestSceneFactory.cs assets/codebase/rendering.tools/AxisTest2SceneFactory.cs assets/codebase/rendering.tools/ColoredCubeGridSceneFactory.cs assets/codebase/rendering.tools/CubeTestSceneFactory.cs assets/codebase/rendering.tools/DirectionalShadowPlazaSceneFactory.cs assets/codebase/rendering.tools/ScaledCubeSceneFactory.cs assets/codebase/rendering.tools/TexturedCubeGridSceneFactory.cs assets/scenes/rendering/axis_test.helen assets/scenes/rendering/axis_test2.helen assets/scenes/rendering/colored_cube_grid.helen assets/scenes/rendering/cube_test.helen assets/scenes/rendering/directional_shadow_plaza.helen assets/scenes/rendering/scaled_cube.helen assets/scenes/rendering/textured_cube_grid.helen
-git -C C:\dev\helprojs\city commit -m "feat: add demo-disc light cycle indicator"
+git -C C:\dev\helprojs\demodisc add assets/codebase/rendering.tools/DemoDiscLightIndicatorOverlayFactory.cs assets/codebase/rendering/DemoDiscLightToggleComponent.cs assets/codebase/rendering/DemoDiscDirectionalLightToggleState.cs assets/codebase/rendering.tools/AxisTestSceneFactory.cs assets/codebase/rendering.tools/AxisTest2SceneFactory.cs assets/codebase/rendering.tools/ColoredCubeGridSceneFactory.cs assets/codebase/rendering.tools/CubeTestSceneFactory.cs assets/codebase/rendering.tools/DirectionalShadowPlazaSceneFactory.cs assets/codebase/rendering.tools/ScaledCubeSceneFactory.cs assets/codebase/rendering.tools/TexturedCubeGridSceneFactory.cs assets/scenes/rendering/axis_test.helen assets/scenes/rendering/axis_test2.helen assets/scenes/rendering/colored_cube_grid.helen assets/scenes/rendering/cube_test.helen assets/scenes/rendering/directional_shadow_plaza.helen assets/scenes/rendering/scaled_cube.helen assets/scenes/rendering/textured_cube_grid.helen
+git -C C:\dev\helprojs\demodisc commit -m "feat: add demo-disc light cycle indicator"
 ```
 
 ## Self-Review

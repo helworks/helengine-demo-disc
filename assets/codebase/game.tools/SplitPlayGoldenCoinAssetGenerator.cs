@@ -9,6 +9,12 @@ namespace city.game.tools {
     /// Generates the reusable Split Play coin support assets.
     /// </summary>
     public sealed class SplitPlayGoldenCoinAssetGenerator {
+        const string GoldenCoinBaseColor = "#FFE27AFF";
+        const string GoldenCoinEmissiveColor = "#FFD54A33";
+        const string WindowsGoldenCoinRoughness = "0.28";
+        const string WindowsGoldenCoinMetallic = "0.10";
+        const string WindowsGoldenCoinSpecular = "0.65";
+
         const string WindowsMaterialSchemaId = "standard-shader";
         const string Ps2MaterialSchemaId = "ps2-simple-lit";
         const string GameCubeMaterialSchemaId = "gamecube-standard";
@@ -21,6 +27,7 @@ namespace city.game.tools {
         const string MetallicFieldId = "metallic";
         const string SpecularFieldId = "specular";
         const string BaseColorFieldId = "base-color";
+        const string EmissiveColorFieldId = "emissive-color";
         const string CastsShadowFieldId = "casts-shadow";
         const string ReceivesShadowFieldId = "receives-shadow";
         const string AlphaModeFieldId = "alpha-mode";
@@ -66,6 +73,7 @@ namespace city.game.tools {
             SceneAssetReference materialReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath);
 
             MeshComponent meshComponent = new MeshComponent();
+            meshComponent.Materials = new RuntimeMaterial[] { null };
             EntityComponentSaveState saveState = new EntityComponentSaveState();
             saveState.SetAssetReference("Model", commonModelReference);
             saveState.SetAssetReference("Materials[0]", materialReference);
@@ -77,7 +85,8 @@ namespace city.game.tools {
             ComponentPersistenceRegistry registry = GeneratedScenePersistenceRegistryFactory.Create();
             SceneComponentAssetRecord baseRecord = registry.GetDescriptor(meshComponent).SerializeComponent(meshComponent, 0, saveState);
             SceneComponentAssetRecord meshRecord = new ComponentPlatformOverridePayloadService().Wrap(baseRecord, saveState);
-            SceneComponentAssetRecord idleMotionRecord = AutomaticDescriptor.SerializeComponent(new city.game.SplitPlayIdleMotionComponent(), 1, null);
+            SceneComponentAssetRecord collectibleRecord = AutomaticDescriptor.SerializeComponent(new city.game.TiltTrialCollectibleCoinComponent(), 1, null);
+            SceneComponentAssetRecord idleMotionRecord = AutomaticDescriptor.SerializeComponent(new city.game.SplitPlayIdleMotionComponent(), 2, null);
 
             return new BlueprintAsset {
                 Id = SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath,
@@ -89,7 +98,7 @@ namespace city.game.tools {
                     LocalPosition = float3.Zero,
                     LocalScale = float3.One,
                     LocalOrientation = float4.Identity,
-                    Components = [meshRecord, idleMotionRecord],
+                    Components = [meshRecord, collectibleRecord, idleMotionRecord],
                     Children = Array.Empty<SceneEntityAsset>()
                 },
                 AssetReferences = [commonModelReference, dsModelReference, materialReference]
@@ -101,48 +110,49 @@ namespace city.game.tools {
             definition.MaterialAsset = new ShaderMaterialAsset {
                 Id = SplitPlayAssetCatalog.GoldenCoinMaterialAssetId,
                 RenderState = new MaterialRenderState {
-                    CullMode = MaterialCullMode.None
+                    CullMode = MaterialCullMode.Back
                 },
-                CastsShadows = true,
-                ReceivesShadows = true
+                CastsShadows = false,
+                ReceivesShadows = false
             };
 
-            ConfigureWindowsPlatform(definition.GetOrCreatePlatform("windows"), 0.38f);
+            ConfigureWindowsPlatform(definition.GetOrCreatePlatform("windows"));
             ConfigurePs2Platform(definition.GetOrCreatePlatform("ps2"));
-            ConfigureWindowsPlatform(definition.GetOrCreatePlatform("psp"), 0.38f);
+            ConfigureWindowsPlatform(definition.GetOrCreatePlatform("psp"));
             ConfigureGameCubePlatform(definition.GetOrCreatePlatform("gamecube"));
             ConfigureDsPlatform(definition.GetOrCreatePlatform("ds"));
             return definition;
         }
 
-        void ConfigureWindowsPlatform(CityGeneratedMaterialPlatformDefinition platformDefinition, float roughness) {
+        void ConfigureWindowsPlatform(CityGeneratedMaterialPlatformDefinition platformDefinition) {
             platformDefinition.SchemaId = WindowsMaterialSchemaId;
             platformDefinition.SetFieldValue(UseCustomShaderFieldId, "false");
             platformDefinition.SetFieldValue(ShaderAssetIdFieldId, StandardShaderAssetId);
-            platformDefinition.SetFieldValue(RoughnessFieldId, roughness.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
-            platformDefinition.SetFieldValue(MetallicFieldId, "0.75");
-            platformDefinition.SetFieldValue(SpecularFieldId, "0.5");
+            platformDefinition.SetFieldValue(RoughnessFieldId, WindowsGoldenCoinRoughness);
+            platformDefinition.SetFieldValue(MetallicFieldId, WindowsGoldenCoinMetallic);
+            platformDefinition.SetFieldValue(SpecularFieldId, WindowsGoldenCoinSpecular);
             platformDefinition.SetFieldValue(AlphaModeFieldId, "opaque");
-            platformDefinition.SetFieldValue(DoubleSidedFieldId, "true");
-            platformDefinition.SetFieldValue(CastsShadowFieldId, "true");
-            platformDefinition.SetFieldValue(ReceivesShadowFieldId, "true");
-            platformDefinition.SetFieldValue(BaseColorFieldId, "#FFF0C62E");
+            platformDefinition.SetFieldValue(DoubleSidedFieldId, "false");
+            platformDefinition.SetFieldValue(CastsShadowFieldId, "false");
+            platformDefinition.SetFieldValue(ReceivesShadowFieldId, "false");
+            platformDefinition.SetFieldValue(BaseColorFieldId, GoldenCoinBaseColor);
+            platformDefinition.SetFieldValue(EmissiveColorFieldId, GoldenCoinEmissiveColor);
         }
 
         void ConfigurePs2Platform(CityGeneratedMaterialPlatformDefinition platformDefinition) {
             platformDefinition.SchemaId = Ps2MaterialSchemaId;
             platformDefinition.SetFieldValue(AlphaModeFieldId, "opaque");
             platformDefinition.SetFieldValue(DoubleSidedFieldId, "false");
-            platformDefinition.SetFieldValue(Ps2CastShadowsFieldId, "true");
+            platformDefinition.SetFieldValue(Ps2CastShadowsFieldId, "false");
             platformDefinition.SetFieldValue(VertexColorModeFieldId, "ignore");
-            platformDefinition.SetFieldValue(BaseColorFieldId, "#FFF0C62E");
+            platformDefinition.SetFieldValue(BaseColorFieldId, GoldenCoinBaseColor);
         }
 
         void ConfigureGameCubePlatform(CityGeneratedMaterialPlatformDefinition platformDefinition) {
             platformDefinition.SchemaId = GameCubeMaterialSchemaId;
             platformDefinition.SetFieldValue(DoubleSidedFieldId, "false");
             platformDefinition.SetFieldValue(VertexColorModeFieldId, "ignore");
-            platformDefinition.SetFieldValue(BaseColorFieldId, "#FFF0C62E");
+            platformDefinition.SetFieldValue(BaseColorFieldId, GoldenCoinBaseColor);
             platformDefinition.SetFieldValue(LightingModeFieldId, "lit");
         }
 
@@ -150,7 +160,7 @@ namespace city.game.tools {
             platformDefinition.SchemaId = DsMaterialSchemaId;
             platformDefinition.SetFieldValue(DoubleSidedFieldId, "false");
             platformDefinition.SetFieldValue(VertexColorModeFieldId, "ignore");
-            platformDefinition.SetFieldValue(BaseColorFieldId, "#FFF0C62E");
+            platformDefinition.SetFieldValue(BaseColorFieldId, GoldenCoinBaseColor);
             platformDefinition.SetFieldValue(LightingModeFieldId, "lit");
         }
 
@@ -162,96 +172,72 @@ namespace city.game.tools {
             }
 
             const float radius = 0.5f;
-            const float halfDepth = 0.08f;
+            const float rimHalfDepth = 0.04f;
 
-            List<float3> positions = new List<float3>();
-            List<float3> normals = new List<float3>();
-            List<float2> texCoords = new List<float2>();
-            List<ushort> indices = new List<ushort>();
+            ModelAsset engineCylinder = TransformGizmoMeshFactory.CreateCylinder(radius, rimHalfDepth * 2f, radialSteps);
+            float3[] positions = new float3[engineCylinder.Positions.Length];
+            float3[] normals = new float3[engineCylinder.Normals.Length];
+            float2[] texCoords = new float2[engineCylinder.TexCoords.Length];
+            ushort[] indices = ExtractSingleSidedTriangles(engineCylinder.Indices16, radialSteps);
 
-            AppendCap(+halfDepth, +1f);
-            AppendCap(-halfDepth, -1f);
-            AppendSideBand();
+            for (int index = 0; index < engineCylinder.Positions.Length; index++) {
+                float3 centeredPosition = engineCylinder.Positions[index] - new float3(0f, rimHalfDepth, 0f);
+                positions[index] = RotateYAxisCylinderToCoinAxis(centeredPosition);
+                normals[index] = RotateYAxisCylinderToCoinAxis(engineCylinder.Normals[index]);
+                texCoords[index] = engineCylinder.TexCoords[index];
+            }
 
             return new ModelAsset {
                 Id = assetId,
-                Positions = positions.ToArray(),
-                Normals = normals.ToArray(),
-                TexCoords = texCoords.ToArray(),
-                Indices16 = indices.ToArray(),
-                BoundsMin = new float3(-radius, -radius, -halfDepth),
-                BoundsMax = new float3(radius, radius, halfDepth),
+                Positions = positions,
+                Normals = normals,
+                TexCoords = texCoords,
+                Indices16 = indices,
+                BoundsMin = new float3(-radius, -radius, -rimHalfDepth),
+                BoundsMax = new float3(radius, radius, rimHalfDepth),
                 Submeshes = [
                     new ModelSubmeshAsset {
                         MaterialSlotName = "DefaultMaterial",
                         IndexStart = 0,
-                        IndexCount = indices.Count
+                        IndexCount = indices.Length
                     }
                 ]
             };
 
-            void AppendCap(float z, float normalZ) {
-                ushort centerIndex = (ushort)positions.Count;
-                positions.Add(new float3(0f, 0f, z));
-                normals.Add(new float3(0f, 0f, normalZ));
-                texCoords.Add(new float2(0.5f, 0.5f));
-
-                for (int step = 0; step < radialSteps; step++) {
-                    float angle = (MathF.PI * 2f * step) / radialSteps;
-                    float x = MathF.Cos(angle) * radius;
-                    float y = MathF.Sin(angle) * radius;
-                    positions.Add(new float3(x, y, z));
-                    normals.Add(new float3(0f, 0f, normalZ));
-                    texCoords.Add(new float2((x / radius + 1f) * 0.5f, (y / radius + 1f) * 0.5f));
-                }
-
-                for (int step = 0; step < radialSteps; step++) {
-                    ushort ringA = (ushort)(centerIndex + 1 + step);
-                    ushort ringB = (ushort)(centerIndex + 1 + ((step + 1) % radialSteps));
-                    if (normalZ > 0f) {
-                        indices.Add(centerIndex);
-                        indices.Add(ringA);
-                        indices.Add(ringB);
-                    } else {
-                        indices.Add(centerIndex);
-                        indices.Add(ringB);
-                        indices.Add(ringA);
-                    }
-                }
+            static float3 RotateYAxisCylinderToCoinAxis(float3 value) {
+                return new float3(value.X, -value.Z, value.Y);
             }
 
-            void AppendSideBand() {
-                ushort sideStartIndex = (ushort)positions.Count;
-                for (int step = 0; step < radialSteps; step++) {
-                    float angle = (MathF.PI * 2f * step) / radialSteps;
-                    float x = MathF.Cos(angle) * radius;
-                    float y = MathF.Sin(angle) * radius;
-                    float3 normal = new float3(MathF.Cos(angle), MathF.Sin(angle), 0f);
-                    float u = (float)step / radialSteps;
-
-                    positions.Add(new float3(x, y, halfDepth));
-                    normals.Add(normal);
-                    texCoords.Add(new float2(u, 0f));
-
-                    positions.Add(new float3(x, y, -halfDepth));
-                    normals.Add(normal);
-                    texCoords.Add(new float2(u, 1f));
+            static ushort[] ExtractSingleSidedTriangles(ushort[] sourceIndices, int radialSteps) {
+                if (sourceIndices == null) {
+                    throw new InvalidOperationException("Engine cylinder generation must provide triangle indices.");
+                } else if (sourceIndices.Length % 6 != 0) {
+                    throw new InvalidOperationException("Expected the engine cylinder helper to emit paired double-sided triangles.");
                 }
 
-                for (int step = 0; step < radialSteps; step++) {
-                    int nextStep = (step + 1) % radialSteps;
-                    ushort topA = (ushort)(sideStartIndex + step * 2);
-                    ushort bottomA = (ushort)(sideStartIndex + step * 2 + 1);
-                    ushort topB = (ushort)(sideStartIndex + nextStep * 2);
-                    ushort bottomB = (ushort)(sideStartIndex + nextStep * 2 + 1);
+                ushort[] singleSidedIndices = new ushort[sourceIndices.Length / 2];
+                int writeIndex = 0;
+                for (int sourceIndex = 0; sourceIndex < sourceIndices.Length; sourceIndex += 6) {
+                    singleSidedIndices[writeIndex++] = sourceIndices[sourceIndex];
+                    singleSidedIndices[writeIndex++] = sourceIndices[sourceIndex + 1];
+                    singleSidedIndices[writeIndex++] = sourceIndices[sourceIndex + 2];
+                }
 
-                    indices.Add(topA);
-                    indices.Add(bottomA);
-                    indices.Add(topB);
+                int sideTriangleCount = radialSteps * 2;
+                int bottomCapTriangleStart = sideTriangleCount;
+                int topCapTriangleStart = sideTriangleCount + radialSteps;
+                FlipTriangleRange(singleSidedIndices, bottomCapTriangleStart, radialSteps);
+                FlipTriangleRange(singleSidedIndices, topCapTriangleStart, radialSteps);
 
-                    indices.Add(topB);
-                    indices.Add(bottomA);
-                    indices.Add(bottomB);
+                return singleSidedIndices;
+            }
+
+            static void FlipTriangleRange(ushort[] indices, int triangleStart, int triangleCount) {
+                for (int triangleIndex = triangleStart; triangleIndex < triangleStart + triangleCount; triangleIndex++) {
+                    int indexOffset = triangleIndex * 3;
+                    ushort b = indices[indexOffset + 1];
+                    indices[indexOffset + 1] = indices[indexOffset + 2];
+                    indices[indexOffset + 2] = b;
                 }
             }
         }

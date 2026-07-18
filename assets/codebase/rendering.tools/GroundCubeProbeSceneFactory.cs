@@ -90,7 +90,7 @@ namespace city.rendering.tools {
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new FPSComponent {
                 Font = ResolveRequiredEditorFont(),
-                FontScale = 1f
+                FontScale = 2f
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;

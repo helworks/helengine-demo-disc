@@ -65,7 +65,7 @@ This design intentionally duplicates the menu scene list instead of deriving it 
 Use the smallest validation that proves the configuration is correct:
 
 1. Inspect the edited `wiiu` entry in `user_settings/build_config.json`.
-2. Run the shared wrapper build for `-Platform wiiu` against `C:\dev\helprojs\city\project.heproj`.
+2. Run the shared wrapper build for `-Platform wiiu` against `C:\dev\helprojs\demodisc\project.heproj`.
 3. Inspect the staged Wii U output and confirm it contains cooked scene artifacts for `DemoDiscMainMenu` and the referenced playable scenes.
 
 ## Out Of Scope

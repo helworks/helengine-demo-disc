@@ -90,7 +90,7 @@ namespace city.menu {
         }
 
         /// <summary>
-        /// Builds the curated Nintendo handheld physics scene entry set, including render-only probes that should not appear in the playable physics menu.
+        /// Builds the curated Nintendo handheld physics scene entry set, including the matrix render probe that should not appear in the playable physics menu.
         /// </summary>
         /// <returns>Curated Nintendo handheld scene entries.</returns>
         public IReadOnlyList<DemoDiscPhysicsSceneEntry> CreatePhysicsNintendoHandheldSceneEntries() {
@@ -116,11 +116,7 @@ namespace city.menu {
                 new DemoDiscGameSceneEntry(
                     "games-tilt-trial",
                     "Tilt Trial",
-                    "tilt_trial"),
-                new DemoDiscGameSceneEntry(
-                    "games-zombislayer",
-                    "Zombislayer",
-                    "zombislayer")
+                    "tilt_trial")
             ];
         }
     }

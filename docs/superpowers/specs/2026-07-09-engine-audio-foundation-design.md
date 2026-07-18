@@ -10,7 +10,7 @@ Add a first-class Helengine audio foundation that supports:
 - canonical source assets with per-platform overrides
 - per-platform cooked audio formats behind one runtime-facing API
 
-The first validated target is `windows`, but the design must fit the project's supported platforms in [project.heproj](/abs/path/C:/dev/helprojs/city/project.heproj:1):
+The first validated target is `windows`, but the design must fit the project's supported platforms in [project.heproj](/abs/path/C:/dev/helprojs/demodisc/project.heproj:1):
 
 - `windows`
 - `ps2`

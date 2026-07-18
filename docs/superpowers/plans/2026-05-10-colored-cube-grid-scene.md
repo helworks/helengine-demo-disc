@@ -28,13 +28,13 @@
 - Modify: `C:/dev/helworks/helengine-ps2/.worktrees/normalize-camera-viewport-core/builder.tests/Ps2NativeBuildInputsTests.cs`
 
 **city main**
-- Create: `C:/dev/helprojs/city/assets/codebase/rendering.tools/ColoredCubeGridSceneFactory.cs`
-- Modify: `C:/dev/helprojs/city/assets/codebase/rendering.tools/RenderingSceneGenerator.cs`
-- Modify: `C:/dev/helprojs/city/assets/codebase/menu/DemoDiscSceneCatalog.cs`
-- Modify: `C:/dev/helprojs/city/assets/codebase/rendering.tools/CubeTestSceneFactory.cs` only if shared helpers are extracted; otherwise leave unchanged
-- Modify: `C:/dev/helprojs/city/assets/codebase/rendering.tools/RenderingScriptComponentRecordFactory.cs` only if a shared spin-record helper needs extension; otherwise leave unchanged
-- Modify: `C:/dev/helprojs/city/user_settings/build_config.json`
-- Create/generated: `C:/dev/helprojs/city/assets/scenes/rendering/colored_cube_grid.helen`
+- Create: `C:/dev/helprojs/demodisc/assets/codebase/rendering.tools/ColoredCubeGridSceneFactory.cs`
+- Modify: `C:/dev/helprojs/demodisc/assets/codebase/rendering.tools/RenderingSceneGenerator.cs`
+- Modify: `C:/dev/helprojs/demodisc/assets/codebase/menu/DemoDiscSceneCatalog.cs`
+- Modify: `C:/dev/helprojs/demodisc/assets/codebase/rendering.tools/CubeTestSceneFactory.cs` only if shared helpers are extracted; otherwise leave unchanged
+- Modify: `C:/dev/helprojs/demodisc/assets/codebase/rendering.tools/RenderingScriptComponentRecordFactory.cs` only if a shared spin-record helper needs extension; otherwise leave unchanged
+- Modify: `C:/dev/helprojs/demodisc/user_settings/build_config.json`
+- Create/generated: `C:/dev/helprojs/demodisc/assets/scenes/rendering/colored_cube_grid.helen`
 - Modify: `C:/dev/helworks/helengine/.worktrees/normalize-camera-viewport-core/engine/helengine.editor.tests/CityCubeTestSceneSourceTests.cs`
 
 ### Task 1: Add Base Color To The Generated Standard Material Path
@@ -331,10 +331,10 @@ git commit -m "feat: shade ps2 materials with authored base color"
 ### Task 3: Add The Colored Cube Grid Scene To City
 
 **Files:**
-- Create: `C:/dev/helprojs/city/assets/codebase/rendering.tools/ColoredCubeGridSceneFactory.cs`
-- Modify: `C:/dev/helprojs/city/assets/codebase/rendering.tools/RenderingSceneGenerator.cs`
-- Modify: `C:/dev/helprojs/city/assets/codebase/menu/DemoDiscSceneCatalog.cs`
-- Modify: `C:/dev/helprojs/city/user_settings/build_config.json`
+- Create: `C:/dev/helprojs/demodisc/assets/codebase/rendering.tools/ColoredCubeGridSceneFactory.cs`
+- Modify: `C:/dev/helprojs/demodisc/assets/codebase/rendering.tools/RenderingSceneGenerator.cs`
+- Modify: `C:/dev/helprojs/demodisc/assets/codebase/menu/DemoDiscSceneCatalog.cs`
+- Modify: `C:/dev/helprojs/demodisc/user_settings/build_config.json`
 - Test: `C:/dev/helworks/helengine/.worktrees/normalize-camera-viewport-core/engine/helengine.editor.tests/CityCubeTestSceneSourceTests.cs`
 
 - [ ] **Step 1: Write the failing scene-source regression**
@@ -344,7 +344,7 @@ Add one source-level test that proves the generator emits both rendering scenes 
 ```csharp
 [Fact]
 public void ColoredCubeGridSceneFactory_creates_sixteen_rotating_cubes_with_distinct_colors() {
-    string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\rendering.tools\ColoredCubeGridSceneFactory.cs");
+    string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\ColoredCubeGridSceneFactory.cs");
 
     Assert.Contains("public const string SceneId = RenderingSceneGenerator.ColoredCubeGridSceneId;", source, StringComparison.Ordinal);
     Assert.Contains("for (int row = 0; row < 4; row++)", source, StringComparison.Ordinal);
@@ -359,7 +359,7 @@ Add one generator/catalog expectation:
 ```csharp
 [Fact]
 public void RenderingSceneGenerator_generates_cube_test_and_colored_cube_grid() {
-    string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\rendering.tools\RenderingSceneGenerator.cs");
+    string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingSceneGenerator.cs");
 
     Assert.Contains("public const string CubeTestSceneId = \"scenes/rendering/cube_test.helen\";", source, StringComparison.Ordinal);
     Assert.Contains("public const string ColoredCubeGridSceneId = \"scenes/rendering/colored_cube_grid.helen\";", source, StringComparison.Ordinal);
@@ -512,7 +512,7 @@ git commit -m "feat: add colored cube grid scene"
 ### Task 4: Regenerate, Export, And Verify The New Scene
 
 **Files:**
-- Generated: `C:/dev/helprojs/city/assets/scenes/rendering/colored_cube_grid.helen`
+- Generated: `C:/dev/helprojs/demodisc/assets/scenes/rendering/colored_cube_grid.helen`
 - Verify: `C:/dev/helprojs/output/ps2-colored-cube-grid/game.iso`
 
 - [ ] **Step 1: Regenerate rendering scenes from the updated city generator**
@@ -520,7 +520,7 @@ git commit -m "feat: add colored cube grid scene"
 Run:
 
 ```powershell
-dotnet C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\city\project.heproj --editor-command menu.generate-rendering-scenes
+dotnet C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\demodisc\project.heproj --editor-command menu.generate-rendering-scenes
 ```
 
 Expected: `cube_test.helen` and `colored_cube_grid.helen` are rewritten under `assets/scenes/rendering`.
@@ -530,7 +530,7 @@ Expected: `cube_test.helen` and `colored_cube_grid.helen` are rewritten under `a
 Run:
 
 ```powershell
-Get-ChildItem C:\dev\helprojs\city\assets\scenes\rendering\colored_cube_grid.helen
+Get-ChildItem C:\dev\helprojs\demodisc\assets\scenes\rendering\colored_cube_grid.helen
 ```
 
 Expected: one file entry for `colored_cube_grid.helen`
@@ -541,7 +541,7 @@ Run:
 
 ```powershell
 $env:HELENGINE_ROOT='C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core'
-dotnet C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\city\project.heproj --build ps2 --output C:\dev\helprojs\output\ps2-colored-cube-grid
+dotnet C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\demodisc\project.heproj --build ps2 --output C:\dev\helprojs\output\ps2-colored-cube-grid
 ```
 
 Expected:

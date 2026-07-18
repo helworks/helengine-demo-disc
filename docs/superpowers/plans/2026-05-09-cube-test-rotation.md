@@ -12,11 +12,11 @@
 
 ## File Map
 
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering\CubeTestSpinComponent.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering\CubeTestSpinComponent.cs`
   - Runtime update component that computes cube yaw from absolute elapsed time.
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\RenderingScriptComponentRecordFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingScriptComponentRecordFactory.cs`
   - Add one helper for the cube spin script component record.
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\CubeTestSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\CubeTestSceneFactory.cs`
   - Attach the cube spin record to the cube entity with the selected defaults.
 - Modify: `C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\engine\helengine.editor.tests\CityCubeTestSceneSourceTests.cs`
   - Add source-level coverage that the cube scene emits the spin component with the intended defaults.
@@ -24,7 +24,7 @@
 ### Task 1: Add The Runtime Cube Spin Component
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering\CubeTestSpinComponent.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering\CubeTestSpinComponent.cs`
 
 - [ ] **Step 1: Write the component file**
 
@@ -81,8 +81,8 @@ git commit -m "feat: add cube test spin component"
 ### Task 2: Serialize The Spin Component Into The Cube Scene
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\RenderingScriptComponentRecordFactory.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\CubeTestSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingScriptComponentRecordFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\CubeTestSceneFactory.cs`
 
 - [ ] **Step 1: Extend the rendering script record factory with a cube-spin helper**
 
@@ -145,7 +145,7 @@ LocalOrientation = float4.Identity,
 Run:
 
 ```powershell
-dotnet C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\city\project.heproj --headless-command menu.generate-rendering-scenes
+dotnet C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\demodisc\project.heproj --headless-command menu.generate-rendering-scenes
 ```
 
 Expected:
@@ -173,7 +173,7 @@ Add a test shaped like this:
 ```csharp
 [Fact]
 public void Cube_test_scene_factory_emits_spin_component_with_slow_rotation_defaults() {
-    string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\rendering.tools\CubeTestSceneFactory.cs");
+    string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\CubeTestSceneFactory.cs");
 
     Assert.Contains("RenderingScriptComponentRecordFactory.CreateCubeTestSpinRecord(1, 0f, (float)(Math.PI / 2.0))", source, StringComparison.Ordinal);
 }
@@ -240,7 +240,7 @@ git commit -m "test: cover cube scene spin serialization"
 Run:
 
 ```powershell
-dotnet C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --build ps2 --project C:\dev\helprojs\city\project.heproj --output C:\dev\helprojs\output\ps2-cube-rotating
+dotnet C:\dev\helworks\helengine\.worktrees\normalize-camera-viewport-core\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --build ps2 --project C:\dev\helprojs\demodisc\project.heproj --output C:\dev\helprojs\output\ps2-cube-rotating
 ```
 
 Expected:

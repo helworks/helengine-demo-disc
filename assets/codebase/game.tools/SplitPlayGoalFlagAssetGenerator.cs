@@ -69,6 +69,7 @@ namespace city.game.tools {
             SceneAssetReference bannerMaterialReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath);
 
             MeshComponent meshComponent = new MeshComponent();
+            meshComponent.Materials = new RuntimeMaterial[] { null, null };
             EntityComponentSaveState saveState = new EntityComponentSaveState();
             saveState.SetAssetReference("Model", commonModelReference);
             saveState.SetAssetReference("Materials[0]", poleMaterialReference);

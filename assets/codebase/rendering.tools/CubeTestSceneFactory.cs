@@ -42,17 +42,21 @@ namespace city.rendering.tools {
             DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
             Entity cameraEntity = CreateCameraEntity();
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
+            ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
+            consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    UseDefaultBottomOverlay = false,
+                    UseDefaultBottomOverlay = true,
                     BottomScreenRootEntities = Array.Empty<Entity>()
                 },
                 RootEntities = new[] {
                     cameraEntity,
                     instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity,
                     CreateUiEntity(),
                     CreateDirectionalLightEntity(),
                     CreateCubeEntity(cubeModel, solidColorMaterial)
@@ -143,7 +147,7 @@ namespace city.rendering.tools {
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new FPSComponent {
                 Font = ResolveRequiredEditorFont(),
-                FontScale = 1f
+                FontScale = 2f
             });
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             entity.AddComponent(new DemoDiscLightToggleComponent());

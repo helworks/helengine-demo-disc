@@ -17,5 +17,10 @@ namespace city.rendering.tools {
         /// Gets or sets optional custom bottom-screen root entities supplied by a generator when it opts out of the default overlay.
         /// </summary>
         public Entity[] BottomScreenRootEntities { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether authored 2D roots should be relocated beneath the shared bottom-screen viewport.
+        /// </summary>
+        public bool MoveTopScreen2DRootsToBottomScreen { get; set; } = true;
     }
 }

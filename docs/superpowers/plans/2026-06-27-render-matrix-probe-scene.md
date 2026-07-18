@@ -20,9 +20,9 @@
 ```csharp
 [Fact]
 public void City_render_matrix_probe_scene_source_is_exposed_as_render_only_visual_cases() {
-    string catalogSourcePath = @"C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneCatalog.cs";
+    string catalogSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneCatalog.cs";
     string catalogSource = File.ReadAllText(catalogSourcePath);
-    string factorySourcePath = @"C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneFactory.cs";
+    string factorySourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs";
     string factorySource = File.ReadAllText(factorySourcePath);
 
     Assert.Contains("public const string RenderMatrixProbeSceneId = \"scenes/physics/test_scene_render_matrix_probe.helen\";", catalogSource, StringComparison.Ordinal);
@@ -60,8 +60,8 @@ Expected: `PASS`
 ### Task 2: Author The Render-Only Probe Scene
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneCatalog.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneCatalog.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs`
 
 - [ ] **Step 1: Add the new scene id to the catalog**
 
@@ -115,7 +115,7 @@ Expected: `PASS`
 ### Task 3: Boot Windows Directly Into The Probe Scene
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\user_settings\build_config.json`
+- Modify: `C:\dev\helprojs\demodisc\user_settings\build_config.json`
 
 - [ ] **Step 1: Replace the Windows selected scenes with the new probe scene**
 
@@ -133,15 +133,15 @@ Expected: `PASS`
 
 - [ ] **Step 2: Regenerate authored physics scenes**
 
-Run: `rtk powershell -NoProfile -Command "dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\city\project.heproj --editor-command menu.generate-physics-scenes"`
+Run: `rtk powershell -NoProfile -Command "dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc\project.heproj --editor-command menu.generate-physics-scenes"`
 Expected: output ends with `Editor command 'menu.generate-physics-scenes' executed successfully.`
 
 - [ ] **Step 3: Build the Windows package**
 
-Run: `rtk powershell -NoProfile -ExecutionPolicy Bypass -Command "& 'C:\dev\helworks\helengine\artifacts\build-platform.ps1' -Project 'C:\dev\helprojs\city\project.heproj' -Platform 'windows' -Output 'C:\dev\helprojs\city\windows-build'"`
-Expected: `C:\dev\helprojs\city\windows-build\helengine_windows.exe` exists with fresh timestamp.
+Run: `rtk powershell -NoProfile -ExecutionPolicy Bypass -Command "& 'C:\dev\helworks\helengine\artifacts\build-platform.ps1' -Project 'C:\dev\helprojs\demodisc\project.heproj' -Platform 'windows' -Output 'C:\dev\helprojs\demodisc\windows-build'"`
+Expected: `C:\dev\helprojs\demodisc\windows-build\helengine_windows.exe` exists with fresh timestamp.
 
 - [ ] **Step 4: Launch the package and verify direct boot**
 
-Run: `Start-Process -FilePath 'C:\dev\helprojs\city\windows-build\helengine_windows.exe' -WorkingDirectory 'C:\dev\helprojs\city\windows-build'`
+Run: `Start-Process -FilePath 'C:\dev\helprojs\demodisc\windows-build\helengine_windows.exe' -WorkingDirectory 'C:\dev\helprojs\demodisc\windows-build'`
 Expected: runtime boots directly into the new four-cube probe scene.

@@ -36,10 +36,10 @@ Expected: `FAIL` because the physics DS generation path and DS build selection a
 ### Task 2: Add A City-Owned Physics DS Companion Generator
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\menu\DemoDiscSceneCatalog.cs`
-- Create or modify: `C:\dev\helprojs\city\assets\codebase\scene.tools\...`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\GeneratedAuthoringSceneWriteService.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\menu.tools\DemoMenuItemProvider.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\menu\DemoDiscSceneCatalog.cs`
+- Create or modify: `C:\dev\helprojs\demodisc\assets\codebase\scene.tools\...`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\GeneratedAuthoringSceneWriteService.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\menu.tools\DemoMenuItemProvider.cs`
 
 - [ ] **Step 1: Expose the curated physics scene ids from the catalog**
 
@@ -67,9 +67,9 @@ Run the smallest relevant test command from Steps 1-2 and confirm the new genera
 ### Task 3: Generate The Physics DS Scene Assets
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\scenes\physics\test_scene_dynamic_stack_boxes_ds.helen`
-- Create: `C:\dev\helprojs\city\assets\scenes\physics\test_scene_dynamic_sphere_stack_ds.helen`
-- Create: `C:\dev\helprojs\city\assets\scenes\physics\test_scene_dynamic_mixed_stack_ds.helen`
+- Create: `C:\dev\helprojs\demodisc\assets\scenes\physics\test_scene_dynamic_stack_boxes_ds.helen`
+- Create: `C:\dev\helprojs\demodisc\assets\scenes\physics\test_scene_dynamic_sphere_stack_ds.helen`
+- Create: `C:\dev\helprojs\demodisc\assets\scenes\physics\test_scene_dynamic_mixed_stack_ds.helen`
 
 - [ ] **Step 1: Run the city generator command**
 
@@ -86,8 +86,8 @@ Confirm the generated assets use the generic DS scaffold rather than a duplicate
 ### Task 4: Include The Physics DS Scenes In The DS Build Flow
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\user_settings\build_config.json`
-- Update generated output if needed: `C:\dev\helprojs\city\assets\scenes\GeneratedBootScene.helen`
+- Modify: `C:\dev\helprojs\demodisc\user_settings\build_config.json`
+- Update generated output if needed: `C:\dev\helprojs\demodisc\assets\scenes\GeneratedBootScene.helen`
 
 - [ ] **Step 1: Add the physics `_ds` scene ids to the DS-only build selection**
 
@@ -117,7 +117,7 @@ Expected: `PASS`
 Run:
 
 ```powershell
-rtk dotnet build C:\dev\helprojs\city\city.sln --no-restore -v minimal
+rtk dotnet build C:\dev\helprojs\demodisc\city.sln --no-restore -v minimal
 ```
 
 Expected: build succeeds with only existing known warnings.
@@ -127,7 +127,7 @@ Expected: build succeeds with only existing known warnings.
 Run:
 
 ```powershell
-dotnet C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\city --build ds --output C:\dev\helprojs\output\ds
+dotnet C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll --project C:\dev\helprojs\demodisc --build ds --output C:\dev\helprojs\output\ds
 ```
 
 Expected: `Build completed for platform 'ds'`
@@ -144,8 +144,8 @@ Confirm the DS packaged playable scene set does not rely on the non-DS physics s
 - [ ] **Step 4: Commit**
 
 ```powershell
-git -C C:\dev\helprojs\city add assets/codebase assets/scenes user_settings/build_config.json docs/superpowers/plans/2026-05-25-physics-ds-scene-generation.md
+git -C C:\dev\helprojs\demodisc add assets/codebase assets/scenes user_settings/build_config.json docs/superpowers/plans/2026-05-25-physics-ds-scene-generation.md
 git -C C:\dev\helworks\helengine-ds add builder.tests/CityNintendoDsSceneSourceAuditTests.cs
-git -C C:\dev\helprojs\city commit -m "feat: generate DS physics companion scenes"
+git -C C:\dev\helprojs\demodisc commit -m "feat: generate DS physics companion scenes"
 git -C C:\dev\helworks\helengine-ds commit -m "test: audit city physics DS scene coverage"
 ```

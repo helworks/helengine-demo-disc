@@ -4,7 +4,10 @@
     "selectedBuildProfileId": "debug",
     "textureScalePercent": 100,
     "shaderVariantPruningEnabled": true,
-    "selectedOptionValues": {}
+    "selectedOptionValues": {
+      "enable-native-runtime-diagnostics": "false",
+      "enable-native-fatal-error-console": "false"
+    }
   },
   "graphics": {
     "selectedGraphicsProfileId": "",

@@ -7,7 +7,8 @@ user_settings/
 # Generated/cooked artifacts
 assets/.generated-build/
 
-# Local platform builds
+# Canonical local platform builds live under output/<platform>
+# Legacy root-level build folders are still ignored here because older notes and one-off workflows may reference them.
 3ds-build/
 ds-build/
 ds-build-*/

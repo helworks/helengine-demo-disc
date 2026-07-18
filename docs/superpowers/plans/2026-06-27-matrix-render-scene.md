@@ -14,13 +14,13 @@
 
 - `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityPhysicsSceneSourceTests.cs`
   Adds one source-audit test that locks the new scene id, scene factory method, hero/reference entity ids, and render-only component wiring into place before implementation.
-- `C:\dev\helprojs\city\assets\codebase\rendering\MatrixRenderComponent.cs`
+- `C:\dev\helprojs\demodisc\assets\codebase\rendering\MatrixRenderComponent.cs`
   Defines the dedicated runtime animation component that applies the seven deterministic move/rotate/scale phases to the hero cube without introducing any physics dependencies.
-- `C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneCatalog.cs`
+- `C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneCatalog.cs`
   Exposes the new `test_scene_matrix_render` scene id and inserts it into the stable generated-physics scene order.
-- `C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneFactory.cs`
+- `C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs`
   Routes the new scene id, authors the static reference cubes plus fixed camera, and creates the hero cube entity with `MatrixRenderComponent`.
-- `C:\dev\helprojs\city\user_settings\build_config.json`
+- `C:\dev\helprojs\demodisc\user_settings\build_config.json`
   Points the Windows loose-file build directly at the new motion probe scene so each rebuild launches straight into the visual harness.
 
 ### Task 1: Add Failing Source Coverage For The New Matrix Render Scene
@@ -36,9 +36,9 @@
 /// </summary>
 [Fact]
 public void City_matrix_render_scene_source_is_exposed_as_visual_only_with_matrix_render_component() {
-    string catalogSourcePath = @"C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneCatalog.cs";
+    string catalogSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneCatalog.cs";
     string catalogSource = File.ReadAllText(catalogSourcePath);
-    string factorySourcePath = @"C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneFactory.cs";
+    string factorySourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs";
     string factorySource = File.ReadAllText(factorySourcePath);
 
     Assert.Contains("public const string MatrixRenderSceneId = \"scenes/physics/test_scene_matrix_render.helen\";", catalogSource, StringComparison.Ordinal);
@@ -76,7 +76,7 @@ Expected: `PASS`
 ### Task 2: Add The Matrix Render Runtime Component
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering\MatrixRenderComponent.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering\MatrixRenderComponent.cs`
 
 - [ ] **Step 1: Create the component skeleton**
 
@@ -193,7 +193,7 @@ float4.Identity
 Run:
 
 ```powershell
-rtk powershell -NoProfile -Command "dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\city\project.heproj --editor-command menu.generate-physics-scenes"
+rtk powershell -NoProfile -Command "dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc\project.heproj --editor-command menu.generate-physics-scenes"
 ```
 
 Expected: the city script assembly compiles and the command ends with `Editor command 'menu.generate-physics-scenes' executed successfully.`
@@ -201,8 +201,8 @@ Expected: the city script assembly compiles and the command ends with `Editor co
 ### Task 3: Author The Matrix Render Scene
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneCatalog.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\physics.tools\PhysicsSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneCatalog.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs`
 
 - [ ] **Step 1: Add the new scene id to the catalog**
 
@@ -289,7 +289,7 @@ Expected: `PASS`
 ### Task 4: Boot Windows Directly Into Matrix Render And Validate It
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\user_settings\build_config.json`
+- Modify: `C:\dev\helprojs\demodisc\user_settings\build_config.json`
 
 - [ ] **Step 1: Switch the Windows selected scene to the new motion probe**
 
@@ -310,7 +310,7 @@ Expected: `PASS`
 Run:
 
 ```powershell
-rtk powershell -NoProfile -Command "dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\city\project.heproj --editor-command menu.generate-physics-scenes"
+rtk powershell -NoProfile -Command "dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc\project.heproj --editor-command menu.generate-physics-scenes"
 ```
 
 Expected: `Editor command 'menu.generate-physics-scenes' executed successfully.`
@@ -320,17 +320,17 @@ Expected: `Editor command 'menu.generate-physics-scenes' executed successfully.`
 Run:
 
 ```powershell
-rtk powershell -NoProfile -ExecutionPolicy Bypass -Command "& 'C:\dev\helworks\helengine\artifacts\build-platform.ps1' -Project 'C:\dev\helprojs\city\project.heproj' -Platform 'windows' -Output 'C:\dev\helprojs\city\windows-build'"
+rtk powershell -NoProfile -ExecutionPolicy Bypass -Command "& 'C:\dev\helworks\helengine\artifacts\build-platform.ps1' -Project 'C:\dev\helprojs\demodisc\project.heproj' -Platform 'windows' -Output 'C:\dev\helprojs\demodisc\windows-build'"
 ```
 
-Expected: `C:\dev\helprojs\city\windows-build\helengine_windows.exe` exists and `C:\dev\helprojs\city\windows-build\cooked\scenes\physics\test_scene_matrix_render.hasset` exists.
+Expected: `C:\dev\helprojs\demodisc\windows-build\helengine_windows.exe` exists and `C:\dev\helprojs\demodisc\windows-build\cooked\scenes\physics\test_scene_matrix_render.hasset` exists.
 
 - [ ] **Step 4: Launch the Windows build**
 
 Run:
 
 ```powershell
-Start-Process -FilePath 'C:\dev\helprojs\city\windows-build\helengine_windows.exe' -WorkingDirectory 'C:\dev\helprojs\city\windows-build'
+Start-Process -FilePath 'C:\dev\helprojs\demodisc\windows-build\helengine_windows.exe' -WorkingDirectory 'C:\dev\helprojs\demodisc\windows-build'
 ```
 
 Expected: runtime boots directly into `test_scene_matrix_render`.
@@ -340,7 +340,7 @@ Expected: runtime boots directly into `test_scene_matrix_render`.
 Run:
 
 ```powershell
-rtk powershell -NoProfile -Command "Get-Content 'C:\dev\helprojs\city\windows-build\helengine_windows.startup.log' | Select-Object -First 20"
+rtk powershell -NoProfile -Command "Get-Content 'C:\dev\helprojs\demodisc\windows-build\helengine_windows.startup.log' | Select-Object -First 20"
 ```
 
 Expected line:

@@ -53,21 +53,21 @@
 
 ### City Files
 
-- Create: `C:\dev\helprojs\city\assets\Textures\rendering\tilt_trial\PlayerSphereMarble.jpg`
+- Create: `C:\dev\helprojs\demodisc\assets\Textures\rendering\tilt_trial\PlayerSphereMarble.jpg`
   - Project-owned marble albedo copied from `C:\Users\Helena\Downloads\WhatsApp Image 2026-07-06 at 17.59.09.jpeg`.
-- Create: `C:\dev\helprojs\city\assets\Textures\rendering\tilt_trial\PlayerSphereMarbleRoughness.jpg`
+- Create: `C:\dev\helprojs\demodisc\assets\Textures\rendering\tilt_trial\PlayerSphereMarbleRoughness.jpg`
   - Project-owned roughness source copied from `C:\Users\Helena\Downloads\WhatsApp Image 2026-07-06 at 17.59.58.jpeg`.
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\TiltTrialPlayerSphereWalnutMaterialFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialPlayerSphereWalnutMaterialFactory.cs`
   - No new behavior beyond staying as the reference pattern; only touch if shared helpers are extracted.
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering.tools\TiltTrialPlayerSphereMarbleMaterialFactory.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialPlayerSphereMarbleMaterialFactory.cs`
   - Author the marble material, resolve both imported texture asset ids, and emit Windows roughness fields.
-- Modify: `C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneGenerator.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs`
   - Generate the marble material asset before preparing runtime assets.
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\RenderingSceneGenerationAssets.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingSceneGenerationAssets.cs`
   - Rename the Tilt Trial player sphere material slot from walnut-specific to marble-specific.
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\RenderingSceneAssetPreparationService.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingSceneAssetPreparationService.cs`
   - Load the authored marble material instead of the walnut material.
-- Modify: `C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs`
   - Switch the player sphere material asset id/path/runtime material reference from walnut to marble.
 - Modify: `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityGameSceneSourceTests.cs`
   - Assert Tilt Trial now references the marble material path and generator.
@@ -609,9 +609,9 @@ git -C C:\dev\helworks\helengine commit -m "feat: bind roughness textures in win
 ### Task 6: Author the Marble Material Inputs and Material Factory
 
 **Files:**
-- Create: `C:\dev\helprojs\city\assets\Textures\rendering\tilt_trial\PlayerSphereMarble.jpg`
-- Create: `C:\dev\helprojs\city\assets\Textures\rendering\tilt_trial\PlayerSphereMarbleRoughness.jpg`
-- Create: `C:\dev\helprojs\city\assets\codebase\rendering.tools\TiltTrialPlayerSphereMarbleMaterialFactory.cs`
+- Create: `C:\dev\helprojs\demodisc\assets\Textures\rendering\tilt_trial\PlayerSphereMarble.jpg`
+- Create: `C:\dev\helprojs\demodisc\assets\Textures\rendering\tilt_trial\PlayerSphereMarbleRoughness.jpg`
+- Create: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialPlayerSphereMarbleMaterialFactory.cs`
 - Modify: `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityTiltTrialMarbleMaterialTests.cs`
 
 - [ ] **Step 1: Copy the marble albedo source into the project**
@@ -621,10 +621,10 @@ Run:
 ```powershell
 Copy-Item `
   -LiteralPath 'C:\Users\Helena\Downloads\WhatsApp Image 2026-07-06 at 17.59.09.jpeg' `
-  -Destination 'C:\dev\helprojs\city\assets\Textures\rendering\tilt_trial\PlayerSphereMarble.jpg'
+  -Destination 'C:\dev\helprojs\demodisc\assets\Textures\rendering\tilt_trial\PlayerSphereMarble.jpg'
 ```
 
-Expected: `C:\dev\helprojs\city\assets\Textures\rendering\tilt_trial\PlayerSphereMarble.jpg` exists.
+Expected: `C:\dev\helprojs\demodisc\assets\Textures\rendering\tilt_trial\PlayerSphereMarble.jpg` exists.
 
 - [ ] **Step 2: Copy the marble roughness source into the project**
 
@@ -633,16 +633,16 @@ Run:
 ```powershell
 Copy-Item `
   -LiteralPath 'C:\Users\Helena\Downloads\WhatsApp Image 2026-07-06 at 17.59.58.jpeg' `
-  -Destination 'C:\dev\helprojs\city\assets\Textures\rendering\tilt_trial\PlayerSphereMarbleRoughness.jpg'
+  -Destination 'C:\dev\helprojs\demodisc\assets\Textures\rendering\tilt_trial\PlayerSphereMarbleRoughness.jpg'
 ```
 
-Expected: `C:\dev\helprojs\city\assets\Textures\rendering\tilt_trial\PlayerSphereMarbleRoughness.jpg` exists.
+Expected: `C:\dev\helprojs\demodisc\assets\Textures\rendering\tilt_trial\PlayerSphereMarbleRoughness.jpg` exists.
 
 - [ ] **Step 3: Write the failing authored marble material test**
 
 ```csharp
 public sealed class CityTiltTrialMarbleMaterialTests {
-    const string TiltTrialMarbleMaterialPath = @"C:\dev\helprojs\city\assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset";
+    const string TiltTrialMarbleMaterialPath = @"C:\dev\helprojs\demodisc\assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset";
 
     [Fact]
     public void Tilt_trial_marble_material_source_preserves_windows_roughness_fields() {
@@ -694,7 +694,7 @@ Mirror the walnut factory pattern for non-Windows fallback platforms, but leave 
 
 - [ ] **Step 6: Generate the authored marble material and re-run the test**
 
-Run: `rtk powershell -NoProfile -Command "dotnet build 'C:\dev\helprojs\city\user_settings\generated_code\projects\game.tools\game.tools.csproj' -c Debug"`
+Run: `rtk powershell -NoProfile -Command "dotnet build 'C:\dev\helprojs\demodisc\user_settings\generated_code\projects\game.tools\game.tools.csproj' -c Debug"`
 
 Then run:
 
@@ -705,19 +705,19 @@ Expected: PASS.
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C C:\dev\helprojs\city add assets\Textures\rendering\tilt_trial\PlayerSphereMarble.jpg assets\Textures\rendering\tilt_trial\PlayerSphereMarbleRoughness.jpg assets\codebase\rendering.tools\TiltTrialPlayerSphereMarbleMaterialFactory.cs assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset
+git -C C:\dev\helprojs\demodisc add assets\Textures\rendering\tilt_trial\PlayerSphereMarble.jpg assets\Textures\rendering\tilt_trial\PlayerSphereMarbleRoughness.jpg assets\codebase\rendering.tools\TiltTrialPlayerSphereMarbleMaterialFactory.cs assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset
 git -C C:\dev\helworks\helengine add engine\helengine.editor.tests\CityTiltTrialMarbleMaterialTests.cs
-git -C C:\dev\helprojs\city commit -m "feat: add tilt trial marble roughness material"
+git -C C:\dev\helprojs\demodisc commit -m "feat: add tilt trial marble roughness material"
 git -C C:\dev\helworks\helengine commit -m "test: cover tilt trial marble material fields"
 ```
 
 ### Task 7: Switch Tilt Trial from Walnut to Marble
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneGenerator.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\RenderingSceneGenerationAssets.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\rendering.tools\RenderingSceneAssetPreparationService.cs`
-- Modify: `C:\dev\helprojs\city\assets\codebase\game.tools\GameSceneFactory.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingSceneGenerationAssets.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingSceneAssetPreparationService.cs`
+- Modify: `C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs`
 - Modify: `C:\dev\helworks\helengine\engine\helengine.editor.tests\CityGameSceneSourceTests.cs`
 
 - [ ] **Step 1: Write the failing Tilt Trial source test updates**
@@ -780,18 +780,18 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git -C C:\dev\helprojs\city add assets\codebase\game.tools\GameSceneGenerator.cs assets\codebase\rendering.tools\RenderingSceneGenerationAssets.cs assets\codebase\rendering.tools\RenderingSceneAssetPreparationService.cs assets\codebase\game.tools\GameSceneFactory.cs
+git -C C:\dev\helprojs\demodisc add assets\codebase\game.tools\GameSceneGenerator.cs assets\codebase\rendering.tools\RenderingSceneGenerationAssets.cs assets\codebase\rendering.tools\RenderingSceneAssetPreparationService.cs assets\codebase\game.tools\GameSceneFactory.cs
 git -C C:\dev\helworks\helengine add engine\helengine.editor.tests\CityGameSceneSourceTests.cs
-git -C C:\dev\helprojs\city commit -m "feat: switch tilt trial sphere to marble material"
+git -C C:\dev\helprojs\demodisc commit -m "feat: switch tilt trial sphere to marble material"
 git -C C:\dev\helworks\helengine commit -m "test: cover tilt trial marble scene wiring"
 ```
 
 ### Task 8: Rebuild and Verify the Windows Package
 
 **Files:**
-- Modify: `C:\dev\helprojs\city\assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset`
-- Modify: `C:\dev\helprojs\city\assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset.windows.hasset`
-- Verify: `C:\dev\helprojs\city\windows-build`
+- Modify: `C:\dev\helprojs\demodisc\assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset`
+- Modify: `C:\dev\helprojs\demodisc\assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset.windows.hasset`
+- Verify: `C:\dev\helprojs\demodisc\windows-build`
 
 - [ ] **Step 1: Rebuild the editor app and city gameplay tools**
 
@@ -799,7 +799,7 @@ Run:
 
 ```powershell
 rtk powershell -NoProfile -Command "dotnet build 'C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj' -c Debug --no-restore"
-rtk powershell -NoProfile -Command "dotnet build 'C:\dev\helprojs\city\user_settings\generated_code\projects\game.tools\game.tools.csproj' -c Debug --no-restore"
+rtk powershell -NoProfile -Command "dotnet build 'C:\dev\helprojs\demodisc\user_settings\generated_code\projects\game.tools\game.tools.csproj' -c Debug --no-restore"
 ```
 
 Expected: both builds succeed.
@@ -819,17 +819,17 @@ Expected: command exits without a locking error.
 Run:
 
 ```powershell
-rtk powershell -NoProfile -Command "& 'C:\Program Files\dotnet\dotnet.exe' 'C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll' --project 'C:\dev\helprojs\city\project.heproj' --build windows --output 'C:\dev\helprojs\city\windows-build'"
+rtk powershell -NoProfile -Command "& 'C:\Program Files\dotnet\dotnet.exe' 'C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\bin\Debug\net9.0-windows\helengine.editor.app.dll' --project 'C:\dev\helprojs\demodisc\project.heproj' --build windows --output 'C:\dev\helprojs\demodisc\windows-build'"
 ```
 
-Expected: log ends with `Build completed for platform 'windows': C:\dev\helprojs\city\windows-build`.
+Expected: log ends with `Build completed for platform 'windows': C:\dev\helprojs\demodisc\windows-build`.
 
 - [ ] **Step 4: Launch the Windows build**
 
 Run:
 
 ```powershell
-rtk powershell -NoProfile -Command "Start-Process -FilePath 'C:\dev\helprojs\city\windows-build\helengine_windows.exe' -WorkingDirectory 'C:\dev\helprojs\city\windows-build'"
+rtk powershell -NoProfile -Command "Start-Process -FilePath 'C:\dev\helprojs\demodisc\windows-build\helengine_windows.exe' -WorkingDirectory 'C:\dev\helprojs\demodisc\windows-build'"
 ```
 
 Expected: the Windows build launches into the current city startup flow.
@@ -848,6 +848,6 @@ Check:
 - [ ] **Step 6: Commit final authored assets**
 
 ```bash
-git -C C:\dev\helprojs\city add assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset.windows.hasset windows-build
-git -C C:\dev\helprojs\city commit -m "feat: add windows standard shader roughness to tilt trial marble"
+git -C C:\dev\helprojs\demodisc add assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset assets\materials\rendering\tilt_trial\PlayerSphereMarble.hasset.windows.hasset windows-build
+git -C C:\dev\helprojs\demodisc commit -m "feat: add windows standard shader roughness to tilt trial marble"
 ```

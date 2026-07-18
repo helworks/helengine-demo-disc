@@ -120,6 +120,9 @@ namespace city.rendering.tools {
             DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
             Entity cameraEntity = CreateCameraEntity();
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
+            ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
+            consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -131,6 +134,7 @@ namespace city.rendering.tools {
                 RootEntities = new[] {
                     cameraEntity,
                     instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity,
                     CreateUiEntity(),
                     CreateDirectionalLightRigEntity(arrowModel, axisMaterials[4]),
                     CreateFloorEntity(cubeModel, axisMaterials[3]),

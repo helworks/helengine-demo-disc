@@ -14,6 +14,26 @@ namespace city.rendering.tools {
         const float NintendoDsBottomOverlayFontScale = 1f;
 
         /// <summary>
+        /// Fixed font scale used by Nintendo 3DS light and back button labels after the shared DS reference canvas is resolved to the 3DS screen.
+        /// </summary>
+        const float Nintendo3DsBottomButtonLabelFontScale = 0.5f;
+
+        /// <summary>
+        /// Fixed font scale used by Nintendo 3DS FPS diagnostics after the shared DS reference canvas is resolved to the 3DS screen.
+        /// </summary>
+        const float Nintendo3DsFpsFontScale = 1f;
+
+        /// <summary>
+        /// Stable platform identifier used for the generated Nintendo 3DS button-label component override.
+        /// </summary>
+        const string Nintendo3DsPlatformId = "3ds";
+
+        /// <summary>
+        /// Editor component override service used to persist platform-specific label presentation without changing the shared DS baseline.
+        /// </summary>
+        readonly ComponentPlatformEditingService PlatformEditingServiceValue = new ComponentPlatformEditingService();
+
+        /// <summary>
         /// Runtime layer mask used by packaged 2D overlay drawables.
         /// </summary>
         const byte RuntimeLayerMask = 0b00000001;
@@ -124,9 +144,9 @@ namespace city.rendering.tools {
         const int NintendoDsLightSwatchSize = 20;
 
         /// <summary>
-        /// Render order used by the scaffold-owned Nintendo DS light swatch so the DS OBJ pass submits it before the button body.
+        /// Render order used by the scaffold-owned Nintendo DS light swatch so it remains visible above the button body and below its label.
         /// </summary>
-        const byte NintendoDsLightSwatchRenderOrder = 209;
+        const byte NintendoDsLightSwatchRenderOrder = 211;
 
         /// <summary>
         /// Render order used by the scaffold-owned Nintendo DS back button sprite body.
@@ -142,10 +162,16 @@ namespace city.rendering.tools {
         /// Creates one dual-screen Nintendo DS root set from top-screen scene content and optional bottom-screen content.
         /// </summary>
         /// <param name="topScreenRoots">Scene roots that should remain on the top screen.</param>
-        /// <param name="useDefaultBottomOverlay">True when the temporary bottom proof text should be emitted.</param>
+        /// <param name="useDefaultBottomOverlay">True when the scaffold-owned FPS, light, and back controls should be emitted.</param>
+        /// <param name="moveTopScreen2DRootsToBottomScreen">True when authored 2D roots should be moved beneath the bottom-screen viewport.</param>
         /// <param name="bottomScreenRoots">Optional custom bottom-screen roots supplied by the generator.</param>
         /// <returns>Combined DS companion-scene roots.</returns>
-        public Entity[] CreateSceneRoots(Entity[] topScreenRoots, bool useDefaultBottomOverlay, Entity[] bottomScreenRoots, FontAsset bottomOverlayFont) {
+        public Entity[] CreateSceneRoots(
+            Entity[] topScreenRoots,
+            bool useDefaultBottomOverlay,
+            bool moveTopScreen2DRootsToBottomScreen,
+            Entity[] bottomScreenRoots,
+            FontAsset bottomOverlayFont) {
             if (topScreenRoots == null) {
                 throw new ArgumentNullException(nameof(topScreenRoots));
             } else if (bottomScreenRoots == null) {
@@ -165,12 +191,18 @@ namespace city.rendering.tools {
                 ReferenceWidth = ScreenWidth,
                 ReferenceHeight = ScreenHeight
             });
-            RelocateFpsComponentsToBottomScreen(filteredTopScreenRoots, bottomScreenViewportRoot, bottomOverlayFont);
+            if (useDefaultBottomOverlay) {
+                RelocateFpsComponentsToBottomScreen(filteredTopScreenRoots, bottomScreenViewportRoot, bottomOverlayFont);
+            }
             Entity topScreenCameraEntity = ConfigureTopScreenRoots(filteredTopScreenRoots);
-            Entity[] adjustedTopScreenRoots = MoveTopScreen2DRootsUnderViewport(filteredTopScreenRoots, topScreenCameraEntity);
+            Entity[] adjustedTopScreenRoots = moveTopScreen2DRootsToBottomScreen
+                ? Move2DRootsUnderBottomScreenViewport(filteredTopScreenRoots, bottomScreenViewportRoot)
+                : filteredTopScreenRoots;
 
-            CreateBottomScreenLightButton(bottomScreenViewportRoot, bottomOverlayFont);
-            CreateBottomScreenBackButton(bottomScreenViewportRoot, bottomOverlayFont);
+            if (useDefaultBottomOverlay) {
+                CreateBottomScreenLightButton(bottomScreenViewportRoot, bottomOverlayFont);
+                CreateBottomScreenBackButton(bottomScreenViewportRoot, bottomOverlayFont);
+            }
             AttachBottomScreenRoots(bottomScreenViewportRoot, bottomScreenRoots);
             return CombineSceneRoots(adjustedTopScreenRoots, bottomScreenCameraEntity);
         }
@@ -278,16 +310,16 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Moves top-screen 2D roots under one viewport root owned by the top-screen camera so ancestor-camera binding survives scene serialization.
+        /// Moves remaining authored 2D roots under the shared bottom-screen viewport so physics and rendering scenes use one handheld UI surface.
         /// </summary>
         /// <param name="topScreenRoots">Top-screen roots emitted by the DS scaffold before 2D reparenting.</param>
-        /// <param name="topScreenCameraEntity">Resolved top-screen camera entity that should own the viewport root.</param>
+        /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the moved 2D roots.</param>
         /// <returns>Adjusted top-screen roots that should remain as serialized scene roots.</returns>
-        Entity[] MoveTopScreen2DRootsUnderViewport(Entity[] topScreenRoots, Entity topScreenCameraEntity) {
+        Entity[] Move2DRootsUnderBottomScreenViewport(Entity[] topScreenRoots, Entity bottomScreenViewportRoot) {
             if (topScreenRoots == null) {
                 throw new ArgumentNullException(nameof(topScreenRoots));
-            } else if (topScreenCameraEntity == null) {
-                throw new ArgumentNullException(nameof(topScreenCameraEntity));
+            } else if (bottomScreenViewportRoot == null) {
+                throw new ArgumentNullException(nameof(bottomScreenViewportRoot));
             }
 
             List<Entity> remainingRoots = new List<Entity>();
@@ -296,7 +328,7 @@ namespace city.rendering.tools {
                 Entity rootEntity = topScreenRoots[index];
                 if (rootEntity == null) {
                     continue;
-                } else if (ReferenceEquals(rootEntity, topScreenCameraEntity)) {
+                } else if (ReferenceEquals(rootEntity, bottomScreenViewportRoot)) {
                     remainingRoots.Add(rootEntity);
                     continue;
                 }
@@ -313,23 +345,42 @@ namespace city.rendering.tools {
                 return topScreenRoots;
             }
 
-            Entity topScreenViewportRoot = Core.Instance.EntityFactory.CreateChild(topScreenCameraEntity, "DemoDiscTopScreenRoot");
-            topScreenViewportRoot.LayerMask = PersistedSceneLayerMask;
-            topScreenViewportRoot.AddComponent(new ViewportComponent {
-                BindingMode = ViewportComponent.AncestorCameraBindingMode,
-                ScalingMode = ViewportComponent.NoScalingMode
-            });
-
             for (int index = 0; index < movedRoots.Count; index++) {
                 Entity rootEntity = movedRoots[index];
                 if (rootEntity.Parent != null) {
                     rootEntity.Parent.RemoveChild(rootEntity);
                 }
 
-                topScreenViewportRoot.AddChild(rootEntity);
+                NormalizeBottomScreenCoordinatesRecursive(rootEntity);
+                bottomScreenViewportRoot.AddChild(rootEntity);
             }
 
             return remainingRoots.ToArray();
+        }
+
+        /// <summary>
+        /// Converts legacy stacked-dual-screen Y coordinates into the local 192px bottom-screen canvas.
+        /// </summary>
+        /// <param name="entity">Current moved 2D subtree entity.</param>
+        void NormalizeBottomScreenCoordinatesRecursive(Entity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            if (entity.LocalPosition.Y >= ScreenHeight * 2) {
+                entity.LocalPosition = new float3(
+                    entity.LocalPosition.X,
+                    entity.LocalPosition.Y - ScreenHeight * 2,
+                    entity.LocalPosition.Z);
+            }
+
+            if (entity.Children == null) {
+                return;
+            }
+
+            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                NormalizeBottomScreenCoordinatesRecursive(entity.Children[childIndex]);
+            }
         }
 
         /// <summary>
@@ -456,7 +507,8 @@ namespace city.rendering.tools {
                 RenderOrder2D = sourceComponent.RenderOrder2D
             };
             fpsEntity.AddComponent(bottomScreenFpsComponent);
-            ApplyFontReference(fpsEntity, bottomScreenFpsComponent, DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+            ApplyFontReference(fpsEntity, bottomScreenFpsComponent);
+            ApplyNintendo3DsFpsOverride(fpsEntity, bottomScreenFpsComponent);
         }
 
         /// <summary>
@@ -482,7 +534,8 @@ namespace city.rendering.tools {
                 FontScale = NintendoDsBottomOverlayFontScale
             };
             fpsEntity.AddComponent(bottomScreenFpsComponent);
-            ApplyFontReference(fpsEntity, bottomScreenFpsComponent, DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+            ApplyFontReference(fpsEntity, bottomScreenFpsComponent);
+            ApplyNintendo3DsFpsOverride(fpsEntity, bottomScreenFpsComponent);
         }
 
         /// <summary>
@@ -643,13 +696,15 @@ namespace city.rendering.tools {
                 Text = "LIGHT",
                 Font = bottomOverlayFont,
                 FontScale = NintendoDsBottomOverlayFontScale,
+                Alignment = TextAlignment.Center,
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(NintendoDsLightButtonLabelWidth, NintendoDsLightButtonLabelHeight),
                 RenderOrder2D = NintendoDsBackButtonLabelRenderOrder,
                 LayerMask = RuntimeLayerMask
             };
             lightButtonLabelEntity.AddComponent(labelComponent);
-            ApplyFontReference(lightButtonLabelEntity, labelComponent, DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+            ApplyFontReference(lightButtonLabelEntity, labelComponent);
+            ApplyNintendo3DsButtonLabelOverride(lightButtonLabelEntity, labelComponent);
 
             Entity lightSwatchEntity = Core.Instance.EntityFactory.CreateChild(lightButtonEntity, "DemoDiscBottomScreenLightSwatch");
             lightSwatchEntity.LocalPosition = new float3(NintendoDsLightSwatchLeft, NintendoDsLightSwatchTop, 0.1f);
@@ -706,13 +761,75 @@ namespace city.rendering.tools {
                 Text = "BACK",
                 Font = bottomOverlayFont,
                 FontScale = NintendoDsBottomOverlayFontScale,
+                Alignment = TextAlignment.Center,
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(NintendoDsBackButtonLabelWidth, NintendoDsBackButtonLabelHeight),
                 RenderOrder2D = NintendoDsBackButtonLabelRenderOrder,
                 LayerMask = RuntimeLayerMask
             };
             backButtonLabelEntity.AddComponent(labelComponent);
-            ApplyFontReference(backButtonLabelEntity, labelComponent, DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+            ApplyFontReference(backButtonLabelEntity, labelComponent);
+            ApplyNintendo3DsButtonLabelOverride(backButtonLabelEntity, labelComponent);
+        }
+
+        /// <summary>
+        /// Persists the smaller Nintendo 3DS label scale while retaining one centered shared label definition for DS and other platforms.
+        /// </summary>
+        /// <param name="labelEntity">Generated button-label entity receiving the platform override.</param>
+        /// <param name="commonLabelComponent">Shared label component used as the DS baseline.</param>
+        void ApplyNintendo3DsButtonLabelOverride(Entity labelEntity, TextComponent commonLabelComponent) {
+            if (labelEntity == null) {
+                throw new ArgumentNullException(nameof(labelEntity));
+            } else if (commonLabelComponent == null) {
+                throw new ArgumentNullException(nameof(commonLabelComponent));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(labelEntity);
+            TextComponent overrideComponent = (TextComponent)PlatformEditingServiceValue.EnsurePlatformOverrideComponent(
+                commonLabelComponent,
+                saveComponent,
+                Nintendo3DsPlatformId);
+            overrideComponent.FontScale = Nintendo3DsBottomButtonLabelFontScale;
+            PlatformEditingServiceValue.MarkPropertyOverride(
+                commonLabelComponent,
+                saveComponent,
+                Nintendo3DsPlatformId,
+                nameof(TextComponent.FontScale));
+            PlatformEditingServiceValue.PersistPlatformOverride(
+                commonLabelComponent,
+                overrideComponent,
+                saveComponent,
+                Nintendo3DsPlatformId);
+        }
+
+        /// <summary>
+        /// Persists the smaller Nintendo 3DS FPS scale while retaining the shared DS diagnostic definition.
+        /// </summary>
+        /// <param name="fpsEntity">Generated FPS entity receiving the platform override.</param>
+        /// <param name="commonFpsComponent">Shared FPS component used as the DS baseline.</param>
+        void ApplyNintendo3DsFpsOverride(Entity fpsEntity, FPSComponent commonFpsComponent) {
+            if (fpsEntity == null) {
+                throw new ArgumentNullException(nameof(fpsEntity));
+            } else if (commonFpsComponent == null) {
+                throw new ArgumentNullException(nameof(commonFpsComponent));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(fpsEntity);
+            FPSComponent overrideComponent = (FPSComponent)PlatformEditingServiceValue.EnsurePlatformOverrideComponent(
+                commonFpsComponent,
+                saveComponent,
+                Nintendo3DsPlatformId);
+            overrideComponent.FontScale = Nintendo3DsFpsFontScale;
+            PlatformEditingServiceValue.MarkPropertyOverride(
+                commonFpsComponent,
+                saveComponent,
+                Nintendo3DsPlatformId,
+                nameof(FPSComponent.FontScale));
+            PlatformEditingServiceValue.PersistPlatformOverride(
+                commonFpsComponent,
+                overrideComponent,
+                saveComponent,
+                Nintendo3DsPlatformId);
         }
 
         /// <summary>
@@ -815,11 +932,27 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Stores the supplied generated Nintendo DS debug-font reference on the generated scene save state for the given component.
+        /// Stores the shared authored body-font reference on the generated scene save state for the given component.
         /// </summary>
         /// <param name="entity">Entity that owns the component.</param>
         /// <param name="component">Component whose font reference should be stored.</param>
-        /// <param name="fontReference">Generated Nintendo DS debug-font reference.</param>
+        void ApplyFontReference(Entity entity, Component component) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (component == null) {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
+        }
+
+        /// <summary>
+        /// Stores one explicit font reference on the generated scene save state for the given component.
+        /// </summary>
+        /// <param name="entity">Entity that owns the component.</param>
+        /// <param name="component">Component whose font reference should be stored.</param>
+        /// <param name="fontReference">Explicit font reference that should be persisted.</param>
         void ApplyFontReference(Entity entity, Component component, SceneAssetReference fontReference) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));

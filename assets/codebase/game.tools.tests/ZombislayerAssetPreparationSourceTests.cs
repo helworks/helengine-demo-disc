@@ -8,7 +8,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Zombislayer_asset_catalog_exposes_environment_and_weapon_model_paths() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\game.tools\ZombislayerAssetCatalog.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\ZombislayerAssetCatalog.cs");
 
             Assert.Contains("public const string EnvironmentModelRelativePath = \"models/games/zombislayer/level/level.X\";", source, StringComparison.Ordinal);
             Assert.Contains("public const string WeaponModelRelativePath = \"models/games/zombislayer/weapons/m4a1.X\";", source, StringComparison.Ordinal);
@@ -19,7 +19,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Zombislayer_asset_preparation_service_loads_environment_and_weapon_models() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\city\assets\codebase\game.tools\ZombislayerAssetPreparationService.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\ZombislayerAssetPreparationService.cs");
 
             Assert.Contains("LoadImportedModelRuntime(projectRootPath, ZombislayerAssetCatalog.EnvironmentModelRelativePath)", source, StringComparison.Ordinal);
             Assert.Contains("LoadImportedModelRuntime(projectRootPath, ZombislayerAssetCatalog.WeaponModelRelativePath)", source, StringComparison.Ordinal);
