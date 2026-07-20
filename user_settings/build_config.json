@@ -146,7 +146,8 @@
                                                    "tilt_trial_level_02",
                                                    "tilt_trial_level_03",
                                                    "tilt_trial_level_04",
-                                                   "tilt_trial_level_05"
+                                                   "tilt_trial_level_05",
+                                                   "ps2_vu_renderer_probe"
                                                ],
                           "sceneOrders":  [
                                               {
@@ -224,6 +225,10 @@
                                               {
                                                   "sceneId":  "tilt_trial_level_05",
                                                   "orderNumber":  19
+                                                   },
+                                              {
+                                                  "sceneId":  "ps2_vu_renderer_probe",
+                                                  "orderNumber":  20
                                                    }
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\ps2-city-demo-disc",
