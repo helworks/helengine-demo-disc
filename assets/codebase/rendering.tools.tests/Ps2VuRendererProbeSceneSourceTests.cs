@@ -11,10 +11,10 @@ namespace city.rendering.tools.tests {
         const string ProjectRootPath = @"C:\dev\helprojs\demodisc\.worktrees\ps2-textured-vu-renderer-probe";
 
         /// <summary>
-        /// Ensures the probe scene contains five fixed mesh objects using one shared material.
+        /// Ensures the probe scene contains the Tilt Trial opening composition using one shared material.
         /// </summary>
         [Fact]
-        public void Ps2VuRendererProbeSceneFactory_WhenCreatingScene_UsesFourBoxesAndOneCoin() {
+        public void Ps2VuRendererProbeSceneFactory_WhenCreatingScene_UsesGroundWallsAndOneCoin() {
             string projectRootPath = ResolveProjectRootPath();
             string sourcePath = Path.Combine(projectRootPath, "assets", "codebase", "rendering.tools", "Ps2VuRendererProbeSceneFactory.cs");
             Assert.True(File.Exists(sourcePath), $"Expected renderer probe factory at '{sourcePath}'.");
@@ -22,12 +22,31 @@ namespace city.rendering.tools.tests {
             string source = File.ReadAllText(sourcePath);
 
             Assert.Contains("public const string SceneId = \"scenes/rendering/ps2_vu_renderer_probe.helen\";", source, StringComparison.Ordinal);
-            Assert.Equal(4, CountOccurrences(source, "Ps2VuProbeBox"));
+            Assert.Contains("Ps2VuProbeGround", source, StringComparison.Ordinal);
+            Assert.Contains("Ps2VuProbeLeftWall", source, StringComparison.Ordinal);
+            Assert.Contains("Ps2VuProbeRightWall", source, StringComparison.Ordinal);
+            Assert.Equal(0, CountOccurrences(source, "Ps2VuProbeBox00"));
             Assert.Equal(1, CountOccurrences(source, "Ps2VuProbeCoin"));
+            Assert.Contains("new float3(0f, 0f, -6.6f)", source, StringComparison.Ordinal);
+            Assert.Contains("new float3(-3.1f, 1.25f, 2.8f)", source, StringComparison.Ordinal);
+            Assert.Contains("new float3(3.1f, 1.25f, 2.8f)", source, StringComparison.Ordinal);
             Assert.Contains("texturedCubeGridMaterials[0]", File.ReadAllText(Path.Combine(projectRootPath, "assets", "codebase", "rendering.tools", "RenderingSceneGenerator.cs")), StringComparison.Ordinal);
             Assert.Contains("CreateCameraEntity()", source, StringComparison.Ordinal);
             Assert.Contains("CreateDirectionalLightEntity()", source, StringComparison.Ordinal);
             Assert.DoesNotContain("TiltTrial", source, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Ensures the probe camera preserves the original Tilt Trial opening camera position.
+        /// </summary>
+        [Fact]
+        public void Ps2VuRendererProbeSceneFactory_WhenCreatingCamera_UsesTiltTrialOpeningPose() {
+            string projectRootPath = ResolveProjectRootPath();
+            string sourcePath = Path.Combine(projectRootPath, "assets", "codebase", "rendering.tools", "Ps2VuRendererProbeSceneFactory.cs");
+            string source = File.ReadAllText(sourcePath);
+
+            Assert.Contains("new float3(0f, 2.74425f, -10.92f)", source, StringComparison.Ordinal);
+            Assert.Contains("OrbitCenter = new float3(0f, 0f, -5f)", source, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -40,7 +59,7 @@ namespace city.rendering.tools.tests {
             string source = File.ReadAllText(sourcePath);
 
             Assert.Contains("new city.rendering.DemoDiscOrbitCameraComponent", source, StringComparison.Ordinal);
-            Assert.Contains("OrbitCenter = float3.Zero", source, StringComparison.Ordinal);
+            Assert.Contains("OrbitCenter = new float3(0f, 0f, -5f)", source, StringComparison.Ordinal);
         }
 
         /// <summary>

@@ -2,7 +2,7 @@ using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
-    /// Builds the standalone PS2 textured VU renderer probe scene.
+    /// Builds the standalone PS2 textured VU renderer probe scene using the Tilt Trial opening composition.
     /// </summary>
     public sealed class Ps2VuRendererProbeSceneFactory {
         /// <summary>
@@ -11,7 +11,7 @@ namespace city.rendering.tools {
         public const string SceneId = "scenes/rendering/ps2_vu_renderer_probe.helen";
 
         /// <summary>
-        /// Creates four textured boxes and one flattened textured coin using fixed scene transforms.
+        /// Creates one textured ground cube, two textured wall cubes, and one flattened textured coin using Tilt Trial transforms.
         /// </summary>
         /// <param name="cubeModel">Cooked cube model assigned to the four boxes.</param>
         /// <param name="coinModel">Cooked sphere model flattened into the coin shape.</param>
@@ -39,22 +39,21 @@ namespace city.rendering.tools {
                 RootEntities = new[] {
                     CreateCameraEntity(),
                     CreateDirectionalLightEntity(),
-                    CreateMeshEntity("Ps2VuProbeBox00", cubeModel, sharedMaterial, new float3(-3.2f, 1.4f, 0f), new float3(1.2f, 1.2f, 1.2f), float4.Identity),
-                    CreateMeshEntity("Ps2VuProbeBox01", cubeModel, sharedMaterial, new float3(3.2f, 1.4f, 0f), new float3(1.2f, 1.2f, 1.2f), float4.Identity),
-                    CreateMeshEntity("Ps2VuProbeBox02", cubeModel, sharedMaterial, new float3(-3.2f, -1.4f, 0f), new float3(1.2f, 1.2f, 1.2f), float4.Identity),
-                    CreateMeshEntity("Ps2VuProbeBox03", cubeModel, sharedMaterial, new float3(3.2f, -1.4f, 0f), new float3(1.2f, 1.2f, 1.2f), float4.Identity),
-                    CreateMeshEntity("Ps2VuProbeCoin", coinModel, sharedMaterial, new float3(0f, 0f, -0.5f), new float3(1.6f, 0.35f, 1.6f), CreateCoinOrientation())
+                    CreateMeshEntity("Ps2VuProbeGround", cubeModel, sharedMaterial, new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity),
+                    CreateMeshEntity("Ps2VuProbeLeftWall", cubeModel, sharedMaterial, new float3(-3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity),
+                    CreateMeshEntity("Ps2VuProbeRightWall", cubeModel, sharedMaterial, new float3(3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity),
+                    CreateMeshEntity("Ps2VuProbeCoin", coinModel, sharedMaterial, new float3(0f, 1.35f, -2.2f), new float3(0.8f, 0.18f, 0.8f), CreateCoinOrientation())
                 }
             };
         }
 
         /// <summary>
-        /// Creates the fixed camera used by the renderer probe.
+        /// Creates the Tilt Trial opening camera used by the renderer probe.
         /// </summary>
         /// <returns>Configured renderer probe camera entity.</returns>
         Entity CreateCameraEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("Ps2VuProbeCamera");
-            entity.LocalPosition = new float3(0f, 0f, 18f);
+            entity.LocalPosition = new float3(0f, 2.74425f, -10.92f);
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new CameraComponent {
                 CameraDrawOrder = 0,
@@ -76,7 +75,7 @@ namespace city.rendering.tools {
                 }
             });
             entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
-                OrbitCenter = float3.Zero
+                OrbitCenter = new float3(0f, 0f, -5f)
             });
             return entity;
         }
