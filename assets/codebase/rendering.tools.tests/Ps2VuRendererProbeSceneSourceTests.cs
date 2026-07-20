@@ -31,6 +31,19 @@ namespace city.rendering.tools.tests {
         }
 
         /// <summary>
+        /// Ensures the probe camera uses the shared orbit controller around the test geometry.
+        /// </summary>
+        [Fact]
+        public void Ps2VuRendererProbeSceneFactory_WhenCreatingCamera_UsesSharedOrbitController() {
+            string projectRootPath = ResolveProjectRootPath();
+            string sourcePath = Path.Combine(projectRootPath, "assets", "codebase", "rendering.tools", "Ps2VuRendererProbeSceneFactory.cs");
+            string source = File.ReadAllText(sourcePath);
+
+            Assert.Contains("new city.rendering.DemoDiscOrbitCameraComponent", source, StringComparison.Ordinal);
+            Assert.Contains("OrbitCenter = float3.Zero", source, StringComparison.Ordinal);
+        }
+
+        /// <summary>
         /// Counts exact non-overlapping occurrences of one source fragment.
         /// </summary>
         /// <param name="source">Source text to inspect.</param>
