@@ -2,7 +2,7 @@ using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
-    /// Builds the standalone PS2 textured VU renderer probe scene using the Tilt Trial opening composition.
+    /// Builds the standalone PS2 textured VU renderer probe scene using one isolated ground cube.
     /// </summary>
     public sealed class Ps2VuRendererProbeSceneFactory {
         /// <summary>
@@ -11,7 +11,7 @@ namespace city.rendering.tools {
         public const string SceneId = "scenes/rendering/ps2_vu_renderer_probe.helen";
 
         /// <summary>
-        /// Creates one textured ground cube, two textured wall cubes, and one flattened textured coin using Tilt Trial transforms.
+        /// Creates one textured ground cube using the Tilt Trial opening ground transform.
         /// </summary>
         /// <param name="cubeModel">Cooked cube model assigned to the four boxes.</param>
         /// <param name="coinModel">Cooked sphere model flattened into the coin shape.</param>
@@ -39,10 +39,7 @@ namespace city.rendering.tools {
                 RootEntities = new[] {
                     CreateCameraEntity(),
                     CreateDirectionalLightEntity(),
-                    CreateMeshEntity("Ps2VuProbeGround", cubeModel, sharedMaterial, new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity),
-                    CreateMeshEntity("Ps2VuProbeLeftWall", cubeModel, sharedMaterial, new float3(-3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity),
-                    CreateMeshEntity("Ps2VuProbeRightWall", cubeModel, sharedMaterial, new float3(3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity),
-                    CreateMeshEntity("Ps2VuProbeCoin", coinModel, sharedMaterial, new float3(0f, 1.35f, -2.2f), new float3(0.8f, 0.18f, 0.8f), CreateCoinOrientation())
+                    CreateMeshEntity("Ps2VuProbeGround", cubeModel, sharedMaterial, new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity)
                 }
             };
         }

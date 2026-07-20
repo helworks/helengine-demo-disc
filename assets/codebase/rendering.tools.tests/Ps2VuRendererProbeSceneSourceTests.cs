@@ -11,10 +11,10 @@ namespace city.rendering.tools.tests {
         const string ProjectRootPath = @"C:\dev\helprojs\demodisc\.worktrees\ps2-textured-vu-renderer-probe";
 
         /// <summary>
-        /// Ensures the probe scene contains the Tilt Trial opening composition using one shared material.
+        /// Ensures the probe scene contains only one textured ground cube using the shared material.
         /// </summary>
         [Fact]
-        public void Ps2VuRendererProbeSceneFactory_WhenCreatingScene_UsesGroundWallsAndOneCoin() {
+        public void Ps2VuRendererProbeSceneFactory_WhenCreatingScene_UsesOnlyOneGroundCube() {
             string projectRootPath = ResolveProjectRootPath();
             string sourcePath = Path.Combine(projectRootPath, "assets", "codebase", "rendering.tools", "Ps2VuRendererProbeSceneFactory.cs");
             Assert.True(File.Exists(sourcePath), $"Expected renderer probe factory at '{sourcePath}'.");
@@ -23,13 +23,10 @@ namespace city.rendering.tools.tests {
 
             Assert.Contains("public const string SceneId = \"scenes/rendering/ps2_vu_renderer_probe.helen\";", source, StringComparison.Ordinal);
             Assert.Contains("Ps2VuProbeGround", source, StringComparison.Ordinal);
-            Assert.Contains("Ps2VuProbeLeftWall", source, StringComparison.Ordinal);
-            Assert.Contains("Ps2VuProbeRightWall", source, StringComparison.Ordinal);
-            Assert.Equal(0, CountOccurrences(source, "Ps2VuProbeBox00"));
-            Assert.Equal(1, CountOccurrences(source, "Ps2VuProbeCoin"));
+            Assert.DoesNotContain("Ps2VuProbeLeftWall", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("Ps2VuProbeRightWall", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("Ps2VuProbeCoin", source, StringComparison.Ordinal);
             Assert.Contains("new float3(0f, 0f, -6.6f)", source, StringComparison.Ordinal);
-            Assert.Contains("new float3(-3.1f, 1.25f, 2.8f)", source, StringComparison.Ordinal);
-            Assert.Contains("new float3(3.1f, 1.25f, 2.8f)", source, StringComparison.Ordinal);
             Assert.Contains("texturedCubeGridMaterials[0]", File.ReadAllText(Path.Combine(projectRootPath, "assets", "codebase", "rendering.tools", "RenderingSceneGenerator.cs")), StringComparison.Ordinal);
             Assert.Contains("CreateCameraEntity()", source, StringComparison.Ordinal);
             Assert.Contains("CreateDirectionalLightEntity()", source, StringComparison.Ordinal);
