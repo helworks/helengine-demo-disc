@@ -146,6 +146,11 @@ namespace city.rendering.tools {
         readonly TexturedCubeGridSceneFactory TexturedCubeGridFactory;
 
         /// <summary>
+        /// Factory used to author the standalone PS2 textured VU renderer probe scene.
+        /// </summary>
+        readonly Ps2VuRendererProbeSceneFactory Ps2VuRendererProbeFactory;
+
+        /// <summary>
         /// Factory used to author the axis-test scene and its material assets.
         /// </summary>
         readonly AxisTestSceneFactory AxisTestFactory;
@@ -173,6 +178,7 @@ namespace city.rendering.tools {
             ScaledCubeFactory = new ScaledCubeSceneFactory();
             ColoredCubeGridFactory = new ColoredCubeGridSceneFactory();
             TexturedCubeGridFactory = new TexturedCubeGridSceneFactory();
+            Ps2VuRendererProbeFactory = new Ps2VuRendererProbeSceneFactory();
             AxisTestFactory = new AxisTestSceneFactory();
             AxisTest2Factory = new AxisTest2SceneFactory();
             SceneMemoryProbeFactory = new SceneMemoryProbeSceneFactory();
@@ -229,6 +235,7 @@ namespace city.rendering.tools {
             GeneratedAuthoringSceneDefinition scaledCubeSceneDefinition = ScaledCubeFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition coloredCubeGridSceneDefinition;
             GeneratedAuthoringSceneDefinition texturedCubeGridSceneDefinition;
+            GeneratedAuthoringSceneDefinition ps2VuRendererProbeSceneDefinition;
             GeneratedAuthoringSceneDefinition axisTestSceneDefinition = AxisTestFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
             GeneratedAuthoringSceneDefinition axisTest2SceneDefinition = AxisTest2Factory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
             GeneratedAuthoringSceneDefinition sceneMemoryProbeSceneDefinition = SceneMemoryProbeFactory.CreateSceneDefinition();
@@ -237,12 +244,15 @@ namespace city.rendering.tools {
             ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
             TexturedCubeGridFactory.WriteAssets(projectRootPath);
             coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
-            texturedCubeGridSceneDefinition = TexturedCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, TexturedCubeGridFactory.CreateRuntimeMaterials(assets.GeneratedStandardMaterial));
+            RuntimeMaterial[] texturedCubeGridMaterials = TexturedCubeGridFactory.CreateRuntimeMaterials(assets.GeneratedStandardMaterial);
+            texturedCubeGridSceneDefinition = TexturedCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, texturedCubeGridMaterials);
+            ps2VuRendererProbeSceneDefinition = Ps2VuRendererProbeFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedSphereModel, texturedCubeGridMaterials[0]);
             AuthoringSceneWriteService.WriteScene(projectRootPath, cubeTestSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, groundCubeProbeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, scaledCubeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, coloredCubeGridSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, texturedCubeGridSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, ps2VuRendererProbeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, axisTestSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, axisTest2SceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, sceneMemoryProbeSceneDefinition);
