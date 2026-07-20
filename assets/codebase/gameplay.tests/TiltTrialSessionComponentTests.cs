@@ -97,6 +97,13 @@ namespace city.tests {
         }
 
         [Fact]
+        public void Session_retries_coin_discovery_when_scene_expansion_has_not_finished() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialSessionComponent.cs");
+
+            Assert.Contains("if (CollectibleCoinComponents == null || CollectibleCoinComponents.Count == 0) {", source, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Goal_clear_uses_trigger_observer_state_instead_of_level_01_center_distance_check() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialSessionComponent.cs");
 

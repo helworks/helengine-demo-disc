@@ -342,18 +342,14 @@ namespace city.game {
                 keyboardYaw += 1d;
             }
 
-            InputGamepadState gamepadState = inputSystem.GetGamepadState(0);
             double gamepadYaw = 0d;
-            if (gamepadState.Connected) {
-                if (gamepadState.IsButtonDown(InputGamepadButton.LeftShoulder)) {
-                    gamepadYaw -= 1d;
-                }
-                if (gamepadState.IsButtonDown(InputGamepadButton.RightShoulder)) {
-                    gamepadYaw += 1d;
-                }
-
-                gamepadYaw += NormalizeStickAxis(gamepadState.RightStickX);
+            if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.LeftShoulder)) {
+                gamepadYaw -= 1d;
             }
+            if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.RightShoulder)) {
+                gamepadYaw += 1d;
+            }
+            gamepadYaw += NormalizeStickAxis(city.menu.DemoDiscGamepadInput.GetRightStickX(inputSystem));
 
             return Math.Clamp(keyboardYaw + gamepadYaw, -1d, 1d);
         }
@@ -376,11 +372,8 @@ namespace city.game {
                 keyboardPitch -= 1d;
             }
 
-            InputGamepadState gamepadState = inputSystem.GetGamepadState(0);
             double gamepadPitch = 0d;
-            if (gamepadState.Connected) {
-                gamepadPitch += -NormalizeStickAxis(gamepadState.RightStickY);
-            }
+            gamepadPitch += -NormalizeStickAxis(city.menu.DemoDiscGamepadInput.GetRightStickY(inputSystem));
 
             return Math.Clamp(keyboardPitch + gamepadPitch, -1d, 1d);
         }

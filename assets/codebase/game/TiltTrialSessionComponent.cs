@@ -767,7 +767,7 @@ namespace city.game {
                 Entity failBodyEntity = TryFindNamedEntity(FailOverlayEntity, "TiltTrialFailBodyText");
                 FailBodyTextComponent = TryFindTextComponent(failBodyEntity);
             }
-            if (CollectibleCoinComponents == null) {
+            if (CollectibleCoinComponents == null || CollectibleCoinComponents.Count == 0) {
                 CollectibleCoinComponents = FindCollectibleCoinComponentsAcrossScene();
             }
 
@@ -790,8 +790,8 @@ namespace city.game {
                 || inputSystem.WasKeyPressed(Keys.Up)
                 || inputSystem.WasKeyPressed(Keys.A)
                 || inputSystem.WasKeyPressed(Keys.W)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.DPadLeft)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.DPadUp);
+                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadLeft)
+                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp);
         }
 
         bool WasNavigateNextPressed() {
@@ -800,14 +800,15 @@ namespace city.game {
                 || inputSystem.WasKeyPressed(Keys.Down)
                 || inputSystem.WasKeyPressed(Keys.D)
                 || inputSystem.WasKeyPressed(Keys.S)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.DPadRight)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.DPadDown);
+                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadRight)
+                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown);
         }
 
         bool WasAcceptPressed() {
             InputSystem inputSystem = Core.Instance.Input;
             return inputSystem.WasKeyPressed(Keys.Enter)
                 || inputSystem.WasKeyPressed(Keys.Space)
+                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)
                 || Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept);
         }
 

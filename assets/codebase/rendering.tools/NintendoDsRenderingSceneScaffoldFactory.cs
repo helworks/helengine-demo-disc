@@ -159,6 +159,16 @@ namespace city.rendering.tools {
         const byte NintendoDsBackButtonLabelRenderOrder = 221;
 
         /// <summary>
+        /// Render order used by the transparent border overlays drawn over the DS bottom-screen action buttons.
+        /// </summary>
+        const byte NintendoDsBottomButtonBorderRenderOrder = 220;
+
+        /// <summary>
+        /// Border thickness used by the DS bottom-screen action buttons.
+        /// </summary>
+        const float NintendoDsBottomButtonBorderThickness = 2f;
+
+        /// <summary>
         /// Creates one dual-screen Nintendo DS root set from top-screen scene content and optional bottom-screen content.
         /// </summary>
         /// <param name="topScreenRoots">Scene roots that should remain on the top screen.</param>
@@ -680,6 +690,7 @@ namespace city.rendering.tools {
             };
             lightButtonEntity.AddComponent(spriteComponent);
             ApplyTextureReference(lightButtonEntity, spriteComponent, NintendoDsBackButtonTexturePath);
+            CreateBottomScreenButtonBorder(lightButtonEntity);
 
             InteractableComponent interactableComponent = new InteractableComponent {
                 Size = new int2(NintendoDsBackButtonWidth, NintendoDsBackButtonHeight)
@@ -745,6 +756,7 @@ namespace city.rendering.tools {
             };
             backButtonEntity.AddComponent(spriteComponent);
             ApplyTextureReference(backButtonEntity, spriteComponent, NintendoDsBackButtonTexturePath);
+            CreateBottomScreenButtonBorder(backButtonEntity);
 
             InteractableComponent interactableComponent = new InteractableComponent {
                 Size = new int2(NintendoDsBackButtonWidth, NintendoDsBackButtonHeight)
@@ -770,6 +782,30 @@ namespace city.rendering.tools {
             backButtonLabelEntity.AddComponent(labelComponent);
             ApplyFontReference(backButtonLabelEntity, labelComponent);
             ApplyNintendo3DsButtonLabelOverride(backButtonLabelEntity, labelComponent);
+        }
+
+        /// <summary>
+        /// Adds a transparent rounded border above one bottom-screen action-button sprite so its edge remains visible on every handheld renderer.
+        /// </summary>
+        /// <param name="buttonEntity">Bottom-screen action-button entity receiving the border overlay.</param>
+        void CreateBottomScreenButtonBorder(Entity buttonEntity) {
+            if (buttonEntity == null) {
+                throw new ArgumentNullException(nameof(buttonEntity));
+            }
+
+            Entity borderEntity = Core.Instance.EntityFactory.CreateChild(buttonEntity, "Border");
+            borderEntity.LocalPosition = new float3(0f, 0f, 0.1f);
+            borderEntity.LayerMask = PersistedSceneLayerMask;
+            borderEntity.Static = true;
+            borderEntity.AddComponent(new RoundedRectComponent {
+                Size = new int2(NintendoDsBackButtonWidth, NintendoDsBackButtonHeight),
+                Radius = 3f,
+                BorderThickness = NintendoDsBottomButtonBorderThickness,
+                FillColor = new byte4(0, 0, 0, 0),
+                BorderColor = new byte4(201, 147, 255, 255),
+                RenderOrder2D = NintendoDsBottomButtonBorderRenderOrder,
+                LayerMask = RuntimeLayerMask
+            });
         }
 
         /// <summary>

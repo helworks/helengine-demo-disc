@@ -41,8 +41,9 @@ namespace city.menu {
         /// <summary>
         /// Releases the sibling interactable subscription before the component instance is deleted.
         /// </summary>
-        public void Dispose() {
+        public override void Dispose() {
             UnbindInteractable();
+            base.Dispose();
         }
 
         /// <summary>

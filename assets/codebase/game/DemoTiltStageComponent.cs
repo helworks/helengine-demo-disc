@@ -249,24 +249,21 @@ namespace city.game {
                 forward -= 1d;
             }
 
-            InputGamepadState gamepadState = inputSystem.GetGamepadState(0);
-            if (gamepadState.Connected) {
-                if (gamepadState.IsButtonDown(InputGamepadButton.DPadLeft)) {
-                    horizontal -= 1d;
-                }
-                if (gamepadState.IsButtonDown(InputGamepadButton.DPadRight)) {
-                    horizontal += 1d;
-                }
-                if (gamepadState.IsButtonDown(InputGamepadButton.DPadUp)) {
-                    forward += 1d;
-                }
-                if (gamepadState.IsButtonDown(InputGamepadButton.DPadDown)) {
-                    forward -= 1d;
-                }
-
-                horizontal += NormalizeStickAxis(gamepadState.LeftStickX);
-                forward += -NormalizeStickAxis(gamepadState.LeftStickY);
+            if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.DPadLeft)) {
+                horizontal -= 1d;
             }
+            if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.DPadRight)) {
+                horizontal += 1d;
+            }
+            if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.DPadUp)) {
+                forward += 1d;
+            }
+            if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.DPadDown)) {
+                forward -= 1d;
+            }
+
+            horizontal += NormalizeStickAxis(city.menu.DemoDiscGamepadInput.GetLeftStickX(inputSystem));
+            forward += -NormalizeStickAxis(city.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem));
 
             return new float2(
                 (float)Math.Clamp(horizontal, -1d, 1d),

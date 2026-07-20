@@ -33,6 +33,8 @@ namespace city.game {
         TextComponent LevelTimerTextComponent;
         /// <summary>Text displaying the selected stage target times.</summary>
         TextComponent LevelTargetTimesTextComponent;
+        /// <summary>Text displaying the platform-specific confirm and return button hint.</summary>
+        TextComponent LevelSelectHintTextComponent;
         /// <summary>Background used to show the focused Back action.</summary>
         RoundedRectComponent DetailBackButtonBackground;
         /// <summary>Background used to show the focused Play action.</summary>
@@ -217,6 +219,7 @@ namespace city.game {
             ApplyLevelNameText(selectedLevel.DisplayName);
             ApplyLevelTimerText(selectedLevel.StartTimeSeconds);
             ApplyLevelTargetTimesText(selectedLevel.GoldTimeSeconds, selectedLevel.SilverTimeSeconds, selectedLevel.BronzeTimeSeconds);
+            ApplyPlatformHintText();
             ApplyRowSelectionState(selectedLevel.LevelId);
         }
 
@@ -238,6 +241,9 @@ namespace city.game {
             LevelNameTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(DetailsPanelEntity, 0, "Tilt Trial selector level name text"));
             LevelTimerTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(DetailsPanelEntity, 1, "Tilt Trial selector level timer text"));
             LevelTargetTimesTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(DetailsPanelEntity, 2, "Tilt Trial selector target times text"));
+            if (!UseDetailsStage) {
+                LevelSelectHintTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(Parent, 3, "Tilt Trial selector hint text"));
+            }
             if (UseDetailsStage) {
                 DetailBackButtonEntity = FindRequiredChildEntity(DetailsPanelEntity, 3, "Tilt Trial selector Back button");
                 DetailPlayButtonEntity = FindRequiredChildEntity(DetailsPanelEntity, 4, "Tilt Trial selector Play button");
@@ -325,7 +331,40 @@ namespace city.game {
         /// Applies the selected level medal thresholds to the details panel.
         /// </summary>
         void ApplyLevelTargetTimesText(float goldTimeSeconds, float silverTimeSeconds, float bronzeTimeSeconds) {
-            LevelTargetTimesTextComponent.Text = $"Targets G{FormatTimerSeconds(goldTimeSeconds)} S{FormatTimerSeconds(silverTimeSeconds)} B{FormatTimerSeconds(bronzeTimeSeconds)}";
+            LevelTargetTimesTextComponent.Text = $"Gold  {FormatTimerSeconds(goldTimeSeconds)}\nSilver {FormatTimerSeconds(silverTimeSeconds)}\nBronze {FormatTimerSeconds(bronzeTimeSeconds)}";
+        }
+
+        /// <summary>
+        /// Applies the confirm and return labels for the active runtime platform to the shared selector hint.
+        /// </summary>
+        void ApplyPlatformHintText() {
+            if (LevelSelectHintTextComponent != null) {
+                LevelSelectHintTextComponent.Text = ResolvePlatformHintText();
+            }
+        }
+
+        /// <summary>
+        /// Resolves the visible selector hint from the active platform's conventional confirm and return buttons.
+        /// </summary>
+        /// <returns>Platform-specific confirm and return hint text.</returns>
+        static string ResolvePlatformHintText() {
+            PlatformInfo platformInfo = Core.Instance?.PlatformInfo;
+            string platformName = platformInfo != null ? platformInfo.Name : string.Empty;
+            if (string.Equals(platformName, "gamecube", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(platformName, "switch", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(platformName, "wiiu", StringComparison.OrdinalIgnoreCase)) {
+                return "A Play   B Menu";
+            } else if (string.Equals(platformName, "wii", StringComparison.OrdinalIgnoreCase)) {
+                return "A Play   B Menu";
+            } else if (string.Equals(platformName, "ps2", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(platformName, "psp", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(platformName, "psvita", StringComparison.OrdinalIgnoreCase)) {
+                return "Cross Play   Circle Menu";
+            } else if (string.Equals(platformName, "windows", StringComparison.OrdinalIgnoreCase)) {
+                return "Enter Play   Esc Menu";
+            }
+
+            return "A Play   B Menu";
         }
 
         /// <summary>
@@ -355,7 +394,7 @@ namespace city.game {
             InputSystem inputSystem = Core.Instance.Input;
             return inputSystem.WasKeyPressed(Keys.Up)
                 || inputSystem.WasKeyPressed(Keys.W)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.DPadUp)
+                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp)
                 || WasLeftStickUpPressed();
         }
 
@@ -366,7 +405,7 @@ namespace city.game {
             InputSystem inputSystem = Core.Instance.Input;
             return inputSystem.WasKeyPressed(Keys.Down)
                 || inputSystem.WasKeyPressed(Keys.S)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.DPadDown)
+                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown)
                 || WasLeftStickDownPressed();
         }
 
@@ -375,14 +414,10 @@ namespace city.game {
         /// </summary>
         bool WasLeftStickUpPressed() {
             InputSystem inputSystem = Core.Instance.Input;
-            InputGamepadState currentState = inputSystem.GetGamepadState(0);
-            if (!currentState.Connected) {
-                return false;
-            }
-
-            InputGamepadState previousState = inputSystem.GetPreviousGamepadState(0);
-            return currentState.LeftStickY <= -GamepadStickNavigationThreshold
-                && previousState.LeftStickY > -GamepadStickNavigationThreshold;
+            short currentStickY = city.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem);
+            short previousStickY = city.menu.DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem);
+            return currentStickY <= -GamepadStickNavigationThreshold
+                && previousStickY > -GamepadStickNavigationThreshold;
         }
 
         /// <summary>
@@ -390,14 +425,10 @@ namespace city.game {
         /// </summary>
         bool WasLeftStickDownPressed() {
             InputSystem inputSystem = Core.Instance.Input;
-            InputGamepadState currentState = inputSystem.GetGamepadState(0);
-            if (!currentState.Connected) {
-                return false;
-            }
-
-            InputGamepadState previousState = inputSystem.GetPreviousGamepadState(0);
-            return currentState.LeftStickY >= GamepadStickNavigationThreshold
-                && previousState.LeftStickY < GamepadStickNavigationThreshold;
+            short currentStickY = city.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem);
+            short previousStickY = city.menu.DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem);
+            return currentStickY >= GamepadStickNavigationThreshold
+                && previousStickY < GamepadStickNavigationThreshold;
         }
 
         /// <summary>
@@ -406,7 +437,9 @@ namespace city.game {
         bool WasAcceptPressed() {
             InputSystem inputSystem = Core.Instance.Input;
             return inputSystem.WasKeyPressed(Keys.Enter)
+                || inputSystem.WasKeyPressed(Keys.J)
                 || inputSystem.WasKeyPressed(Keys.Space)
+                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)
                 || Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept);
         }
 
@@ -416,7 +449,8 @@ namespace city.game {
         bool WasBackPressed() {
             InputSystem inputSystem = Core.Instance.Input;
             return inputSystem.WasKeyPressed(Keys.Escape)
-                || inputSystem.WasKeyPressed(Keys.Back);
+                || inputSystem.WasKeyPressed(Keys.Back)
+                || inputSystem.WasKeyPressed(Keys.K);
         }
 
         /// <summary>

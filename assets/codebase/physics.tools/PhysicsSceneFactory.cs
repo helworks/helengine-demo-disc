@@ -1362,7 +1362,8 @@ namespace city.physics.tools {
                     CreateAutomaticComponentRecord(new city.rendering.DemoDiscOrbitCameraComponent {
                         OrbitCenter = orbitCenter,
                         AutoYawSpeedRadians = 0f
-                    }, 1)
+                    }, 1),
+                    city.rendering.tools.DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(2)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -1396,7 +1397,8 @@ namespace city.physics.tools {
                             EntityId = targetEntityId
                         },
                         TargetOffset = new float3(0f, 1.4f, 0f)
-                    }, 1)
+                    }, 1),
+                    city.rendering.tools.DemoDiscSceneComponentRecordFactory.CreateReturnToMainMenuRecord(2)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -2192,6 +2194,7 @@ namespace city.physics.tools {
                 OrbitCenter = orbitCenter,
                 AutoYawSpeedRadians = 0f
             });
+            entity.AddComponent(new city.menu.DemoDiscReturnToMenuComponent());
             return entity;
         }
 
@@ -2233,6 +2236,7 @@ namespace city.physics.tools {
                 },
                 TargetOffset = new float3(0f, 1.4f, 0f)
             });
+            entity.AddComponent(new city.menu.DemoDiscReturnToMenuComponent());
             return entity;
         }
 
@@ -2268,7 +2272,6 @@ namespace city.physics.tools {
             };
             entity.AddComponent(fpsComponent);
             ApplyEditorFontReference(entity, fpsComponent);
-            entity.AddComponent(new city.menu.DemoDiscReturnToMenuComponent());
             entity.AddComponent(new city.rendering.DemoDiscLightToggleComponent());
             DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
             lightIndicatorOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont());

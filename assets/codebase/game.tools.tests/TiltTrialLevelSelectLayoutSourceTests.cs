@@ -47,18 +47,17 @@ namespace city.tests {
         }
 
         /// <summary>
-        /// Ensures the PS2 selector has its own native 4:3 canvas and cannot be confused with the desktop root.
+        /// Ensures every non-handheld platform shares one selector and the generator has no PS2-only branch.
         /// </summary>
         [Fact]
-        public void Game_scene_factory_uses_native_ps2_selector_layout() {
+        public void Game_scene_factory_uses_one_shared_non_handheld_selector() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
 
-            Assert.Contains("CreatePs2LevelSelectUiEntity()", source, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialPs2LevelSelectUi", source, StringComparison.Ordinal);
-            Assert.Contains("FixedSize = new int2(640, 448)", source, StringComparison.Ordinal);
-            Assert.Contains("ReferenceWidth = 640", source, StringComparison.Ordinal);
-            Assert.Contains("ReferenceHeight = 448", source, StringComparison.Ordinal);
-            Assert.Contains("GetOrCreateExistencePlatformOverride(\"ps2\").Exists = true", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("Ps2", source, StringComparison.Ordinal);
+            Assert.Contains("CreateLevelSelectUiEntity()", source, StringComparison.Ordinal);
+            Assert.Contains("FixedSize = new int2(1280, 720)", source, StringComparison.Ordinal);
+            Assert.Contains("ReferenceWidth = 1280", source, StringComparison.Ordinal);
+            Assert.Contains("ReferenceHeight = 720", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialLevelSelectBackButton", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialLevelSelectPlayButton", source, StringComparison.Ordinal);
         }
@@ -70,22 +69,15 @@ namespace city.tests {
         public void Game_scene_factory_uses_desktop_selector_detail_action_buttons() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
             int desktopMethodStart = source.IndexOf("EditorEntity CreateLevelSelectUiEntity()", StringComparison.Ordinal);
-            int ps2MethodStart = source.IndexOf("EditorEntity CreatePs2LevelSelectUiEntity()", desktopMethodStart, StringComparison.Ordinal);
 
             Assert.True(desktopMethodStart >= 0);
-            Assert.True(ps2MethodStart > desktopMethodStart);
 
-            string desktopMethodSource = source.Substring(desktopMethodStart, ps2MethodStart - desktopMethodStart);
+            string desktopMethodSource = source.Substring(desktopMethodStart);
             Assert.Contains("CreateLevelSelectActionButton(detailsPanelEntity, \"TiltTrialLevelSelectBackButton\"", desktopMethodSource, StringComparison.Ordinal);
             Assert.Contains("CreateLevelSelectActionButton(detailsPanelEntity, \"TiltTrialLevelSelectPlayButton\"", desktopMethodSource, StringComparison.Ordinal);
             Assert.Contains("GetOrCreateExistencePlatformOverride(\"ds\").Exists = false", desktopMethodSource, StringComparison.Ordinal);
             Assert.Contains("GetOrCreateExistencePlatformOverride(\"3ds\").Exists = false", desktopMethodSource, StringComparison.Ordinal);
-            Assert.Contains("ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(backButtonEntity);", desktopMethodSource, StringComparison.Ordinal);
-            Assert.Contains("ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(playButtonEntity);", desktopMethodSource, StringComparison.Ordinal);
-
-            string ps2MethodSource = source.Substring(ps2MethodStart);
-            Assert.Contains("ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(backButtonEntity);", ps2MethodSource, StringComparison.Ordinal);
-            Assert.Contains("ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(playButtonEntity);", ps2MethodSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("GetOrCreateExistencePlatformOverride(\"ps2\")", desktopMethodSource, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -97,19 +89,42 @@ namespace city.tests {
 
             int handheldMethodStart = source.IndexOf("EditorEntity CreateHandheldLevelSelectUiEntity()", StringComparison.Ordinal);
             int standardMethodStart = source.IndexOf("EditorEntity CreateLevelSelectUiEntity()", StringComparison.Ordinal);
-            int ps2MethodStart = source.IndexOf("EditorEntity CreatePs2LevelSelectUiEntity()", StringComparison.Ordinal);
 
             Assert.True(handheldMethodStart >= 0);
             Assert.True(standardMethodStart > handheldMethodStart);
-            Assert.True(ps2MethodStart > standardMethodStart);
 
             string handheldMethodSource = source.Substring(handheldMethodStart, standardMethodStart - handheldMethodStart);
-            string standardMethodSource = source.Substring(standardMethodStart, ps2MethodStart - standardMethodStart);
-            string ps2MethodSource = source.Substring(ps2MethodStart);
+            string standardMethodSource = source.Substring(standardMethodStart);
 
             Assert.Contains("UseDetailsStage = true", handheldMethodSource, StringComparison.Ordinal);
+            Assert.Contains("entity.AddComponent(new DemoDiscReturnToMenuComponent());", handheldMethodSource, StringComparison.Ordinal);
             Assert.Contains("UseDetailsStage = false", standardMethodSource, StringComparison.Ordinal);
-            Assert.Contains("UseDetailsStage = false", ps2MethodSource, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Ensures the shared selector keeps desktop medal targets readable one medal per line without changing handheld formatting.
+        /// </summary>
+        [Fact]
+        public void Level_select_controller_formats_medals_one_per_line_on_all_platforms() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelSelectComponent.cs");
+
+            Assert.DoesNotContain("UseDetailsStage\n                ? $\"Targets G", source, StringComparison.Ordinal);
+            Assert.Contains("$\"Gold  {FormatTimerSeconds(goldTimeSeconds)}\\nSilver {FormatTimerSeconds(silverTimeSeconds)}\\nBronze {FormatTimerSeconds(bronzeTimeSeconds)}\"", source, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Ensures the non-handheld selector presents platform-appropriate confirm and return button labels.
+        /// </summary>
+        [Fact]
+        public void Level_select_controller_resolves_platform_button_hint() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelSelectComponent.cs");
+
+            Assert.Contains("ResolvePlatformHintText", source, StringComparison.Ordinal);
+            Assert.Contains("gamecube", source, StringComparison.Ordinal);
+            Assert.Contains("Play   B Menu", source, StringComparison.Ordinal);
+            Assert.Contains("Cross Play   Circle Menu", source, StringComparison.Ordinal);
+            Assert.Contains("A Play   B Menu", source, StringComparison.Ordinal);
+            Assert.Contains("Enter Play   Esc Menu", source, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -152,6 +167,17 @@ namespace city.tests {
             Assert.Contains("DetailActionIndex = DetailActionIndex == 0 ? 1 : 0;", source, StringComparison.Ordinal);
             Assert.Contains("if (DetailActionIndex == 0)", source, StringComparison.Ordinal);
             Assert.Contains("ApplyDetailActionSelection();", source, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Ensures the shared face-A and face-B keyboard bindings work on handheld selectors.
+        /// </summary>
+        [Fact]
+        public void Level_select_controller_supports_shared_keyboard_face_buttons() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelSelectComponent.cs");
+
+            Assert.Contains("inputSystem.WasKeyPressed(Keys.J)", source, StringComparison.Ordinal);
+            Assert.Contains("inputSystem.WasKeyPressed(Keys.K)", source, StringComparison.Ordinal);
         }
 
         /// <summary>

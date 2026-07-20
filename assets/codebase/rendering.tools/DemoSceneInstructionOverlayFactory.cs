@@ -294,6 +294,22 @@ namespace city.rendering.tools {
         };
 
         /// <summary>
+        /// Console camera icon bindings for both the directional pad and the primary camera stick.
+        /// </summary>
+        static readonly DesktopInstructionPlatformIconSlotSpec[] ConsoleCameraIconSlotSpecs = new[] {
+            new DesktopInstructionPlatformIconSlotSpec("ps2", "dpad", new int2(48, 48), 0),
+            new DesktopInstructionPlatformIconSlotSpec("ps2", "left_stick", new int2(48, 48), 1),
+            new DesktopInstructionPlatformIconSlotSpec("gamecube", "dpad", new int2(48, 48), 0),
+            new DesktopInstructionPlatformIconSlotSpec("gamecube", "control_stick", new int2(48, 48), 1),
+            new DesktopInstructionPlatformIconSlotSpec("wii", "dpad", new int2(48, 48), 0),
+            new DesktopInstructionPlatformIconSlotSpec("wii", "stick", new int2(48, 48), 1),
+            new DesktopInstructionPlatformIconSlotSpec("switch", "dpad", new int2(48, 48), 0),
+            new DesktopInstructionPlatformIconSlotSpec("switch", "left_stick", new int2(48, 48), 1),
+            new DesktopInstructionPlatformIconSlotSpec("wiiu", "dpad", new int2(48, 48), 0, "wii"),
+            new DesktopInstructionPlatformIconSlotSpec("wiiu", "stick", new int2(48, 48), 1, "wii")
+        };
+
+        /// <summary>
         /// Console-only light-toggle bindings used by the reusable camera/light Blueprint.
         /// </summary>
         static readonly DesktopInstructionPlatformIconSpec[] ConsoleLightIconSpecs = new[] {
@@ -350,7 +366,8 @@ namespace city.rendering.tools {
                 DesktopInstructionFirstRowTop,
                 DesktopInstructionRotateTextTopAdjustment,
                 "ps2",
-                ConsoleCameraIconSpecs);
+                ConsoleCameraIconSpecs,
+                ConsoleCameraIconSlotSpecs);
             CreateDesktopInstructionRow(
                 panelEntity,
                 projectRootPath,
@@ -432,6 +449,9 @@ namespace city.rendering.tools {
         /// <param name="text">Row label text.</param>
         /// <param name="topOffset">Vertical offset within the panel.</param>
         /// <param name="textTopAdjustment">Desktop/shared vertical text adjustment for the row label.</param>
+        /// <param name="commonPlatformId">Platform supplying the shared baseline icon components.</param>
+        /// <param name="cameraIconSpecs">Optional single-slot platform icon bindings used by the desktop row.</param>
+        /// <param name="cameraSlotSpecsOverride">Optional explicit platform and slot bindings used by console rows.</param>
         void CreateDesktopInstructionCameraRow(
             Entity panelEntity,
             string projectRootPath,
@@ -440,7 +460,8 @@ namespace city.rendering.tools {
             float topOffset,
             float textTopAdjustment,
             string commonPlatformId = "windows",
-            DesktopInstructionPlatformIconSpec[] cameraIconSpecs = null) {
+            DesktopInstructionPlatformIconSpec[] cameraIconSpecs = null,
+            DesktopInstructionPlatformIconSlotSpec[] cameraSlotSpecsOverride = null) {
             if (panelEntity == null) {
                 throw new ArgumentNullException(nameof(panelEntity));
             } else if (string.IsNullOrWhiteSpace(projectRootPath)) {
@@ -451,12 +472,11 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Instruction text must be provided.", nameof(text));
             }
 
-            DesktopInstructionPlatformIconSlotSpec[] cameraSlotSpecs = cameraIconSpecs == null
-                ? CameraIconSpecs
-                : CreateSingleCameraSlotSpecs(cameraIconSpecs);
+            DesktopInstructionPlatformIconSlotSpec[] cameraSlotSpecs = cameraSlotSpecsOverride
+                ?? (cameraIconSpecs == null ? CameraIconSpecs : CreateSingleCameraSlotSpecs(cameraIconSpecs));
 
             CreateInstructionIconEntity(projectRootPath, panelEntity, "CameraIconPrimary", DesktopInstructionCameraPrimaryIconLeft, topOffset, cameraSlotSpecs, 0, 201, commonPlatformId);
-            if (cameraIconSpecs == null) {
+            if (cameraIconSpecs == null || cameraSlotSpecsOverride != null) {
                 CreateInstructionIconEntity(projectRootPath, panelEntity, "CameraIconSecondary", DesktopInstructionCameraSecondaryIconLeft, topOffset, cameraSlotSpecs, 1, 201, commonPlatformId);
             }
 

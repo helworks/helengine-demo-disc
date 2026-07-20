@@ -49,6 +49,7 @@ namespace city.menu.tools {
             SceneWriteService.WriteScene(projectRootPath, standardSceneDefinition);
 
             GeneratedAuthoringSceneDefinition handheldSceneDefinition = SceneFactory.CreateHandheldSceneDefinition(providerTypeName, definition);
+            MenuBuildSceneAuthoringService.ApplyBuildSceneAvailability(projectRootPath, handheldSceneDefinition, definition);
             SceneWriteService.WriteScene(projectRootPath, handheldSceneDefinition);
         }
 

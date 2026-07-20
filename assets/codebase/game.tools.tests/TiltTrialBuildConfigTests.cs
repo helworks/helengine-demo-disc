@@ -78,6 +78,7 @@ namespace city.tests {
                 dsPlatform.GetProperty("selectedSceneIds").EnumerateArray().Select(sceneId => sceneId.GetString() ?? string.Empty),
                 StringComparer.Ordinal);
             Assert.Contains(city.game.TiltTrialSceneIds.HandheldLevelSelectSceneId, selectedSceneIds);
+            Assert.Contains(helengine.PlatformMenuSceneResolver.NintendoHandheldMainMenuSceneId, selectedSceneIds);
             foreach (string requiredSceneId in RequiredTiltTrialGameplaySceneIds) {
                 Assert.Contains(requiredSceneId, selectedSceneIds);
             }

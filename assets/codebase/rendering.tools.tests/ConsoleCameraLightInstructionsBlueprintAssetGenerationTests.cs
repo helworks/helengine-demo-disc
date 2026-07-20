@@ -22,10 +22,10 @@ namespace city.tests {
             SceneEntityAsset root = blueprint.RootEntity;
             Assert.Contains(root.Children, child => child != null && child.Name == "ConsoleCameraLightInstructionsPanel");
             Assert.Contains(EnumerateEntities(root), entity => entity.Name == "CameraIconPrimary");
+            Assert.Contains(EnumerateEntities(root), entity => entity.Name == "CameraIconSecondary");
             Assert.Contains(EnumerateEntities(root), entity => entity.Name == "CameraText");
             Assert.Contains(EnumerateEntities(root), entity => entity.Name == "LightIcon");
             Assert.Contains(EnumerateEntities(root), entity => entity.Name == "LightIconText");
-            Assert.DoesNotContain(EnumerateEntities(root), entity => entity.Name.Contains("Secondary", StringComparison.OrdinalIgnoreCase));
             Assert.DoesNotContain(EnumerateEntities(root), entity => entity.Name.Contains("Fps", StringComparison.OrdinalIgnoreCase));
             Assert.DoesNotContain(EnumerateEntities(root), entity => entity.Name.Contains("Back", StringComparison.OrdinalIgnoreCase));
             Assert.DoesNotContain(EnumerateEntities(root), entity => entity.Name.Contains("Swatch", StringComparison.OrdinalIgnoreCase));
@@ -33,12 +33,16 @@ namespace city.tests {
             Assert.DoesNotContain(EnumerateComponentTypes(root), componentType => componentType.Contains("DemoDiscLightToggleComponent", StringComparison.Ordinal));
 
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/ps2/dpad.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/ps2/left_stick.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/ps2/r1.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/gamecube/dpad.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/gamecube/control_stick.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/gamecube/r.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/wii/dpad.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/wii/stick.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/wii/b.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/switch/dpad.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/switch/left_stick.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/switch/r.png");
         }
 

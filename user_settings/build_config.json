@@ -624,9 +624,27 @@
                       },
                       {
                           "platformId":  "ds",
-                          "selectedSceneIds":  [
-                                                   "tilt_trial_level_01"
-                                               ],
+                "selectedSceneIds":  [
+                                             "DemoDiscMainMenuHandheld",
+                                             "cube_test",
+                                             "colored_cube_grid",
+                                             "textured_cube_grid",
+                                             "axis_test",
+                                             "axis_test2",
+                                             "test_scene_matrix_render",
+                                             "directional_shadow_plaza",
+                                             "test_scene_dynamic_stack_boxes",
+                                             "test_scene_dynamic_sphere_stack",
+                                             "test_scene_dynamic_mixed_stack",
+                                             "test_scene_static_mesh_showcase",
+                                             "test_scene_static_mesh_minimal",
+                                             "tilt_trial_ds",
+                                             "tilt_trial_level_01",
+                                             "tilt_trial_level_02",
+                                             "tilt_trial_level_03",
+                                             "tilt_trial_level_04",
+                                             "tilt_trial_level_05"
+                                         ],
                           "sceneOrders":  [
                                               {
                                                   "sceneId":  "DemoDiscMainMenu",

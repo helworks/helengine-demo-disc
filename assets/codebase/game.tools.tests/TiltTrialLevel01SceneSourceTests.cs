@@ -4,6 +4,24 @@ namespace city.tests {
     /// </summary>
     public sealed class TiltTrialLevel01SceneSourceTests {
         [Fact]
+        public void Game_scene_factory_authors_dedicated_cube_layouts_for_levels_02_through_05() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+
+            Assert.Contains("CreateTiltTrialLevel02StageRootEntity()", source, StringComparison.Ordinal);
+            Assert.Contains("CreateTiltTrialLevel03StageRootEntity()", source, StringComparison.Ordinal);
+            Assert.Contains("CreateTiltTrialLevel04StageRootEntity()", source, StringComparison.Ordinal);
+            Assert.Contains("CreateTiltTrialLevel05StageRootEntity()", source, StringComparison.Ordinal);
+            Assert.Contains("CreateTiltTrialLevel02StageRootEntity", source, StringComparison.Ordinal);
+            Assert.Contains("CreateTiltTrialLevel03StageRootEntity", source, StringComparison.Ordinal);
+            Assert.Contains("CreateTiltTrialLevel04StageRootEntity", source, StringComparison.Ordinal);
+            Assert.Contains("CreateTiltTrialLevel05StageRootEntity", source, StringComparison.Ordinal);
+            Assert.Contains("Level02StartPad", source, StringComparison.Ordinal);
+            Assert.Contains("Level03Platform01", source, StringComparison.Ordinal);
+            Assert.Contains("Level04Blocker03", source, StringComparison.Ordinal);
+            Assert.Contains("Level05Platform04", source, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Game_scene_factory_authors_dedicated_level_01_layout_with_beginner_collectibles_and_flag() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
 

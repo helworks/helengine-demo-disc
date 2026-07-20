@@ -73,6 +73,36 @@ namespace city.game.tools {
         readonly RuntimeMaterial TiltTrialCourseMaterial;
 
         /// <summary>
+        /// Editor service used to persist the 3DS-specific reference-canvas dimensions without changing the shared DS layout.
+        /// </summary>
+        readonly ComponentPlatformEditingService PlatformEditingServiceValue = new ComponentPlatformEditingService();
+
+        /// <summary>
+        /// Stable platform identifier used by the 3DS handheld viewport overrides.
+        /// </summary>
+        const string Nintendo3DsPlatformId = "3ds";
+
+        /// <summary>
+        /// Native Nintendo 3DS top-screen width used by the generated handheld presentation.
+        /// </summary>
+        const int Nintendo3DsTopScreenWidth = 400;
+
+        /// <summary>
+        /// Native Nintendo 3DS top-screen height used by the generated handheld presentation.
+        /// </summary>
+        const int Nintendo3DsTopScreenHeight = 240;
+
+        /// <summary>
+        /// Native Nintendo 3DS bottom-screen width used by the generated handheld presentation.
+        /// </summary>
+        const int Nintendo3DsBottomScreenWidth = 320;
+
+        /// <summary>
+        /// Native Nintendo 3DS bottom-screen height used by the generated handheld presentation.
+        /// </summary>
+        const int Nintendo3DsBottomScreenHeight = 240;
+
+        /// <summary>
         /// Initializes one game-scene factory backed by the prepared generated runtime assets required by the authored gameplay scenes.
         /// </summary>
         /// <param name="assets">Prepared runtime assets consumed by the generated game scenes.</param>
@@ -114,8 +144,7 @@ namespace city.game.tools {
                 SceneSettings = new SceneSettingsAsset(),
                 RootEntities = [
                     CreateLevelSelectCameraEntity(),
-                    CreateLevelSelectUiEntity(),
-                    CreatePs2LevelSelectUiEntity()
+                    CreateLevelSelectUiEntity()
                 ]
             };
         }
@@ -184,13 +213,15 @@ namespace city.game.tools {
 
             Entity viewportRoot = Core.Instance.EntityFactory.CreateChild(cameraEntity, "TiltTrialHandheldLevelSelectBottomScreenRoot");
             viewportRoot.LayerMask = EditorLayerMasks.SceneObjects;
-            viewportRoot.AddComponent(new ViewportComponent {
+            ViewportComponent viewportComponent = new ViewportComponent {
                 BindingMode = ViewportComponent.AncestorCameraBindingMode,
                 FixedSize = new int2(256, 192),
                 ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
                 ReferenceWidth = 256,
                 ReferenceHeight = 192
-            });
+            };
+            viewportRoot.AddComponent(viewportComponent);
+            ApplyNintendo3DsViewportOverride(viewportRoot, viewportComponent, Nintendo3DsBottomScreenWidth, Nintendo3DsBottomScreenHeight, 256, 192);
             viewportRoot.AddChild(CreateHandheldLevelSelectUiEntity());
             return cameraEntity;
         }
@@ -207,14 +238,18 @@ namespace city.game.tools {
 
             Entity entity = Core.Instance.EntityFactory.CreateChild(parent, "TiltTrialHandheldLevelSelectTopInfo");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.AddComponent(new ViewportComponent {
+            ViewportComponent viewportComponent = new ViewportComponent {
                 BindingMode = ViewportComponent.AncestorCameraBindingMode,
                 FixedSize = new int2(256, 192)
-            });
-            entity.AddComponent(new ReferenceCanvasFitComponent {
+            };
+            entity.AddComponent(viewportComponent);
+            ApplyNintendo3DsViewportOverride(entity, viewportComponent, Nintendo3DsTopScreenWidth, Nintendo3DsTopScreenHeight, 256, 192);
+            ReferenceCanvasFitComponent referenceCanvasFitComponent = new ReferenceCanvasFitComponent {
                 ReferenceWidth = 256,
                 ReferenceHeight = 192
-            });
+            };
+            entity.AddComponent(referenceCanvasFitComponent);
+            ApplyNintendo3DsReferenceCanvasOverride(entity, referenceCanvasFitComponent, 256, 192);
             CreateUiTextEntity(entity, "TiltTrialHandheldLevelSelectTitle", new float3(20f, 28f, 0.1f), "TILT TRIAL", new int2(216, 34), 1.35f, 2, new byte4(247, 248, 252, 255), TextAlignment.Center);
             Entity previewPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialHandheldLevelSelectPreviewPanel", new float3(72f, 67f, 0f), new int2(112, 112), 8f, 2f, new byte4(26, 40, 61, 255), new byte4(122, 147, 182, 255), 2);
             CreateUiTextEntity(previewPanelEntity, "TiltTrialHandheldLevelSelectPreviewText", new float3(8f, 42f, 0.1f), "Preview", new int2(96, 28), 0.85f, 3, new byte4(223, 230, 239, 255), TextAlignment.Center);
@@ -228,16 +263,19 @@ namespace city.game.tools {
         EditorEntity CreateHandheldLevelSelectUiEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("TiltTrialHandheldLevelSelectUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.AddComponent(new DemoDiscReturnToMenuComponent());
             entity.AddComponent(new city.game.TiltTrialLevelSelectComponent {
                 UseDetailsStage = true
             });
-            entity.AddComponent(new ViewportComponent {
+            ViewportComponent viewportComponent = new ViewportComponent {
                 BindingMode = ViewportComponent.AncestorCameraBindingMode,
                 FixedSize = new int2(256, 192),
                 ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
                 ReferenceWidth = 256,
                 ReferenceHeight = 192
-            });
+            };
+            entity.AddComponent(viewportComponent);
+            ApplyNintendo3DsViewportOverride(entity, viewportComponent, Nintendo3DsBottomScreenWidth, Nintendo3DsBottomScreenHeight, Nintendo3DsBottomScreenWidth, Nintendo3DsBottomScreenHeight);
 
             Entity listPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectListPanel", new float3(6f, 8f, 0f), new int2(244, 176), 5f, 0f, new byte4(0, 0, 0, 0), new byte4(0, 0, 0, 0), 1);
             Entity detailsPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectDetailsPanel", new float3(6f, 8f, 0f), new int2(244, 176), 5f, 0f, new byte4(0, 0, 0, 0), new byte4(0, 0, 0, 0), 1);
@@ -380,13 +418,15 @@ namespace city.game.tools {
 
             Entity viewportRoot = Core.Instance.EntityFactory.CreateChild(cameraEntity, "TiltTrialHandheldGameplayBottomScreenRoot");
             viewportRoot.LayerMask = EditorLayerMasks.SceneObjects;
-            viewportRoot.AddComponent(new ViewportComponent {
+            ViewportComponent viewportComponent = new ViewportComponent {
                 BindingMode = ViewportComponent.AncestorCameraBindingMode,
                 FixedSize = new int2(256, 192),
                 ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
                 ReferenceWidth = 256,
                 ReferenceHeight = 192
-            });
+            };
+            viewportRoot.AddComponent(viewportComponent);
+            ApplyNintendo3DsViewportOverride(viewportRoot, viewportComponent, Nintendo3DsBottomScreenWidth, Nintendo3DsBottomScreenHeight, 256, 192);
             viewportRoot.AddChild(CreateHandheldGameplayUiEntity(levelEntry));
 
             if (cameraEntity is EditorEntity editorEntity) {
@@ -408,13 +448,15 @@ namespace city.game.tools {
 
             Entity entity = Core.Instance.EntityFactory.Create("TiltTrialHandheldGameplayUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.AddComponent(new ViewportComponent {
+            ViewportComponent viewportComponent = new ViewportComponent {
                 BindingMode = ViewportComponent.AncestorCameraBindingMode,
                 FixedSize = new int2(256, 192),
                 ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
                 ReferenceWidth = 256,
                 ReferenceHeight = 192
-            });
+            };
+            entity.AddComponent(viewportComponent);
+            ApplyNintendo3DsViewportOverride(entity, viewportComponent, Nintendo3DsBottomScreenWidth, Nintendo3DsBottomScreenHeight, Nintendo3DsBottomScreenWidth, Nintendo3DsBottomScreenHeight);
 
             Entity panelEntity = CreateRoundedPanelEntity(entity, "TiltTrialHandheldGameplayPanel", new float3(6f, 6f, 0f), new int2(244, 180), 6f, 2f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
             CreateUiTextEntity(panelEntity, "TiltTrialTimerText", new float3(12f, 10f, 0.1f), global::city.game.TiltTrialLevelSelectComponent.FormatTimerSeconds(levelEntry.StartTimeSeconds), new int2(104, 26), 0.8f, 2, new byte4(255, 246, 223, 255), TextAlignment.Left);
@@ -790,7 +832,6 @@ namespace city.game.tools {
             ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(playButtonEntity);
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.GetOrCreateExistencePlatformOverride("ps2").Exists = false;
             saveComponent.GetOrCreateExistencePlatformOverride("ds").Exists = false;
             saveComponent.GetOrCreateExistencePlatformOverride("3ds").Exists = false;
 
@@ -802,83 +843,63 @@ namespace city.game.tools {
         }
 
         /// <summary>
-        /// Creates the compact 4:3 Tilt Trial selector authored specifically for the PS2 target resolution.
+        /// Persists the native 3DS viewport dimensions for one shared handheld viewport component.
         /// </summary>
-        /// <returns>Generated PS2 selector UI root entity.</returns>
-        EditorEntity CreatePs2LevelSelectUiEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialPs2LevelSelectUi");
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
-            entity.AddComponent(new city.game.TiltTrialLevelSelectComponent {
-                UseDetailsStage = false
-            });
-            entity.AddComponent(new ViewportComponent {
-                BindingMode = ViewportComponent.ScreenBindingMode,
-                FixedSize = new int2(640, 448)
-            });
-            entity.AddComponent(new ReferenceCanvasFitComponent {
-                ReferenceWidth = 640,
-                ReferenceHeight = 448
-            });
-
-            Entity listPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectListPanel", new float3(20f, 58f, 0f), new int2(260, 370), 18f, 2f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
-            Entity detailsPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectDetailsPanel", new float3(296f, 58f, 0f), new int2(324, 370), 18f, 2f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
-
-            CreateUiTextEntity(entity, "TiltTrialLevelSelectTitle", new float3(24f, 12f, 0.1f), "TILT TRIAL", new int2(280, 34), 1.45f, 2, new byte4(247, 248, 252, 255), TextAlignment.Left);
-            CreateUiTextEntity(entity, "TiltTrialLevelSelectHint", new float3(350f, 14f, 0.1f), "X PLAY  O BACK", new int2(266, 28), 0.72f, 2, new byte4(196, 210, 226, 255), TextAlignment.Right);
-            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectName", new float3(20f, 20f, 0.1f), "LEVEL 1", new int2(284, 34), 1.35f, 3, new byte4(247, 248, 252, 255), TextAlignment.Left);
-            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTimer", new float3(20f, 64f, 0.1f), "START 99.00", new int2(284, 24), 0.88f, 3, new byte4(255, 214, 138, 255), TextAlignment.Left);
-            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTargetTimes", new float3(20f, 96f, 0.1f), "TARGETS G18.00 S28.00 B40.00", new int2(284, 24), 0.62f, 3, new byte4(223, 230, 239, 255), TextAlignment.Left);
-            Entity previewPanelEntity = CreateRoundedPanelEntity(
-                detailsPanelEntity,
-                "TiltTrialLevelSelectPreviewPanel",
-                new float3(20f, 132f, 0f),
-                new int2(284, 94),
-                10f,
-                1f,
-                new byte4(18, 29, 45, 255),
-                new byte4(109, 138, 170, 255),
-                3);
-            CreateUiTextEntity(
-                previewPanelEntity,
-                "TiltTrialLevelSelectPreviewText",
-                new float3(12f, 32f, 0.1f),
-                "Preview",
-                new int2(260, 28),
-                0.9f,
-                4,
-                new byte4(223, 230, 239, 255),
-                TextAlignment.Center);
-
-            IReadOnlyList<global::city.game.TiltTrialLevelCatalogEntry> levelEntries = global::city.game.TiltTrialLevelCatalog.CreateEntries();
-            for (int index = 0; index < levelEntries.Count; index++) {
-                int oneBasedIndex = index + 1;
-                CreateLevelSelectActionButton(
-                    listPanelEntity,
-                    $"TiltTrialPs2LevelRow{oneBasedIndex:00}",
-                    new float3(12f, 10f + (index * 68f), 0f), new int2(236, 54),
-                    levelEntries[index].DisplayName,
-                    city.game.TiltTrialLevelSelectAction.SelectStage,
-                    index);
+        /// <param name="entity">Entity that owns the shared viewport component.</param>
+        /// <param name="commonComponent">Shared DS-baseline viewport component.</param>
+        /// <param name="width">Native 3DS screen width for the viewport.</param>
+        /// <param name="height">Native 3DS screen height for the viewport.</param>
+        /// <param name="referenceWidth">Authored reference width that should be mapped into the native viewport.</param>
+        /// <param name="referenceHeight">Authored reference height that should be mapped into the native viewport.</param>
+        void ApplyNintendo3DsViewportOverride(Entity entity, ViewportComponent commonComponent, int width, int height, int referenceWidth, int referenceHeight) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (commonComponent == null) {
+                throw new ArgumentNullException(nameof(commonComponent));
+            } else if (width <= 0 || height <= 0 || referenceWidth <= 0 || referenceHeight <= 0) {
+                throw new ArgumentOutOfRangeException(nameof(width), "3DS viewport dimensions must be positive.");
             }
 
-            Entity backButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectBackButton", new float3(20f, 250f, 0f), new int2(284, 36), "BACK", city.game.TiltTrialLevelSelectAction.BackToStages, -1);
-            Entity playButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectPlayButton", new float3(20f, 300f, 0f), new int2(284, 42), "PLAY", city.game.TiltTrialLevelSelectAction.PlaySelectedStage, -1);
-            ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(backButtonEntity);
-            ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(playButtonEntity);
-
-            string[] excludedPlatformIds = ["windows", "psp", "psvita", "ds", "3ds", "wii", "switch", "wiiu"];
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.GetOrCreateExistencePlatformOverride("ps2").Exists = true;
-            for (int index = 0; index < excludedPlatformIds.Length; index++) {
-                saveComponent.GetOrCreateExistencePlatformOverride(excludedPlatformIds[index]).Exists = false;
+            ViewportComponent overrideComponent = (ViewportComponent)PlatformEditingServiceValue.EnsurePlatformOverrideComponent(
+                commonComponent,
+                saveComponent,
+                Nintendo3DsPlatformId);
+            overrideComponent.FixedSize = new int2(width, height);
+            PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, Nintendo3DsPlatformId, nameof(ViewportComponent.FixedSize));
+            overrideComponent.ReferenceWidth = referenceWidth;
+            PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, Nintendo3DsPlatformId, nameof(ViewportComponent.ReferenceWidth));
+            overrideComponent.ReferenceHeight = referenceHeight;
+            PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, Nintendo3DsPlatformId, nameof(ViewportComponent.ReferenceHeight));
+            PlatformEditingServiceValue.PersistPlatformOverride(commonComponent, overrideComponent, saveComponent, Nintendo3DsPlatformId);
+        }
+
+        /// <summary>
+        /// Persists the native 3DS reference canvas for one shared top-screen fit component.
+        /// </summary>
+        /// <param name="entity">Entity that owns the shared reference-canvas component.</param>
+        /// <param name="commonComponent">Shared DS-baseline reference-canvas component.</param>
+        /// <param name="width">Native 3DS screen width for the reference canvas.</param>
+        /// <param name="height">Native 3DS screen height for the reference canvas.</param>
+        void ApplyNintendo3DsReferenceCanvasOverride(Entity entity, ReferenceCanvasFitComponent commonComponent, int width, int height) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (commonComponent == null) {
+                throw new ArgumentNullException(nameof(commonComponent));
+            } else if (width <= 0 || height <= 0) {
+                throw new ArgumentOutOfRangeException(nameof(width), "3DS reference-canvas dimensions must be positive.");
             }
 
-            if (entity is EditorEntity editorEntity) {
-                return editorEntity;
-            }
-
-            throw new InvalidOperationException("PS2 Tilt Trial selector generation requires editor-authored entities.");
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            ReferenceCanvasFitComponent overrideComponent = (ReferenceCanvasFitComponent)PlatformEditingServiceValue.EnsurePlatformOverrideComponent(
+                commonComponent,
+                saveComponent,
+                Nintendo3DsPlatformId);
+            overrideComponent.ReferenceWidth = width;
+            PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, Nintendo3DsPlatformId, nameof(ReferenceCanvasFitComponent.ReferenceWidth));
+            overrideComponent.ReferenceHeight = height;
+            PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, Nintendo3DsPlatformId, nameof(ReferenceCanvasFitComponent.ReferenceHeight));
+            PlatformEditingServiceValue.PersistPlatformOverride(commonComponent, overrideComponent, saveComponent, Nintendo3DsPlatformId);
         }
 
         /// <summary>
@@ -999,6 +1020,11 @@ namespace city.game.tools {
             physicsBoundsStatusTextEntity.AddComponent(physicsBoundsStatusAnchorComponent);
             ApplyFontReference(physicsBoundsStatusTextEntity, physicsBoundsStatusTextComponent, TiltTrialSpeedHudFontRelativePath);
             physicsBoundsStatusTextEntity.AddComponent(new city.game.TiltTrialPhysicsBoundsStatusTextComponent());
+            EntitySaveComponent physicsBoundsStatusTextEntitySaveComponent = FindRequiredEntitySaveComponent(physicsBoundsStatusTextEntity);
+            string[] nonWindowsPlatformIds = ["ps2", "psp", "psvita", "gamecube", "wii", "wiiu", "switch", "ds", "3ds"];
+            for (int platformIndex = 0; platformIndex < nonWindowsPlatformIds.Length; platformIndex++) {
+                physicsBoundsStatusTextEntitySaveComponent.GetOrCreateExistencePlatformOverride(nonWindowsPlatformIds[platformIndex]).Exists = false;
+            }
 
             if (entity is EditorEntity editorEntity) {
                 return editorEntity;
@@ -1032,6 +1058,14 @@ namespace city.game.tools {
 
             if (string.Equals(levelEntry.LevelId, "tilt-trial-01", StringComparison.Ordinal)) {
                 return CreateTiltTrialLevel01StageRootEntity();
+            } else if (string.Equals(levelEntry.LevelId, "tilt-trial-02", StringComparison.Ordinal)) {
+                return CreateTiltTrialLevel02StageRootEntity();
+            } else if (string.Equals(levelEntry.LevelId, "tilt-trial-03", StringComparison.Ordinal)) {
+                return CreateTiltTrialLevel03StageRootEntity();
+            } else if (string.Equals(levelEntry.LevelId, "tilt-trial-04", StringComparison.Ordinal)) {
+                return CreateTiltTrialLevel04StageRootEntity();
+            } else if (string.Equals(levelEntry.LevelId, "tilt-trial-05", StringComparison.Ordinal)) {
+                return CreateTiltTrialLevel05StageRootEntity();
             }
 
             return CreateStageRootEntity();
@@ -1099,6 +1133,115 @@ namespace city.game.tools {
             }
 
             throw new InvalidOperationException("Tilt Trial stage generation requires editor-authored entities.");
+        }
+
+        /// <summary>
+        /// Creates the wider offset course used by the second Tilt Trial level.
+        /// </summary>
+        /// <returns>Generated editor stage root for level 2.</returns>
+        EditorEntity CreateTiltTrialLevel02StageRootEntity() {
+            Entity entity = CreateTiltTrialStageRoot("Level02StageRoot", 11.75f, 4.5f);
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level02StartPad", new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level02Straight", new float3(0f, 0.25f, 0.5f), new float3(5.2f, 0.8f, 7f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level02Offset", new float3(1.45f, 0.55f, 6.2f), new float3(4f, 0.8f, 5.5f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level02Finish", new float3(1.45f, 0.65f, 11.4f), new float3(6f, 0.9f, 5.2f), float4.Identity));
+            entity.AddChild(CreateGoalPadEntity(new float3(1.45f, 1.3f, 13.3f), new float3(2.4f, 2f, 2.4f)));
+            entity.AddChild(CreateGoalFlagEntity(new float3(1.45f, 1f, 13f)));
+            return RequireEditorEntity(entity, "level 2");
+        }
+
+        /// <summary>
+        /// Creates the alternating narrow-platform course used by the third Tilt Trial level.
+        /// </summary>
+        /// <returns>Generated editor stage root for level 3.</returns>
+        EditorEntity CreateTiltTrialLevel03StageRootEntity() {
+            Entity entity = CreateTiltTrialStageRoot("Level03StageRoot", 12.25f, 4.5f);
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level03StartPad", new float3(0f, 0f, -6.6f), new float3(6.5f, 1f, 8f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level03Platform01", new float3(-1.35f, 0.3f, 0.1f), new float3(3.7f, 0.8f, 5.4f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level03Platform02", new float3(1.25f, 0.65f, 4.8f), new float3(3.4f, 0.8f, 4.8f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level03Platform03", new float3(-1.25f, 1f, 9.2f), new float3(3.2f, 0.8f, 4.8f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level03Finish", new float3(1.35f, 1.35f, 13.7f), new float3(4.6f, 0.9f, 5.2f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level03Blocker01", new float3(-1.35f, 1.35f, 1.1f), new float3(0.8f, 1.6f, 0.9f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level03Blocker02", new float3(1.25f, 1.7f, 5.9f), new float3(0.8f, 1.6f, 0.9f), float4.Identity));
+            entity.AddChild(CreateGoalPadEntity(new float3(1.35f, 2f, 15.5f), new float3(2.2f, 2f, 2.2f)));
+            entity.AddChild(CreateGoalFlagEntity(new float3(1.35f, 1.7f, 15.2f)));
+            return RequireEditorEntity(entity, "level 3");
+        }
+
+        /// <summary>
+        /// Creates the stepped turn-and-gap course used by the fourth Tilt Trial level.
+        /// </summary>
+        /// <returns>Generated editor stage root for level 4.</returns>
+        EditorEntity CreateTiltTrialLevel04StageRootEntity() {
+            Entity entity = CreateTiltTrialStageRoot("Level04StageRoot", 12.75f, 4.7f);
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level04StartPad", new float3(0f, 0f, -6.6f), new float3(6f, 1f, 8f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level04Platform01", new float3(1.5f, 0.35f, -0.1f), new float3(3.2f, 0.8f, 4.8f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level04Platform02", new float3(-1.55f, 0.85f, 4.1f), new float3(3f, 0.8f, 4.2f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level04Platform03", new float3(1.45f, 1.35f, 8.3f), new float3(2.8f, 0.8f, 4.2f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level04Finish", new float3(-1.25f, 1.85f, 12.8f), new float3(4.2f, 0.9f, 4.8f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level04Blocker01", new float3(1.5f, 1.45f, 0.5f), new float3(0.75f, 1.8f, 0.8f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level04Blocker02", new float3(-1.55f, 1.95f, 4.7f), new float3(0.75f, 1.8f, 0.8f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level04Blocker03", new float3(1.45f, 2.45f, 8.9f), new float3(0.75f, 1.8f, 0.8f), float4.Identity));
+            entity.AddChild(CreateGoalPadEntity(new float3(-1.25f, 2.5f, 14.4f), new float3(2f, 2f, 2f)));
+            entity.AddChild(CreateGoalFlagEntity(new float3(-1.25f, 2.25f, 14.1f)));
+            return RequireEditorEntity(entity, "level 4");
+        }
+
+        /// <summary>
+        /// Creates the narrow rising zig-zag course used by the fifth Tilt Trial level.
+        /// </summary>
+        /// <returns>Generated editor stage root for level 5.</returns>
+        EditorEntity CreateTiltTrialLevel05StageRootEntity() {
+            Entity entity = CreateTiltTrialStageRoot("Level05StageRoot", 13.25f, 4.9f);
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level05StartPad", new float3(0f, 0f, -6.6f), new float3(5.8f, 1f, 7.5f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level05Platform01", new float3(-1.55f, 0.4f, -0.1f), new float3(2.8f, 0.8f, 3.7f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level05Platform02", new float3(1.55f, 0.9f, 3.55f), new float3(2.7f, 0.8f, 3.5f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level05Platform03", new float3(-1.55f, 1.4f, 7.1f), new float3(2.6f, 0.8f, 3.5f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level05Platform04", new float3(1.55f, 1.9f, 10.65f), new float3(2.5f, 0.8f, 3.5f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level05Finish", new float3(-1.25f, 2.4f, 14.2f), new float3(3.8f, 0.9f, 4.4f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level05Blocker01", new float3(-1.55f, 1.5f, 0.2f), new float3(0.7f, 2f, 0.75f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level05Blocker02", new float3(1.55f, 2f, 3.9f), new float3(0.7f, 2f, 0.75f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level05Blocker03", new float3(-1.55f, 2.5f, 7.45f), new float3(0.7f, 2f, 0.75f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity("Level05Blocker04", new float3(1.55f, 3f, 11f), new float3(0.7f, 2f, 0.75f), float4.Identity));
+            entity.AddChild(CreateGoalPadEntity(new float3(-1.25f, 3.05f, 15.8f), new float3(1.8f, 2f, 1.8f)));
+            entity.AddChild(CreateGoalFlagEntity(new float3(-1.25f, 2.8f, 15.5f)));
+            return RequireEditorEntity(entity, "level 5");
+        }
+
+        /// <summary>
+        /// Creates common Tilt Trial stage behavior and guide walls for a generated difficulty layout.
+        /// </summary>
+        /// <param name="name">Stable stage-root entity name.</param>
+        /// <param name="maximumPlanarSpeed">Maximum sphere speed for the layout.</param>
+        /// <param name="wallX">Absolute guide-wall center offset.</param>
+        /// <returns>Generated stage root.</returns>
+        Entity CreateTiltTrialStageRoot(string name, float maximumPlanarSpeed, float wallX) {
+            Entity entity = Core.Instance.EntityFactory.Create(name);
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = float3.Zero;
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = float4.Identity;
+            entity.AddComponent(new city.game.DemoTiltStageComponent {
+                MaximumPlanarSpeed = maximumPlanarSpeed,
+                PlanarAccelerationUnitsPerSecond = 4.25f
+            });
+            entity.AddChild(CreateKinematicCourseBoxEntity($"{name}LeftWall", new float3(-wallX, 1.3f, 3.5f), new float3(0.75f, 2.8f, 22f), float4.Identity));
+            entity.AddChild(CreateKinematicCourseBoxEntity($"{name}RightWall", new float3(wallX, 1.3f, 3.5f), new float3(0.75f, 2.8f, 22f), float4.Identity));
+            return entity;
+        }
+
+        /// <summary>
+        /// Converts a generated stage entity into the editor-authored type required by scene serialization.
+        /// </summary>
+        /// <param name="entity">Generated stage entity.</param>
+        /// <param name="levelDescription">Level description used in the failure message.</param>
+        /// <returns>Editor-authored stage root.</returns>
+        EditorEntity RequireEditorEntity(Entity entity, string levelDescription) {
+            if (entity is EditorEntity editorEntity) {
+                return editorEntity;
+            }
+
+            throw new InvalidOperationException($"Tilt Trial {levelDescription} stage generation requires editor-authored entities.");
         }
 
         /// <summary>
@@ -1385,9 +1528,18 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated finish flag entity.</returns>
         Entity CreateGoalFlagEntity() {
+            return CreateGoalFlagEntity(new float3(1.35f, 0.65f, 16.6f));
+        }
+
+        /// <summary>
+        /// Creates the visual finish flag blueprint instance at the supplied course location.
+        /// </summary>
+        /// <param name="position">Local position of the flag.</param>
+        /// <returns>Generated finish flag entity.</returns>
+        Entity CreateGoalFlagEntity(float3 position) {
             Entity entity = Core.Instance.EntityFactory.Create("GoalFlag");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.LocalPosition = new float3(1.35f, 0.65f, 16.6f);
+            entity.LocalPosition = position;
             entity.LocalScale = new float3(1.2f, 1.2f, 1.2f);
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new BlueprintInstanceComponent {

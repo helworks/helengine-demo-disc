@@ -64,8 +64,9 @@ namespace city.menu {
         /// <summary>
         /// Releases any bound pointer interactable subscription before the component instance is deleted.
         /// </summary>
-        public void Dispose() {
+        public override void Dispose() {
             UnbindInteractable();
+            base.Dispose();
         }
 
         /// <summary>
@@ -83,11 +84,12 @@ namespace city.menu {
         /// <param name="inputSystem">Input system supplying the current frame state.</param>
         /// <returns>True when one desktop return key pressed this frame.</returns>
         bool WasKeyboardReturnPressed(InputSystem inputSystem) {
-#if DESKTOP_PLATFORM
-            return inputSystem.WasKeyPressed(Keys.Escape) || inputSystem.WasKeyPressed(Keys.Back);
-#else
-            return false;
-#endif
+            return inputSystem.WasKeyPressed(Keys.Escape)
+                || inputSystem.WasKeyPressed(Keys.Back)
+                || inputSystem.WasKeyPressed(Keys.K)
+                || inputSystem.IsKeyDown(Keys.Escape)
+                || inputSystem.IsKeyDown(Keys.Back)
+                || inputSystem.IsKeyDown(Keys.K);
         }
 
         /// <summary>
@@ -100,7 +102,8 @@ namespace city.menu {
                 throw new ArgumentNullException(nameof(inputSystem));
             }
 
-            return DemoDiscReturnInputUtils.WasReturnPressed(inputSystem);
+            return DemoDiscReturnInputUtils.WasReturnPressed(inputSystem)
+                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East);
         }
 
         /// <summary>

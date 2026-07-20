@@ -14,6 +14,11 @@ namespace city.menu {
         public const string SerializedComponentTypeId = "city.menu.MenuComponent, gameplay";
 
         /// <summary>
+        /// Minimum signed left-stick axis magnitude required to produce one menu navigation event.
+        /// </summary>
+        const short GamepadStickNavigationThreshold = 16384;
+
+        /// <summary>
         /// Baked panels keyed by stable panel id.
         /// </summary>
         readonly Dictionary<string, MenuPanelRuntime> PanelsById;
@@ -141,7 +146,7 @@ namespace city.menu {
         /// <summary>
         /// Releases runtime-only menu binding state before the native backend deletes the component instance.
         /// </summary>
-        public void Dispose() {
+        public override void Dispose() {
             ReleasePanelRuntimes();
             PanelsById.Clear();
             PanelRuntimes.Clear();
@@ -151,6 +156,7 @@ namespace city.menu {
             ActivePanelIdValue = string.Empty;
             SelectedItemIdValue = string.Empty;
             IsInitialized = false;
+            base.Dispose();
         }
 
         /// <summary>
@@ -424,11 +430,13 @@ namespace city.menu {
                 MoveSelection(-1);
             } else if (inputSystem.WasKeyPressed(Keys.Down) || inputSystem.WasKeyPressed(Keys.S)) {
                 MoveSelection(1);
-            } else if (inputSystem.WasKeyPressed(Keys.Enter)) {
+            } else if (inputSystem.WasKeyPressed(Keys.Enter) || inputSystem.WasKeyPressed(Keys.J)) {
                 ConfirmSelection(Keys.Enter);
             } else if (inputSystem.WasKeyPressed(Keys.Space)) {
                 ConfirmSelection(Keys.Space);
-            } else if (inputSystem.WasKeyPressed(Keys.Escape) || inputSystem.WasKeyPressed(Keys.Back)) {
+            } else if (inputSystem.WasKeyPressed(Keys.Escape)
+                || inputSystem.WasKeyPressed(Keys.Back)
+                || inputSystem.WasKeyPressed(Keys.K)) {
                 NavigateBack();
             }
         }
@@ -484,25 +492,48 @@ namespace city.menu {
         }
 
         /// <summary>
-        /// Handles d-pad and face-button navigation for the primary gamepad.
+        /// Handles d-pad, left-stick, and face-button navigation for the primary gamepad.
         /// </summary>
         /// <param name="inputSystem">Input system supplying the current frame state.</param>
         void HandleGamepadInput(InputSystem inputSystem) {
-            InputGamepadState currentGamepadState = inputSystem.GetGamepadState(0);
-            if (!currentGamepadState.Connected) {
-                return;
-            }
-
-            if (inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.DPadUp)) {
+            if (DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp)
+                || WasLeftStickUpPressed(inputSystem)) {
                 MoveSelection(-1);
-            } else if (inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.DPadDown)) {
+            } else if (DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown)
+                || WasLeftStickDownPressed(inputSystem)) {
                 MoveSelection(1);
-            } else if (Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept)) {
+            } else if (Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept)
+                || DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)) {
                 ConfirmSelection(Keys.Enter);
             } else if (Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Return)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.Select)) {
+                || DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.Select)
+                || DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East)) {
                 NavigateBack();
             }
+        }
+
+        /// <summary>
+        /// Returns whether the primary left stick crossed the upward navigation threshold this frame.
+        /// </summary>
+        /// <param name="inputSystem">Input system supplying current and previous gamepad states.</param>
+        /// <returns>True only when the stick newly enters its upward range.</returns>
+        bool WasLeftStickUpPressed(InputSystem inputSystem) {
+            short currentStickY = DemoDiscGamepadInput.GetLeftStickY(inputSystem);
+            short previousStickY = DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem);
+            return currentStickY <= -GamepadStickNavigationThreshold
+                && previousStickY > -GamepadStickNavigationThreshold;
+        }
+
+        /// <summary>
+        /// Returns whether the primary left stick crossed the downward navigation threshold this frame.
+        /// </summary>
+        /// <param name="inputSystem">Input system supplying current and previous gamepad states.</param>
+        /// <returns>True only when the stick newly enters its downward range.</returns>
+        bool WasLeftStickDownPressed(InputSystem inputSystem) {
+            short currentStickY = DemoDiscGamepadInput.GetLeftStickY(inputSystem);
+            short previousStickY = DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem);
+            return currentStickY >= GamepadStickNavigationThreshold
+                && previousStickY < GamepadStickNavigationThreshold;
         }
 
         /// <summary>

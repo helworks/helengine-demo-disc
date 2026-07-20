@@ -39,5 +39,17 @@ namespace city.tests {
             Assert.Contains("\"F3 Bounds Off\"", source, StringComparison.Ordinal);
             Assert.Contains("physicsBoundsStatusTextEntity.AddComponent(new city.game.TiltTrialPhysicsBoundsStatusTextComponent());", source, StringComparison.Ordinal);
         }
+
+        /// <summary>
+        /// Ensures the F3 status row is removed from every non-Windows cooked gameplay scene.
+        /// </summary>
+        [Fact]
+        public void Game_scene_factory_cooks_f3_status_row_only_for_windows() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+
+            Assert.Contains("EntitySaveComponent physicsBoundsStatusTextEntitySaveComponent = FindRequiredEntitySaveComponent(physicsBoundsStatusTextEntity);", source, StringComparison.Ordinal);
+            Assert.Contains("string[] nonWindowsPlatformIds = [\"ps2\", \"psp\", \"psvita\", \"gamecube\", \"wii\", \"wiiu\", \"switch\", \"ds\", \"3ds\"]", source, StringComparison.Ordinal);
+            Assert.Contains("GetOrCreateExistencePlatformOverride(nonWindowsPlatformIds[platformIndex]).Exists = false", source, StringComparison.Ordinal);
+        }
     }
 }

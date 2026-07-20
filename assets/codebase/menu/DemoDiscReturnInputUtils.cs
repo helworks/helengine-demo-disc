@@ -4,11 +4,6 @@ namespace city.menu {
     /// </summary>
     public static class DemoDiscReturnInputUtils {
         /// <summary>
-        /// Stable primary gamepad index used by demo-disc scenes.
-        /// </summary>
-        const int PrimaryGamepadIndex = 0;
-
-        /// <summary>
         /// Returns whether the current frame pressed one of the shared demo-disc return inputs.
         /// </summary>
         /// <param name="inputSystem">Input system supplying the current and previous frame state.</param>
@@ -21,9 +16,7 @@ namespace city.menu {
             }
 
             return Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Return)
-                || WasFallbackRejectButtonPressed(
-                    inputSystem.GetGamepadState(PrimaryGamepadIndex),
-                    inputSystem.GetPreviousGamepadState(PrimaryGamepadIndex));
+                || DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East);
         }
 
         /// <summary>

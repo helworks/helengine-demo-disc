@@ -60,5 +60,29 @@ namespace city.tests {
                 Assert.Equal(CommonNonHandheldSceneIds, orderedSceneIds);
             }
         }
+
+        /// <summary>
+        /// Ensures Nintendo DS retains the shared rendering and physics scene package while replacing only the menu and Tilt Trial selector ids.
+        /// </summary>
+        [Fact]
+        public void Nintendo_ds_shares_the_common_demo_scene_package() {
+            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
+            using JsonDocument document = JsonDocument.Parse(json);
+
+            JsonElement dsPlatform = document.RootElement.GetProperty("platforms").EnumerateArray()
+                .Single(platform => string.Equals(platform.GetProperty("platformId").GetString(), "ds", StringComparison.Ordinal));
+            HashSet<string> selectedSceneIds = new HashSet<string>(
+                dsPlatform.GetProperty("selectedSceneIds").EnumerateArray().Select(sceneId => sceneId.GetString() ?? string.Empty),
+                StringComparer.Ordinal);
+
+            foreach (string commonSceneId in CommonNonHandheldSceneIds) {
+                string expectedSceneId = commonSceneId switch {
+                    "DemoDiscMainMenu" => "DemoDiscMainMenuHandheld",
+                    "tilt_trial" => "tilt_trial_ds",
+                    _ => commonSceneId
+                };
+                Assert.Contains(expectedSceneId, selectedSceneIds);
+            }
+        }
     }
 }

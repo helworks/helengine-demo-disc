@@ -1,5 +1,6 @@
 using city.menu;
 using helengine;
+using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
@@ -649,6 +650,12 @@ namespace city.rendering.tools {
             settings.Importer.ImporterId = TextureImporterId;
             settings.Importer.SourceChecksum = ComputeSourceChecksum(textureBytes);
             settings.Importer.AssetId = CubeTextureAssetIds[cubeIndex];
+            settings.Processor.Platforms["ps2"] = new AssetPlatformProcessorSettings {
+                Texture = new TextureAssetProcessorSettings {
+                    ColorFormat = TextureAssetColorFormat.Indexed8,
+                    AlphaPrecision = TextureAssetAlphaPrecision.A8
+                }
+            };
             return settings;
         }
 

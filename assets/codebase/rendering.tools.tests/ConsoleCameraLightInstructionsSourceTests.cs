@@ -36,13 +36,14 @@ namespace city.tests {
         }
 
         [Fact]
-        public void Console_factory_authoring_uses_one_camera_slot_and_keeps_light_behavior_outside_the_blueprint() {
+        public void Console_factory_authoring_uses_two_camera_slots_and_keeps_light_behavior_outside_the_blueprint() {
             string source = File.ReadAllText(Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "DemoSceneInstructionOverlayFactory.cs"));
 
             Assert.Contains("CreateConsoleCameraLightInstructionsRoot", source, StringComparison.Ordinal);
             Assert.Contains("ConsoleCameraIconSpecs", source, StringComparison.Ordinal);
             Assert.Contains("ConsoleLightIconSpecs", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("ConsoleCameraIconSecondary", source, StringComparison.Ordinal);
+            Assert.Contains("ConsoleCameraIconSlotSpecs", source, StringComparison.Ordinal);
+            Assert.Contains("CreateInstructionIconEntity", source, StringComparison.Ordinal);
         }
 
         [Fact]

@@ -155,7 +155,10 @@ namespace city.menu.tools {
                 foreach (KeyValuePair<string, HashSet<string>> configuredScenesByPlatformEntry in configuredSceneIdsByPlatform) {
                     bool hasAnyScene = false;
                     for (int sceneIndex = 0; sceneIndex < sceneIds.Count; sceneIndex++) {
-                        if (configuredScenesByPlatformEntry.Value.Contains(sceneIds[sceneIndex])) {
+                        if (ContainsConfiguredScene(
+                            configuredScenesByPlatformEntry.Key,
+                            sceneIds[sceneIndex],
+                            configuredScenesByPlatformEntry.Value)) {
                             hasAnyScene = true;
                             break;
                         }
@@ -260,12 +263,57 @@ namespace city.menu.tools {
 
             List<string> excludedPlatformIds = [];
             foreach (KeyValuePair<string, HashSet<string>> configuredScenesByPlatformEntry in configuredSceneIdsByPlatform) {
-                if (!configuredScenesByPlatformEntry.Value.Contains(sceneId)) {
+                if (!ContainsConfiguredScene(
+                    configuredScenesByPlatformEntry.Key,
+                    sceneId,
+                    configuredScenesByPlatformEntry.Value)) {
                     excludedPlatformIds.Add(configuredScenesByPlatformEntry.Key);
                 }
             }
 
             return excludedPlatformIds;
+        }
+
+        /// <summary>
+        /// Determines whether a canonical menu scene is present in one platform's selected scene set, including its handheld alias.
+        /// </summary>
+        /// <param name="platformId">Platform whose selected scene ids are being inspected.</param>
+        /// <param name="sceneId">Canonical scene id targeted by the menu item.</param>
+        /// <param name="configuredSceneIds">Selected scene ids persisted for the platform.</param>
+        /// <returns>True when the canonical scene or its platform-specific alias is selected.</returns>
+        static bool ContainsConfiguredScene(string platformId, string sceneId, HashSet<string> configuredSceneIds) {
+            if (string.IsNullOrWhiteSpace(platformId)) {
+                throw new ArgumentException("Platform id must be provided.", nameof(platformId));
+            } else if (string.IsNullOrWhiteSpace(sceneId)) {
+                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            } else if (configuredSceneIds == null) {
+                throw new ArgumentNullException(nameof(configuredSceneIds));
+            }
+
+            string resolvedSceneId = ResolveConfiguredSceneIdForPlatform(platformId, sceneId);
+            return configuredSceneIds.Contains(resolvedSceneId);
+        }
+
+        /// <summary>
+        /// Resolves the selected-scene id corresponding to one canonical menu target on the active platform.
+        /// </summary>
+        /// <param name="platformId">Platform whose scene naming convention should be applied.</param>
+        /// <param name="sceneId">Canonical scene id targeted by the menu.</param>
+        /// <returns>Selected-scene id used by the platform build configuration.</returns>
+        static string ResolveConfiguredSceneIdForPlatform(string platformId, string sceneId) {
+            if (string.IsNullOrWhiteSpace(platformId)) {
+                throw new ArgumentException("Platform id must be provided.", nameof(platformId));
+            } else if (string.IsNullOrWhiteSpace(sceneId)) {
+                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            }
+
+            if ((string.Equals(platformId, "ds", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(platformId, "3ds", StringComparison.OrdinalIgnoreCase))
+                && string.Equals(sceneId, "tilt_trial", StringComparison.Ordinal)) {
+                return sceneId + "_ds";
+            }
+
+            return sceneId;
         }
 
         /// <summary>
