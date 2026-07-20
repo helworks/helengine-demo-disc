@@ -23,9 +23,9 @@ namespace city.rendering.tools.tests {
 
             Assert.Contains("public const string SceneId = \"scenes/rendering/ps2_vu_renderer_probe.helen\";", source, StringComparison.Ordinal);
             Assert.Contains("Ps2VuProbeGround", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("Ps2VuProbeLeftWall", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("Ps2VuProbeRightWall", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("Ps2VuProbeCoin", source, StringComparison.Ordinal);
+            Assert.Contains("Ps2VuProbeLeftWall", source, StringComparison.Ordinal);
+            Assert.Contains("Ps2VuProbeRightWall", source, StringComparison.Ordinal);
+            Assert.Contains("Ps2VuProbeCoin", source, StringComparison.Ordinal);
             Assert.Contains("new float3(0f, 0f, 0f)", source, StringComparison.Ordinal);
             Assert.Contains("new float3(5f, 1f, 5f)", source, StringComparison.Ordinal);
             Assert.Contains("texturedCubeGridMaterials[0]", File.ReadAllText(Path.Combine(projectRootPath, "assets", "codebase", "rendering.tools", "RenderingSceneGenerator.cs")), StringComparison.Ordinal);
