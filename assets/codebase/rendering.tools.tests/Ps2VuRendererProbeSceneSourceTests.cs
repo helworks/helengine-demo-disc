@@ -26,7 +26,8 @@ namespace city.rendering.tools.tests {
             Assert.DoesNotContain("Ps2VuProbeLeftWall", source, StringComparison.Ordinal);
             Assert.DoesNotContain("Ps2VuProbeRightWall", source, StringComparison.Ordinal);
             Assert.DoesNotContain("Ps2VuProbeCoin", source, StringComparison.Ordinal);
-            Assert.Contains("new float3(0f, 0f, -6.6f)", source, StringComparison.Ordinal);
+            Assert.Contains("new float3(0f, 0f, 0f)", source, StringComparison.Ordinal);
+            Assert.Contains("float3.One", source, StringComparison.Ordinal);
             Assert.Contains("texturedCubeGridMaterials[0]", File.ReadAllText(Path.Combine(projectRootPath, "assets", "codebase", "rendering.tools", "RenderingSceneGenerator.cs")), StringComparison.Ordinal);
             Assert.Contains("CreateCameraEntity()", source, StringComparison.Ordinal);
             Assert.Contains("CreateDirectionalLightEntity()", source, StringComparison.Ordinal);

@@ -39,7 +39,7 @@ namespace city.rendering.tools {
                 RootEntities = new[] {
                     CreateCameraEntity(),
                     CreateDirectionalLightEntity(),
-                    CreateMeshEntity("Ps2VuProbeGround", cubeModel, sharedMaterial, new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity)
+                    CreateMeshEntity("Ps2VuProbeGround", cubeModel, sharedMaterial, new float3(0f, 0f, 0f), float3.One, float4.Identity)
                 }
             };
         }
