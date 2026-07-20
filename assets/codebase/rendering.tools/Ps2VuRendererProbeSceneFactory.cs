@@ -39,7 +39,7 @@ namespace city.rendering.tools {
                 RootEntities = new[] {
                     CreateCameraEntity(),
                     CreateDirectionalLightEntity(),
-                    CreateMeshEntity("Ps2VuProbeGround", cubeModel, sharedMaterial, new float3(0f, 0f, 0f), float3.One, float4.Identity)
+                    CreateMeshEntity("Ps2VuProbeGround", cubeModel, sharedMaterial, new float3(0f, 0f, 0f), new float3(2f, 2f, 2f), float4.Identity)
                 }
             };
         }
@@ -50,7 +50,7 @@ namespace city.rendering.tools {
         /// <returns>Configured renderer probe camera entity.</returns>
         Entity CreateCameraEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("Ps2VuProbeCamera");
-            entity.LocalPosition = new float3(0f, 2.74425f, -10.92f);
+            entity.LocalPosition = new float3(0f, 0f, 5f);
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new CameraComponent {
                 CameraDrawOrder = 0,
@@ -72,7 +72,7 @@ namespace city.rendering.tools {
                 }
             });
             entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
-                OrbitCenter = new float3(0f, 0f, -5f)
+                OrbitCenter = float3.Zero
             });
             return entity;
         }

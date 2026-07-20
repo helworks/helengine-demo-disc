@@ -27,7 +27,7 @@ namespace city.rendering.tools.tests {
             Assert.DoesNotContain("Ps2VuProbeRightWall", source, StringComparison.Ordinal);
             Assert.DoesNotContain("Ps2VuProbeCoin", source, StringComparison.Ordinal);
             Assert.Contains("new float3(0f, 0f, 0f)", source, StringComparison.Ordinal);
-            Assert.Contains("float3.One", source, StringComparison.Ordinal);
+            Assert.Contains("new float3(2f, 2f, 2f)", source, StringComparison.Ordinal);
             Assert.Contains("texturedCubeGridMaterials[0]", File.ReadAllText(Path.Combine(projectRootPath, "assets", "codebase", "rendering.tools", "RenderingSceneGenerator.cs")), StringComparison.Ordinal);
             Assert.Contains("CreateCameraEntity()", source, StringComparison.Ordinal);
             Assert.Contains("CreateDirectionalLightEntity()", source, StringComparison.Ordinal);
@@ -35,16 +35,16 @@ namespace city.rendering.tools.tests {
         }
 
         /// <summary>
-        /// Ensures the probe camera preserves the original Tilt Trial opening camera position.
+        /// Ensures the probe camera uses the known-good cube-test framing while retaining orbit control.
         /// </summary>
         [Fact]
-        public void Ps2VuRendererProbeSceneFactory_WhenCreatingCamera_UsesTiltTrialOpeningPose() {
+        public void Ps2VuRendererProbeSceneFactory_WhenCreatingCamera_UsesKnownGoodCubePose() {
             string projectRootPath = ResolveProjectRootPath();
             string sourcePath = Path.Combine(projectRootPath, "assets", "codebase", "rendering.tools", "Ps2VuRendererProbeSceneFactory.cs");
             string source = File.ReadAllText(sourcePath);
 
-            Assert.Contains("new float3(0f, 2.74425f, -10.92f)", source, StringComparison.Ordinal);
-            Assert.Contains("OrbitCenter = new float3(0f, 0f, -5f)", source, StringComparison.Ordinal);
+            Assert.Contains("new float3(0f, 0f, 5f)", source, StringComparison.Ordinal);
+            Assert.Contains("OrbitCenter = float3.Zero", source, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace city.rendering.tools.tests {
             string source = File.ReadAllText(sourcePath);
 
             Assert.Contains("new city.rendering.DemoDiscOrbitCameraComponent", source, StringComparison.Ordinal);
-            Assert.Contains("OrbitCenter = new float3(0f, 0f, -5f)", source, StringComparison.Ordinal);
+            Assert.Contains("OrbitCenter = float3.Zero", source, StringComparison.Ordinal);
         }
 
         /// <summary>
