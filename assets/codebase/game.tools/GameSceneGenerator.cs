@@ -47,6 +47,9 @@ namespace city.game.tools {
             GeneratedAuthoringSceneDefinition handheldLevelSelectScene = handheldLevelSelectSceneFactory.Create(factory);
             sceneWriteService.WriteScene(projectRootPath, handheldLevelSelectScene);
 
+            GeneratedAuthoringSceneDefinition tiltTrialLevel01RenderTestScene = factory.CreateTiltTrialLevel01RenderTestScene();
+            sceneWriteService.WriteScene(projectRootPath, tiltTrialLevel01RenderTestScene);
+
             ZombislayerAssetPreparationService zombislayerAssetPreparationService = new ZombislayerAssetPreparationService();
             ZombislayerGenerationAssets zombislayerAssets = zombislayerAssetPreparationService.Prepare(projectRootPath);
             ZombislayerSceneFactory zombislayerSceneFactory = new ZombislayerSceneFactory(zombislayerAssets);

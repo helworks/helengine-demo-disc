@@ -65,6 +65,11 @@ namespace city.rendering.tools {
             RuntimeMaterial generatedStandardMaterial = EngineGeneratedMaterialCache.GetRuntimeMaterial(EngineGeneratedMaterialCache.StandardAssetId);
             RuntimeMaterial tiltTrialPlayerSphereMarbleMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/tilt_trial/PlayerSphereMarble.hasset");
             RuntimeMaterial tiltTrialCourseMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, TiltTrialCourseMaterialFactory.MaterialRelativePath);
+            RuntimeModel goldenCoinModel = LoadImportedModelRuntime(projectRootPath, "models/games/split_play/golden_coin.hasset");
+            RuntimeMaterial goldenCoinMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/games/split_play/GoldenCoin.hasset");
+            RuntimeModel goalFlagModel = LoadImportedModelRuntime(projectRootPath, "models/games/split_play/goal_flag.hasset");
+            RuntimeMaterial goalFlagPoleMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/games/split_play/GoalFlagPole.hasset");
+            RuntimeMaterial goalFlagBannerMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/games/split_play/GoalFlagBanner.hasset");
             RuntimeMaterial generatedCubeTestSolidMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, ForwardSolidColorMaterialFactory.MaterialRelativePath);
             RuntimeMaterial[] axisMaterials = new[] {
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/X.hasset"),
@@ -89,6 +94,11 @@ namespace city.rendering.tools {
                 GeneratedStandardMaterial = generatedStandardMaterial,
                 TiltTrialPlayerSphereMarbleMaterial = tiltTrialPlayerSphereMarbleMaterial,
                 TiltTrialCourseMaterial = tiltTrialCourseMaterial,
+                GoldenCoinModel = goldenCoinModel,
+                GoldenCoinMaterial = goldenCoinMaterial,
+                GoalFlagModel = goalFlagModel,
+                GoalFlagPoleMaterial = goalFlagPoleMaterial,
+                GoalFlagBannerMaterial = goalFlagBannerMaterial,
                 GeneratedCubeTestSolidMaterial = generatedCubeTestSolidMaterial,
                 GeneratedArrowModel = generatedArrowModel,
                 AxisMaterials = axisMaterials,

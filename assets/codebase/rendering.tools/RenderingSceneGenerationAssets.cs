@@ -34,6 +34,31 @@ namespace city.rendering.tools {
         public RuntimeMaterial TiltTrialCourseMaterial { get; set; }
 
         /// <summary>
+        /// Gets or sets the authored golden-coin runtime model used by render-only Tilt Trial probes.
+        /// </summary>
+        public RuntimeModel GoldenCoinModel { get; set; }
+
+        /// <summary>
+        /// Gets or sets the authored golden-coin runtime material used by render-only Tilt Trial probes.
+        /// </summary>
+        public RuntimeMaterial GoldenCoinMaterial { get; set; }
+
+        /// <summary>
+        /// Gets or sets the authored goal-flag runtime model used by render-only Tilt Trial probes.
+        /// </summary>
+        public RuntimeModel GoalFlagModel { get; set; }
+
+        /// <summary>
+        /// Gets or sets the authored goal-flag pole material used by render-only Tilt Trial probes.
+        /// </summary>
+        public RuntimeMaterial GoalFlagPoleMaterial { get; set; }
+
+        /// <summary>
+        /// Gets or sets the authored goal-flag banner material used by render-only Tilt Trial probes.
+        /// </summary>
+        public RuntimeMaterial GoalFlagBannerMaterial { get; set; }
+
+        /// <summary>
         /// Gets or sets the generated shared solid-color runtime material used by the cube-test scene.
         /// </summary>
         public RuntimeMaterial GeneratedCubeTestSolidMaterial { get; set; }

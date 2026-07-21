@@ -143,6 +143,7 @@
                                                    "test_scene_static_mesh_minimal",
                                                    "tilt_trial",
                                                    "tilt_trial_level_01",
+                                                   "test_scene_tilt_trial_level_01_render",
                                                    "tilt_trial_level_02",
                                                    "tilt_trial_level_03",
                                                    "tilt_trial_level_04",
@@ -224,6 +225,10 @@
                                               {
                                                   "sceneId":  "tilt_trial_level_05",
                                                   "orderNumber":  19
+                                                   },
+                                              {
+                                                  "sceneId":  "test_scene_tilt_trial_level_01_render",
+                                                  "orderNumber":  20
                                                    }
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\ps2-city-demo-disc",

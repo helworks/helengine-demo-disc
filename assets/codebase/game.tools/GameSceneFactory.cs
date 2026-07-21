@@ -43,6 +43,11 @@ namespace city.game.tools {
         const string TiltTrialGameplaySceneAssetDirectoryRelativePath = "scenes/games/tilt";
 
         /// <summary>
+        /// Stable authored asset path used by the standalone Level 1 rendering validation scene.
+        /// </summary>
+        const string TiltTrialLevel01RenderTestSceneAssetRelativePath = "scenes/physics/test_scene_tilt_trial_level_01_render.helen";
+
+        /// <summary>
         /// Stable mesh save-state slot used by the generated player sphere material reference.
         /// </summary>
         const string PlayerSphereMaterialReferenceName = "Materials[0]";
@@ -71,6 +76,31 @@ namespace city.game.tools {
         /// Dedicated authored course material used by the Tilt Trial stage pieces and catch floor.
         /// </summary>
         readonly RuntimeMaterial TiltTrialCourseMaterial;
+
+        /// <summary>
+        /// Authored golden-coin model used by the standalone render-test scene.
+        /// </summary>
+        readonly RuntimeModel GoldenCoinModel;
+
+        /// <summary>
+        /// Authored golden-coin material used by the standalone render-test scene.
+        /// </summary>
+        readonly RuntimeMaterial GoldenCoinMaterial;
+
+        /// <summary>
+        /// Authored goal-flag model used by the standalone render-test scene.
+        /// </summary>
+        readonly RuntimeModel GoalFlagModel;
+
+        /// <summary>
+        /// Authored goal-flag pole material used by the standalone render-test scene.
+        /// </summary>
+        readonly RuntimeMaterial GoalFlagPoleMaterial;
+
+        /// <summary>
+        /// Authored goal-flag banner material used by the standalone render-test scene.
+        /// </summary>
+        readonly RuntimeMaterial GoalFlagBannerMaterial;
 
         /// <summary>
         /// Editor service used to persist the 3DS-specific reference-canvas dimensions without changing the shared DS layout.
@@ -117,12 +147,21 @@ namespace city.game.tools {
                 throw new ArgumentException($"Game scene generation requires authored runtime material '{TiltTrialPlayerSphereMarbleMaterialAssetId}'.", nameof(assets));
             } else if (assets.TiltTrialCourseMaterial == null) {
                 throw new ArgumentException($"Game scene generation requires authored runtime material '{TiltTrialCourseMaterialAssetId}'.", nameof(assets));
+            } else if (assets.GoldenCoinModel == null || assets.GoldenCoinMaterial == null) {
+                throw new ArgumentException("Game scene generation requires the authored golden-coin model and material.", nameof(assets));
+            } else if (assets.GoalFlagModel == null || assets.GoalFlagPoleMaterial == null || assets.GoalFlagBannerMaterial == null) {
+                throw new ArgumentException("Game scene generation requires the authored goal-flag model and materials.", nameof(assets));
             }
 
             GeneratedCubeModel = assets.GeneratedCubeModel;
             GeneratedSphereModel = assets.GeneratedSphereModel;
             TiltTrialPlayerSphereMarbleMaterial = assets.TiltTrialPlayerSphereMarbleMaterial;
             TiltTrialCourseMaterial = assets.TiltTrialCourseMaterial;
+            GoldenCoinModel = assets.GoldenCoinModel;
+            GoldenCoinMaterial = assets.GoldenCoinMaterial;
+            GoalFlagModel = assets.GoalFlagModel;
+            GoalFlagPoleMaterial = assets.GoalFlagPoleMaterial;
+            GoalFlagBannerMaterial = assets.GoalFlagBannerMaterial;
         }
 
         /// <summary>
@@ -131,6 +170,26 @@ namespace city.game.tools {
         /// <returns>Generated authored scene definition for Tilt Trial.</returns>
         public GeneratedAuthoringSceneDefinition CreateTiltTrialScene() {
             return CreateTiltTrialLevelSelectScene();
+        }
+
+        /// <summary>
+        /// Creates a gameplay-free rendering probe containing the visible Level 1 course, coins, flag, lighting, camera, and FPS overlay.
+        /// </summary>
+        /// <returns>Generated authored Level 1 render-test scene.</returns>
+        public GeneratedAuthoringSceneDefinition CreateTiltTrialLevel01RenderTestScene() {
+            return new GeneratedAuthoringSceneDefinition {
+                SceneId = GameSceneCatalog.TiltTrialLevel01RenderTestSceneId,
+                SceneAssetRelativePath = TiltTrialLevel01RenderTestSceneAssetRelativePath,
+                SceneSettings = new SceneSettingsAsset(),
+                RootEntities = [
+                    CreateLevel01RenderTestCameraEntity(),
+                    CreateDirectionalLightEntity(),
+                    CreateDirectionalFillLightEntity(),
+                    CreateAmbientLightEntity(),
+                    CreateLevel01RenderTestFpsEntity(),
+                    CreateLevel01RenderOnlyStageRootEntity()
+                ]
+            };
         }
 
         /// <summary>
@@ -1136,6 +1195,190 @@ namespace city.game.tools {
         }
 
         /// <summary>
+        /// Creates the fixed-orbit camera used to inspect every render-only Level 1 object.
+        /// </summary>
+        /// <returns>Generated render-test camera entity.</returns>
+        EditorEntity CreateLevel01RenderTestCameraEntity() {
+            float4 orientation;
+            float4.CreateFromYawPitchRoll(0f, -0.28f, 0f, out orientation);
+            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialLevel01RenderTestCamera");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = new float3(0f, 7f, 28f);
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = orientation;
+            entity.AddComponent(new CameraComponent {
+                CameraDrawOrder = 0,
+                LayerMask = EditorLayerMasks.SceneObjects,
+                Viewport = new float4(0f, 0f, 1f, 1f),
+                NearPlaneDistance = 0.1f,
+                FarPlaneDistance = 160f,
+                ClearSettings = new CameraClearSettings(true, new float4(100f / 255f, 149f / 255f, 237f / 255f, 1f), true, 1f, false, 0),
+                RenderSettings = new CameraRenderSettings {
+                    DepthPrepassMode = DepthPrepassMode.Auto,
+                    ShadowDistance = 80f,
+                    PostProcessTier = PostProcessTier.Disabled
+                }
+            });
+            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+                OrbitCenter = new float3(0f, 1.5f, 4f),
+                AutoYawSpeedRadians = 0f
+            });
+            return RequireEditorEntity(entity, "Level 1 render-test camera");
+        }
+
+        /// <summary>
+        /// Creates the FPS-only diagnostic overlay for the Level 1 rendering validation scene.
+        /// </summary>
+        /// <returns>Generated FPS overlay entity.</returns>
+        EditorEntity CreateLevel01RenderTestFpsEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialLevel01RenderTestFps");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            FPSComponent fpsComponent = new FPSComponent {
+                Font = ResolveRequiredEditorFont(),
+                FontScale = 2f
+            };
+            entity.AddComponent(fpsComponent);
+            ApplyEditorFontReference(entity, fpsComponent);
+            return RequireEditorEntity(entity, "Level 1 render-test FPS overlay");
+        }
+
+        /// <summary>
+        /// Creates the Level 1 visible course without stage, physics, trigger, or gameplay components.
+        /// </summary>
+        /// <returns>Generated render-only stage root.</returns>
+        EditorEntity CreateLevel01RenderOnlyStageRootEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialLevel01RenderOnlyStage");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = float3.Zero;
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = float4.Identity;
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("StartPad", new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity));
+            float4 rampOrientation;
+            float4.CreateFromYawPitchRoll(0f, -0.14f, 0f, out rampOrientation);
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("Ramp", new float3(0f, -0.05f, -0.1f), new float3(6f, 0.9f, 8f), rampOrientation));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("Bridge", new float3(0f, 0.5f, 5.8f), new float3(4.2f, 0.8f, 8.4f), float4.Identity));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("BridgeBlockerLeft", new float3(-0.95f, 1.25f, 3.2f), new float3(1.1f, 1.5f, 1.1f), float4.Identity));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("BridgeBlockerRight", new float3(0.95f, 1.25f, 7.3f), new float3(1.1f, 1.5f, 1.1f), float4.Identity));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("FinalPlatform", new float3(1.35f, 0.2f, 13.8f), new float3(8.4f, 0.9f, 8.8f), float4.Identity));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("GoalPadVisual", new float3(1.35f, 1.05f, 16.95f), new float3(2f, 2f, 2f), float4.Identity));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("LeftWall", new float3(-3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("RightWall", new float3(3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("FinalLeftGuard", new float3(-2.5f, 1.25f, 14.2f), new float3(0.8f, 2.8f, 7.4f), float4.Identity));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("FinalRightGuard", new float3(5.2f, 1.25f, 14.2f), new float3(0.8f, 2.8f, 7.4f), float4.Identity));
+            return RequireEditorEntity(entity, "Level 1 render-only stage");
+        }
+
+        /// <summary>
+        /// Creates one material-backed course box for the render-only Level 1 scene.
+        /// </summary>
+        /// <param name="name">Authored entity name.</param>
+        /// <param name="position">Local position.</param>
+        /// <param name="scale">Full box dimensions.</param>
+        /// <param name="orientation">Local orientation.</param>
+        /// <returns>Generated visual-only course box.</returns>
+        Entity CreateLevel01RenderOnlyCourseBoxEntity(string name, float3 position, float3 scale, float4 orientation) {
+            if (string.IsNullOrWhiteSpace(name)) {
+                throw new ArgumentException("Render-only course box names must be provided.", nameof(name));
+            }
+
+            Entity entity = Core.Instance.EntityFactory.Create(name);
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = position;
+            entity.LocalScale = scale;
+            entity.LocalOrientation = orientation;
+            MeshComponent meshComponent = new MeshComponent {
+                Model = GeneratedCubeModel,
+                Materials = new[] { TiltTrialCourseMaterial },
+                RenderOrder3D = 0
+            };
+            entity.AddComponent(meshComponent);
+            ApplyTiltTrialCourseMaterialReference(entity, meshComponent);
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates a visual-only coin using the shared authored golden-coin blueprint.
+        /// </summary>
+        /// <param name="name">Authored entity name.</param>
+        /// <param name="position">Local position.</param>
+        /// <returns>Generated visual-only coin entity.</returns>
+        Entity CreateLevel01RenderOnlyCoinEntity(string name, float3 position) {
+            if (string.IsNullOrWhiteSpace(name)) {
+                throw new ArgumentException("Render-only coin names must be provided.", nameof(name));
+            }
+
+            Entity entity = Core.Instance.EntityFactory.Create(name);
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = position;
+            entity.LocalScale = new float3(0.51f, 0.51f, 0.51f);
+            entity.LocalOrientation = float4.Identity;
+            MeshComponent meshComponent = new MeshComponent {
+                Model = GoldenCoinModel,
+                Materials = new[] { GoldenCoinMaterial },
+                RenderOrder3D = 0
+            };
+            entity.AddComponent(meshComponent);
+            ApplyRenderOnlyCoinReferences(entity, meshComponent);
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates a visual-only finish flag using the shared authored flag blueprint.
+        /// </summary>
+        /// <param name="position">Local position.</param>
+        /// <returns>Generated visual-only goal flag entity.</returns>
+        Entity CreateLevel01RenderOnlyGoalFlagEntity(float3 position) {
+            Entity entity = Core.Instance.EntityFactory.Create("GoalFlag");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = position;
+            entity.LocalScale = new float3(1.2f, 1.2f, 1.2f);
+            entity.LocalOrientation = float4.Identity;
+            MeshComponent meshComponent = new MeshComponent {
+                Model = GoalFlagModel,
+                Materials = new[] { GoalFlagPoleMaterial, GoalFlagBannerMaterial },
+                RenderOrder3D = 0
+            };
+            entity.AddComponent(meshComponent);
+            ApplyRenderOnlyGoalFlagReferences(entity, meshComponent);
+            return entity;
+        }
+
+        /// <summary>
+        /// Stores the file-backed model and material references for one standalone coin mesh.
+        /// </summary>
+        /// <param name="entity">Coin entity receiving the save metadata.</param>
+        /// <param name="meshComponent">Coin mesh component receiving the references.</param>
+        void ApplyRenderOnlyCoinReferences(Entity entity, MeshComponent meshComponent) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (meshComponent == null) {
+                throw new ArgumentNullException(nameof(meshComponent));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(meshComponent, "Model", global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(SplitPlayAssetCatalog.GoldenCoinCommonModelRelativePath));
+            saveComponent.SetAssetReference(meshComponent, "Materials[0]", global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath));
+        }
+
+        /// <summary>
+        /// Stores the file-backed model and material references for one standalone goal-flag mesh.
+        /// </summary>
+        /// <param name="entity">Goal-flag entity receiving the save metadata.</param>
+        /// <param name="meshComponent">Goal-flag mesh component receiving the references.</param>
+        void ApplyRenderOnlyGoalFlagReferences(Entity entity, MeshComponent meshComponent) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (meshComponent == null) {
+                throw new ArgumentNullException(nameof(meshComponent));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(meshComponent, "Model", global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(SplitPlayAssetCatalog.GoalFlagCommonModelRelativePath));
+            saveComponent.SetAssetReference(meshComponent, "Materials[0]", global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath));
+            saveComponent.SetAssetReference(meshComponent, "Materials[1]", global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath));
+        }
+
+        /// <summary>
         /// Creates the wider offset course used by the second Tilt Trial level.
         /// </summary>
         /// <returns>Generated editor stage root for level 2.</returns>
@@ -1938,6 +2181,22 @@ namespace city.game.tools {
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             saveComponent.SetAssetReference(component, "Font", global::helengine.SceneAssetReferenceFactory.CreateFileSystemFont(fontPath));
+        }
+
+        /// <summary>
+        /// Stores the editor UI font reference on the generated FPS component used by the render-test scene.
+        /// </summary>
+        /// <param name="entity">Entity that owns the FPS component.</param>
+        /// <param name="component">FPS component whose font reference should be stored.</param>
+        void ApplyEditorFontReference(Entity entity, FPSComponent component) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (component == null) {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
         }
 
         /// <summary>

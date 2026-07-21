@@ -19,6 +19,11 @@ namespace city.game.tools {
         public const string TiltTrialLevel01SceneId = global::city.game.TiltTrialSceneIds.Level01SceneId;
 
         /// <summary>
+        /// Stable scene id used by the render-only Level 1 PS2 validation scene.
+        /// </summary>
+        public const string TiltTrialLevel01RenderTestSceneId = "test_scene_tilt_trial_level_01_render";
+
+        /// <summary>
         /// Stable scene id used by the second generated Tilt Trial gameplay level.
         /// </summary>
         public const string TiltTrialLevel02SceneId = global::city.game.TiltTrialSceneIds.Level02SceneId;
@@ -52,6 +57,7 @@ namespace city.game.tools {
                 TiltTrialSceneId,
                 TiltTrialHandheldLevelSelectSceneId,
                 TiltTrialLevel01SceneId,
+                TiltTrialLevel01RenderTestSceneId,
                 TiltTrialLevel02SceneId,
                 TiltTrialLevel03SceneId,
                 TiltTrialLevel04SceneId,

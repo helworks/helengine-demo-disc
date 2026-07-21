@@ -51,6 +51,30 @@ namespace city.tests {
         }
 
         /// <summary>
+        /// Ensures the dedicated Level 1 render test scene reuses the visible course assets without gameplay components.
+        /// </summary>
+        [Fact]
+        public void Level_01_render_test_scene_uses_visual_assets_and_fps_only() {
+            string catalogSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneCatalog.cs");
+            string generatorSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
+            string factorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+
+            Assert.Contains("TiltTrialLevel01RenderTestSceneId", catalogSource, StringComparison.Ordinal);
+            Assert.Contains("CreateTiltTrialLevel01RenderTestScene", generatorSource, StringComparison.Ordinal);
+            Assert.Contains("CreateLevel01RenderOnlyCourseBoxEntity", factorySource, StringComparison.Ordinal);
+            Assert.Contains("GoldenCoinBlueprintRelativePath", factorySource, StringComparison.Ordinal);
+            Assert.Contains("GoalFlagBlueprintRelativePath", factorySource, StringComparison.Ordinal);
+            Assert.Contains("new FPSComponent", factorySource, StringComparison.Ordinal);
+            Assert.Contains("test_scene_tilt_trial_level_01_render.helen", factorySource, StringComparison.Ordinal);
+            Assert.Contains("CreateLevel01RenderOnlyStageRootEntity", factorySource, StringComparison.Ordinal);
+            Assert.Contains("CreateLevel01RenderOnlyCoinEntity", factorySource, StringComparison.Ordinal);
+      Assert.Contains("CreateLevel01RenderOnlyGoalFlagEntity", factorySource, StringComparison.Ordinal);
+      Assert.Contains("new city.rendering.DemoDiscOrbitCameraComponent", factorySource, StringComparison.Ordinal);
+      Assert.DoesNotContain("CreateLevel01RenderOnlyCoinEntity(\"Coin01\"", factorySource, StringComparison.Ordinal);
+      Assert.DoesNotContain("CreateLevel01RenderOnlyGoalFlagEntity(new float3(1.35f, 0.65f, 16.6f))", factorySource, StringComparison.Ordinal);
+  }
+
+        /// <summary>
         /// Ensures gameplay sessions bind and refresh target-time text from the current level metadata.
         /// </summary>
         [Fact]
