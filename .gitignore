@@ -17,12 +17,14 @@ ds-generic-feature-overrides/
 ds-runtime-feature-manifest-pass*/
 ds-size-*/
 gamecube-build/
+switch-build/
 ps2-build/
 psp-build/
 psvita-build/
 vita-build/
 wii-build/
 wiiu-build/
+wiiu-build-*/
 wiiu-build-fixcheck/
 windows-build/
 windows-build-*/
