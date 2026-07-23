@@ -41,6 +41,7 @@ namespace city.menu.tools.tests {
             Assert.Contains("SceneLoadMode.Additive", source, StringComparison.Ordinal);
             Assert.Contains("SceneManager.LoadScene(MainMenuSceneId, SceneLoadMode.Additive)", source, StringComparison.Ordinal);
             Assert.Contains("SceneManager.UnloadScene(SplashSceneId)", source, StringComparison.Ordinal);
+            Assert.Contains("Core.Instance != null && Core.Instance.SceneManager != null", source, StringComparison.Ordinal);
         }
     }
 }
