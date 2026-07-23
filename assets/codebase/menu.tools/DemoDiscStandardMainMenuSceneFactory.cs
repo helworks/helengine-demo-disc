@@ -329,7 +329,7 @@ namespace city.menu.tools {
             byte4 idleFillColor = definition.AccentSecondaryColor;
             byte4 idleBorderColor = definition.SurfaceBorderColor;
             byte4 selectedFillColor = definition.AccentColor;
-            byte4 selectedBorderColor = definition.AccentColor;
+            byte4 selectedBorderColor = definition.AccentSecondaryColor;
 
             Entity itemEntity = Core.Instance.EntityFactory.CreateChild(itemsRootEntity, $"Item-{itemDefinition.ItemId}");
             itemEntity.LocalPosition = new float3(0f, visibleIndex * (DemoMenuLayout.ButtonHeight + DemoMenuLayout.ButtonSpacing), 0f);

@@ -30,5 +30,22 @@ namespace city.menu.tools.tests {
             Assert.Contains("OutlineScale = outlineScale", handheldFactorySource, StringComparison.Ordinal);
             Assert.Contains(outlineAssignment, handheldFactorySource, StringComparison.Ordinal);
         }
+
+        /// <summary>
+        /// Ensures the standard selected menu button retains its purple fill while exposing the teal secondary accent at its border.
+        /// </summary>
+        [Fact]
+        public void Standard_menu_selected_button_uses_the_teal_secondary_accent_for_its_border() {
+            string projectRootPath = Environment.GetEnvironmentVariable("HELENGINE_TEST_PROJECT_ROOT") ?? @"C:\dev\helprojs\demodisc";
+            string standardFactorySource = File.ReadAllText(Path.Combine(
+                projectRootPath,
+                "assets",
+                "codebase",
+                "menu.tools",
+                "DemoDiscStandardMainMenuSceneFactory.cs"));
+
+            Assert.Contains("byte4 selectedFillColor = definition.AccentColor;", standardFactorySource, StringComparison.Ordinal);
+            Assert.Contains("byte4 selectedBorderColor = definition.AccentSecondaryColor;", standardFactorySource, StringComparison.Ordinal);
+        }
     }
 }
