@@ -11,7 +11,7 @@ namespace city.menu.tools {
         /// <summary>
         /// Stable scene id used by the startup package and runtime self-unload request.
         /// </summary>
-        public const string SceneId = "HelenOfCodeSplash";
+        public const string SceneId = "Scenes/HelenOfCodeSplash.helen";
 
         /// <summary>
         /// Project-relative path to the splash logo texture.

@@ -68,7 +68,9 @@ namespace city.menu {
             BackgroundSprite = FindRequiredSprite(entity, BackgroundChildIndex);
             LogoSprite = FindRequiredSprite(entity, LogoChildIndex);
             SetSpriteAlpha(0);
-            RequestMainMenuLoad();
+            if (Core.Instance != null && Core.Instance.SceneManager != null) {
+                RequestMainMenuLoad();
+            }
         }
 
         /// <summary>
@@ -77,6 +79,7 @@ namespace city.menu {
         public override void Update() {
             base.Update();
 
+            RequestMainMenuLoad();
             ElapsedSeconds += Core.Instance.FrameDeltaSeconds;
             int alpha = ResolveAlphaForElapsedSeconds(ElapsedSeconds);
             SetSpriteAlpha(alpha);
