@@ -122,7 +122,9 @@ namespace city.menu {
                 throw new InvalidOperationException("Splash sprites must be bound before their alpha can be updated.");
             }
 
-            BackgroundSprite.Color = new byte4(0, 0, 0, (byte)alpha);
+            double fadeOutStartSeconds = FadeDurationSeconds + HoldDurationSeconds;
+            byte backgroundAlpha = ElapsedSeconds >= fadeOutStartSeconds ? (byte)alpha : (byte)255;
+            BackgroundSprite.Color = new byte4(0, 0, 0, backgroundAlpha);
             LogoSprite.Color = new byte4(255, 255, 255, (byte)alpha);
         }
 

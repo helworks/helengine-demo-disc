@@ -22,6 +22,11 @@ namespace city.menu.tools {
         readonly DemoDiscMenuBuildSceneAuthoringService MenuBuildSceneAuthoringService;
 
         /// <summary>
+        /// Factory used to author the initial Helen of Code splash scene.
+        /// </summary>
+        readonly HelenOfCodeSplashSceneFactory SplashSceneFactory;
+
+        /// <summary>
         /// Initializes one demo-disc scene generator.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
@@ -29,6 +34,7 @@ namespace city.menu.tools {
             SceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver);
             SceneFactory = new DemoDiscMainMenuSceneFactory();
             MenuBuildSceneAuthoringService = new DemoDiscMenuBuildSceneAuthoringService();
+            SplashSceneFactory = new HelenOfCodeSplashSceneFactory();
         }
 
         /// <summary>
@@ -44,6 +50,7 @@ namespace city.menu.tools {
             DemoDiscMenuDefinitionProvider provider = new DemoDiscMenuDefinitionProvider();
             MenuDefinition definition = provider.CreateMenuDefinition();
             string providerTypeName = BuildProviderTypeName(typeof(DemoDiscMenuDefinitionProvider));
+            SceneWriteService.WriteScene(projectRootPath, SplashSceneFactory.CreateSceneDefinition());
             GeneratedAuthoringSceneDefinition standardSceneDefinition = SceneFactory.CreateStandardSceneDefinition(providerTypeName, definition);
             MenuBuildSceneAuthoringService.ApplyBuildSceneAvailability(projectRootPath, standardSceneDefinition, definition);
             SceneWriteService.WriteScene(projectRootPath, standardSceneDefinition);
