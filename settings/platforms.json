@@ -2,6 +2,7 @@
     "supportedPlatforms":  [
                                "ps2",
                                "psp",
+                               "psvita",
                                "ds",
                                "3ds",
                                "windows",

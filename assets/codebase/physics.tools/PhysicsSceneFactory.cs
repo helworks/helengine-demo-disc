@@ -1314,7 +1314,7 @@ namespace city.physics.tools {
                         continue;
                     } else if (childEntity.InternalEntity) {
                         continue;
-                    } else if (childEntity.LayerMask != EditorLayerMasks.SceneObjects) {
+                    } else if (!childEntity.IsSceneOwned) {
                         continue;
                     }
 
@@ -2305,7 +2305,6 @@ namespace city.physics.tools {
                 Size = new int2(1024, 56),
                 FontScale = 1.5f,
                 RenderOrder2D = 1,
-                LayerMask = 1
             };
             phaseStatusEntity.AddComponent(phaseStatusTextComponent);
             ApplyEditorFontReference(phaseStatusEntity, phaseStatusTextComponent);

@@ -363,7 +363,6 @@ namespace city.game.tools {
                 FillColor = fillColor,
                 BorderColor = borderColor,
                 RenderOrder2D = renderOrder2D,
-                LayerMask = 1
             });
             return entity;
         }
@@ -399,7 +398,6 @@ namespace city.game.tools {
                 FontScale = fontScale,
                 Alignment = alignment,
                 RenderOrder2D = renderOrder2D,
-                LayerMask = 1
             };
             entity.AddComponent(textComponent);
             ApplyFontReference(entity, textComponent, PauseOverlayFontRelativePath);

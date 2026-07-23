@@ -95,7 +95,7 @@ namespace city.menu.tools {
         const byte NintendoDsBottomMenuLabelRenderOrder = 220;
 
         /// <summary>
-        /// Dedicated authored scene layer used by the Nintendo DS menu metadata subtree so scene save preserves the runtime panel-binding structure.
+        /// Runtime layer used by the Nintendo DS menu metadata subtree so the handheld cameras can render its panel-binding structure.
         /// </summary>
         const ushort NintendoDsMenuMetadataLayerMask = EditorLayerMasks.SceneObjects;
 
@@ -170,7 +170,9 @@ namespace city.menu.tools {
         /// <param name="fontScale">Uniform glyph scale applied to the authored text component.</param>
         /// <param name="isStatic">Whether the authored text entity should be marked static for runtime caching.</param>
         /// <param name="convertTextToSprite">Whether the Nintendo DS text should be converted into a sprite-friendly representation.</param>
-        void CreateNintendoDsTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, bool convertTextToSprite = false) {
+        /// <param name="outlineColor">Optional text outline color.</param>
+        /// <param name="outlineScale">Optional text outline scale.</param>
+        void CreateNintendoDsTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, bool convertTextToSprite = false, byte4 outlineColor = default, float outlineScale = 0f) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -190,8 +192,9 @@ namespace city.menu.tools {
                 Size = size,
                 FontScale = fontScale,
                 RenderOrder2D = renderOrder2D,
-                LayerMask = RuntimeLayerMask,
-                ConvertTextToSprite = convertTextToSprite
+                ConvertTextToSprite = convertTextToSprite,
+                OutlineColor = outlineColor,
+                OutlineScale = outlineScale
             };
             entity.AddComponent(textComponent);
             ApplyFontReference(entity, textComponent, fontPath);
@@ -230,7 +233,6 @@ namespace city.menu.tools {
                 FillColor = fillColor,
                 BorderColor = borderColor,
                 RenderOrder2D = renderOrder2D,
-                LayerMask = RuntimeLayerMask
             });
 
             return entity;
@@ -371,7 +373,6 @@ namespace city.menu.tools {
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = new int2(displayWidth, displayHeight),
                 RenderOrder2D = 20,
-                LayerMask = RuntimeLayerMask
             };
             entity.AddComponent(spriteComponent);
             ApplyTextureReference(entity, spriteComponent, overlayImage.TexturePath);
@@ -509,7 +510,6 @@ namespace city.menu.tools {
                 FillColor = visibleIndex == 0 ? selectedFillColor : idleFillColor,
                 BorderColor = visibleIndex == 0 ? selectedFillColor : idleFillColor,
                 RenderOrder2D = 33,
-                LayerMask = RuntimeLayerMask
             });
             CreateNintendoDsTextEntity(
                 itemEntity,
@@ -522,7 +522,10 @@ namespace city.menu.tools {
                 NintendoDsBottomMenuLabelRenderOrder,
                 null,
                 NintendoDsBottomMenuLabelFontScale,
-                true);
+                true,
+                false,
+                definition.SurfaceBorderColor,
+                2f);
         }
 
         /// <summary>

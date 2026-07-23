@@ -24,19 +24,19 @@ namespace city.menu {
         public const double HoldDurationSeconds = 3d;
 
         /// <summary>
-        /// Zero-based generated child index used by the full-screen black background sprite.
+        /// Stable serialized scene reference identifying the full-screen black background entity.
         /// </summary>
-        public const int BackgroundChildIndex = 0;
+        public SceneEntityReference BackgroundSpriteEntityReference { get; set; }
 
         /// <summary>
-        /// Zero-based generated child index used by the centered logo sprite.
+        /// Stable serialized scene reference identifying the centered logo entity.
         /// </summary>
-        public const int LogoChildIndex = 1;
+        public SceneEntityReference LogoSpriteEntityReference { get; set; }
 
         /// <summary>
-        /// Background sprite whose alpha is driven by the splash phase.
+        /// Full-screen solid background whose alpha is driven by the splash phase.
         /// </summary>
-        SpriteComponent BackgroundSprite;
+        RoundedRectComponent BackgroundRectangle;
 
         /// <summary>
         /// Logo sprite whose alpha is driven by the splash phase.
@@ -64,13 +64,19 @@ namespace city.menu {
         /// <param name="entity">Generated splash root entity that owns the component.</param>
         public override void ComponentAdded(Entity entity) {
             base.ComponentAdded(entity);
+            StartupInputGate.Acquire();
 
-            BackgroundSprite = FindRequiredSprite(entity, BackgroundChildIndex);
-            LogoSprite = FindRequiredSprite(entity, LogoChildIndex);
-            SetSpriteAlpha(0);
             if (Core.Instance != null && Core.Instance.SceneManager != null) {
                 RequestMainMenuLoad();
             }
+        }
+
+        /// <summary>
+        /// Returns menu input ownership when the splash component is removed after its update pass.
+        /// </summary>
+        public override void Dispose() {
+            StartupInputGate.Release();
+            base.Dispose();
         }
 
         /// <summary>
@@ -80,15 +86,45 @@ namespace city.menu {
             base.Update();
 
             RequestMainMenuLoad();
+            if (IsAcceptPressed()) {
+                RequestSplashUnload();
+                return;
+            }
+
+            ResolveSpritesWhenNeeded();
             ElapsedSeconds += Core.Instance.FrameDeltaSeconds;
             int alpha = ResolveAlphaForElapsedSeconds(ElapsedSeconds);
             SetSpriteAlpha(alpha);
 
             double totalDurationSeconds = (FadeDurationSeconds * 2d) + HoldDurationSeconds;
-            if (ElapsedSeconds >= totalDurationSeconds && !SplashUnloadWasRequested) {
-                SplashUnloadWasRequested = true;
-                Core.Instance.SceneManager.UnloadScene(SplashSceneId);
+            if (ElapsedSeconds >= totalDurationSeconds) {
+                RequestSplashUnload();
             }
+        }
+
+        /// <summary>
+        /// Determines whether the user pressed one of the menu's established accept inputs this frame.
+        /// </summary>
+        /// <returns>True when keyboard, platform, or primary gamepad accept input was pressed.</returns>
+        bool IsAcceptPressed() {
+            InputSystem inputSystem = Core.Instance.Input;
+            return inputSystem.WasKeyPressed(Keys.Enter)
+                || inputSystem.WasKeyPressed(Keys.Space)
+                || inputSystem.WasKeyPressed(Keys.J)
+                || Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept)
+                || DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South);
+        }
+
+        /// <summary>
+        /// Releases the startup input gate and unloads the splash scene once.
+        /// </summary>
+        void RequestSplashUnload() {
+            if (SplashUnloadWasRequested) {
+                return;
+            }
+
+            SplashUnloadWasRequested = true;
+            Core.Instance.SceneManager.UnloadScene(SplashSceneId);
         }
 
         /// <summary>
@@ -121,43 +157,188 @@ namespace city.menu {
         /// </summary>
         /// <param name="alpha">Alpha channel in the inclusive byte range 0 through 255.</param>
         void SetSpriteAlpha(int alpha) {
-            if (BackgroundSprite == null || LogoSprite == null) {
-                throw new InvalidOperationException("Splash sprites must be bound before their alpha can be updated.");
+            if (BackgroundRectangle == null || LogoSprite == null) {
+                throw new InvalidOperationException("Splash background and logo must be bound before their alpha can be updated.");
             }
 
             double fadeOutStartSeconds = FadeDurationSeconds + HoldDurationSeconds;
             byte backgroundAlpha = ElapsedSeconds >= fadeOutStartSeconds ? (byte)alpha : (byte)255;
-            BackgroundSprite.Color = new byte4(0, 0, 0, backgroundAlpha);
+            BackgroundRectangle.FillColor = new byte4(0, 0, 0, backgroundAlpha);
+            BackgroundRectangle.BorderColor = new byte4(0, 0, 0, backgroundAlpha);
             LogoSprite.Color = new byte4(255, 255, 255, (byte)alpha);
         }
 
         /// <summary>
-        /// Resolves one cardinal sprite by generated child index from the splash root.
+        /// Resolves both serialized splash sprite entity references once the scene hierarchy is available.
         /// </summary>
-        /// <param name="rootEntity">Generated splash root entity.</param>
-        /// <param name="childIndex">Required direct child index.</param>
+        void ResolveSpritesWhenNeeded() {
+            if (BackgroundRectangle != null && LogoSprite != null) {
+                return;
+            } else if (Core.Instance == null || Core.Instance.ObjectManager == null) {
+                throw new InvalidOperationException("Helen of Code splash sprite resolution requires an initialized object manager.");
+            }
+
+            BackgroundRectangle = ResolveBackgroundRectangle(BackgroundSpriteEntityReference);
+            LogoSprite = ResolveSpriteReferenceOrAuthoredRole(LogoSpriteEntityReference, "logo", true);
+            SetSpriteAlpha(0);
+        }
+
+        /// <summary>
+        /// Resolves a serialized sprite entity reference, retaining an authored-role fallback for legacy scenes whose reference payload predates stable ids.
+        /// </summary>
+        /// <param name="entityReference">Stable reference identifying the sprite entity.</param>
+        /// <param name="description">Human-readable role of the required sprite.</param>
+        /// <param name="requiresTexture">Whether the authored sprite role must have a loaded texture.</param>
+        /// <returns>The required splash sprite component.</returns>
+        SpriteComponent ResolveSpriteReferenceOrAuthoredRole(SceneEntityReference entityReference, string description, bool requiresTexture) {
+            if (entityReference != null && entityReference.EntityId != 0u) {
+                return FindRequiredSprite(entityReference, description);
+            }
+
+            if (Parent == null || Parent.Children == null) {
+                throw new InvalidOperationException($"Helen of Code splash cannot resolve its authored {description} sprite role.");
+            }
+
+            for (int childIndex = 0; childIndex < Parent.Children.Count; childIndex++) {
+                Entity childEntity = Parent.Children[childIndex];
+                if (childEntity == null || childEntity.Components == null) {
+                    continue;
+                }
+
+                for (int componentIndex = 0; componentIndex < childEntity.Components.Count; componentIndex++) {
+                    if (childEntity.Components[componentIndex] is SpriteComponent spriteComponent && (spriteComponent.Texture != null) == requiresTexture) {
+                        return spriteComponent;
+                    }
+                }
+            }
+
+            throw new InvalidOperationException($"Helen of Code splash could not resolve its authored {description} sprite role.");
+        }
+
+        /// <summary>
+        /// Resolves the full-screen solid rectangle used to hide the menu while the splash is visible.
+        /// </summary>
+        /// <param name="entityReference">Stable reference identifying the authored background entity.</param>
+        /// <returns>The required background rectangle component.</returns>
+        RoundedRectComponent ResolveBackgroundRectangle(SceneEntityReference entityReference) {
+            if (entityReference != null && entityReference.EntityId != 0u) {
+                return FindRequiredBackgroundRectangle(entityReference);
+            }
+
+            if (Parent == null || Parent.Children == null) {
+                throw new InvalidOperationException("Helen of Code splash cannot resolve its authored background role.");
+            }
+
+            for (int childIndex = 0; childIndex < Parent.Children.Count; childIndex++) {
+                Entity childEntity = Parent.Children[childIndex];
+                if (childEntity == null || childEntity.Components == null) {
+                    continue;
+                }
+
+                for (int componentIndex = 0; componentIndex < childEntity.Components.Count; componentIndex++) {
+                    if (childEntity.Components[componentIndex] is RoundedRectComponent backgroundRectangle) {
+                        return backgroundRectangle;
+                    }
+                }
+            }
+
+            throw new InvalidOperationException("Helen of Code splash could not resolve its authored background role.");
+        }
+
+        /// <summary>
+        /// Resolves one serialized scene entity reference to its required sprite component.
+        /// </summary>
+        /// <param name="entityReference">Stable reference identifying the sprite entity.</param>
+        /// <param name="description">Human-readable role of the required sprite.</param>
+        /// <returns>The sprite component attached to the referenced entity.</returns>
+        SpriteComponent FindRequiredSprite(SceneEntityReference entityReference, string description) {
+            if (entityReference == null || entityReference.EntityId == 0u) {
+                throw new InvalidOperationException($"Helen of Code splash requires a serialized {description} sprite entity reference.");
+            }
+
+            List<Entity> entities = Core.Instance.ObjectManager.Entities;
+            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
+                Entity candidateEntity = entities[entityIndex];
+                if (FindSceneEntityRuntimeIdOrZero(candidateEntity) != entityReference.EntityId) {
+                    continue;
+                }
+
+                return FindRequiredSpriteOnEntity(candidateEntity, description);
+            }
+
+            throw new InvalidOperationException($"Helen of Code splash could not resolve the serialized {description} sprite entity reference '{entityReference.EntityId}'.");
+        }
+
+        /// <summary>
+        /// Resolves the rounded rectangle on the entity identified by the persisted background reference.
+        /// </summary>
+        /// <param name="entityReference">Stable reference identifying the background entity.</param>
+        /// <returns>The background rectangle component.</returns>
+        RoundedRectComponent FindRequiredBackgroundRectangle(SceneEntityReference entityReference) {
+            if (entityReference == null || entityReference.EntityId == 0u) {
+                throw new InvalidOperationException("Helen of Code splash requires a serialized background entity reference.");
+            }
+
+            List<Entity> entities = Core.Instance.ObjectManager.Entities;
+            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
+                Entity candidateEntity = entities[entityIndex];
+                if (FindSceneEntityRuntimeIdOrZero(candidateEntity) != entityReference.EntityId) {
+                    continue;
+                }
+
+                if (candidateEntity.Components == null) {
+                    break;
+                }
+
+                for (int componentIndex = 0; componentIndex < candidateEntity.Components.Count; componentIndex++) {
+                    if (candidateEntity.Components[componentIndex] is RoundedRectComponent backgroundRectangle) {
+                        return backgroundRectangle;
+                    }
+                }
+
+                break;
+            }
+
+            throw new InvalidOperationException($"Helen of Code splash background entity '{entityReference.EntityId}' must contain one RoundedRectComponent.");
+        }
+
+        /// <summary>
+        /// Finds the sprite component attached to one resolved splash entity.
+        /// </summary>
+        /// <param name="entity">Resolved splash sprite entity.</param>
+        /// <param name="description">Human-readable role of the required sprite.</param>
         /// <returns>The required sprite component.</returns>
-        SpriteComponent FindRequiredSprite(Entity rootEntity, int childIndex) {
-            if (rootEntity == null) {
-                throw new ArgumentNullException(nameof(rootEntity));
-            } else if (childIndex < 0) {
-                throw new ArgumentOutOfRangeException(nameof(childIndex), "Splash sprite child index cannot be negative.");
-            } else if (rootEntity.Children == null) {
-                throw new InvalidOperationException("The splash root must expose its generated child entities.");
+        SpriteComponent FindRequiredSpriteOnEntity(Entity entity, string description) {
+            if (entity == null || entity.Components == null) {
+                throw new InvalidOperationException($"Helen of Code splash {description} sprite entity must contain initialized components.");
             }
 
-            if (childIndex >= rootEntity.Children.Count || rootEntity.Children[childIndex] == null) {
-                throw new InvalidOperationException($"Splash sprite child index '{childIndex}' must exist in the generated hierarchy.");
-            }
-
-            Entity childEntity = rootEntity.Children[childIndex];
-            for (int componentIndex = 0; componentIndex < childEntity.Components.Count; componentIndex++) {
-                if (childEntity.Components[componentIndex] is SpriteComponent spriteComponent) {
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is SpriteComponent spriteComponent) {
                     return spriteComponent;
                 }
             }
 
-            throw new InvalidOperationException($"Splash sprite child index '{childIndex}' must contain one SpriteComponent.");
+            throw new InvalidOperationException($"Helen of Code splash {description} sprite entity must contain one SpriteComponent.");
+        }
+
+        /// <summary>
+        /// Finds the stable scene id attached to one runtime entity.
+        /// </summary>
+        /// <param name="entity">Entity whose scene id should be inspected.</param>
+        /// <returns>The authored scene entity id, or zero when unavailable.</returns>
+        uint FindSceneEntityRuntimeIdOrZero(Entity entity) {
+            if (entity == null || entity.Components == null) {
+                return 0u;
+            }
+
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is SceneEntityRuntimeIdComponent runtimeIdComponent) {
+                    return runtimeIdComponent.SceneEntityId;
+                }
+            }
+
+            return 0u;
         }
 
         /// <summary>

@@ -421,7 +421,6 @@ namespace city.rendering.tools {
                 FillColor = new byte4(20, 24, 32, 224),
                 BorderColor = new byte4(120, 140, 170, 255),
                 RenderOrder2D = 200,
-                LayerMask = OverlayDrawableLayerMask
             });
 
             return viewportRootEntity;
@@ -490,7 +489,6 @@ namespace city.rendering.tools {
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(DesktopInstructionTextWidth, DesktopInstructionTextHeight),
                 RenderOrder2D = 202,
-                LayerMask = OverlayDrawableLayerMask
             };
             textEntity.AddComponent(textComponent);
             ApplyFontReference(textEntity, textComponent);
@@ -565,7 +563,6 @@ namespace city.rendering.tools {
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(DesktopInstructionTextWidth, DesktopInstructionTextHeight),
                 RenderOrder2D = 202,
-                LayerMask = OverlayDrawableLayerMask
             };
             textEntity.AddComponent(textComponent);
             ApplyFontReference(textEntity, textComponent);
@@ -595,7 +592,6 @@ namespace city.rendering.tools {
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = size,
                 RenderOrder2D = 211,
-                LayerMask = OverlayDrawableLayerMask
             };
             iconEntity.AddComponent(spriteComponent);
             ApplyTextureReference(iconEntity, spriteComponent, texturePath);
@@ -610,7 +606,6 @@ namespace city.rendering.tools {
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(NintendoDsInstructionTextWidth, NintendoDsInstructionTextHeight),
                 RenderOrder2D = 212,
-                LayerMask = OverlayDrawableLayerMask
             };
             textEntity.AddComponent(textComponent);
             ApplyFontReference(textEntity, textComponent, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
@@ -653,7 +648,6 @@ namespace city.rendering.tools {
                 Size = commonIcon.FitDisplaySizeWithin(commonSpec.Size),
                 SourceRect = commonIcon.SourceRect,
                 RenderOrder2D = renderOrder2D,
-                LayerMask = OverlayDrawableLayerMask
             };
             entity.AddComponent(spriteComponent);
             ApplyTextureReference(entity, spriteComponent, commonIcon.SourcePngRelativePath);
@@ -717,7 +711,6 @@ namespace city.rendering.tools {
                 SourceRect = commonIcon.SourceRect,
                 Color = hideByDefault ? new byte4(255, 255, 255, 0) : new byte4(255, 255, 255, 255),
                 RenderOrder2D = renderOrder2D,
-                LayerMask = OverlayDrawableLayerMask
             };
             entity.AddComponent(spriteComponent);
             ApplyTextureReference(entity, spriteComponent, commonIcon.SourcePngRelativePath);

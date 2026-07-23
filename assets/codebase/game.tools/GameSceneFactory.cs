@@ -108,6 +108,26 @@ namespace city.game.tools {
         readonly ComponentPlatformEditingService PlatformEditingServiceValue = new ComponentPlatformEditingService();
 
         /// <summary>
+        /// Editor service used to store component-only tessellation metadata for constrained target platforms.
+        /// </summary>
+        readonly MeshComponentTessellationSettingsService MeshComponentTessellationSettingsServiceValue = new MeshComponentTessellationSettingsService();
+
+        /// <summary>
+        /// Stable platform identifier used for PlayStation 2-specific scene cooking.
+        /// </summary>
+        const string Ps2PlatformId = "ps2";
+
+        /// <summary>
+        /// Stable platform identifier used for PlayStation Portable-specific scene cooking.
+        /// </summary>
+        const string PspPlatformId = "psp";
+
+        /// <summary>
+        /// Maximum world-space edge length used to subdivide scaled Tilt Trial render-test course geometry on constrained platforms.
+        /// </summary>
+        const double TiltTrialRenderTestTessellationMaxEdgeLength = 1d;
+
+        /// <summary>
         /// Stable platform identifier used by the 3DS handheld viewport overrides.
         /// </summary>
         const string Nintendo3DsPlatformId = "3ds";
@@ -533,7 +553,6 @@ namespace city.game.tools {
                 FontScale = 0.9f,
                 Alignment = TextAlignment.Center,
                 RenderOrder2D = 2,
-                LayerMask = 1
             };
             speedTextEntity.AddComponent(speedTextComponent);
             ApplyFontReference(speedTextEntity, speedTextComponent, TiltTrialSpeedHudFontRelativePath);
@@ -1016,7 +1035,6 @@ namespace city.game.tools {
                 FontScale = 2.2f,
                 Alignment = TextAlignment.Center,
                 RenderOrder2D = 1,
-                LayerMask = 1
             };
             speedTextEntity.AddComponent(speedTextComponent);
             LayoutComponent speedTextAnchorComponent = new LayoutComponent();
@@ -1050,7 +1068,6 @@ namespace city.game.tools {
                 FontScale = 1.45f,
                 Alignment = TextAlignment.Left,
                 RenderOrder2D = 1,
-                LayerMask = 1
             };
             coinTextEntity.AddComponent(coinTextComponent);
             LayoutComponent coinTextAnchorComponent = new LayoutComponent();
@@ -1070,7 +1087,6 @@ namespace city.game.tools {
                 FontScale = 1.1f,
                 Alignment = TextAlignment.Left,
                 RenderOrder2D = 1,
-                LayerMask = 1
             };
             physicsBoundsStatusTextEntity.AddComponent(physicsBoundsStatusTextComponent);
             LayoutComponent physicsBoundsStatusAnchorComponent = new LayoutComponent();
@@ -1252,17 +1268,20 @@ namespace city.game.tools {
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("StartPad", new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("StartPad", new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity, true));
             float4 rampOrientation;
             float4.CreateFromYawPitchRoll(0f, -0.14f, 0f, out rampOrientation);
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("Ramp", new float3(0f, -0.05f, -0.1f), new float3(6f, 0.9f, 8f), rampOrientation));
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("Bridge", new float3(0f, 0.5f, 5.8f), new float3(4.2f, 0.8f, 8.4f), float4.Identity));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("Ramp", new float3(0f, -0.05f, -0.1f), new float3(6f, 0.9f, 8f), rampOrientation, true));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("Bridge", new float3(0f, 0.5f, 5.8f), new float3(4.2f, 0.8f, 8.4f), float4.Identity, true));
             entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("BridgeBlockerLeft", new float3(-0.95f, 1.25f, 3.2f), new float3(1.1f, 1.5f, 1.1f), float4.Identity));
             entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("BridgeBlockerRight", new float3(0.95f, 1.25f, 7.3f), new float3(1.1f, 1.5f, 1.1f), float4.Identity));
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("FinalPlatform", new float3(1.35f, 0.2f, 13.8f), new float3(8.4f, 0.9f, 8.8f), float4.Identity));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("FinalPlatform", new float3(1.35f, 0.2f, 13.8f), new float3(8.4f, 0.9f, 8.8f), float4.Identity, true));
             entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("GoalPadVisual", new float3(1.35f, 1.05f, 16.95f), new float3(2f, 2f, 2f), float4.Identity));
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("LeftWall", new float3(-3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity));
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("RightWall", new float3(3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity));
+            entity.AddChild(CreateLevel01RenderOnlyCoinEntity("Coin01", new float3(0f, 1.35f, -2.2f)));
+            entity.AddChild(CreateLevel01RenderOnlyCoinEntity("Coin02", new float3(-0.8f, 1.9f, 4.6f)));
+            entity.AddChild(CreateLevel01RenderOnlyCoinEntity("Coin03", new float3(1.35f, 1.9f, 13.8f)));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("LeftWall", new float3(-3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity, true));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("RightWall", new float3(3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity, true));
             entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("FinalLeftGuard", new float3(-2.5f, 1.25f, 14.2f), new float3(0.8f, 2.8f, 7.4f), float4.Identity));
             entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("FinalRightGuard", new float3(5.2f, 1.25f, 14.2f), new float3(0.8f, 2.8f, 7.4f), float4.Identity));
             return RequireEditorEntity(entity, "Level 1 render-only stage");
@@ -1275,8 +1294,9 @@ namespace city.game.tools {
         /// <param name="position">Local position.</param>
         /// <param name="scale">Full box dimensions.</param>
         /// <param name="orientation">Local orientation.</param>
+        /// <param name="enableConstrainedPlatformTessellation">Whether PS2 and PSP should generate a component-specific tessellated model variant.</param>
         /// <returns>Generated visual-only course box.</returns>
-        Entity CreateLevel01RenderOnlyCourseBoxEntity(string name, float3 position, float3 scale, float4 orientation) {
+        Entity CreateLevel01RenderOnlyCourseBoxEntity(string name, float3 position, float3 scale, float4 orientation, bool enableConstrainedPlatformTessellation = false) {
             if (string.IsNullOrWhiteSpace(name)) {
                 throw new ArgumentException("Render-only course box names must be provided.", nameof(name));
             }
@@ -1293,7 +1313,29 @@ namespace city.game.tools {
             };
             entity.AddComponent(meshComponent);
             ApplyTiltTrialCourseMaterialReference(entity, meshComponent);
+            if (enableConstrainedPlatformTessellation) {
+                ApplyConstrainedPlatformTessellation(entity, meshComponent);
+            }
             return entity;
+        }
+
+        /// <summary>
+        /// Stores PS2- and PSP-only MeshComponent tessellation settings for one scaled Level 1 render-test course object.
+        /// </summary>
+        /// <param name="entity">Entity that owns the MeshComponent and its editor persistence metadata.</param>
+        /// <param name="meshComponent">Course MeshComponent that should receive component-only tessellation settings.</param>
+        void ApplyConstrainedPlatformTessellation(Entity entity, MeshComponent meshComponent) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (meshComponent == null) {
+                throw new ArgumentNullException(nameof(meshComponent));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            EntityComponentSaveState saveState = saveComponent.GetOrCreateComponentState(meshComponent);
+            MeshComponentTessellationSettings settings = new MeshComponentTessellationSettings(true, TiltTrialRenderTestTessellationMaxEdgeLength);
+            MeshComponentTessellationSettingsServiceValue.SetForPlatform(saveState, Ps2PlatformId, settings);
+            MeshComponentTessellationSettingsServiceValue.SetForPlatform(saveState, PspPlatformId, settings);
         }
 
         /// <summary>
@@ -1583,7 +1625,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated kinematic stage piece.</returns>
         Entity CreateLevel01StartPadEntity() {
-            return CreateKinematicCourseBoxEntity("StartPad", new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity);
+            return CreateKinematicCourseBoxEntity("StartPad", new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity, true);
         }
 
         /// <summary>
@@ -1603,7 +1645,7 @@ namespace city.game.tools {
         Entity CreateLevel01RampEntity() {
             float4 orientation;
             float4.CreateFromYawPitchRoll(0f, -0.14f, 0f, out orientation);
-            return CreateKinematicCourseBoxEntity("Ramp", new float3(0f, -0.05f, -0.1f), new float3(6f, 0.9f, 8f), orientation);
+            return CreateKinematicCourseBoxEntity("Ramp", new float3(0f, -0.05f, -0.1f), new float3(6f, 0.9f, 8f), orientation, true);
         }
 
         /// <summary>
@@ -1611,7 +1653,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated kinematic stage piece.</returns>
         Entity CreateLevel01BridgeEntity() {
-            return CreateKinematicCourseBoxEntity("Bridge", new float3(0f, 0.5f, 5.8f), new float3(4.2f, 0.8f, 8.4f), float4.Identity);
+            return CreateKinematicCourseBoxEntity("Bridge", new float3(0f, 0.5f, 5.8f), new float3(4.2f, 0.8f, 8.4f), float4.Identity, true);
         }
 
         /// <summary>
@@ -1635,7 +1677,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated kinematic stage piece.</returns>
         Entity CreateLevel01FinalPlatformEntity() {
-            return CreateKinematicCourseBoxEntity("FinalPlatform", new float3(1.35f, 0.2f, 13.8f), new float3(8.4f, 0.9f, 8.8f), float4.Identity);
+            return CreateKinematicCourseBoxEntity("FinalPlatform", new float3(1.35f, 0.2f, 13.8f), new float3(8.4f, 0.9f, 8.8f), float4.Identity, true);
         }
 
         /// <summary>
@@ -1696,7 +1738,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated kinematic stage piece.</returns>
         Entity CreateLevel01LeftWallEntity() {
-            return CreateKinematicCourseBoxEntity("LeftWall", new float3(-3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity);
+            return CreateKinematicCourseBoxEntity("LeftWall", new float3(-3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity, true);
         }
 
         /// <summary>
@@ -1712,7 +1754,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated kinematic stage piece.</returns>
         Entity CreateLevel01RightWallEntity() {
-            return CreateKinematicCourseBoxEntity("RightWall", new float3(3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity);
+            return CreateKinematicCourseBoxEntity("RightWall", new float3(3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity, true);
         }
 
         /// <summary>
@@ -1798,8 +1840,9 @@ namespace city.game.tools {
         /// <param name="position">Local stage position.</param>
         /// <param name="scale">Full box size.</param>
         /// <param name="orientation">Local stage orientation.</param>
+        /// <param name="enableConstrainedPlatformTessellation">Whether PS2 and PSP should generate a component-specific tessellated model variant.</param>
         /// <returns>Generated kinematic course entity.</returns>
-        Entity CreateKinematicCourseBoxEntity(string name, float3 position, float3 scale, float4 orientation) {
+        Entity CreateKinematicCourseBoxEntity(string name, float3 position, float3 scale, float4 orientation, bool enableConstrainedPlatformTessellation = false) {
             if (string.IsNullOrWhiteSpace(name)) {
                 throw new ArgumentException("Course box names must be provided.", nameof(name));
             }
@@ -1816,6 +1859,9 @@ namespace city.game.tools {
             };
             entity.AddComponent(meshComponent);
             ApplyTiltTrialCourseMaterialReference(entity, meshComponent);
+            if (enableConstrainedPlatformTessellation) {
+                ApplyConstrainedPlatformTessellation(entity, meshComponent);
+            }
             entity.AddComponent(new RigidBody3DComponent {
                 BodyKind = BodyKind3D.Static,
                 UseGravity = false,
@@ -2103,7 +2149,6 @@ namespace city.game.tools {
                 FillColor = fillColor,
                 BorderColor = borderColor,
                 RenderOrder2D = renderOrder2D,
-                LayerMask = 1
             });
             entity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
                 Role = entityName
@@ -2142,7 +2187,6 @@ namespace city.game.tools {
                 FontScale = fontScale,
                 Alignment = alignment,
                 RenderOrder2D = renderOrder2D,
-                LayerMask = 1
             };
             entity.AddComponent(textComponent);
             ApplyFontReference(entity, textComponent, TiltTrialSpeedHudFontRelativePath);

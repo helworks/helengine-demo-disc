@@ -125,7 +125,6 @@ namespace city.rendering.tools {
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(IndicatorLabelWidth, IndicatorLabelHeight),
                 RenderOrder2D = IndicatorRenderOrder,
-                LayerMask = OverlayDrawableLayerMask
             };
             labelEntity.AddComponent(labelComponent);
             ApplyEditorFontReference(labelEntity, labelComponent);
@@ -140,7 +139,6 @@ namespace city.rendering.tools {
                 FillColor = new byte4(255, 255, 255, 255),
                 BorderColor = new byte4(30, 30, 30, 255),
                 RenderOrder2D = IndicatorRenderOrder,
-                LayerMask = OverlayDrawableLayerMask
             });
         }
 

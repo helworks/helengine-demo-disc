@@ -170,6 +170,10 @@ namespace city.menu {
                 }
             }
 
+            if (StartupInputGate.IsBlocked) {
+                return;
+            }
+
             InputSystem inputSystem = Core.Instance.Input;
             HandleKeyboardInput(inputSystem);
             HandleMouseInput(inputSystem);

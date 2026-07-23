@@ -186,7 +186,8 @@ namespace city.rendering.tools {
                 : sceneAssetRelativePath;
             string scenePath = Path.Combine(fullProjectRootPath, "assets", sceneRelativePathToSave.Replace('/', Path.DirectorySeparatorChar));
             NormalizeGeneratedMenuRootInitialPanels(generatedRoots);
-            EditorEntityLayerMaskSnapshot[] hiddenRootSnapshots = HideNonTargetSceneRoots(generatedRoots);
+            MarkGeneratedRootsAsSceneOwned(generatedRoots);
+            EditorEntitySceneOwnershipSnapshot[] hiddenRootSnapshots = HideNonTargetSceneRoots(generatedRoots);
 
             try {
                 saveService.Save(scenePath, sceneSettings ?? new SceneSettingsAsset());
@@ -616,11 +617,55 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Temporarily hides every non-target scene root so the editor serializer only sees the generated roots being written.
+        /// Marks the generated root subtrees as authored scene content before they enter the editor serializer.
+        /// </summary>
+        /// <param name="generatedRoots">Generated roots that should participate in scene serialization.</param>
+        void MarkGeneratedRootsAsSceneOwned(Entity[] generatedRoots) {
+            if (generatedRoots == null) {
+                throw new ArgumentNullException(nameof(generatedRoots));
+            }
+
+            for (int index = 0; index < generatedRoots.Length; index++) {
+                if (generatedRoots[index] is not EditorEntity editorEntity) {
+                    throw new InvalidOperationException("Generated scene roots must be EditorEntity instances.");
+                }
+
+                MarkSceneSubtreeAsOwned(editorEntity);
+            }
+        }
+
+        /// <summary>
+        /// Marks editor entities within one non-internal generated subtree as authored scene content.
+        /// </summary>
+        /// <param name="entity">Generated editor entity whose subtree should be marked.</param>
+        void MarkSceneSubtreeAsOwned(EditorEntity entity) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            }
+            if (entity.InternalEntity) {
+                return;
+            }
+
+            entity.IsSceneOwned = true;
+            if (entity.Children == null) {
+                return;
+            }
+
+            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                if (entity.Children[childIndex] is not EditorEntity childEntity) {
+                    continue;
+                }
+
+                MarkSceneSubtreeAsOwned(childEntity);
+            }
+        }
+
+        /// <summary>
+        /// Temporarily removes every non-target authored scene root from serializer ownership so only generated roots are written.
         /// </summary>
         /// <param name="generatedRoots">Generated roots that should remain visible to the serializer.</param>
         /// <returns>Snapshots used to restore the hidden roots.</returns>
-        EditorEntityLayerMaskSnapshot[] HideNonTargetSceneRoots(Entity[] generatedRoots) {
+        EditorEntitySceneOwnershipSnapshot[] HideNonTargetSceneRoots(Entity[] generatedRoots) {
             if (generatedRoots == null) {
                 throw new ArgumentNullException(nameof(generatedRoots));
             }
@@ -632,7 +677,7 @@ namespace city.rendering.tools {
                 }
             }
 
-            List<EditorEntityLayerMaskSnapshot> snapshots = new List<EditorEntityLayerMaskSnapshot>();
+            List<EditorEntitySceneOwnershipSnapshot> snapshots = new List<EditorEntitySceneOwnershipSnapshot>();
             List<Entity> liveEntities = Core.Instance.ObjectManager.Entities;
             for (int index = 0; index < liveEntities.Count; index++) {
                 if (liveEntities[index] is not EditorEntity editorEntity) {
@@ -643,28 +688,28 @@ namespace city.rendering.tools {
                     continue;
                 } else if (editorEntity.InternalEntity) {
                     continue;
-                } else if (editorEntity.LayerMask != EditorLayerMasks.SceneObjects) {
+                } else if (!editorEntity.IsSceneOwned) {
                     continue;
                 }
 
-                snapshots.Add(new EditorEntityLayerMaskSnapshot(editorEntity, editorEntity.LayerMask));
-                editorEntity.LayerMask = 0;
+                snapshots.Add(new EditorEntitySceneOwnershipSnapshot(editorEntity, editorEntity.IsSceneOwned));
+                editorEntity.IsSceneOwned = false;
             }
 
             return snapshots.ToArray();
         }
 
         /// <summary>
-        /// Restores the user scene roots that were temporarily hidden during scene save.
+        /// Restores authored-scene ownership for user scene roots temporarily excluded during generated scene save.
         /// </summary>
         /// <param name="snapshots">Root snapshots captured before the save operation.</param>
-        void RestoreHiddenUserSceneRoots(EditorEntityLayerMaskSnapshot[] snapshots) {
+        void RestoreHiddenUserSceneRoots(EditorEntitySceneOwnershipSnapshot[] snapshots) {
             if (snapshots == null) {
                 return;
             }
 
             for (int index = 0; index < snapshots.Length; index++) {
-                snapshots[index].Entity.LayerMask = snapshots[index].LayerMask;
+                snapshots[index].Entity.IsSceneOwned = snapshots[index].IsSceneOwned;
             }
         }
 

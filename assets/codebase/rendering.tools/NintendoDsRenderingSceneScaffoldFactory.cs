@@ -39,7 +39,7 @@ namespace city.rendering.tools {
         const byte RuntimeLayerMask = 0b00000001;
 
         /// <summary>
-        /// Authored editor layer mask required for generated scene entities to persist through the scene save pipeline.
+        /// Runtime layer mask used by generated bottom-screen entities so the Nintendo DS cameras can render them.
         /// </summary>
         const ushort PersistedSceneLayerMask = EditorLayerMasks.SceneObjects;
 
@@ -54,10 +54,6 @@ namespace city.rendering.tools {
         const int ScreenHeight = 192;
 
         /// <summary>
-        /// Stable project-relative texture path used by the scaffold-owned Nintendo DS back button body.
-        /// </summary>
-        const string NintendoDsBackButtonTexturePath = "images/menu/ds-back-button.png";
-
         /// <summary>
         /// Fixed width used by the scaffold-owned Nintendo DS back button body.
         /// </summary>
@@ -141,7 +137,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Fixed square size used by the scaffold-owned Nintendo DS light swatch.
         /// </summary>
-        const int NintendoDsLightSwatchSize = 20;
+        const int NintendoDsLightSwatchSize = 16;
 
         /// <summary>
         /// Render order used by the scaffold-owned Nintendo DS light swatch so it remains visible above the button body and below its label.
@@ -683,13 +679,7 @@ namespace city.rendering.tools {
             lightButtonEntity.LayerMask = PersistedSceneLayerMask;
             lightButtonEntity.Static = true;
 
-            SpriteComponent spriteComponent = new SpriteComponent {
-                Size = new int2(NintendoDsBackButtonWidth, NintendoDsBackButtonHeight),
-                RenderOrder2D = NintendoDsBackButtonSpriteRenderOrder,
-                LayerMask = RuntimeLayerMask
-            };
-            lightButtonEntity.AddComponent(spriteComponent);
-            ApplyTextureReference(lightButtonEntity, spriteComponent, NintendoDsBackButtonTexturePath);
+            CreateBottomScreenButtonBody(lightButtonEntity);
             CreateBottomScreenButtonBorder(lightButtonEntity);
 
             InteractableComponent interactableComponent = new InteractableComponent {
@@ -711,7 +701,6 @@ namespace city.rendering.tools {
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(NintendoDsLightButtonLabelWidth, NintendoDsLightButtonLabelHeight),
                 RenderOrder2D = NintendoDsBackButtonLabelRenderOrder,
-                LayerMask = RuntimeLayerMask
             };
             lightButtonLabelEntity.AddComponent(labelComponent);
             ApplyFontReference(lightButtonLabelEntity, labelComponent);
@@ -728,7 +717,6 @@ namespace city.rendering.tools {
                 FillColor = new byte4(255, 255, 255, 255),
                 BorderColor = new byte4(30, 30, 30, 255),
                 RenderOrder2D = NintendoDsLightSwatchRenderOrder,
-                LayerMask = RuntimeLayerMask
             });
         }
 
@@ -749,13 +737,7 @@ namespace city.rendering.tools {
             backButtonEntity.LayerMask = PersistedSceneLayerMask;
             backButtonEntity.Static = true;
 
-            SpriteComponent spriteComponent = new SpriteComponent {
-                Size = new int2(NintendoDsBackButtonWidth, NintendoDsBackButtonHeight),
-                RenderOrder2D = NintendoDsBackButtonSpriteRenderOrder,
-                LayerMask = RuntimeLayerMask
-            };
-            backButtonEntity.AddComponent(spriteComponent);
-            ApplyTextureReference(backButtonEntity, spriteComponent, NintendoDsBackButtonTexturePath);
+            CreateBottomScreenButtonBody(backButtonEntity);
             CreateBottomScreenButtonBorder(backButtonEntity);
 
             InteractableComponent interactableComponent = new InteractableComponent {
@@ -777,11 +759,29 @@ namespace city.rendering.tools {
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(NintendoDsBackButtonLabelWidth, NintendoDsBackButtonLabelHeight),
                 RenderOrder2D = NintendoDsBackButtonLabelRenderOrder,
-                LayerMask = RuntimeLayerMask
             };
             backButtonLabelEntity.AddComponent(labelComponent);
             ApplyFontReference(backButtonLabelEntity, labelComponent);
             ApplyNintendo3DsButtonLabelOverride(backButtonLabelEntity, labelComponent);
+        }
+
+        /// <summary>
+        /// Adds a palette-free solid body to one DS action button so the control remains visible after scene sprites consume OBJ palette banks.
+        /// </summary>
+        /// <param name="buttonEntity">Bottom-screen action-button entity receiving the body.</param>
+        void CreateBottomScreenButtonBody(Entity buttonEntity) {
+            if (buttonEntity == null) {
+                throw new ArgumentNullException(nameof(buttonEntity));
+            }
+
+            buttonEntity.AddComponent(new RoundedRectComponent {
+                Size = new int2(NintendoDsBackButtonWidth, NintendoDsBackButtonHeight),
+                Radius = 3f,
+                BorderThickness = 0f,
+                FillColor = new byte4(48, 29, 65, 255),
+                BorderColor = new byte4(48, 29, 65, 255),
+                RenderOrder2D = NintendoDsBackButtonSpriteRenderOrder,
+            });
         }
 
         /// <summary>
@@ -804,7 +804,6 @@ namespace city.rendering.tools {
                 FillColor = new byte4(0, 0, 0, 0),
                 BorderColor = new byte4(201, 147, 255, 255),
                 RenderOrder2D = NintendoDsBottomButtonBorderRenderOrder,
-                LayerMask = RuntimeLayerMask
             });
         }
 

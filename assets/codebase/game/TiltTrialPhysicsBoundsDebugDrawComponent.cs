@@ -1,6 +1,7 @@
 using helengine;
 
 namespace city.game {
+#if DESKTOP_PLATFORM
     /// <summary>
     /// Toggles one Windows-only physics-bounds debug overlay that draws wireframe bounds around supported collider volumes.
     /// </summary>
@@ -453,4 +454,15 @@ namespace city.game {
             public Entity VisualEntity { get; }
         }
     }
+#else
+    /// <summary>
+    /// Preserves the serialized Windows-only bounds-debug component reference on non-desktop builds without retaining its shader-backed diagnostic implementation.
+    /// </summary>
+    public sealed class TiltTrialPhysicsBoundsDebugDrawComponent : UpdateComponent {
+        /// <summary>
+        /// Gets whether the Windows-only diagnostic overlay is visible on this runtime.
+        /// </summary>
+        public bool Visible => false;
+    }
+#endif
 }

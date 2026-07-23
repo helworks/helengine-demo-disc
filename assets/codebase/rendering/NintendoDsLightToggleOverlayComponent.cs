@@ -9,6 +9,11 @@ namespace city.rendering {
         const int OffLightStateIndex = 5;
 
         /// <summary>
+        /// Stable size used by the scaffold-owned small light-state swatch.
+        /// </summary>
+        const int IndicatorSwatchSize = 16;
+
+        /// <summary>
         /// White light color used by the first cycle state and startup normalization.
         /// </summary>
         static readonly float4 WhiteLightColor = new float4(1f, 1f, 1f, 1f);
@@ -252,7 +257,7 @@ namespace city.rendering {
                 throw new InvalidOperationException("NintendoDsLightToggleOverlayComponent requires an initialized input system.");
             }
 
-            return inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.RightShoulder);
+            return inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.North);
         }
 
         /// <summary>
@@ -367,7 +372,9 @@ namespace city.rendering {
 
             if (entity.Components != null) {
                 for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                    if (entity.Components[componentIndex] is RoundedRectComponent roundedRectComponent) {
+                    if (entity.Components[componentIndex] is RoundedRectComponent roundedRectComponent
+                        && roundedRectComponent.Size.X == IndicatorSwatchSize
+                        && roundedRectComponent.Size.Y == IndicatorSwatchSize) {
                         return roundedRectComponent;
                     }
                 }

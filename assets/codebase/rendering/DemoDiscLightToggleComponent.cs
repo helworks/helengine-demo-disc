@@ -306,7 +306,7 @@ namespace city.rendering {
             }
 
             return inputSystem.WasKeyPressed(Keys.L)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.RightShoulder);
+                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.North);
         }
     }
 }

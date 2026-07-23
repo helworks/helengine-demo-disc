@@ -18,6 +18,7 @@ namespace city.tests {
 
             Assert.Contains("const Keys ToggleKey = Keys.F3;", source, StringComparison.Ordinal);
             Assert.Contains("const string WindowsPlatformId = \"windows\";", source, StringComparison.Ordinal);
+            Assert.Contains("#if DESKTOP_PLATFORM", source, StringComparison.Ordinal);
             Assert.Contains("core.Input.WasKeyPressed(ToggleKey)", source, StringComparison.Ordinal);
             Assert.Contains("core.Input.IsKeyDown(ToggleKey)", source, StringComparison.Ordinal);
             Assert.Contains("string.Equals(core.PlatformInfo.Name, WindowsPlatformId, StringComparison.OrdinalIgnoreCase)", source, StringComparison.Ordinal);

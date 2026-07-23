@@ -14,6 +14,16 @@ namespace city.rendering {
         const double MinimumOrbitRadius = 0.001d;
 
         /// <summary>
+        /// Maximum orbit radius allowed while manually zooming the camera out.
+        /// </summary>
+        const double MaximumOrbitRadius = 100d;
+
+        /// <summary>
+        /// Orbit-radius units traversed per second while a zoom control is held.
+        /// </summary>
+        const double ManualZoomSpeed = 5d;
+
+        /// <summary>
         /// Gets or sets the world-space orbit center that the camera should circle around.
         /// </summary>
         public float3 OrbitCenter { get; set; }
@@ -126,7 +136,10 @@ namespace city.rendering {
             double elapsedSeconds = core.FrameDeltaSeconds;
             double yawInput = ResolveYawInput(inputSystem);
             double pitchInput = ResolvePitchInput(inputSystem);
-            bool hasManualInput = Math.Abs(yawInput) > 0.0001d || Math.Abs(pitchInput) > 0.0001d;
+            double zoomInput = ResolveZoomInput(inputSystem);
+            bool hasManualInput = Math.Abs(yawInput) > 0.0001d
+                || Math.Abs(pitchInput) > 0.0001d
+                || Math.Abs(zoomInput) > 0.0001d;
 
             if (hasManualInput) {
                 IdleElapsedSeconds = 0d;
@@ -134,6 +147,7 @@ namespace city.rendering {
                 CurrentYawRadians += (float)(yawInput * ManualYawSpeedRadians * elapsedSeconds);
                 CurrentPitchRadians -= (float)(pitchInput * ManualPitchSpeedRadians * elapsedSeconds);
                 CurrentPitchRadians = ClampPitch(CurrentPitchRadians);
+                CurrentOrbitRadius = (float)Math.Clamp(CurrentOrbitRadius + (zoomInput * ManualZoomSpeed * elapsedSeconds), MinimumOrbitRadius, MaximumOrbitRadius);
             } else {
                 IdleElapsedSeconds += elapsedSeconds;
                 if (IdleElapsedSeconds >= IdleReturnDelaySeconds) {
@@ -242,6 +256,38 @@ namespace city.rendering {
             }
 
             return Math.Clamp(keyboardPitch + gamepadPitch, -1d, 1d);
+        }
+
+        /// <summary>
+        /// Resolves the normalized zoom input from keyboard Q/E keys and controller shoulder buttons.
+        /// </summary>
+        /// <param name="inputSystem">Input system supplying current frame input.</param>
+        /// <returns>Normalized zoom input where positive values zoom out and negative values zoom in.</returns>
+        double ResolveZoomInput(InputSystem inputSystem) {
+            if (inputSystem == null) {
+                throw new ArgumentNullException(nameof(inputSystem));
+            }
+
+            double keyboardZoom = 0d;
+            if (inputSystem.IsKeyDown(Keys.Q)) {
+                keyboardZoom += 1d;
+            }
+            if (inputSystem.IsKeyDown(Keys.E)) {
+                keyboardZoom -= 1d;
+            }
+
+            InputGamepadState gamepadState = inputSystem.GetGamepadState(0);
+            double gamepadZoom = 0d;
+            if (gamepadState.Connected) {
+                if (gamepadState.IsButtonDown(InputGamepadButton.LeftShoulder)) {
+                    gamepadZoom += 1d;
+                }
+                if (gamepadState.IsButtonDown(InputGamepadButton.RightShoulder)) {
+                    gamepadZoom -= 1d;
+                }
+            }
+
+            return Math.Clamp(keyboardZoom + gamepadZoom, -1d, 1d);
         }
 
         /// <summary>

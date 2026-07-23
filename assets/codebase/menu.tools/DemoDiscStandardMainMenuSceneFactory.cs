@@ -350,7 +350,6 @@ namespace city.menu.tools {
                 FillColor = visibleIndex == 0 ? selectedFillColor : idleFillColor,
                 BorderColor = visibleIndex == 0 ? selectedBorderColor : idleBorderColor,
                 RenderOrder2D = 33,
-                LayerMask = RuntimeLayerMask
             });
 
             CreateTextEntity(
@@ -364,7 +363,9 @@ namespace city.menu.tools {
                 34,
                 null,
                 2f,
-                true);
+                true,
+                definition.SurfaceBorderColor,
+                2f);
         }
 
         /// <summary>
@@ -381,7 +382,9 @@ namespace city.menu.tools {
         /// <param name="anchorComponent">Optional anchor component attached to the entity.</param>
         /// <param name="fontScale">Uniform glyph scale applied to the authored text component.</param>
         /// <param name="isStatic">Whether the authored text entity should be marked static for runtime caching.</param>
-        void CreateTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true) {
+        /// <param name="outlineColor">Optional text outline color.</param>
+        /// <param name="outlineScale">Optional text outline scale.</param>
+        void CreateTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, byte4 outlineColor = default, float outlineScale = 0f) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -401,7 +404,8 @@ namespace city.menu.tools {
                 Size = size,
                 FontScale = fontScale,
                 RenderOrder2D = renderOrder2D,
-                LayerMask = RuntimeLayerMask
+                OutlineColor = outlineColor,
+                OutlineScale = outlineScale,
             };
             entity.AddComponent(textComponent);
             ApplyFontReference(entity, textComponent, fontPath);
@@ -445,7 +449,6 @@ namespace city.menu.tools {
                 Size = size,
                 FontScale = fontScale,
                 RenderOrder2D = renderOrder2D,
-                LayerMask = RuntimeLayerMask,
                 ConvertTextToSprite = convertTextToSprite
             };
             entity.AddComponent(textComponent);
@@ -485,7 +488,6 @@ namespace city.menu.tools {
                 FillColor = fillColor,
                 BorderColor = borderColor,
                 RenderOrder2D = renderOrder2D,
-                LayerMask = RuntimeLayerMask
             });
 
             return entity;
@@ -507,7 +509,6 @@ namespace city.menu.tools {
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = new int2(overlayImage.Width, overlayImage.Height),
                 RenderOrder2D = 28,
-                LayerMask = RuntimeLayerMask
             };
             entity.AddComponent(spriteComponent);
             ApplyTextureReference(entity, spriteComponent, overlayImage.TexturePath);
