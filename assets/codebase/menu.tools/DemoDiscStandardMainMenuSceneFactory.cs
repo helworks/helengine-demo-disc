@@ -207,12 +207,15 @@ namespace city.menu.tools {
 
             Entity generatedRootEntity = Core.Instance.EntityFactory.CreateChild(entity, DemoMenuLayout.GeneratedRootEntityName);
 
+            CreateAnimatedBackgroundEntity(generatedRootEntity, definition);
+
             if (definition.OverlayImage != null) {
                 CreateOverlayImageEntity(generatedRootEntity, definition.OverlayImage);
             }
             if (definition.PlatformInfoOverlay != null) {
                 CreatePlatformInfoOverlayEntity(generatedRootEntity, definition, definition.PlatformInfoOverlay);
             }
+            CreateFooterIdentityEntity(generatedRootEntity, definition);
 
             for (int panelIndex = 0; panelIndex < definition.Panels.Length; panelIndex++) {
                 CreatePanelEntity(generatedRootEntity, definition, definition.Panels[panelIndex]);
@@ -384,7 +387,7 @@ namespace city.menu.tools {
         /// <param name="isStatic">Whether the authored text entity should be marked static for runtime caching.</param>
         /// <param name="outlineColor">Optional text outline color.</param>
         /// <param name="outlineScale">Optional text outline scale.</param>
-        void CreateTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, byte4 outlineColor = default, float outlineScale = 0f) {
+        Entity CreateTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, byte4 outlineColor = default, float outlineScale = 0f) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -413,6 +416,49 @@ namespace city.menu.tools {
             if (anchorComponent != null) {
                 entity.AddComponent(anchorComponent);
             }
+
+            return entity;
+        }
+
+        /// <summary>
+        /// Creates the subtle grid and scanline layers that animate behind every standard menu visual.
+        /// </summary>
+        /// <param name="generatedRootEntity">Generated menu subtree that owns the background layers.</param>
+        /// <param name="definition">Menu definition that provides the established accent palette.</param>
+        void CreateAnimatedBackgroundEntity(Entity generatedRootEntity, MenuDefinition definition) {
+            if (generatedRootEntity == null) {
+                throw new ArgumentNullException(nameof(generatedRootEntity));
+            } else if (definition == null) {
+                throw new ArgumentNullException(nameof(definition));
+            }
+
+            Entity backgroundEntity = Core.Instance.EntityFactory.CreateChild(generatedRootEntity, "DemoDiscAnimatedBackground");
+            backgroundEntity.Static = false;
+            Entity gridEntity = Core.Instance.EntityFactory.CreateChild(backgroundEntity, "DemoDiscAnimatedBackgroundGrid");
+            gridEntity.Static = false;
+            Entity scanlineEntity = Core.Instance.EntityFactory.CreateChild(backgroundEntity, "DemoDiscAnimatedBackgroundScanlines");
+            scanlineEntity.Static = false;
+            byte4 gridColor = new byte4(126, 87, 164, 28);
+            byte4 scanlineColor = new byte4(224, 193, 255, 12);
+
+            for (int x = -48; x <= DemoMenuLayout.CanvasWidth + 48; x += 48) {
+                CreateBackgroundEntity(gridEntity, $"DemoDiscAnimatedBackgroundGridVertical{x}", new float3(x, -48f, 0f), new int2(1, DemoMenuLayout.CanvasHeight + 96), 0f, 0f, gridColor, gridColor, 2);
+            }
+            for (int y = -48; y <= DemoMenuLayout.CanvasHeight + 48; y += 48) {
+                CreateBackgroundEntity(gridEntity, $"DemoDiscAnimatedBackgroundGridHorizontal{y}", new float3(-48f, y, 0f), new int2(DemoMenuLayout.CanvasWidth + 96, 1), 0f, 0f, gridColor, gridColor, 2);
+            }
+            for (int y = -8; y <= DemoMenuLayout.CanvasHeight + 8; y += 8) {
+                CreateBackgroundEntity(scanlineEntity, $"DemoDiscAnimatedBackgroundScanline{y}", new float3(0f, y, 0.1f), new int2(DemoMenuLayout.CanvasWidth, 1), 0f, 0f, scanlineColor, scanlineColor, 3);
+            }
+
+            backgroundEntity.AddComponent(new MenuBackgroundMotionComponent {
+                GridEntityReference = CreateEntityReference(gridEntity),
+                ScanlineEntityReference = CreateEntityReference(scanlineEntity),
+                GridPeriod = 48f,
+                ScanlinePeriod = 8f,
+                GridPixelsPerSecond = 0.6f,
+                ScanlinePixelsPerSecond = 0.2f
+            });
         }
 
         /// <summary>
@@ -548,10 +594,58 @@ namespace city.menu.tools {
             anchorComponent.LayoutSpace = LayoutComponent.CameraViewportLayoutSpace;
             anchorComponent.SetAnchorDistances(right: platformInfoOverlay.RightMargin, top: platformInfoOverlay.TopMargin);
             entity.AddComponent(anchorComponent);
-            entity.AddComponent(new PlatformInfoTextComponent());
+            CreateTextEntity(entity, "DemoDiscTitleHelengineText", new float3(-300f, 0f, 0.1f), "HELENGINE", definition.BodyFontPath, definition.TextColor, new int2(280, 28), 42, null, 2f, false, definition.SurfaceBorderColor, 2f);
+            CreateTextEntity(entity, "DemoDiscTitleDemoDiscText", new float3(-280f, 64f, 0.1f), "DEMO DISC", definition.BodyFontPath, definition.MutedTextColor, new int2(280, 28), 42, null, 2f, false, definition.SurfaceBorderColor, 2f);
+        }
 
-            CreateTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(0f, 0f, 0.1f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, null, 2f, false);
-            CreateTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(0f, platformInfoOverlay.LineSpacing, 0.1f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(1, 1), 42, null, 2f, false);
+        /// <summary>
+        /// Creates the static maker signature anchored at the bottom-left of the standard menu viewport.
+        /// </summary>
+        /// <param name="generatedRootEntity">Generated menu subtree that owns the footer.</param>
+        /// <param name="definition">Menu definition that provides the shared body font and muted text color.</param>
+        void CreateFooterIdentityEntity(Entity generatedRootEntity, MenuDefinition definition) {
+            if (generatedRootEntity == null) {
+                throw new ArgumentNullException(nameof(generatedRootEntity));
+            } else if (definition == null) {
+                throw new ArgumentNullException(nameof(definition));
+            }
+
+            Entity entity = CreateBackgroundEntity(generatedRootEntity, "DemoDiscFooterIdentitySurface", new float3(0f, 0f, 0f), new int2(DemoMenuLayout.CanvasWidth, 42), 0f, 0f, definition.SurfaceColor, definition.SurfaceColor, 50);
+            LayoutComponent anchorComponent = new LayoutComponent {
+                LayoutSpace = LayoutComponent.CameraViewportLayoutSpace
+            };
+            anchorComponent.SetAnchorDistances(left: 0f, bottom: 8f);
+            entity.AddComponent(anchorComponent);
+            CreateBackgroundEntity(entity, "DemoDiscFooterIdentityTopBorder", new float3(0f, 0f, 0.1f), new int2(DemoMenuLayout.CanvasWidth, 1), 0f, 0f, definition.MutedTextColor, definition.MutedTextColor, 51);
+            CreateBackgroundEntity(entity, "DemoDiscFooterIdentityBottomBorder", new float3(0f, 41f, 0.1f), new int2(DemoMenuLayout.CanvasWidth, 1), 0f, 0f, definition.MutedTextColor, definition.MutedTextColor, 51);
+            Entity footerTextEntity = CreateTextEntity(entity, "DemoDiscFooterIdentityText", new float3(DemoMenuLayout.CanvasWidth, 2f, 0.2f), "MADE BY HELENA / HELEN OF CODE", definition.BodyFontPath, definition.MutedTextColor, new int2(420, 20), 52, null, 1f, false);
+            entity.AddComponent(new FooterIdentityMarqueeComponent {
+                TextEntityReference = CreateEntityReference(footerTextEntity),
+                StripWidth = DemoMenuLayout.CanvasWidth,
+                TextWidth = 420f,
+                PixelsPerSecond = 70f,
+                ReferenceViewportWidth = DemoMenuLayout.CanvasWidth
+            });
+        }
+
+        /// <summary>
+        /// Creates a stable serialized scene entity reference, allocating an id for newly authored generated entities when required.
+        /// </summary>
+        /// <param name="entity">Generated entity that should receive a stable serialized reference.</param>
+        /// <returns>Stable reference that resolves the entity after scene loading.</returns>
+        SceneEntityReference CreateEntityReference(Entity entity) {
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            if (saveComponent.EntityId == 0u) {
+                if (Core.Instance is not EditorCore editorCore || editorCore.SceneEntityIdAllocator == null) {
+                    throw new InvalidOperationException("Generated scene entity references require an initialized editor scene id allocator.");
+                }
+
+                saveComponent.EntityId = editorCore.SceneEntityIdAllocator.Allocate();
+            }
+
+            return new SceneEntityReference {
+                EntityId = saveComponent.EntityId
+            };
         }
 
         /// <summary>

@@ -31,7 +31,7 @@ namespace city.menu {
         /// <summary>
         /// Gets the decorative logo bottom margin in authored canvas pixels.
         /// </summary>
-        public int LogoBottomMargin => 36;
+        public int LogoBottomMargin => 76;
 
         /// <summary>
         /// Gets the decorative logo right margin in authored canvas pixels.
