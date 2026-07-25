@@ -1,0 +1,8 @@
+{
+  "moduleId": "menu",
+  "dependencyModuleIds": [],
+  "loadScopes": [
+    "always-loaded"
+  ],
+  "moduleKind": "runtime"
+}

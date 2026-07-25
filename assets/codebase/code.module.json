@@ -1,0 +1,12 @@
+{
+  "moduleId": "gameplay",
+  "dependencyModuleIds": [
+    "game",
+    "menu",
+    "rendering"
+  ],
+  "loadScopes": [
+    "always-loaded"
+  ],
+  "moduleKind": "runtime"
+}
