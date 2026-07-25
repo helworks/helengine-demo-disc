@@ -1,8 +1,0 @@
-{
-  "moduleId": "rendering",
-  "dependencyModuleIds": [],
-  "loadScopes": [
-    "always-loaded"
-  ],
-  "moduleKind": "runtime"
-}
