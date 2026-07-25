@@ -50,6 +50,11 @@ namespace city.game {
         public int SelectedIndex { get; private set; }
 
         /// <summary>
+        /// Gets or sets whether the selector may process navigation and activation input.
+        /// </summary>
+        public bool AcceptsInput { get; set; } = true;
+
+        /// <summary>
         /// Gets or sets whether accepting a level opens a separate details stage before play.
         /// </summary>
         public bool UseDetailsStage { get; set; }
@@ -71,6 +76,10 @@ namespace city.game {
 
             if (Parent == null) {
                 throw new InvalidOperationException("TiltTrialLevelSelectComponent requires an attached selector root entity.");
+            }
+
+            if (!AcceptsInput) {
+                return;
             }
 
             IReadOnlyList<TiltTrialLevelCatalogEntry> levels = LevelEntries;

@@ -7,7 +7,7 @@ namespace city.tests {
         public void Game_scene_generator_writes_selectors_and_presentation_blueprints_without_gameplay_levels() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
 
-            Assert.Contains("CreateTiltTrialLevelSelectScene()", source, StringComparison.Ordinal);
+            Assert.Contains("CreateTiltTrialScene()", source, StringComparison.Ordinal);
             Assert.Contains("sceneWriteService.WriteScene(projectRootPath, tiltTrialLevelSelectScene);", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialGameplayPresentationBlueprintGenerator", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialHandheldLevelSelectSceneFactory", source, StringComparison.Ordinal);
@@ -48,6 +48,25 @@ namespace city.tests {
             Assert.Contains("ConfigureTiltTrialGoalTarget(stageRootEntity, playerSphereEntity);", source, StringComparison.Ordinal);
             Assert.Contains("if (parent.Children[childIndex] is EditorEntity childEntity", source, StringComparison.Ordinal);
             Assert.DoesNotContain("child?.Name", source, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Verifies the Tilt Trial front door is generated as a title shell before the existing level selector.
+        /// </summary>
+        [Fact]
+        public void Tilt_trial_front_door_generates_title_options_and_level_select_panels() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+
+            Assert.Contains("CreateTiltPlayShellUiEntity()", source, StringComparison.Ordinal);
+            Assert.Contains("\"TiltPlayTitlePanel\"", source, StringComparison.Ordinal);
+            Assert.Contains("\"TILT PLAY\"", source, StringComparison.Ordinal);
+            Assert.Contains("\"TiltPlayOptionsPanel\"", source, StringComparison.Ordinal);
+            Assert.Contains("\"Settings coming soon\"", source, StringComparison.Ordinal);
+            Assert.Contains("\"TiltPlayLevelSelectPanel\"", source, StringComparison.Ordinal);
+            Assert.Contains("new city.game.TiltPlayMenuComponent()", source, StringComparison.Ordinal);
+            Assert.Contains("new city.game.TiltPlayMenuActionComponent", source, StringComparison.Ordinal);
+            Assert.Contains("new float3(12f, 2f, 0.1f)", source, StringComparison.Ordinal);
+            Assert.Contains("new int2(size.X - 24, size.Y - 4)", source, StringComparison.Ordinal);
         }
 
         /// <summary>

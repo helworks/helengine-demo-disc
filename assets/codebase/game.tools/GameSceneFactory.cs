@@ -189,7 +189,15 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated authored scene definition for Tilt Trial.</returns>
         public GeneratedAuthoringSceneDefinition CreateTiltTrialScene() {
-            return CreateTiltTrialLevelSelectScene();
+            return new GeneratedAuthoringSceneDefinition {
+                SceneId = GameSceneCatalog.TiltTrialSceneId,
+                SceneAssetRelativePath = TiltTrialLevelSelectSceneAssetRelativePath,
+                SceneSettings = new SceneSettingsAsset(),
+                RootEntities = [
+                    CreateLevelSelectCameraEntity(),
+                    CreateTiltPlayShellUiEntity()
+                ]
+            };
         }
 
         /// <summary>
@@ -226,6 +234,49 @@ namespace city.game.tools {
                     CreateLevelSelectUiEntity()
                 ]
             };
+        }
+
+        /// <summary>
+        /// Creates the generated Tilt Play front-door shell containing title, placeholder options, and level-selector panels.
+        /// </summary>
+        /// <returns>Generated authoring root for the Tilt Play front-door UI.</returns>
+        EditorEntity CreateTiltPlayShellUiEntity() {
+            Entity shell = Core.Instance.EntityFactory.Create("TiltPlayShellUi");
+            shell.LayerMask = EditorLayerMasks.SceneObjects;
+            shell.AddComponent(new city.game.TiltPlayMenuComponent());
+            shell.AddComponent(new ViewportComponent {
+                BindingMode = ViewportComponent.ScreenBindingMode,
+                FixedSize = new int2(1280, 720)
+            });
+            shell.AddComponent(new ReferenceCanvasFitComponent {
+                ReferenceWidth = 1280,
+                ReferenceHeight = 720
+            });
+
+            Entity titlePanel = CreateRoundedPanelEntity(shell, "TiltPlayTitlePanel", new float3(0f, 0f, 0f), new int2(1280, 720), 0f, 0f, new byte4(18, 29, 45, 255), new byte4(18, 29, 45, 255), 1);
+            CreateUiTextEntity(titlePanel, "TiltPlayTitle", new float3(240f, 220f, 0.1f), "TILT PLAY", new int2(800, 110), 4.5f, 3, new byte4(247, 248, 252, 255), TextAlignment.Center);
+            CreateTiltPlayActionButton(titlePanel, "TiltPlayPlayButton", new float3(420f, 480f, 0.1f), new int2(440, 48), "PLAY", city.game.TiltPlayMenuAction.Play);
+            CreateTiltPlayActionButton(titlePanel, "TiltPlayOptionsButton", new float3(420f, 538f, 0.1f), new int2(440, 48), "OPTIONS", city.game.TiltPlayMenuAction.Options);
+            CreateTiltPlayActionButton(titlePanel, "TiltPlayDemoDiscButton", new float3(420f, 596f, 0.1f), new int2(440, 48), "BACK TO DEMO DISC", city.game.TiltPlayMenuAction.BackToDemoDisc);
+
+            Entity optionsPanel = CreateRoundedPanelEntity(shell, "TiltPlayOptionsPanel", new float3(0f, 0f, 0f), new int2(1280, 720), 0f, 0f, new byte4(18, 29, 45, 255), new byte4(18, 29, 45, 255), 1);
+            optionsPanel.Enabled = false;
+            CreateUiTextEntity(optionsPanel, "TiltPlayOptionsTitle", new float3(240f, 230f, 0.1f), "OPTIONS", new int2(800, 80), 3f, 3, new byte4(247, 248, 252, 255), TextAlignment.Center);
+            CreateUiTextEntity(optionsPanel, "TiltPlayOptionsPlaceholder", new float3(240f, 330f, 0.1f), "Settings coming soon", new int2(800, 48), 1.5f, 3, new byte4(196, 210, 226, 255), TextAlignment.Center);
+            CreateTiltPlayActionButton(optionsPanel, "TiltPlayOptionsBackButton", new float3(420f, 520f, 0.1f), new int2(440, 48), "BACK", city.game.TiltPlayMenuAction.Back);
+
+            Entity levelSelectPanel = CreateLevelSelectUiEntity();
+            levelSelectPanel.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+                Role = "TiltPlayLevelSelectPanel"
+            });
+            levelSelectPanel.Enabled = false;
+            shell.AddChild(levelSelectPanel);
+
+            if (shell is EditorEntity editorEntity) {
+                return editorEntity;
+            }
+
+            throw new InvalidOperationException("Tilt Play shell generation requires editor-authored entities.");
         }
 
         /// <summary>
@@ -607,6 +658,28 @@ namespace city.game.tools {
         }
 
         /// <summary>
+        /// Creates one Tilt Play title-shell action button and its semantic pointer-action bridge.
+        /// </summary>
+        /// <param name="parent">Title-shell panel that owns the button.</param>
+        /// <param name="name">Stable generated button role.</param>
+        /// <param name="position">Button position in the shared reference canvas.</param>
+        /// <param name="size">Button dimensions in authored pixels.</param>
+        /// <param name="label">Visible action label.</param>
+        /// <param name="action">Semantic Tilt Play action emitted on release.</param>
+        /// <returns>Generated action button entity.</returns>
+        Entity CreateTiltPlayActionButton(Entity parent, string name, float3 position, int2 size, string label, city.game.TiltPlayMenuAction action) {
+            Entity buttonEntity = CreateRoundedPanelEntity(parent, name, position, size, 16f, 2f, new byte4(40, 58, 87, 255), new byte4(109, 138, 170, 255), 2);
+            buttonEntity.AddComponent(new InteractableComponent {
+                Size = size
+            });
+            buttonEntity.AddComponent(new city.game.TiltPlayMenuActionComponent {
+                Action = action
+            });
+            CreateUiTextEntity(buttonEntity, name + "Label", new float3(12f, 2f, 0.1f), label, new int2(size.X - 24, size.Y - 4), 1.2f, 3, new byte4(247, 248, 252, 255), TextAlignment.Center);
+            return buttonEntity;
+        }
+
+        /// <summary>
         /// Removes a handheld-only selector action entity from every non-handheld platform cook while retaining the authored DS and 3DS version.
         /// </summary>
         /// <param name="entity">Handheld-only selector action entity to exclude from non-handheld cooks.</param>
@@ -854,7 +927,6 @@ namespace city.game.tools {
         EditorEntity CreateLevelSelectUiEntity() {
             Entity entity = Core.Instance.EntityFactory.Create("TiltTrialLevelSelectUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
             entity.AddComponent(new city.game.TiltTrialLevelSelectComponent {
                 UseDetailsStage = false
             });
