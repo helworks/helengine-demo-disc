@@ -56,5 +56,22 @@ namespace city.game.tools {
             GeneratedAuthoringSceneDefinition zombislayerScene = zombislayerSceneFactory.CreateGameplayScene();
             sceneWriteService.WriteScene(projectRootPath, zombislayerScene);
         }
+
+        /// <summary>
+        /// Regenerates only the Tilt Trial front-door scene without rewriting the other generated game scenes or shared rendering assets.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
+        public void GenerateTiltTrialScene(string projectRootPath) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            }
+
+            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService();
+            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(projectRootPath);
+            GameSceneFactory factory = new GameSceneFactory(assets);
+            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue);
+            GeneratedAuthoringSceneDefinition tiltTrialScene = factory.CreateTiltTrialScene();
+            sceneWriteService.WriteScene(projectRootPath, tiltTrialScene);
+        }
     }
 }

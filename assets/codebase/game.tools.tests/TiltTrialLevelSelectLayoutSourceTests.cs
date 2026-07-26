@@ -54,12 +54,24 @@ namespace city.tests {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
 
             Assert.DoesNotContain("Ps2", source, StringComparison.Ordinal);
-            Assert.Contains("CreateLevelSelectUiEntity()", source, StringComparison.Ordinal);
+            Assert.Contains("CreateLevelSelectUiEntity(useOwnViewport: true)", source, StringComparison.Ordinal);
             Assert.Contains("FixedSize = new int2(1280, 720)", source, StringComparison.Ordinal);
             Assert.Contains("ReferenceWidth = 1280", source, StringComparison.Ordinal);
             Assert.Contains("ReferenceHeight = 720", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialLevelSelectBackButton", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialLevelSelectPlayButton", source, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Ensures the selector embedded in the Tilt Play shell inherits the shell viewport instead of applying a second canvas fit.
+        /// </summary>
+        [Fact]
+        public void Game_scene_factory_uses_shell_viewport_for_embedded_level_selector() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+
+            Assert.Contains("CreateLevelSelectUiEntity(useOwnViewport: false)", source, StringComparison.Ordinal);
+            Assert.Contains("EditorEntity CreateLevelSelectUiEntity(bool useOwnViewport)", source, StringComparison.Ordinal);
+            Assert.Contains("if (useOwnViewport)", source, StringComparison.Ordinal);
         }
 
         /// <summary>

@@ -231,7 +231,7 @@ namespace city.game.tools {
                 SceneSettings = new SceneSettingsAsset(),
                 RootEntities = [
                     CreateLevelSelectCameraEntity(),
-                    CreateLevelSelectUiEntity()
+                    CreateLevelSelectUiEntity(useOwnViewport: true)
                 ]
             };
         }
@@ -265,7 +265,7 @@ namespace city.game.tools {
             CreateUiTextEntity(optionsPanel, "TiltPlayOptionsPlaceholder", new float3(240f, 330f, 0.1f), "Settings coming soon", new int2(800, 48), 1.5f, 3, new byte4(196, 210, 226, 255), TextAlignment.Center);
             CreateTiltPlayActionButton(optionsPanel, "TiltPlayOptionsBackButton", new float3(420f, 520f, 0.1f), new int2(440, 48), "BACK", city.game.TiltPlayMenuAction.Back);
 
-            Entity levelSelectPanel = CreateLevelSelectUiEntity();
+            Entity levelSelectPanel = CreateLevelSelectUiEntity(useOwnViewport: false);
             levelSelectPanel.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
                 Role = "TiltPlayLevelSelectPanel"
             });
@@ -921,23 +921,26 @@ namespace city.game.tools {
         }
 
         /// <summary>
-        /// Creates the authored UI root that drives the dedicated Tilt Trial level-select scene.
+        /// Creates the authored UI root that drives one Tilt Trial level selector.
         /// </summary>
+        /// <param name="useOwnViewport">Whether the selector is a standalone scene root that must fit itself to the live viewport.</param>
         /// <returns>Generated selector UI root entity.</returns>
-        EditorEntity CreateLevelSelectUiEntity() {
+        EditorEntity CreateLevelSelectUiEntity(bool useOwnViewport) {
             Entity entity = Core.Instance.EntityFactory.Create("TiltTrialLevelSelectUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.AddComponent(new city.game.TiltTrialLevelSelectComponent {
                 UseDetailsStage = false
             });
-            entity.AddComponent(new ViewportComponent {
-                BindingMode = ViewportComponent.ScreenBindingMode,
-                FixedSize = new int2(1280, 720)
-            });
-            entity.AddComponent(new ReferenceCanvasFitComponent {
-                ReferenceWidth = 1280,
-                ReferenceHeight = 720
-            });
+            if (useOwnViewport) {
+                entity.AddComponent(new ViewportComponent {
+                    BindingMode = ViewportComponent.ScreenBindingMode,
+                    FixedSize = new int2(1280, 720)
+                });
+                entity.AddComponent(new ReferenceCanvasFitComponent {
+                    ReferenceWidth = 1280,
+                    ReferenceHeight = 720
+                });
+            }
 
             Entity listPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectListPanel", new float3(40f, 92f, 0f), new int2(420, 596), 28f, 3f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
             Entity detailsPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectDetailsPanel", new float3(500f, 72f, 0f), new int2(740, 596), 28f, 3f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
