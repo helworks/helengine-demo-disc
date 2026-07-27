@@ -31,6 +31,16 @@ windows-build-*/
 
 # Local build logs
 *.log
+*.err
+*.exitcode
+*.vpk
+
+# Root-level local build and temporary folders
+/ps2-build-*/
+/vita-build-*/
+/.codex-temp/
+/tmp/
+/tmp_*/
 
 # Local .NET build output
 bin/
