@@ -335,23 +335,34 @@ namespace city.game {
             }
 
             double keyboardYaw = 0d;
+#if DESKTOP_PLATFORM
             if (inputSystem.IsKeyDown(Keys.Left)) {
                 keyboardYaw -= 1d;
             }
             if (inputSystem.IsKeyDown(Keys.Right)) {
                 keyboardYaw += 1d;
             }
+#endif
 
             double gamepadYaw = 0d;
+            bool invertPspShoulderCamera = IsPspPlatform();
             if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.LeftShoulder)) {
-                gamepadYaw -= 1d;
+                gamepadYaw += invertPspShoulderCamera ? 1d : -1d;
             }
             if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.RightShoulder)) {
-                gamepadYaw += 1d;
+                gamepadYaw += invertPspShoulderCamera ? -1d : 1d;
             }
             gamepadYaw += NormalizeStickAxis(city.menu.DemoDiscGamepadInput.GetRightStickX(inputSystem));
 
             return Math.Clamp(keyboardYaw + gamepadYaw, -1d, 1d);
+        }
+
+        /// <summary>
+        /// Returns whether the active runtime platform is PSP, whose shoulder camera direction is reversed.
+        /// </summary>
+        static bool IsPspPlatform() {
+            PlatformInfo platformInfo = Core.Instance?.PlatformInfo;
+            return platformInfo != null && string.Equals(platformInfo.Name, "psp", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -365,12 +376,14 @@ namespace city.game {
             }
 
             double keyboardPitch = 0d;
+#if DESKTOP_PLATFORM
             if (inputSystem.IsKeyDown(Keys.Up)) {
                 keyboardPitch += 1d;
             }
             if (inputSystem.IsKeyDown(Keys.Down)) {
                 keyboardPitch -= 1d;
             }
+#endif
 
             double gamepadPitch = 0d;
             gamepadPitch += -NormalizeStickAxis(city.menu.DemoDiscGamepadInput.GetRightStickY(inputSystem));
