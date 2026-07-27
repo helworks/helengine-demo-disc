@@ -21,8 +21,19 @@ namespace city.menu.tools.tests {
         public void Splash_phase_remains_opaque_during_hold_and_fades_to_transparent() {
             HelenOfCodeSplashComponent component = new HelenOfCodeSplashComponent();
 
-            Assert.Equal(255, component.ResolveAlphaForElapsedSeconds(3.0d));
-            Assert.Equal(0, component.ResolveAlphaForElapsedSeconds(4.5d));
+            Assert.Equal(255, component.ResolveAlphaForElapsedSeconds(3.5d));
+            Assert.Equal(0, component.ResolveAlphaForElapsedSeconds(5d));
+        }
+
+        /// <summary>
+        /// Ensures a synchronous disc read cannot advance the splash timer by multiple seconds in one update.
+        /// </summary>
+        [Fact]
+        public void Splash_animation_caps_disc_load_frame_time() {
+            HelenOfCodeSplashComponent component = new HelenOfCodeSplashComponent();
+
+            Assert.Equal(0.1d, component.ResolveAnimationFrameDeltaSeconds(7d), 10);
+            Assert.Equal(1d / 30d, component.ResolveAnimationFrameDeltaSeconds(1d / 30d), 10);
         }
 
         /// <summary>
@@ -59,7 +70,7 @@ namespace city.menu.tools.tests {
         }
 
         /// <summary>
-        /// Ensures the splash uses the menu's accept inputs to release the gate and unload immediately.
+        /// Ensures the splash releases menu input before it queues its own unload, so input does not depend on deferred disposal timing.
         /// </summary>
         [Fact]
         public void Splash_runtime_source_skips_on_accept_input() {
@@ -76,12 +87,29 @@ namespace city.menu.tools.tests {
             Assert.Contains("inputSystem.WasKeyPressed(Keys.J)", source, StringComparison.Ordinal);
             Assert.Contains("Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept)", source, StringComparison.Ordinal);
             Assert.Contains("DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)", source, StringComparison.Ordinal);
-            Assert.Contains("StartupInputGate.Release()", source, StringComparison.Ordinal);
-            Assert.Contains("Core.Instance.SceneManager.UnloadScene(SplashSceneId)", source, StringComparison.Ordinal);
+            Assert.Contains("SplashUnloadWasRequested = true;\n            StartupInputGate.Release();\n            Core.Instance.SceneManager.UnloadScene(SplashSceneId);", source, StringComparison.Ordinal);
         }
 
         /// <summary>
-        /// Ensures splash input ownership remains held until disposal so the accept event cannot reach the menu in the same frame.
+        /// Ensures a controller state already held when the splash begins cannot be interpreted as a request to skip it.
+        /// </summary>
+        [Fact]
+        public void Splash_runtime_source_ignores_accept_input_on_its_first_update() {
+            string sourcePath = Path.Combine(
+                @"C:\dev\helprojs\demodisc",
+                "assets",
+                "codebase",
+                "menu",
+                "HelenOfCodeSplashComponent.cs");
+            string source = File.ReadAllText(sourcePath);
+
+            Assert.Contains("bool HasCompletedFirstUpdate;", source, StringComparison.Ordinal);
+            Assert.Contains("if (HasCompletedFirstUpdate && IsAcceptPressed())", source, StringComparison.Ordinal);
+            Assert.Contains("HasCompletedFirstUpdate = true;", source, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Ensures disposal also releases the input gate when an external lifecycle path removes the splash.
         /// </summary>
         [Fact]
         public void Splash_runtime_source_releases_input_gate_during_dispose() {

@@ -24,9 +24,17 @@ namespace city.menu {
         public const double FadeDurationSeconds = 0.75d;
 
         /// <summary>
-        /// Duration, in seconds, that the splash remains fully opaque before fading out.
+        /// Hold duration, in seconds, that keeps the splash visible between its two 0.75-second fades.
+        /// The complete splash presentation therefore lasts five seconds.
         /// </summary>
-        public const double HoldDurationSeconds = 3d;
+        public const double HoldDurationSeconds = 3.5d;
+
+        /// <summary>
+        /// Maximum elapsed time that one update may contribute to the splash animation.
+        /// Disc-backed scene loads can block the main thread for several seconds; those
+        /// I/O stalls must not consume the authored splash display interval.
+        /// </summary>
+        public const double MaximumAnimationFrameDeltaSeconds = 0.1d;
 
         /// <summary>
         /// Stable serialized scene reference identifying the full-screen black background entity.
@@ -69,6 +77,11 @@ namespace city.menu {
         bool SplashUnloadWasRequested;
 
         /// <summary>
+        /// Tracks whether the first input snapshot after the splash became active has been observed and must no longer be ignored.
+        /// </summary>
+        bool HasCompletedFirstUpdate;
+
+        /// <summary>
         /// Binds the generated splash sprites and queues the additive main-menu load.
         /// </summary>
         /// <param name="entity">Generated splash root entity that owns the component.</param>
@@ -96,14 +109,16 @@ namespace city.menu {
             base.Update();
 
             RequestMainMenuLoad();
-            if (IsAcceptPressed()) {
+            if (HasCompletedFirstUpdate && IsAcceptPressed()) {
                 RequestSplashUnload();
                 return;
             }
 
+            HasCompletedFirstUpdate = true;
+
             ResolveSpritesWhenNeeded();
             FitBackgroundToViewport();
-            ElapsedSeconds += Core.Instance.FrameDeltaSeconds;
+            ElapsedSeconds += ResolveAnimationFrameDeltaSeconds(Core.Instance.FrameDeltaSeconds);
             int alpha = ResolveAlphaForElapsedSeconds(ElapsedSeconds);
             SetSpriteAlpha(alpha);
 
@@ -114,18 +129,35 @@ namespace city.menu {
         }
 
         /// <summary>
-        /// Determines whether the user pressed one of the menu's established accept inputs this frame.
+        /// Bounds one frame's contribution to splash time so synchronous asset loading cannot skip the presentation.
+        /// </summary>
+        /// <param name="frameDeltaSeconds">Raw elapsed time reported by the platform update loop.</param>
+        /// <returns>The non-negative frame time limited to the splash animation maximum.</returns>
+        public double ResolveAnimationFrameDeltaSeconds(double frameDeltaSeconds) {
+            if (double.IsNaN(frameDeltaSeconds) || double.IsInfinity(frameDeltaSeconds) || frameDeltaSeconds < 0d) {
+                throw new ArgumentOutOfRangeException(nameof(frameDeltaSeconds), "Splash frame time must be finite and non-negative.");
+            }
+
+            return Math.Min(frameDeltaSeconds, MaximumAnimationFrameDeltaSeconds);
+        }
+
+        /// <summary>
+        /// Determines whether the user pressed one of the desktop menu accept inputs this frame.
+        /// Console startup input is intentionally excluded because the first controller snapshot can
+        /// contain a transient button edge while the platform backend is synchronizing hardware state.
         /// </summary>
         /// <returns>True when keyboard, platform, or primary gamepad accept input was pressed.</returns>
         bool IsAcceptPressed() {
+#if !DESKTOP_PLATFORM
+            return false;
+#else
             InputSystem inputSystem = Core.Instance.Input;
-#if DESKTOP_PLATFORM
             if (inputSystem.WasKeyPressed(Keys.Enter) || inputSystem.WasKeyPressed(Keys.Space) || inputSystem.WasKeyPressed(Keys.J)) {
                 return true;
             }
-#endif
             return Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept)
                 || DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South);
+#endif
         }
 
         /// <summary>
@@ -137,6 +169,7 @@ namespace city.menu {
             }
 
             SplashUnloadWasRequested = true;
+            StartupInputGate.Release();
             Core.Instance.SceneManager.UnloadScene(SplashSceneId);
         }
 

@@ -60,8 +60,8 @@ namespace city.menu.tools.tests {
             string source = File.ReadAllText(sourcePath);
 
             Assert.Contains("Entity cameraEntity = CreateCameraEntity();", source, StringComparison.Ordinal);
-            Assert.Contains("CreateSplashRootEntity(cameraEntity)", source, StringComparison.Ordinal);
-            Assert.Contains("Entity CreateSplashRootEntity(Entity parent)", source, StringComparison.Ordinal);
+            Assert.Contains("CreateSplashRootEntity(cameraEntity, backgroundEntity)", source, StringComparison.Ordinal);
+            Assert.Contains("Entity CreateSplashRootEntity(Entity parent, Entity backgroundEntity)", source, StringComparison.Ordinal);
             Assert.Contains("Core.Instance.EntityFactory.CreateChild(parent, SceneId)", source, StringComparison.Ordinal);
             Assert.Contains("BindingMode = ViewportComponent.AncestorCameraBindingMode", source, StringComparison.Ordinal);
         }
@@ -76,6 +76,7 @@ namespace city.menu.tools.tests {
 
             Assert.Contains("Entity backgroundEntity = CreateBackgroundEntity(cameraEntity);", factorySource, StringComparison.Ordinal);
             Assert.Contains("BackgroundRectangle.Size = Core.Instance.RenderManager3D.MainWindowSize", componentSource, StringComparison.Ordinal);
+            Assert.Contains("new CameraClearSettings(\n                    true,", factorySource, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -117,12 +118,15 @@ namespace city.menu.tools.tests {
             SceneAsset scene = Assert.IsType<SceneAsset>(global::helengine.AssetSerializer.Deserialize(stream));
 
             SceneEntityAsset authoredCameraEntity = Assert.Single(authoredScene.RootEntities);
-            SceneEntityAsset authoredSplashRootEntity = Assert.Single(authoredCameraEntity.Children);
+            Assert.Equal(2, authoredCameraEntity.Children.Length);
+            SceneEntityAsset authoredBackgroundEntity = Assert.Single(authoredCameraEntity.Children.Where(entity => entity.Components.Any(component => component.ComponentTypeId == "helengine.RoundedRectComponent")));
+            SceneEntityAsset authoredSplashRootEntity = Assert.Single(authoredCameraEntity.Children.Where(entity => entity.Children.Length == 1));
             SceneEntityAsset cameraEntity = Assert.Single(scene.RootEntities);
             SceneEntityAsset splashRootEntity = Assert.Single(cameraEntity.Children);
             SceneEntityAsset[] spriteEntities = splashRootEntity.Children;
 
             Assert.Equal((ushort)2, authoredCameraEntity.LayerMask);
+            Assert.Equal((ushort)2, authoredBackgroundEntity.LayerMask);
             Assert.Equal((ushort)2, authoredSplashRootEntity.LayerMask);
             Assert.Equal((ushort)2, cameraEntity.LayerMask);
             Assert.Equal((ushort)2, splashRootEntity.LayerMask);

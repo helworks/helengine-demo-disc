@@ -62,7 +62,7 @@ namespace city.menu.tools {
                 LayerMask = SplashRuntimeLayerMask,
                 Viewport = new float4(0f, 0f, 1f, 1f),
                 ClearSettings = new CameraClearSettings(
-                    false,
+                    true,
                     new float4(0f, 0f, 0f, 1f),
                     false,
                     1f,
