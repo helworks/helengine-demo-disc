@@ -14,6 +14,11 @@ namespace city.menu {
         public const string MainMenuSceneId = "DemoDiscMainMenu";
 
         /// <summary>
+        /// Stable scene id of the persistent overlay loaded alongside the main menu.
+        /// </summary>
+        public const string LoadingScreenSceneId = "SceneLoadingScreen";
+
+        /// <summary>
         /// Duration, in seconds, used to fade the splash from transparent to opaque.
         /// </summary>
         public const double FadeDurationSeconds = 0.75d;
@@ -37,6 +42,11 @@ namespace city.menu {
         /// Full-screen solid background whose alpha is driven by the splash phase.
         /// </summary>
         RoundedRectComponent BackgroundRectangle;
+
+        /// <summary>
+        /// Last viewport size applied to the camera-owned blackout rectangle.
+        /// </summary>
+        int2 BackgroundViewportSize;
 
         /// <summary>
         /// Logo sprite whose alpha is driven by the splash phase.
@@ -92,6 +102,7 @@ namespace city.menu {
             }
 
             ResolveSpritesWhenNeeded();
+            FitBackgroundToViewport();
             ElapsedSeconds += Core.Instance.FrameDeltaSeconds;
             int alpha = ResolveAlphaForElapsedSeconds(ElapsedSeconds);
             SetSpriteAlpha(alpha);
@@ -108,10 +119,12 @@ namespace city.menu {
         /// <returns>True when keyboard, platform, or primary gamepad accept input was pressed.</returns>
         bool IsAcceptPressed() {
             InputSystem inputSystem = Core.Instance.Input;
-            return inputSystem.WasKeyPressed(Keys.Enter)
-                || inputSystem.WasKeyPressed(Keys.Space)
-                || inputSystem.WasKeyPressed(Keys.J)
-                || Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept)
+#if DESKTOP_PLATFORM
+            if (inputSystem.WasKeyPressed(Keys.Enter) || inputSystem.WasKeyPressed(Keys.Space) || inputSystem.WasKeyPressed(Keys.J)) {
+                return true;
+            }
+#endif
+            return Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept)
                 || DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South);
         }
 
@@ -166,6 +179,25 @@ namespace city.menu {
             BackgroundRectangle.FillColor = new byte4(0, 0, 0, backgroundAlpha);
             BackgroundRectangle.BorderColor = new byte4(0, 0, 0, backgroundAlpha);
             LogoSprite.Color = new byte4(255, 255, 255, (byte)alpha);
+        }
+
+        /// <summary>
+        /// Resizes the camera-owned blackout rectangle to the live viewport without changing the fitted splash-content canvas.
+        /// </summary>
+        void FitBackgroundToViewport() {
+            if (BackgroundRectangle == null || Core.Instance == null || Core.Instance.RenderManager3D == null) {
+                throw new InvalidOperationException("Splash background fitting requires initialized background and render manager instances.");
+            }
+
+            int2 viewportSize = Core.Instance.RenderManager3D.MainWindowSize;
+            if (viewportSize.X < 1 || viewportSize.Y < 1) {
+                throw new InvalidOperationException("Splash background fitting requires a non-empty live viewport.");
+            } else if (BackgroundViewportSize.X == viewportSize.X && BackgroundViewportSize.Y == viewportSize.Y) {
+                return;
+            }
+
+            BackgroundRectangle.Size = Core.Instance.RenderManager3D.MainWindowSize;
+            BackgroundViewportSize = viewportSize;
         }
 
         /// <summary>
@@ -352,6 +384,7 @@ namespace city.menu {
             }
 
             MainMenuLoadWasRequested = true;
+            Core.Instance.SceneManager.LoadScene(LoadingScreenSceneId, SceneLoadMode.Additive);
             Core.Instance.SceneManager.LoadScene(MainMenuSceneId, SceneLoadMode.Additive);
         }
 

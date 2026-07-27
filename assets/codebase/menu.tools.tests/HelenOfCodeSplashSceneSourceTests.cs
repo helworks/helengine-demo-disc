@@ -67,6 +67,18 @@ namespace city.menu.tools.tests {
         }
 
         /// <summary>
+        /// Ensures the splash blackout rectangle is owned by the camera and resized from the live viewport rather than letterboxed with the reference-canvas content.
+        /// </summary>
+        [Fact]
+        public void Splash_factory_keeps_its_blackout_background_outside_the_fitted_canvas() {
+            string factorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\menu.tools\HelenOfCodeSplashSceneFactory.cs");
+            string componentSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\menu\HelenOfCodeSplashComponent.cs");
+
+            Assert.Contains("Entity backgroundEntity = CreateBackgroundEntity(cameraEntity);", factorySource, StringComparison.Ordinal);
+            Assert.Contains("BackgroundRectangle.Size = Core.Instance.RenderManager3D.MainWindowSize", componentSource, StringComparison.Ordinal);
+        }
+
+        /// <summary>
         /// Ensures every splash camera and sprite entity occupies the dedicated runtime layer culled by the overlay camera rather than the menu camera.
         /// </summary>
         [Fact]

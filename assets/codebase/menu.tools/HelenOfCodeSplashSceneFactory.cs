@@ -34,7 +34,8 @@ namespace city.menu.tools {
         /// <returns>Generated authored splash scene definition.</returns>
         public GeneratedAuthoringSceneDefinition CreateSceneDefinition() {
             Entity cameraEntity = CreateCameraEntity();
-            CreateSplashRootEntity(cameraEntity);
+            Entity backgroundEntity = CreateBackgroundEntity(cameraEntity);
+            CreateSplashRootEntity(cameraEntity, backgroundEntity);
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset {
@@ -80,7 +81,7 @@ namespace city.menu.tools {
         /// Creates the screen-fit splash root, background sprite, logo sprite, and runtime transition component.
         /// </summary>
         /// <returns>Authored splash root entity.</returns>
-        Entity CreateSplashRootEntity(Entity parent) {
+        Entity CreateSplashRootEntity(Entity parent, Entity backgroundEntity) {
             Entity entity = Core.Instance.EntityFactory.CreateChild(parent, SceneId);
             entity.LayerMask = SplashRuntimeLayerMask;
             entity.AddComponent(new ViewportComponent {
@@ -92,7 +93,6 @@ namespace city.menu.tools {
                 ReferenceHeight = DemoMenuLayout.CanvasHeight
             });
 
-            Entity backgroundEntity = CreateBackgroundEntity(entity);
             Entity logoEntity = CreateLogoEntity(entity);
             entity.AddComponent(new HelenOfCodeSplashComponent {
                 BackgroundSpriteEntityReference = CreateEntityReference(backgroundEntity),

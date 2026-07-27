@@ -42,7 +42,8 @@ namespace city.tests {
             JsonElement.ArrayEnumerator platforms = document.RootElement.GetProperty("platforms").EnumerateArray();
             foreach (JsonElement platform in platforms) {
                 string platformId = platform.GetProperty("platformId").GetString() ?? string.Empty;
-                if (string.Equals(platformId, "ds", StringComparison.OrdinalIgnoreCase)
+                if (string.Equals(platformId, "windows", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(platformId, "ds", StringComparison.OrdinalIgnoreCase)
                     || string.Equals(platformId, "3ds", StringComparison.OrdinalIgnoreCase)
                     || string.Equals(platformId, "ps2", StringComparison.OrdinalIgnoreCase)) {
                     continue;
@@ -61,6 +62,54 @@ namespace city.tests {
                 Assert.Equal(CommonNonHandheldSceneIds, selectedSceneIds);
                 Assert.Equal(CommonNonHandheldSceneIds, orderedSceneIds);
             }
+        }
+
+        /// <summary>
+        /// Ensures the Windows package contains the persistent scene that presents every normal transition.
+        /// </summary>
+        [Fact]
+        public void Windows_platform_packages_the_persistent_loading_screen_scene() {
+            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
+            using JsonDocument document = JsonDocument.Parse(json);
+            JsonElement windowsPlatform = document.RootElement.GetProperty("platforms").EnumerateArray()
+                .Single(platform => string.Equals(platform.GetProperty("platformId").GetString(), "windows", StringComparison.OrdinalIgnoreCase));
+
+            string[] selectedSceneIds = windowsPlatform.GetProperty("selectedSceneIds")
+                .EnumerateArray()
+                .Select(sceneId => sceneId.GetString() ?? string.Empty)
+                .ToArray();
+            string[] orderedSceneIds = windowsPlatform.GetProperty("sceneOrders")
+                .EnumerateArray()
+                .OrderBy(sceneOrder => sceneOrder.GetProperty("orderNumber").GetInt32())
+                .Select(sceneOrder => sceneOrder.GetProperty("sceneId").GetString() ?? string.Empty)
+                .ToArray();
+
+            Assert.Contains("SceneLoadingScreen", selectedSceneIds);
+            Assert.Contains("SceneLoadingScreen", orderedSceneIds);
+        }
+
+        /// <summary>
+        /// Ensures the Wii U package includes the persistent loading scene required by the splash transition path.
+        /// </summary>
+        [Fact]
+        public void Wii_u_platform_packages_the_persistent_loading_screen_scene() {
+            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
+            using JsonDocument document = JsonDocument.Parse(json);
+            JsonElement wiiUPlatform = document.RootElement.GetProperty("platforms").EnumerateArray()
+                .Single(platform => string.Equals(platform.GetProperty("platformId").GetString(), "wiiu", StringComparison.OrdinalIgnoreCase));
+
+            string[] selectedSceneIds = wiiUPlatform.GetProperty("selectedSceneIds")
+                .EnumerateArray()
+                .Select(sceneId => sceneId.GetString() ?? string.Empty)
+                .ToArray();
+            string[] orderedSceneIds = wiiUPlatform.GetProperty("sceneOrders")
+                .EnumerateArray()
+                .OrderBy(sceneOrder => sceneOrder.GetProperty("orderNumber").GetInt32())
+                .Select(sceneOrder => sceneOrder.GetProperty("sceneId").GetString() ?? string.Empty)
+                .ToArray();
+
+            Assert.Contains("SceneLoadingScreen", selectedSceneIds);
+            Assert.Contains("SceneLoadingScreen", orderedSceneIds);
         }
 
         /// <summary>

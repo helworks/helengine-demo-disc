@@ -614,6 +614,9 @@ namespace city.game.tools {
 
             CreateUiTextEntity(panelEntity, "TiltTrialHandheldGameplayHint", new float3(12f, 145f, 0.1f), "D-PAD MOVE   L/R CAMERA", new int2(220, 20), 0.5f, 2, new byte4(196, 210, 226, 255), TextAlignment.Center);
 
+            Entity startOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialStartOverlay", new float3(16f, 58f, 0f), new int2(224, 68), 6f, 2f, new byte4(18, 27, 43, 245), new byte4(255, 214, 138, 255), 4);
+            CreateUiTextEntity(startOverlayEntity, "TiltTrialStartPromptText", new float3(12f, 22f, 0.1f), "Press \"X\" to start", new int2(200, 24), 0.72f, 5, new byte4(255, 236, 196, 255), TextAlignment.Center);
+
             Entity resultsOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialResultsOverlay", new float3(16f, 8f, 0f), new int2(224, 176), 6f, 2f, new byte4(18, 27, 43, 245), new byte4(255, 214, 138, 255), 4);
             resultsOverlayEntity.Enabled = false;
             CreateUiTextEntity(resultsOverlayEntity, "TiltTrialResultsTitleText", new float3(12f, 8f, 0.1f), "Clear", new int2(200, 20), 0.82f, 5, new byte4(255, 236, 196, 255), TextAlignment.Center);
@@ -1121,6 +1124,9 @@ namespace city.game.tools {
                 TargetEntityName = "PlayerSphere",
                 TargetEntityRole = "PlayerSphere"
             });
+
+            Entity startOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialStartOverlay", new float3(320f, 260f, 0f), new int2(640, 150), 28f, 3f, new byte4(18, 27, 43, 238), new byte4(255, 214, 138, 255), 4);
+            CreateUiTextEntity(startOverlayEntity, "TiltTrialStartPromptText", new float3(36f, 48f, 0.1f), "Press \"X\" to start", new int2(568, 48), 2f, 5, new byte4(255, 236, 196, 255), TextAlignment.Center);
 
             Entity resultsOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialResultsOverlay", new float3(320f, 130f, 0f), new int2(640, 380), 28f, 3f, new byte4(18, 27, 43, 238), new byte4(255, 214, 138, 255), 4);
             resultsOverlayEntity.Enabled = false;

@@ -24,6 +24,10 @@ namespace city.game {
         TextComponent TimerTextComponent;
         TextComponent CoinTextComponent;
         TextComponent TargetTimesTextComponent;
+        /// <summary>
+        /// Overlay that blocks the session until the player accepts the Tilt Play start prompt.
+        /// </summary>
+        Entity StartOverlayEntity;
         Entity ResultsOverlayEntity;
         TextComponent ResultsTitleTextComponent;
         TextComponent ResultsBodyTextComponent;
@@ -85,6 +89,7 @@ namespace city.game {
             TimerTextComponent = null;
             CoinTextComponent = null;
             TargetTimesTextComponent = null;
+            StartOverlayEntity = null;
             ResultsOverlayEntity = null;
             ResultsTitleTextComponent = null;
             ResultsBodyTextComponent = null;
@@ -131,6 +136,9 @@ namespace city.game {
             EnsureSessionStateInitialized();
 
             ReportStage("TiltTrialSession:Update:AfterEnsureSessionState");
+            if (SessionStateMachine.CurrentState == TiltTrialSessionState.Start) {
+                UpdateStartState();
+            }
             if (SessionStateMachine.CurrentState == TiltTrialSessionState.Playing) {
                 ReportStage("TiltTrialSession:Update:Playing");
                 UpdatePlayingState();
@@ -280,6 +288,7 @@ namespace city.game {
         /// <returns>Uninitialized Tilt Trial state machine with registered states.</returns>
         public static FiniteStateMachine<TiltTrialSessionState> CreateStateMachine() {
             FiniteStateMachine<TiltTrialSessionState> machine = new FiniteStateMachine<TiltTrialSessionState>();
+            machine.RegisterState(TiltTrialSessionState.Start, new FiniteStateDefinition<TiltTrialSessionState>());
             machine.RegisterState(TiltTrialSessionState.Playing, new FiniteStateDefinition<TiltTrialSessionState>());
             machine.RegisterState(TiltTrialSessionState.Paused, new FiniteStateDefinition<TiltTrialSessionState>());
             machine.RegisterState(TiltTrialSessionState.Results, new FiniteStateDefinition<TiltTrialSessionState>());
@@ -387,11 +396,26 @@ namespace city.game {
             FinalTimeSeconds = 0f;
             AwardedMedal = TiltTrialMedal.None;
             OverlaySelectionIndex = 0;
-            SessionStateMachine.Initialize(TiltTrialSessionState.Playing);
-            SetGameplayUpdatesSuppressed(false);
+            SessionStateMachine.Initialize(TiltTrialSessionState.Start);
+            CaptureFrozenPlayerPose();
+            SetGameplayUpdatesSuppressed(true);
             ReportStage("TiltTrialSession:EnsureSessionState:RefreshOverlay");
             RefreshOverlayPresentation();
             IsSessionStateInitialized = true;
+        }
+
+        /// <summary>
+        /// Waits for the sole permitted Accept action before enabling the active gameplay session.
+        /// </summary>
+        void UpdateStartState() {
+            if (!WasAcceptPressed()) {
+                return;
+            }
+
+            HasFrozenPlayerPose = false;
+            SetGameplayUpdatesSuppressed(false);
+            SessionStateMachine.TryChangeState(TiltTrialSessionState.Playing);
+            RefreshOverlayPresentation();
         }
 
         void UpdatePlayingState() {
@@ -561,6 +585,9 @@ namespace city.game {
             if (TargetTimesTextComponent != null && CurrentLevel != null) {
                 RefreshTargetTimesText();
             }
+            if (StartOverlayEntity != null) {
+                StartOverlayEntity.Enabled = SessionStateMachine.CurrentState == TiltTrialSessionState.Start;
+            }
             if (ResultsOverlayEntity != null) {
                 ResultsOverlayEntity.Enabled = SessionStateMachine.CurrentState == TiltTrialSessionState.Results;
             }
@@ -727,6 +754,12 @@ namespace city.game {
                 Entity targetTimesTextEntity = TryFindNamedEntity(Parent, "TiltTrialTargetTimesText");
                 TargetTimesTextComponent = TryFindTextComponent(targetTimesTextEntity);
             }
+            if (StartOverlayEntity == null) {
+                StartOverlayEntity = TryFindNamedEntity(Parent, "TiltTrialStartOverlay");
+            }
+            if (StartOverlayEntity == null) {
+                missingDependencies.Add("start overlay");
+            }
             if (ResultsOverlayEntity == null) {
                 ResultsOverlayEntity = TryFindNamedEntity(Parent, "TiltTrialResultsOverlay");
             }
@@ -786,29 +819,34 @@ namespace city.game {
 
         bool WasNavigatePreviousPressed() {
             InputSystem inputSystem = Core.Instance.Input;
-            return inputSystem.WasKeyPressed(Keys.Left)
-                || inputSystem.WasKeyPressed(Keys.Up)
-                || inputSystem.WasKeyPressed(Keys.A)
-                || inputSystem.WasKeyPressed(Keys.W)
-                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadLeft)
+#if DESKTOP_PLATFORM
+            if (inputSystem.WasKeyPressed(Keys.Left) || inputSystem.WasKeyPressed(Keys.Up) || inputSystem.WasKeyPressed(Keys.A) || inputSystem.WasKeyPressed(Keys.W)) {
+                return true;
+            }
+#endif
+            return city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadLeft)
                 || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp);
         }
 
         bool WasNavigateNextPressed() {
             InputSystem inputSystem = Core.Instance.Input;
-            return inputSystem.WasKeyPressed(Keys.Right)
-                || inputSystem.WasKeyPressed(Keys.Down)
-                || inputSystem.WasKeyPressed(Keys.D)
-                || inputSystem.WasKeyPressed(Keys.S)
-                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadRight)
+#if DESKTOP_PLATFORM
+            if (inputSystem.WasKeyPressed(Keys.Right) || inputSystem.WasKeyPressed(Keys.Down) || inputSystem.WasKeyPressed(Keys.D) || inputSystem.WasKeyPressed(Keys.S)) {
+                return true;
+            }
+#endif
+            return city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadRight)
                 || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown);
         }
 
         bool WasAcceptPressed() {
             InputSystem inputSystem = Core.Instance.Input;
-            return inputSystem.WasKeyPressed(Keys.Enter)
-                || inputSystem.WasKeyPressed(Keys.Space)
-                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)
+#if DESKTOP_PLATFORM
+            if (inputSystem.WasKeyPressed(Keys.Enter) || inputSystem.WasKeyPressed(Keys.Space)) {
+                return true;
+            }
+#endif
+            return city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)
                 || Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept);
         }
 
@@ -827,12 +865,7 @@ namespace city.game {
                 throw new InvalidOperationException("Tilt Trial session scene loads require a valid target scene id.");
             }
 
-            SceneManager sceneManager = Core.Instance.SceneManager;
-            if (RequiresExplicitSceneReload(sceneId, sceneManager.GetLoadedSceneIds())) {
-                sceneManager.UnloadScene(sceneId);
-            }
-
-            sceneManager.LoadScene(sceneId, SceneLoadMode.Single);
+            Core.Instance.SceneManager.RequestSceneTransition(sceneId);
         }
 
         TiltTrialLevelCatalogEntry ResolveCurrentLevel() {

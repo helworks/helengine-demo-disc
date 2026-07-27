@@ -89,6 +89,43 @@ namespace city.tests {
             Assert.Equal(city.game.TiltTrialSessionState.Failed, machine.CurrentState);
         }
 
+        /// <summary>
+        /// Ensures every Tilt Trial session can wait for Accept before entering active gameplay.
+        /// </summary>
+        [Fact]
+        public void Build_state_machine_starts_waiting_for_accept_and_transitions_to_playing() {
+            helengine.FiniteStateMachine<city.game.TiltTrialSessionState> machine = city.game.TiltTrialSessionComponent.CreateStateMachine();
+
+            machine.Initialize(city.game.TiltTrialSessionState.Start);
+            bool changed = machine.TryChangeState(city.game.TiltTrialSessionState.Playing);
+
+            Assert.True(changed);
+            Assert.Equal(city.game.TiltTrialSessionState.Playing, machine.CurrentState);
+        }
+
+        /// <summary>
+        /// Ensures session initialization freezes gameplay and only the explicit start branch can release it.
+        /// </summary>
+        [Fact]
+        public void Session_initializes_frozen_until_the_accept_start_transition() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialSessionComponent.cs");
+
+            Assert.Contains("SessionStateMachine.Initialize(TiltTrialSessionState.Start)", source, StringComparison.Ordinal);
+            Assert.Contains("CaptureFrozenPlayerPose();", source, StringComparison.Ordinal);
+            Assert.Contains("SetGameplayUpdatesSuppressed(true);", source, StringComparison.Ordinal);
+            Assert.Contains("void UpdateStartState()", source, StringComparison.Ordinal);
+            Assert.Contains("if (!WasAcceptPressed())", source, StringComparison.Ordinal);
+            Assert.Contains("SetGameplayUpdatesSuppressed(false);", source, StringComparison.Ordinal);
+            Assert.Contains("SessionStateMachine.TryChangeState(TiltTrialSessionState.Playing);", source, StringComparison.Ordinal);
+            Assert.Contains("StartOverlayEntity.Enabled = SessionStateMachine.CurrentState == TiltTrialSessionState.Start", source, StringComparison.Ordinal);
+
+            int startStateMethodIndex = source.IndexOf("void UpdateStartState()", StringComparison.Ordinal);
+            int playingStateMethodIndex = source.IndexOf("void UpdatePlayingState()", StringComparison.Ordinal);
+            string startStateMethodSource = source.Substring(startStateMethodIndex, playingStateMethodIndex - startStateMethodIndex);
+
+            Assert.Contains("RefreshOverlayPresentation();", startStateMethodSource, StringComparison.Ordinal);
+        }
+
         [Fact]
         public void Format_coin_progress_returns_expected_hud_label() {
             string label = city.game.TiltTrialSessionComponent.FormatCoinProgress(3, 7);

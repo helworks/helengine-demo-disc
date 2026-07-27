@@ -27,6 +27,11 @@ namespace city.menu.tools {
         readonly HelenOfCodeSplashSceneFactory SplashSceneFactory;
 
         /// <summary>
+        /// Factory used to author the persistent transition loading overlay scene.
+        /// </summary>
+        readonly SceneLoadingScreenFactory LoadingScreenFactory;
+
+        /// <summary>
         /// Initializes one demo-disc scene generator.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
@@ -35,6 +40,7 @@ namespace city.menu.tools {
             SceneFactory = new DemoDiscMainMenuSceneFactory();
             MenuBuildSceneAuthoringService = new DemoDiscMenuBuildSceneAuthoringService();
             SplashSceneFactory = new HelenOfCodeSplashSceneFactory();
+            LoadingScreenFactory = new SceneLoadingScreenFactory();
         }
 
         /// <summary>
@@ -51,6 +57,7 @@ namespace city.menu.tools {
             MenuDefinition definition = provider.CreateMenuDefinition();
             string providerTypeName = BuildProviderTypeName(typeof(DemoDiscMenuDefinitionProvider));
             SceneWriteService.WriteScene(projectRootPath, SplashSceneFactory.CreateSceneDefinition());
+            SceneWriteService.WriteScene(projectRootPath, LoadingScreenFactory.CreateSceneDefinition());
             GeneratedAuthoringSceneDefinition standardSceneDefinition = SceneFactory.CreateStandardSceneDefinition(providerTypeName, definition);
             MenuBuildSceneAuthoringService.ApplyBuildSceneAvailability(projectRootPath, standardSceneDefinition, definition);
             SceneWriteService.WriteScene(projectRootPath, standardSceneDefinition);
