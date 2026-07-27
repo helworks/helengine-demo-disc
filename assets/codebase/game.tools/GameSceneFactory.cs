@@ -1879,8 +1879,8 @@ namespace city.game.tools {
                 UseGravity = false,
                 Mass = 1d
             });
-            entity.AddComponent(new SphereCollider3DComponent {
-                Radius = 0.75f,
+            entity.AddComponent(new BoxCollider3DComponent {
+                Size = new float3(1.5f, 3f, 1.5f),
                 IsTrigger = true
             });
             entity.AddComponent(new global::city.game.TiltTrialPhysicsDebugSphereBoundsComponent {

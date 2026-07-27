@@ -51,6 +51,18 @@ namespace city.tests {
         }
 
         /// <summary>
+        /// Verifies collectible coin instances use a trigger volume that is twice as tall as its horizontal footprint.
+        /// </summary>
+        [Fact]
+        public void Game_scene_factory_authors_tall_box_trigger_for_collectible_coins() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+
+            Assert.Contains("new BoxCollider3DComponent {", source, StringComparison.Ordinal);
+            Assert.Contains("Size = new float3(1.5f, 3f, 1.5f)", source, StringComparison.Ordinal);
+            Assert.Contains("IsTrigger = true", source, StringComparison.Ordinal);
+        }
+
+        /// <summary>
         /// Verifies the Tilt Trial front door is generated as a title shell before the existing level selector.
         /// </summary>
         [Fact]
