@@ -201,7 +201,7 @@ namespace city.game.tools {
         }
 
         /// <summary>
-        /// Creates a gameplay-free rendering probe containing the visible Level 1 course, coins, flag, lighting, camera, and FPS overlay.
+        /// Creates a deterministic clipping probe containing one scaled cube, one light, a fixed-axis zoom camera, and the FPS overlay.
         /// </summary>
         /// <returns>Generated authored Level 1 render-test scene.</returns>
         public GeneratedAuthoringSceneDefinition CreateTiltTrialLevel01RenderTestScene() {
@@ -212,8 +212,6 @@ namespace city.game.tools {
                 RootEntities = [
                     CreateLevel01RenderTestCameraEntity(),
                     CreateDirectionalLightEntity(),
-                    CreateDirectionalFillLightEntity(),
-                    CreateAmbientLightEntity(),
                     CreateLevel01RenderTestFpsEntity(),
                     CreateLevel01RenderOnlyStageRootEntity()
                 ]
@@ -1292,15 +1290,15 @@ namespace city.game.tools {
         }
 
         /// <summary>
-        /// Creates the fixed-orbit camera used to inspect every render-only Level 1 object.
+        /// Creates the fixed-axis camera used to move directly toward and through the clipping probe cube.
         /// </summary>
         /// <returns>Generated render-test camera entity.</returns>
         EditorEntity CreateLevel01RenderTestCameraEntity() {
             float4 orientation;
-            float4.CreateFromYawPitchRoll(0f, -0.28f, 0f, out orientation);
+            float4.CreateFromYawPitchRoll(0.6435011f, -0.3805064f, 0f, out orientation);
             Entity entity = Core.Instance.EntityFactory.Create("TiltTrialLevel01RenderTestCamera");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.LocalPosition = new float3(0f, 7f, 28f);
+            entity.LocalPosition = new float3(6f, 4f, 8f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = orientation;
             entity.AddComponent(new CameraComponent {
@@ -1317,10 +1315,12 @@ namespace city.game.tools {
                 }
             });
             entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
-                OrbitCenter = new float3(0f, 1.5f, 4f),
-                AutoYawSpeedRadians = 0f
+                OrbitCenter = float3.Zero,
+                AutoYawSpeedRadians = 0f,
+                ManualYawSpeedRadians = 0f,
+                ManualPitchSpeedRadians = 0f
             });
-            return RequireEditorEntity(entity, "Level 1 render-test camera");
+            return RequireEditorEntity(entity, "clipping-probe camera");
         }
 
         /// <summary>
@@ -1340,32 +1340,17 @@ namespace city.game.tools {
         }
 
         /// <summary>
-        /// Creates the Level 1 visible course without stage, physics, trigger, or gameplay components.
+        /// Creates the clipping probe root with exactly one constrained-platform tessellated 5-by-1-by-5 cube.
         /// </summary>
         /// <returns>Generated render-only stage root.</returns>
         EditorEntity CreateLevel01RenderOnlyStageRootEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialLevel01RenderOnlyStage");
+            Entity entity = Core.Instance.EntityFactory.Create("Ps2ClippingProbe");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("StartPad", new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity, true));
-            float4 rampOrientation;
-            float4.CreateFromYawPitchRoll(0f, -0.14f, 0f, out rampOrientation);
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("Ramp", new float3(0f, -0.05f, -0.1f), new float3(6f, 0.9f, 8f), rampOrientation, true));
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("Bridge", new float3(0f, 0.5f, 5.8f), new float3(4.2f, 0.8f, 8.4f), float4.Identity, true));
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("BridgeBlockerLeft", new float3(-0.95f, 1.25f, 3.2f), new float3(1.1f, 1.5f, 1.1f), float4.Identity));
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("BridgeBlockerRight", new float3(0.95f, 1.25f, 7.3f), new float3(1.1f, 1.5f, 1.1f), float4.Identity));
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("FinalPlatform", new float3(1.35f, 0.2f, 13.8f), new float3(8.4f, 0.9f, 8.8f), float4.Identity, true));
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("GoalPadVisual", new float3(1.35f, 1.05f, 16.95f), new float3(2f, 2f, 2f), float4.Identity));
-            entity.AddChild(CreateLevel01RenderOnlyCoinEntity("Coin01", new float3(0f, 1.35f, -2.2f)));
-            entity.AddChild(CreateLevel01RenderOnlyCoinEntity("Coin02", new float3(-0.8f, 1.9f, 4.6f)));
-            entity.AddChild(CreateLevel01RenderOnlyCoinEntity("Coin03", new float3(1.35f, 1.9f, 13.8f)));
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("LeftWall", new float3(-3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity, true));
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("RightWall", new float3(3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity, true));
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("FinalLeftGuard", new float3(-2.5f, 1.25f, 14.2f), new float3(0.8f, 2.8f, 7.4f), float4.Identity));
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("FinalRightGuard", new float3(5.2f, 1.25f, 14.2f), new float3(0.8f, 2.8f, 7.4f), float4.Identity));
-            return RequireEditorEntity(entity, "Level 1 render-only stage");
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("ClipProbeCube", float3.Zero, new float3(5f, 1f, 5f), float4.Identity, true));
+            return RequireEditorEntity(entity, "single-cube clipping probe");
         }
 
         /// <summary>

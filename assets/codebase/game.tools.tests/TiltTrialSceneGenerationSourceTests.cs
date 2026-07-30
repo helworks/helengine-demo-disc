@@ -82,10 +82,10 @@ namespace city.tests {
         }
 
         /// <summary>
-        /// Ensures the dedicated Level 1 render test scene reuses the visible course assets without gameplay components.
+        /// Ensures the dedicated Level 1 render test scene contains one tessellated cube, one light, a fixed-axis camera, and FPS diagnostics.
         /// </summary>
         [Fact]
-        public void Level_01_render_test_scene_uses_visual_assets_and_fps_only() {
+        public void Level_01_render_test_scene_uses_one_tessellated_cube_light_camera_and_fps_only() {
             string catalogSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneCatalog.cs");
             string generatorSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
             string factorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
@@ -93,17 +93,15 @@ namespace city.tests {
             Assert.Contains("TiltTrialLevel01RenderTestSceneId", catalogSource, StringComparison.Ordinal);
             Assert.Contains("CreateTiltTrialLevel01RenderTestScene", generatorSource, StringComparison.Ordinal);
             Assert.Contains("CreateLevel01RenderOnlyCourseBoxEntity", factorySource, StringComparison.Ordinal);
-            Assert.Contains("GoldenCoinBlueprintRelativePath", factorySource, StringComparison.Ordinal);
-            Assert.Contains("GoalFlagBlueprintRelativePath", factorySource, StringComparison.Ordinal);
             Assert.Contains("new FPSComponent", factorySource, StringComparison.Ordinal);
             Assert.Contains("test_scene_tilt_trial_level_01_render.helen", factorySource, StringComparison.Ordinal);
             Assert.Contains("CreateLevel01RenderOnlyStageRootEntity", factorySource, StringComparison.Ordinal);
-            Assert.Contains("CreateLevel01RenderOnlyCoinEntity", factorySource, StringComparison.Ordinal);
-      Assert.Contains("CreateLevel01RenderOnlyGoalFlagEntity", factorySource, StringComparison.Ordinal);
-      Assert.Contains("new city.rendering.DemoDiscOrbitCameraComponent", factorySource, StringComparison.Ordinal);
-      Assert.DoesNotContain("CreateLevel01RenderOnlyCoinEntity(\"Coin01\"", factorySource, StringComparison.Ordinal);
-      Assert.DoesNotContain("CreateLevel01RenderOnlyGoalFlagEntity(new float3(1.35f, 0.65f, 16.6f))", factorySource, StringComparison.Ordinal);
-  }
+            Assert.Contains("CreateLevel01RenderOnlyCourseBoxEntity(\"ClipProbeCube\", float3.Zero, new float3(5f, 1f, 5f), float4.Identity, true)", factorySource, StringComparison.Ordinal);
+            Assert.Contains("entity.LocalPosition = new float3(6f, 4f, 8f)", factorySource, StringComparison.Ordinal);
+            Assert.Contains("float4.CreateFromYawPitchRoll(0.6435011f, -0.3805064f, 0f, out orientation)", factorySource, StringComparison.Ordinal);
+            Assert.Contains("ManualYawSpeedRadians = 0f", factorySource, StringComparison.Ordinal);
+            Assert.Contains("ManualPitchSpeedRadians = 0f", factorySource, StringComparison.Ordinal);
+        }
 
         /// <summary>
         /// Ensures gameplay sessions bind and refresh target-time text from the current level metadata.

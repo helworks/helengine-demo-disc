@@ -37,22 +37,13 @@ namespace city.tests {
         }
 
         /// <summary>
-        /// Ensures the scaled render-test course surfaces and side walls request platform-only component tessellation for PS2 and PSP cooking.
+        /// Ensures the render-test scene uses one constrained-platform tessellated cube for near-camera clipping diagnostics.
         /// </summary>
         [Fact]
-        public void Game_scene_factory_configures_level_01_render_test_walls_and_ground_for_ps2_and_psp_tessellation() {
+        public void Game_scene_factory_creates_one_tessellated_clipping_probe_cube() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
 
-            Assert.Contains("CreateLevel01RenderOnlyCourseBoxEntity(\"StartPad\", new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity, true)", source, StringComparison.Ordinal);
-            Assert.Contains("CreateLevel01RenderOnlyCourseBoxEntity(\"Ramp\", new float3(0f, -0.05f, -0.1f), new float3(6f, 0.9f, 8f), rampOrientation, true)", source, StringComparison.Ordinal);
-            Assert.Contains("CreateLevel01RenderOnlyCourseBoxEntity(\"Bridge\", new float3(0f, 0.5f, 5.8f), new float3(4.2f, 0.8f, 8.4f), float4.Identity, true)", source, StringComparison.Ordinal);
-            Assert.Contains("CreateLevel01RenderOnlyCourseBoxEntity(\"FinalPlatform\", new float3(1.35f, 0.2f, 13.8f), new float3(8.4f, 0.9f, 8.8f), float4.Identity, true)", source, StringComparison.Ordinal);
-            Assert.Contains("CreateLevel01RenderOnlyCourseBoxEntity(\"LeftWall\", new float3(-3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity, true)", source, StringComparison.Ordinal);
-            Assert.Contains("CreateLevel01RenderOnlyCourseBoxEntity(\"RightWall\", new float3(3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity, true)", source, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialRenderTestTessellationMaxEdgeLength = 1d", source, StringComparison.Ordinal);
-            Assert.Contains("MeshComponentTessellationSettings(true, TiltTrialRenderTestTessellationMaxEdgeLength)", source, StringComparison.Ordinal);
-            Assert.Contains("Ps2PlatformId", source, StringComparison.Ordinal);
-            Assert.Contains("PspPlatformId", source, StringComparison.Ordinal);
+            Assert.Contains("CreateLevel01RenderOnlyCourseBoxEntity(\"ClipProbeCube\", float3.Zero, new float3(5f, 1f, 5f), float4.Identity, true)", source, StringComparison.Ordinal);
         }
 
         /// <summary>
