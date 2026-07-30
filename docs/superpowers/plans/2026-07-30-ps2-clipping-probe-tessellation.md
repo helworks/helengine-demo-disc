@@ -78,14 +78,19 @@ Expected: the enabled call appears in all three files, the 1.0-unit constant rem
 
 **Files:**
 - Modify: `C:\dev\helworks\helengine-ps2\src\platform\ps2\Ps2BootHost.cpp:194`
+- Modify: `C:\dev\helworks\helengine-ps2\builder.tests\Ps2VuNearPlaneClippingSourceTests.cs`
 - Build output: `C:\dev\helworks\builds\demodisc\ps2\B297-tessellated-clip-probe`
 
-- [ ] **Step 1: Set the visible build identifier**
+- [ ] **Step 1: Set and contract the visible build identifier**
 
-Change:
+Change the runtime constant and its source-contract expectation:
 
 ```cpp
 constexpr const char* FrameTimingOverlayBuildNumber = "B297";
+```
+
+```csharp
+Assert.Contains("FrameTimingOverlayBuildNumber = \"B297\"", source, StringComparison.Ordinal);
 ```
 
 - [ ] **Step 2: Run the existing PS2 clipping contracts**
@@ -93,6 +98,8 @@ constexpr const char* FrameTimingOverlayBuildNumber = "B297";
 Run:
 
 ```powershell
+rtk.exe dotnet build C:\dev\helworks\helengine-ps2\builder.tests\helengine.ps2.builder.tests.csproj --artifacts-path C:\dev\helworks\builds\helengine-ps2\tests\B297 --nologo
+rtk.exe proxy powershell.exe -NoProfile -Command "Copy-Item -LiteralPath 'C:\dev\helworks\builds\helengine-ps2\tests\B297\bin\helengine.ps2.builder.tests\debug\helengine.ps2.builder.tests.dll','C:\dev\helworks\builds\helengine-ps2\tests\B297\bin\helengine.ps2.builder.tests\debug\helengine.ps2.builder.tests.pdb' -Destination 'C:\dev\helworks\helengine-ps2\builder.tests\bin\Debug\net9.0\' -Force"
 rtk.exe dotnet test C:\dev\helworks\helengine-ps2\builder.tests\helengine.ps2.builder.tests.csproj --filter FullyQualifiedName~Ps2VuNearPlaneClippingSourceTests --no-build --no-restore --nologo
 ```
 
