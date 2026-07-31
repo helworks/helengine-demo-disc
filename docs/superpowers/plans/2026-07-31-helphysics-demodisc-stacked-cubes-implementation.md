@@ -39,7 +39,7 @@ Expected: all three commands exit 0. If any fail, stop before creating a worktre
 
 - [ ] **Step 2: Capture each main checkout's immutable snapshot**
 
-Run `git rev-parse HEAD` and `git status --porcelain=v1 --untracked-files=all` in all four main roots and save the exact output outside every repository under a new `%LOCALAPPDATA%\Temp\helengine-builds\...\main-snapshots` directory.
+Run `git rev-parse HEAD` and `git status --porcelain=v1 --untracked-files=all` in all four main roots and save the exact output outside every repository under a new `C:\dev\helworks\builds\helphysics-demodisc-stack-test\<build-id>\main-snapshots` directory.
 
 - [ ] **Step 3: Create dedicated worktrees at the exact baselines**
 
@@ -353,7 +353,7 @@ The script must:
 9. compare all four main snapshots in `finally` and fail if any differ;
 10. print the absolute executable path but never launch it.
 
-Any temporary recursive cleanup must first resolve and validate that the target is beneath `%LOCALAPPDATA%\Temp\helengine-builds`.
+Pass the build wrapper an explicit workspace beneath `C:\dev\helworks\builds\helphysics-demodisc-stack-test\<build-id>`. Any recursive cleanup must first resolve and validate that its target remains beneath that visible workspace-owned build root; the script must not direct agent-owned output to `%TEMP%` or `AppData\Local\Temp`.
 
 - [ ] **Step 3: Run script contract tests and commit**
 
