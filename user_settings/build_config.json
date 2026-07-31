@@ -3,117 +3,22 @@
                       {
                           "platformId":  "windows",
                           "selectedSceneIds":  [
-                                                   "HelenOfCodeSplash",
-                                                   "SceneLoadingScreen",
-                                                   "DemoDiscMainMenu",
-                                                   "cube_test",
-                                                   "colored_cube_grid",
-                                                   "textured_cube_grid",
-                                                   "axis_test",
-                                                   "axis_test2",
-                                                   "test_scene_matrix_render",
-                                                   "directional_shadow_plaza",
-                                                   "test_scene_dynamic_stack_boxes",
-                                                   "test_scene_dynamic_sphere_stack",
-                                                   "test_scene_dynamic_mixed_stack",
-                                                   "test_scene_static_mesh_showcase",
-                                                   "test_scene_static_mesh_minimal",
-                                                   "tilt_trial",
-                                                   "tilt_trial_level_01",
-                                                   "tilt_trial_level_02",
-                                                   "tilt_trial_level_03",
-                                                   "tilt_trial_level_04",
-                                                   "tilt_trial_level_05"
+                                                   "test_scene_dynamic_stack_boxes"
                                                ],
                           "sceneOrders":  [
                                               {
-                                                  "sceneId":  "HelenOfCodeSplash",
-                                                  "orderNumber":  1
-                                                   },
-                                               {
-                                                   "sceneId":  "SceneLoadingScreen",
-                                                   "orderNumber":  2
-                                                    },
-                                               {
-                                                   "sceneId":  "DemoDiscMainMenu",
-                                                   "orderNumber":  3
-                                                   },
-                                              {
-                                                  "sceneId":  "cube_test",
-                                                  "orderNumber":  2
-                                                   },
-                                              {
-                                                  "sceneId":  "colored_cube_grid",
-                                                  "orderNumber":  3
-                                                   },
-                                              {
-                                                  "sceneId":  "textured_cube_grid",
-                                                  "orderNumber":  4
-                                                   },
-                                              {
-                                                  "sceneId":  "axis_test",
-                                                  "orderNumber":  5
-                                                   },
-                                              {
-                                                  "sceneId":  "axis_test2",
-                                                  "orderNumber":  6
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_matrix_render",
-                                                  "orderNumber":  7
-                                                   },
-                                              {
-                                                  "sceneId":  "directional_shadow_plaza",
-                                                  "orderNumber":  8
-                                                   },
-                                              {
                                                   "sceneId":  "test_scene_dynamic_stack_boxes",
-                                                  "orderNumber":  9
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_dynamic_sphere_stack",
-                                                  "orderNumber":  10
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_dynamic_mixed_stack",
-                                                  "orderNumber":  11
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_showcase",
-                                                  "orderNumber":  12
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_minimal",
-                                                  "orderNumber":  13
-                                                   },
-                                              {
-                                                  "sceneId":  "tilt_trial",
-                                                  "orderNumber":  14
-                                                   },
-                                              {
-                                                  "sceneId":  "tilt_trial_level_01",
-                                                  "orderNumber":  15
-                                                   },
-                                              {
-                                                  "sceneId":  "tilt_trial_level_02",
-                                                  "orderNumber":  16
-                                                   },
-                                              {
-                                                  "sceneId":  "tilt_trial_level_03",
-                                                  "orderNumber":  17
-                                                   },
-                                              {
-                                                  "sceneId":  "tilt_trial_level_04",
-                                                  "orderNumber":  18
-                                                   },
-                                              {
-                                                  "sceneId":  "tilt_trial_level_05",
-                                                  "orderNumber":  19
-                                                   }
+                                                  "orderNumber":  1
+                                              }
                                           ],
-                          "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\windows",
+                          "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\windows-helphysics-stack-test",
                           "debugBuild":  false,
                           "selectedBuildProfileId":  "release",
+                          "editorPrebuildCommandIdsByBuildProfileId":  {
+                                                                            "release":  [
+                                                                                            "physics.prepare-helphysics-stack-test-scene"
+                                                                                        ]
+                                                                        },
                           "selectedGraphicsProfileId":  "directx11",
                           "selectedBuildOptionValues":  {
                                                             "texture-scale-percent":  "100",
@@ -132,7 +37,11 @@
                                                               "write-conversion-report":  "true",
                                                               "include-project-defined-preprocessor-symbols":  "false",
                                                               "load-native-runtime-metadata":  "true",
-                                                              "type-remaps":  "System.Numerics.Vector2=helengine.float2;System.Numerics.Vector3=helengine.float3;System.Numerics.Vector4=helengine.float4;System.Numerics.Quaternion=helengine.float4"
+                                                              "type-remaps":  "System.Numerics.Vector2=helengine.float2;System.Numerics.Vector3=helengine.float3;System.Numerics.Vector4=helengine.float4;System.Numerics.Quaternion=helengine.float4",
+                                                              "physics-runtime-backend":  "helphysics",
+                                                              "physics-fixed-step-hertz":  "20",
+                                                              "physics-velocity-iterations":  "4",
+                                                              "physics-penetration-correction-passes":  "1"
                                                           }
                       },
                       {
