@@ -26,7 +26,7 @@ namespace city.game.tools {
 
             RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService();
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(context.ProjectRootPath);
-            GameSceneFactory sceneFactory = new GameSceneFactory(assets);
+            GameSceneFactory sceneFactory = new GameSceneFactory(assets, context.ProjectRootPath);
             TiltTrialGameplayPresentationBlueprintGenerator generator = new TiltTrialGameplayPresentationBlueprintGenerator();
             generator.Generate(context.ProjectRootPath, sceneFactory);
         }

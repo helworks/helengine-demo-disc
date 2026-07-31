@@ -33,8 +33,6 @@ namespace city.game {
         TextComponent LevelTimerTextComponent;
         /// <summary>Text displaying the selected stage target times.</summary>
         TextComponent LevelTargetTimesTextComponent;
-        /// <summary>Text displaying the platform-specific confirm and return button hint.</summary>
-        TextComponent LevelSelectHintTextComponent;
         /// <summary>Background used to show the focused Back action.</summary>
         RoundedRectComponent DetailBackButtonBackground;
         /// <summary>Background used to show the focused Play action.</summary>
@@ -213,7 +211,7 @@ namespace city.game {
                 throw new InvalidOperationException("Tilt Trial selector has no valid selected stage.");
             }
 
-            Core.Instance.SceneManager.LoadScene(levels[SelectedIndex].SceneId, SceneLoadMode.Single);
+            Core.Instance.SceneManager.RequestSceneTransition(levels[SelectedIndex].SceneId);
         }
 
         /// <summary>
@@ -228,7 +226,6 @@ namespace city.game {
             ApplyLevelNameText(selectedLevel.DisplayName);
             ApplyLevelTimerText(selectedLevel.StartTimeSeconds);
             ApplyLevelTargetTimesText(selectedLevel.GoldTimeSeconds, selectedLevel.SilverTimeSeconds, selectedLevel.BronzeTimeSeconds);
-            ApplyPlatformHintText();
             ApplyRowSelectionState(selectedLevel.LevelId);
         }
 
@@ -250,9 +247,6 @@ namespace city.game {
             LevelNameTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(DetailsPanelEntity, 0, "Tilt Trial selector level name text"));
             LevelTimerTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(DetailsPanelEntity, 1, "Tilt Trial selector level timer text"));
             LevelTargetTimesTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(DetailsPanelEntity, 2, "Tilt Trial selector target times text"));
-            if (!UseDetailsStage) {
-                LevelSelectHintTextComponent = FindRequiredComponent<TextComponent>(FindRequiredChildEntity(Parent, 3, "Tilt Trial selector hint text"));
-            }
             if (UseDetailsStage) {
                 DetailBackButtonEntity = FindRequiredChildEntity(DetailsPanelEntity, 3, "Tilt Trial selector Back button");
                 DetailPlayButtonEntity = FindRequiredChildEntity(DetailsPanelEntity, 4, "Tilt Trial selector Play button");
@@ -333,7 +327,7 @@ namespace city.game {
         /// Applies the selected level start time to the details panel.
         /// </summary>
         void ApplyLevelTimerText(float startTimeSeconds) {
-            LevelTimerTextComponent.Text = $"Start {FormatTimerSeconds(startTimeSeconds)}";
+            LevelTimerTextComponent.Text = $"Limit {FormatTimerSeconds(startTimeSeconds)}";
         }
 
         /// <summary>
@@ -341,39 +335,6 @@ namespace city.game {
         /// </summary>
         void ApplyLevelTargetTimesText(float goldTimeSeconds, float silverTimeSeconds, float bronzeTimeSeconds) {
             LevelTargetTimesTextComponent.Text = $"Gold  {FormatTimerSeconds(goldTimeSeconds)}\nSilver {FormatTimerSeconds(silverTimeSeconds)}\nBronze {FormatTimerSeconds(bronzeTimeSeconds)}";
-        }
-
-        /// <summary>
-        /// Applies the confirm and return labels for the active runtime platform to the shared selector hint.
-        /// </summary>
-        void ApplyPlatformHintText() {
-            if (LevelSelectHintTextComponent != null) {
-                LevelSelectHintTextComponent.Text = ResolvePlatformHintText();
-            }
-        }
-
-        /// <summary>
-        /// Resolves the visible selector hint from the active platform's conventional confirm and return buttons.
-        /// </summary>
-        /// <returns>Platform-specific confirm and return hint text.</returns>
-        static string ResolvePlatformHintText() {
-            PlatformInfo platformInfo = Core.Instance?.PlatformInfo;
-            string platformName = platformInfo != null ? platformInfo.Name : string.Empty;
-            if (string.Equals(platformName, "gamecube", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(platformName, "switch", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(platformName, "wiiu", StringComparison.OrdinalIgnoreCase)) {
-                return "A Play   B Menu";
-            } else if (string.Equals(platformName, "wii", StringComparison.OrdinalIgnoreCase)) {
-                return "A Play   B Menu";
-            } else if (string.Equals(platformName, "ps2", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(platformName, "psp", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(platformName, "psvita", StringComparison.OrdinalIgnoreCase)) {
-                return "Cross Play   Circle Menu";
-            } else if (string.Equals(platformName, "windows", StringComparison.OrdinalIgnoreCase)) {
-                return "Enter Play   Esc Menu";
-            }
-
-            return "A Play   B Menu";
         }
 
         /// <summary>
@@ -401,9 +362,12 @@ namespace city.game {
         /// </summary>
         bool WasNavigatePreviousPressed() {
             InputSystem inputSystem = Core.Instance.Input;
-            return inputSystem.WasKeyPressed(Keys.Up)
-                || inputSystem.WasKeyPressed(Keys.W)
-                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp)
+#if DESKTOP_PLATFORM
+            if (inputSystem.WasKeyPressed(Keys.Up) || inputSystem.WasKeyPressed(Keys.W)) {
+                return true;
+            }
+#endif
+            return city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp)
                 || WasLeftStickUpPressed();
         }
 
@@ -412,9 +376,12 @@ namespace city.game {
         /// </summary>
         bool WasNavigateNextPressed() {
             InputSystem inputSystem = Core.Instance.Input;
-            return inputSystem.WasKeyPressed(Keys.Down)
-                || inputSystem.WasKeyPressed(Keys.S)
-                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown)
+#if DESKTOP_PLATFORM
+            if (inputSystem.WasKeyPressed(Keys.Down) || inputSystem.WasKeyPressed(Keys.S)) {
+                return true;
+            }
+#endif
+            return city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown)
                 || WasLeftStickDownPressed();
         }
 
@@ -445,10 +412,12 @@ namespace city.game {
         /// </summary>
         bool WasAcceptPressed() {
             InputSystem inputSystem = Core.Instance.Input;
-            return inputSystem.WasKeyPressed(Keys.Enter)
-                || inputSystem.WasKeyPressed(Keys.J)
-                || inputSystem.WasKeyPressed(Keys.Space)
-                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)
+#if DESKTOP_PLATFORM
+            if (inputSystem.WasKeyPressed(Keys.Enter) || inputSystem.WasKeyPressed(Keys.J) || inputSystem.WasKeyPressed(Keys.Space)) {
+                return true;
+            }
+#endif
+            return city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)
                 || Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept);
         }
 
@@ -457,9 +426,12 @@ namespace city.game {
         /// </summary>
         bool WasBackPressed() {
             InputSystem inputSystem = Core.Instance.Input;
-            return inputSystem.WasKeyPressed(Keys.Escape)
-                || inputSystem.WasKeyPressed(Keys.Back)
-                || inputSystem.WasKeyPressed(Keys.K);
+#if DESKTOP_PLATFORM
+            if (inputSystem.WasKeyPressed(Keys.Escape) || inputSystem.WasKeyPressed(Keys.Back) || inputSystem.WasKeyPressed(Keys.K)) {
+                return true;
+            }
+#endif
+            return city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East);
         }
 
         /// <summary>

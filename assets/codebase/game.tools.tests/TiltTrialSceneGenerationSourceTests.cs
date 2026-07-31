@@ -30,6 +30,9 @@ namespace city.tests {
             Assert.Contains("TiltTrialResultRetryButton", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialResultExitButton", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialResultNextButton", source, StringComparison.Ordinal);
+            Assert.Contains("TiltTrialStartOverlay", source, StringComparison.Ordinal);
+            Assert.Contains("TiltTrialStartPromptText", source, StringComparison.Ordinal);
+            Assert.Contains("Press \"X\" to start", source, StringComparison.Ordinal);
             Assert.Contains("new city.game.TiltTrialLevelSelectComponent", source, StringComparison.Ordinal);
             Assert.Contains("new global::helengine.SceneEntityTriggerObserverComponent()", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltTrialCoinText\"", source, StringComparison.Ordinal);
@@ -71,7 +74,7 @@ namespace city.tests {
 
             Assert.Contains("CreateTiltPlayShellUiEntity()", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltPlayTitlePanel\"", source, StringComparison.Ordinal);
-            Assert.Contains("\"TILT PLAY\"", source, StringComparison.Ordinal);
+            Assert.Contains("\"TILT TRIAL\"", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltPlayOptionsPanel\"", source, StringComparison.Ordinal);
             Assert.Contains("\"Settings coming soon\"", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltPlayLevelSelectPanel\"", source, StringComparison.Ordinal);
@@ -82,10 +85,73 @@ namespace city.tests {
         }
 
         /// <summary>
-        /// Ensures the dedicated Level 1 render test scene contains one tessellated cube, one light, a fixed-axis camera, and FPS diagnostics.
+        /// Verifies the textured title panel keeps the stable role required by the runtime Tilt Play menu controller.
         /// </summary>
         [Fact]
-        public void Level_01_render_test_scene_uses_one_tessellated_cube_light_camera_and_fps_only() {
+        public void Tilt_trial_front_door_title_panel_has_its_required_presentation_role() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+
+            Assert.Contains("titlePanel.AddComponent(new city.game.TiltTrialPresentationRoleComponent {", source, StringComparison.Ordinal);
+            Assert.Contains("Role = \"TiltPlayTitlePanel\"", source, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Verifies title-screen sprites retain their stable roles for runtime menu dependency resolution.
+        /// </summary>
+        [Fact]
+        public void Tilt_trial_front_door_sprite_factory_assigns_the_sprite_role() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+
+            Assert.Contains("spriteEntity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {", source, StringComparison.Ordinal);
+            Assert.Contains("Role = name", source, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Ensures the Tilt Trial front door emits the approved game-show arena title treatment without changing menu actions.
+        /// </summary>
+        [Fact]
+        public void Tilt_trial_front_door_generates_the_arena_title_treatment() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string menuSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltPlayMenuComponent.cs");
+
+            Assert.Contains("CreateTiltPlayTitleBackgroundSprite(titlePanel);", source, StringComparison.Ordinal);
+            Assert.Contains("\"TiltPlayPlayButton\"", source, StringComparison.Ordinal);
+            Assert.Contains("new int2(520, 72)", source, StringComparison.Ordinal);
+            Assert.Contains("city.game.TiltPlayMenuAction.Play", source, StringComparison.Ordinal);
+            Assert.Contains("city.game.TiltPlayMenuAction.Options", source, StringComparison.Ordinal);
+            Assert.Contains("city.game.TiltPlayMenuAction.BackToDemoDisc", source, StringComparison.Ordinal);
+            Assert.Contains("ApplyTitleActionSelection", menuSource, StringComparison.Ordinal);
+            Assert.Contains("PlayButtonSelectedOverlay.Enabled", menuSource, StringComparison.Ordinal);
+            Assert.Contains("OptionsButtonSelectedOverlay.Enabled", menuSource, StringComparison.Ordinal);
+            Assert.Contains("DemoDiscButtonSelectedOverlay.Enabled", menuSource, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Ensures the Tilt Trial title screen uses authored sprite textures instead of renderer-specific rounded rectangles.
+        /// </summary>
+        [Fact]
+        public void Tilt_trial_front_door_uses_authored_png_sprites_for_title_chrome() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string menuSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltPlayMenuComponent.cs");
+
+            Assert.Contains("images/ui/tilt_trial/title/background.png", source, StringComparison.Ordinal);
+            Assert.Contains("images/ui/tilt_trial/title/button_primary.png", source, StringComparison.Ordinal);
+            Assert.Contains("images/ui/tilt_trial/title/button_primary_selected.png", source, StringComparison.Ordinal);
+            Assert.Contains("images/ui/tilt_trial/title/button_secondary_options.png", source, StringComparison.Ordinal);
+            Assert.Contains("images/ui/tilt_trial/title/button_secondary_options_selected.png", source, StringComparison.Ordinal);
+            Assert.Contains("images/ui/tilt_trial/title/button_secondary_demo_disc.png", source, StringComparison.Ordinal);
+            Assert.Contains("images/ui/tilt_trial/title/button_secondary_demo_disc_selected.png", source, StringComparison.Ordinal);
+            Assert.Contains("new SpriteComponent", source, StringComparison.Ordinal);
+            Assert.Contains("CreateFileSystemTexture", source, StringComparison.Ordinal);
+            Assert.Contains("Entity PlayButtonSelectedOverlay", menuSource, StringComparison.Ordinal);
+            Assert.Contains("ApplyTitleActionSelection", menuSource, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Ensures the dedicated render test scene isolates one clipping-probe cube with deterministic camera controls.
+        /// </summary>
+        [Fact]
+        public void Level_01_render_test_scene_uses_one_cube_light_camera_and_fps_only() {
             string catalogSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneCatalog.cs");
             string generatorSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
             string factorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
@@ -101,6 +167,18 @@ namespace city.tests {
             Assert.Contains("float4.CreateFromYawPitchRoll(0.6435011f, -0.3805064f, 0f, out orientation)", factorySource, StringComparison.Ordinal);
             Assert.Contains("ManualYawSpeedRadians = 0f", factorySource, StringComparison.Ordinal);
             Assert.Contains("ManualPitchSpeedRadians = 0f", factorySource, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Verifies the render-only stage excludes the former course, sphere, coin, and flag root attachments.
+        /// </summary>
+        [Fact]
+        public void Level_01_render_test_scene_excludes_unrelated_visual_roots() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+
+            Assert.DoesNotContain("entity.AddChild(CreateLevel01RenderOnlyPlayerSphereEntity())", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("entity.AddChild(CreateLevel01RenderOnlyCoinEntity(", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("entity.AddChild(CreateLevel01RenderOnlyGoalFlagEntity(", source, StringComparison.Ordinal);
         }
 
         /// <summary>

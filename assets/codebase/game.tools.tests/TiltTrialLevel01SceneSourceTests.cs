@@ -78,7 +78,8 @@ namespace city.tests {
             Assert.Contains("FinalPlatform", serviceSource, StringComparison.Ordinal);
             Assert.Contains("LeftWall", serviceSource, StringComparison.Ordinal);
             Assert.Contains("RightWall", serviceSource, StringComparison.Ordinal);
-            Assert.Contains("MeshComponentTessellationSettings(true, 1d)", serviceSource, StringComparison.Ordinal);
+            Assert.Contains("MeshBakeScaleMemberName = \"MeshBakeScale\"", serviceSource, StringComparison.Ordinal);
+            Assert.Contains("pspOverride.SetMemberValue(MeshBakeScaleMemberName, true.ToString(CultureInfo.InvariantCulture))", serviceSource, StringComparison.Ordinal);
         }
     }
 }

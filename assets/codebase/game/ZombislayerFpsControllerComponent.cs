@@ -132,8 +132,10 @@ namespace city.game {
         /// <param name="inputSystem">Input system supplying the current frame state.</param>
         void UpdateLook(InputSystem inputSystem) {
             inputSystem.RequestPointerWrapEnabled();
+#if DESKTOP_PLATFORM
             CurrentYawDegrees += inputSystem.GetMouseDeltaX() * LookSensitivityDegrees;
             CurrentPitchDegrees = ClampPitchDegrees(CurrentPitchDegrees - (inputSystem.GetMouseDeltaY() * LookSensitivityDegrees));
+#endif
 
             float4 yawOrientation;
             float4.CreateFromYawPitchRoll(CurrentYawDegrees * (float)(Math.PI / 180d), 0f, 0f, out yawOrientation);
@@ -152,8 +154,12 @@ namespace city.game {
         /// <param name="inputSystem">Input system supplying the current frame state.</param>
         /// <param name="frameDeltaSeconds">Frame delta in seconds.</param>
         void UpdateMovement(InputSystem inputSystem, double frameDeltaSeconds) {
-            float forwardAmount = ResolveAxisAmount(inputSystem.IsKeyDown(Keys.W), inputSystem.IsKeyDown(Keys.S));
-            float rightAmount = ResolveAxisAmount(inputSystem.IsKeyDown(Keys.D), inputSystem.IsKeyDown(Keys.A));
+            float forwardAmount = 0f;
+            float rightAmount = 0f;
+#if DESKTOP_PLATFORM
+            forwardAmount = ResolveAxisAmount(inputSystem.IsKeyDown(Keys.W), inputSystem.IsKeyDown(Keys.S));
+            rightAmount = ResolveAxisAmount(inputSystem.IsKeyDown(Keys.D), inputSystem.IsKeyDown(Keys.A));
+#endif
             float3 direction = BuildPlanarMoveDirection(CurrentYawDegrees * (float)(Math.PI / 180d), forwardAmount, rightAmount);
             if (direction == float3.Zero) {
                 return;

@@ -155,6 +155,8 @@ namespace city.rendering.tools {
             windowsSettings.SetFieldValue(PixelProgramFieldId, SolidColorPixelProgramName);
             windowsSettings.SetFieldValue(VariantFieldId, MeshVariantName);
             windowsSettings.SetFieldValue(BaseColorFieldId, CubeBaseColor);
+            windowsSettings.SetFieldValue("metallic", "0.0");
+            windowsSettings.SetFieldValue("specular", "0.0");
             windowsSettings.SetFieldValue(CastsShadowFieldId, "false");
             windowsSettings.SetFieldValue(ReceivesShadowFieldId, "false");
 

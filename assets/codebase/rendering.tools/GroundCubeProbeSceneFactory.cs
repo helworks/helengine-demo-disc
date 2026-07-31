@@ -92,6 +92,7 @@ namespace city.rendering.tools {
                 Font = ResolveRequiredEditorFont(),
                 FontScale = 2f
             });
+            PspFpsComponentOverrideService.Apply(entity);
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;
         }

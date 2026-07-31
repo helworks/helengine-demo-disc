@@ -165,6 +165,7 @@ namespace city.rendering.tools {
                 FontScale = 2f
             };
             entity.AddComponent(fpsComponent);
+            PspFpsComponentOverrideService.Apply(entity);
             ApplyEditorFontReference(entity, fpsComponent);
             entity.AddComponent(new DemoDiscLightToggleComponent());
             DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();

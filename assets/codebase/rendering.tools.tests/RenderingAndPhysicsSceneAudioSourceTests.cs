@@ -59,6 +59,17 @@ namespace city.tests {
             Assert.Contains("StripSharedSceneMusic", physicsNintendoDsSource, StringComparison.Ordinal);
         }
 
+        /// <summary>
+        /// Verifies the handheld physics generator identifies the matrix scene with the same canonical asset id used by the scene factory.
+        /// </summary>
+        [Fact]
+        public void Nintendo_handheld_generator_rebuilds_the_matrix_scene_from_its_canonical_asset_id() {
+            string physicsNintendoDsSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsNintendoDsSceneGenerator.cs");
+
+            Assert.Contains("string.Equals(BuildPhysicsSceneAssetId(sceneEntry.SceneId), PhysicsSceneCatalog.MatrixRenderSceneId, StringComparison.Ordinal)", physicsNintendoDsSource, StringComparison.Ordinal);
+            Assert.Contains("CreateFreshPhysicsSceneAssetWithoutSharedMusic(BuildPhysicsSceneAssetId(sceneEntry.SceneId))", physicsNintendoDsSource, StringComparison.Ordinal);
+        }
+
         static void AssertAllScenesAreSilent(IEnumerable<string> relativePaths, string audioSourceComponentTypeId) {
             foreach (string relativePath in relativePaths) {
                 SceneAsset scene = LoadSceneAsset(relativePath);

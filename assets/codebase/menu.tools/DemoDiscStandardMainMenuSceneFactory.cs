@@ -554,7 +554,7 @@ namespace city.menu.tools {
             Entity entity = Core.Instance.EntityFactory.CreateChild(generatedRootEntity, "DemoDiscOverlayImage");
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = new int2(overlayImage.Width, overlayImage.Height),
-                RenderOrder2D = 28,
+                RenderOrder2D = 31,
             };
             entity.AddComponent(spriteComponent);
             ApplyTextureReference(entity, spriteComponent, overlayImage.TexturePath);
@@ -623,8 +623,7 @@ namespace city.menu.tools {
                 TextEntityReference = CreateEntityReference(footerTextEntity),
                 StripWidth = DemoMenuLayout.CanvasWidth,
                 TextWidth = 420f,
-                PixelsPerSecond = 70f,
-                ReferenceViewportWidth = DemoMenuLayout.CanvasWidth
+                PixelsPerSecond = 70f
             });
         }
 

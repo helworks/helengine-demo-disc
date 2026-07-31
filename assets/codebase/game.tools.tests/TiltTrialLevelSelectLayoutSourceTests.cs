@@ -93,6 +93,33 @@ namespace city.tests {
         }
 
         /// <summary>
+        /// Ensures the desktop selector removes its title and expands the left list into the recovered vertical space.
+        /// </summary>
+        [Fact]
+        public void Game_scene_factory_expands_desktop_level_list_without_title() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            int desktopMethodStart = source.IndexOf("EditorEntity CreateLevelSelectUiEntity(bool useOwnViewport)", StringComparison.Ordinal);
+
+            Assert.True(desktopMethodStart >= 0);
+
+            string desktopMethodSource = source.Substring(desktopMethodStart);
+            Assert.Contains("CreateRoundedPanelEntity(entity, \"TiltTrialLevelSelectListPanel\", new float3(40f, 32f, 0f), new int2(420, 656)", desktopMethodSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("TiltTrialLevelSelectTitle", desktopMethodSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("TiltTrialLevelSelectHint", desktopMethodSource, StringComparison.Ordinal);
+            Assert.Contains("Limit 99.00", desktopMethodSource, StringComparison.Ordinal);
+            Assert.Contains("TiltTrialLevelSelectPlayPrompt", desktopMethodSource, StringComparison.Ordinal);
+            Assert.Contains("TiltTrialLevelSelectMenuPrompt", desktopMethodSource, StringComparison.Ordinal);
+            Assert.Contains("new float3(500f, 32f, 0f), new int2(740, 576)", desktopMethodSource, StringComparison.Ordinal);
+            Assert.Contains("CreateLevelSelectActionPrompt(entity, \"TiltTrialLevelSelectPlayPrompt\", new float3(848f, 638f, 0f)", desktopMethodSource, StringComparison.Ordinal);
+            Assert.Contains("CreateLevelSelectActionPrompt(entity, \"TiltTrialLevelSelectMenuPrompt\", new float3(1056f, 638f, 0f)", desktopMethodSource, StringComparison.Ordinal);
+            Assert.Contains("int2 iconBounds = new int2(56, 48)", source, StringComparison.Ordinal);
+            Assert.Contains("Core.Instance.EntityFactory.CreateChild(parent, name)", source, StringComparison.Ordinal);
+            Assert.Contains("new float3(392f, 28f, 0f)", desktopMethodSource, StringComparison.Ordinal);
+            Assert.Contains("GeneratedControlIconAssetResolver", source, StringComparison.Ordinal);
+            Assert.Contains("CreateFileSystemTexture(resolvedIcon.SourcePngRelativePath)", source, StringComparison.Ordinal);
+        }
+
+        /// <summary>
         /// Ensures only the handheld selector enables the two-stage details flow.
         /// </summary>
         [Fact]
@@ -128,15 +155,17 @@ namespace city.tests {
         /// Ensures the non-handheld selector presents platform-appropriate confirm and return button labels.
         /// </summary>
         [Fact]
-        public void Level_select_controller_resolves_platform_button_hint() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelSelectComponent.cs");
+        public void Level_select_controller_uses_generated_platform_action_prompts() {
+            string componentSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelSelectComponent.cs");
+            string factorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
 
-            Assert.Contains("ResolvePlatformHintText", source, StringComparison.Ordinal);
-            Assert.Contains("gamecube", source, StringComparison.Ordinal);
-            Assert.Contains("Play   B Menu", source, StringComparison.Ordinal);
-            Assert.Contains("Cross Play   Circle Menu", source, StringComparison.Ordinal);
-            Assert.Contains("A Play   B Menu", source, StringComparison.Ordinal);
-            Assert.Contains("Enter Play   Esc Menu", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("ResolvePlatformHintText", componentSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("TiltTrialLevelSelectHint", componentSource, StringComparison.Ordinal);
+            Assert.Contains("$\"Limit {FormatTimerSeconds(startTimeSeconds)}\"", componentSource, StringComparison.Ordinal);
+            Assert.Contains("GeneratedControlIconAssetResolver", factorySource, StringComparison.Ordinal);
+            Assert.Contains("ControlIconResolver.RequireIcon(ProjectRootPath, \"windows\", controlId)", factorySource, StringComparison.Ordinal);
+            Assert.Contains("\"enter\", \"PLAY\"", factorySource, StringComparison.Ordinal);
+            Assert.Contains("\"escape\", \"MENU\"", factorySource, StringComparison.Ordinal);
         }
 
         /// <summary>

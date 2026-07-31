@@ -53,8 +53,10 @@ namespace city.menu {
             }
 
             InputSystem inputSystem = Core.Instance.Input;
-            bool wasReturnPressed = (AllowKeyboardReturn && WasKeyboardReturnPressed(inputSystem))
-                || (AllowGamepadReturn && WasGamepadReturnPressed(inputSystem));
+            bool wasReturnPressed = AllowGamepadReturn && WasGamepadReturnPressed(inputSystem);
+#if DESKTOP_PLATFORM
+            wasReturnPressed |= AllowKeyboardReturn && WasKeyboardReturnPressed(inputSystem);
+#endif
 
             if (wasReturnPressed) {
                 LoadResolvedMainMenuScene();
@@ -78,6 +80,7 @@ namespace city.menu {
             base.ComponentRemoved(entity);
         }
 
+#if DESKTOP_PLATFORM
         /// <summary>
         /// Returns whether the current frame pressed one of the desktop return keys.
         /// </summary>
@@ -91,6 +94,7 @@ namespace city.menu {
                 || inputSystem.IsKeyDown(Keys.Back)
                 || inputSystem.IsKeyDown(Keys.K);
         }
+#endif
 
         /// <summary>
         /// Returns whether the current frame pressed the configured standard platform return action.
@@ -176,7 +180,7 @@ namespace city.menu {
 
             string resolvedSceneId = DemoDiscMainMenuSceneResolver.ResolveRuntimeSceneId();
             SceneLoadWasRequested = true;
-            Core.Instance.SceneManager.LoadScene(resolvedSceneId, SceneLoadMode.Single);
+            Core.Instance.SceneManager.RequestSceneTransition(resolvedSceneId);
         }
     }
 }

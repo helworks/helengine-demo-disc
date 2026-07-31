@@ -136,7 +136,7 @@ namespace city.menu {
 
             string resolvedSceneId = DemoDiscMainMenuSceneResolver.ResolveRuntimeSceneId();
             SceneLoadWasRequested = true;
-            Core.Instance.SceneManager.LoadScene(resolvedSceneId, SceneLoadMode.Single);
+            Core.Instance.SceneManager.RequestSceneTransition(resolvedSceneId);
         }
     }
 }

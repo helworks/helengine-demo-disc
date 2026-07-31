@@ -208,12 +208,14 @@ namespace city.rendering {
             }
 
             double keyboardYaw = 0d;
+#if DESKTOP_PLATFORM
             if (inputSystem.IsKeyDown(Keys.A)) {
                 keyboardYaw -= 1d;
             }
             if (inputSystem.IsKeyDown(Keys.D)) {
                 keyboardYaw += 1d;
             }
+#endif
 
             InputGamepadState gamepadState = inputSystem.GetGamepadState(0);
             double gamepadYaw = 0d;
@@ -242,12 +244,14 @@ namespace city.rendering {
             }
 
             double keyboardPitch = 0d;
+#if DESKTOP_PLATFORM
             if (inputSystem.IsKeyDown(Keys.W)) {
                 keyboardPitch += 1d;
             }
             if (inputSystem.IsKeyDown(Keys.S)) {
                 keyboardPitch -= 1d;
             }
+#endif
 
             InputGamepadState gamepadState = inputSystem.GetGamepadState(0);
             double gamepadPitch = 0d;

@@ -58,5 +58,23 @@ namespace city.tests {
             Assert.DoesNotContain("InputGamepadButton.RightShoulder", sharedSource, StringComparison.Ordinal);
             Assert.DoesNotContain("InputGamepadButton.RightShoulder", handheldSource, StringComparison.Ordinal);
         }
+
+        /// <summary>
+        /// Ensures instruction overlays use each platform's concrete North-button icon rather than the retired shoulder-button artwork.
+        /// </summary>
+        [Fact]
+        public void Light_instruction_icons_match_platform_north_button_bindings() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
+
+            Assert.Contains("new DesktopInstructionPlatformIconSpec(\"windows\", \"y\", new int2(46, 46), \"xbox360\")", source, StringComparison.Ordinal);
+            Assert.Contains("new DesktopInstructionPlatformIconSpec(\"xbox360\", \"y\", new int2(46, 46))", source, StringComparison.Ordinal);
+            Assert.Contains("new DesktopInstructionPlatformIconSpec(\"switch\", \"x\", new int2(46, 46))", source, StringComparison.Ordinal);
+            Assert.Contains("new DesktopInstructionPlatformIconSpec(\"gamecube\", \"y\", new int2(46, 46))", source, StringComparison.Ordinal);
+            Assert.Contains("new DesktopInstructionPlatformIconSpec(\"wii\", \"2\", new int2(46, 46))", source, StringComparison.Ordinal);
+            Assert.Contains("new DesktopInstructionPlatformIconSpec(\"ps2\", \"triangle\", new int2(46, 46))", source, StringComparison.Ordinal);
+            Assert.Contains("new DesktopInstructionPlatformIconSpec(\"wiiu\", \"y\", new int2(46, 46), \"xbox360\")", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("new DesktopInstructionPlatformIconSpec(\"xbox360\", \"rb\"", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("new DesktopInstructionPlatformIconSpec(\"ps2\", \"r1\"", source, StringComparison.Ordinal);
+        }
     }
 }

@@ -2271,6 +2271,7 @@ namespace city.physics.tools {
                 FontScale = 2f
             };
             entity.AddComponent(fpsComponent);
+            city.rendering.tools.PspFpsComponentOverrideService.Apply(entity);
             ApplyEditorFontReference(entity, fpsComponent);
             entity.AddComponent(new city.rendering.DemoDiscLightToggleComponent());
             DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
@@ -2293,6 +2294,7 @@ namespace city.physics.tools {
                 FontScale = 2f
             };
             entity.AddComponent(fpsComponent);
+            city.rendering.tools.PspFpsComponentOverrideService.Apply(entity);
             ApplyEditorFontReference(entity, fpsComponent);
             entity.AddComponent(new city.menu.DemoDiscReturnToMenuComponent());
             Entity phaseStatusEntity = Core.Instance.EntityFactory.CreateChild(entity, "MatrixRenderPhaseStatus");

@@ -305,8 +305,12 @@ namespace city.rendering {
                 throw new InvalidOperationException("Light toggle component requires an initialized input system.");
             }
 
-            return inputSystem.WasKeyPressed(Keys.L)
-                || inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.North);
+#if DESKTOP_PLATFORM
+            if (inputSystem.WasKeyPressed(Keys.L)) {
+                return true;
+            }
+#endif
+            return inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.North);
         }
     }
 }

@@ -114,20 +114,24 @@ namespace city.game {
         /// </summary>
         void UpdateSessionState() {
             InputSystem inputSystem = Core.Instance.Input;
+#if DESKTOP_PLATFORM
             if (inputSystem.WasKeyPressed(Keys.Escape)) {
                 SessionStateMachine.TryChangeState(ResolveStateAfterPauseToggle(SessionStateMachine.CurrentState));
                 return;
             }
+#endif
 
             if (SessionStateMachine.CurrentState != ZombislayerSessionState.Paused) {
                 return;
             }
 
+#if DESKTOP_PLATFORM
             if (inputSystem.WasKeyPressed(Keys.Enter)) {
                 SessionStateMachine.TryChangeState(ZombislayerSessionState.Playing);
             } else if (inputSystem.WasKeyPressed(Keys.Back)) {
                 LoadResolvedMainMenuScene();
             }
+#endif
         }
 
         /// <summary>
@@ -146,7 +150,7 @@ namespace city.game {
         /// </summary>
         void LoadResolvedMainMenuScene() {
             string resolvedSceneId = DemoDiscMainMenuSceneResolver.ResolveRuntimeSceneId();
-            Core.Instance.SceneManager.LoadScene(resolvedSceneId, SceneLoadMode.Single);
+            Core.Instance.SceneManager.RequestSceneTransition(resolvedSceneId);
         }
 
         /// <summary>

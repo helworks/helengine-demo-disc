@@ -19,6 +19,11 @@ namespace city.menu.tools {
         const ushort RuntimeLayerMask = 0b0000000000000100;
 
         /// <summary>
+        /// Draw order reserved below the startup splash so the splash remains the final startup overlay.
+        /// </summary>
+        const byte LoadingScreenCameraDrawOrder = byte.MaxValue - 1;
+
+        /// <summary>
         /// Creates the persistent loading-scene definition.
         /// </summary>
         /// <returns>Generated authored loading scene.</returns>
@@ -26,7 +31,7 @@ namespace city.menu.tools {
             Entity camera = Core.Instance.EntityFactory.Create("SceneLoadingScreenCamera");
             camera.LayerMask = RuntimeLayerMask;
             camera.AddComponent(new CameraComponent {
-                CameraDrawOrder = byte.MaxValue,
+                CameraDrawOrder = LoadingScreenCameraDrawOrder,
                 LayerMask = RuntimeLayerMask,
                 Viewport = new float4(0f, 0f, 1f, 1f),
                 ClearSettings = new CameraClearSettings(false, new float4(0f, 0f, 0f, 1f), false, 1f, false, 0)

@@ -89,7 +89,9 @@ namespace city.game {
                 return;
             }
 
-            ResolveRuntimeDependenciesWhenNeeded();
+            if (!ResolveRuntimeDependenciesWhenNeeded()) {
+                return;
+            }
 
             Core core = Core.Instance ?? throw new InvalidOperationException("A core instance must exist before Tilt Trial updates can run.");
             double elapsedSeconds = core.FrameDeltaSeconds;
@@ -155,23 +157,26 @@ namespace city.game {
         /// <summary>
         /// Resolves the cached follow camera, followed sphere, and sphere rigid body required by the Tilt Trial controller.
         /// </summary>
-        void ResolveRuntimeDependenciesWhenNeeded() {
-            ResolveFollowCameraWhenNeeded();
+        bool ResolveRuntimeDependenciesWhenNeeded() {
+            if (!ResolveFollowCameraWhenNeeded()) {
+                return false;
+            }
             ResolvePlayerSphereWhenNeeded();
 
             if (PlayerSphereRigidBody != null) {
-                return;
+                return true;
             }
 
             PlayerSphereRigidBody = FindRequiredRigidBodyComponent(PlayerSphereEntity);
+            return true;
         }
 
         /// <summary>
         /// Resolves the active Tilt Trial follow-camera component and its owning camera entity from the live scene.
         /// </summary>
-        void ResolveFollowCameraWhenNeeded() {
+        bool ResolveFollowCameraWhenNeeded() {
             if (FollowCameraComponent != null && OrbitCameraEntity != null) {
-                return;
+                return true;
             } else if (Core.Instance == null) {
                 throw new InvalidOperationException("A core instance must exist before Tilt Trial camera resolution can run.");
             }
@@ -186,10 +191,10 @@ namespace city.game {
 
                 OrbitCameraEntity = entity;
                 FollowCameraComponent = component;
-                return;
+                return true;
             }
 
-            throw new InvalidOperationException("DemoTiltStageComponent could not resolve the active DemoTiltFollowCameraComponent.");
+            return false;
         }
 
         /// <summary>
@@ -234,20 +239,24 @@ namespace city.game {
             }
 
             double horizontal = 0d;
+#if DESKTOP_PLATFORM
             if (inputSystem.IsKeyDown(Keys.A)) {
                 horizontal -= 1d;
             }
             if (inputSystem.IsKeyDown(Keys.D)) {
                 horizontal += 1d;
             }
+#endif
 
             double forward = 0d;
+#if DESKTOP_PLATFORM
             if (inputSystem.IsKeyDown(Keys.W)) {
                 forward += 1d;
             }
             if (inputSystem.IsKeyDown(Keys.S)) {
                 forward -= 1d;
             }
+#endif
 
             if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.DPadLeft)) {
                 horizontal -= 1d;

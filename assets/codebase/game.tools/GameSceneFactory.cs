@@ -53,6 +53,41 @@ namespace city.game.tools {
         const string PlayerSphereMaterialReferenceName = "Materials[0]";
 
         /// <summary>
+        /// Project-relative opaque PNG backdrop for the Tilt Trial title screen.
+        /// </summary>
+        const string TiltPlayTitleBackgroundTextureRelativePath = "images/ui/tilt_trial/title/background.png";
+
+        /// <summary>
+        /// Project-relative PNG for the normal primary title action.
+        /// </summary>
+        const string TiltPlayPrimaryButtonTextureRelativePath = "images/ui/tilt_trial/title/button_primary.png";
+
+        /// <summary>
+        /// Project-relative PNG for the focused primary title action.
+        /// </summary>
+        const string TiltPlayPrimaryButtonSelectedTextureRelativePath = "images/ui/tilt_trial/title/button_primary_selected.png";
+
+        /// <summary>
+        /// Project-relative PNG for the normal Options title action.
+        /// </summary>
+        const string TiltPlayOptionsButtonTextureRelativePath = "images/ui/tilt_trial/title/button_secondary_options.png";
+
+        /// <summary>
+        /// Project-relative PNG for the focused Options title action.
+        /// </summary>
+        const string TiltPlayOptionsButtonSelectedTextureRelativePath = "images/ui/tilt_trial/title/button_secondary_options_selected.png";
+
+        /// <summary>
+        /// Project-relative PNG for the normal Demo Disc return title action.
+        /// </summary>
+        const string TiltPlayDemoDiscButtonTextureRelativePath = "images/ui/tilt_trial/title/button_secondary_demo_disc.png";
+
+        /// <summary>
+        /// Project-relative PNG for the focused Demo Disc return title action.
+        /// </summary>
+        const string TiltPlayDemoDiscButtonSelectedTextureRelativePath = "images/ui/tilt_trial/title/button_secondary_demo_disc_selected.png";
+
+        /// <summary>
         /// Shared generated cube model used by the authored Tilt Trial course geometry.
         /// </summary>
         readonly RuntimeModel GeneratedCubeModel;
@@ -108,6 +143,16 @@ namespace city.game.tools {
         readonly ComponentPlatformEditingService PlatformEditingServiceValue = new ComponentPlatformEditingService();
 
         /// <summary>
+        /// Resolves generated platform-specific action icons for selector prompts.
+        /// </summary>
+        readonly GeneratedControlIconAssetResolver ControlIconResolver = new GeneratedControlIconAssetResolver();
+
+        /// <summary>
+        /// Absolute project root used to resolve generated selector action icons.
+        /// </summary>
+        readonly string ProjectRootPath;
+
+        /// <summary>
         /// Editor service used to store component-only tessellation metadata for constrained target platforms.
         /// </summary>
         readonly MeshComponentTessellationSettingsService MeshComponentTessellationSettingsServiceValue = new MeshComponentTessellationSettingsService();
@@ -156,9 +201,11 @@ namespace city.game.tools {
         /// Initializes one game-scene factory backed by the prepared generated runtime assets required by the authored gameplay scenes.
         /// </summary>
         /// <param name="assets">Prepared runtime assets consumed by the generated game scenes.</param>
-        public GameSceneFactory(RenderingSceneGenerationAssets assets) {
+        public GameSceneFactory(RenderingSceneGenerationAssets assets, string projectRootPath) {
             if (assets == null) {
                 throw new ArgumentNullException(nameof(assets));
+            } else if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Game scene generation requires a project root path.", nameof(projectRootPath));
             } else if (assets.GeneratedCubeModel == null) {
                 throw new ArgumentException("Game scene generation requires the generated cube runtime model.", nameof(assets));
             } else if (assets.GeneratedSphereModel == null) {
@@ -182,6 +229,7 @@ namespace city.game.tools {
             GoalFlagModel = assets.GoalFlagModel;
             GoalFlagPoleMaterial = assets.GoalFlagPoleMaterial;
             GoalFlagBannerMaterial = assets.GoalFlagBannerMaterial;
+            ProjectRootPath = Path.GetFullPath(projectRootPath);
         }
 
         /// <summary>
@@ -251,17 +299,21 @@ namespace city.game.tools {
                 ReferenceHeight = 720
             });
 
-            Entity titlePanel = CreateRoundedPanelEntity(shell, "TiltPlayTitlePanel", new float3(0f, 0f, 0f), new int2(1280, 720), 0f, 0f, new byte4(18, 29, 45, 255), new byte4(18, 29, 45, 255), 1);
-            CreateUiTextEntity(titlePanel, "TiltPlayTitle", new float3(240f, 220f, 0.1f), "TILT PLAY", new int2(800, 110), 4.5f, 3, new byte4(247, 248, 252, 255), TextAlignment.Center);
-            CreateTiltPlayActionButton(titlePanel, "TiltPlayPlayButton", new float3(420f, 480f, 0.1f), new int2(440, 48), "PLAY", city.game.TiltPlayMenuAction.Play);
-            CreateTiltPlayActionButton(titlePanel, "TiltPlayOptionsButton", new float3(420f, 538f, 0.1f), new int2(440, 48), "OPTIONS", city.game.TiltPlayMenuAction.Options);
-            CreateTiltPlayActionButton(titlePanel, "TiltPlayDemoDiscButton", new float3(420f, 596f, 0.1f), new int2(440, 48), "BACK TO DEMO DISC", city.game.TiltPlayMenuAction.BackToDemoDisc);
+            Entity titlePanel = Core.Instance.EntityFactory.CreateChild(shell, "TiltPlayTitlePanel");
+            titlePanel.LayerMask = EditorLayerMasks.SceneObjects;
+            titlePanel.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+                Role = "TiltPlayTitlePanel"
+            });
+            CreateTiltPlayTitleBackgroundSprite(titlePanel);
+            CreateTiltPlayActionButton(titlePanel, "TiltPlayPlayButton", new float3(380f, 398f, 0.1f), new int2(520, 72), city.game.TiltPlayMenuAction.Play, TiltPlayPrimaryButtonTextureRelativePath, TiltPlayPrimaryButtonSelectedTextureRelativePath);
+            CreateTiltPlayActionButton(titlePanel, "TiltPlayOptionsButton", new float3(380f, 486f, 0.1f), new int2(250, 52), city.game.TiltPlayMenuAction.Options, TiltPlayOptionsButtonTextureRelativePath, TiltPlayOptionsButtonSelectedTextureRelativePath);
+            CreateTiltPlayActionButton(titlePanel, "TiltPlayDemoDiscButton", new float3(650f, 486f, 0.1f), new int2(250, 52), city.game.TiltPlayMenuAction.BackToDemoDisc, TiltPlayDemoDiscButtonTextureRelativePath, TiltPlayDemoDiscButtonSelectedTextureRelativePath);
 
             Entity optionsPanel = CreateRoundedPanelEntity(shell, "TiltPlayOptionsPanel", new float3(0f, 0f, 0f), new int2(1280, 720), 0f, 0f, new byte4(18, 29, 45, 255), new byte4(18, 29, 45, 255), 1);
             optionsPanel.Enabled = false;
             CreateUiTextEntity(optionsPanel, "TiltPlayOptionsTitle", new float3(240f, 230f, 0.1f), "OPTIONS", new int2(800, 80), 3f, 3, new byte4(247, 248, 252, 255), TextAlignment.Center);
             CreateUiTextEntity(optionsPanel, "TiltPlayOptionsPlaceholder", new float3(240f, 330f, 0.1f), "Settings coming soon", new int2(800, 48), 1.5f, 3, new byte4(196, 210, 226, 255), TextAlignment.Center);
-            CreateTiltPlayActionButton(optionsPanel, "TiltPlayOptionsBackButton", new float3(420f, 520f, 0.1f), new int2(440, 48), "BACK", city.game.TiltPlayMenuAction.Back);
+            CreateTiltPlayOptionsBackButton(optionsPanel);
 
             Entity levelSelectPanel = CreateLevelSelectUiEntity(useOwnViewport: false);
             levelSelectPanel.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
@@ -409,7 +461,7 @@ namespace city.game.tools {
             Entity detailsPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectDetailsPanel", new float3(6f, 8f, 0f), new int2(244, 176), 5f, 0f, new byte4(0, 0, 0, 0), new byte4(0, 0, 0, 0), 1);
             detailsPanelEntity.Enabled = false;
             CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectName", new float3(12f, 10f, 0.1f), "Level 1", new int2(220, 22), 0.85f, 3, new byte4(247, 248, 252, 255), TextAlignment.Left);
-            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTimer", new float3(12f, 40f, 0.1f), "Start 99.00", new int2(220, 18), 0.65f, 3, new byte4(255, 214, 138, 255), TextAlignment.Left);
+            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTimer", new float3(12f, 40f, 0.1f), "Limit 99.00", new int2(220, 18), 0.65f, 3, new byte4(255, 214, 138, 255), TextAlignment.Left);
             CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTargetTimes", new float3(12f, 64f, 0.1f), "Targets G18.00 S28.00 B40.00", new int2(220, 18), 0.7f, 3, new byte4(223, 230, 239, 255), TextAlignment.Left);
             IReadOnlyList<global::city.game.TiltTrialLevelCatalogEntry> levelEntries = global::city.game.TiltTrialLevelCatalog.CreateEntries();
             for (int index = 0; index < levelEntries.Count; index++) {
@@ -659,25 +711,149 @@ namespace city.game.tools {
         }
 
         /// <summary>
+        /// Creates the authored opaque sprite backdrop for the Tilt Trial title screen.
+        /// </summary>
+        /// <param name="parent">Title panel that owns the backdrop sprite.</param>
+        void CreateTiltPlayTitleBackgroundSprite(Entity parent) {
+            if (parent == null) {
+                throw new ArgumentNullException(nameof(parent));
+            }
+
+            CreateTiltPlaySpriteEntity(parent, "TiltPlayTitleBackground", new float3(0f, 0f, 0f), new int2(1280, 720), TiltPlayTitleBackgroundTextureRelativePath, 1);
+        }
+
+        /// <summary>
+        /// Creates one selector action prompt using the generated platform-specific control icon pack.
+        /// </summary>
+        /// <param name="parent">Selector view root that owns the prompt.</param>
+        /// <param name="name">Stable prompt entity name.</param>
+        /// <param name="position">Prompt position within the 1280 by 720 selector view.</param>
+        /// <param name="controlId">Windows control id used by the common sprite.</param>
+        /// <param name="label">Action label shown beside the icon.</param>
+        /// <returns>Generated prompt entity.</returns>
+        Entity CreateLevelSelectActionPrompt(Entity parent, string name, float3 position, string controlId, string label) {
+            int2 iconBounds = new int2(56, 48);
+            Entity promptEntity = Core.Instance.EntityFactory.CreateChild(parent, name);
+            promptEntity.LocalPosition = position;
+            promptEntity.LayerMask = EditorLayerMasks.SceneObjects;
+            Entity iconEntity = Core.Instance.EntityFactory.CreateChild(promptEntity, name + "Icon");
+            iconEntity.LocalPosition = new float3(10f, 7f, 0.1f);
+            iconEntity.LayerMask = EditorLayerMasks.SceneObjects;
+            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(ProjectRootPath, "windows", controlId);
+            SpriteComponent spriteComponent = new SpriteComponent {
+                Size = commonIcon.FitDisplaySizeWithin(iconBounds),
+                SourceRect = commonIcon.SourceRect,
+                RenderOrder2D = 3
+            };
+            iconEntity.AddComponent(spriteComponent);
+            ApplyLevelSelectPromptTexture(iconEntity, spriteComponent, commonIcon.SourcePngRelativePath);
+            CreateLevelSelectPromptPlatformOverride(iconEntity, spriteComponent, "gamecube", "gamecube", controlId == "enter" ? "a" : "b", iconBounds);
+            CreateLevelSelectPromptPlatformOverride(iconEntity, spriteComponent, "switch", "switch", controlId == "enter" ? "a" : "b", iconBounds);
+            CreateLevelSelectPromptPlatformOverride(iconEntity, spriteComponent, "wiiu", "wii", controlId == "enter" ? "a" : "b", iconBounds);
+            CreateLevelSelectPromptPlatformOverride(iconEntity, spriteComponent, "wii", "wii", controlId == "enter" ? "a" : "b", iconBounds);
+            CreateLevelSelectPromptPlatformOverride(iconEntity, spriteComponent, "ps2", "ps2", controlId == "enter" ? "cross" : "circle", iconBounds);
+            CreateLevelSelectPromptPlatformOverride(iconEntity, spriteComponent, "psp", "psp", controlId == "enter" ? "cross" : "circle", iconBounds);
+            CreateLevelSelectPromptPlatformOverride(iconEntity, spriteComponent, "psvita", "psvita", controlId == "enter" ? "cross" : "circle", iconBounds);
+            CreateUiTextEntity(promptEntity, name + "Label", new float3(72f, 7f, 0.1f), label, new int2(112, 48), 0.9f, 3, new byte4(247, 248, 252, 255), TextAlignment.Left);
+            return promptEntity;
+        }
+
+        /// <summary>
+        /// Applies one generated icon texture reference to a selector prompt sprite.
+        /// </summary>
+        /// <param name="entity">Icon entity owning the sprite.</param>
+        /// <param name="component">Sprite component receiving the reference.</param>
+        /// <param name="relativePath">Project-relative texture path.</param>
+        void ApplyLevelSelectPromptTexture(Entity entity, SpriteComponent component, string relativePath) {
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(relativePath));
+        }
+
+        /// <summary>
+        /// Persists one platform-specific selector prompt icon override.
+        /// </summary>
+        /// <param name="entity">Icon entity owning the shared sprite.</param>
+        /// <param name="commonComponent">Windows sprite component.</param>
+        /// <param name="platformId">Target platform receiving the override.</param>
+        /// <param name="sourcePlatformId">Icon family platform used to resolve the source asset.</param>
+        /// <param name="controlId">Control id within the source icon family.</param>
+        /// <param name="iconBounds">Maximum display size for the icon.</param>
+        void CreateLevelSelectPromptPlatformOverride(Entity entity, SpriteComponent commonComponent, string platformId, string sourcePlatformId, string controlId, int2 iconBounds) {
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            SpriteComponent overrideComponent = (SpriteComponent)PlatformEditingServiceValue.EnsurePlatformOverrideComponent(commonComponent, saveComponent, platformId);
+            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(ProjectRootPath, sourcePlatformId, controlId);
+            overrideComponent.Size = resolvedIcon.FitDisplaySizeWithin(iconBounds);
+            overrideComponent.SourceRect = resolvedIcon.SourceRect;
+            PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.Size));
+            PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.SourceRect));
+            PlatformEditingServiceValue.StoreAssetReference(commonComponent, overrideComponent, saveComponent, platformId, TextureAssetScenePersistenceSupport.TextureReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(resolvedIcon.SourcePngRelativePath));
+            PlatformEditingServiceValue.PersistPlatformOverride(commonComponent, overrideComponent, saveComponent, platformId);
+        }
+
+        /// <summary>
         /// Creates one Tilt Play title-shell action button and its semantic pointer-action bridge.
         /// </summary>
         /// <param name="parent">Title-shell panel that owns the button.</param>
         /// <param name="name">Stable generated button role.</param>
         /// <param name="position">Button position in the shared reference canvas.</param>
         /// <param name="size">Button dimensions in authored pixels.</param>
-        /// <param name="label">Visible action label.</param>
         /// <param name="action">Semantic Tilt Play action emitted on release.</param>
+        /// <param name="normalTextureRelativePath">Project-relative PNG used while the action is not selected.</param>
+        /// <param name="selectedTextureRelativePath">Project-relative PNG used while the action is selected.</param>
         /// <returns>Generated action button entity.</returns>
-        Entity CreateTiltPlayActionButton(Entity parent, string name, float3 position, int2 size, string label, city.game.TiltPlayMenuAction action) {
-            Entity buttonEntity = CreateRoundedPanelEntity(parent, name, position, size, 16f, 2f, new byte4(40, 58, 87, 255), new byte4(109, 138, 170, 255), 2);
+        Entity CreateTiltPlayActionButton(Entity parent, string name, float3 position, int2 size, city.game.TiltPlayMenuAction action, string normalTextureRelativePath, string selectedTextureRelativePath) {
+            Entity buttonEntity = CreateTiltPlaySpriteEntity(parent, name, position, size, normalTextureRelativePath, 4);
             buttonEntity.AddComponent(new InteractableComponent {
                 Size = size
             });
             buttonEntity.AddComponent(new city.game.TiltPlayMenuActionComponent {
                 Action = action
             });
-            CreateUiTextEntity(buttonEntity, name + "Label", new float3(12f, 2f, 0.1f), label, new int2(size.X - 24, size.Y - 4), 1.2f, 3, new byte4(247, 248, 252, 255), TextAlignment.Center);
+            Entity selectedOverlayEntity = CreateTiltPlaySpriteEntity(buttonEntity, name + "SelectedOverlay", new float3(0f, 0f, 0.1f), size, selectedTextureRelativePath, 5);
+            selectedOverlayEntity.Enabled = false;
             return buttonEntity;
+        }
+
+        /// <summary>
+        /// Creates one title-screen sprite and persists its authored texture reference for platform-independent rendering.
+        /// </summary>
+        /// <param name="parent">Entity that owns the sprite.</param>
+        /// <param name="name">Stable sprite entity role.</param>
+        /// <param name="position">Sprite position in the reference canvas.</param>
+        /// <param name="size">Authored pixel size of the sprite.</param>
+        /// <param name="textureRelativePath">Project-relative PNG path for the sprite.</param>
+        /// <param name="renderOrder">2D render order within the title screen.</param>
+        /// <returns>Created sprite entity.</returns>
+        Entity CreateTiltPlaySpriteEntity(Entity parent, string name, float3 position, int2 size, string textureRelativePath, byte renderOrder) {
+            Entity spriteEntity = Core.Instance.EntityFactory.CreateChild(parent, name);
+            spriteEntity.LocalPosition = position;
+            spriteEntity.LayerMask = EditorLayerMasks.SceneObjects;
+            SpriteComponent spriteComponent = new SpriteComponent {
+                Size = size,
+                RenderOrder2D = renderOrder
+            };
+            spriteEntity.AddComponent(spriteComponent);
+            spriteEntity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+                Role = name
+            });
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(spriteEntity);
+            saveComponent.SetAssetReference(spriteComponent, TextureAssetScenePersistenceSupport.TextureReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(textureRelativePath));
+            return spriteEntity;
+        }
+
+        /// <summary>
+        /// Creates the temporary Options return button while that placeholder screen remains outside the title-screen sprite scope.
+        /// </summary>
+        /// <param name="parent">Options panel that owns the return action.</param>
+        void CreateTiltPlayOptionsBackButton(Entity parent) {
+            Entity buttonEntity = CreateRoundedPanelEntity(parent, "TiltPlayOptionsBackButton", new float3(420f, 520f, 0.1f), new int2(440, 48), 16f, 2f, new byte4(45, 36, 103, 255), new byte4(92, 239, 222, 255), 4);
+            buttonEntity.AddComponent(new InteractableComponent {
+                Size = new int2(440, 48)
+            });
+            buttonEntity.AddComponent(new city.game.TiltPlayMenuActionComponent {
+                Action = city.game.TiltPlayMenuAction.Back
+            });
+            CreateUiTextEntity(buttonEntity, "TiltPlayOptionsBackButtonLabel", new float3(12f, 2f, 0.1f), "BACK", new int2(416, 44), 1f, 5, new byte4(247, 248, 252, 255), TextAlignment.Center);
         }
 
         /// <summary>
@@ -943,18 +1119,16 @@ namespace city.game.tools {
                 });
             }
 
-            Entity listPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectListPanel", new float3(40f, 92f, 0f), new int2(420, 596), 28f, 3f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
-            Entity detailsPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectDetailsPanel", new float3(500f, 72f, 0f), new int2(740, 596), 28f, 3f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
+            Entity listPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectListPanel", new float3(40f, 32f, 0f), new int2(420, 656), 28f, 3f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
+            Entity detailsPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectDetailsPanel", new float3(500f, 32f, 0f), new int2(740, 576), 28f, 3f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
 
-            CreateUiTextEntity(entity, "TiltTrialLevelSelectTitle", new float3(52f, 18f, 0.1f), "Tilt Trial", new int2(420, 48), 2.5f, 2, new byte4(247, 248, 252, 255), TextAlignment.Left);
-            CreateUiTextEntity(entity, "TiltTrialLevelSelectHint", new float3(500f, 18f, 0.1f), "Enter Play   Esc Menu", new int2(460, 40), 1.25f, 2, new byte4(196, 210, 226, 255), TextAlignment.Left);
             CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectName", new float3(28f, 24f, 0.1f), "Level 1", new int2(420, 56), 2.2f, 3, new byte4(247, 248, 252, 255), TextAlignment.Left);
-            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTimer", new float3(28f, 86f, 0.1f), "Start 99.00", new int2(220, 36), 1.4f, 3, new byte4(255, 214, 138, 255), TextAlignment.Left);
-            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectMedals", new float3(28f, 132f, 0.1f), "Gold  18.00\nSilver 28.00\nBronze 40.00", new int2(260, 120), 1.2f, 3, new byte4(223, 230, 239, 255), TextAlignment.Left);
+            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTimer", new float3(28f, 110f, 0.1f), "Limit 99.00", new int2(220, 36), 1.4f, 3, new byte4(255, 214, 138, 255), TextAlignment.Left);
+            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectMedals", new float3(28f, 156f, 0.1f), "Gold  18.00\nSilver 28.00\nBronze 40.00", new int2(260, 120), 1.2f, 3, new byte4(223, 230, 239, 255), TextAlignment.Left);
             Entity previewPanelEntity = CreateRoundedPanelEntity(
                 detailsPanelEntity,
                 "TiltTrialLevelSelectPreviewPanel",
-                new float3(380f, 108f, 0f),
+                new float3(392f, 28f, 0f),
                 new int2(320, 260),
                 18f,
                 2f,
@@ -982,6 +1156,8 @@ namespace city.game.tools {
 
             Entity backButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectBackButton", new float3(28f, 430f, 0f), new int2(320, 56), "BACK", city.game.TiltTrialLevelSelectAction.BackToStages, -1);
             Entity playButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectPlayButton", new float3(28f, 500f, 0f), new int2(320, 56), "PLAY", city.game.TiltTrialLevelSelectAction.PlaySelectedStage, -1);
+            CreateLevelSelectActionPrompt(entity, "TiltTrialLevelSelectPlayPrompt", new float3(848f, 638f, 0f), "enter", "PLAY");
+            CreateLevelSelectActionPrompt(entity, "TiltTrialLevelSelectMenuPrompt", new float3(1056f, 638f, 0f), "escape", "MENU");
             ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(backButtonEntity);
             ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(playButtonEntity);
 
@@ -1351,6 +1527,26 @@ namespace city.game.tools {
             entity.LocalOrientation = float4.Identity;
             entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("ClipProbeCube", float3.Zero, new float3(5f, 1f, 5f), float4.Identity, true));
             return RequireEditorEntity(entity, "single-cube clipping probe");
+        }
+
+        /// <summary>
+        /// Creates the visible Level 1 player sphere without physics, reset, or session behavior.
+        /// </summary>
+        /// <returns>Generated visual-only player sphere entity.</returns>
+        Entity CreateLevel01RenderOnlyPlayerSphereEntity() {
+            Entity entity = Core.Instance.EntityFactory.Create("PlayerSphere");
+            entity.LayerMask = EditorLayerMasks.SceneObjects;
+            entity.LocalPosition = new float3(0f, 1.2f, -7f);
+            entity.LocalScale = float3.One;
+            entity.LocalOrientation = float4.Identity;
+            MeshComponent meshComponent = new MeshComponent {
+                Model = GeneratedSphereModel,
+                Materials = new[] { TiltTrialPlayerSphereMarbleMaterial },
+                RenderOrder3D = 0
+            };
+            entity.AddComponent(meshComponent);
+            ApplyTiltTrialPlayerSphereMaterialReference(entity, meshComponent);
+            return entity;
         }
 
         /// <summary>

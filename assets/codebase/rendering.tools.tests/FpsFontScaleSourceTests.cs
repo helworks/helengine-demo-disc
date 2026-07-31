@@ -15,7 +15,6 @@ namespace city.tests {
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "AxisTest2SceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "ColoredCubeGridSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "CubeTestSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "DemoDiscSceneComponentRecordFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "DirectionalShadowPlazaSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "GroundCubeProbeSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "physics.tools", "PhysicsSceneFactory.cs"),
@@ -29,6 +28,7 @@ namespace city.tests {
                 Assert.Contains("FPSComponent", source, StringComparison.Ordinal);
                 Assert.DoesNotContain("FontScale = 1f", source, StringComparison.Ordinal);
                 Assert.Contains("FontScale = 2f", source, StringComparison.Ordinal);
+                Assert.Contains("PspFpsComponentOverrideService.Apply", source, StringComparison.Ordinal);
             }
         }
 

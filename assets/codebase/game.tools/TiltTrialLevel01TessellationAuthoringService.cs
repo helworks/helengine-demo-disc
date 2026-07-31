@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace city.game.tools {
     /// <summary>
     /// Updates only the scalable course MeshComponents in the existing authored Tilt Trial Level 01 scene with cook-time tessellation settings.
@@ -24,6 +26,11 @@ namespace city.game.tools {
         const string PspPlatformId = "psp";
 
         /// <summary>
+        /// Stable detached PSP MeshComponent member that marks one cooked render variant as already scale-baked.
+        /// </summary>
+        const string MeshBakeScaleMemberName = "MeshBakeScale";
+
+        /// <summary>
         /// World-space maximum edge length used for the constrained-platform course tessellation variants.
         /// </summary>
         const double TessellationMaxEdgeLength = 0.5d;
@@ -31,7 +38,7 @@ namespace city.game.tools {
         /// <summary>
         /// Names of the only scalable playable Level 01 course entities that receive tessellation metadata.
         /// </summary>
-        static readonly string[] TessellatedEntityNames = ["StartPad", "Ramp", "Bridge", "FinalPlatform", "LeftWall", "RightWall"];
+        static readonly string[] TessellatedEntityNames = ["StartPad", "Ramp", "Bridge", "FinalPlatform", "LeftWall", "RightWall", "BridgeBlockerLeft", "BridgeBlockerRight"];
 
         /// <summary>
         /// Reads and rewrites editor-only component platform override payloads.
@@ -81,9 +88,12 @@ namespace city.game.tools {
             int meshComponentIndex = FindRequiredMeshComponentIndex(entity, entityName);
             SceneComponentAssetRecord componentRecord = entity.Components[meshComponentIndex];
             EntityComponentSaveState saveState = CreateSaveStateWithExistingPlatformOverrides(componentRecord);
-            MeshComponentTessellationSettings settings = new MeshComponentTessellationSettings(true, 1d);
-            TessellationSettingsService.SetForPlatform(saveState, Ps2PlatformId, settings);
-            TessellationSettingsService.SetForPlatform(saveState, PspPlatformId, settings);
+            MeshComponentTessellationSettings ps2Settings = new MeshComponentTessellationSettings(true, TessellationMaxEdgeLength);
+            MeshComponentTessellationSettings pspSettings = new MeshComponentTessellationSettings(true, TessellationMaxEdgeLength);
+            TessellationSettingsService.SetForPlatform(saveState, Ps2PlatformId, ps2Settings);
+            TessellationSettingsService.SetForPlatform(saveState, PspPlatformId, pspSettings);
+            EntityComponentPlatformOverrideState pspOverride = saveState.GetOrCreatePlatformOverride(PspPlatformId);
+            pspOverride.SetMemberValue(MeshBakeScaleMemberName, true.ToString(CultureInfo.InvariantCulture));
             SceneComponentAssetRecord baseRecord = OverridePayloadService.UnwrapBaseRecord(componentRecord);
             entity.Components[meshComponentIndex] = OverridePayloadService.Wrap(baseRecord, saveState);
         }

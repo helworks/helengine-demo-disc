@@ -4,6 +4,7 @@
                           "platformId":  "windows",
                           "selectedSceneIds":  [
                                                    "HelenOfCodeSplash",
+                                                   "SceneLoadingScreen",
                                                    "DemoDiscMainMenu",
                                                    "cube_test",
                                                    "colored_cube_grid",
@@ -29,9 +30,13 @@
                                                   "sceneId":  "HelenOfCodeSplash",
                                                   "orderNumber":  1
                                                    },
-                                              {
-                                                  "sceneId":  "DemoDiscMainMenu",
-                                                  "orderNumber":  2
+                                               {
+                                                   "sceneId":  "SceneLoadingScreen",
+                                                   "orderNumber":  2
+                                                    },
+                                               {
+                                                   "sceneId":  "DemoDiscMainMenu",
+                                                   "orderNumber":  3
                                                    },
                                               {
                                                   "sceneId":  "cube_test",
@@ -134,6 +139,7 @@
                           "platformId":  "ps2",
                           "selectedSceneIds":  [
                                                    "HelenOfCodeSplash",
+                                                   "SceneLoadingScreen",
                                                    "DemoDiscMainMenu",
                                                    "cube_test",
                                                    "colored_cube_grid",
@@ -158,87 +164,109 @@
                                               {
                                                   "sceneId":  "HelenOfCodeSplash",
                                                   "orderNumber":  1
-                                                   },
+                                              },
+                                              {
+                                                  "sceneId":  "SceneLoadingScreen",
+                                                  "orderNumber":  2
+                                              },
                                               {
                                                   "sceneId":  "DemoDiscMainMenu",
-                                                  "orderNumber":  2
-                                                   },
+                                                  "orderNumber":  3
+                                              },
                                               {
                                                   "sceneId":  "cube_test",
-                                                  "orderNumber":  2
-                                                   },
+                                                  "orderNumber":  4
+                                              },
                                               {
                                                   "sceneId":  "colored_cube_grid",
-                                                  "orderNumber":  3
-                                                   },
+                                                  "orderNumber":  5
+                                              },
                                               {
                                                   "sceneId":  "textured_cube_grid",
-                                                  "orderNumber":  4
-                                                   },
+                                                  "orderNumber":  6
+                                              },
                                               {
                                                   "sceneId":  "axis_test",
-                                                  "orderNumber":  5
-                                                   },
+                                                  "orderNumber":  7
+                                              },
                                               {
                                                   "sceneId":  "axis_test2",
-                                                  "orderNumber":  6
-                                                   },
+                                                  "orderNumber":  8
+                                              },
                                               {
                                                   "sceneId":  "test_scene_matrix_render",
-                                                  "orderNumber":  7
-                                                   },
+                                                  "orderNumber":  9
+                                              },
                                               {
                                                   "sceneId":  "directional_shadow_plaza",
-                                                  "orderNumber":  8
-                                                   },
+                                                  "orderNumber":  10
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_stack_boxes",
-                                                  "orderNumber":  9
-                                                   },
+                                                  "orderNumber":  11
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_sphere_stack",
-                                                  "orderNumber":  10
-                                                   },
+                                                  "orderNumber":  12
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_mixed_stack",
-                                                  "orderNumber":  11
-                                                   },
+                                                  "orderNumber":  13
+                                              },
                                               {
                                                   "sceneId":  "test_scene_static_mesh_showcase",
-                                                  "orderNumber":  12
-                                                   },
+                                                  "orderNumber":  14
+                                              },
                                               {
                                                   "sceneId":  "test_scene_static_mesh_minimal",
-                                                  "orderNumber":  13
-                                                   },
+                                                  "orderNumber":  15
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial",
-                                                  "orderNumber":  14
-                                                   },
+                                                  "orderNumber":  16
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_01",
-                                                  "orderNumber":  15
-                                                   },
+                                                  "orderNumber":  17
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_02",
-                                                  "orderNumber":  16
-                                                   },
+                                                  "orderNumber":  18
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_03",
-                                                  "orderNumber":  17
-                                                   },
+                                                  "orderNumber":  19
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_04",
-                                                  "orderNumber":  18
-                                                   },
+                                                  "orderNumber":  20
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_05",
-                                                  "orderNumber":  19
-                                                   }
+                                                  "orderNumber":  21
+                                              }
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\ps2-city-demo-disc",
                           "debugBuild":  true,
                           "selectedBuildProfileId":  "ps2-default",
+                          "editorPrebuildCommandIdsByBuildProfileId":  {
+                                                                            "ps2-default":  [
+                                                                                                "menu.generate-game-scenes",
+                                                                                                "menu.regenerate-demo-disc-main-menu",
+                                                                                                "menu.attach-tilt-trial-presentation-blueprints"
+                                                                                            ],
+                                                                            "debug":  [
+                                                                                          "menu.generate-game-scenes",
+                                                                                          "menu.regenerate-demo-disc-main-menu",
+                                                                                          "menu.attach-tilt-trial-presentation-blueprints"
+                                                                                      ],
+                                                                            "release":  [
+                                                                                            "menu.generate-game-scenes",
+                                                                                            "menu.regenerate-demo-disc-main-menu",
+                                                                                            "menu.attach-tilt-trial-presentation-blueprints"
+                                                                                        ],
+                                                                            "colored-cube-grid":  []
+                                                                        },
                           "selectedGraphicsProfileId":  "ps2-standard-forward",
                           "selectedBuildOptionValues":  {
                                                             "texture-scale-percent":  "100",
@@ -263,31 +291,16 @@
                       {
                           "platformId":  "psp",
                           "selectedSceneIds":  [
-                                                   "HelenOfCodeSplash",
-                                                   "DemoDiscMainMenu",
-                                                   "cube_test",
-                                                   "colored_cube_grid",
-                                                   "textured_cube_grid",
-                                                   "axis_test",
-                                                   "axis_test2",
-                                                   "test_scene_matrix_render",
-                                                   "directional_shadow_plaza",
-                                                   "test_scene_dynamic_stack_boxes",
-                                                   "test_scene_dynamic_sphere_stack",
-                                                   "test_scene_dynamic_mixed_stack",
-                                                   "test_scene_static_mesh_showcase",
-                                                   "test_scene_static_mesh_minimal",
-                                                   "tilt_trial",
-                                                   "tilt_trial_level_01",
-                                                   "tilt_trial_level_02",
-                                                   "tilt_trial_level_03",
-                                                   "tilt_trial_level_04",
-                                                   "tilt_trial_level_05"
+                                                   "tilt_trial_level_01"
                                                ],
                           "sceneOrders":  [
                                               {
                                                   "sceneId":  "HelenOfCodeSplash",
                                                   "orderNumber":  1
+                                                   },
+                                              {
+                                                  "sceneId":  "SceneLoadingScreen",
+                                                  "orderNumber":  2
                                                    },
                                               {
                                                   "sceneId":  "DemoDiscMainMenu",
@@ -393,6 +406,7 @@
                           "platformId":  "gamecube",
                           "selectedSceneIds":  [
                                                    "HelenOfCodeSplash",
+                                                   "SceneLoadingScreen",
                                                    "DemoDiscMainMenu",
                                                    "cube_test",
                                                    "colored_cube_grid",
@@ -419,8 +433,12 @@
                                                   "orderNumber":  1
                                                    },
                                               {
-                                                  "sceneId":  "DemoDiscMainMenu",
+                                                  "sceneId":  "SceneLoadingScreen",
                                                   "orderNumber":  2
+                                                   },
+                                              {
+                                                  "sceneId":  "DemoDiscMainMenu",
+                                                  "orderNumber":  3
                                                    },
                                               {
                                                   "sceneId":  "cube_test",
@@ -522,6 +540,7 @@
                           "platformId":  "wii",
                           "selectedSceneIds":  [
                                                    "HelenOfCodeSplash",
+                                                   "SceneLoadingScreen",
                                                    "DemoDiscMainMenu",
                                                    "cube_test",
                                                    "colored_cube_grid",
@@ -546,6 +565,10 @@
                                               {
                                                   "sceneId":  "HelenOfCodeSplash",
                                                   "orderNumber":  1
+                                                   },
+                                              {
+                                                  "sceneId":  "SceneLoadingScreen",
+                                                  "orderNumber":  2
                                                    },
                                               {
                                                   "sceneId":  "DemoDiscMainMenu",
@@ -914,6 +937,7 @@
                           "platformId":  "psvita",
                           "selectedSceneIds":  [
                                                    "HelenOfCodeSplash",
+                                                   "SceneLoadingScreen",
                                                    "DemoDiscMainMenu",
                                                    "cube_test",
                                                    "colored_cube_grid",
@@ -940,8 +964,12 @@
                                                   "orderNumber":  1
                                                    },
                                               {
-                                                  "sceneId":  "DemoDiscMainMenu",
+                                                  "sceneId":  "SceneLoadingScreen",
                                                   "orderNumber":  2
+                                                   },
+                                              {
+                                                  "sceneId":  "DemoDiscMainMenu",
+                                                  "orderNumber":  3
                                                    },
                                               {
                                                   "sceneId":  "cube_test",
@@ -1174,6 +1202,7 @@
                           "platformId":  "wiiu",
                           "selectedSceneIds":  [
                                                    "HelenOfCodeSplash",
+                                                   "SceneLoadingScreen",
                                                    "DemoDiscMainMenu",
                                                    "cube_test",
                                                    "colored_cube_grid",
@@ -1198,6 +1227,10 @@
                                               {
                                                   "sceneId":  "HelenOfCodeSplash",
                                                   "orderNumber":  1
+                                                   },
+                                              {
+                                                  "sceneId":  "SceneLoadingScreen",
+                                                  "orderNumber":  2
                                                    },
                                               {
                                                   "sceneId":  "DemoDiscMainMenu",

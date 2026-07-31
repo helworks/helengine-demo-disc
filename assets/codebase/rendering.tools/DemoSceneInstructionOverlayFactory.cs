@@ -112,7 +112,7 @@ namespace city.rendering.tools {
         const float DesktopInstructionRotateTextTopAdjustment = -9f;
 
         /// <summary>
-        /// Fixed desktop and console vertical nudge used to keep the toggle-light label aligned against the shoulder-button icon row.
+        /// Fixed desktop and console vertical nudge used to keep the toggle-light label aligned against the face-button icon row.
         /// </summary>
         const float DesktopInstructionToggleTextTopAdjustment = -10f;
 
@@ -190,15 +190,17 @@ namespace city.rendering.tools {
         /// Raw generated control-icon binding plus the authored icon size used for one platform.
         /// </summary>
         readonly struct DesktopInstructionPlatformIconSpec {
-            public DesktopInstructionPlatformIconSpec(string platformId, string controlId, int2 size) {
+            public DesktopInstructionPlatformIconSpec(string platformId, string controlId, int2 size, string sourcePlatformId = null) {
                 PlatformId = platformId;
                 ControlId = controlId;
                 Size = size;
+                SourcePlatformId = string.IsNullOrWhiteSpace(sourcePlatformId) ? platformId : sourcePlatformId;
             }
 
             public string PlatformId { get; }
             public string ControlId { get; }
             public int2 Size { get; }
+            public string SourcePlatformId { get; }
         }
 
         /// <summary>
@@ -263,23 +265,23 @@ namespace city.rendering.tools {
         /// Shared light-toggle-row icon bindings keyed by runtime platform.
         /// </summary>
         static readonly DesktopInstructionPlatformIconSpec[] LightIconSpecs = new[] {
-            new DesktopInstructionPlatformIconSpec("windows", "key_l", new int2(46, 46)),
-            new DesktopInstructionPlatformIconSpec("win32", "key_l", new int2(46, 46)),
-            new DesktopInstructionPlatformIconSpec("xbox360", "rb", new int2(78, 45)),
-            new DesktopInstructionPlatformIconSpec("switch", "r", new int2(89, 41)),
-            new DesktopInstructionPlatformIconSpec("gamecube", "r", new int2(82, 43)),
-            new DesktopInstructionPlatformIconSpec("wii", "b", new int2(58, 46)),
-            new DesktopInstructionPlatformIconSpec("ds", "r", new int2(74, 42)),
-            new DesktopInstructionPlatformIconSpec("3ds", "r", new int2(74, 42)),
-            new DesktopInstructionPlatformIconSpec("psp", "r1", new int2(74, 42)),
-            new DesktopInstructionPlatformIconSpec("ps2", "r1", new int2(65, 48)),
-            new DesktopInstructionPlatformIconSpec("psvita", "r1", new int2(74, 42)),
-            new DesktopInstructionPlatformIconSpec("n64", "r", new int2(70, 42)),
-            new DesktopInstructionPlatformIconSpec("dreamcast", "r", new int2(70, 42)),
-            new DesktopInstructionPlatformIconSpec("ps1", "r1", new int2(65, 48)),
-            new DesktopInstructionPlatformIconSpec("ps3", "r1", new int2(65, 48)),
-            new DesktopInstructionPlatformIconSpec("xbox", "rb", new int2(78, 45)),
-            new DesktopInstructionPlatformIconSpec("steamdeck", "r1", new int2(78, 45))
+            new DesktopInstructionPlatformIconSpec("windows", "y", new int2(46, 46), "xbox360"),
+            new DesktopInstructionPlatformIconSpec("win32", "y", new int2(46, 46), "xbox360"),
+            new DesktopInstructionPlatformIconSpec("xbox360", "y", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("switch", "x", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("gamecube", "y", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("wii", "2", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("ds", "x", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("3ds", "y", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("psp", "triangle", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("ps2", "triangle", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("psvita", "triangle", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("n64", "face_cluster", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("dreamcast", "y", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("ps1", "triangle", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("ps3", "triangle", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("xbox", "y", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("steamdeck", "y", new int2(46, 46))
         };
 
         /// <summary>
@@ -313,11 +315,11 @@ namespace city.rendering.tools {
         /// Console-only light-toggle bindings used by the reusable camera/light Blueprint.
         /// </summary>
         static readonly DesktopInstructionPlatformIconSpec[] ConsoleLightIconSpecs = new[] {
-            new DesktopInstructionPlatformIconSpec("ps2", "r1", new int2(65, 48)),
-            new DesktopInstructionPlatformIconSpec("gamecube", "r", new int2(82, 43)),
-            new DesktopInstructionPlatformIconSpec("wii", "b", new int2(58, 46)),
-            new DesktopInstructionPlatformIconSpec("switch", "r", new int2(89, 41)),
-            new DesktopInstructionPlatformIconSpec("wiiu", "b", new int2(58, 46))
+            new DesktopInstructionPlatformIconSpec("ps2", "triangle", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("gamecube", "y", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("wii", "2", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("switch", "x", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("wiiu", "y", new int2(46, 46), "xbox360")
         };
 
         /// <summary>
@@ -643,7 +645,7 @@ namespace city.rendering.tools {
             entity.LocalPosition = new float3(leftOffset, topOffset, 0.1f);
             entity.LayerMask = DesktopOverlayLayerMask;
             DesktopInstructionPlatformIconSpec commonSpec = FindRequiredCommonSpec(specs, commonPlatformId);
-            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(projectRootPath, commonSpec.PlatformId, commonSpec.ControlId);
+            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(projectRootPath, commonSpec.SourcePlatformId, commonSpec.ControlId);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = commonIcon.FitDisplaySizeWithin(commonSpec.Size),
                 SourceRect = commonIcon.SourceRect,
@@ -746,7 +748,7 @@ namespace city.rendering.tools {
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             SpriteComponent overrideComponent = (SpriteComponent)PlatformEditingService.EnsurePlatformOverrideComponent(commonComponent, saveComponent, spec.PlatformId);
-            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(projectRootPath, spec.PlatformId, spec.ControlId);
+            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(projectRootPath, spec.SourcePlatformId, spec.ControlId);
             overrideComponent.Size = resolvedIcon.FitDisplaySizeWithin(spec.Size);
             PlatformEditingService.MarkPropertyOverride(commonComponent, saveComponent, spec.PlatformId, nameof(SpriteComponent.Size));
             overrideComponent.SourceRect = resolvedIcon.SourceRect;

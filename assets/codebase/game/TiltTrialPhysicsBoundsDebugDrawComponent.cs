@@ -14,13 +14,17 @@ namespace city.game {
         const string BaseColorBufferName = "BaseColorBuffer";
         const string EmissiveColorBufferName = "EmissiveColorBuffer";
         const float BoundsPadding = 0.02f;
+#if DESKTOP_PLATFORM
         const Keys ToggleKey = Keys.F3;
+#endif
 
         readonly List<BoundsVisualRecord> VisualRecords = new List<BoundsVisualRecord>();
 
         RuntimeModel boundsWireframeModel;
         RuntimeMaterial edgeMaterial;
+#if DESKTOP_PLATFORM
         bool wasToggleKeyDown;
+#endif
         bool visible;
 
         /// <summary>
@@ -61,12 +65,14 @@ namespace city.game {
                 return;
             }
 
+#if DESKTOP_PLATFORM
             bool isToggleKeyDown = core.Input.IsKeyDown(ToggleKey);
             if (core.Input.WasKeyPressed(ToggleKey) || (isToggleKeyDown && !wasToggleKeyDown)) {
                 visible = !visible;
                 SetAllVisualsEnabled(visible);
             }
             wasToggleKeyDown = isToggleKeyDown;
+#endif
 
             if (!visible) {
                 return;
@@ -309,7 +315,9 @@ namespace city.game {
 
         void Cleanup() {
             RemoveAllVisuals();
+#if DESKTOP_PLATFORM
             wasToggleKeyDown = false;
+#endif
 
             Core core = Core.Instance;
             if (core != null && core.RenderManager3D != null) {

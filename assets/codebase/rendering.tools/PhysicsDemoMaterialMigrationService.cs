@@ -121,6 +121,8 @@ namespace city.rendering.tools {
             settings.FieldValues["casts-shadow"] = "false";
             settings.FieldValues["receives-shadow"] = "true";
             settings.FieldValues["base-color"] = definition.BaseColor;
+            settings.FieldValues["metallic"] = "0.0";
+            settings.FieldValues["specular"] = "0.0";
             return settings;
         }
 

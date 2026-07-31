@@ -31,19 +31,19 @@ namespace city.game {
         Entity LevelSelectPanelEntity;
 
         /// <summary>
-        /// Background that presents the focused Play title action.
+        /// Overlay sprite that presents the focused Play title action.
         /// </summary>
-        RoundedRectComponent PlayButtonBackground;
+        Entity PlayButtonSelectedOverlay;
 
         /// <summary>
-        /// Background that presents the focused Options title action.
+        /// Overlay sprite that presents the focused Options title action.
         /// </summary>
-        RoundedRectComponent OptionsButtonBackground;
+        Entity OptionsButtonSelectedOverlay;
 
         /// <summary>
-        /// Background that presents the focused Demo Disc return title action.
+        /// Overlay sprite that presents the focused Demo Disc return title action.
         /// </summary>
-        RoundedRectComponent DemoDiscButtonBackground;
+        Entity DemoDiscButtonSelectedOverlay;
 
         /// <summary>
         /// Existing selector controller whose input ownership follows the active panel state.
@@ -181,7 +181,7 @@ namespace city.game {
         /// </summary>
         void ResolveRuntimeDependenciesWhenNeeded() {
             if (TitlePanelEntity != null && OptionsPanelEntity != null && LevelSelectPanelEntity != null && LevelSelectComponent != null
-                && PlayButtonBackground != null && OptionsButtonBackground != null && DemoDiscButtonBackground != null) {
+                && PlayButtonSelectedOverlay != null && OptionsButtonSelectedOverlay != null && DemoDiscButtonSelectedOverlay != null) {
                 return;
             }
 
@@ -189,9 +189,9 @@ namespace city.game {
             OptionsPanelEntity = FindRequiredNamedEntity(Parent, "TiltPlayOptionsPanel");
             LevelSelectPanelEntity = FindRequiredNamedEntity(Parent, "TiltPlayLevelSelectPanel");
             LevelSelectComponent = FindRequiredComponent<TiltTrialLevelSelectComponent>(LevelSelectPanelEntity);
-            PlayButtonBackground = FindRequiredComponent<RoundedRectComponent>(FindRequiredNamedEntity(Parent, "TiltPlayPlayButton"));
-            OptionsButtonBackground = FindRequiredComponent<RoundedRectComponent>(FindRequiredNamedEntity(Parent, "TiltPlayOptionsButton"));
-            DemoDiscButtonBackground = FindRequiredComponent<RoundedRectComponent>(FindRequiredNamedEntity(Parent, "TiltPlayDemoDiscButton"));
+            PlayButtonSelectedOverlay = FindRequiredNamedEntity(Parent, "TiltPlayPlayButtonSelectedOverlay");
+            OptionsButtonSelectedOverlay = FindRequiredNamedEntity(Parent, "TiltPlayOptionsButtonSelectedOverlay");
+            DemoDiscButtonSelectedOverlay = FindRequiredNamedEntity(Parent, "TiltPlayDemoDiscButtonSelectedOverlay");
         }
 
         /// <summary>
@@ -242,32 +242,13 @@ namespace city.game {
         }
 
         /// <summary>
-        /// Applies a purple focus treatment to the title action selected by keyboard or gamepad navigation.
+        /// Displays the authored selected-state PNG only for the title action selected by keyboard or gamepad navigation.
         /// </summary>
         void ApplyTitleActionSelection() {
             bool isTitleVisible = StateMachine.CurrentState == TiltPlayMenuState.Title;
-            ApplyTitleActionButtonStyle(PlayButtonBackground, isTitleVisible && SelectedTitleActionIndex == 0);
-            ApplyTitleActionButtonStyle(OptionsButtonBackground, isTitleVisible && SelectedTitleActionIndex == 1);
-            ApplyTitleActionButtonStyle(DemoDiscButtonBackground, isTitleVisible && SelectedTitleActionIndex == 2);
-        }
-
-        /// <summary>
-        /// Applies either the focused purple title-button treatment or the neutral title-button treatment.
-        /// </summary>
-        /// <param name="background">Button background to style.</param>
-        /// <param name="isSelected">Whether the button owns current title focus.</param>
-        void ApplyTitleActionButtonStyle(RoundedRectComponent background, bool isSelected) {
-            if (background == null) {
-                throw new ArgumentNullException(nameof(background));
-            }
-
-            if (isSelected) {
-                background.FillColor = new byte4(102, 56, 160, 255);
-                background.BorderColor = new byte4(190, 142, 255, 255);
-            } else {
-                background.FillColor = new byte4(40, 58, 87, 255);
-                background.BorderColor = new byte4(109, 138, 170, 255);
-            }
+            PlayButtonSelectedOverlay.Enabled = isTitleVisible && SelectedTitleActionIndex == 0;
+            OptionsButtonSelectedOverlay.Enabled = isTitleVisible && SelectedTitleActionIndex == 1;
+            DemoDiscButtonSelectedOverlay.Enabled = isTitleVisible && SelectedTitleActionIndex == 2;
         }
 
         /// <summary>
@@ -290,9 +271,12 @@ namespace city.game {
         /// <param name="inputSystem">Input source for the current runtime frame.</param>
         /// <returns>True when previous-option navigation was requested.</returns>
         bool WasNavigatePreviousPressed(InputSystem inputSystem) {
-            return inputSystem.WasKeyPressed(Keys.Up)
-                || inputSystem.WasKeyPressed(Keys.W)
-                || global::city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp)
+#if DESKTOP_PLATFORM
+            if (inputSystem.WasKeyPressed(Keys.Up) || inputSystem.WasKeyPressed(Keys.W)) {
+                return true;
+            }
+#endif
+            return global::city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp)
                 || (global::city.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem) <= -GamepadStickNavigationThreshold
                     && global::city.menu.DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem) > -GamepadStickNavigationThreshold);
         }
@@ -303,9 +287,12 @@ namespace city.game {
         /// <param name="inputSystem">Input source for the current runtime frame.</param>
         /// <returns>True when next-option navigation was requested.</returns>
         bool WasNavigateNextPressed(InputSystem inputSystem) {
-            return inputSystem.WasKeyPressed(Keys.Down)
-                || inputSystem.WasKeyPressed(Keys.S)
-                || global::city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown)
+#if DESKTOP_PLATFORM
+            if (inputSystem.WasKeyPressed(Keys.Down) || inputSystem.WasKeyPressed(Keys.S)) {
+                return true;
+            }
+#endif
+            return global::city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown)
                 || (global::city.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem) >= GamepadStickNavigationThreshold
                     && global::city.menu.DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem) < GamepadStickNavigationThreshold);
         }
@@ -316,10 +303,12 @@ namespace city.game {
         /// <param name="inputSystem">Input source for the current runtime frame.</param>
         /// <returns>True when accepting the focused action was requested.</returns>
         bool WasAcceptPressed(InputSystem inputSystem) {
-            return inputSystem.WasKeyPressed(Keys.Enter)
-                || inputSystem.WasKeyPressed(Keys.J)
-                || inputSystem.WasKeyPressed(Keys.Space)
-                || global::city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)
+#if DESKTOP_PLATFORM
+            if (inputSystem.WasKeyPressed(Keys.Enter) || inputSystem.WasKeyPressed(Keys.J) || inputSystem.WasKeyPressed(Keys.Space)) {
+                return true;
+            }
+#endif
+            return global::city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)
                 || Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept);
         }
 
@@ -329,10 +318,12 @@ namespace city.game {
         /// <param name="inputSystem">Input source for the current runtime frame.</param>
         /// <returns>True when return navigation was requested.</returns>
         bool WasBackPressed(InputSystem inputSystem) {
-            return inputSystem.WasKeyPressed(Keys.Escape)
-                || inputSystem.WasKeyPressed(Keys.Back)
-                || inputSystem.WasKeyPressed(Keys.K)
-                || global::city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East);
+#if DESKTOP_PLATFORM
+            if (inputSystem.WasKeyPressed(Keys.Escape) || inputSystem.WasKeyPressed(Keys.Back) || inputSystem.WasKeyPressed(Keys.K)) {
+                return true;
+            }
+#endif
+            return global::city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East);
         }
 
         /// <summary>

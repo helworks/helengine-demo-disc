@@ -121,8 +121,8 @@ namespace city.physics.tools {
                 sceneEntry.SceneId + ".helen");
             IReadOnlyList<string> supportedPlatformIds = new EditorProjectPlatformsService(fullProjectRootPath).Load().SupportedPlatforms;
             SceneAsset authoredSceneAsset;
-            if (string.Equals(sceneEntry.SceneId, PhysicsSceneCatalog.MatrixRenderSceneId, StringComparison.Ordinal)) {
-                authoredSceneAsset = CreateFreshPhysicsSceneAssetWithoutSharedMusic(sceneEntry.SceneId);
+            if (string.Equals(BuildPhysicsSceneAssetId(sceneEntry.SceneId), PhysicsSceneCatalog.MatrixRenderSceneId, StringComparison.Ordinal)) {
+                authoredSceneAsset = CreateFreshPhysicsSceneAssetWithoutSharedMusic(BuildPhysicsSceneAssetId(sceneEntry.SceneId));
             } else {
                 authoredSceneAsset = LoadSceneAssetWithoutSharedMusic(authoredScenePath);
                 authoredSceneAsset.RootEntities = RemoveNintendoHandheldOnlyEntities(authoredSceneAsset.RootEntities, supportedPlatformIds);

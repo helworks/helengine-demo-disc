@@ -161,7 +161,7 @@ namespace city.menu {
         }
 
         /// <summary>
-        /// Releases the startup input gate and unloads the splash scene once.
+        /// Queues the splash scene for unload while retaining the persistent loading overlay for later scene transitions.
         /// </summary>
         void RequestSplashUnload() {
             if (SplashUnloadWasRequested) {
@@ -169,7 +169,6 @@ namespace city.menu {
             }
 
             SplashUnloadWasRequested = true;
-            StartupInputGate.Release();
             Core.Instance.SceneManager.UnloadScene(SplashSceneId);
         }
 

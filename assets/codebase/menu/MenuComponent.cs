@@ -174,9 +174,15 @@ namespace city.menu {
                 return;
             }
 
+            if (Core.Instance.SceneManager.IsSceneTransitionActive) {
+                return;
+            }
+
             InputSystem inputSystem = Core.Instance.Input;
+#if DESKTOP_PLATFORM
             HandleKeyboardInput(inputSystem);
             HandleMouseInput(inputSystem);
+#endif
             HandleGamepadInput(inputSystem);
         }
 
@@ -355,8 +361,7 @@ namespace city.menu {
         /// <summary>
         /// Executes the action associated with the currently selected baked item.
         /// </summary>
-        /// <param name="key">Logical activation key routed to the active item.</param>
-        void ConfirmSelection(Keys key) {
+        void ConfirmSelection() {
             if (ActivePanel == null) {
                 return;
             }
@@ -418,13 +423,14 @@ namespace city.menu {
             }
 
             string resolvedSceneId = SceneMapComponent.ResolveSceneId(sceneId);
-            Core.Instance.SceneManager.LoadScene(resolvedSceneId, SceneLoadMode.Single);
+            Core.Instance.SceneManager.RequestSceneTransition(resolvedSceneId);
             if (ComponentExecutionContext.CurrentMode == ComponentExecutionMode.Editor
                 && Parent != null) {
                 Parent.Enabled = false;
             }
         }
 
+#if DESKTOP_PLATFORM
         /// <summary>
         /// Handles keyboard navigation and activation for the active baked panel.
         /// </summary>
@@ -435,9 +441,9 @@ namespace city.menu {
             } else if (inputSystem.WasKeyPressed(Keys.Down) || inputSystem.WasKeyPressed(Keys.S)) {
                 MoveSelection(1);
             } else if (inputSystem.WasKeyPressed(Keys.Enter) || inputSystem.WasKeyPressed(Keys.J)) {
-                ConfirmSelection(Keys.Enter);
+                ConfirmSelection();
             } else if (inputSystem.WasKeyPressed(Keys.Space)) {
-                ConfirmSelection(Keys.Space);
+                ConfirmSelection();
             } else if (inputSystem.WasKeyPressed(Keys.Escape)
                 || inputSystem.WasKeyPressed(Keys.Back)
                 || inputSystem.WasKeyPressed(Keys.K)) {
@@ -494,6 +500,7 @@ namespace city.menu {
 
             return inputSystem.WasMouseLeftButtonPressed();
         }
+#endif
 
         /// <summary>
         /// Handles d-pad, left-stick, and face-button navigation for the primary gamepad.
@@ -508,7 +515,7 @@ namespace city.menu {
                 MoveSelection(1);
             } else if (Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept)
                 || DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)) {
-                ConfirmSelection(Keys.Enter);
+                ConfirmSelection();
             } else if (Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Return)
                 || DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.Select)
                 || DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East)) {
@@ -540,6 +547,7 @@ namespace city.menu {
                 && previousStickY < GamepadStickNavigationThreshold;
         }
 
+#if DESKTOP_PLATFORM
         /// <summary>
         /// Resolves the current pointer X coordinate in the menu root's local viewport space.
         /// </summary>
@@ -567,6 +575,7 @@ namespace city.menu {
             float4 viewportBounds = ResolveMenuViewportBounds();
             return inputSystem.GetMouseY() - (int)Math.Round(viewportBounds.Y);
         }
+#endif
 
         /// <summary>
         /// Resolves the current menu viewport bounds so pointer hit tests can normalize bottom-screen coordinates into menu-local space.

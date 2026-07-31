@@ -432,6 +432,7 @@ namespace city.rendering.tools {
                 Font = ResolveRequiredEditorFont(),
                 FontScale = 2f
             });
+            PspFpsComponentOverrideService.Apply(entity);
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;
         }
@@ -727,6 +728,8 @@ namespace city.rendering.tools {
             windowsSettings.SetFieldValue(CastsShadowFieldId, "true");
             windowsSettings.SetFieldValue(ReceivesShadowFieldId, "true");
             windowsSettings.SetFieldValue(BaseColorFieldId, "#FFFFFFFF");
+            windowsSettings.SetFieldValue("metallic", "0.0");
+            windowsSettings.SetFieldValue("specular", "0.0");
             return definition;
         }
 

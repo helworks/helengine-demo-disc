@@ -113,6 +113,30 @@ namespace city.tests {
         }
 
         /// <summary>
+        /// Ensures the Wii package includes the persistent loading scene required by the splash transition path.
+        /// </summary>
+        [Fact]
+        public void Wii_platform_packages_the_persistent_loading_screen_scene() {
+            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
+            using JsonDocument document = JsonDocument.Parse(json);
+            JsonElement wiiPlatform = document.RootElement.GetProperty("platforms").EnumerateArray()
+                .Single(platform => string.Equals(platform.GetProperty("platformId").GetString(), "wii", StringComparison.OrdinalIgnoreCase));
+
+            string[] selectedSceneIds = wiiPlatform.GetProperty("selectedSceneIds")
+                .EnumerateArray()
+                .Select(sceneId => sceneId.GetString() ?? string.Empty)
+                .ToArray();
+            string[] orderedSceneIds = wiiPlatform.GetProperty("sceneOrders")
+                .EnumerateArray()
+                .OrderBy(sceneOrder => sceneOrder.GetProperty("orderNumber").GetInt32())
+                .Select(sceneOrder => sceneOrder.GetProperty("sceneId").GetString() ?? string.Empty)
+                .ToArray();
+
+            Assert.Contains("SceneLoadingScreen", selectedSceneIds);
+            Assert.Contains("SceneLoadingScreen", orderedSceneIds);
+        }
+
+        /// <summary>
         /// Ensures the dedicated PS2 renderer-performance export contains only the Level 1 render-test scene so startup enters it directly.
         /// </summary>
         [Fact]

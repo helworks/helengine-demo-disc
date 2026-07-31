@@ -24,11 +24,6 @@ namespace city.menu {
         public float PixelsPerSecond { get; set; }
 
         /// <summary>
-        /// Authored viewport width used as the one-times speed baseline.
-        /// </summary>
-        public float ReferenceViewportWidth { get; set; }
-
-        /// <summary>
         /// Runtime text entity resolved from <see cref="TextEntityReference"/> after scene loading completes.
         /// </summary>
         Entity TextEntity;
@@ -49,12 +44,14 @@ namespace city.menu {
                 return;
             }
 
-            double viewportScale = ResolveViewportScale();
-            double movement = (double)PixelsPerSecond * viewportScale * Core.Instance.FrameDeltaSeconds;
+            float2 canvasScale = ResolveCanvasScale();
+            float textWidth = TextWidth * canvasScale.X;
+            double movement = (double)PixelsPerSecond * canvasScale.X * Core.Instance.FrameDeltaSeconds;
             float3 localPosition = TextEntity.LocalPosition;
             float nextPositionX = localPosition.X - (float)movement;
-            if (nextPositionX + TextWidth <= 0f) {
-                nextPositionX = StripWidth;
+            if (nextPositionX + textWidth <= 0f) {
+                PositionTextAtStripStart();
+                return;
             }
 
             TextEntity.LocalPosition = new float3(nextPositionX, localPosition.Y, localPosition.Z);
@@ -80,8 +77,8 @@ namespace city.menu {
                 }
 
                 TextEntity = candidateEntity;
-                TextEntity.LocalPosition = new float3(StripWidth, TextEntity.LocalPosition.Y, TextEntity.LocalPosition.Z);
                 FooterTextComponent = FindRequiredTextComponent(TextEntity);
+                PositionTextAtStripStart();
                 FooterTextComponent.Text = BuildFooterText();
                 return;
             }
@@ -123,30 +120,24 @@ namespace city.menu {
         }
 
         /// <summary>
-        /// Resolves the current viewport-width multiplier from the nearest viewport owner in the entity hierarchy.
+        /// Places the text at the authored strip start after converting that position into the active canvas coordinates.
         /// </summary>
-        /// <returns>Multiplier that keeps marquee movement proportional to the active viewport width.</returns>
-        double ResolveViewportScale() {
-            if (ReferenceViewportWidth <= 0f) {
-                throw new InvalidOperationException("Footer marquee requires a positive reference viewport width.");
-            }
-
-            ViewportComponent viewportComponent = FindRequiredViewportComponent();
-            int2 resolvedViewportSize = viewportComponent.ResolvedViewportSize;
-            return (double)resolvedViewportSize.X / ReferenceViewportWidth;
+        void PositionTextAtStripStart() {
+            float3 localPosition = TextEntity.LocalPosition;
+            TextEntity.LocalPosition = new float3(ResolveFittedStripStartX(), localPosition.Y, localPosition.Z);
         }
 
         /// <summary>
-        /// Finds the nearest viewport component that owns the footer's reference-canvas subtree.
+        /// Resolves the current horizontal and vertical conversion factors from the footer's owning reference canvas.
         /// </summary>
-        /// <returns>Viewport component that resolves the active screen width.</returns>
-        ViewportComponent FindRequiredViewportComponent() {
+        /// <returns>Scale factors that convert the footer's authored measurements into active canvas coordinates.</returns>
+        float2 ResolveCanvasScale() {
             Entity currentEntity = Parent;
             while (currentEntity != null) {
                 if (currentEntity.Components != null) {
                     for (int componentIndex = 0; componentIndex < currentEntity.Components.Count; componentIndex++) {
-                        if (currentEntity.Components[componentIndex] is ViewportComponent viewportComponent) {
-                            return viewportComponent;
+                        if (currentEntity.Components[componentIndex] is ReferenceCanvasFitComponent referenceCanvas) {
+                            return referenceCanvas.CalculateScale();
                         }
                     }
                 }
@@ -154,7 +145,28 @@ namespace city.menu {
                 currentEntity = currentEntity.Parent;
             }
 
-            throw new InvalidOperationException("Footer marquee must be inside a viewport-owned menu hierarchy.");
+            throw new InvalidOperationException("Footer marquee must be inside a reference-canvas-owned menu hierarchy.");
+        }
+
+        /// <summary>
+        /// Resolves the strip's authored restart coordinate through the footer's owning reference canvas.
+        /// </summary>
+        /// <returns>Fitted horizontal coordinate at the right edge of the authored strip.</returns>
+        float ResolveFittedStripStartX() {
+            Entity currentEntity = Parent;
+            while (currentEntity != null) {
+                if (currentEntity.Components != null) {
+                    for (int componentIndex = 0; componentIndex < currentEntity.Components.Count; componentIndex++) {
+                        if (currentEntity.Components[componentIndex] is ReferenceCanvasFitComponent referenceCanvas) {
+                            return referenceCanvas.CalculatePosition(new float3(StripWidth, 0f, 0f)).X;
+                        }
+                    }
+                }
+
+                currentEntity = currentEntity.Parent;
+            }
+
+            throw new InvalidOperationException("Footer marquee must be inside a reference-canvas-owned menu hierarchy.");
         }
 
         /// <summary>

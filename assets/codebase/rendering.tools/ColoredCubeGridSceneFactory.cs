@@ -107,6 +107,7 @@ namespace city.rendering.tools {
         /// </summary>
         const string MaterialRootRelativePath = "Materials/rendering/colored_cube_grid";
 
+
         /// <summary>
         /// Stable authored colors assigned to the sixteen cube materials.
         /// </summary>
@@ -162,21 +163,13 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Colored cube-grid generation requires sixteen runtime materials.", nameof(coloredMaterials));
             }
 
-            FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
             Entity[] cubeEntities = CreateCubeEntities(cubeModel, coloredMaterials);
-            Entity[] rootEntities = new Entity[cubeEntities.Length + 5];
+            Entity[] rootEntities = new Entity[cubeEntities.Length + 3];
             Entity cameraEntity = CreateCameraEntity();
-            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
-            ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
-            consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
-            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
             rootEntities[0] = cameraEntity;
-            rootEntities[1] = instructionOverlayEntity;
-            rootEntities[2] = consoleInstructionBlueprintEntity;
-            rootEntities[3] = CreateUiEntity();
-            rootEntities[4] = CreateDirectionalLightEntity();
-            Array.Copy(cubeEntities, 0, rootEntities, 5, cubeEntities.Length);
+            rootEntities[1] = CreateUiEntity();
+            rootEntities[2] = CreateDirectionalLightEntity();
+            Array.Copy(cubeEntities, 0, rootEntities, 3, cubeEntities.Length);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -260,10 +253,8 @@ namespace city.rendering.tools {
                 Font = ResolveRequiredEditorFont(),
                 FontScale = 2f
             });
+            PspFpsComponentOverrideService.Apply(entity);
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
-            entity.AddComponent(new DemoDiscLightToggleComponent());
-            DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
-            lightIndicatorOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont());
             return entity;
         }
 
@@ -450,6 +441,8 @@ namespace city.rendering.tools {
             windowsSettings.SetFieldValue(CastsShadowFieldId, "true");
             windowsSettings.SetFieldValue(ReceivesShadowFieldId, "true");
             windowsSettings.SetFieldValue(BaseColorFieldId, CubeMaterialColors[cubeIndex]);
+            windowsSettings.SetFieldValue("metallic", "0.0");
+            windowsSettings.SetFieldValue("specular", "0.0");
 
             GeneratedMaterialPlatformDefinition ps2Settings = definition.GetOrCreatePlatform("ps2");
             ps2Settings.SchemaId = Ps2MaterialSchemaId;

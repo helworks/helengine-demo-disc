@@ -4,7 +4,11 @@
     "selectedBuildProfileId": "",
     "textureScalePercent": 100,
     "shaderVariantPruningEnabled": true,
-    "selectedOptionValues": {}
+    "selectedOptionValues": {
+      "enable-direct-frame-diagnostic": "false",
+      "enable-logo-animation-diagnostic": "false",
+      "enable-input-trace-diagnostic": "false"
+    }
   },
   "graphics": {
     "selectedGraphicsProfileId": "",

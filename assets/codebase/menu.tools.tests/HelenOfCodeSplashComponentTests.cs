@@ -37,10 +37,10 @@ namespace city.menu.tools.tests {
         }
 
         /// <summary>
-        /// Verifies the runtime component requests additive menu loading and removes only its splash scene.
+        /// Verifies the runtime component requests additive menu loading and removes only its splash scene so the persistent loading overlay remains available for later transitions.
         /// </summary>
         [Fact]
-        public void Splash_runtime_source_uses_additive_menu_loading_and_self_unload() {
+        public void Splash_runtime_source_uses_additive_menu_loading_and_preserves_loading_overlay() {
             string sourcePath = Path.Combine(
                 @"C:\dev\helprojs\demodisc",
                 "assets",
@@ -59,6 +59,7 @@ namespace city.menu.tools.tests {
             Assert.Contains("SceneLoadMode.Additive", source, StringComparison.Ordinal);
             Assert.Contains("SceneManager.LoadScene(MainMenuSceneId, SceneLoadMode.Additive)", source, StringComparison.Ordinal);
             Assert.Contains("SceneManager.UnloadScene(SplashSceneId)", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("SceneManager.UnloadScene(LoadingScreenSceneId)", source, StringComparison.Ordinal);
             Assert.Contains("StartupInputGate.Acquire()", source, StringComparison.Ordinal);
             Assert.Contains("StartupInputGate.Release()", source, StringComparison.Ordinal);
             Assert.Contains("Core.Instance != null && Core.Instance.SceneManager != null", source, StringComparison.Ordinal);
@@ -70,7 +71,7 @@ namespace city.menu.tools.tests {
         }
 
         /// <summary>
-        /// Ensures the splash releases menu input before it queues its own unload, so input does not depend on deferred disposal timing.
+        /// Ensures the splash keeps menu input blocked until its deferred unload disposes the splash component.
         /// </summary>
         [Fact]
         public void Splash_runtime_source_skips_on_accept_input() {
@@ -87,7 +88,14 @@ namespace city.menu.tools.tests {
             Assert.Contains("inputSystem.WasKeyPressed(Keys.J)", source, StringComparison.Ordinal);
             Assert.Contains("Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept)", source, StringComparison.Ordinal);
             Assert.Contains("DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)", source, StringComparison.Ordinal);
-            Assert.Contains("SplashUnloadWasRequested = true;\n            StartupInputGate.Release();\n            Core.Instance.SceneManager.UnloadScene(SplashSceneId);", source, StringComparison.Ordinal);
+            int requestStart = source.IndexOf("void RequestSplashUnload()", StringComparison.Ordinal);
+            int disposeStart = source.IndexOf("public override void Dispose()", StringComparison.Ordinal);
+            Assert.True(requestStart >= 0);
+            Assert.True(disposeStart >= 0);
+            string requestSource = source.Substring(requestStart);
+            Assert.Contains("SplashUnloadWasRequested = true;", requestSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("StartupInputGate.Release();", requestSource, StringComparison.Ordinal);
+            Assert.Contains("StartupInputGate.Release();", source.Substring(0, requestStart), StringComparison.Ordinal);
         }
 
         /// <summary>

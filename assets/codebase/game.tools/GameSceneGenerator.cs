@@ -37,7 +37,7 @@ namespace city.game.tools {
             materialFactory.WriteMaterialAsset(projectRootPath);
             RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService();
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(projectRootPath);
-            GameSceneFactory factory = new GameSceneFactory(assets);
+            GameSceneFactory factory = new GameSceneFactory(assets, projectRootPath);
             GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue);
             TiltTrialGameplayPresentationBlueprintGenerator presentationBlueprintGenerator = new TiltTrialGameplayPresentationBlueprintGenerator();
             presentationBlueprintGenerator.Generate(projectRootPath, factory);
@@ -68,7 +68,7 @@ namespace city.game.tools {
 
             RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService();
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(projectRootPath);
-            GameSceneFactory factory = new GameSceneFactory(assets);
+            GameSceneFactory factory = new GameSceneFactory(assets, projectRootPath);
             GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue);
             GeneratedAuthoringSceneDefinition tiltTrialScene = factory.CreateTiltTrialScene();
             sceneWriteService.WriteScene(projectRootPath, tiltTrialScene);
