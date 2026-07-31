@@ -52,8 +52,21 @@ namespace city.physics.tools {
                 throw new InvalidOperationException($"The HelPhysics proof scene must contain exactly one '{ReturnToMenuComponentTypeId}' record, but found '{removedComponentCount}'.");
             }
 
-            using FileStream outputStream = new FileStream(scenePath, FileMode.Create, FileAccess.Write, FileShare.None);
-            global::helengine.editor.AssetSerializer.Serialize(outputStream, sceneAsset);
+            string temporaryScenePath = Path.Combine(
+                Path.GetDirectoryName(scenePath) ?? throw new InvalidOperationException($"The HelPhysics proof scene '{scenePath}' has no parent directory."),
+                $".{Path.GetFileName(scenePath)}.{Guid.NewGuid():N}.tmp");
+            try {
+                using (FileStream outputStream = new FileStream(temporaryScenePath, FileMode.CreateNew, FileAccess.Write, FileShare.None)) {
+                    global::helengine.editor.AssetSerializer.Serialize(outputStream, sceneAsset);
+                    outputStream.Flush(true);
+                }
+
+                File.Move(temporaryScenePath, scenePath, true);
+            } finally {
+                if (File.Exists(temporaryScenePath)) {
+                    File.Delete(temporaryScenePath);
+                }
+            }
         }
 
         /// <summary>
