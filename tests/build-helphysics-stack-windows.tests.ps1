@@ -59,6 +59,34 @@ function Assert-ContainsCount {
     }
 }
 
+function Get-BuildScriptFunctionDefinition {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$SourcePath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$FunctionName
+    )
+
+    $Tokens = $null
+    $ParseErrors = $null
+    $SyntaxTree = [System.Management.Automation.Language.Parser]::ParseFile($SourcePath, [ref]$Tokens, [ref]$ParseErrors)
+    if ($ParseErrors.Count -ne 0) {
+        throw "Unable to parse build script for functional contract tests: $($ParseErrors[0].Message)"
+    }
+
+    $Definitions = @($SyntaxTree.FindAll({
+        param($Node)
+        return $Node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+            $Node.Name -ceq $FunctionName
+    }, $true))
+    if ($Definitions.Count -ne 1) {
+        throw "Expected one function named '$FunctionName' in '$SourcePath', but found $($Definitions.Count)."
+    }
+
+    return [scriptblock]::Create($Definitions[0].Extent.Text)
+}
+
 $BuildScriptPath = Join-Path (Split-Path -Parent $PSScriptRoot) "build-helphysics-stack-windows.ps1"
 if (-not (Test-Path -LiteralPath $BuildScriptPath -PathType Leaf)) {
     throw "Guarded build script was not found at '$BuildScriptPath'."
@@ -108,6 +136,9 @@ Assert-ContainsText $Source 'codegenToolPath = $CodegenToolPath' "isolated manif
 Assert-ContainsText $Source 'Start-VerifiedPackagePublication' "two-phase final package publication"
 Assert-ContainsText $Source 'Undo-VerifiedPackagePublication' "failed publication rollback"
 Assert-ContainsText $Source 'Complete-VerifiedPackagePublication' "post-audit publication completion"
+Assert-ContainsText $Source '[System.IO.FileShare]::None' "exclusive final-package publication lock"
+Assert-ContainsText $Source '.helengine-publication-owner' "per-publication destination ownership marker"
+Assert-ContainsCount $Source 'Assert-VerifiedPackagePublicationOwnership -Publication $Publication' 2 "ownership checks before rollback and completion moves"
 Assert-ContainsText $Source 'Get-Command powershell.exe -CommandType Application' "caller-independent Windows PowerShell resolution"
 Assert-ContainsText $Source 'cpp-conversion-report.json' "conversion report validation"
 Assert-ContainsText $Source 'hasErrors' "conversion error rejection"
@@ -131,5 +162,198 @@ Assert-DoesNotContainText $Source '& (Join-Path $OutputRootPath' "the build scri
 Assert-DoesNotContainText $Source 'Remove-Item' "the build script must preserve publication candidates and backups without recursive deletion"
 Assert-DoesNotContainText $Source 'AppData\Local\Temp' "agent-controlled output must not use the system temp tree"
 Assert-DoesNotContainText $Source '[System.IO.Path]::GetTempPath' "agent-controlled output must not use GetTempPath"
+
+$PublicationFunctionNames = @(
+    "Assert-SafeWorkspaceOwnedPath",
+    "Enter-VerifiedPackagePublicationLock",
+    "Exit-VerifiedPackagePublicationLock",
+    "Assert-VerifiedPackagePublicationOwnership",
+    "Start-VerifiedPackagePublication",
+    "Undo-VerifiedPackagePublication",
+    "Complete-VerifiedPackagePublication",
+    "Invoke-VerifiedPackagePublicationLifecycle"
+)
+foreach ($FunctionName in $PublicationFunctionNames) {
+    . (Get-BuildScriptFunctionDefinition -SourcePath $BuildScriptPath -FunctionName $FunctionName)
+}
+
+$FunctionalTestRootPath = Join-Path "C:\dev\helworks\builds\helphysics-demodisc-stack-test\publication-contract-tests" ([Guid]::NewGuid().ToString("N"))
+$null = New-Item -ItemType Directory -Path $FunctionalTestRootPath
+$LockDestinationRootPath = Join-Path $FunctionalTestRootPath "locked-final-package"
+$FirstPublicationLock = Enter-VerifiedPackagePublicationLock `
+    -DestinationRootPath $LockDestinationRootPath `
+    -DestinationParentRootPath $FunctionalTestRootPath
+$SecondLockFailure = $null
+try {
+    try {
+        $null = Enter-VerifiedPackagePublicationLock `
+            -DestinationRootPath $LockDestinationRootPath `
+            -DestinationParentRootPath $FunctionalTestRootPath
+    } catch {
+        $SecondLockFailure = $_
+    }
+
+    if ($null -eq $SecondLockFailure) {
+        throw "A second publication unexpectedly acquired the same final-package lock."
+    }
+} finally {
+    Exit-VerifiedPackagePublicationLock -PublicationLock $FirstPublicationLock
+}
+
+$ReacquiredPublicationLock = Enter-VerifiedPackagePublicationLock `
+    -DestinationRootPath $LockDestinationRootPath `
+    -DestinationParentRootPath $FunctionalTestRootPath
+Exit-VerifiedPackagePublicationLock -PublicationLock $ReacquiredPublicationLock
+
+$LifecycleWorkspaceRootPath = Join-Path $FunctionalTestRootPath "lifecycle-workspace"
+$LifecycleVerifiedOutputRootPath = Join-Path $FunctionalTestRootPath "lifecycle-verified-output"
+$LifecycleDestinationRootPath = Join-Path $FunctionalTestRootPath "lifecycle-final-package"
+$null = New-Item -ItemType Directory -Path $LifecycleWorkspaceRootPath, $LifecycleVerifiedOutputRootPath
+Set-Content -LiteralPath (Join-Path $LifecycleVerifiedOutputRootPath "artifact.txt") -Value "verified" -NoNewline
+$LifecycleObservations = [pscustomobject]@{
+    ValidationLockWasHeld = $false
+    AuditLockWasHeld = $false
+}
+$LifecyclePublication = Invoke-VerifiedPackagePublicationLifecycle `
+    -VerifiedOutputRootPath $LifecycleVerifiedOutputRootPath `
+    -DestinationRootPath $LifecycleDestinationRootPath `
+    -DestinationParentRootPath $FunctionalTestRootPath `
+    -WorkspaceOwnedRootPath $LifecycleWorkspaceRootPath `
+    -ValidatePublishedPackage {
+        param($PublishedOutputRootPath)
+        if (-not (Test-Path -LiteralPath (Join-Path $PublishedOutputRootPath "artifact.txt") -PathType Leaf)) {
+            throw "Lifecycle validation did not receive the promoted package."
+        }
+
+        $CompetingLock = $null
+        $CompetingLockFailure = $null
+        try {
+            $CompetingLock = Enter-VerifiedPackagePublicationLock `
+                -DestinationRootPath $LifecycleDestinationRootPath `
+                -DestinationParentRootPath $FunctionalTestRootPath
+        } catch {
+            $CompetingLockFailure = $_
+        }
+        if ($null -ne $CompetingLock) {
+            Exit-VerifiedPackagePublicationLock -PublicationLock $CompetingLock
+            throw "Validation acquired the publication lock before the transaction completed."
+        }
+        if ($null -eq $CompetingLockFailure) {
+            throw "Validation did not observe publication lock contention."
+        }
+
+        $LifecycleObservations.ValidationLockWasHeld = $true
+    } `
+    -AuditMainRepositories {
+        $CompetingLock = $null
+        $CompetingLockFailure = $null
+        try {
+            $CompetingLock = Enter-VerifiedPackagePublicationLock `
+                -DestinationRootPath $LifecycleDestinationRootPath `
+                -DestinationParentRootPath $FunctionalTestRootPath
+        } catch {
+            $CompetingLockFailure = $_
+        }
+        if ($null -ne $CompetingLock) {
+            Exit-VerifiedPackagePublicationLock -PublicationLock $CompetingLock
+            throw "Audit acquired the publication lock before the transaction completed."
+        }
+        if ($null -eq $CompetingLockFailure) {
+            throw "Audit did not observe publication lock contention."
+        }
+
+        $LifecycleObservations.AuditLockWasHeld = $true
+    }
+if (-not $LifecycleObservations.ValidationLockWasHeld -or
+    -not $LifecycleObservations.AuditLockWasHeld) {
+    throw "The publication lifecycle did not hold its lock through validation and audit."
+}
+Assert-VerifiedPackagePublicationOwnership -Publication $LifecyclePublication
+
+$BlockedLifecycleDestinationRootPath = Join-Path $FunctionalTestRootPath "blocked-lifecycle-final-package"
+$BlockingLifecycleLock = Enter-VerifiedPackagePublicationLock `
+    -DestinationRootPath $BlockedLifecycleDestinationRootPath `
+    -DestinationParentRootPath $FunctionalTestRootPath
+$BlockedLifecycleObservations = [pscustomobject]@{
+    AuditWasRun = $false
+}
+$BlockedLifecycleFailure = $null
+try {
+    try {
+        $null = Invoke-VerifiedPackagePublicationLifecycle `
+            -VerifiedOutputRootPath $LifecycleVerifiedOutputRootPath `
+            -DestinationRootPath $BlockedLifecycleDestinationRootPath `
+            -DestinationParentRootPath $FunctionalTestRootPath `
+            -WorkspaceOwnedRootPath $LifecycleWorkspaceRootPath `
+            -ValidatePublishedPackage {
+                param($PublishedOutputRootPath)
+                throw "A lock-blocked publication unexpectedly reached validation for '$PublishedOutputRootPath'."
+            } `
+            -AuditMainRepositories {
+                $BlockedLifecycleObservations.AuditWasRun = $true
+            }
+    } catch {
+        $BlockedLifecycleFailure = $_
+    }
+} finally {
+    Exit-VerifiedPackagePublicationLock -PublicationLock $BlockingLifecycleLock
+}
+if ($null -eq $BlockedLifecycleFailure -or -not $BlockedLifecycleObservations.AuditWasRun) {
+    throw "A lock acquisition failure did not preserve the final main-repository audit."
+}
+
+$OwnershipWorkspaceRootPath = Join-Path $FunctionalTestRootPath "ownership-workspace"
+$OwnershipDestinationRootPath = Join-Path $FunctionalTestRootPath "owned-final-package"
+$OwnershipBackupRootPath = Join-Path $FunctionalTestRootPath "owned-backup-package"
+$null = New-Item -ItemType Directory -Path $OwnershipWorkspaceRootPath, $OwnershipDestinationRootPath, $OwnershipBackupRootPath
+Set-Content -LiteralPath (Join-Path $OwnershipDestinationRootPath ".helengine-publication-owner") -Value "replacement-publication" -NoNewline
+$MismatchedPublication = [pscustomobject]@{
+    PublicationId = "original-publication"
+    DestinationRootPath = $OwnershipDestinationRootPath
+    BackupRootPath = $OwnershipBackupRootPath
+    HadPreviousPackage = $true
+    WorkspaceOwnedRootPath = $OwnershipWorkspaceRootPath
+}
+$OwnershipFailure = $null
+try {
+    Undo-VerifiedPackagePublication -Publication $MismatchedPublication
+} catch {
+    $OwnershipFailure = $_
+}
+
+if ($null -eq $OwnershipFailure) {
+    throw "Rollback unexpectedly moved a final package owned by another publication."
+}
+if (-not (Test-Path -LiteralPath $OwnershipDestinationRootPath -PathType Container) -or
+    -not (Test-Path -LiteralPath $OwnershipBackupRootPath -PathType Container)) {
+    throw "Ownership rejection changed a destination or backup package before failing."
+}
+
+$CompletionWorkspaceRootPath = Join-Path $FunctionalTestRootPath "completion-workspace"
+$CompletionDestinationRootPath = Join-Path $FunctionalTestRootPath "completion-final-package"
+$CompletionBackupRootPath = Join-Path $FunctionalTestRootPath "completion-backup-package"
+$null = New-Item -ItemType Directory -Path $CompletionWorkspaceRootPath, $CompletionDestinationRootPath, $CompletionBackupRootPath
+Set-Content -LiteralPath (Join-Path $CompletionDestinationRootPath ".helengine-publication-owner") -Value "replacement-publication" -NoNewline
+$MismatchedCompletion = [pscustomobject]@{
+    PublicationId = "original-publication"
+    DestinationRootPath = $CompletionDestinationRootPath
+    BackupRootPath = $CompletionBackupRootPath
+    HadPreviousPackage = $true
+    WorkspaceOwnedRootPath = $CompletionWorkspaceRootPath
+}
+$CompletionOwnershipFailure = $null
+try {
+    Complete-VerifiedPackagePublication -Publication $MismatchedCompletion
+} catch {
+    $CompletionOwnershipFailure = $_
+}
+
+if ($null -eq $CompletionOwnershipFailure) {
+    throw "Completion unexpectedly archived a backup for a final package owned by another publication."
+}
+if (-not (Test-Path -LiteralPath $CompletionDestinationRootPath -PathType Container) -or
+    -not (Test-Path -LiteralPath $CompletionBackupRootPath -PathType Container)) {
+    throw "Completion ownership rejection changed a destination or backup package before failing."
+}
 
 Write-Host "Guarded HelPhysics Windows build script contract passed."

@@ -151,6 +151,61 @@ function Get-OnlyFile {
     return $Matches[0].FullName
 }
 
+function Enter-VerifiedPackagePublicationLock {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$DestinationRootPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$DestinationParentRootPath
+    )
+
+    $SafeDestinationRootPath = Assert-SafeWorkspaceOwnedPath -TargetPath $DestinationRootPath -WorkspaceOwnedRootPath $DestinationParentRootPath
+    $LockFilePath = Assert-SafeWorkspaceOwnedPath `
+        -TargetPath ($SafeDestinationRootPath + ".publication.lock") `
+        -WorkspaceOwnedRootPath $DestinationParentRootPath
+    try {
+        $LockStream = [System.IO.File]::Open(
+            $LockFilePath,
+            [System.IO.FileMode]::OpenOrCreate,
+            [System.IO.FileAccess]::ReadWrite,
+            [System.IO.FileShare]::None)
+    } catch [System.IO.IOException] {
+        throw "Another build owns the final-package publication lock '$LockFilePath'."
+    }
+
+    return [pscustomobject]@{
+        LockFilePath = $LockFilePath
+        LockStream = $LockStream
+    }
+}
+
+function Exit-VerifiedPackagePublicationLock {
+    param(
+        [Parameter(Mandatory = $true)]
+        [object]$PublicationLock
+    )
+
+    $PublicationLock.LockStream.Dispose()
+}
+
+function Assert-VerifiedPackagePublicationOwnership {
+    param(
+        [Parameter(Mandatory = $true)]
+        [object]$Publication
+    )
+
+    $OwnershipMarkerPath = Join-Path $Publication.DestinationRootPath ".helengine-publication-owner"
+    if (-not (Test-Path -LiteralPath $OwnershipMarkerPath -PathType Leaf)) {
+        throw "Published package ownership marker is missing from '$($Publication.DestinationRootPath)'."
+    }
+
+    $ActualPublicationId = (Get-Content -LiteralPath $OwnershipMarkerPath -Raw).Trim()
+    if ($ActualPublicationId -cne $Publication.PublicationId) {
+        throw "Published package '$($Publication.DestinationRootPath)' is owned by publication '$ActualPublicationId', not '$($Publication.PublicationId)'."
+    }
+}
+
 function Start-VerifiedPackagePublication {
     param(
         [Parameter(Mandatory = $true)]
@@ -176,6 +231,7 @@ function Start-VerifiedPackagePublication {
         -WorkspaceOwnedRootPath $DestinationParentRootPath
     $HadPreviousPackage = $false
     Copy-Item -LiteralPath $VerifiedOutputRootPath -Destination $StagingRootPath -Recurse
+    Set-Content -LiteralPath (Join-Path $StagingRootPath ".helengine-publication-owner") -Value $PublishId -NoNewline
     if (Test-Path -LiteralPath $SafeDestinationRootPath) {
         Move-Item -LiteralPath $SafeDestinationRootPath -Destination $BackupRootPath
         $HadPreviousPackage = $true
@@ -197,6 +253,7 @@ function Start-VerifiedPackagePublication {
     }
 
     return [pscustomobject]@{
+        PublicationId = $PublishId
         DestinationRootPath = $SafeDestinationRootPath
         BackupRootPath = $BackupRootPath
         HadPreviousPackage = $HadPreviousPackage
@@ -210,6 +267,7 @@ function Undo-VerifiedPackagePublication {
         [object]$Publication
     )
 
+    Assert-VerifiedPackagePublicationOwnership -Publication $Publication
     $FailedPackageRootPath = Assert-SafeWorkspaceOwnedPath `
         -TargetPath (Join-Path $Publication.WorkspaceOwnedRootPath "failed-published-package") `
         -WorkspaceOwnedRootPath $Publication.WorkspaceOwnedRootPath
@@ -227,6 +285,7 @@ function Complete-VerifiedPackagePublication {
         [object]$Publication
     )
 
+    Assert-VerifiedPackagePublicationOwnership -Publication $Publication
     if (-not $Publication.HadPreviousPackage) {
         return
     }
@@ -235,6 +294,85 @@ function Complete-VerifiedPackagePublication {
         -TargetPath (Join-Path $Publication.WorkspaceOwnedRootPath "previous-final-package") `
         -WorkspaceOwnedRootPath $Publication.WorkspaceOwnedRootPath
     Move-Item -LiteralPath $Publication.BackupRootPath -Destination $ArchivedPackageRootPath
+}
+
+function Invoke-VerifiedPackagePublicationLifecycle {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$VerifiedOutputRootPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$DestinationRootPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$DestinationParentRootPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$WorkspaceOwnedRootPath,
+
+        [Parameter(Mandatory = $true)]
+        [scriptblock]$ValidatePublishedPackage,
+
+        [Parameter(Mandatory = $true)]
+        [scriptblock]$AuditMainRepositories
+    )
+
+    $PublicationLock = $null
+    $Publication = $null
+    $OperationFailure = $null
+    $AuditFailure = $null
+    $RollbackFailure = $null
+    try {
+        try {
+            $PublicationLock = Enter-VerifiedPackagePublicationLock `
+                -DestinationRootPath $DestinationRootPath `
+                -DestinationParentRootPath $DestinationParentRootPath
+            $Publication = Start-VerifiedPackagePublication `
+                -VerifiedOutputRootPath $VerifiedOutputRootPath `
+                -DestinationRootPath $DestinationRootPath `
+                -DestinationParentRootPath $DestinationParentRootPath `
+                -WorkspaceOwnedRootPath $WorkspaceOwnedRootPath
+            & $ValidatePublishedPackage $Publication.DestinationRootPath
+        } catch {
+            $OperationFailure = $_
+        }
+
+        try {
+            & $AuditMainRepositories
+        } catch {
+            $AuditFailure = $_
+        }
+
+        if ($null -ne $OperationFailure -or $null -ne $AuditFailure) {
+            if ($null -ne $Publication) {
+                try {
+                    Undo-VerifiedPackagePublication -Publication $Publication
+                } catch {
+                    $RollbackFailure = $_
+                }
+            }
+
+            $FailureMessages = New-Object System.Collections.Generic.List[string]
+            if ($null -ne $OperationFailure) {
+                $FailureMessages.Add("Final package publication failed: $($OperationFailure.Exception.Message)")
+            }
+            if ($null -ne $AuditFailure) {
+                $FailureMessages.Add("The final main-checkout audit failed: $($AuditFailure.Exception.Message)")
+            }
+            if ($null -ne $RollbackFailure) {
+                $FailureMessages.Add("Restoring the previous final package failed: $($RollbackFailure.Exception.Message)")
+            }
+
+            throw ($FailureMessages -join " ")
+        }
+
+        Complete-VerifiedPackagePublication -Publication $Publication
+        return $Publication
+    } finally {
+        if ($null -ne $PublicationLock) {
+            Exit-VerifiedPackagePublicationLock -PublicationLock $PublicationLock
+        }
+    }
 }
 
 function Assert-ConversionReport {
@@ -323,7 +461,6 @@ $MainRepositorySnapshots = @(
 $OriginalSharedUserSettingsRoot = $env:HELENGINE_SHARED_USER_SETTINGS_ROOT
 $BuildFailure = $null
 $AuditFailure = $null
-$PublicationFailure = $null
 $Publication = $null
 $BuildRootPath = $null
 $ExecutablePath = $null
@@ -420,53 +557,49 @@ try {
         throw "Authored stack scene changed during the isolated build."
     }
 
-    $Publication = Start-VerifiedPackagePublication `
-        -VerifiedOutputRootPath $OutputRootPath `
-        -DestinationRootPath $FinalOutputRootPath `
-        -DestinationParentRootPath $FinalOutputParentRootPath `
-        -WorkspaceOwnedRootPath $BuildRootPath
-    $PublishedOutputRootPath = $Publication.DestinationRootPath
-    $ExecutablePath = Join-Path $PublishedOutputRootPath "helengine_windows.exe"
-    $BackendManifestPath = Join-Path $PublishedOutputRootPath "runtime\runtime-physics-backend.json"
-    if (-not (Test-Path -LiteralPath $ExecutablePath -PathType Leaf)) {
-        throw "Published Windows executable is missing from '$PublishedOutputRootPath'."
-    }
-    Assert-BackendManifest -ManifestPath $BackendManifestPath
 } catch {
     $BuildFailure = $_
 } finally {
     $env:HELENGINE_SHARED_USER_SETTINGS_ROOT = $OriginalSharedUserSettingsRoot
+}
+
+if ($null -ne $BuildFailure) {
     try {
         Assert-MainRepositorySnapshotsUnchanged -Snapshots $MainRepositorySnapshots
     } catch {
         $AuditFailure = $_
     }
-}
-
-if ($null -ne $BuildFailure -or $null -ne $AuditFailure) {
-    if ($null -ne $Publication) {
-        try {
-            Undo-VerifiedPackagePublication -Publication $Publication
-        } catch {
-            $PublicationFailure = $_
-        }
-    }
 
     $FailureMessages = New-Object System.Collections.Generic.List[string]
-    if ($null -ne $BuildFailure) {
-        $FailureMessages.Add("The isolated build failed: $($BuildFailure.Exception.Message)")
-    }
+    $FailureMessages.Add("The isolated build failed: $($BuildFailure.Exception.Message)")
     if ($null -ne $AuditFailure) {
         $FailureMessages.Add("The final main-checkout audit failed: $($AuditFailure.Exception.Message)")
-    }
-    if ($null -ne $PublicationFailure) {
-        $FailureMessages.Add("Restoring the previous final package failed: $($PublicationFailure.Exception.Message)")
     }
 
     throw ($FailureMessages -join " ")
 }
 
-Complete-VerifiedPackagePublication -Publication $Publication
+$Publication = Invoke-VerifiedPackagePublicationLifecycle `
+    -VerifiedOutputRootPath $OutputRootPath `
+    -DestinationRootPath $FinalOutputRootPath `
+    -DestinationParentRootPath $FinalOutputParentRootPath `
+    -WorkspaceOwnedRootPath $BuildRootPath `
+    -ValidatePublishedPackage {
+        param($PublishedOutputRootPath)
+        $PublishedExecutablePath = Join-Path $PublishedOutputRootPath "helengine_windows.exe"
+        $PublishedBackendManifestPath = Join-Path $PublishedOutputRootPath "runtime\runtime-physics-backend.json"
+        if (-not (Test-Path -LiteralPath $PublishedExecutablePath -PathType Leaf)) {
+            throw "Published Windows executable is missing from '$PublishedOutputRootPath'."
+        }
+
+        Assert-BackendManifest -ManifestPath $PublishedBackendManifestPath
+    } `
+    -AuditMainRepositories {
+        Assert-MainRepositorySnapshotsUnchanged -Snapshots $MainRepositorySnapshots
+    }
+$PublishedOutputRootPath = $Publication.DestinationRootPath
+$ExecutablePath = Join-Path $PublishedOutputRootPath "helengine_windows.exe"
+$BackendManifestPath = Join-Path $PublishedOutputRootPath "runtime\runtime-physics-backend.json"
 
 Write-Host "HelPhysics stack Windows build complete."
 Write-Host "Executable: $ExecutablePath"
