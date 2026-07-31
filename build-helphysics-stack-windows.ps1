@@ -151,7 +151,7 @@ function Get-OnlyFile {
     return $Matches[0].FullName
 }
 
-function Publish-VerifiedPackage {
+function Start-VerifiedPackagePublication {
     param(
         [Parameter(Mandatory = $true)]
         [string]$VerifiedOutputRootPath,
@@ -160,45 +160,81 @@ function Publish-VerifiedPackage {
         [string]$DestinationRootPath,
 
         [Parameter(Mandatory = $true)]
-        [string]$DestinationParentRootPath
+        [string]$DestinationParentRootPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$WorkspaceOwnedRootPath
     )
 
     $SafeDestinationRootPath = Assert-SafeWorkspaceOwnedPath -TargetPath $DestinationRootPath -WorkspaceOwnedRootPath $DestinationParentRootPath
     $PublishId = [Guid]::NewGuid().ToString("N")
     $StagingRootPath = Assert-SafeWorkspaceOwnedPath `
-        -TargetPath (Join-Path $DestinationParentRootPath ("windows-helphysics-stack-test.publish-" + $PublishId)) `
-        -WorkspaceOwnedRootPath $DestinationParentRootPath
+        -TargetPath (Join-Path $WorkspaceOwnedRootPath "final-package-staging") `
+        -WorkspaceOwnedRootPath $WorkspaceOwnedRootPath
     $BackupRootPath = Assert-SafeWorkspaceOwnedPath `
         -TargetPath (Join-Path $DestinationParentRootPath ("windows-helphysics-stack-test.backup-" + $PublishId)) `
         -WorkspaceOwnedRootPath $DestinationParentRootPath
-    $MovedExistingPackage = $false
-    try {
-        Copy-Item -LiteralPath $VerifiedOutputRootPath -Destination $StagingRootPath -Recurse
-        if (Test-Path -LiteralPath $SafeDestinationRootPath) {
-            Move-Item -LiteralPath $SafeDestinationRootPath -Destination $BackupRootPath
-            $MovedExistingPackage = $true
-        }
-
-        try {
-            Move-Item -LiteralPath $StagingRootPath -Destination $SafeDestinationRootPath
-        } catch {
-            if ($MovedExistingPackage -and -not (Test-Path -LiteralPath $SafeDestinationRootPath)) {
-                Move-Item -LiteralPath $BackupRootPath -Destination $SafeDestinationRootPath
-                $MovedExistingPackage = $false
-            }
-
-            throw
-        }
-    } finally {
-        if (Test-Path -LiteralPath $StagingRootPath) {
-            Remove-Item -LiteralPath $StagingRootPath -Recurse -Force
-        }
-        if ($MovedExistingPackage -and (Test-Path -LiteralPath $BackupRootPath)) {
-            Remove-Item -LiteralPath $BackupRootPath -Recurse -Force
-        }
+    $HadPreviousPackage = $false
+    Copy-Item -LiteralPath $VerifiedOutputRootPath -Destination $StagingRootPath -Recurse
+    if (Test-Path -LiteralPath $SafeDestinationRootPath) {
+        Move-Item -LiteralPath $SafeDestinationRootPath -Destination $BackupRootPath
+        $HadPreviousPackage = $true
     }
 
-    return $SafeDestinationRootPath
+    try {
+        Move-Item -LiteralPath $StagingRootPath -Destination $SafeDestinationRootPath
+    } catch {
+        $PromotionFailure = $_
+        if ($HadPreviousPackage -and -not (Test-Path -LiteralPath $SafeDestinationRootPath)) {
+            try {
+                Move-Item -LiteralPath $BackupRootPath -Destination $SafeDestinationRootPath
+            } catch {
+                throw "Package promotion failed: $($PromotionFailure.Exception.Message) Restoring the previous package also failed: $($_.Exception.Message) The previous package remains at '$BackupRootPath'."
+            }
+        }
+
+        throw $PromotionFailure
+    }
+
+    return [pscustomobject]@{
+        DestinationRootPath = $SafeDestinationRootPath
+        BackupRootPath = $BackupRootPath
+        HadPreviousPackage = $HadPreviousPackage
+        WorkspaceOwnedRootPath = $WorkspaceOwnedRootPath
+    }
+}
+
+function Undo-VerifiedPackagePublication {
+    param(
+        [Parameter(Mandatory = $true)]
+        [object]$Publication
+    )
+
+    $FailedPackageRootPath = Assert-SafeWorkspaceOwnedPath `
+        -TargetPath (Join-Path $Publication.WorkspaceOwnedRootPath "failed-published-package") `
+        -WorkspaceOwnedRootPath $Publication.WorkspaceOwnedRootPath
+    if (Test-Path -LiteralPath $Publication.DestinationRootPath) {
+        Move-Item -LiteralPath $Publication.DestinationRootPath -Destination $FailedPackageRootPath
+    }
+    if ($Publication.HadPreviousPackage) {
+        Move-Item -LiteralPath $Publication.BackupRootPath -Destination $Publication.DestinationRootPath
+    }
+}
+
+function Complete-VerifiedPackagePublication {
+    param(
+        [Parameter(Mandatory = $true)]
+        [object]$Publication
+    )
+
+    if (-not $Publication.HadPreviousPackage) {
+        return
+    }
+
+    $ArchivedPackageRootPath = Assert-SafeWorkspaceOwnedPath `
+        -TargetPath (Join-Path $Publication.WorkspaceOwnedRootPath "previous-final-package") `
+        -WorkspaceOwnedRootPath $Publication.WorkspaceOwnedRootPath
+    Move-Item -LiteralPath $Publication.BackupRootPath -Destination $ArchivedPackageRootPath
 }
 
 function Assert-ConversionReport {
@@ -287,6 +323,9 @@ $MainRepositorySnapshots = @(
 $OriginalSharedUserSettingsRoot = $env:HELENGINE_SHARED_USER_SETTINGS_ROOT
 $BuildFailure = $null
 $AuditFailure = $null
+$PublicationFailure = $null
+$Publication = $null
+$BuildRootPath = $null
 $ExecutablePath = $null
 $BackendManifestPath = $null
 $WindowsBuildManifestPath = $null
@@ -381,10 +420,12 @@ try {
         throw "Authored stack scene changed during the isolated build."
     }
 
-    $PublishedOutputRootPath = Publish-VerifiedPackage `
+    $Publication = Start-VerifiedPackagePublication `
         -VerifiedOutputRootPath $OutputRootPath `
         -DestinationRootPath $FinalOutputRootPath `
-        -DestinationParentRootPath $FinalOutputParentRootPath
+        -DestinationParentRootPath $FinalOutputParentRootPath `
+        -WorkspaceOwnedRootPath $BuildRootPath
+    $PublishedOutputRootPath = $Publication.DestinationRootPath
     $ExecutablePath = Join-Path $PublishedOutputRootPath "helengine_windows.exe"
     $BackendManifestPath = Join-Path $PublishedOutputRootPath "runtime\runtime-physics-backend.json"
     if (-not (Test-Path -LiteralPath $ExecutablePath -PathType Leaf)) {
@@ -402,16 +443,30 @@ try {
     }
 }
 
-if ($null -ne $BuildFailure) {
-    if ($null -ne $AuditFailure) {
-        throw "The isolated build failed: $($BuildFailure.Exception.Message) The final main-checkout audit also failed: $($AuditFailure.Exception.Message)"
+if ($null -ne $BuildFailure -or $null -ne $AuditFailure) {
+    if ($null -ne $Publication) {
+        try {
+            Undo-VerifiedPackagePublication -Publication $Publication
+        } catch {
+            $PublicationFailure = $_
+        }
     }
 
-    throw $BuildFailure
+    $FailureMessages = New-Object System.Collections.Generic.List[string]
+    if ($null -ne $BuildFailure) {
+        $FailureMessages.Add("The isolated build failed: $($BuildFailure.Exception.Message)")
+    }
+    if ($null -ne $AuditFailure) {
+        $FailureMessages.Add("The final main-checkout audit failed: $($AuditFailure.Exception.Message)")
+    }
+    if ($null -ne $PublicationFailure) {
+        $FailureMessages.Add("Restoring the previous final package failed: $($PublicationFailure.Exception.Message)")
+    }
+
+    throw ($FailureMessages -join " ")
 }
-if ($null -ne $AuditFailure) {
-    throw $AuditFailure
-}
+
+Complete-VerifiedPackagePublication -Publication $Publication
 
 Write-Host "HelPhysics stack Windows build complete."
 Write-Host "Executable: $ExecutablePath"
