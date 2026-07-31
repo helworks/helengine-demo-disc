@@ -1,0 +1,334 @@
+[CmdletBinding()]
+param()
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+$ExpectedBranchName = "codex/helphysics-demodisc-stack-test"
+$DemoMainRootPath = "C:\dev\helprojs\demodisc"
+$EngineMainRootPath = "C:\dev\helworks\helengine"
+$WindowsMainRootPath = "C:\dev\helworks\helengine-windows"
+$CodegenMainRootPath = "C:\dev\helworks\csharpcodegen"
+$DemoWorktreeRootPath = "C:\dev\helprojs\demodisc\.worktrees\helphysics-demodisc-stack-test"
+$EngineWorktreeRootPath = "C:\dev\helworks\helengine\.worktrees\helphysics-demodisc-stack-test"
+$WindowsWorktreeRootPath = "C:\dev\helworks\helengine-windows\.worktrees\helphysics-demodisc-stack-test"
+$CodegenWorktreeRootPath = "C:\dev\helworks\csharpcodegen\.worktrees\helphysics-demodisc-stack-test"
+$DemoBaselineCommit = "d716776b6ec6d719c7448fe57652cf342d0b09d6"
+$EngineBaselineCommit = "25374214867e8e5deeb3cd9e19893caeb2278b64"
+$WindowsBaselineCommit = "b9590af9bece2c824b3531bdc5cc237853879188"
+$CodegenBaselineCommit = "87958b3ac4f5b2e6221551874e8bf0a7a5620254"
+$VisibleBuildRootPath = "C:\dev\helworks\builds\helphysics-demodisc-stack-test"
+$StackSceneRelativePath = "assets/scenes/physics/test_scene_dynamic_stack_boxes.helen"
+$StackSceneId = "test_scene_dynamic_stack_boxes"
+
+function Invoke-GitText {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RepositoryRootPath,
+
+        [Parameter(Mandatory = $true)]
+        [string[]]$Arguments
+    )
+
+    $Output = & git -C $RepositoryRootPath @Arguments 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw "git -C '$RepositoryRootPath' $($Arguments -join ' ') failed: $($Output -join [Environment]::NewLine)"
+    }
+
+    return ($Output -join "`n").TrimEnd()
+}
+
+function Get-MainRepositorySnapshot {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RepositoryRootPath
+    )
+
+    return [pscustomobject]@{
+        RepositoryRootPath = [System.IO.Path]::GetFullPath($RepositoryRootPath)
+        Head = Invoke-GitText -RepositoryRootPath $RepositoryRootPath -Arguments @("rev-parse", "HEAD")
+        Status = Invoke-GitText -RepositoryRootPath $RepositoryRootPath -Arguments @("status", "--porcelain=v1", "--untracked-files=all")
+    }
+}
+
+function Assert-MainRepositorySnapshotsUnchanged {
+    param(
+        [Parameter(Mandatory = $true)]
+        [object[]]$Snapshots
+    )
+
+    $ChangedRepositories = New-Object System.Collections.Generic.List[string]
+    foreach ($Snapshot in $Snapshots) {
+        $CurrentHead = Invoke-GitText -RepositoryRootPath $Snapshot.RepositoryRootPath -Arguments @("rev-parse", "HEAD")
+        $CurrentStatus = Invoke-GitText -RepositoryRootPath $Snapshot.RepositoryRootPath -Arguments @("status", "--porcelain=v1", "--untracked-files=all")
+        if ($CurrentHead -cne $Snapshot.Head -or $CurrentStatus -cne $Snapshot.Status) {
+            $ChangedRepositories.Add($Snapshot.RepositoryRootPath)
+        }
+    }
+
+    if ($ChangedRepositories.Count -gt 0) {
+        throw "Main checkout state changed during the isolated build: $($ChangedRepositories -join ', ')."
+    }
+}
+
+function Assert-IsolatedWorktree {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RepositoryRootPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$BaselineCommit
+    )
+
+    $BranchName = Invoke-GitText -RepositoryRootPath $RepositoryRootPath -Arguments @("branch", "--show-current")
+    if ($BranchName -cne $ExpectedBranchName) {
+        throw "Worktree '$RepositoryRootPath' is on '$BranchName' instead of '$ExpectedBranchName'."
+    }
+
+    $null = & git -C $RepositoryRootPath merge-base --is-ancestor $BaselineCommit HEAD 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw "Worktree '$RepositoryRootPath' does not descend from required baseline '$BaselineCommit'."
+    }
+
+    $WorktreeStatus = Invoke-GitText -RepositoryRootPath $RepositoryRootPath -Arguments @("status", "--porcelain=v1", "--untracked-files=all")
+    if (-not [string]::IsNullOrWhiteSpace($WorktreeStatus)) {
+        throw "Worktree '$RepositoryRootPath' has uncommitted source changes: $WorktreeStatus"
+    }
+}
+
+function Assert-SafeWorkspaceOwnedPath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$TargetPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$WorkspaceOwnedRootPath
+    )
+
+    $FullOwnedRootPath = [System.IO.Path]::GetFullPath($WorkspaceOwnedRootPath).TrimEnd('\', '/')
+    $FullTargetPath = [System.IO.Path]::GetFullPath($TargetPath).TrimEnd('\', '/')
+    $RequiredPrefix = $FullOwnedRootPath + [System.IO.Path]::DirectorySeparatorChar
+    if ($FullTargetPath -ceq $FullOwnedRootPath -or
+        -not $FullTargetPath.StartsWith($RequiredPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Path '$FullTargetPath' is not a child of workspace-owned root '$FullOwnedRootPath'."
+    }
+
+    return $FullTargetPath
+}
+
+function Invoke-CheckedCommand {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$DisplayName,
+
+        [Parameter(Mandatory = $true)]
+        [scriptblock]$Command
+    )
+
+    Write-Host "[build] $DisplayName"
+    & $Command
+    if ($LASTEXITCODE -ne 0) {
+        throw "$DisplayName failed with exit code $LASTEXITCODE."
+    }
+}
+
+function Get-OnlyFile {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$SearchRootPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$FileName
+    )
+
+    $Matches = @(Get-ChildItem -LiteralPath $SearchRootPath -Recurse -File -Filter $FileName)
+    if ($Matches.Count -ne 1) {
+        throw "Expected exactly one '$FileName' beneath '$SearchRootPath', but found '$($Matches.Count)'."
+    }
+
+    return $Matches[0].FullName
+}
+
+function Assert-ConversionReport {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ReportPath
+    )
+
+    $Report = Get-Content -LiteralPath $ReportPath -Raw | ConvertFrom-Json
+    $ErrorDiagnostics = @($Report.diagnostics | Where-Object { $_.severity -eq "Error" })
+    if ($Report.hasErrors -or [int]$Report.errorCount -ne 0 -or $ErrorDiagnostics.Count -ne 0) {
+        throw "Generated C++ conversion report contains errors: '$ReportPath'."
+    }
+}
+
+function Assert-BackendManifest {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ManifestPath
+    )
+
+    $Manifest = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
+    if ($Manifest.backend -cne "helphysics" -or
+        [int]$Manifest.fixedStepHertz -ne 20 -or
+        [int]$Manifest.velocityIterations -ne 4 -or
+        [int]$Manifest.penetrationCorrectionPasses -ne 1) {
+        throw "Packaged runtime physics manifest does not describe HelPhysics 20/4/1: '$ManifestPath'."
+    }
+}
+
+function Assert-OneSceneBuildManifest {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ManifestPath
+    )
+
+    $Manifest = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
+    $Scenes = @($Manifest.Scenes)
+    if ($Manifest.StartupSceneId -cne $StackSceneId -or
+        $Scenes.Count -ne 1 -or
+        $Scenes[0].ItemId -cne $StackSceneId) {
+        throw "Windows build manifest does not contain exactly '$StackSceneId' as its only startup scene: '$ManifestPath'."
+    }
+}
+
+function Assert-GeneratedBackendSelection {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$GeneratedManifestHeaderPath
+    )
+
+    $HeaderSource = Get-Content -LiteralPath $GeneratedManifestHeaderPath -Raw
+    if ($HeaderSource.IndexOf("HELENGINE_RUNTIME_PHYSICS_BACKEND_HELPHYSICS", [System.StringComparison]::Ordinal) -lt 0 -or
+        $HeaderSource.IndexOf("HELENGINE_RUNTIME_PHYSICS_BACKEND_BEPU", [System.StringComparison]::Ordinal) -ge 0) {
+        throw "Generated native backend header is not exclusively HelPhysics: '$GeneratedManifestHeaderPath'."
+    }
+
+    $GeneratedCoreRootPath = Split-Path -Parent (Split-Path -Parent $GeneratedManifestHeaderPath)
+    $HelPhysicsRegistrationSourcePath = Join-Path $GeneratedCoreRootPath "HelPhysicsRuntimeComponentRegistration.cpp"
+    if (-not (Test-Path -LiteralPath $HelPhysicsRegistrationSourcePath -PathType Leaf)) {
+        throw "Generated HelPhysics registration source is missing from '$GeneratedCoreRootPath'."
+    }
+
+    $HelPhysicsRegistrationCall = "HelPhysicsRuntimeComponentRegistration::RegisterConfigured"
+    $WindowsHostSourcePath = Join-Path $WindowsWorktreeRootPath "src\platform\windows\win32\win32_application.cpp"
+    $WindowsHostSource = Get-Content -LiteralPath $WindowsHostSourcePath -Raw
+    if ($WindowsHostSource.IndexOf($HelPhysicsRegistrationCall, [System.StringComparison]::Ordinal) -lt 0) {
+        throw "Windows host does not contain the selected HelPhysics registration call."
+    }
+
+    $ForbiddenBepuRegistrationCall = "Physics3DRuntimeComponentRegistration::Register"
+    $GeneratedBepuEvidence = @(Get-ChildItem -LiteralPath $GeneratedCoreRootPath -Recurse -File -Include "*.cpp", "*.hpp" |
+        Select-String -SimpleMatch $ForbiddenBepuRegistrationCall)
+    if ($GeneratedBepuEvidence.Count -ne 0) {
+        throw "HelPhysics generated core contains BEPU registration evidence."
+    }
+}
+
+$MainRepositorySnapshots = @(
+    Get-MainRepositorySnapshot -RepositoryRootPath $DemoMainRootPath
+    Get-MainRepositorySnapshot -RepositoryRootPath $EngineMainRootPath
+    Get-MainRepositorySnapshot -RepositoryRootPath $WindowsMainRootPath
+    Get-MainRepositorySnapshot -RepositoryRootPath $CodegenMainRootPath
+)
+
+$OriginalSharedUserSettingsRoot = $env:HELENGINE_SHARED_USER_SETTINGS_ROOT
+try {
+    Assert-IsolatedWorktree -RepositoryRootPath $DemoWorktreeRootPath -BaselineCommit $DemoBaselineCommit
+    Assert-IsolatedWorktree -RepositoryRootPath $EngineWorktreeRootPath -BaselineCommit $EngineBaselineCommit
+    Assert-IsolatedWorktree -RepositoryRootPath $WindowsWorktreeRootPath -BaselineCommit $WindowsBaselineCommit
+    Assert-IsolatedWorktree -RepositoryRootPath $CodegenWorktreeRootPath -BaselineCommit $CodegenBaselineCommit
+
+    $ExpectedSceneBlob = Invoke-GitText -RepositoryRootPath $DemoWorktreeRootPath -Arguments @("rev-parse", ($DemoBaselineCommit + ":" + $StackSceneRelativePath))
+    $SourceScenePath = Join-Path $DemoWorktreeRootPath ($StackSceneRelativePath.Replace('/', '\'))
+    $CurrentSceneBlob = Invoke-GitText -RepositoryRootPath $DemoWorktreeRootPath -Arguments @("hash-object", "--", $SourceScenePath)
+    if ($CurrentSceneBlob -cne $ExpectedSceneBlob) {
+        throw "Authored stack scene differs from baseline '$DemoBaselineCommit'."
+    }
+
+    $BuildId = (Get-Date -Format "yyyyMMdd-HHmmssfff") + "-" + [Guid]::NewGuid().ToString("N").Substring(0, 8)
+    $BuildRootPath = Assert-SafeWorkspaceOwnedPath -TargetPath (Join-Path $VisibleBuildRootPath $BuildId) -WorkspaceOwnedRootPath $VisibleBuildRootPath
+    $WorkspaceRootPath = Assert-SafeWorkspaceOwnedPath -TargetPath (Join-Path $BuildRootPath "workspace") -WorkspaceOwnedRootPath $BuildRootPath
+    $OutputRootPath = Assert-SafeWorkspaceOwnedPath -TargetPath (Join-Path $BuildRootPath "output") -WorkspaceOwnedRootPath $BuildRootPath
+    $SharedUserSettingsRootPath = Assert-SafeWorkspaceOwnedPath -TargetPath (Join-Path $BuildRootPath "user-settings") -WorkspaceOwnedRootPath $BuildRootPath
+    $DescriptorGeneratedCoreRootPath = Assert-SafeWorkspaceOwnedPath -TargetPath (Join-Path $BuildRootPath "descriptor-generated-core") -WorkspaceOwnedRootPath $BuildRootPath
+    $null = New-Item -ItemType Directory -Path $WorkspaceRootPath, $OutputRootPath, $SharedUserSettingsRootPath, $DescriptorGeneratedCoreRootPath
+
+    $CodegenProjectPath = Join-Path $CodegenWorktreeRootPath "codegen\codegen.csproj"
+    Invoke-CheckedCommand -DisplayName "isolated codegen Release" -Command {
+        & dotnet build $CodegenProjectPath -c Release
+    }
+    $CodegenToolPath = Join-Path $CodegenWorktreeRootPath "codegen\bin\Release\net9.0\codegen.exe"
+    if (-not (Test-Path -LiteralPath $CodegenToolPath -PathType Leaf)) {
+        throw "Isolated release codegen executable was not produced at '$CodegenToolPath'."
+    }
+
+    $WindowsBuilderProjectPath = Join-Path $WindowsWorktreeRootPath "builder\helengine.windows.builder.csproj"
+    Invoke-CheckedCommand -DisplayName "isolated Windows builder Debug" -Command {
+        & dotnet build $WindowsBuilderProjectPath -c Debug --property:HelEngineRoot=$EngineWorktreeRootPath
+    }
+    $WindowsBuilderAssemblyPath = Join-Path $WindowsWorktreeRootPath "builder\bin\Debug\net9.0\helengine.windows.builder.dll"
+    if (-not (Test-Path -LiteralPath $WindowsBuilderAssemblyPath -PathType Leaf)) {
+        throw "Isolated Windows builder assembly was not produced at '$WindowsBuilderAssemblyPath'."
+    }
+
+    $ProjectDocument = Get-Content -LiteralPath (Join-Path $DemoWorktreeRootPath "project.heproj") -Raw | ConvertFrom-Json
+    $PlatformManifest = @{
+        platforms = @(
+            @{
+                engineVersion = $ProjectDocument.requiredEngineVersion
+                platformId = "windows"
+                displayName = "Windows DirectX HelPhysics Stack Proof"
+                builderAssemblyPath = $WindowsBuilderAssemblyPath
+                playerSourceRootPath = $WindowsWorktreeRootPath
+                generatedCoreCppRootPath = $DescriptorGeneratedCoreRootPath
+                codegenToolPath = $CodegenToolPath
+            }
+        )
+    }
+    $PlatformManifestPath = Join-Path $SharedUserSettingsRootPath "platforms.json"
+    $PlatformManifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $PlatformManifestPath -Encoding UTF8
+    $env:HELENGINE_SHARED_USER_SETTINGS_ROOT = $SharedUserSettingsRootPath
+
+    $EngineBuildScriptPath = Join-Path $EngineWorktreeRootPath "scripts\build-platform.ps1"
+    $EditorProjectPath = Join-Path $EngineWorktreeRootPath "helengine.ui\helengine.editor.app\helengine.editor.app.csproj"
+    $PowerShellExecutablePath = Join-Path $PSHOME "powershell.exe"
+    Invoke-CheckedCommand -DisplayName "guarded isolated Windows package" -Command {
+        & $PowerShellExecutablePath -NoProfile -ExecutionPolicy Bypass -File $EngineBuildScriptPath `
+            -Project (Join-Path $DemoWorktreeRootPath "project.heproj") `
+            -Platform windows `
+            -Configuration Release `
+            -BuildProfile release `
+            -Output $OutputRootPath `
+            -EditorProject $EditorProjectPath `
+            -WorkspaceRoot $WorkspaceRootPath
+    }
+
+    $ConversionReportPath = Get-OnlyFile -SearchRootPath $WorkspaceRootPath -FileName "cpp-conversion-report.json"
+    Assert-ConversionReport -ReportPath $ConversionReportPath
+    $BackendManifestPath = Join-Path $OutputRootPath "runtime\runtime-physics-backend.json"
+    Assert-BackendManifest -ManifestPath $BackendManifestPath
+    $WindowsBuildManifestPath = Get-OnlyFile -SearchRootPath $WorkspaceRootPath -FileName "windows-build-manifest.json"
+    Assert-OneSceneBuildManifest -ManifestPath $WindowsBuildManifestPath
+    $GeneratedBackendHeaderPath = Get-OnlyFile -SearchRootPath $WorkspaceRootPath -FileName "runtime_physics_backend_manifest.hpp"
+    Assert-GeneratedBackendSelection -GeneratedManifestHeaderPath $GeneratedBackendHeaderPath
+
+    $ExecutablePath = Join-Path $OutputRootPath "helengine_windows.exe"
+    if (-not (Test-Path -LiteralPath $ExecutablePath -PathType Leaf)) {
+        throw "Windows executable was not produced at '$ExecutablePath'."
+    }
+
+    $CurrentSceneBlobAfterBuild = Invoke-GitText -RepositoryRootPath $DemoWorktreeRootPath -Arguments @("hash-object", "--", $SourceScenePath)
+    if ($CurrentSceneBlobAfterBuild -cne $ExpectedSceneBlob) {
+        throw "Authored stack scene changed during the isolated build."
+    }
+
+    Write-Host "HelPhysics stack Windows build complete."
+    Write-Host "Executable: $ExecutablePath"
+    Write-Host "Backend manifest: $BackendManifestPath"
+    Write-Host "Build manifest: $WindowsBuildManifestPath"
+    Write-Host "Conversion report: $ConversionReportPath"
+} finally {
+    $env:HELENGINE_SHARED_USER_SETTINGS_ROOT = $OriginalSharedUserSettingsRoot
+    Assert-MainRepositorySnapshotsUnchanged -Snapshots $MainRepositorySnapshots
+}
