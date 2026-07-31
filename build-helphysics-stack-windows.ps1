@@ -18,6 +18,8 @@ $EngineBaselineCommit = "25374214867e8e5deeb3cd9e19893caeb2278b64"
 $WindowsBaselineCommit = "b9590af9bece2c824b3531bdc5cc237853879188"
 $CodegenBaselineCommit = "87958b3ac4f5b2e6221551874e8bf0a7a5620254"
 $VisibleBuildRootPath = "C:\dev\helworks\builds\helphysics-demodisc-stack-test"
+$FinalOutputParentRootPath = "C:\dev\helprojs\output"
+$FinalOutputRootPath = "C:\dev\helprojs\output\windows-helphysics-stack-test"
 $StackSceneRelativePath = "assets/scenes/physics/test_scene_dynamic_stack_boxes.helen"
 $StackSceneId = "test_scene_dynamic_stack_boxes"
 
@@ -149,6 +151,56 @@ function Get-OnlyFile {
     return $Matches[0].FullName
 }
 
+function Publish-VerifiedPackage {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$VerifiedOutputRootPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$DestinationRootPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$DestinationParentRootPath
+    )
+
+    $SafeDestinationRootPath = Assert-SafeWorkspaceOwnedPath -TargetPath $DestinationRootPath -WorkspaceOwnedRootPath $DestinationParentRootPath
+    $PublishId = [Guid]::NewGuid().ToString("N")
+    $StagingRootPath = Assert-SafeWorkspaceOwnedPath `
+        -TargetPath (Join-Path $DestinationParentRootPath ("windows-helphysics-stack-test.publish-" + $PublishId)) `
+        -WorkspaceOwnedRootPath $DestinationParentRootPath
+    $BackupRootPath = Assert-SafeWorkspaceOwnedPath `
+        -TargetPath (Join-Path $DestinationParentRootPath ("windows-helphysics-stack-test.backup-" + $PublishId)) `
+        -WorkspaceOwnedRootPath $DestinationParentRootPath
+    $MovedExistingPackage = $false
+    try {
+        Copy-Item -LiteralPath $VerifiedOutputRootPath -Destination $StagingRootPath -Recurse
+        if (Test-Path -LiteralPath $SafeDestinationRootPath) {
+            Move-Item -LiteralPath $SafeDestinationRootPath -Destination $BackupRootPath
+            $MovedExistingPackage = $true
+        }
+
+        try {
+            Move-Item -LiteralPath $StagingRootPath -Destination $SafeDestinationRootPath
+        } catch {
+            if ($MovedExistingPackage -and -not (Test-Path -LiteralPath $SafeDestinationRootPath)) {
+                Move-Item -LiteralPath $BackupRootPath -Destination $SafeDestinationRootPath
+                $MovedExistingPackage = $false
+            }
+
+            throw
+        }
+    } finally {
+        if (Test-Path -LiteralPath $StagingRootPath) {
+            Remove-Item -LiteralPath $StagingRootPath -Recurse -Force
+        }
+        if ($MovedExistingPackage -and (Test-Path -LiteralPath $BackupRootPath)) {
+            Remove-Item -LiteralPath $BackupRootPath -Recurse -Force
+        }
+    }
+
+    return $SafeDestinationRootPath
+}
+
 function Assert-ConversionReport {
     param(
         [Parameter(Mandatory = $true)]
@@ -233,6 +285,12 @@ $MainRepositorySnapshots = @(
 )
 
 $OriginalSharedUserSettingsRoot = $env:HELENGINE_SHARED_USER_SETTINGS_ROOT
+$BuildFailure = $null
+$AuditFailure = $null
+$ExecutablePath = $null
+$BackendManifestPath = $null
+$WindowsBuildManifestPath = $null
+$ConversionReportPath = $null
 try {
     Assert-IsolatedWorktree -RepositoryRootPath $DemoWorktreeRootPath -BaselineCommit $DemoBaselineCommit
     Assert-IsolatedWorktree -RepositoryRootPath $EngineWorktreeRootPath -BaselineCommit $EngineBaselineCommit
@@ -292,7 +350,7 @@ try {
 
     $EngineBuildScriptPath = Join-Path $EngineWorktreeRootPath "scripts\build-platform.ps1"
     $EditorProjectPath = Join-Path $EngineWorktreeRootPath "helengine.ui\helengine.editor.app\helengine.editor.app.csproj"
-    $PowerShellExecutablePath = Join-Path $PSHOME "powershell.exe"
+    $PowerShellExecutablePath = (Get-Command powershell.exe -CommandType Application -ErrorAction Stop).Path
     Invoke-CheckedCommand -DisplayName "guarded isolated Windows package" -Command {
         & $PowerShellExecutablePath -NoProfile -ExecutionPolicy Bypass -File $EngineBuildScriptPath `
             -Project (Join-Path $DemoWorktreeRootPath "project.heproj") `
@@ -313,9 +371,9 @@ try {
     $GeneratedBackendHeaderPath = Get-OnlyFile -SearchRootPath $WorkspaceRootPath -FileName "runtime_physics_backend_manifest.hpp"
     Assert-GeneratedBackendSelection -GeneratedManifestHeaderPath $GeneratedBackendHeaderPath
 
-    $ExecutablePath = Join-Path $OutputRootPath "helengine_windows.exe"
-    if (-not (Test-Path -LiteralPath $ExecutablePath -PathType Leaf)) {
-        throw "Windows executable was not produced at '$ExecutablePath'."
+    $VerificationExecutablePath = Join-Path $OutputRootPath "helengine_windows.exe"
+    if (-not (Test-Path -LiteralPath $VerificationExecutablePath -PathType Leaf)) {
+        throw "Windows executable was not produced at '$VerificationExecutablePath'."
     }
 
     $CurrentSceneBlobAfterBuild = Invoke-GitText -RepositoryRootPath $DemoWorktreeRootPath -Arguments @("hash-object", "--", $SourceScenePath)
@@ -323,12 +381,40 @@ try {
         throw "Authored stack scene changed during the isolated build."
     }
 
-    Write-Host "HelPhysics stack Windows build complete."
-    Write-Host "Executable: $ExecutablePath"
-    Write-Host "Backend manifest: $BackendManifestPath"
-    Write-Host "Build manifest: $WindowsBuildManifestPath"
-    Write-Host "Conversion report: $ConversionReportPath"
+    $PublishedOutputRootPath = Publish-VerifiedPackage `
+        -VerifiedOutputRootPath $OutputRootPath `
+        -DestinationRootPath $FinalOutputRootPath `
+        -DestinationParentRootPath $FinalOutputParentRootPath
+    $ExecutablePath = Join-Path $PublishedOutputRootPath "helengine_windows.exe"
+    $BackendManifestPath = Join-Path $PublishedOutputRootPath "runtime\runtime-physics-backend.json"
+    if (-not (Test-Path -LiteralPath $ExecutablePath -PathType Leaf)) {
+        throw "Published Windows executable is missing from '$PublishedOutputRootPath'."
+    }
+    Assert-BackendManifest -ManifestPath $BackendManifestPath
+} catch {
+    $BuildFailure = $_
 } finally {
     $env:HELENGINE_SHARED_USER_SETTINGS_ROOT = $OriginalSharedUserSettingsRoot
-    Assert-MainRepositorySnapshotsUnchanged -Snapshots $MainRepositorySnapshots
+    try {
+        Assert-MainRepositorySnapshotsUnchanged -Snapshots $MainRepositorySnapshots
+    } catch {
+        $AuditFailure = $_
+    }
 }
+
+if ($null -ne $BuildFailure) {
+    if ($null -ne $AuditFailure) {
+        throw "The isolated build failed: $($BuildFailure.Exception.Message) The final main-checkout audit also failed: $($AuditFailure.Exception.Message)"
+    }
+
+    throw $BuildFailure
+}
+if ($null -ne $AuditFailure) {
+    throw $AuditFailure
+}
+
+Write-Host "HelPhysics stack Windows build complete."
+Write-Host "Executable: $ExecutablePath"
+Write-Host "Backend manifest: $BackendManifestPath"
+Write-Host "Build manifest: $WindowsBuildManifestPath"
+Write-Host "Conversion report: $ConversionReportPath"
