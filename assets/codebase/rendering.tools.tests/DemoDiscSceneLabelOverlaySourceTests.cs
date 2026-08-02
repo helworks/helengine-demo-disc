@@ -31,6 +31,18 @@ namespace city.tests {
         }
 
         [Fact]
+        public void Shared_label_overlay_marks_text_component_absent_on_nintendo_handhelds() {
+            string sourcePath = Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "DemoDiscSceneLabelOverlayFactory.cs");
+            Assert.True(File.Exists(sourcePath), $"Expected '{sourcePath}' to exist.");
+            string source = File.ReadAllText(sourcePath);
+            Assert.Contains("const string NintendoDsPlatformId = \"ds\";", source, StringComparison.Ordinal);
+            Assert.Contains("const string Nintendo3DsPlatformId = \"3ds\";", source, StringComparison.Ordinal);
+            Assert.Contains("ComponentPlatformEditingService", source, StringComparison.Ordinal);
+            Assert.Contains("PlatformEditingService.RemoveComponent(labelComponent, saveComponent, NintendoDsPlatformId);", source, StringComparison.Ordinal);
+            Assert.Contains("PlatformEditingService.RemoveComponent(labelComponent, saveComponent, Nintendo3DsPlatformId);", source, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Curated_rendering_factories_contain_the_approved_labels() {
             (string FileName, string Label)[] expected = [
                 ("CubeTestSceneFactory.cs", "1. Cube Test"),

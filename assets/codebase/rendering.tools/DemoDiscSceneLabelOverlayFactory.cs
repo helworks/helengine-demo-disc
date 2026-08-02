@@ -5,6 +5,8 @@ namespace city.rendering.tools {
         const string LabelViewportEntityName = "DemoDiscSceneLabelViewport";
         const string LabelEntityName = "DemoDiscSceneLabelText";
         const string FontReferenceName = "Font";
+        const string NintendoDsPlatformId = "ds";
+        const string Nintendo3DsPlatformId = "3ds";
         const int ReferenceViewportWidth = 1280;
         const int ReferenceViewportHeight = 720;
         const float SceneLabelRight = 24f;
@@ -13,6 +15,7 @@ namespace city.rendering.tools {
         const int SceneLabelHeight = 32;
         const float SceneLabelFontScale = 1.5f;
         const int SceneLabelRenderOrder = 255;
+        readonly ComponentPlatformEditingService PlatformEditingService = new ComponentPlatformEditingService();
 
         public void AttachToSceneUi(Entity sceneUiEntity, FontAsset font, string labelText) {
             if (sceneUiEntity == null) {
@@ -52,6 +55,8 @@ namespace city.rendering.tools {
                 labelComponent,
                 FontReferenceName,
                 DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
+            PlatformEditingService.RemoveComponent(labelComponent, saveComponent, NintendoDsPlatformId);
+            PlatformEditingService.RemoveComponent(labelComponent, saveComponent, Nintendo3DsPlatformId);
         }
 
         EntitySaveComponent FindRequiredEntitySaveComponent(Entity entity) {
