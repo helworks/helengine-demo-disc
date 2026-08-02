@@ -1,6 +1,19 @@
 namespace city.tests {
     public sealed class DemoDiscSceneLabelOverlaySourceTests {
-        const string ProjectRootPath = @"C:\dev\helprojs\demodisc";
+        static readonly string ProjectRootPath = ResolveProjectRoot();
+
+        static string ResolveProjectRoot([System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "") {
+            DirectoryInfo currentDirectory = new DirectoryInfo(Path.GetDirectoryName(sourceFilePath));
+            while (currentDirectory != null) {
+                string assetsPath = Path.Combine(currentDirectory.FullName, "assets");
+                string projectFilePath = Path.Combine(currentDirectory.FullName, "project.heproj");
+                if (Directory.Exists(assetsPath) && File.Exists(projectFilePath)) {
+                    return currentDirectory.FullName;
+                }
+                currentDirectory = currentDirectory.Parent;
+            }
+            throw new InvalidOperationException("Unable to locate the demo-disc checkout root from the test working directory.");
+        }
 
         [Fact]
         public void Shared_label_overlay_uses_fixed_top_right_body_font_layout() {
@@ -57,6 +70,12 @@ namespace city.tests {
             foreach (string path in paths) {
                 Assert.DoesNotContain("DemoDiscSceneLabelOverlayFactory", File.ReadAllText(path), StringComparison.Ordinal);
             }
+
+            string physicsSource = File.ReadAllText(paths[2]);
+            Assert.Contains("static readonly string[] NintendoHandheldPlatformIds = [\"ds\", \"3ds\"];", physicsSource, StringComparison.Ordinal);
+            Assert.Contains("authoredSceneAsset.RootEntities = RemoveNintendoHandheldOnlyEntities(authoredSceneAsset.RootEntities, supportedPlatformIds);", physicsSource, StringComparison.Ordinal);
+            Assert.Contains("SceneEntityAsset[] RemoveNintendoHandheldOnlyEntities", physicsSource, StringComparison.Ordinal);
+            Assert.Contains("return existsOnNintendoHandheld && !existsOnNonHandheld;", physicsSource, StringComparison.Ordinal);
         }
 
         [Fact]
