@@ -154,6 +154,8 @@ namespace city.rendering.tools {
             entity.AddComponent(new DemoDiscLightToggleComponent());
             DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
             lightIndicatorOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont());
+            DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new DemoDiscSceneLabelOverlayFactory();
+            sceneLabelOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont(), "1. Cube Test");
             return entity;
         }
 
