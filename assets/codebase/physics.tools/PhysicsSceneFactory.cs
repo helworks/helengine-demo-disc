@@ -962,7 +962,7 @@ namespace city.physics.tools {
                 instructionOverlayRootEntity.Dispose();
             }
 
-            EditorEntity physicsShowcaseUiEntity = CreateLivePhysicsShowcaseUiEntity();
+            EditorEntity physicsShowcaseUiEntity = CreateLivePhysicsShowcaseUiEntity(ResolveDemoDiscSceneLabel(sceneId));
             try {
                 ReassignGeneratedEditorEntityIds(physicsShowcaseUiEntity);
                 rootEntities.Add(SerializeGeneratedEditorEntity(physicsShowcaseUiEntity, assetReferences, assetReferenceKeys));
@@ -1951,6 +1951,23 @@ namespace city.physics.tools {
                 || string.Equals(sceneId, PhysicsSceneCatalog.StaticMeshMinimalSceneId, StringComparison.Ordinal);
         }
 
+        static string ResolveDemoDiscSceneLabel(string sceneId) {
+            if (string.IsNullOrWhiteSpace(sceneId)) {
+                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.DynamicStackBoxesSceneId, StringComparison.Ordinal)) {
+                return "8. Stacked Boxes";
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.DynamicSphereStackSceneId, StringComparison.Ordinal)) {
+                return "9. Sphere Stack";
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.DynamicMixedStackSceneId, StringComparison.Ordinal)) {
+                return "10. Mixed Stack";
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.StaticMeshShowcaseSceneId, StringComparison.Ordinal)) {
+                return "11. Static Mesh";
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.StaticMeshMinimalSceneId, StringComparison.Ordinal)) {
+                return "12. Simple Mesh";
+            }
+            return string.Empty;
+        }
+
         /// <summary>
         /// Writes one playable physics showcase scene through the live authoring save pipeline so the desktop instruction overlay persists with the same metadata contract used by the rendering demo scenes.
         /// </summary>
@@ -2043,7 +2060,7 @@ namespace city.physics.tools {
 
             List<Entity> rootEntities = new List<Entity> {
                 cameraEntity,
-                CreateLivePhysicsShowcaseUiEntity()
+                CreateLivePhysicsShowcaseUiEntity(ResolveDemoDiscSceneLabel(normalizedSceneId))
             };
             if (includeDesktopInstructionOverlay) {
                 city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory();
@@ -2264,7 +2281,7 @@ namespace city.physics.tools {
         /// Creates one live authored UI root that shows FPS diagnostics and owns the playable showcase light-toggle updater.
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
-        EditorEntity CreateLivePhysicsShowcaseUiEntity() {
+        EditorEntity CreateLivePhysicsShowcaseUiEntity(string sceneLabel) {
             Entity entity = Core.Instance.EntityFactory.Create("ShowcaseUi");
             FPSComponent fpsComponent = new FPSComponent {
                 Font = ResolveRequiredEditorFont(),
@@ -2276,6 +2293,10 @@ namespace city.physics.tools {
             entity.AddComponent(new city.rendering.DemoDiscLightToggleComponent());
             DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
             lightIndicatorOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont());
+            if (!string.IsNullOrWhiteSpace(sceneLabel)) {
+                city.rendering.tools.DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new city.rendering.tools.DemoDiscSceneLabelOverlayFactory();
+                sceneLabelOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont(), sceneLabel);
+            }
             if (entity is EditorEntity editorEntity) {
                 return editorEntity;
             }
@@ -2311,6 +2332,8 @@ namespace city.physics.tools {
             phaseStatusEntity.AddComponent(phaseStatusTextComponent);
             ApplyEditorFontReference(phaseStatusEntity, phaseStatusTextComponent);
             phaseStatusEntity.AddComponent(new city.rendering.MatrixRenderPhaseStatusTextComponent());
+            city.rendering.tools.DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new city.rendering.tools.DemoDiscSceneLabelOverlayFactory();
+            sceneLabelOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont(), "6. Matrix Render");
             if (entity is EditorEntity editorEntity) {
                 return editorEntity;
             }
