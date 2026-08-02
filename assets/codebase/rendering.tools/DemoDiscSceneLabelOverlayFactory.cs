@@ -2,8 +2,8 @@ using helengine.editor;
 
 namespace city.rendering.tools {
     public sealed class DemoDiscSceneLabelOverlayFactory {
-        public const string LabelViewportEntityName = "DemoDiscSceneLabelViewport";
-        public const string LabelEntityName = "DemoDiscSceneLabelText";
+        const string LabelViewportEntityName = "DemoDiscSceneLabelViewport";
+        const string LabelEntityName = "DemoDiscSceneLabelText";
         const string FontReferenceName = "Font";
         const int ReferenceViewportWidth = 1280;
         const int ReferenceViewportHeight = 720;
