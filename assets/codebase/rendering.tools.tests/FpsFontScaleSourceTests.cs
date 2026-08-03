@@ -32,6 +32,21 @@ namespace city.tests {
             }
         }
 
+        [Fact]
+        public void Psp_fps_override_persists_the_font_reference_before_serializing_the_override() {
+            string sourcePath = Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "PspFpsComponentOverrideService.cs");
+            string source = File.ReadAllText(sourcePath);
+
+            int fontReferenceIndex = source.IndexOf("saveComponent.SetAssetReference(", StringComparison.Ordinal);
+            int overrideSerializationIndex = source.IndexOf(
+                "FPSComponent overrideComponent = (FPSComponent)PlatformEditingService.EnsurePlatformOverrideComponent",
+                StringComparison.Ordinal);
+
+            Assert.True(fontReferenceIndex >= 0);
+            Assert.True(overrideSerializationIndex >= 0);
+            Assert.True(fontReferenceIndex < overrideSerializationIndex);
+        }
+
         /// <summary>
         /// Ensures the shared handheld scaffold keeps DS button labels at the common scale while authoring a centered half-scale 3DS override.
         /// </summary>

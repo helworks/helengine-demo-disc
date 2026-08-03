@@ -46,6 +46,10 @@ namespace city.rendering.tools {
                 throw new InvalidOperationException("Generated FPS entities must contain an editor save component.");
             }
 
+            saveComponent.SetAssetReference(
+                fpsComponent,
+                "Font",
+                DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
             FPSComponent overrideComponent = (FPSComponent)PlatformEditingService.EnsurePlatformOverrideComponent(
                 fpsComponent,
                 saveComponent,
