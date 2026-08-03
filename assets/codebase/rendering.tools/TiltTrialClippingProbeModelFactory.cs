@@ -3,7 +3,7 @@ using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
-    /// Creates the canonical six-colored-face cube model used to isolate PlayStation 2 clipping behavior from shared scene geometry.
+    /// Creates the positive-Y-only model used to isolate the implicated PlayStation 2 textured fast-path face from shared scene geometry.
     /// </summary>
     public sealed class TiltTrialClippingProbeModelFactory {
         /// <summary>
@@ -27,46 +27,6 @@ namespace city.rendering.tools {
         const int TextureHeight = 64;
 
         /// <summary>
-        /// Atlas coordinates for the negative-Z back face's padded red cell.
-        /// </summary>
-        static readonly float2[] BackFaceUv = [
-            new float2(9f / TextureWidth, 5f / TextureHeight),
-            new float2(38f / TextureWidth, 5f / TextureHeight),
-            new float2(38f / TextureWidth, 26f / TextureHeight),
-            new float2(9f / TextureWidth, 26f / TextureHeight)
-        ];
-
-        /// <summary>
-        /// Atlas coordinates for the positive-Z front face's padded green cell.
-        /// </summary>
-        static readonly float2[] FrontFaceUv = [
-            new float2(49f / TextureWidth, 5f / TextureHeight),
-            new float2(78f / TextureWidth, 5f / TextureHeight),
-            new float2(78f / TextureWidth, 26f / TextureHeight),
-            new float2(49f / TextureWidth, 26f / TextureHeight)
-        ];
-
-        /// <summary>
-        /// Atlas coordinates for the positive-X right face's padded blue cell.
-        /// </summary>
-        static readonly float2[] RightFaceUv = [
-            new float2(89f / TextureWidth, 5f / TextureHeight),
-            new float2(118f / TextureWidth, 5f / TextureHeight),
-            new float2(118f / TextureWidth, 26f / TextureHeight),
-            new float2(89f / TextureWidth, 26f / TextureHeight)
-        ];
-
-        /// <summary>
-        /// Atlas coordinates for the negative-X left face's padded yellow cell.
-        /// </summary>
-        static readonly float2[] LeftFaceUv = [
-            new float2(9f / TextureWidth, 37f / TextureHeight),
-            new float2(38f / TextureWidth, 37f / TextureHeight),
-            new float2(38f / TextureWidth, 58f / TextureHeight),
-            new float2(9f / TextureWidth, 58f / TextureHeight)
-        ];
-
-        /// <summary>
         /// Atlas coordinates for the positive-Y top face's padded magenta cell.
         /// </summary>
         static readonly float2[] TopFaceUv = [
@@ -77,46 +37,21 @@ namespace city.rendering.tools {
         ];
 
         /// <summary>
-        /// Atlas coordinates for the negative-Y bottom face's padded cyan cell.
-        /// </summary>
-        static readonly float2[] BottomFaceUv = [
-            new float2(89f / TextureWidth, 37f / TextureHeight),
-            new float2(118f / TextureWidth, 37f / TextureHeight),
-            new float2(118f / TextureWidth, 58f / TextureHeight),
-            new float2(89f / TextureWidth, 58f / TextureHeight)
-        ];
-
-        /// <summary>
-        /// Creates the fixed 12-triangle cube mesh with one normal and atlas region per canonical face.
+        /// Creates the fixed two-triangle positive-Y mesh while retaining full-cube bounds for unchanged frustum behavior.
         /// </summary>
         /// <returns>Serializable model asset for the colored-face clipping probe.</returns>
         public ModelAsset CreateModelAsset() {
             return new ModelAsset {
                 Id = ModelAssetId,
                 Positions = [
-                    new float3(-0.5f, -0.5f, -0.5f), new float3(-0.5f, 0.5f, -0.5f), new float3(0.5f, 0.5f, -0.5f), new float3(0.5f, -0.5f, -0.5f),
-                    new float3(-0.5f, -0.5f, 0.5f), new float3(0.5f, -0.5f, 0.5f), new float3(0.5f, 0.5f, 0.5f), new float3(-0.5f, 0.5f, 0.5f),
-                    new float3(0.5f, -0.5f, -0.5f), new float3(0.5f, 0.5f, -0.5f), new float3(0.5f, 0.5f, 0.5f), new float3(0.5f, -0.5f, 0.5f),
-                    new float3(-0.5f, -0.5f, -0.5f), new float3(-0.5f, -0.5f, 0.5f), new float3(-0.5f, 0.5f, 0.5f), new float3(-0.5f, 0.5f, -0.5f),
-                    new float3(-0.5f, 0.5f, -0.5f), new float3(-0.5f, 0.5f, 0.5f), new float3(0.5f, 0.5f, 0.5f), new float3(0.5f, 0.5f, -0.5f),
-                    new float3(-0.5f, -0.5f, -0.5f), new float3(0.5f, -0.5f, -0.5f), new float3(0.5f, -0.5f, 0.5f), new float3(-0.5f, -0.5f, 0.5f)
+                    new float3(-0.5f, 0.5f, -0.5f), new float3(-0.5f, 0.5f, 0.5f), new float3(0.5f, 0.5f, 0.5f), new float3(0.5f, 0.5f, -0.5f)
                 ],
                 Normals = [
-                    new float3(0f, 0f, -1f), new float3(0f, 0f, -1f), new float3(0f, 0f, -1f), new float3(0f, 0f, -1f),
-                    new float3(0f, 0f, 1f), new float3(0f, 0f, 1f), new float3(0f, 0f, 1f), new float3(0f, 0f, 1f),
-                    new float3(1f, 0f, 0f), new float3(1f, 0f, 0f), new float3(1f, 0f, 0f), new float3(1f, 0f, 0f),
-                    new float3(-1f, 0f, 0f), new float3(-1f, 0f, 0f), new float3(-1f, 0f, 0f), new float3(-1f, 0f, 0f),
-                    new float3(0f, 1f, 0f), new float3(0f, 1f, 0f), new float3(0f, 1f, 0f), new float3(0f, 1f, 0f),
-                    new float3(0f, -1f, 0f), new float3(0f, -1f, 0f), new float3(0f, -1f, 0f), new float3(0f, -1f, 0f)
+                    new float3(0f, 1f, 0f), new float3(0f, 1f, 0f), new float3(0f, 1f, 0f), new float3(0f, 1f, 0f)
                 ],
-                TexCoords = [.. BackFaceUv, .. FrontFaceUv, .. RightFaceUv, .. LeftFaceUv, .. TopFaceUv, .. BottomFaceUv],
+                TexCoords = [.. TopFaceUv],
                 Indices16 = [
-                    0, 1, 2, 0, 2, 3,
-                    4, 5, 6, 4, 6, 7,
-                    8, 9, 10, 8, 10, 11,
-                    12, 13, 14, 12, 14, 15,
-                    16, 17, 18, 16, 18, 19,
-                    20, 21, 22, 20, 22, 23
+                    0, 1, 2, 0, 2, 3
                 ],
                 BoundsMin = new float3(-0.5f, -0.5f, -0.5f),
                 BoundsMax = new float3(0.5f, 0.5f, 0.5f),
@@ -124,14 +59,14 @@ namespace city.rendering.tools {
                     new ModelSubmeshAsset {
                         MaterialSlotName = "DefaultMaterial",
                         IndexStart = 0,
-                        IndexCount = 36
+                        IndexCount = 6
                     }
                 ]
             };
         }
 
         /// <summary>
-        /// Serializes the colored-face probe model into its deterministic project asset location.
+        /// Serializes the top-face-only probe model into its deterministic project asset location.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative DemoDisc project root path.</param>
         public void WriteModelAsset(string projectRootPath) {

@@ -5,23 +5,42 @@ namespace city.tests {
     public sealed class TiltTrialClippingProbeAssetSourceTests {
         [Fact]
         /// <summary>
-        /// Validates the probe model source preserves the named asset identity, hand-authored cube geometry, and six face-specific UV arrays required for deterministic clipping analysis.
+        /// Validates the probe model source isolates the positive-Y face while preserving the fixed asset identity and full-cube bounds used by the clipping experiment.
         /// </summary>
-        public void Clipping_probe_model_source_defines_canonical_cube_and_face_uv_contract() {
+        public void Clipping_probe_model_source_defines_top_face_only_contract() {
             string modelSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialClippingProbeModelFactory.cs";
             string modelSource = File.ReadAllText(modelSourcePath);
 
             Assert.Contains("public const string ModelAssetId = \"Models.rendering.tilt_trial.ClippingProbeFaceColors\";", modelSource, StringComparison.Ordinal);
             Assert.Contains("public ModelAsset CreateModelAsset()", modelSource, StringComparison.Ordinal);
             Assert.Contains("new float3(-0.5f, -0.5f, -0.5f)", modelSource, StringComparison.Ordinal);
-            Assert.Contains("Indices16 =", modelSource, StringComparison.Ordinal);
             Assert.Contains("global::helengine.editor.AssetSerializer.Serialize", modelSource, StringComparison.Ordinal);
-            Assert.Contains("BackFaceUv", modelSource, StringComparison.Ordinal);
-            Assert.Contains("FrontFaceUv", modelSource, StringComparison.Ordinal);
-            Assert.Contains("RightFaceUv", modelSource, StringComparison.Ordinal);
-            Assert.Contains("LeftFaceUv", modelSource, StringComparison.Ordinal);
             Assert.Contains("TopFaceUv", modelSource, StringComparison.Ordinal);
-            Assert.Contains("BottomFaceUv", modelSource, StringComparison.Ordinal);
+            Assert.Contains("TexCoords = [.. TopFaceUv]", modelSource, StringComparison.Ordinal);
+            Assert.Contains("BoundsMin = new float3(-0.5f, -0.5f, -0.5f)", modelSource, StringComparison.Ordinal);
+            Assert.Contains("BoundsMax = new float3(0.5f, 0.5f, 0.5f)", modelSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("BackFaceUv", modelSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("FrontFaceUv", modelSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("RightFaceUv", modelSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("LeftFaceUv", modelSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("BottomFaceUv", modelSource, StringComparison.Ordinal);
+
+            global::System.Text.RegularExpressions.Match positionsMatch = global::System.Text.RegularExpressions.Regex.Match(
+                modelSource,
+                @"Positions\s*=\s*\[(?<positions>[^\]]+)\]",
+                global::System.Text.RegularExpressions.RegexOptions.Singleline);
+            Assert.True(positionsMatch.Success, "The probe model must assign its positions from one array literal.");
+            string positions = positionsMatch.Groups["positions"].Value;
+            Assert.Equal(4, global::System.Text.RegularExpressions.Regex.Matches(positions, @"new float3\([^\)]*0\.5f[^\)]*\)").Count);
+            Assert.Equal(4, global::System.Text.RegularExpressions.Regex.Matches(positions, @"new float3\([^,]+, 0\.5f, [^\)]+\)").Count);
+
+            global::System.Text.RegularExpressions.Match normalsMatch = global::System.Text.RegularExpressions.Regex.Match(
+                modelSource,
+                @"Normals\s*=\s*\[(?<normals>[^\]]+)\]",
+                global::System.Text.RegularExpressions.RegexOptions.Singleline);
+            Assert.True(normalsMatch.Success, "The probe model must assign its normals from one array literal.");
+            string normals = normalsMatch.Groups["normals"].Value;
+            Assert.Equal(4, global::System.Text.RegularExpressions.Regex.Matches(normals, @"new float3\(0f, 1f, 0f\)").Count);
 
             global::System.Text.RegularExpressions.Match indicesMatch = global::System.Text.RegularExpressions.Regex.Match(
                 modelSource,
@@ -29,23 +48,8 @@ namespace city.tests {
                 global::System.Text.RegularExpressions.RegexOptions.Singleline);
             Assert.True(indicesMatch.Success, "The probe model must assign its 16-bit triangle indices from one array literal.");
             string[] indices = indicesMatch.Groups["indices"].Value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            Assert.Equal(36, indices.Length);
-        }
-
-        [Fact]
-        /// <summary>
-        /// Validates that every canonical cube face targets its own one-texel-inset atlas cell, preventing texture-border sampling from obscuring clipping results.
-        /// </summary>
-        public void Clipping_probe_model_source_maps_each_face_to_one_non_overlapping_padded_atlas_region() {
-            string modelSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialClippingProbeModelFactory.cs";
-            string modelSource = File.ReadAllText(modelSourcePath);
-
-            AssertFaceUvRegion(modelSource, "BackFaceUv", 9, 38, 5, 26);
-            AssertFaceUvRegion(modelSource, "FrontFaceUv", 49, 78, 5, 26);
-            AssertFaceUvRegion(modelSource, "RightFaceUv", 89, 118, 5, 26);
-            AssertFaceUvRegion(modelSource, "LeftFaceUv", 9, 38, 37, 58);
-            AssertFaceUvRegion(modelSource, "TopFaceUv", 49, 78, 37, 58);
-            AssertFaceUvRegion(modelSource, "BottomFaceUv", 89, 118, 37, 58);
+            Assert.Equal(new[] { "0", "1", "2", "0", "2", "3" }, indices);
+            Assert.Contains("IndexCount = 6", modelSource, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -72,27 +76,6 @@ namespace city.tests {
             Assert.Contains("ps2-simple-lit-textured", materialSource, StringComparison.Ordinal);
             Assert.Contains("texture-relative-path", materialSource, StringComparison.Ordinal);
             Assert.Contains("double-sided", materialSource, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Verifies one named UV array contains exactly the four inset corners of its assigned atlas cell.
-        /// </summary>
-        /// <param name="modelSource">Complete model factory source text to inspect.</param>
-        /// <param name="faceUvName">Named UV array assigned to one canonical cube face.</param>
-        /// <param name="minimumU">Inclusive atlas-space minimum horizontal texel coordinate.</param>
-        /// <param name="maximumU">Inclusive atlas-space maximum horizontal texel coordinate.</param>
-        /// <param name="minimumV">Inclusive atlas-space minimum vertical texel coordinate.</param>
-        /// <param name="maximumV">Inclusive atlas-space maximum vertical texel coordinate.</param>
-        static void AssertFaceUvRegion(string modelSource, string faceUvName, int minimumU, int maximumU, int minimumV, int maximumV) {
-            string faceUvPattern = $@"{faceUvName}\s*=\s*\[(?<coordinates>[\s\S]*?)\];";
-            global::System.Text.RegularExpressions.Match faceUvMatch = global::System.Text.RegularExpressions.Regex.Match(modelSource, faceUvPattern);
-            Assert.True(faceUvMatch.Success, $"The probe model must define the {faceUvName} atlas UV array.");
-            string coordinates = faceUvMatch.Groups["coordinates"].Value;
-
-            Assert.Contains($"new float2({minimumU}f / TextureWidth, {minimumV}f / TextureHeight)", coordinates, StringComparison.Ordinal);
-            Assert.Contains($"new float2({maximumU}f / TextureWidth, {minimumV}f / TextureHeight)", coordinates, StringComparison.Ordinal);
-            Assert.Contains($"new float2({maximumU}f / TextureWidth, {maximumV}f / TextureHeight)", coordinates, StringComparison.Ordinal);
-            Assert.Contains($"new float2({minimumU}f / TextureWidth, {maximumV}f / TextureHeight)", coordinates, StringComparison.Ordinal);
         }
     }
 }
