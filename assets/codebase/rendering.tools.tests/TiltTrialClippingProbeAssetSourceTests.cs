@@ -3,10 +3,10 @@ namespace city.tests {
     /// Verifies the colored-face clipping probe factories keep their deterministic model, atlas, and textured material source contracts.
     /// </summary>
     public sealed class TiltTrialClippingProbeAssetSourceTests {
-        /// <summary>
-        /// Ensures the probe model factory declares the canonical asset identity, cube geometry, and six independently addressable face UV arrays.
-        /// </summary>
         [Fact]
+        /// <summary>
+        /// Validates the probe model source preserves the named asset identity, hand-authored cube geometry, and six face-specific UV arrays required for deterministic clipping analysis.
+        /// </summary>
         public void Clipping_probe_model_source_defines_canonical_cube_and_face_uv_contract() {
             string modelSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialClippingProbeModelFactory.cs";
             string modelSource = File.ReadAllText(modelSourcePath);
@@ -15,6 +15,7 @@ namespace city.tests {
             Assert.Contains("public ModelAsset CreateModelAsset()", modelSource, StringComparison.Ordinal);
             Assert.Contains("new float3(-0.5f, -0.5f, -0.5f)", modelSource, StringComparison.Ordinal);
             Assert.Contains("Indices16 =", modelSource, StringComparison.Ordinal);
+            Assert.Contains("global::helengine.editor.AssetSerializer.Serialize", modelSource, StringComparison.Ordinal);
             Assert.Contains("BackFaceUv", modelSource, StringComparison.Ordinal);
             Assert.Contains("FrontFaceUv", modelSource, StringComparison.Ordinal);
             Assert.Contains("RightFaceUv", modelSource, StringComparison.Ordinal);
@@ -31,10 +32,10 @@ namespace city.tests {
             Assert.Equal(36, indices.Length);
         }
 
-        /// <summary>
-        /// Ensures the six face UV arrays use one-texel-inset regions that occupy distinct cells in the 128-by-64 atlas.
-        /// </summary>
         [Fact]
+        /// <summary>
+        /// Validates that every canonical cube face targets its own one-texel-inset atlas cell, preventing texture-border sampling from obscuring clipping results.
+        /// </summary>
         public void Clipping_probe_model_source_maps_each_face_to_one_non_overlapping_padded_atlas_region() {
             string modelSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialClippingProbeModelFactory.cs";
             string modelSource = File.ReadAllText(modelSourcePath);
@@ -47,10 +48,10 @@ namespace city.tests {
             AssertFaceUvRegion(modelSource, "BottomFaceUv", 89, 118, 37, 58);
         }
 
-        /// <summary>
-        /// Ensures the probe texture factory preserves the deterministic atlas size and per-cell color resolver.
-        /// </summary>
         [Fact]
+        /// <summary>
+        /// Validates the texture source retains the fixed atlas dimensions and cell-color resolver that make individual face colors reproducible across probe runs.
+        /// </summary>
         public void Clipping_probe_texture_source_defines_deterministic_face_color_atlas() {
             string textureSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialClippingProbeTextureFactory.cs";
             string textureSource = File.ReadAllText(textureSourcePath);
@@ -60,10 +61,10 @@ namespace city.tests {
             Assert.Contains("ResolveCellColor", textureSource, StringComparison.Ordinal);
         }
 
-        /// <summary>
-        /// Ensures the probe material keeps PS2 on the lit textured shader path with explicit imported texture and culling settings.
-        /// </summary>
         [Fact]
+        /// <summary>
+        /// Validates the material source keeps PlayStation 2 on the lit textured path with the imported atlas and explicit culling fields needed by the clipping probe.
+        /// </summary>
         public void Clipping_probe_material_source_defines_lit_ps2_textured_contract() {
             string materialSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialClippingProbeMaterialFactory.cs";
             string materialSource = File.ReadAllText(materialSourcePath);

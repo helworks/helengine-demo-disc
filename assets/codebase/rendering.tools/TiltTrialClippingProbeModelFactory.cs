@@ -147,7 +147,7 @@ namespace city.rendering.tools {
 
             Directory.CreateDirectory(modelDirectoryPath);
             using FileStream stream = File.Create(fullModelPath);
-            AssetSerializer.Serialize(stream, CreateModelAsset());
+            global::helengine.editor.AssetSerializer.Serialize(stream, CreateModelAsset());
         }
     }
 }
