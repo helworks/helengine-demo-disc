@@ -434,6 +434,8 @@ namespace city.rendering.tools {
             });
             PspFpsComponentOverrideService.Apply(entity);
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
+            DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new DemoDiscSceneLabelOverlayFactory();
+            sceneLabelOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont(), "3. Textured Cubes");
             return entity;
         }
 
