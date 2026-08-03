@@ -5,51 +5,36 @@ namespace city.tests {
     public sealed class TiltTrialClippingProbeAssetSourceTests {
         [Fact]
         /// <summary>
-        /// Validates the probe model source isolates the positive-Y face while preserving the fixed asset identity and full-cube bounds used by the clipping experiment.
+        /// Validates the probe model source contains only the exact positive-Y submission required by the isolated fast-path hypothesis test.
         /// </summary>
         public void Clipping_probe_model_source_defines_top_face_only_contract() {
             string modelSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialClippingProbeModelFactory.cs";
             string modelSource = File.ReadAllText(modelSourcePath);
 
-            Assert.Contains("public const string ModelAssetId = \"Models.rendering.tilt_trial.ClippingProbeFaceColors\";", modelSource, StringComparison.Ordinal);
+            Assert.Equal("models/rendering/tilt_trial/clipping_probe_face_colors.hasset", GetSingleStringConstantValue(modelSource, "ModelRelativePath"));
+            Assert.Equal("Models.rendering.tilt_trial.ClippingProbeFaceColors", GetSingleStringConstantValue(modelSource, "ModelAssetId"));
+            Assert.Equal("128", GetSingleIntegerConstantValue(modelSource, "TextureWidth"));
+            Assert.Equal("64", GetSingleIntegerConstantValue(modelSource, "TextureHeight"));
             Assert.Contains("public ModelAsset CreateModelAsset()", modelSource, StringComparison.Ordinal);
-            Assert.Contains("new float3(-0.5f, -0.5f, -0.5f)", modelSource, StringComparison.Ordinal);
-            Assert.Contains("global::helengine.editor.AssetSerializer.Serialize", modelSource, StringComparison.Ordinal);
-            Assert.Contains("TopFaceUv", modelSource, StringComparison.Ordinal);
-            Assert.Contains("TexCoords = [.. TopFaceUv]", modelSource, StringComparison.Ordinal);
-            Assert.Contains("BoundsMin = new float3(-0.5f, -0.5f, -0.5f)", modelSource, StringComparison.Ordinal);
-            Assert.Contains("BoundsMax = new float3(0.5f, 0.5f, 0.5f)", modelSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("BackFaceUv", modelSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("FrontFaceUv", modelSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("RightFaceUv", modelSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("LeftFaceUv", modelSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("BottomFaceUv", modelSource, StringComparison.Ordinal);
-
-            global::System.Text.RegularExpressions.Match positionsMatch = global::System.Text.RegularExpressions.Regex.Match(
-                modelSource,
-                @"Positions\s*=\s*\[(?<positions>[^\]]+)\]",
-                global::System.Text.RegularExpressions.RegexOptions.Singleline);
-            Assert.True(positionsMatch.Success, "The probe model must assign its positions from one array literal.");
-            string positions = positionsMatch.Groups["positions"].Value;
-            Assert.Equal(4, global::System.Text.RegularExpressions.Regex.Matches(positions, @"new float3\([^\)]*0\.5f[^\)]*\)").Count);
-            Assert.Equal(4, global::System.Text.RegularExpressions.Regex.Matches(positions, @"new float3\([^,]+, 0\.5f, [^\)]+\)").Count);
-
-            global::System.Text.RegularExpressions.Match normalsMatch = global::System.Text.RegularExpressions.Regex.Match(
-                modelSource,
-                @"Normals\s*=\s*\[(?<normals>[^\]]+)\]",
-                global::System.Text.RegularExpressions.RegexOptions.Singleline);
-            Assert.True(normalsMatch.Success, "The probe model must assign its normals from one array literal.");
-            string normals = normalsMatch.Groups["normals"].Value;
-            Assert.Equal(4, global::System.Text.RegularExpressions.Regex.Matches(normals, @"new float3\(0f, 1f, 0f\)").Count);
-
-            global::System.Text.RegularExpressions.Match indicesMatch = global::System.Text.RegularExpressions.Regex.Match(
-                modelSource,
-                @"Indices16\s*=\s*\[(?<indices>[^\]]+)\]",
-                global::System.Text.RegularExpressions.RegexOptions.Singleline);
-            Assert.True(indicesMatch.Success, "The probe model must assign its 16-bit triangle indices from one array literal.");
-            string[] indices = indicesMatch.Groups["indices"].Value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            Assert.Contains("Id = ModelAssetId,", modelSource, StringComparison.Ordinal);
+            Assert.Contains("Path.Combine(Path.GetFullPath(projectRootPath), \"assets\", ModelRelativePath.Replace('/', Path.DirectorySeparatorChar))", modelSource, StringComparison.Ordinal);
+            Assert.Contains("global::helengine.editor.AssetSerializer.Serialize(stream, CreateModelAsset())", modelSource, StringComparison.Ordinal);
+            Assert.Equal("newfloat3(-0.5f,0.5f,-0.5f),newfloat3(-0.5f,0.5f,0.5f),newfloat3(0.5f,0.5f,0.5f),newfloat3(0.5f,0.5f,-0.5f)", NormalizeSourceFragment(GetSingleArrayContents(modelSource, "Positions")));
+            Assert.Equal(4, global::System.Text.RegularExpressions.Regex.Matches(GetSingleArrayContents(modelSource, "Positions"), @"new\s+float3\(").Count);
+            Assert.Equal("newfloat3(0f,1f,0f),newfloat3(0f,1f,0f),newfloat3(0f,1f,0f),newfloat3(0f,1f,0f)", NormalizeSourceFragment(GetSingleArrayContents(modelSource, "Normals")));
+            Assert.Equal(4, global::System.Text.RegularExpressions.Regex.Matches(GetSingleArrayContents(modelSource, "Normals"), @"new\s+float3\(").Count);
+            Assert.Equal("newfloat2(49f/TextureWidth,37f/TextureHeight),newfloat2(78f/TextureWidth,37f/TextureHeight),newfloat2(78f/TextureWidth,58f/TextureHeight),newfloat2(49f/TextureWidth,58f/TextureHeight)", NormalizeSourceFragment(GetSingleArrayContents(modelSource, "TopFaceUv")));
+            Assert.Equal(4, global::System.Text.RegularExpressions.Regex.Matches(GetSingleArrayContents(modelSource, "TopFaceUv"), @"new\s+float2\(").Count);
+            Assert.Equal("..TopFaceUv", NormalizeSourceFragment(GetSingleArrayContents(modelSource, "TexCoords")));
+            Assert.Equal("0,1,2,0,2,3", NormalizeSourceFragment(GetSingleArrayContents(modelSource, "Indices16")));
+            string[] indices = GetSingleArrayContents(modelSource, "Indices16").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             Assert.Equal(new[] { "0", "1", "2", "0", "2", "3" }, indices);
-            Assert.Contains("IndexCount = 6", modelSource, StringComparison.Ordinal);
+            string submeshes = GetSingleArrayContents(modelSource, "Submeshes");
+            Assert.Single(global::System.Text.RegularExpressions.Regex.Matches(submeshes, @"new\s+ModelSubmeshAsset\s*\{").Cast<global::System.Text.RegularExpressions.Match>());
+            Assert.Equal("newModelSubmeshAsset{MaterialSlotName=\"DefaultMaterial\",IndexStart=0,IndexCount=6}", NormalizeSourceFragment(submeshes));
+            Assert.Equal("newfloat3(-0.5f,-0.5f,-0.5f)", NormalizeSourceFragment(GetSingleFloat3AssignmentValue(modelSource, "BoundsMin")));
+            Assert.Equal("newfloat3(0.5f,0.5f,0.5f)", NormalizeSourceFragment(GetSingleFloat3AssignmentValue(modelSource, "BoundsMax")));
+            Assert.DoesNotMatch(@"\b(BackFaceUv|FrontFaceUv|RightFaceUv|LeftFaceUv|BottomFaceUv)\b", modelSource);
         }
 
         [Fact]
@@ -76,6 +61,75 @@ namespace city.tests {
             Assert.Contains("ps2-simple-lit-textured", materialSource, StringComparison.Ordinal);
             Assert.Contains("texture-relative-path", materialSource, StringComparison.Ordinal);
             Assert.Contains("double-sided", materialSource, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Extracts the contents of one uniquely named C# collection-expression assignment from a model factory source file.
+        /// </summary>
+        /// <param name="source">Complete model factory source text.</param>
+        /// <param name="memberName">Name of the assigned model member or static field.</param>
+        /// <returns>Text between the collection-expression brackets.</returns>
+        static string GetSingleArrayContents(string source, string memberName) {
+            global::System.Text.RegularExpressions.MatchCollection matches = global::System.Text.RegularExpressions.Regex.Matches(
+                source,
+                $@"\b{memberName}\s*=\s*\[(?<contents>[^\]]*)\]\s*(?:,|;|(?=\}}))",
+                global::System.Text.RegularExpressions.RegexOptions.Singleline);
+            Assert.Single(matches.Cast<global::System.Text.RegularExpressions.Match>());
+            return matches[0].Groups["contents"].Value;
+        }
+
+        /// <summary>
+        /// Extracts one exact public string constant value from the model factory source.
+        /// </summary>
+        /// <param name="source">Complete model factory source text.</param>
+        /// <param name="constantName">Name of the required public string constant.</param>
+        /// <returns>Unquoted constant value.</returns>
+        static string GetSingleStringConstantValue(string source, string constantName) {
+            global::System.Text.RegularExpressions.MatchCollection matches = global::System.Text.RegularExpressions.Regex.Matches(
+                source,
+                $@"public\s+const\s+string\s+{constantName}\s*=\s*""(?<value>[^""]*)""\s*;",
+                global::System.Text.RegularExpressions.RegexOptions.Singleline);
+            Assert.Single(matches.Cast<global::System.Text.RegularExpressions.Match>());
+            return matches[0].Groups["value"].Value;
+        }
+
+        /// <summary>
+        /// Extracts one exact integer constant value from the model factory source.
+        /// </summary>
+        /// <param name="source">Complete model factory source text.</param>
+        /// <param name="constantName">Name of the required integer constant.</param>
+        /// <returns>Integer literal without its declaration syntax.</returns>
+        static string GetSingleIntegerConstantValue(string source, string constantName) {
+            global::System.Text.RegularExpressions.MatchCollection matches = global::System.Text.RegularExpressions.Regex.Matches(
+                source,
+                $@"const\s+int\s+{constantName}\s*=\s*(?<value>\d+)\s*;",
+                global::System.Text.RegularExpressions.RegexOptions.Singleline);
+            Assert.Single(matches.Cast<global::System.Text.RegularExpressions.Match>());
+            return matches[0].Groups["value"].Value;
+        }
+
+        /// <summary>
+        /// Extracts one float3 assignment used for the model bounds from the model factory source.
+        /// </summary>
+        /// <param name="source">Complete model factory source text.</param>
+        /// <param name="memberName">Name of the bounds member assignment.</param>
+        /// <returns>Assigned float3 construction expression.</returns>
+        static string GetSingleFloat3AssignmentValue(string source, string memberName) {
+            global::System.Text.RegularExpressions.MatchCollection matches = global::System.Text.RegularExpressions.Regex.Matches(
+                source,
+                $@"\b{memberName}\s*=\s*(?<value>new\s+float3\([^\)]*\))\s*,",
+                global::System.Text.RegularExpressions.RegexOptions.Singleline);
+            Assert.Single(matches.Cast<global::System.Text.RegularExpressions.Match>());
+            return matches[0].Groups["value"].Value;
+        }
+
+        /// <summary>
+        /// Removes layout whitespace so source contract assertions compare semantic collection contents rather than formatting.
+        /// </summary>
+        /// <param name="sourceFragment">Source fragment whose layout whitespace is insignificant.</param>
+        /// <returns>Source fragment with all whitespace removed.</returns>
+        static string NormalizeSourceFragment(string sourceFragment) {
+            return global::System.Text.RegularExpressions.Regex.Replace(sourceFragment, @"\s+", string.Empty);
         }
     }
 }
