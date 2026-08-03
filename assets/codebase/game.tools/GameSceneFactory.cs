@@ -113,6 +113,16 @@ namespace city.game.tools {
         readonly RuntimeMaterial TiltTrialCourseMaterial;
 
         /// <summary>
+        /// Authored six-colored-face model used exclusively by the render-only Tilt Trial clipping probe.
+        /// </summary>
+        readonly RuntimeModel TiltTrialClippingProbeModel;
+
+        /// <summary>
+        /// Authored textured material used exclusively by the render-only Tilt Trial clipping probe.
+        /// </summary>
+        readonly RuntimeMaterial TiltTrialClippingProbeMaterial;
+
+        /// <summary>
         /// Authored golden-coin model used by the standalone render-test scene.
         /// </summary>
         readonly RuntimeModel GoldenCoinModel;
@@ -214,6 +224,8 @@ namespace city.game.tools {
                 throw new ArgumentException($"Game scene generation requires authored runtime material '{TiltTrialPlayerSphereMarbleMaterialAssetId}'.", nameof(assets));
             } else if (assets.TiltTrialCourseMaterial == null) {
                 throw new ArgumentException($"Game scene generation requires authored runtime material '{TiltTrialCourseMaterialAssetId}'.", nameof(assets));
+            } else if (assets.TiltTrialClippingProbeModel == null || assets.TiltTrialClippingProbeMaterial == null) {
+                throw new ArgumentException("Game scene generation requires the authored Tilt Trial clipping probe model and material.", nameof(assets));
             } else if (assets.GoldenCoinModel == null || assets.GoldenCoinMaterial == null) {
                 throw new ArgumentException("Game scene generation requires the authored golden-coin model and material.", nameof(assets));
             } else if (assets.GoalFlagModel == null || assets.GoalFlagPoleMaterial == null || assets.GoalFlagBannerMaterial == null) {
@@ -224,6 +236,8 @@ namespace city.game.tools {
             GeneratedSphereModel = assets.GeneratedSphereModel;
             TiltTrialPlayerSphereMarbleMaterial = assets.TiltTrialPlayerSphereMarbleMaterial;
             TiltTrialCourseMaterial = assets.TiltTrialCourseMaterial;
+            TiltTrialClippingProbeModel = assets.TiltTrialClippingProbeModel;
+            TiltTrialClippingProbeMaterial = assets.TiltTrialClippingProbeMaterial;
             GoldenCoinModel = assets.GoldenCoinModel;
             GoldenCoinMaterial = assets.GoldenCoinMaterial;
             GoalFlagModel = assets.GoalFlagModel;
@@ -1516,7 +1530,7 @@ namespace city.game.tools {
         }
 
         /// <summary>
-        /// Creates the clipping probe root with exactly one constrained-platform tessellated 5-by-1-by-5 cube.
+        /// Creates the clipping probe root with exactly one authored six-colored-face 5-by-1-by-5 cube.
         /// </summary>
         /// <returns>Generated render-only stage root.</returns>
         EditorEntity CreateLevel01RenderOnlyStageRootEntity() {
@@ -1525,7 +1539,7 @@ namespace city.game.tools {
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("ClipProbeCube", float3.Zero, new float3(5f, 1f, 5f), float4.Identity, true));
+            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("ClipProbeCube", float3.Zero, new float3(5f, 1f, 5f), float4.Identity));
             return RequireEditorEntity(entity, "single-cube clipping probe");
         }
 
@@ -1550,15 +1564,14 @@ namespace city.game.tools {
         }
 
         /// <summary>
-        /// Creates one material-backed course box for the render-only Level 1 scene.
+        /// Creates one authored colored-face clipping probe cube for the render-only Level 1 scene.
         /// </summary>
         /// <param name="name">Authored entity name.</param>
         /// <param name="position">Local position.</param>
         /// <param name="scale">Full box dimensions.</param>
         /// <param name="orientation">Local orientation.</param>
-        /// <param name="enableConstrainedPlatformTessellation">Whether PS2 and PSP should generate a component-specific tessellated model variant.</param>
-        /// <returns>Generated visual-only course box.</returns>
-        Entity CreateLevel01RenderOnlyCourseBoxEntity(string name, float3 position, float3 scale, float4 orientation, bool enableConstrainedPlatformTessellation = false) {
+        /// <returns>Generated visual-only colored-face clipping probe cube.</returns>
+        Entity CreateLevel01RenderOnlyCourseBoxEntity(string name, float3 position, float3 scale, float4 orientation) {
             if (string.IsNullOrWhiteSpace(name)) {
                 throw new ArgumentException("Render-only course box names must be provided.", nameof(name));
             }
@@ -1569,16 +1582,30 @@ namespace city.game.tools {
             entity.LocalScale = scale;
             entity.LocalOrientation = orientation;
             MeshComponent meshComponent = new MeshComponent {
-                Model = GeneratedCubeModel,
-                Materials = new[] { TiltTrialCourseMaterial },
+                Model = TiltTrialClippingProbeModel,
+                Materials = new[] { TiltTrialClippingProbeMaterial },
                 RenderOrder3D = 0
             };
             entity.AddComponent(meshComponent);
-            ApplyTiltTrialCourseMaterialReference(entity, meshComponent);
-            if (enableConstrainedPlatformTessellation) {
-                ApplyConstrainedPlatformTessellation(entity, meshComponent);
-            }
+            ApplyTiltTrialClippingProbeReferences(entity, meshComponent);
             return entity;
+        }
+
+        /// <summary>
+        /// Stores the authored model and material references required to serialize the isolated colored-face clipping probe mesh.
+        /// </summary>
+        /// <param name="entity">Generated probe entity that owns the mesh component.</param>
+        /// <param name="meshComponent">Probe mesh component assigned to the generated entity.</param>
+        void ApplyTiltTrialClippingProbeReferences(Entity entity, MeshComponent meshComponent) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (meshComponent == null) {
+                throw new ArgumentNullException(nameof(meshComponent));
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(meshComponent, "Model", global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(TiltTrialClippingProbeModelFactory.ModelRelativePath));
+            saveComponent.SetAssetReference(meshComponent, "Materials[0]", global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(TiltTrialClippingProbeMaterialFactory.MaterialRelativePath));
         }
 
         /// <summary>

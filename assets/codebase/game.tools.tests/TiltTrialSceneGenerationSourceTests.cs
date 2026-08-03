@@ -154,6 +154,7 @@ namespace city.tests {
         public void Level_01_render_test_scene_uses_one_cube_light_camera_and_fps_only() {
             string catalogSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneCatalog.cs");
             string generatorSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
+            string preparationSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingSceneAssetPreparationService.cs");
             string factorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
 
             Assert.Contains("TiltTrialLevel01RenderTestSceneId", catalogSource, StringComparison.Ordinal);
@@ -162,7 +163,13 @@ namespace city.tests {
             Assert.Contains("new FPSComponent", factorySource, StringComparison.Ordinal);
             Assert.Contains("test_scene_tilt_trial_level_01_render.helen", factorySource, StringComparison.Ordinal);
             Assert.Contains("CreateLevel01RenderOnlyStageRootEntity", factorySource, StringComparison.Ordinal);
-            Assert.Contains("CreateLevel01RenderOnlyCourseBoxEntity(\"ClipProbeCube\", float3.Zero, new float3(5f, 1f, 5f), float4.Identity, true)", factorySource, StringComparison.Ordinal);
+            Assert.Contains("TiltTrialClippingProbeModel = tiltTrialClippingProbeModel", preparationSource, StringComparison.Ordinal);
+            Assert.Contains("TiltTrialClippingProbeMaterial = tiltTrialClippingProbeMaterial", preparationSource, StringComparison.Ordinal);
+            Assert.Contains("Model = TiltTrialClippingProbeModel", factorySource, StringComparison.Ordinal);
+            Assert.Contains("Materials = new[] { TiltTrialClippingProbeMaterial }", factorySource, StringComparison.Ordinal);
+            Assert.Contains("CreateFileSystemModel(TiltTrialClippingProbeModelFactory.ModelRelativePath)", factorySource, StringComparison.Ordinal);
+            Assert.Contains("CreateFileSystemMaterial(TiltTrialClippingProbeMaterialFactory.MaterialRelativePath)", factorySource, StringComparison.Ordinal);
+            Assert.DoesNotContain("CreateLevel01RenderOnlyCourseBoxEntity(\"ClipProbeCube\", float3.Zero, new float3(5f, 1f, 5f), float4.Identity, true)", factorySource, StringComparison.Ordinal);
             Assert.Contains("entity.LocalPosition = new float3(6f, 4f, 8f)", factorySource, StringComparison.Ordinal);
             Assert.Contains("float4.CreateFromYawPitchRoll(0.6435011f, -0.3805064f, 0f, out orientation)", factorySource, StringComparison.Ordinal);
             Assert.Contains("ManualYawSpeedRadians = 0f", factorySource, StringComparison.Ordinal);

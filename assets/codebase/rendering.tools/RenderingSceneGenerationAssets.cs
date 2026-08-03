@@ -34,6 +34,16 @@ namespace city.rendering.tools {
         public RuntimeMaterial TiltTrialCourseMaterial { get; set; }
 
         /// <summary>
+        /// Gets or sets the authored six-colored-face runtime model used only by the Tilt Trial clipping probe render scene.
+        /// </summary>
+        public RuntimeModel TiltTrialClippingProbeModel { get; set; }
+
+        /// <summary>
+        /// Gets or sets the authored textured runtime material used only by the Tilt Trial clipping probe render scene.
+        /// </summary>
+        public RuntimeMaterial TiltTrialClippingProbeMaterial { get; set; }
+
+        /// <summary>
         /// Gets or sets the authored golden-coin runtime model used by render-only Tilt Trial probes.
         /// </summary>
         public RuntimeModel GoldenCoinModel { get; set; }

@@ -56,8 +56,12 @@ namespace city.rendering.tools {
             EditorProjectBootstrapContext bootstrap = EditorProjectBootstrapper.Create(fullProjectRootPath);
             ForwardSolidColorMaterialFactory forwardSolidColorMaterialFactory = new ForwardSolidColorMaterialFactory();
             TiltTrialCourseMaterialFactory tiltTrialCourseMaterialFactory = new TiltTrialCourseMaterialFactory();
+            TiltTrialClippingProbeModelFactory tiltTrialClippingProbeModelFactory = new TiltTrialClippingProbeModelFactory();
+            TiltTrialClippingProbeMaterialFactory tiltTrialClippingProbeMaterialFactory = new TiltTrialClippingProbeMaterialFactory();
             forwardSolidColorMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             tiltTrialCourseMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
+            tiltTrialClippingProbeModelFactory.WriteModelAsset(fullProjectRootPath);
+            tiltTrialClippingProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             RuntimeModel generatedCubeModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.CubeAssetId);
             RuntimeModel generatedPlaneModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.PlaneAssetId);
             RuntimeModel generatedSphereModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.SphereAssetId);
@@ -65,6 +69,8 @@ namespace city.rendering.tools {
             RuntimeMaterial generatedStandardMaterial = EngineGeneratedMaterialCache.GetRuntimeMaterial(EngineGeneratedMaterialCache.StandardAssetId);
             RuntimeMaterial tiltTrialPlayerSphereMarbleMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/tilt_trial/PlayerSphereMarble.hasset");
             RuntimeMaterial tiltTrialCourseMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, TiltTrialCourseMaterialFactory.MaterialRelativePath);
+            RuntimeModel tiltTrialClippingProbeModel = LoadImportedModelRuntime(projectRootPath, TiltTrialClippingProbeModelFactory.ModelRelativePath);
+            RuntimeMaterial tiltTrialClippingProbeMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, TiltTrialClippingProbeMaterialFactory.MaterialRelativePath);
             RuntimeModel goldenCoinModel = LoadImportedModelRuntime(projectRootPath, "models/games/split_play/golden_coin.hasset");
             RuntimeMaterial goldenCoinMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/games/split_play/GoldenCoin.hasset");
             RuntimeModel goalFlagModel = LoadImportedModelRuntime(projectRootPath, "models/games/split_play/goal_flag.hasset");
@@ -94,6 +100,8 @@ namespace city.rendering.tools {
                 GeneratedStandardMaterial = generatedStandardMaterial,
                 TiltTrialPlayerSphereMarbleMaterial = tiltTrialPlayerSphereMarbleMaterial,
                 TiltTrialCourseMaterial = tiltTrialCourseMaterial,
+                TiltTrialClippingProbeModel = tiltTrialClippingProbeModel,
+                TiltTrialClippingProbeMaterial = tiltTrialClippingProbeMaterial,
                 GoldenCoinModel = goldenCoinModel,
                 GoldenCoinMaterial = goldenCoinMaterial,
                 GoalFlagModel = goalFlagModel,
