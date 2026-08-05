@@ -60,12 +60,14 @@ namespace city.rendering.tools {
             TiltTrialClippingProbeMaterialFactory tiltTrialClippingProbeMaterialFactory = new TiltTrialClippingProbeMaterialFactory();
             DepthClipProbeMaterialFactory depthClipProbeMaterialFactory = new DepthClipProbeMaterialFactory();
             DepthClipProbeCenterMaterialFactory depthClipProbeCenterMaterialFactory = new DepthClipProbeCenterMaterialFactory();
+            PbrTexturedShowcaseMaterialFactory pbrTexturedShowcaseMaterialFactory = new PbrTexturedShowcaseMaterialFactory();
             forwardSolidColorMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             tiltTrialCourseMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             tiltTrialClippingProbeModelFactory.WriteModelAsset(fullProjectRootPath);
             tiltTrialClippingProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             depthClipProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             depthClipProbeCenterMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
+            pbrTexturedShowcaseMaterialFactory.WriteMaterialAssets(fullProjectRootPath);
             RuntimeModel generatedCubeModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.CubeAssetId);
             RuntimeModel generatedPlaneModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.PlaneAssetId);
             RuntimeModel generatedSphereModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.SphereAssetId);
@@ -98,6 +100,8 @@ namespace city.rendering.tools {
             };
             RuntimeModel lamppostModel = LoadImportedModelRuntime(projectRootPath, "models/riemers/lamppost.x");
             RuntimeModel racerModel = LoadImportedModelRuntime(projectRootPath, "models/riemers/racer.x");
+            RuntimeMaterial pbrTexturedShowcaseMetalMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, PbrTexturedShowcaseMaterialFactory.MetalMaterialRelativePath);
+            RuntimeMaterial pbrTexturedShowcaseWoodMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, PbrTexturedShowcaseMaterialFactory.WoodMaterialRelativePath);
 
             return new RenderingSceneGenerationAssets {
                 GeneratedCubeModel = generatedCubeModel,
@@ -120,7 +124,9 @@ namespace city.rendering.tools {
                 AxisMaterials = axisMaterials,
                 RacerMaterials = racerMaterials,
                 LamppostModel = lamppostModel,
-                RacerModel = racerModel
+                RacerModel = racerModel,
+                PbrTexturedShowcaseMetalMaterial = pbrTexturedShowcaseMetalMaterial,
+                PbrTexturedShowcaseWoodMaterial = pbrTexturedShowcaseWoodMaterial
             };
         }
 

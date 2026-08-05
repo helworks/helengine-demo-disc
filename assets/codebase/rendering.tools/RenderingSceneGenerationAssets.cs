@@ -107,5 +107,15 @@ namespace city.rendering.tools {
         /// Gets or sets the runtime racer model used by the spotlight street-slice scene.
         /// </summary>
         public RuntimeModel RacerModel { get; set; }
+
+        /// <summary>
+        /// Gets or sets the authored scuffed-metal runtime material used by the PBR textured showcase scene.
+        /// </summary>
+        public RuntimeMaterial PbrTexturedShowcaseMetalMaterial { get; set; }
+
+        /// <summary>
+        /// Gets or sets the authored wood-plank runtime material used by the PBR textured showcase scene.
+        /// </summary>
+        public RuntimeMaterial PbrTexturedShowcaseWoodMaterial { get; set; }
     }
 }
