@@ -49,9 +49,9 @@ namespace city.rendering.tools {
                     CreateDirectionalLightEntity(),
                     CreateSpotLightEntity(),
                     CreatePedestalEntity(cubeModel, pedestalMaterial),
-                    CreateClusterSphereEntity("PbrShadowTheaterSphereLowRoughMetal", new float3(-1.3f, 2.1f, 0f), sphereModel, lowRoughnessMetal),
-                    CreateClusterSphereEntity("PbrShadowTheaterSphereHighRoughMetal", new float3(1.3f, 2.1f, 0f), sphereModel, highRoughnessMetal),
-                    CreateClusterSphereEntity("PbrShadowTheaterSphereDielectric", new float3(0f, 2.1f, 1.6f), sphereModel, lowRoughnessDielectric)
+                    CreateClusterSphereEntity("PbrShadowTheaterSphereLowRoughMetal", new float3(-1.3f, 1.8f, 0f), sphereModel, lowRoughnessMetal),
+                    CreateClusterSphereEntity("PbrShadowTheaterSphereHighRoughMetal", new float3(1.3f, 1.8f, 0f), sphereModel, highRoughnessMetal),
+                    CreateClusterSphereEntity("PbrShadowTheaterSphereDielectric", new float3(0f, 1.8f, 1.6f), sphereModel, lowRoughnessDielectric)
                 }
             };
         }

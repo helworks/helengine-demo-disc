@@ -19,7 +19,7 @@ namespace city.tests {
             int theaterWriteIndex = source.IndexOf("AuthoringSceneWriteService.WriteScene(projectRootPath, pbrShadowTheaterSceneDefinition);", StringComparison.Ordinal);
             Assert.True(spotlightWriteIndex >= 0 && galleryWriteIndex > spotlightWriteIndex && texturedWriteIndex > galleryWriteIndex && theaterWriteIndex > texturedWriteIndex,
                 "Expected the three new PBR scenes to be written, in order, after the existing spotlight street-slice scene.");
-            Assert.Contains("PbrMaterialGalleryMaterialFactory.WriteMaterialAssets(projectRootPath);", source, StringComparison.Ordinal);
+            Assert.Contains("PbrMaterialGalleryMaterials.WriteMaterialAssets(projectRootPath);", source, StringComparison.Ordinal);
         }
     }
 }

@@ -26,14 +26,14 @@ namespace city.rendering.tools {
         const string Ps2MaterialSchemaId = "ps2-simple-lit-textured";
 
         /// <summary>
-        /// Stable GameCube textured material schema identifier.
+        /// Stable GameCube untextured material schema identifier.
         /// </summary>
-        const string GameCubeMaterialSchemaId = "gamecube-standard-textured";
+        const string GameCubeMaterialSchemaId = "gamecube-standard";
 
         /// <summary>
-        /// Stable Nintendo DS textured material schema identifier.
+        /// Stable Nintendo DS untextured material schema identifier.
         /// </summary>
-        const string DsMaterialSchemaId = "ds-standard-textured";
+        const string DsMaterialSchemaId = "ds-standard-lit";
 
         /// <summary>
         /// Stable built-in forward shader asset id used by the editor preview material path.
