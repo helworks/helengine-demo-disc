@@ -111,6 +111,21 @@ namespace city.rendering.tools {
         public const string SceneMemoryProbeNintendoDsSceneId = "scenes/rendering/ds/scene_memory_probe_ds.helen";
 
         /// <summary>
+        /// Stable scene id used by the PBR material gallery showcase.
+        /// </summary>
+        public const string PbrMaterialGallerySceneId = "scenes/rendering/pbr_material_gallery.helen";
+
+        /// <summary>
+        /// Stable scene id used by the PBR textured showcase.
+        /// </summary>
+        public const string PbrTexturedShowcaseSceneId = "scenes/rendering/pbr_textured_showcase.helen";
+
+        /// <summary>
+        /// Stable scene id used by the PBR shadow theater showcase.
+        /// </summary>
+        public const string PbrShadowTheaterSceneId = "scenes/rendering/pbr_shadow_theater.helen";
+
+        /// <summary>
         /// Writer used to persist generated live-authored scenes through the editor save pipeline.
         /// </summary>
         readonly GeneratedAuthoringSceneWriteService AuthoringSceneWriteService;
@@ -171,6 +186,31 @@ namespace city.rendering.tools {
         readonly SceneMemoryProbeSceneFactory SceneMemoryProbeFactory;
 
         /// <summary>
+        /// Factory used to author the PBR material gallery materials.
+        /// </summary>
+        readonly PbrMaterialGalleryMaterialFactory PbrMaterialGalleryMaterialFactory;
+
+        /// <summary>
+        /// Factory used to author the PBR material gallery scene.
+        /// </summary>
+        readonly PbrMaterialGallerySceneFactory PbrMaterialGallerySceneFactory;
+
+        /// <summary>
+        /// Factory used to author the PBR textured showcase materials.
+        /// </summary>
+        readonly PbrTexturedShowcaseMaterialFactory PbrTexturedShowcaseMaterialFactory;
+
+        /// <summary>
+        /// Factory used to author the PBR textured showcase scene.
+        /// </summary>
+        readonly PbrTexturedShowcaseSceneFactory PbrTexturedShowcaseSceneFactory;
+
+        /// <summary>
+        /// Factory used to author the PBR shadow theater scene.
+        /// </summary>
+        readonly PbrShadowTheaterSceneFactory PbrShadowTheaterSceneFactory;
+
+        /// <summary>
         /// Initializes one city rendering scene generator.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
@@ -187,6 +227,11 @@ namespace city.rendering.tools {
             AxisTestFactory = new AxisTestSceneFactory();
             AxisTest2Factory = new AxisTest2SceneFactory();
             SceneMemoryProbeFactory = new SceneMemoryProbeSceneFactory();
+            PbrMaterialGalleryMaterialFactory = new PbrMaterialGalleryMaterialFactory();
+            PbrMaterialGallerySceneFactory = new PbrMaterialGallerySceneFactory();
+            PbrTexturedShowcaseMaterialFactory = new PbrTexturedShowcaseMaterialFactory();
+            PbrTexturedShowcaseSceneFactory = new PbrTexturedShowcaseSceneFactory();
+            PbrShadowTheaterSceneFactory = new PbrShadowTheaterSceneFactory();
         }
 
         /// <summary>
@@ -250,6 +295,11 @@ namespace city.rendering.tools {
             GeneratedAuthoringSceneDefinition sceneMemoryProbeSceneDefinition = SceneMemoryProbeFactory.CreateSceneDefinition();
             GeneratedAuthoringSceneDefinition directionalShadowPlazaSceneDefinition = DirectionalShadowPlazaFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition spotlightStreetSliceSceneDefinition = SpotlightStreetSliceFactory.CreateSceneDefinition(assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial, assets.LamppostModel, assets.RacerModel, assets.RacerMaterials);
+            PbrMaterialGalleryMaterialFactory.WriteMaterialAssets(projectRootPath);
+            RuntimeMaterial[] pbrGalleryMaterials = PbrMaterialGalleryMaterialFactory.CreateRuntimeMaterials();
+            GeneratedAuthoringSceneDefinition pbrMaterialGallerySceneDefinition = PbrMaterialGallerySceneFactory.CreateSceneDefinition(assets.GeneratedPlaneModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial, pbrGalleryMaterials);
+            GeneratedAuthoringSceneDefinition pbrTexturedShowcaseSceneDefinition = PbrTexturedShowcaseSceneFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedPlaneModel, assets.GeneratedStandardMaterial, assets.PbrTexturedShowcaseMetalMaterial, assets.PbrTexturedShowcaseWoodMaterial);
+            GeneratedAuthoringSceneDefinition pbrShadowTheaterSceneDefinition = PbrShadowTheaterSceneFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial, pbrGalleryMaterials);
             ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
             TexturedCubeGridFactory.WriteAssets(projectRootPath);
             coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
@@ -265,6 +315,9 @@ namespace city.rendering.tools {
             AuthoringSceneWriteService.WriteScene(projectRootPath, sceneMemoryProbeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, directionalShadowPlazaSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, spotlightStreetSliceSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, pbrMaterialGallerySceneDefinition);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, pbrTexturedShowcaseSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, pbrShadowTheaterSceneDefinition);
         }
 
         /// <summary>

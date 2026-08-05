@@ -50,7 +50,10 @@ namespace city.tests {
                 ("TexturedCubeGridSceneFactory.cs", "3. Textured Cubes"),
                 ("AxisTestSceneFactory.cs", "4. Axis 1"),
                 ("AxisTest2SceneFactory.cs", "5. Axis 2"),
-                ("DirectionalShadowPlazaSceneFactory.cs", "7. Shadow Plaza")
+                ("DirectionalShadowPlazaSceneFactory.cs", "7. Shadow Plaza"),
+                ("PbrMaterialGallerySceneFactory.cs", "13. PBR Gallery"),
+                ("PbrTexturedShowcaseSceneFactory.cs", "14. PBR Textures"),
+                ("PbrShadowTheaterSceneFactory.cs", "15. PBR Shadow Theater")
             ];
             foreach ((string fileName, string label) in expected) {
                 string source = File.ReadAllText(Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", fileName));
