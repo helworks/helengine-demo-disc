@@ -3,6 +3,7 @@ cache/
 output/
 user_settings/
 .worktrees/
+.superpowers/
 
 # Generated/cooked artifacts
 assets/.generated-build/
