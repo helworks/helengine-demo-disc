@@ -23,7 +23,10 @@
                                                    "tilt_trial_level_02",
                                                    "tilt_trial_level_03",
                                                    "tilt_trial_level_04",
-                                                   "tilt_trial_level_05"
+                                                   "tilt_trial_level_05",
+                                                   "pbr_material_gallery",
+                                                   "pbr_textured_showcase",
+                                                   "pbr_shadow_theater"
                                                ],
                           "sceneOrders":  [
                                               {
@@ -109,7 +112,19 @@
                                               {
                                                   "sceneId":  "tilt_trial_level_05",
                                                   "orderNumber":  19
-                                                   }
+                                                   },
+                                              {
+                                                  "sceneId":  "pbr_material_gallery",
+                                                  "orderNumber":  20
+                                              },
+                                              {
+                                                  "sceneId":  "pbr_textured_showcase",
+                                                  "orderNumber":  21
+                                              },
+                                              {
+                                                  "sceneId":  "pbr_shadow_theater",
+                                                  "orderNumber":  22
+                                              }
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\windows",
                           "debugBuild":  false,
