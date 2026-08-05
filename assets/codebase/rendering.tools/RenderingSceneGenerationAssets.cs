@@ -74,6 +74,16 @@ namespace city.rendering.tools {
         public RuntimeMaterial GeneratedCubeTestSolidMaterial { get; set; }
 
         /// <summary>
+        /// Gets or sets the generated shared blue solid-color runtime material used by the depth-clip-probe scene.
+        /// </summary>
+        public RuntimeMaterial DepthClipProbeMaterial { get; set; }
+
+        /// <summary>
+        /// Gets or sets the generated shared green solid-color runtime material used by the depth-clip-probe scene's center box.
+        /// </summary>
+        public RuntimeMaterial DepthClipProbeCenterMaterial { get; set; }
+
+        /// <summary>
         /// Gets or sets the generated directional-light arrow runtime model used by the axis showcase scenes.
         /// </summary>
         public RuntimeModel GeneratedArrowModel { get; set; }

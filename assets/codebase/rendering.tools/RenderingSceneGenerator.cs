@@ -96,6 +96,11 @@ namespace city.rendering.tools {
         public const string AxisTest2NintendoDsSceneId = "scenes/rendering/ds/axis_test2_ds.helen";
 
         /// <summary>
+        /// Stable scene id used by the two-cube depth-ordering and near-plane-clipping probe showcase.
+        /// </summary>
+        public const string DepthClipProbeSceneId = "scenes/rendering/depth_clip_probe.helen";
+
+        /// <summary>
         /// Stable scene id used by the persistent scene-memory probe showcase.
         /// </summary>
         public const string SceneMemoryProbeSceneId = "scenes/rendering/scene_memory_probe.helen";
@@ -136,6 +141,11 @@ namespace city.rendering.tools {
         readonly ScaledCubeSceneFactory ScaledCubeFactory;
 
         /// <summary>
+        /// Factory used to author the depth-clip-probe scene.
+        /// </summary>
+        readonly DepthClipProbeSceneFactory DepthClipProbeFactory;
+
+        /// <summary>
         /// Factory used to author the colored cube-grid scene and its material assets.
         /// </summary>
         readonly ColoredCubeGridSceneFactory ColoredCubeGridFactory;
@@ -171,6 +181,7 @@ namespace city.rendering.tools {
             CubeTestFactory = new CubeTestSceneFactory();
             GroundCubeProbeFactory = new GroundCubeProbeSceneFactory();
             ScaledCubeFactory = new ScaledCubeSceneFactory();
+            DepthClipProbeFactory = new DepthClipProbeSceneFactory();
             ColoredCubeGridFactory = new ColoredCubeGridSceneFactory();
             TexturedCubeGridFactory = new TexturedCubeGridSceneFactory();
             AxisTestFactory = new AxisTestSceneFactory();
@@ -197,6 +208,10 @@ namespace city.rendering.tools {
             } else if (assets.GeneratedStandardMaterial == null) {
                 throw new ArgumentNullException(nameof(assets));
             } else if (assets.GeneratedCubeTestSolidMaterial == null) {
+                throw new ArgumentNullException(nameof(assets));
+            } else if (assets.DepthClipProbeMaterial == null) {
+                throw new ArgumentNullException(nameof(assets));
+            } else if (assets.DepthClipProbeCenterMaterial == null) {
                 throw new ArgumentNullException(nameof(assets));
             } else if (assets.GeneratedArrowModel == null) {
                 throw new ArgumentNullException(nameof(assets));
@@ -227,6 +242,7 @@ namespace city.rendering.tools {
             GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedCubeTestSolidMaterial);
             GeneratedAuthoringSceneDefinition groundCubeProbeSceneDefinition = GroundCubeProbeFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition scaledCubeSceneDefinition = ScaledCubeFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
+            GeneratedAuthoringSceneDefinition depthClipProbeSceneDefinition = DepthClipProbeFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.DepthClipProbeMaterial, assets.DepthClipProbeCenterMaterial);
             GeneratedAuthoringSceneDefinition coloredCubeGridSceneDefinition;
             GeneratedAuthoringSceneDefinition texturedCubeGridSceneDefinition;
             GeneratedAuthoringSceneDefinition axisTestSceneDefinition = AxisTestFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
@@ -241,6 +257,7 @@ namespace city.rendering.tools {
             AuthoringSceneWriteService.WriteScene(projectRootPath, cubeTestSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, groundCubeProbeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, scaledCubeSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, depthClipProbeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, coloredCubeGridSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, texturedCubeGridSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, axisTestSceneDefinition);

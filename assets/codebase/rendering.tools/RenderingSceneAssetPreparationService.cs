@@ -58,10 +58,14 @@ namespace city.rendering.tools {
             TiltTrialCourseMaterialFactory tiltTrialCourseMaterialFactory = new TiltTrialCourseMaterialFactory();
             TiltTrialClippingProbeModelFactory tiltTrialClippingProbeModelFactory = new TiltTrialClippingProbeModelFactory();
             TiltTrialClippingProbeMaterialFactory tiltTrialClippingProbeMaterialFactory = new TiltTrialClippingProbeMaterialFactory();
+            DepthClipProbeMaterialFactory depthClipProbeMaterialFactory = new DepthClipProbeMaterialFactory();
+            DepthClipProbeCenterMaterialFactory depthClipProbeCenterMaterialFactory = new DepthClipProbeCenterMaterialFactory();
             forwardSolidColorMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             tiltTrialCourseMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             tiltTrialClippingProbeModelFactory.WriteModelAsset(fullProjectRootPath);
             tiltTrialClippingProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
+            depthClipProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
+            depthClipProbeCenterMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             RuntimeModel generatedCubeModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.CubeAssetId);
             RuntimeModel generatedPlaneModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.PlaneAssetId);
             RuntimeModel generatedSphereModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.SphereAssetId);
@@ -77,6 +81,8 @@ namespace city.rendering.tools {
             RuntimeMaterial goalFlagPoleMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/games/split_play/GoalFlagPole.hasset");
             RuntimeMaterial goalFlagBannerMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/games/split_play/GoalFlagBanner.hasset");
             RuntimeMaterial generatedCubeTestSolidMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, ForwardSolidColorMaterialFactory.MaterialRelativePath);
+            RuntimeMaterial depthClipProbeMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, DepthClipProbeMaterialFactory.MaterialRelativePath);
+            RuntimeMaterial depthClipProbeCenterMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, DepthClipProbeCenterMaterialFactory.MaterialRelativePath);
             RuntimeMaterial[] axisMaterials = new[] {
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/X.hasset"),
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/Y.hasset"),
@@ -108,6 +114,8 @@ namespace city.rendering.tools {
                 GoalFlagPoleMaterial = goalFlagPoleMaterial,
                 GoalFlagBannerMaterial = goalFlagBannerMaterial,
                 GeneratedCubeTestSolidMaterial = generatedCubeTestSolidMaterial,
+                DepthClipProbeMaterial = depthClipProbeMaterial,
+                DepthClipProbeCenterMaterial = depthClipProbeCenterMaterial,
                 GeneratedArrowModel = generatedArrowModel,
                 AxisMaterials = axisMaterials,
                 RacerMaterials = racerMaterials,
