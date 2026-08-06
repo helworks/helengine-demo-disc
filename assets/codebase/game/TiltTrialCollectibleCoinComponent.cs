@@ -15,6 +15,7 @@ namespace city.game {
         /// </summary>
         /// <param name="entity">Coin entity or one authored wrapper entity in its ancestor chain.</param>
         /// <returns>Nearest authored wrapper with a trigger observer when present; otherwise the supplied entity.</returns>
+        [NativeBorrowedReturn]
         public static Entity ResolveCollectibleRootEntity(Entity entity) {
             Entity current = entity;
             while (current != null) {

@@ -160,6 +160,7 @@ namespace city.game {
         /// <param name="childIndex">Zero-based child index.</param>
         /// <param name="entityRole">Human-readable role used when building exception messages.</param>
         /// <returns>Matching child entity instance.</returns>
+        [NativeBorrowedReturn]
         static Entity FindRequiredChildEntity(Entity entity, int childIndex, string entityRole) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));

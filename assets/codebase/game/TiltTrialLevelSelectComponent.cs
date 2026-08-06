@@ -441,6 +441,7 @@ namespace city.game {
         /// <param name="childIndex">Zero-based child index in the generated hierarchy.</param>
         /// <param name="description">Human-readable child description used for failure messages.</param>
         /// <returns>Required child entity at the supplied index.</returns>
+        [NativeBorrowedReturn]
         static Entity FindRequiredChildEntity(Entity entity, int childIndex, string description) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
@@ -460,6 +461,7 @@ namespace city.game {
         /// <summary>
         /// Finds one required component on the supplied entity.
         /// </summary>
+        [NativeBorrowedReturn]
         static TComponent FindRequiredComponent<TComponent>(Entity entity) where TComponent : Component {
             if (entity == null || entity.Components == null) {
                 throw new InvalidOperationException($"Tilt Trial level selector could not resolve component '{typeof(TComponent).Name}'.");

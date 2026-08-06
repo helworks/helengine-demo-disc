@@ -34,6 +34,14 @@ namespace city.menu {
         TextComponent FooterTextComponent;
 
         /// <summary>
+        /// Initializes one footer marquee with every runtime-resolved reference in a known state, because native builds do not zero-initialize C# instance fields automatically.
+        /// </summary>
+        public FooterIdentityMarqueeComponent() {
+            TextEntity = null;
+            FooterTextComponent = null;
+        }
+
+        /// <summary>
         /// Advances the footer text at a constant speed once its serialized scene reference is available at runtime.
         /// </summary>
         public override void Update() {

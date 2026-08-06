@@ -16,7 +16,7 @@ namespace city.menu {
             Entity rootEntity,
             Entity itemsRootEntity,
             ScrollComponent itemsScrollComponent,
-            MenuItemRuntime[] items) {
+            [NativeTakesOwnership] MenuItemRuntime[] items) {
             Definition = definition ?? throw new ArgumentNullException(nameof(definition));
             RootEntity = rootEntity ?? throw new ArgumentNullException(nameof(rootEntity));
             ItemsRootEntity = itemsRootEntity ?? throw new ArgumentNullException(nameof(itemsRootEntity));

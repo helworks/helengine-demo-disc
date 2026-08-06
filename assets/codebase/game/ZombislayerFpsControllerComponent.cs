@@ -192,6 +192,7 @@ namespace city.game {
         /// </summary>
         /// <param name="entity">Starting entity.</param>
         /// <returns>Scene-root entity.</returns>
+        [NativeBorrowedReturn]
         static Entity FindSceneRootEntity(Entity entity) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
@@ -213,6 +214,7 @@ namespace city.game {
         /// <typeparam name="TComponent">Required component type.</typeparam>
         /// <param name="entity">Subtree root to search.</param>
         /// <returns>Matching component instance.</returns>
+        [NativeBorrowedReturn]
         static TComponent FindRequiredComponentRecursive<TComponent>(Entity entity) where TComponent : Component {
             TComponent match = TryFindComponentRecursive<TComponent>(entity);
             if (match == null) {
@@ -227,6 +229,7 @@ namespace city.game {
         /// <param name="childIndex">Zero-based child index.</param>
         /// <param name="entityRole">Human-readable role used when building exception messages.</param>
         /// <returns>Matching child entity instance.</returns>
+        [NativeBorrowedReturn]
         static Entity FindRequiredChildEntity(Entity entity, int childIndex, string entityRole) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
@@ -245,6 +248,7 @@ namespace city.game {
         /// <typeparam name="TComponent">Required component type.</typeparam>
         /// <param name="entity">Subtree root to search.</param>
         /// <returns>Matching component instance, or null when none exists.</returns>
+        [NativeBorrowedReturn]
         static TComponent TryFindComponentRecursive<TComponent>(Entity entity) where TComponent : Component {
             if (entity == null) {
                 return null;

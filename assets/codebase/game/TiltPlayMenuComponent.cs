@@ -332,6 +332,7 @@ namespace city.game {
         /// <param name="root">Hierarchy root to search.</param>
         /// <param name="entityName">Generated entity name to resolve.</param>
         /// <returns>Required matching entity.</returns>
+        [NativeBorrowedReturn]
         static Entity FindRequiredNamedEntity(Entity root, string entityName) {
             if (root == null) {
                 throw new ArgumentNullException(nameof(root));
@@ -361,6 +362,7 @@ namespace city.game {
         /// <param name="root">Hierarchy branch to search.</param>
         /// <param name="entityName">Generated entity name to resolve.</param>
         /// <returns>Matching entity, or null when absent from the branch.</returns>
+        [NativeBorrowedReturn]
         static Entity FindNamedEntity(Entity root, string entityName) {
             if (root == null) {
                 return null;
@@ -407,6 +409,7 @@ namespace city.game {
         /// <typeparam name="TComponent">Required component type.</typeparam>
         /// <param name="root">Hierarchy root to search.</param>
         /// <returns>Required matching component.</returns>
+        [NativeBorrowedReturn]
         static TComponent FindRequiredComponent<TComponent>(Entity root) where TComponent : Component {
             if (root.Components != null) {
                 for (int componentIndex = 0; componentIndex < root.Components.Count; componentIndex++) {
@@ -434,6 +437,7 @@ namespace city.game {
         /// <typeparam name="TComponent">Component type to resolve.</typeparam>
         /// <param name="root">Hierarchy branch to search.</param>
         /// <returns>Matching component, or null when absent from the branch.</returns>
+        [NativeBorrowedReturn]
         static TComponent FindComponent<TComponent>(Entity root) where TComponent : Component {
             if (root.Components != null) {
                 for (int componentIndex = 0; componentIndex < root.Components.Count; componentIndex++) {

@@ -124,7 +124,7 @@ namespace city.game {
             }
         }
 
-        void CollectColliderBounds(Entity entity, List<Entity> activeSourceEntities) {
+        void CollectColliderBounds(Entity entity, [NativeNoEscape] List<Entity> activeSourceEntities) {
             if (entity == null || activeSourceEntities == null) {
                 return;
             }
@@ -179,6 +179,7 @@ namespace city.game {
             return false;
         }
 
+        [NativeBorrowedReturn]
         BoundsVisualRecord EnsureVisualRecord(Entity sourceEntity) {
             BoundsVisualRecord existingRecord = FindVisualRecord(sourceEntity);
             if (existingRecord != null) {
@@ -199,9 +200,8 @@ namespace city.game {
             });
             Parent.AddChild(visualEntity);
 
-            BoundsVisualRecord createdRecord = new BoundsVisualRecord(sourceEntity, visualEntity);
-            VisualRecords.Add(createdRecord);
-            return createdRecord;
+            VisualRecords.Add(new BoundsVisualRecord(sourceEntity, visualEntity));
+            return VisualRecords[VisualRecords.Count - 1];
         }
 
         void UpdateVisualRecord(BoundsVisualRecord visualRecord, ushort layerMask, float3 min, float3 max) {
@@ -252,7 +252,6 @@ namespace city.game {
             materialAsset.VertexProgram = StandardVertexProgramName;
             materialAsset.PixelProgram = StandardPixelProgramName;
             materialAsset.Variant = StandardShaderVariantName;
-            materialAsset.RenderState = new MaterialRenderState();
             materialAsset.RenderState.CullMode = MaterialCullMode.None;
             materialAsset.CastsShadows = false;
             materialAsset.ReceivesShadows = false;
@@ -411,7 +410,7 @@ namespace city.game {
             return radius * maximumScale;
         }
 
-        static bool ContainsEntity(List<Entity> entities, Entity entity) {
+        static bool ContainsEntity([NativeNoEscape] List<Entity> entities, Entity entity) {
             if (entities == null || entity == null) {
                 return false;
             }

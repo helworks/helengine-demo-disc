@@ -74,6 +74,11 @@ namespace city.menu {
             InitialPanelIdValue = string.Empty;
             ActivePanelIdValue = string.Empty;
             SelectedItemIdValue = string.Empty;
+            // Native builds do not zero-initialize C# instance fields automatically.
+            // Keep every runtime-only dependency in a known state until it is resolved.
+            ActivePanel = null;
+            PressedPointerItem = null;
+            IsInitialized = false;
         }
 
         /// <summary>
@@ -223,16 +228,15 @@ namespace city.menu {
             for (int panelIndex = 0; panelIndex < panelEntities.Count; panelIndex++) {
                 Entity panelEntity = panelEntities[panelIndex];
                 MenuPanelComponent panelComponent = FindRequiredComponent<MenuPanelComponent>(panelEntity);
-                MenuItemRuntime[] itemRuntimes = BindItems(panelEntity, panelComponent.PanelId);
                 ScrollComponent itemsScrollComponent = ResolveItemsScrollComponent(panelEntity, panelComponent.PanelId);
-                itemsScrollComponent.ItemCount = itemRuntimes.Length;
-                itemsScrollComponent.ClipOriginEntity = ResolveItemsViewportEntity(itemsScrollComponent, panelComponent.PanelId);
                 MenuPanelRuntime panelRuntime = new MenuPanelRuntime(
                     panelComponent,
                     panelEntity,
                     itemsScrollComponent.Parent,
                     itemsScrollComponent,
-                    itemRuntimes);
+                    BindItems(panelEntity, panelComponent.PanelId));
+                itemsScrollComponent.ItemCount = panelRuntime.Items.Length;
+                itemsScrollComponent.ClipOriginEntity = ResolveItemsViewportEntity(itemsScrollComponent, panelComponent.PanelId);
                 panelRuntime.ItemsScrollComponent.ScrollOffsetChanged += HandleItemsScrollOffsetChanged;
                 ApplyItemsScrollOffset(panelRuntime.ItemsRootEntity, panelRuntime.ItemsScrollComponent.ScrollOffset);
                 if (PanelsById.ContainsKey(panelComponent.PanelId)) {
@@ -254,6 +258,7 @@ namespace city.menu {
         /// <param name="panelEntity">Panel root whose baked items should be bound.</param>
         /// <param name="panelId">Stable panel id expected for every bound item.</param>
         /// <returns>Bound baked item runtime records.</returns>
+        [NativeOwnedReturn]
         MenuItemRuntime[] BindItems(Entity panelEntity, string panelId) {
             List<Entity> itemEntities = new List<Entity>();
             CollectEntitiesWithComponent<MenuItemComponent>(panelEntity, itemEntities);
@@ -703,6 +708,7 @@ namespace city.menu {
         /// </summary>
         /// <param name="rootEntity">Owning menu root entity.</param>
         /// <returns>Generated menu subtree root.</returns>
+        [NativeBorrowedReturn]
         Entity FindGeneratedRootEntity(Entity rootEntity) {
             if (rootEntity == null) {
                 throw new ArgumentNullException(nameof(rootEntity));
@@ -813,6 +819,7 @@ namespace city.menu {
         /// <param name="scrollComponent">Scroll component hosted by the moving item root.</param>
         /// <param name="panelId">Stable panel id used in diagnostics.</param>
         /// <returns>Viewport entity that should anchor clip and hit-test bounds.</returns>
+        [NativeBorrowedReturn]
         Entity ResolveItemsViewportEntity(ScrollComponent scrollComponent, string panelId) {
             if (scrollComponent == null) {
                 throw new ArgumentNullException(nameof(scrollComponent));
@@ -919,7 +926,7 @@ namespace city.menu {
         /// <typeparam name="TComponent">Component type that marks collected entities.</typeparam>
         /// <param name="entity">Root entity to inspect.</param>
         /// <param name="entities">Destination list receiving matching entities.</param>
-        void CollectEntitiesWithComponent<TComponent>(Entity entity, List<Entity> entities) where TComponent : Component {
+        void CollectEntitiesWithComponent<TComponent>(Entity entity, [NativeNoEscape] List<Entity> entities) where TComponent : Component {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
             }
@@ -946,6 +953,7 @@ namespace city.menu {
         /// <typeparam name="TComponent">Component type to resolve.</typeparam>
         /// <param name="entity">Entity that must own the component.</param>
         /// <returns>Resolved component instance.</returns>
+        [NativeBorrowedReturn]
         TComponent FindRequiredComponent<TComponent>(Entity entity) where TComponent : Component {
             if (TryFindComponent<TComponent>(entity, out TComponent component)) {
                 return component;
@@ -960,6 +968,7 @@ namespace city.menu {
         /// <typeparam name="TComponent">Component type to resolve.</typeparam>
         /// <param name="entity">Entity to inspect.</param>
         /// <returns>Resolved component when present; otherwise null.</returns>
+        [NativeBorrowedReturn]
         TComponent FindFirstComponent<TComponent>(Entity entity) where TComponent : Component {
             if (TryFindComponent<TComponent>(entity, out TComponent component)) {
                 return component;

@@ -59,6 +59,24 @@ namespace city.menu {
         bool IsInitialized;
 
         /// <summary>
+        /// Initializes one platform-info overlay with every runtime-resolved reference in a known state, because native builds do not zero-initialize C# instance fields automatically.
+        /// </summary>
+        public PlatformInfoTextComponent() {
+            OwnerEntity = null;
+            PlatformNameTextEntity = null;
+            PlatformVersionTextEntity = null;
+            PlatformNameTextComponent = null;
+            PlatformNameLayoutComponent = null;
+            PlatformVersionTextComponent = null;
+            PlatformVersionLayoutComponent = null;
+            PlatformNameBaseLocalPosition = float3.Zero;
+            PlatformNameBaseSize = new int2(0, 0);
+            PlatformVersionBaseLocalPosition = float3.Zero;
+            PlatformVersionBaseSize = new int2(0, 0);
+            IsInitialized = false;
+        }
+
+        /// <summary>
         /// Captures the owning entity and attempts initialization once the runtime hierarchy becomes available.
         /// </summary>
         /// <param name="entity">Owning initialized entity.</param>

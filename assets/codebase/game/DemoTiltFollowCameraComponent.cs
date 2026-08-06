@@ -185,6 +185,7 @@ namespace city.game {
         /// </summary>
         /// <param name="name">Entity name to resolve.</param>
         /// <returns>Matching runtime entity, or null when it is not loaded yet.</returns>
+        [NativeBorrowedReturn]
         Entity FindEntityByName(string name) {
             return FindEntityByRole(name);
         }
@@ -194,6 +195,7 @@ namespace city.game {
         /// </summary>
         /// <param name="role">Gameplay role to resolve.</param>
         /// <returns>Matching runtime entity, or null when it is not loaded yet.</returns>
+        [NativeBorrowedReturn]
         Entity FindEntityByRole(string role) {
             List<Entity> entities = Core.Instance.ObjectManager.Entities;
             for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
@@ -212,6 +214,7 @@ namespace city.game {
         /// <param name="entity">Current hierarchy entity.</param>
         /// <param name="role">Gameplay role to resolve.</param>
         /// <returns>Matching entity, or null when the subtree does not contain it.</returns>
+        [NativeBorrowedReturn]
         static Entity FindEntityByRoleRecursive(Entity entity, string role) {
             if (entity == null) {
                 return null;
@@ -244,6 +247,7 @@ namespace city.game {
         /// <param name="entity">Current hierarchy entity.</param>
         /// <param name="name">Entity name to resolve.</param>
         /// <returns>Matching entity, or null when the subtree does not contain it.</returns>
+        [NativeBorrowedReturn]
         static Entity FindEntityByNameRecursive(Entity entity, string name) {
             return FindEntityByRoleRecursive(entity, name);
         }

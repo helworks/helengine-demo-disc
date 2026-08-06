@@ -900,6 +900,7 @@ namespace city.game {
             return null;
         }
 
+        [NativeBorrowedReturn]
         Entity FindPlayerSphereEntityAcrossScene() {
             List<Entity> entities = Core.Instance.ObjectManager.Entities;
             for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
@@ -912,6 +913,7 @@ namespace city.game {
             return null;
         }
 
+        [NativeBorrowedReturn]
         Entity FindGoalEntityAcrossScene() {
             List<Entity> entities = Core.Instance.ObjectManager.Entities;
             for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
@@ -924,6 +926,7 @@ namespace city.game {
             return null;
         }
 
+        [NativeBorrowedReturn]
         static Entity FindPlayerSphereEntityRecursive(Entity entity) {
             if (entity == null) {
                 return null;
@@ -946,6 +949,7 @@ namespace city.game {
             return null;
         }
 
+        [NativeBorrowedReturn]
         static Entity FindGoalEntityRecursive(Entity entity) {
             if (entity == null) {
                 return null;
@@ -1071,7 +1075,7 @@ namespace city.game {
             return matches;
         }
 
-        static void CollectCoinComponentsRecursive(Entity entity, List<TiltTrialCollectibleCoinComponent> matches) {
+        static void CollectCoinComponentsRecursive(Entity entity, [NativeNoEscape] List<TiltTrialCollectibleCoinComponent> matches) {
             if (entity == null) {
                 return;
             }
@@ -1099,6 +1103,7 @@ namespace city.game {
         /// <param name="childIndex">Zero-based child index in the generated hierarchy.</param>
         /// <param name="description">Human-readable child description used for failure messages.</param>
         /// <returns>Required child entity at the supplied index.</returns>
+        [NativeBorrowedReturn]
         static Entity FindRequiredChildEntity(Entity entity, int childIndex, string description) {
             Entity childEntity = TryFindChildEntity(entity, childIndex);
             if (childEntity != null) {
@@ -1108,6 +1113,7 @@ namespace city.game {
             throw new InvalidOperationException($"Tilt Trial session could not resolve required entity '{description}'.");
         }
 
+        [NativeBorrowedReturn]
         static Entity TryFindChildEntity(Entity entity, int childIndex) {
             if (entity == null) {
                 return null;
@@ -1128,6 +1134,7 @@ namespace city.game {
         /// <param name="root">Hierarchy root to search.</param>
         /// <param name="name">Exact entity name to find.</param>
         /// <returns>First matching entity, or null when no matching entity exists.</returns>
+        [NativeBorrowedReturn]
         static Entity TryFindNamedEntity(Entity root, string name) {
             if (root == null || string.IsNullOrWhiteSpace(name)) {
                 return null;

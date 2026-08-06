@@ -44,6 +44,14 @@ namespace city.menu {
         Entity ScanlineEntity;
 
         /// <summary>
+        /// Initializes one background motion component with every runtime-resolved reference in a known state, because native builds do not zero-initialize C# instance fields automatically.
+        /// </summary>
+        public MenuBackgroundMotionComponent() {
+            GridEntity = null;
+            ScanlineEntity = null;
+        }
+
+        /// <summary>
         /// Advances both decorative background layers after their serialized scene references resolve.
         /// </summary>
         public override void Update() {
