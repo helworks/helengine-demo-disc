@@ -444,10 +444,11 @@ namespace city.game {
             }
 
             BoundsVisualRecord visualRecord = VisualRecords[index];
-            VisualRecords.RemoveAt(index);
             if (visualRecord != null && visualRecord.VisualEntity != null) {
                 visualRecord.VisualEntity.Dispose();
             }
+
+            VisualRecords.RemoveAt(index);
         }
 
         sealed class BoundsVisualRecord {
