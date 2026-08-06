@@ -228,23 +228,23 @@ namespace city.menu {
             for (int panelIndex = 0; panelIndex < panelEntities.Count; panelIndex++) {
                 Entity panelEntity = panelEntities[panelIndex];
                 MenuPanelComponent panelComponent = FindRequiredComponent<MenuPanelComponent>(panelEntity);
-                ScrollComponent itemsScrollComponent = ResolveItemsScrollComponent(panelEntity, panelComponent.PanelId);
-                MenuPanelRuntime panelRuntime = new MenuPanelRuntime(
-                    panelComponent,
-                    panelEntity,
-                    itemsScrollComponent.Parent,
-                    itemsScrollComponent,
-                    BindItems(panelEntity, panelComponent.PanelId));
-                itemsScrollComponent.ItemCount = panelRuntime.Items.Length;
-                itemsScrollComponent.ClipOriginEntity = ResolveItemsViewportEntity(itemsScrollComponent, panelComponent.PanelId);
-                panelRuntime.ItemsScrollComponent.ScrollOffsetChanged += HandleItemsScrollOffsetChanged;
-                ApplyItemsScrollOffset(panelRuntime.ItemsRootEntity, panelRuntime.ItemsScrollComponent.ScrollOffset);
                 if (PanelsById.ContainsKey(panelComponent.PanelId)) {
                     throw new InvalidOperationException($"Duplicate baked menu panel id '{panelComponent.PanelId}' was found.");
                 }
 
+                ScrollComponent itemsScrollComponent = ResolveItemsScrollComponent(panelEntity, panelComponent.PanelId);
+                PanelRuntimes.Add(new MenuPanelRuntime(
+                    panelComponent,
+                    panelEntity,
+                    itemsScrollComponent.Parent,
+                    itemsScrollComponent,
+                    BindItems(panelEntity, panelComponent.PanelId)));
+                MenuPanelRuntime panelRuntime = PanelRuntimes[PanelRuntimes.Count - 1];
+                itemsScrollComponent.ItemCount = panelRuntime.Items.Length;
+                itemsScrollComponent.ClipOriginEntity = ResolveItemsViewportEntity(itemsScrollComponent, panelComponent.PanelId);
+                panelRuntime.ItemsScrollComponent.ScrollOffsetChanged += HandleItemsScrollOffsetChanged;
+                ApplyItemsScrollOffset(panelRuntime.ItemsRootEntity, panelRuntime.ItemsScrollComponent.ScrollOffset);
                 PanelsById.Add(panelComponent.PanelId, panelRuntime);
-                PanelRuntimes.Add(panelRuntime);
             }
 
             if (PanelsById.Count == 0) {
