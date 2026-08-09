@@ -125,6 +125,25 @@ if ($projectId -cne 'demodisc') {
 }
 
 $surfaces = Get-RequiredArray $document 'surfaces' 'profile' $false
+$profileDirectory = Split-Path -Parent $resolvedProfilePath
+foreach ($surfaceForAssetAudit in $surfaces) {
+    $surfaceForAssetAuditId = Get-RequiredStringProperty $surfaceForAssetAudit 'id' 'surface'
+    $recognitionForAssetAudit = Get-RequiredProperty $surfaceForAssetAudit 'recognition' "surface '$surfaceForAssetAuditId'"
+    $cluesForAssetAudit = Get-RequiredArray $recognitionForAssetAudit 'clues' "surface '$surfaceForAssetAuditId' recognition" $false
+    foreach ($clueForAssetAudit in $cluesForAssetAudit) {
+        $clueTypeForAssetAudit = Get-RequiredStringProperty $clueForAssetAudit 'type' "recognition clue on '$surfaceForAssetAuditId'"
+        if ($clueTypeForAssetAudit -cne 'image_must_match') {
+            continue
+        }
+
+        $paramsForAssetAudit = Get-RequiredProperty $clueForAssetAudit 'params' "recognition clue on '$surfaceForAssetAuditId'"
+        $imagePathForAssetAudit = Get-RequiredStringProperty $paramsForAssetAudit 'imagePath' "image clue on '$surfaceForAssetAuditId'"
+        $resolvedImagePathForAssetAudit = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($profileDirectory, $imagePathForAssetAudit))
+        if (-not (Test-Path -LiteralPath $resolvedImagePathForAssetAudit -PathType Leaf)) {
+            Fail "image clue on '$surfaceForAssetAuditId' references missing asset '$imagePathForAssetAudit' relative to the profile directory"
+        }
+    }
+}
 
 $inputCatalog = Get-RequiredProperty $document 'inputCatalog' 'profile'
 $inputControls = Get-RequiredArray $inputCatalog 'controls' 'profile.inputCatalog' $false
@@ -403,7 +422,7 @@ Assert-Route 'surface-tilt-trial-console-title' 'surface-demodisc-main-menu' 'ti
 Assert-Route 'surface-tilt-trial-options' 'surface-tilt-trial-console-title' 'Tilt Play options back'
 Assert-Route 'surface-tilt-trial-console-selector' 'surface-tilt-trial-console-title' 'console selector back'
 Assert-Route 'surface-tilt-trial-handheld-list' 'surface-demodisc-main-menu' 'handheld return'
-Assert-NodeRoute 'surface-demodisc-games-menu' 'node-demodisc-games-tilt-trial' 'surface-tilt-trial-console-title' 'Games Tilt Trial console entry'
+Assert-NodeRoute 'surface-demodisc-games-menu' 'node-demodisc-games-tilt-trial' 'surface-tilt-trial-console-selector' 'Games Tilt Trial console entry'
 Assert-NodeRoute 'surface-demodisc-games-menu' 'node-demodisc-games-tilt-trial' 'surface-tilt-trial-handheld-list' 'Games Tilt Trial handheld entry'
 Assert-NodeRoute 'surface-demodisc-demo-scenes-menu' 'node-demodisc-rendering-back' 'surface-demodisc-main-menu' 'rendering Back node'
 Assert-NodeRoute 'surface-demodisc-physics-scenes-menu' 'node-demodisc-physics-back' 'surface-demodisc-main-menu' 'physics Back node'

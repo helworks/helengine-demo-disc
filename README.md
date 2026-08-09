@@ -34,4 +34,4 @@ Validate it on this Windows host with:
 powershell.exe -NoProfile -File .\tools\helenui\validate-demodisc-profile.ps1
 ```
 
-A HelenUI session must compose the profile with the Demodisc repository root so paths such as `assets/images/ui/tilt_trial/title/...` resolve relative to the Demodisc checkout.
+The profile’s image clues use paths such as `../assets/images/ui/tilt_trial/title/...`, resolved relative to `helenui/demodisc.json`; keep the profile in this repository location so NavigatorService can load the authored assets.
