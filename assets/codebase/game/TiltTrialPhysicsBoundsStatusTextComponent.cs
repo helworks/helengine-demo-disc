@@ -36,6 +36,7 @@ namespace city.game {
         /// Keeps the HUD text synchronized with the current bounds-debug toggle state.
         /// </summary>
         public override void Update() {
+#if HELENGINE_ENV_DEBUG
             if (statusTextComponent == null) {
                 statusTextComponent = FindOwnedTextComponent();
                 if (statusTextComponent == null) {
@@ -64,6 +65,15 @@ namespace city.game {
                 || statusTextComponent.Color.W != nextColor.W) {
                 statusTextComponent.Color = nextColor;
             }
+#else
+            if (statusTextComponent == null) {
+                statusTextComponent = FindOwnedTextComponent();
+            }
+
+            if (statusTextComponent != null && !string.IsNullOrEmpty(statusTextComponent.Text)) {
+                statusTextComponent.Text = string.Empty;
+            }
+#endif
         }
 
         TextComponent FindOwnedTextComponent() {

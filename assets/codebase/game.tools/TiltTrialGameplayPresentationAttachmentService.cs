@@ -34,14 +34,13 @@ namespace city.game.tools {
             }
 
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
+            ApplyWindowsOnlyDebugStatusOverrideToConsoleBlueprint(fullProjectRootPath);
             foreach (global::city.game.TiltTrialLevelCatalogEntry levelEntry in global::city.game.TiltTrialLevelCatalog.CreateEntries()) {
                 string scenePath = ResolveAuthoredScenePath(fullProjectRootPath, levelEntry.SceneId);
                 SceneAsset sceneAsset = LoadScene(scenePath);
                 RemoveLegacyPresentationRoots(sceneAsset);
                 ApplyWindowsOnlyDebugRootOverride(sceneAsset);
-                AddPresentationRoot(fullProjectRootPath, sceneAsset, "TiltTrialConsolePresentation", TiltTrialGameplayPresentationBlueprintGenerator.ConsoleBlueprintRelativePath, [
-                    ..CreateWindowsOnlyPlatformOverrides()
-                ]);
+                AddPresentationRoot(fullProjectRootPath, sceneAsset, "TiltTrialConsolePresentation", TiltTrialGameplayPresentationBlueprintGenerator.ConsoleBlueprintRelativePath, CreateConsolePresentationPlatformOverrides());
                 AddPresentationRoot(fullProjectRootPath, sceneAsset, "TiltTrialHandheldPresentation", TiltTrialGameplayPresentationBlueprintGenerator.HandheldBlueprintRelativePath, CreateHandheldOnlyPlatformOverrides());
                 SaveScene(scenePath, sceneAsset);
             }
@@ -115,11 +114,27 @@ namespace city.game.tools {
                     continue;
                 }
 
-                root.PlatformExistenceOverrides = CreateWindowsOnlyPlatformOverrides();
+                root.PlatformExistenceOverrides = CreateWindowsOnlyDebugPlatformOverrides();
                 return;
             }
 
             throw new InvalidOperationException("Tilt Trial scene is missing the Windows-only physics bounds debug root.");
+        }
+
+        /// <summary>
+        /// Marks the F3 status row inside the console presentation Blueprint as absent from non-Windows and Windows Release cooks.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute project root that owns the presentation Blueprint.</param>
+        void ApplyWindowsOnlyDebugStatusOverrideToConsoleBlueprint(string projectRootPath) {
+            string blueprintPath = TiltTrialGameplayPresentationBlueprintGenerator.ConsoleBlueprintRelativePath;
+            BlueprintAsset blueprintAsset = LoadBlueprintAsset(projectRootPath, blueprintPath);
+            SceneEntityAsset statusText = FindEntityByName(blueprintAsset.RootEntity, "TiltTrialPhysicsBoundsStatusText");
+            if (statusText == null) {
+                throw new InvalidOperationException("Tilt Trial console presentation Blueprint is missing the Windows-only physics bounds status row.");
+            }
+
+            statusText.PlatformExistenceOverrides = CreateWindowsOnlyDebugStatusOverrides();
+            SaveBlueprintAsset(projectRootPath, blueprintPath, blueprintAsset);
         }
 
         /// <summary>
@@ -182,6 +197,18 @@ namespace city.game.tools {
             }
 
             return blueprintAsset;
+        }
+
+        /// <summary>
+        /// Saves one project-relative presentation Blueprint after applying authoring-time existence overrides.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute project root that owns the Blueprint asset.</param>
+        /// <param name="blueprintPath">Project-relative Blueprint asset path.</param>
+        /// <param name="blueprintAsset">Blueprint asset to serialize.</param>
+        static void SaveBlueprintAsset(string projectRootPath, string blueprintPath, BlueprintAsset blueprintAsset) {
+            string blueprintFullPath = Path.Combine(projectRootPath, "assets", blueprintPath.Replace('/', Path.DirectorySeparatorChar));
+            using FileStream stream = File.Create(blueprintFullPath);
+            helengine.editor.AssetSerializer.Serialize(stream, blueprintAsset);
         }
 
         /// <summary>
@@ -257,14 +284,48 @@ namespace city.game.tools {
         }
 
         /// <summary>
-        /// Creates platform exclusions that leave a Windows-only entity absent from Nintendo handheld platforms.
+        /// Creates platform exclusions that leave the console presentation absent from Nintendo handheld platforms while preserving it on Windows Release.
         /// </summary>
-        /// <returns>Windows-only platform existence overrides.</returns>
-        static SceneEntityPlatformExistenceOverrideAsset[] CreateWindowsOnlyPlatformOverrides() {
+        /// <returns>Console presentation platform existence overrides.</returns>
+        static SceneEntityPlatformExistenceOverrideAsset[] CreateConsolePresentationPlatformOverrides() {
             return [
                 new SceneEntityPlatformExistenceOverrideAsset { PlatformId = "ds", Exists = false },
                 new SceneEntityPlatformExistenceOverrideAsset { PlatformId = "3ds", Exists = false }
             ];
+        }
+
+        /// <summary>
+        /// Creates platform and environment exclusions that leave the debug-only entity absent from Nintendo handheld and Windows Release platforms.
+        /// </summary>
+        /// <returns>Windows-only debug platform and environment existence overrides.</returns>
+        static SceneEntityPlatformExistenceOverrideAsset[] CreateWindowsOnlyDebugPlatformOverrides() {
+            return [
+                new SceneEntityPlatformExistenceOverrideAsset { PlatformId = "ds", Exists = false },
+                new SceneEntityPlatformExistenceOverrideAsset { PlatformId = "3ds", Exists = false },
+                new SceneEntityPlatformExistenceOverrideAsset { PlatformId = "windows", EnvironmentId = "release", Exists = false }
+            ];
+        }
+
+        /// <summary>
+        /// Creates the full platform and environment exclusions for the separately authored F3 status row.
+        /// </summary>
+        /// <returns>F3 status-row platform and environment existence overrides.</returns>
+        static SceneEntityPlatformExistenceOverrideAsset[] CreateWindowsOnlyDebugStatusOverrides() {
+            string[] nonWindowsPlatformIds = ["ps2", "psp", "psvita", "gamecube", "wii", "wiiu", "switch", "ds", "3ds"];
+            SceneEntityPlatformExistenceOverrideAsset[] overrides = new SceneEntityPlatformExistenceOverrideAsset[nonWindowsPlatformIds.Length + 1];
+            for (int platformIndex = 0; platformIndex < nonWindowsPlatformIds.Length; platformIndex++) {
+                overrides[platformIndex] = new SceneEntityPlatformExistenceOverrideAsset {
+                    PlatformId = nonWindowsPlatformIds[platformIndex],
+                    Exists = false
+                };
+            }
+
+            overrides[^1] = new SceneEntityPlatformExistenceOverrideAsset {
+                PlatformId = "windows",
+                EnvironmentId = "release",
+                Exists = false
+            };
+            return overrides;
         }
 
         /// <summary>

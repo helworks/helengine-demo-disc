@@ -1373,6 +1373,7 @@ namespace city.game.tools {
             for (int platformIndex = 0; platformIndex < nonWindowsPlatformIds.Length; platformIndex++) {
                 physicsBoundsStatusTextEntitySaveComponent.GetOrCreateExistencePlatformOverride(nonWindowsPlatformIds[platformIndex]).Exists = false;
             }
+            physicsBoundsStatusTextEntitySaveComponent.GetOrCreateExistencePlatformOverride(new global::helengine.EditorOverrideScope("windows", "release")).Exists = false;
 
             if (entity is EditorEntity editorEntity) {
                 return editorEntity;
@@ -1392,6 +1393,8 @@ namespace city.game.tools {
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new global::city.game.TiltTrialPhysicsBoundsDebugDrawComponent());
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.GetOrCreateExistencePlatformOverride(new global::helengine.EditorOverrideScope("windows", "release")).Exists = false;
             return entity;
         }
 
