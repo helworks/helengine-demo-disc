@@ -1,22 +1,17 @@
-using helengine.editor;
-
 namespace city.rendering.tools {
     public sealed class DemoDiscSceneLabelOverlayFactory {
-        const string LabelViewportEntityName = "DemoDiscSceneLabelViewport";
         const string LabelEntityName = "DemoDiscSceneLabelText";
         const string FontReferenceName = "Font";
         const string NintendoDsPlatformId = "ds";
         const string Nintendo3DsPlatformId = "3ds";
-        const int ReferenceViewportWidth = 1280;
-        const int ReferenceViewportHeight = 720;
+        const string SceneLabelFontRelativePath = "Fonts/DemoDiscBody.ttf";
+        const int SceneLabelCanvasWidth = 1280;
         const float SceneLabelRight = 24f;
-        const float SceneLabelTop = 24f;
-        const int SceneLabelWidth = 420;
-        const int SceneLabelHeight = 32;
-        const float SceneLabelFontScale = 1.5f;
-        const int SceneLabelRenderOrder = 255;
-        readonly ComponentPlatformEditingService PlatformEditingService = new ComponentPlatformEditingService();
-
+        const float SceneLabelTop = 72f;
+        const int SceneLabelWidth = 520;
+        const int SceneLabelHeight = 56;
+        const float SceneLabelFontScale = 1f;
+        const int SceneLabelRenderOrder = 7;
         public void AttachToSceneUi(Entity sceneUiEntity, FontAsset font, string labelText) {
             if (sceneUiEntity == null) {
                 throw new ArgumentNullException(nameof(sceneUiEntity));
@@ -27,24 +22,18 @@ namespace city.rendering.tools {
             }
 
             ushort overlayLayerMask = sceneUiEntity.LayerMask;
-            Entity viewportEntity = Core.Instance.EntityFactory.CreateChild(sceneUiEntity, LabelViewportEntityName);
-            viewportEntity.LayerMask = overlayLayerMask;
-            viewportEntity.AddComponent(new ViewportComponent {
-                BindingMode = ViewportComponent.ScreenBindingMode,
-                FixedSize = new int2(ReferenceViewportWidth, ReferenceViewportHeight)
-            });
-
-            Entity labelEntity = Core.Instance.EntityFactory.CreateChild(viewportEntity, LabelEntityName);
+            Entity labelEntity = Core.Instance.EntityFactory.CreateChild(sceneUiEntity, LabelEntityName);
             labelEntity.LocalPosition = new float3(
-                ReferenceViewportWidth - SceneLabelRight - SceneLabelWidth,
+                SceneLabelCanvasWidth - SceneLabelRight - SceneLabelWidth,
                 SceneLabelTop,
                 0.1f);
+            labelEntity.Static = false;
             labelEntity.LayerMask = overlayLayerMask;
             TextComponent labelComponent = new TextComponent {
                 Text = labelText,
                 Font = font,
                 FontScale = SceneLabelFontScale,
-                Alignment = TextAlignment.Right,
+                Alignment = TextAlignment.Left,
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(SceneLabelWidth, SceneLabelHeight),
                 RenderOrder2D = SceneLabelRenderOrder
@@ -54,9 +43,11 @@ namespace city.rendering.tools {
             saveComponent.SetAssetReference(
                 labelComponent,
                 FontReferenceName,
-                DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
-            PlatformEditingService.RemoveComponent(labelComponent, saveComponent, NintendoDsPlatformId);
-            PlatformEditingService.RemoveComponent(labelComponent, saveComponent, Nintendo3DsPlatformId);
+                global::helengine.SceneAssetReferenceFactory.CreateFileSystemFont(SceneLabelFontRelativePath));
+            sceneUiEntity.AddComponent(new city.rendering.DemoDiscDebugSceneLabelComponent());
+            saveComponent.GetOrCreateExistencePlatformOverride(NintendoDsPlatformId).Exists = false;
+            saveComponent.GetOrCreateExistencePlatformOverride(Nintendo3DsPlatformId).Exists = false;
+            labelEntity.Enabled = true;
         }
 
         EntitySaveComponent FindRequiredEntitySaveComponent(Entity entity) {

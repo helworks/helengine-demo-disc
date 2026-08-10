@@ -1287,6 +1287,10 @@ namespace city.game.tools {
                 ReferenceWidth = 1280,
                 ReferenceHeight = 720
             });
+            new DemoDiscSceneLabelOverlayFactory().AttachToSceneUi(
+                entity,
+                ResolveRequiredEditorFont(),
+                levelEntry.DisplayName);
 
             CreateUiTextEntity(entity, "TiltTrialTimerText", new float3(530f, 16f, 0f), global::city.game.TiltTrialLevelSelectComponent.FormatTimerSeconds(levelEntry.StartTimeSeconds), new int2(220, 56), 2.2f, 1, new byte4(255, 246, 223, 255), TextAlignment.Center);
 

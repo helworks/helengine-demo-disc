@@ -1,17 +1,18 @@
 namespace city.tests {
     /// <summary>
-    /// Verifies the generated Tilt Trial scene source emits selectors and presentation Blueprints without rewriting gameplay levels.
+    /// Verifies the generated Tilt Trial scene source emits selectors, gameplay levels, and presentation Blueprints.
     /// </summary>
     public sealed class TiltTrialSceneGenerationSourceTests {
         [Fact]
-        public void Game_scene_generator_writes_selectors_and_presentation_blueprints_without_gameplay_levels() {
+        public void Game_scene_generator_writes_selectors_gameplay_levels_and_presentation_blueprints() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
 
             Assert.Contains("CreateTiltTrialScene()", source, StringComparison.Ordinal);
             Assert.Contains("sceneWriteService.WriteScene(projectRootPath, tiltTrialLevelSelectScene);", source, StringComparison.Ordinal);
+            Assert.Contains("CreateTiltTrialLevelScenes()", source, StringComparison.Ordinal);
+            Assert.Contains("sceneWriteService.WriteScene(projectRootPath, tiltTrialLevelScenes[index]);", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialGameplayPresentationBlueprintGenerator", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialHandheldLevelSelectSceneFactory", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("sceneWriteService.WriteScene(projectRootPath, tiltTrialLevelScenes[index]);", source, StringComparison.Ordinal);
         }
 
         [Fact]

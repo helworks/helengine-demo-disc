@@ -20,14 +20,18 @@ namespace city.tests {
             string sourcePath = Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "DemoDiscSceneLabelOverlayFactory.cs");
             Assert.True(File.Exists(sourcePath), $"Expected '{sourcePath}' to exist.");
             string source = File.ReadAllText(sourcePath);
-            Assert.Contains("const int ReferenceViewportWidth = 1280;", source, StringComparison.Ordinal);
-            Assert.Contains("const int ReferenceViewportHeight = 720;", source, StringComparison.Ordinal);
             Assert.Contains("const float SceneLabelRight = 24f;", source, StringComparison.Ordinal);
-            Assert.Contains("const float SceneLabelTop = 24f;", source, StringComparison.Ordinal);
-            Assert.Contains("BindingMode = ViewportComponent.ScreenBindingMode", source, StringComparison.Ordinal);
-            Assert.Contains("Alignment = TextAlignment.Right", source, StringComparison.Ordinal);
-            Assert.Contains("DemoDiscSceneComponentRecordFactory.CreateEditorFontReference()", source, StringComparison.Ordinal);
+            Assert.Contains("const float SceneLabelTop = 72f;", source, StringComparison.Ordinal);
+            Assert.Contains("CreateChild(sceneUiEntity, LabelEntityName)", source, StringComparison.Ordinal);
+            Assert.Contains("const int SceneLabelCanvasWidth = 1280;", source, StringComparison.Ordinal);
+            Assert.Contains("SceneLabelCanvasWidth - SceneLabelRight - SceneLabelWidth", source, StringComparison.Ordinal);
+            Assert.Contains("labelEntity.Static = false;", source, StringComparison.Ordinal);
+            Assert.Contains("Alignment = TextAlignment.Left", source, StringComparison.Ordinal);
+            Assert.Contains("SceneAssetReferenceFactory.CreateFileSystemFont(SceneLabelFontRelativePath)", source, StringComparison.Ordinal);
+            Assert.Contains("const int SceneLabelRenderOrder = 7;", source, StringComparison.Ordinal);
             Assert.Contains("RenderOrder2D = SceneLabelRenderOrder", source, StringComparison.Ordinal);
+            Assert.Contains("sceneUiEntity.AddComponent(new city.rendering.DemoDiscDebugSceneLabelComponent())", source, StringComparison.Ordinal);
+            Assert.Contains("labelEntity.Enabled = true;", source, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -37,9 +41,9 @@ namespace city.tests {
             string source = File.ReadAllText(sourcePath);
             Assert.Contains("const string NintendoDsPlatformId = \"ds\";", source, StringComparison.Ordinal);
             Assert.Contains("const string Nintendo3DsPlatformId = \"3ds\";", source, StringComparison.Ordinal);
-            Assert.Contains("ComponentPlatformEditingService", source, StringComparison.Ordinal);
-            Assert.Contains("PlatformEditingService.RemoveComponent(labelComponent, saveComponent, NintendoDsPlatformId);", source, StringComparison.Ordinal);
-            Assert.Contains("PlatformEditingService.RemoveComponent(labelComponent, saveComponent, Nintendo3DsPlatformId);", source, StringComparison.Ordinal);
+            Assert.Contains("saveComponent.GetOrCreateExistencePlatformOverride(NintendoDsPlatformId).Exists = false;", source, StringComparison.Ordinal);
+            Assert.Contains("saveComponent.GetOrCreateExistencePlatformOverride(Nintendo3DsPlatformId).Exists = false;", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("RemoveComponent(labelComponent", source, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -76,9 +80,8 @@ namespace city.tests {
         }
 
         [Fact]
-        public void Game_and_handheld_generators_do_not_reference_the_label_overlay() {
+        public void Gameplay_scene_generator_uses_the_debug_scene_label_overlay() {
             string[] paths = [
-                Path.Combine(ProjectRootPath, "assets", "codebase", "game.tools", "GameSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "NintendoDsRenderingSceneScaffoldFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "physics.tools", "PhysicsNintendoDsSceneGenerator.cs")
             ];
@@ -86,7 +89,17 @@ namespace city.tests {
                 Assert.DoesNotContain("DemoDiscSceneLabelOverlayFactory", File.ReadAllText(path), StringComparison.Ordinal);
             }
 
-            string physicsSource = File.ReadAllText(paths[2]);
+            string gameplaySource = File.ReadAllText(Path.Combine(ProjectRootPath, "assets", "codebase", "game.tools", "GameSceneFactory.cs"));
+            Assert.Contains("DemoDiscSceneLabelOverlayFactory", gameplaySource, StringComparison.Ordinal);
+            Assert.Contains("levelEntry.DisplayName", gameplaySource, StringComparison.Ordinal);
+
+            string runtimeSource = File.ReadAllText(Path.Combine(ProjectRootPath, "assets", "codebase", "rendering", "DemoDiscDebugSceneLabelComponent.cs"));
+            Assert.Contains("#if HELENGINE_ENV_DEBUG", runtimeSource, StringComparison.Ordinal);
+            Assert.Contains("overlayEntity.Enabled = false", runtimeSource, StringComparison.Ordinal);
+            Assert.Contains("SetOverlayVisibility();", runtimeSource, StringComparison.Ordinal);
+            Assert.Contains("public override void ComponentAdded(Entity entity)", runtimeSource, StringComparison.Ordinal);
+
+            string physicsSource = File.ReadAllText(paths[1]);
             Assert.Contains("static readonly string[] NintendoHandheldPlatformIds = [\"ds\", \"3ds\"];", physicsSource, StringComparison.Ordinal);
             Assert.Contains("authoredSceneAsset.RootEntities = RemoveNintendoHandheldOnlyEntities(authoredSceneAsset.RootEntities, supportedPlatformIds);", physicsSource, StringComparison.Ordinal);
             Assert.Contains("SceneEntityAsset[] RemoveNintendoHandheldOnlyEntities", physicsSource, StringComparison.Ordinal);

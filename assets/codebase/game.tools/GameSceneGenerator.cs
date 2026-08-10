@@ -43,6 +43,10 @@ namespace city.game.tools {
             presentationBlueprintGenerator.Generate(projectRootPath, factory);
             GeneratedAuthoringSceneDefinition tiltTrialLevelSelectScene = factory.CreateTiltTrialScene();
             sceneWriteService.WriteScene(projectRootPath, tiltTrialLevelSelectScene);
+            IReadOnlyList<GeneratedAuthoringSceneDefinition> tiltTrialLevelScenes = factory.CreateTiltTrialLevelScenes();
+            for (int index = 0; index < tiltTrialLevelScenes.Count; index++) {
+                sceneWriteService.WriteScene(projectRootPath, tiltTrialLevelScenes[index]);
+            }
             TiltTrialHandheldLevelSelectSceneFactory handheldLevelSelectSceneFactory = new TiltTrialHandheldLevelSelectSceneFactory();
             GeneratedAuthoringSceneDefinition handheldLevelSelectScene = handheldLevelSelectSceneFactory.Create(factory);
             sceneWriteService.WriteScene(projectRootPath, handheldLevelSelectScene);
