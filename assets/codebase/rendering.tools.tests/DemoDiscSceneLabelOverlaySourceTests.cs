@@ -24,6 +24,7 @@ namespace city.tests {
             Assert.Contains("const float SceneLabelTop = 72f;", source, StringComparison.Ordinal);
             Assert.Contains("CreateChild(sceneUiEntity, LabelEntityName)", source, StringComparison.Ordinal);
             Assert.Contains("const int SceneLabelCanvasWidth = 1280;", source, StringComparison.Ordinal);
+            Assert.Contains("const string SceneLabelFontRelativePath = \"Fonts/DemoDiscBody.ttf\";", source, StringComparison.Ordinal);
             Assert.Contains("SceneLabelCanvasWidth - SceneLabelRight - SceneLabelWidth", source, StringComparison.Ordinal);
             Assert.Contains("labelEntity.Static = false;", source, StringComparison.Ordinal);
             Assert.Contains("Alignment = TextAlignment.Left", source, StringComparison.Ordinal);

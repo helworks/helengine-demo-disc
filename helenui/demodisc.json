@@ -3815,11 +3815,19 @@
             }
           },
           {
+            "id": "tilt-level-1-debug-label",
+            "type": "text_must_appear",
+            "weight": 1.5,
+            "params": {
+              "text": "Level 1"
+            }
+          },
+          {
             "id": "tilt-level-1-route-evidence",
             "type": "visual_cue",
             "weight": 0.75,
             "params": {
-              "description": "Common active Tilt Trial gameplay HUD; console level identity is supplied by the selector route because the console presentation does not render a level label."
+              "description": "Common active Tilt Trial gameplay HUD; Debug builds also render the level identity in the top-right diagnostic label."
             }
           }
         ]
@@ -3942,11 +3950,19 @@
             }
           },
           {
+            "id": "tilt-level-2-debug-label",
+            "type": "text_must_appear",
+            "weight": 1.5,
+            "params": {
+              "text": "Level 2"
+            }
+          },
+          {
             "id": "tilt-level-2-route-evidence",
             "type": "visual_cue",
             "weight": 0.75,
             "params": {
-              "description": "Common active Tilt Trial gameplay HUD; console level identity is supplied by the selector route because the console presentation does not render a level label."
+              "description": "Common active Tilt Trial gameplay HUD; Debug builds also render the level identity in the top-right diagnostic label."
             }
           }
         ]
@@ -4069,11 +4085,19 @@
             }
           },
           {
+            "id": "tilt-level-3-debug-label",
+            "type": "text_must_appear",
+            "weight": 1.5,
+            "params": {
+              "text": "Level 3"
+            }
+          },
+          {
             "id": "tilt-level-3-route-evidence",
             "type": "visual_cue",
             "weight": 0.75,
             "params": {
-              "description": "Common active Tilt Trial gameplay HUD; console level identity is supplied by the selector route because the console presentation does not render a level label."
+              "description": "Common active Tilt Trial gameplay HUD; Debug builds also render the level identity in the top-right diagnostic label."
             }
           }
         ]
@@ -4196,11 +4220,19 @@
             }
           },
           {
+            "id": "tilt-level-4-debug-label",
+            "type": "text_must_appear",
+            "weight": 1.5,
+            "params": {
+              "text": "Level 4"
+            }
+          },
+          {
             "id": "tilt-level-4-route-evidence",
             "type": "visual_cue",
             "weight": 0.75,
             "params": {
-              "description": "Common active Tilt Trial gameplay HUD; console level identity is supplied by the selector route because the console presentation does not render a level label."
+              "description": "Common active Tilt Trial gameplay HUD; Debug builds also render the level identity in the top-right diagnostic label."
             }
           }
         ]
@@ -4323,11 +4355,19 @@
             }
           },
           {
+            "id": "tilt-level-5-debug-label",
+            "type": "text_must_appear",
+            "weight": 1.5,
+            "params": {
+              "text": "Level 5"
+            }
+          },
+          {
             "id": "tilt-level-5-route-evidence",
             "type": "visual_cue",
             "weight": 0.75,
             "params": {
-              "description": "Common active Tilt Trial gameplay HUD; console level identity is supplied by the selector route because the console presentation does not render a level label."
+              "description": "Common active Tilt Trial gameplay HUD; Debug builds also render the level identity in the top-right diagnostic label."
             }
           }
         ]
