@@ -8,9 +8,9 @@ namespace city.rendering.tools {
         const int SceneLabelCanvasWidth = 1280;
         const float SceneLabelRight = 24f;
         const float SceneLabelTop = 72f;
-        const int SceneLabelWidth = 520;
+        const int SceneLabelWidth = 656;
         const int SceneLabelHeight = 56;
-        const float SceneLabelFontScale = 1f;
+        const float SceneLabelFontScale = 1.35f;
         const int SceneLabelRenderOrder = 7;
         public void AttachToSceneUi(Entity sceneUiEntity, FontAsset font, string labelText) {
             if (sceneUiEntity == null) {
@@ -33,7 +33,7 @@ namespace city.rendering.tools {
                 Text = labelText,
                 Font = font,
                 FontScale = SceneLabelFontScale,
-                Alignment = TextAlignment.Left,
+                Alignment = TextAlignment.Right,
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(SceneLabelWidth, SceneLabelHeight),
                 RenderOrder2D = SceneLabelRenderOrder

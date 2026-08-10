@@ -27,7 +27,7 @@ namespace city.tests {
             Assert.Contains("const string SceneLabelFontRelativePath = \"Fonts/DemoDiscBody.ttf\";", source, StringComparison.Ordinal);
             Assert.Contains("SceneLabelCanvasWidth - SceneLabelRight - SceneLabelWidth", source, StringComparison.Ordinal);
             Assert.Contains("labelEntity.Static = false;", source, StringComparison.Ordinal);
-            Assert.Contains("Alignment = TextAlignment.Left", source, StringComparison.Ordinal);
+            Assert.Contains("Alignment = TextAlignment.Right", source, StringComparison.Ordinal);
             Assert.Contains("SceneAssetReferenceFactory.CreateFileSystemFont(SceneLabelFontRelativePath)", source, StringComparison.Ordinal);
             Assert.Contains("const int SceneLabelRenderOrder = 7;", source, StringComparison.Ordinal);
             Assert.Contains("RenderOrder2D = SceneLabelRenderOrder", source, StringComparison.Ordinal);
