@@ -126,6 +126,18 @@ namespace city.tests {
             Assert.Contains("RefreshOverlayPresentation();", startStateMethodSource, StringComparison.Ordinal);
         }
 
+        /// <summary>
+        /// Ensures every non-playing Tilt Trial session state stops shared fixed-step physics and scene disposal releases that stop.
+        /// </summary>
+        [Fact]
+        public void Session_pauses_shared_physics_until_playing_and_releases_it_on_disposal() {
+            string source = File.ReadAllText(ResolveTiltTrialSessionComponentSourcePath());
+
+            Assert.Contains("Core.Instance.PhysicsSimulationIsPaused = updatesAreSuppressed;", source, StringComparison.Ordinal);
+            Assert.Contains("public override void Dispose()", source, StringComparison.Ordinal);
+            Assert.Contains("Core.Instance.PhysicsSimulationIsPaused = false;", source, StringComparison.Ordinal);
+        }
+
         [Fact]
         public void Format_coin_progress_returns_expected_hud_label() {
             string label = city.game.TiltTrialSessionComponent.FormatCoinProgress(3, 7);
@@ -149,6 +161,20 @@ namespace city.tests {
             Assert.DoesNotContain("dx <=", source, StringComparison.Ordinal);
             Assert.DoesNotContain("dy <=", source, StringComparison.Ordinal);
             Assert.DoesNotContain("dz <=", source, StringComparison.Ordinal);
+        }
+
+        static string ResolveTiltTrialSessionComponentSourcePath() {
+            DirectoryInfo directory = new DirectoryInfo(AppContext.BaseDirectory);
+            while (directory != null) {
+                string candidate = Path.Combine(directory.FullName, "assets", "codebase", "game", "TiltTrialSessionComponent.cs");
+                if (File.Exists(candidate)) {
+                    return candidate;
+                }
+
+                directory = directory.Parent;
+            }
+
+            throw new FileNotFoundException("Unable to locate TiltTrialSessionComponent.cs from the active test checkout.");
         }
 
         static helengine.Entity CreateEntity(helengine.Entity parent, List<helengine.Component> components) {
