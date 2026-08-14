@@ -1,0 +1,4 @@
+interface:
+  display_name: "Platform Boot Workflow"
+  short_description: "Launch platform builds through their owned scripts"
+  default_prompt: "Use $boot-platform-builds to build and launch the current platform artifact."
