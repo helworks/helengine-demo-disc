@@ -117,6 +117,16 @@ namespace city.game {
         }
 
         /// <summary>
+        /// Releases the shared physics pause when this session leaves the active scene.
+        /// </summary>
+        public override void Dispose() {
+            if (Core.Instance != null) {
+                Core.Instance.PhysicsSimulationIsPaused = false;
+            }
+            base.Dispose();
+        }
+
+        /// <summary>
         /// Advances gameplay countdown state or overlay interaction depending on the active session state.
         /// </summary>
         public override void Update() {
@@ -696,6 +706,9 @@ namespace city.game {
         }
 
         void SetGameplayUpdatesSuppressed(bool updatesAreSuppressed) {
+            if (Core.Instance != null) {
+                Core.Instance.PhysicsSimulationIsPaused = updatesAreSuppressed;
+            }
             if (StageComponent != null) {
                 StageComponent.UpdatesAreSuppressed = updatesAreSuppressed;
             }
