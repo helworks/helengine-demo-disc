@@ -18,15 +18,25 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates the canonical ground-cube probe live scene definition.
         /// </summary>
+        /// <param name="projectRootPath">Absolute or relative project root path used to resolve generated prompt icons.</param>
         /// <param name="cubeModel">Generated cube runtime model assigned to the authored meshes.</param>
         /// <param name="standardMaterial">Generated standard runtime material assigned to the authored meshes.</param>
         /// <returns>Live-authored ground-cube probe scene definition.</returns>
-        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
-            if (cubeModel == null) {
+        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(string projectRootPath, RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (cubeModel == null) {
                 throw new ArgumentNullException(nameof(cubeModel));
             } else if (standardMaterial == null) {
                 throw new ArgumentNullException(nameof(standardMaterial));
             }
+
+            FontAsset instructionFont = ResolveRequiredEditorFont();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
+            ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
+            consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -38,6 +48,8 @@ namespace city.rendering.tools {
                     CreateCameraEntity(),
                     CreateUiEntity(),
                     CreateDirectionalLightEntity(),
+                    instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity,
                     CreateGroundEntity(cubeModel, standardMaterial),
                     CreateCubeEntity(cubeModel, standardMaterial)
                 }
@@ -75,26 +87,19 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
+            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+                OrbitCenter = float3.Zero,
+                AutoYawSpeedRadians = 0f
+            });
             return entity;
         }
 
         /// <summary>
-        /// Creates the authored UI root entity for the ground-cube probe scene so every render probe exposes the shared FPS and return controls.
+        /// Creates the authored UI root entity for the ground-cube probe scene so every render probe exposes the shared overlay kit.
         /// </summary>
         /// <returns>Live authored UI root entity.</returns>
         Entity CreateUiEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("GroundCubeProbeUi");
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.LocalPosition = float3.Zero;
-            entity.LocalScale = float3.One;
-            entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new FPSComponent {
-                Font = ResolveRequiredEditorFont(),
-                FontScale = 2f
-            });
-            PspFpsComponentOverrideService.Apply(entity);
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
-            return entity;
+            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("GroundCubeProbeUi", string.Empty);
         }
 
         /// <summary>
@@ -139,7 +144,7 @@ namespace city.rendering.tools {
                 RenderOrder3D = 0
             });
             entity.AddComponent(CreateStaticRigidBodyComponent());
-            entity.AddComponent(CreateBoxColliderComponent(new float3(15f, 1f, 15f)));
+            entity.AddComponent(CreateBoxColliderComponent(float3.One));
             return entity;
         }
 

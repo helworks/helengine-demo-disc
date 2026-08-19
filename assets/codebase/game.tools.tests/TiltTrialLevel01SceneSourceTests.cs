@@ -53,10 +53,10 @@ namespace city.tests {
         public void Game_scene_factory_configures_playable_level_01_walls_and_ground_for_ps2_and_psp_tessellation() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
 
-            Assert.Contains("CreateKinematicCourseBoxEntity(\"StartPad\", new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity, true)", source, StringComparison.Ordinal);
+            Assert.Contains("CreateKinematicCourseBoxEntity(\"StartPad\", new float3(0f, 0f, -6.6f), new float3(7f, 1f, 7f), float4.Identity, true)", source, StringComparison.Ordinal);
             Assert.Contains("CreateKinematicCourseBoxEntity(\"Ramp\", new float3(0f, -0.05f, -0.1f), new float3(6f, 0.9f, 8f), orientation, true)", source, StringComparison.Ordinal);
-            Assert.Contains("CreateKinematicCourseBoxEntity(\"Bridge\", new float3(0f, 0.5f, 5.8f), new float3(4.2f, 0.8f, 8.4f), float4.Identity, true)", source, StringComparison.Ordinal);
-            Assert.Contains("CreateKinematicCourseBoxEntity(\"FinalPlatform\", new float3(1.35f, 0.2f, 13.8f), new float3(8.4f, 0.9f, 8.8f), float4.Identity, true)", source, StringComparison.Ordinal);
+            Assert.Contains("CreateKinematicCourseBoxEntity(\"Bridge\", new float3(0f, 0.5f, 5.8f), new float3(2.5f, 1f, 11.5f), float4.Identity, true)", source, StringComparison.Ordinal);
+            Assert.Contains("CreateKinematicCourseBoxEntity(\"FinalPlatform\", new float3(1.35f, 0.2f, 13.8f), new float3(8.4f, 1f, 8.8f), float4.Identity, true)", source, StringComparison.Ordinal);
             Assert.Contains("CreateKinematicCourseBoxEntity(\"LeftWall\", new float3(-3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity, true)", source, StringComparison.Ordinal);
             Assert.Contains("CreateKinematicCourseBoxEntity(\"RightWall\", new float3(3.1f, 1.25f, 2.8f), new float3(0.8f, 2.8f, 19.8f), float4.Identity, true)", source, StringComparison.Ordinal);
         }

@@ -16,8 +16,6 @@
                                                    "test_scene_dynamic_stack_boxes",
                                                    "test_scene_dynamic_sphere_stack",
                                                    "test_scene_dynamic_mixed_stack",
-                                                   "test_scene_static_mesh_showcase",
-                                                   "test_scene_static_mesh_minimal",
                                                    "tilt_trial",
                                                    "tilt_trial_level_01",
                                                    "tilt_trial_level_02",
@@ -32,87 +30,79 @@
                                               {
                                                   "sceneId":  "HelenOfCodeSplash",
                                                   "orderNumber":  1
-                                                   },
-                                               {
-                                                   "sceneId":  "SceneLoadingScreen",
-                                                   "orderNumber":  2
-                                                    },
-                                               {
-                                                   "sceneId":  "DemoDiscMainMenu",
-                                                   "orderNumber":  3
-                                                   },
+                                              },
+                                              {
+                                                  "sceneId":  "SceneLoadingScreen",
+                                                  "orderNumber":  2
+                                              },
+                                              {
+                                                  "sceneId":  "DemoDiscMainMenu",
+                                                  "orderNumber":  3
+                                              },
                                               {
                                                   "sceneId":  "cube_test",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "colored_cube_grid",
                                                   "orderNumber":  3
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "textured_cube_grid",
                                                   "orderNumber":  4
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test",
                                                   "orderNumber":  5
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test2",
                                                   "orderNumber":  6
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_matrix_render",
                                                   "orderNumber":  7
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "directional_shadow_plaza",
                                                   "orderNumber":  8
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_stack_boxes",
                                                   "orderNumber":  9
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_sphere_stack",
                                                   "orderNumber":  10
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_mixed_stack",
                                                   "orderNumber":  11
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_showcase",
-                                                  "orderNumber":  12
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_minimal",
-                                                  "orderNumber":  13
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial",
                                                   "orderNumber":  14
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_01",
                                                   "orderNumber":  15
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_02",
                                                   "orderNumber":  16
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_03",
                                                   "orderNumber":  17
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_04",
                                                   "orderNumber":  18
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_05",
                                                   "orderNumber":  19
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "pbr_material_gallery",
                                                   "orderNumber":  20
@@ -128,7 +118,11 @@
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\windows",
                           "debugBuild":  false,
+                          "selectedEnvironmentId":  "release",
                           "selectedBuildProfileId":  "release",
+                          "editorPrebuildCommandIdsByBuildProfileId":  {
+
+                                                                       },
                           "selectedGraphicsProfileId":  "directx11",
                           "selectedBuildOptionValues":  {
                                                             "texture-scale-percent":  "100",
@@ -166,8 +160,6 @@
                                                    "test_scene_dynamic_stack_boxes",
                                                    "test_scene_dynamic_sphere_stack",
                                                    "test_scene_dynamic_mixed_stack",
-                                                   "test_scene_static_mesh_showcase",
-                                                   "test_scene_static_mesh_minimal",
                                                    "tilt_trial",
                                                    "tilt_trial_level_01",
                                                    "tilt_trial_level_02",
@@ -229,14 +221,6 @@
                                                   "orderNumber":  13
                                               },
                                               {
-                                                  "sceneId":  "test_scene_static_mesh_showcase",
-                                                  "orderNumber":  14
-                                              },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_minimal",
-                                                  "orderNumber":  15
-                                              },
-                                              {
                                                   "sceneId":  "tilt_trial",
                                                   "orderNumber":  16
                                               },
@@ -263,28 +247,31 @@
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\ps2-city-demo-disc",
                           "debugBuild":  true,
+                          "selectedEnvironmentId":  "release",
                           "selectedBuildProfileId":  "ps2-default",
                           "editorPrebuildCommandIdsByBuildProfileId":  {
-                                                                            "ps2-default":  [
-                                                                                                "menu.generate-game-scenes",
-                                                                                                "menu.generate-rendering-scenes",
-                                                                                                "menu.regenerate-demo-disc-main-menu",
-                                                                                                "menu.attach-tilt-trial-presentation-blueprints"
-                                                                                            ],
-                                                                            "debug":  [
-                                                                                          "menu.generate-game-scenes",
-                                                                                          "menu.generate-rendering-scenes",
-                                                                                          "menu.regenerate-demo-disc-main-menu",
-                                                                                          "menu.attach-tilt-trial-presentation-blueprints"
-                                                                                      ],
-                                                                            "release":  [
-                                                                                            "menu.generate-game-scenes",
-                                                                                            "menu.generate-rendering-scenes",
-                                                                                            "menu.regenerate-demo-disc-main-menu",
-                                                                                            "menu.attach-tilt-trial-presentation-blueprints"
-                                                                                        ],
-                                                                            "colored-cube-grid":  []
-                                                                        },
+                                                                           "ps2-default":  [
+                                                                                               "menu.generate-game-scenes",
+                                                                                               "menu.generate-rendering-scenes",
+                                                                                               "menu.regenerate-demo-disc-main-menu",
+                                                                                               "menu.attach-tilt-trial-presentation-blueprints"
+                                                                                           ],
+                                                                           "debug":  [
+                                                                                         "menu.generate-game-scenes",
+                                                                                         "menu.generate-rendering-scenes",
+                                                                                         "menu.regenerate-demo-disc-main-menu",
+                                                                                         "menu.attach-tilt-trial-presentation-blueprints"
+                                                                                     ],
+                                                                           "release":  [
+                                                                                           "menu.generate-game-scenes",
+                                                                                           "menu.generate-rendering-scenes",
+                                                                                           "menu.regenerate-demo-disc-main-menu",
+                                                                                           "menu.attach-tilt-trial-presentation-blueprints"
+                                                                                       ],
+                                                                           "colored-cube-grid":  [
+
+                                                                                                 ]
+                                                                       },
                           "selectedGraphicsProfileId":  "ps2-standard-forward",
                           "selectedBuildOptionValues":  {
                                                             "texture-scale-percent":  "100",
@@ -309,97 +296,122 @@
                       {
                           "platformId":  "psp",
                           "selectedSceneIds":  [
-                                                   "tilt_trial_level_01"
+                                                   "HelenOfCodeSplash",
+                                                   "SceneLoadingScreen",
+                                                   "DemoDiscMainMenu",
+                                                   "cube_test",
+                                                   "colored_cube_grid",
+                                                   "textured_cube_grid",
+                                                   "axis_test",
+                                                   "axis_test2",
+                                                   "test_scene_matrix_render",
+                                                   "directional_shadow_plaza",
+                                                   "test_scene_dynamic_stack_boxes",
+                                                   "test_scene_dynamic_sphere_stack",
+                                                   "test_scene_dynamic_mixed_stack",
+                                                   "tilt_trial",
+                                                   "tilt_trial_level_01",
+                                                   "tilt_trial_level_02",
+                                                   "tilt_trial_level_03",
+                                                   "tilt_trial_level_04",
+                                                   "tilt_trial_level_05"
                                                ],
                           "sceneOrders":  [
                                               {
                                                   "sceneId":  "HelenOfCodeSplash",
                                                   "orderNumber":  1
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "SceneLoadingScreen",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "DemoDiscMainMenu",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "cube_test",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "colored_cube_grid",
                                                   "orderNumber":  3
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "textured_cube_grid",
                                                   "orderNumber":  4
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test",
                                                   "orderNumber":  5
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test2",
                                                   "orderNumber":  6
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_matrix_render",
                                                   "orderNumber":  7
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "directional_shadow_plaza",
                                                   "orderNumber":  8
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_stack_boxes",
                                                   "orderNumber":  9
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_sphere_stack",
                                                   "orderNumber":  10
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_mixed_stack",
                                                   "orderNumber":  11
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_showcase",
-                                                  "orderNumber":  12
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_minimal",
-                                                  "orderNumber":  13
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial",
                                                   "orderNumber":  14
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_01",
                                                   "orderNumber":  15
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_02",
                                                   "orderNumber":  16
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_03",
                                                   "orderNumber":  17
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_04",
                                                   "orderNumber":  18
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_05",
                                                   "orderNumber":  19
-                                                   }
+                                              }
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\psp-platform-info-startup",
                           "debugBuild":  true,
+                          "selectedEnvironmentId":  "release",
                           "selectedBuildProfileId":  "debug",
+                          "editorPrebuildCommandIdsByBuildProfileId":  {
+                                                                           "debug":  [
+                                                                                         "menu.generate-game-scenes",
+                                                                                         "menu.generate-rendering-scenes",
+                                                                                         "menu.regenerate-demo-disc-main-menu",
+                                                                                         "menu.attach-tilt-trial-presentation-blueprints"
+                                                                                     ],
+                                                                           "release":  [
+                                                                                           "menu.generate-game-scenes",
+                                                                                           "menu.generate-rendering-scenes",
+                                                                                           "menu.regenerate-demo-disc-main-menu",
+                                                                                           "menu.attach-tilt-trial-presentation-blueprints"
+                                                                                       ]
+                                                                       },
                           "selectedGraphicsProfileId":  "psp-forward",
                           "selectedBuildOptionValues":  {
                                                             "texture-scale-percent":  "100",
@@ -436,8 +448,6 @@
                                                    "test_scene_dynamic_stack_boxes",
                                                    "test_scene_dynamic_sphere_stack",
                                                    "test_scene_dynamic_mixed_stack",
-                                                   "test_scene_static_mesh_showcase",
-                                                   "test_scene_static_mesh_minimal",
                                                    "tilt_trial",
                                                    "tilt_trial_level_01",
                                                    "tilt_trial_level_02",
@@ -449,91 +459,87 @@
                                               {
                                                   "sceneId":  "HelenOfCodeSplash",
                                                   "orderNumber":  1
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "SceneLoadingScreen",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "DemoDiscMainMenu",
                                                   "orderNumber":  3
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "cube_test",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "colored_cube_grid",
                                                   "orderNumber":  3
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "textured_cube_grid",
                                                   "orderNumber":  4
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test",
                                                   "orderNumber":  5
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test2",
                                                   "orderNumber":  6
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_matrix_render",
                                                   "orderNumber":  7
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "directional_shadow_plaza",
                                                   "orderNumber":  8
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_stack_boxes",
                                                   "orderNumber":  9
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_sphere_stack",
                                                   "orderNumber":  10
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_mixed_stack",
                                                   "orderNumber":  11
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_showcase",
-                                                  "orderNumber":  12
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_minimal",
-                                                  "orderNumber":  13
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial",
                                                   "orderNumber":  14
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_01",
                                                   "orderNumber":  15
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_02",
                                                   "orderNumber":  16
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_03",
                                                   "orderNumber":  17
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_04",
                                                   "orderNumber":  18
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_05",
                                                   "orderNumber":  19
-                                                   }
+                                              }
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\gamecube",
                           "debugBuild":  true,
+                          "selectedEnvironmentId":  "release",
                           "selectedBuildProfileId":  "gamecube-default",
+                          "editorPrebuildCommandIdsByBuildProfileId":  {
+
+                                                                       },
                           "selectedGraphicsProfileId":  "gx",
                           "selectedBuildOptionValues":  {
                                                             "texture-scale-percent":  "100",
@@ -570,8 +576,6 @@
                                                    "test_scene_dynamic_stack_boxes",
                                                    "test_scene_dynamic_sphere_stack",
                                                    "test_scene_dynamic_mixed_stack",
-                                                   "test_scene_static_mesh_showcase",
-                                                   "test_scene_static_mesh_minimal",
                                                    "tilt_trial",
                                                    "tilt_trial_level_01",
                                                    "tilt_trial_level_02",
@@ -583,91 +587,87 @@
                                               {
                                                   "sceneId":  "HelenOfCodeSplash",
                                                   "orderNumber":  1
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "SceneLoadingScreen",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "DemoDiscMainMenu",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "cube_test",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "colored_cube_grid",
                                                   "orderNumber":  3
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "textured_cube_grid",
                                                   "orderNumber":  4
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test",
                                                   "orderNumber":  5
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test2",
                                                   "orderNumber":  6
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_matrix_render",
                                                   "orderNumber":  7
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "directional_shadow_plaza",
                                                   "orderNumber":  8
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_stack_boxes",
                                                   "orderNumber":  9
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_sphere_stack",
                                                   "orderNumber":  10
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_mixed_stack",
                                                   "orderNumber":  11
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_showcase",
-                                                  "orderNumber":  12
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_minimal",
-                                                  "orderNumber":  13
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial",
                                                   "orderNumber":  14
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_01",
                                                   "orderNumber":  15
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_02",
                                                   "orderNumber":  16
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_03",
                                                   "orderNumber":  17
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_04",
                                                   "orderNumber":  18
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_05",
                                                   "orderNumber":  19
-                                                   }
+                                              }
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\wii",
                           "debugBuild":  true,
+                          "selectedEnvironmentId":  "release",
                           "selectedBuildProfileId":  "wii-default",
+                          "editorPrebuildCommandIdsByBuildProfileId":  {
+
+                                                                       },
                           "selectedGraphicsProfileId":  "",
                           "selectedBuildOptionValues":  {
                                                             "texture-scale-percent":  "100",
@@ -690,27 +690,25 @@
                       },
                       {
                           "platformId":  "ds",
-                "selectedSceneIds":  [
-                                             "DemoDiscMainMenuHandheld",
-                                             "cube_test",
-                                             "colored_cube_grid",
-                                             "textured_cube_grid",
-                                             "axis_test",
-                                             "axis_test2",
-                                             "test_scene_matrix_render",
-                                             "directional_shadow_plaza",
-                                             "test_scene_dynamic_stack_boxes",
-                                             "test_scene_dynamic_sphere_stack",
-                                             "test_scene_dynamic_mixed_stack",
-                                             "test_scene_static_mesh_showcase",
-                                             "test_scene_static_mesh_minimal",
-                                             "tilt_trial_ds",
-                                             "tilt_trial_level_01",
-                                             "tilt_trial_level_02",
-                                             "tilt_trial_level_03",
-                                             "tilt_trial_level_04",
-                                             "tilt_trial_level_05"
-                                         ],
+                          "selectedSceneIds":  [
+                                                   "DemoDiscMainMenuHandheld",
+                                                   "cube_test",
+                                                   "colored_cube_grid",
+                                                   "textured_cube_grid",
+                                                   "axis_test",
+                                                   "axis_test2",
+                                                   "test_scene_matrix_render",
+                                                   "directional_shadow_plaza",
+                                                   "test_scene_dynamic_stack_boxes",
+                                                   "test_scene_dynamic_sphere_stack",
+                                                   "test_scene_dynamic_mixed_stack",
+                                                   "tilt_trial_ds",
+                                                   "tilt_trial_level_01",
+                                                   "tilt_trial_level_02",
+                                                   "tilt_trial_level_03",
+                                                   "tilt_trial_level_04",
+                                                   "tilt_trial_level_05"
+                                               ],
                           "sceneOrders":  [
                                               {
                                                   "sceneId":  "DemoDiscMainMenu",
@@ -755,14 +753,6 @@
                                               {
                                                   "sceneId":  "test_scene_dynamic_mixed_stack",
                                                   "orderNumber":  12
-                                              },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_showcase",
-                                                  "orderNumber":  13
-                                              },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_minimal",
-                                                  "orderNumber":  14
                                               },
                                               {
                                                   "sceneId":  "spotlight_street_slice",
@@ -799,7 +789,11 @@
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\ds",
                           "debugBuild":  true,
+                          "selectedEnvironmentId":  "release",
                           "selectedBuildProfileId":  "debug",
+                          "editorPrebuildCommandIdsByBuildProfileId":  {
+
+                                                                       },
                           "selectedGraphicsProfileId":  "ds-main-2d",
                           "selectedBuildOptionValues":  {
                                                             "startup-top-screen-color":  "#FF0000",
@@ -836,20 +830,18 @@
                                                    "test_scene_dynamic_stack_boxes",
                                                    "test_scene_dynamic_sphere_stack",
                                                    "test_scene_dynamic_mixed_stack",
-                                                   "test_scene_static_mesh_showcase",
-                                                   "test_scene_static_mesh_minimal",
                                                    "tilt_trial_ds",
                                                    "tilt_trial_level_01",
                                                    "tilt_trial_level_02",
                                                    "tilt_trial_level_03",
                                                    "tilt_trial_level_04",
                                                    "tilt_trial_level_05"
-                                          ],
+                                               ],
                           "sceneOrders":  [
                                               {
                                                   "sceneId":  "DemoDiscMainMenu",
                                                   "orderNumber":  1
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test2",
                                                   "orderNumber":  3
@@ -899,14 +891,6 @@
                                                   "orderNumber":  14
                                               },
                                               {
-                                                  "sceneId":  "test_scene_static_mesh_showcase",
-                                                  "orderNumber":  15
-                                              },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_minimal",
-                                                  "orderNumber":  16
-                                              },
-                                              {
                                                   "sceneId":  "tilt_trial_ds",
                                                   "orderNumber":  17
                                               },
@@ -933,7 +917,11 @@
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\3ds",
                           "debugBuild":  true,
+                          "selectedEnvironmentId":  "release",
                           "selectedBuildProfileId":  "3ds-default",
+                          "editorPrebuildCommandIdsByBuildProfileId":  {
+
+                                                                       },
                           "selectedGraphicsProfileId":  "3ds-bootstrap",
                           "selectedBuildOptionValues":  {
                                                             "startup-top-screen-color":  "#FF0000",
@@ -967,104 +955,98 @@
                                                    "test_scene_dynamic_stack_boxes",
                                                    "test_scene_dynamic_sphere_stack",
                                                    "test_scene_dynamic_mixed_stack",
-                                                   "test_scene_static_mesh_showcase",
-                                                   "test_scene_static_mesh_minimal",
                                                    "tilt_trial",
                                                    "tilt_trial_level_01",
                                                    "tilt_trial_level_02",
                                                    "tilt_trial_level_03",
                                                    "tilt_trial_level_04",
                                                    "tilt_trial_level_05"
-                                          ],
+                                               ],
                           "sceneOrders":  [
                                               {
                                                   "sceneId":  "HelenOfCodeSplash",
                                                   "orderNumber":  1
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "SceneLoadingScreen",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "DemoDiscMainMenu",
                                                   "orderNumber":  3
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "cube_test",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "colored_cube_grid",
                                                   "orderNumber":  3
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "textured_cube_grid",
                                                   "orderNumber":  4
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test",
                                                   "orderNumber":  5
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test2",
                                                   "orderNumber":  6
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_matrix_render",
                                                   "orderNumber":  7
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "directional_shadow_plaza",
                                                   "orderNumber":  8
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_stack_boxes",
                                                   "orderNumber":  9
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_sphere_stack",
                                                   "orderNumber":  10
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_mixed_stack",
                                                   "orderNumber":  11
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_showcase",
-                                                  "orderNumber":  12
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_minimal",
-                                                  "orderNumber":  13
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial",
                                                   "orderNumber":  14
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_01",
                                                   "orderNumber":  15
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_02",
                                                   "orderNumber":  16
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_03",
                                                   "orderNumber":  17
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_04",
                                                   "orderNumber":  18
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_05",
                                                   "orderNumber":  19
-                                                   }
+                                              }
                                           ],
                           "outputDirectoryPath":  "C:\\tmp\\city-psvita-main-menu-cli",
                           "debugBuild":  true,
+                          "selectedEnvironmentId":  "release",
                           "selectedBuildProfileId":  "debug",
+                          "editorPrebuildCommandIdsByBuildProfileId":  {
+
+                                                                       },
                           "selectedGraphicsProfileId":  "psvita-forward",
                           "selectedBuildOptionValues":  {
                                                             "texture-scale-percent":  "100",
@@ -1103,8 +1085,6 @@
                                                    "test_scene_dynamic_stack_boxes",
                                                    "test_scene_dynamic_sphere_stack",
                                                    "test_scene_dynamic_mixed_stack",
-                                                   "test_scene_static_mesh_showcase",
-                                                   "test_scene_static_mesh_minimal",
                                                    "tilt_trial",
                                                    "tilt_trial_level_01",
                                                    "tilt_trial_level_02",
@@ -1116,87 +1096,83 @@
                                               {
                                                   "sceneId":  "HelenOfCodeSplash",
                                                   "orderNumber":  1
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "DemoDiscMainMenu",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "cube_test",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "colored_cube_grid",
                                                   "orderNumber":  3
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "textured_cube_grid",
                                                   "orderNumber":  4
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test",
                                                   "orderNumber":  5
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test2",
                                                   "orderNumber":  6
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_matrix_render",
                                                   "orderNumber":  7
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "directional_shadow_plaza",
                                                   "orderNumber":  8
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_stack_boxes",
                                                   "orderNumber":  9
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_sphere_stack",
                                                   "orderNumber":  10
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_mixed_stack",
                                                   "orderNumber":  11
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_showcase",
-                                                  "orderNumber":  12
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_minimal",
-                                                  "orderNumber":  13
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial",
                                                   "orderNumber":  14
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_01",
                                                   "orderNumber":  15
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_02",
                                                   "orderNumber":  16
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_03",
                                                   "orderNumber":  17
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_04",
                                                   "orderNumber":  18
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_05",
                                                   "orderNumber":  19
-                                                   }
+                                              }
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\switch",
                           "debugBuild":  true,
+                          "selectedEnvironmentId":  "release",
                           "selectedBuildProfileId":  "debug",
+                          "editorPrebuildCommandIdsByBuildProfileId":  {
+
+                                                                       },
                           "selectedGraphicsProfileId":  "switch-native",
                           "selectedBuildOptionValues":  {
                                                             "startup-clear-color":  "#FFFF00"
@@ -1232,8 +1208,6 @@
                                                    "test_scene_dynamic_stack_boxes",
                                                    "test_scene_dynamic_sphere_stack",
                                                    "test_scene_dynamic_mixed_stack",
-                                                   "test_scene_static_mesh_showcase",
-                                                   "test_scene_static_mesh_minimal",
                                                    "tilt_trial",
                                                    "tilt_trial_level_01",
                                                    "tilt_trial_level_02",
@@ -1245,91 +1219,87 @@
                                               {
                                                   "sceneId":  "HelenOfCodeSplash",
                                                   "orderNumber":  1
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "SceneLoadingScreen",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "DemoDiscMainMenu",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "cube_test",
                                                   "orderNumber":  2
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "colored_cube_grid",
                                                   "orderNumber":  3
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "textured_cube_grid",
                                                   "orderNumber":  4
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test",
                                                   "orderNumber":  5
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "axis_test2",
                                                   "orderNumber":  6
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_matrix_render",
                                                   "orderNumber":  7
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "directional_shadow_plaza",
                                                   "orderNumber":  8
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_stack_boxes",
                                                   "orderNumber":  9
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_sphere_stack",
                                                   "orderNumber":  10
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "test_scene_dynamic_mixed_stack",
                                                   "orderNumber":  11
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_showcase",
-                                                  "orderNumber":  12
-                                                   },
-                                              {
-                                                  "sceneId":  "test_scene_static_mesh_minimal",
-                                                  "orderNumber":  13
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial",
                                                   "orderNumber":  14
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_01",
                                                   "orderNumber":  15
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_02",
                                                   "orderNumber":  16
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_03",
                                                   "orderNumber":  17
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_04",
                                                   "orderNumber":  18
-                                                   },
+                                              },
                                               {
                                                   "sceneId":  "tilt_trial_level_05",
                                                   "orderNumber":  19
-                                                   }
+                                              }
                                           ],
                           "outputDirectoryPath":  "C:\\dev\\helprojs\\output\\wiiu",
                           "debugBuild":  true,
+                          "selectedEnvironmentId":  "release",
                           "selectedBuildProfileId":  "wiiu-default",
+                          "editorPrebuildCommandIdsByBuildProfileId":  {
+
+                                                                       },
                           "selectedGraphicsProfileId":  "wiiu-default",
                           "selectedBuildOptionValues":  {
                                                             "texture-scale-percent":  "100",

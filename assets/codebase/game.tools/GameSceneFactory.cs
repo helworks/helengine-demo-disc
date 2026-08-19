@@ -1921,7 +1921,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated kinematic stage piece.</returns>
         Entity CreateLevel01StartPadEntity() {
-            return CreateKinematicCourseBoxEntity("StartPad", new float3(0f, 0f, -6.6f), new float3(7f, 1f, 9f), float4.Identity, true);
+            return CreateKinematicCourseBoxEntity("StartPad", new float3(0f, 0f, -6.6f), new float3(7f, 1f, 7f), float4.Identity, true);
         }
 
         /// <summary>
@@ -1949,7 +1949,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated kinematic stage piece.</returns>
         Entity CreateLevel01BridgeEntity() {
-            return CreateKinematicCourseBoxEntity("Bridge", new float3(0f, 0.5f, 5.8f), new float3(4.2f, 0.8f, 8.4f), float4.Identity, true);
+            return CreateKinematicCourseBoxEntity("Bridge", new float3(0f, 0.5f, 5.8f), new float3(2.5f, 1f, 11.5f), float4.Identity, true);
         }
 
         /// <summary>
@@ -1973,7 +1973,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated kinematic stage piece.</returns>
         Entity CreateLevel01FinalPlatformEntity() {
-            return CreateKinematicCourseBoxEntity("FinalPlatform", new float3(1.35f, 0.2f, 13.8f), new float3(8.4f, 0.9f, 8.8f), float4.Identity, true);
+            return CreateKinematicCourseBoxEntity("FinalPlatform", new float3(1.35f, 0.2f, 13.8f), new float3(8.4f, 1f, 8.8f), float4.Identity, true);
         }
 
         /// <summary>
@@ -2095,7 +2095,8 @@ namespace city.game.tools {
                 Mass = 1d
             });
             entity.AddComponent(new BoxCollider3DComponent {
-                Size = new float3(1.5f, 3f, 1.5f),
+                // Authored relative to the 0.51 coin scale so the effective trigger stays 1.5 x 3 x 1.5 world units.
+                Size = new float3(1.5f / 0.51f, 3f / 0.51f, 1.5f / 0.51f),
                 IsTrigger = true
             });
             entity.AddComponent(new global::city.game.TiltTrialPhysicsDebugSphereBoundsComponent {
@@ -2164,11 +2165,11 @@ namespace city.game.tools {
                 Mass = 1d
             });
             entity.AddComponent(new BoxCollider3DComponent {
-                // The Windows BEPU backend uses collider dimensions directly.
-                Size = scale
+                // Collider sizes compose with entity scale, so the unit box tracks editor rescales.
+                Size = float3.One
             });
             entity.AddComponent(new global::city.game.TiltTrialPhysicsDebugBoxBoundsComponent {
-                Size = scale
+                Size = float3.One
             });
             return entity;
         }

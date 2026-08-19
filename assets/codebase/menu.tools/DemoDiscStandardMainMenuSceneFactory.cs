@@ -622,7 +622,6 @@ namespace city.menu.tools {
             entity.AddComponent(new FooterIdentityMarqueeComponent {
                 TextEntityReference = CreateEntityReference(footerTextEntity),
                 StripWidth = DemoMenuLayout.CanvasWidth,
-                TextWidth = 420f,
                 PixelsPerSecond = 70f
             });
         }

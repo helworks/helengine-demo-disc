@@ -163,13 +163,22 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Colored cube-grid generation requires sixteen runtime materials.", nameof(coloredMaterials));
             }
 
+            FontAsset instructionFont = ResolveRequiredEditorFont();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
+            ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
+            consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
+
             Entity[] cubeEntities = CreateCubeEntities(cubeModel, coloredMaterials);
-            Entity[] rootEntities = new Entity[cubeEntities.Length + 3];
+            Entity[] rootEntities = new Entity[cubeEntities.Length + 5];
             Entity cameraEntity = CreateCameraEntity();
             rootEntities[0] = cameraEntity;
             rootEntities[1] = CreateUiEntity();
             rootEntities[2] = CreateDirectionalLightEntity();
-            Array.Copy(cubeEntities, 0, rootEntities, 3, cubeEntities.Length);
+            rootEntities[3] = instructionOverlayEntity;
+            rootEntities[4] = consoleInstructionBlueprintEntity;
+            Array.Copy(cubeEntities, 0, rootEntities, 5, cubeEntities.Length);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -247,17 +256,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("ColoredCubeGridUi");
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.AddComponent(new FPSComponent {
-                Font = ResolveRequiredEditorFont(),
-                FontScale = 2f
-            });
-            PspFpsComponentOverrideService.Apply(entity);
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
-            DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new DemoDiscSceneLabelOverlayFactory();
-            sceneLabelOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont(), "2. Colored Cubes");
-            return entity;
+            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("ColoredCubeGridUi", "2. Colored Cubes");
         }
 
         /// <summary>

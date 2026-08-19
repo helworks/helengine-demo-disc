@@ -89,13 +89,16 @@ namespace city.menu.tools.tests {
         [Fact]
         public void Footer_marquee_scales_its_runtime_geometry_to_the_viewport() {
             string projectRootPath = Environment.GetEnvironmentVariable("HELENGINE_TEST_PROJECT_ROOT") ?? @"C:\dev\helprojs\demodisc";
+            string standardFactorySource = File.ReadAllText(Path.Combine(projectRootPath, "assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
             string marqueeComponentSource = File.ReadAllText(Path.Combine(projectRootPath, "assets", "codebase", "menu", "FooterIdentityMarqueeComponent.cs"));
 
-            Assert.Contains("float stripWidth = (float)(StripWidth * viewportScale);", marqueeComponentSource, StringComparison.Ordinal);
-            Assert.Contains("float textWidth = (float)(TextWidth * viewportScale);", marqueeComponentSource, StringComparison.Ordinal);
+            Assert.Contains("FooterTextComponent.Font.MeasureTight(FooterTextComponent.Text).Width", marqueeComponentSource, StringComparison.Ordinal);
+            Assert.Contains("FooterTextComponent.FontScale", marqueeComponentSource, StringComparison.Ordinal);
+            Assert.Contains("MeasuredTextWidth", marqueeComponentSource, StringComparison.Ordinal);
+            Assert.Contains("float textWidth = MeasuredTextWidth * canvasScale.X;", marqueeComponentSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("public float TextWidth", marqueeComponentSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("TextWidth = 420f", standardFactorySource, StringComparison.Ordinal);
             Assert.Contains("if (nextPositionX + textWidth <= 0f)", marqueeComponentSource, StringComparison.Ordinal);
-            Assert.Contains("nextPositionX = stripWidth;", marqueeComponentSource, StringComparison.Ordinal);
-            Assert.Contains("new float3(stripWidth, TextEntity.LocalPosition.Y, TextEntity.LocalPosition.Z)", marqueeComponentSource, StringComparison.Ordinal);
         }
 
         /// <summary>

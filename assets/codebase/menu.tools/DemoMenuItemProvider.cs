@@ -56,7 +56,23 @@ namespace city.menu.tools {
                     "demo.generate-physics-ds-scenes",
                     "Generate Physics DS Scenes",
                     300,
-                    "menu.generate-physics-nintendo-ds-scenes")
+                    "menu.generate-physics-nintendo-ds-scenes"),
+                new EditorMenuItemDescriptor(
+                    "demo",
+                    "Demo",
+                    100,
+                    "demo.generate-tilt-trial-pendulum-hammer",
+                    "Generate Tilt Trial Pendulum Hammer",
+                    310,
+                    "menu.generate-tilt-trial-pendulum-hammer"),
+                new EditorMenuItemDescriptor(
+                    "demo",
+                    "Demo",
+                    100,
+                    "demo.generate-tilt-trial-rotating-platform",
+                    "Generate Tilt Trial Rotating Platform",
+                    320,
+                    "menu.generate-tilt-trial-rotating-platform")
             ];
         }
     }

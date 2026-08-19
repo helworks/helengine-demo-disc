@@ -33,11 +33,11 @@ namespace city.tests {
         }
 
         [Fact]
-        public void Tilt_trial_physics_bounds_debug_component_uses_authored_box_collider_size_directly() {
+        public void Tilt_trial_physics_bounds_debug_component_scales_authored_box_collider_size_by_entity_scale() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialPhysicsBoundsDebugDrawComponent.cs");
 
-            Assert.Contains("float3 halfExtents = CreateBoxHalfExtents(boxBounds.Size);", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("CreateBoxHalfExtents(boxBounds.Size, entity.LocalScale)", source, StringComparison.Ordinal);
+            Assert.Contains("boxBounds.Size.X * entityScale.X", source, StringComparison.Ordinal);
+            Assert.Contains("float3 halfExtents = CreateBoxHalfExtents(scaledSize);", source, StringComparison.Ordinal);
         }
 
         [Fact]

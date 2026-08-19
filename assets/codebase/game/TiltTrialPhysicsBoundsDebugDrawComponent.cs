@@ -158,7 +158,12 @@ namespace city.game {
 
             for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
                 if (entity.Components[componentIndex] is TiltTrialPhysicsDebugBoxBoundsComponent boxBounds) {
-                    float3 halfExtents = CreateBoxHalfExtents(boxBounds.Size);
+                    float3 entityScale = entity.Scale;
+                    float3 scaledSize = new float3(
+                        boxBounds.Size.X * entityScale.X,
+                        boxBounds.Size.Y * entityScale.Y,
+                        boxBounds.Size.Z * entityScale.Z);
+                    float3 halfExtents = CreateBoxHalfExtents(scaledSize);
                     float3 axisAlignedHalfExtents = CreateBoxAxisAlignedHalfExtents(halfExtents, entity.Orientation) + CreatePaddingVector();
                     layerMask = entity.LayerMask;
                     min = entity.Position - axisAlignedHalfExtents;

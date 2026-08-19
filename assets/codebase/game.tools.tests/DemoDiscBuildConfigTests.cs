@@ -21,8 +21,6 @@ namespace city.tests {
             "test_scene_dynamic_stack_boxes",
             "test_scene_dynamic_sphere_stack",
             "test_scene_dynamic_mixed_stack",
-            "test_scene_static_mesh_showcase",
-            "test_scene_static_mesh_minimal",
             "tilt_trial",
             "tilt_trial_level_01",
             "tilt_trial_level_02",
@@ -67,6 +65,21 @@ namespace city.tests {
         /// <summary>
         /// Ensures the Windows package contains the persistent scene that presents every normal transition.
         /// </summary>
+        [Fact]
+        public void Psp_debug_and_release_profiles_regenerate_the_demo_disc_main_menu() {
+            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
+            using JsonDocument document = JsonDocument.Parse(json);
+            JsonElement pspPlatform = document.RootElement.GetProperty("platforms").EnumerateArray()
+                .Single(platform => string.Equals(platform.GetProperty("platformId").GetString(), "psp", StringComparison.Ordinal));
+            JsonElement prebuildCommands = pspPlatform.GetProperty("editorPrebuildCommandIdsByBuildProfileId");
+
+            foreach (string profileId in new[] { "debug", "release" }) {
+                Assert.Contains(
+                    prebuildCommands.GetProperty(profileId).EnumerateArray(),
+                    command => string.Equals(command.GetString(), "menu.regenerate-demo-disc-main-menu", StringComparison.Ordinal));
+            }
+        }
+
         [Fact]
         public void Windows_platform_packages_the_persistent_loading_screen_scene() {
             string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");

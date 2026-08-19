@@ -201,20 +201,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("AxisTest2Ui");
-            entity.LayerMask = SceneObjectsLayerMask;
-            entity.AddComponent(new FPSComponent {
-                Font = ResolveRequiredEditorFont(),
-                FontScale = 2f
-            });
-            PspFpsComponentOverrideService.Apply(entity);
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
-            entity.AddComponent(new DemoDiscLightToggleComponent());
-            DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
-            lightIndicatorOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont());
-            DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new DemoDiscSceneLabelOverlayFactory();
-            sceneLabelOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont(), "5. Axis 2");
-            return entity;
+            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("AxisTest2Ui", "5. Axis 2");
         }
 
         /// <summary>

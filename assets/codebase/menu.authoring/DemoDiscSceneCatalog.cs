@@ -80,15 +80,7 @@ namespace city.menu {
                 new DemoDiscPhysicsSceneEntry(
                     "physics-dynamic-mixed-stack",
                     "Mixed Stack",
-                    "test_scene_dynamic_mixed_stack"),
-                new DemoDiscPhysicsSceneEntry(
-                    "physics-static-mesh-showcase",
-                    "Static Mesh",
-                    "test_scene_static_mesh_showcase"),
-                new DemoDiscPhysicsSceneEntry(
-                    "physics-static-mesh-minimal",
-                    "Static Mesh Simple",
-                    "test_scene_static_mesh_minimal")
+                    "test_scene_dynamic_mixed_stack")
             ];
         }
 

@@ -126,6 +126,16 @@ namespace city.rendering.tools {
         public const string PbrShadowTheaterSceneId = "scenes/rendering/pbr_shadow_theater.helen";
 
         /// <summary>
+        /// Stable scene id used by the Matrix Render transform-inspection scene.
+        /// </summary>
+        public const string MatrixRenderSceneId = "scenes/rendering/test_scene_matrix_render.helen";
+
+        /// <summary>
+        /// Obsolete physics-pipeline path where the Matrix Render scene was generated before it moved into the rendering pipeline.
+        /// </summary>
+        const string ObsoletePhysicsMatrixRenderSceneRelativePath = "scenes/physics/test_scene_matrix_render.helen";
+
+        /// <summary>
         /// Writer used to persist generated live-authored scenes through the editor save pipeline.
         /// </summary>
         readonly GeneratedAuthoringSceneWriteService AuthoringSceneWriteService;
@@ -211,6 +221,11 @@ namespace city.rendering.tools {
         readonly PbrShadowTheaterSceneFactory PbrShadowTheaterScene;
 
         /// <summary>
+        /// Factory used to author the Matrix Render scene and its hero material.
+        /// </summary>
+        readonly MatrixRenderSceneFactory MatrixRenderFactory;
+
+        /// <summary>
         /// Initializes one city rendering scene generator.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
@@ -232,6 +247,7 @@ namespace city.rendering.tools {
             PbrTexturedShowcaseMaterials = new PbrTexturedShowcaseMaterialFactory();
             PbrTexturedShowcaseScene = new PbrTexturedShowcaseSceneFactory();
             PbrShadowTheaterScene = new PbrShadowTheaterSceneFactory();
+            MatrixRenderFactory = new MatrixRenderSceneFactory();
         }
 
         /// <summary>
@@ -283,23 +299,26 @@ namespace city.rendering.tools {
                 editorCore.DefaultFontAssetForEditor);
 
             DeleteObsoleteRenderMatrixProbeScene(projectRootPath);
+            DeleteObsoletePhysicsMatrixRenderScene(projectRootPath);
             DeleteObsoleteNintendoHandheldCompanionScenes(projectRootPath);
             GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedCubeTestSolidMaterial);
-            GeneratedAuthoringSceneDefinition groundCubeProbeSceneDefinition = GroundCubeProbeFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
+            GeneratedAuthoringSceneDefinition groundCubeProbeSceneDefinition = GroundCubeProbeFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition scaledCubeSceneDefinition = ScaledCubeFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
-            GeneratedAuthoringSceneDefinition depthClipProbeSceneDefinition = DepthClipProbeFactory.CreateSceneDefinition(assets.GeneratedCubeModel, assets.DepthClipProbeMaterial, assets.DepthClipProbeCenterMaterial);
+            GeneratedAuthoringSceneDefinition depthClipProbeSceneDefinition = DepthClipProbeFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.DepthClipProbeMaterial, assets.DepthClipProbeCenterMaterial);
             GeneratedAuthoringSceneDefinition coloredCubeGridSceneDefinition;
             GeneratedAuthoringSceneDefinition texturedCubeGridSceneDefinition;
             GeneratedAuthoringSceneDefinition axisTestSceneDefinition = AxisTestFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
             GeneratedAuthoringSceneDefinition axisTest2SceneDefinition = AxisTest2Factory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
             GeneratedAuthoringSceneDefinition sceneMemoryProbeSceneDefinition = SceneMemoryProbeFactory.CreateSceneDefinition();
             GeneratedAuthoringSceneDefinition directionalShadowPlazaSceneDefinition = DirectionalShadowPlazaFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial);
-            GeneratedAuthoringSceneDefinition spotlightStreetSliceSceneDefinition = SpotlightStreetSliceFactory.CreateSceneDefinition(assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial, assets.LamppostModel, assets.RacerModel, assets.RacerMaterials);
+            GeneratedAuthoringSceneDefinition spotlightStreetSliceSceneDefinition = SpotlightStreetSliceFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial, assets.LamppostModel, assets.RacerModel, assets.RacerMaterials);
             PbrMaterialGalleryMaterials.WriteMaterialAssets(projectRootPath);
             RuntimeMaterial[] pbrGalleryMaterials = PbrMaterialGalleryMaterials.CreateRuntimeMaterials();
-            GeneratedAuthoringSceneDefinition pbrMaterialGallerySceneDefinition = PbrMaterialGalleryScene.CreateSceneDefinition(assets.GeneratedPlaneModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial, pbrGalleryMaterials);
-            GeneratedAuthoringSceneDefinition pbrTexturedShowcaseSceneDefinition = PbrTexturedShowcaseScene.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedPlaneModel, assets.GeneratedStandardMaterial, assets.PbrTexturedShowcaseMetalMaterial, assets.PbrTexturedShowcaseWoodMaterial);
-            GeneratedAuthoringSceneDefinition pbrShadowTheaterSceneDefinition = PbrShadowTheaterScene.CreateSceneDefinition(assets.GeneratedCubeModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial, pbrGalleryMaterials);
+            GeneratedAuthoringSceneDefinition pbrMaterialGallerySceneDefinition = PbrMaterialGalleryScene.CreateSceneDefinition(projectRootPath, assets.GeneratedPlaneModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial, pbrGalleryMaterials);
+            GeneratedAuthoringSceneDefinition pbrTexturedShowcaseSceneDefinition = PbrTexturedShowcaseScene.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedPlaneModel, assets.GeneratedStandardMaterial, assets.PbrTexturedShowcaseMetalMaterial, assets.PbrTexturedShowcaseWoodMaterial);
+            GeneratedAuthoringSceneDefinition pbrShadowTheaterSceneDefinition = PbrShadowTheaterScene.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial, pbrGalleryMaterials);
+            MatrixRenderFactory.WriteMaterialAssets(projectRootPath);
+            GeneratedAuthoringSceneDefinition matrixRenderSceneDefinition = MatrixRenderFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel);
             ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
             TexturedCubeGridFactory.WriteAssets(projectRootPath);
             coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
@@ -318,6 +337,22 @@ namespace city.rendering.tools {
             AuthoringSceneWriteService.WriteScene(projectRootPath, pbrMaterialGallerySceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, pbrTexturedShowcaseSceneDefinition);
             AuthoringSceneWriteService.WriteScene(projectRootPath, pbrShadowTheaterSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(projectRootPath, matrixRenderSceneDefinition);
+        }
+
+        /// <summary>
+        /// Deletes the obsolete physics-pipeline Matrix Render scene so the moved rendering-pipeline asset stays the only discoverable copy.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
+        static void DeleteObsoletePhysicsMatrixRenderScene(string projectRootPath) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            }
+
+            string obsoleteScenePath = Path.Combine(Path.GetFullPath(projectRootPath), "assets", ObsoletePhysicsMatrixRenderSceneRelativePath.Replace('/', Path.DirectorySeparatorChar));
+            if (File.Exists(obsoleteScenePath)) {
+                File.Delete(obsoleteScenePath);
+            }
         }
 
         /// <summary>

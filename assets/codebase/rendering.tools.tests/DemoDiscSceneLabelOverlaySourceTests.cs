@@ -55,6 +55,7 @@ namespace city.tests {
                 ("TexturedCubeGridSceneFactory.cs", "3. Textured Cubes"),
                 ("AxisTestSceneFactory.cs", "4. Axis 1"),
                 ("AxisTest2SceneFactory.cs", "5. Axis 2"),
+                ("MatrixRenderSceneFactory.cs", "6. Matrix Render"),
                 ("DirectionalShadowPlazaSceneFactory.cs", "7. Shadow Plaza"),
                 ("PbrMaterialGallerySceneFactory.cs", "13. PBR Gallery"),
                 ("PbrTexturedShowcaseSceneFactory.cs", "14. PBR Textures"),
@@ -62,21 +63,25 @@ namespace city.tests {
             ];
             foreach ((string fileName, string label) in expected) {
                 string source = File.ReadAllText(Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", fileName));
-                Assert.Contains("DemoDiscSceneLabelOverlayFactory", source, StringComparison.Ordinal);
+                Assert.Contains("DemoDiscSceneUiKitFactory", source, StringComparison.Ordinal);
                 Assert.Contains($"\"{label}\"", source, StringComparison.Ordinal);
             }
+
+            string kitSource = File.ReadAllText(Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "DemoDiscSceneUiKitFactory.cs"));
+            Assert.Contains("DemoDiscSceneLabelOverlayFactory", kitSource, StringComparison.Ordinal);
         }
 
         [Fact]
         public void Physics_factory_contains_only_the_curated_physics_labels() {
             string source = File.ReadAllText(Path.Combine(ProjectRootPath, "assets", "codebase", "physics.tools", "PhysicsSceneFactory.cs"));
-            Assert.Contains("DemoDiscSceneLabelOverlayFactory", source, StringComparison.Ordinal);
+            Assert.Contains("DemoDiscSceneUiKitFactory", source, StringComparison.Ordinal);
             foreach (string label in new[] {
-                "6. Matrix Render", "8. Stacked Boxes", "9. Sphere Stack",
-                "10. Mixed Stack", "11. Static Mesh", "12. Simple Mesh"
+                "8. Stacked Boxes", "9. Sphere Stack",
+                "10. Mixed Stack"
             }) {
                 Assert.Contains($"\"{label}\"", source, StringComparison.Ordinal);
             }
+            Assert.DoesNotContain("\"6. Matrix Render\"", source, StringComparison.Ordinal);
             Assert.Contains("ResolveDemoDiscSceneLabel", source, StringComparison.Ordinal);
         }
 

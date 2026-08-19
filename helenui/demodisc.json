@@ -5,6 +5,9 @@
     "name": "Demo Disc",
     "description": "Complete current HelenUI navigation profile for the Demo Disc hub, showcases, and all authored Tilt Trial paths."
   },
+  "capture": {
+    "parentViewportId": "game-content"
+  },
   "surfaces": [
     {
       "id": "surface-demodisc-main-menu",
@@ -20,7 +23,7 @@
         "clues": [
           {
             "id": "demodisc-main-menu-labels",
-            "type": "any_of_texts",
+            "type": "at_least_texts",
             "weight": 1,
             "params": {
               "texts": [
@@ -28,7 +31,8 @@
                 "Physics Scenes",
                 "Games",
                 "Options"
-              ]
+              ],
+              "minimumMatches": 2
             }
           }
         ]
@@ -67,7 +71,7 @@
               "recognition": {
                 "clues": [
                   {
-                    "id": "node-demodisc-demo-scenes-selected",
+                      "id": "node-demodisc-demo-scenes-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -77,6 +81,7 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 8,
                       "minSaturation": 0.2,
+                      "minimumColorCoverage": 0.5,
                       "region": {
                         "x": 0.195,
                         "y": 0.185,
@@ -127,7 +132,7 @@
               "recognition": {
                 "clues": [
                   {
-                    "id": "node-demodisc-physics-scenes-selected",
+                      "id": "node-demodisc-physics-scenes-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -137,6 +142,7 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 8,
                       "minSaturation": 0.2,
+                      "minimumColorCoverage": 0.5,
                       "region": {
                         "x": 0.195,
                         "y": 0.3375,
@@ -187,7 +193,7 @@
               "recognition": {
                 "clues": [
                   {
-                    "id": "node-demodisc-games-selected",
+                      "id": "node-demodisc-games-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -197,6 +203,7 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 8,
                       "minSaturation": 0.2,
+                      "minimumColorCoverage": 0.5,
                       "region": {
                         "x": 0.195,
                         "y": 0.4903,
@@ -247,7 +254,7 @@
               "recognition": {
                 "clues": [
                   {
-                    "id": "node-demodisc-options-selected",
+                      "id": "node-demodisc-options-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -257,6 +264,7 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 8,
                       "minSaturation": 0.2,
+                      "minimumColorCoverage": 0.5,
                       "region": {
                         "x": 0.195,
                         "y": 0.6431,
@@ -289,16 +297,8 @@
       "recognition": {
         "clues": [
           {
-            "id": "demodisc-rendering-catalog-title",
-            "type": "text_must_appear",
-            "weight": 1,
-            "params": {
-              "text": "Cube Test"
-            }
-          },
-          {
             "id": "demodisc-rendering-catalog-entries",
-            "type": "any_of_texts",
+            "type": "at_least_texts",
             "weight": 1,
             "params": {
               "texts": [
@@ -312,7 +312,8 @@
                 "PBR Material Gallery",
                 "PBR Textured Showcase",
                 "PBR Shadow Theater"
-              ]
+              ],
+              "minimumMatches": 2
             }
           }
         ]
@@ -361,8 +362,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -415,8 +416,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -469,8 +470,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -523,8 +524,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -577,8 +578,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -631,8 +632,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -685,8 +686,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -739,8 +740,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -793,8 +794,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -847,8 +848,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -902,8 +903,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -928,16 +929,8 @@
       "recognition": {
         "clues": [
           {
-            "id": "demodisc-physics-catalog-title",
-            "type": "text_must_appear",
-            "weight": 1,
-            "params": {
-              "text": "Stacked Boxes"
-            }
-          },
-          {
             "id": "demodisc-physics-catalog-entries",
-            "type": "any_of_texts",
+            "type": "at_least_texts",
             "weight": 1,
             "params": {
               "texts": [
@@ -946,7 +939,8 @@
                 "Mixed Stack",
                 "Static Mesh",
                 "Static Mesh Simple"
-              ]
+              ],
+              "minimumMatches": 2
             }
           }
         ]
@@ -995,8 +989,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -1049,8 +1043,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -1103,8 +1097,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -1157,8 +1151,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -1211,8 +1205,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -1266,8 +1260,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -1369,8 +1363,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -1444,7 +1438,7 @@
               "recognition": {
                 "clues": [
                   {
-                    "id": "node-demodisc-games-tilt-trial-selected",
+                      "id": "node-demodisc-games-tilt-trial-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -1460,8 +1454,8 @@
                         "width": 0.01,
                         "height": 0.01
                       },
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -1505,7 +1499,7 @@
               "recognition": {
                 "clues": [
                   {
-                    "id": "node-demodisc-games-back-selected",
+                      "id": "node-demodisc-games-back-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -1521,8 +1515,8 @@
                         "width": 0.01,
                         "height": 0.01
                       },
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -1599,8 +1593,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -1647,8 +1641,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -1695,8 +1689,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -1750,8 +1744,8 @@
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 24,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -2262,7 +2256,7 @@
               "recognition": {
                 "clues": [
                   {
-                    "id": "node-tilt-console-level-1-selected",
+                      "id": "node-tilt-console-level-1-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -2278,8 +2272,8 @@
                         "width": 0.01,
                         "height": 0.01
                       },
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -2322,7 +2316,7 @@
               "recognition": {
                 "clues": [
                   {
-                    "id": "node-tilt-console-level-2-selected",
+                      "id": "node-tilt-console-level-2-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -2338,8 +2332,8 @@
                         "width": 0.01,
                         "height": 0.01
                       },
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -2382,7 +2376,7 @@
               "recognition": {
                 "clues": [
                   {
-                    "id": "node-tilt-console-level-3-selected",
+                      "id": "node-tilt-console-level-3-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -2398,8 +2392,8 @@
                         "width": 0.01,
                         "height": 0.01
                       },
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -2442,7 +2436,7 @@
               "recognition": {
                 "clues": [
                   {
-                    "id": "node-tilt-console-level-4-selected",
+                      "id": "node-tilt-console-level-4-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -2458,8 +2452,8 @@
                         "width": 0.01,
                         "height": 0.01
                       },
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -2502,7 +2496,7 @@
               "recognition": {
                 "clues": [
                   {
-                    "id": "node-tilt-console-level-5-selected",
+                      "id": "node-tilt-console-level-5-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -2518,8 +2512,8 @@
                         "height": 0.01
                       },
                       "minSaturation": 0.2,
-                      "includeArrowRegion": false,
-                      "requireArrowRegion": false,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -3817,7 +3811,7 @@
           {
             "id": "tilt-level-1-debug-label",
             "type": "text_must_appear",
-            "weight": 1.5,
+          "weight": 1,
             "params": {
               "text": "Level 1"
             }
@@ -3952,7 +3946,7 @@
           {
             "id": "tilt-level-2-debug-label",
             "type": "text_must_appear",
-            "weight": 1.5,
+          "weight": 1,
             "params": {
               "text": "Level 2"
             }
@@ -4087,7 +4081,7 @@
           {
             "id": "tilt-level-3-debug-label",
             "type": "text_must_appear",
-            "weight": 1.5,
+          "weight": 1,
             "params": {
               "text": "Level 3"
             }
@@ -4222,7 +4216,7 @@
           {
             "id": "tilt-level-4-debug-label",
             "type": "text_must_appear",
-            "weight": 1.5,
+          "weight": 1,
             "params": {
               "text": "Level 4"
             }
@@ -4357,7 +4351,7 @@
           {
             "id": "tilt-level-5-debug-label",
             "type": "text_must_appear",
-            "weight": 1.5,
+          "weight": 1,
             "params": {
               "text": "Level 5"
             }

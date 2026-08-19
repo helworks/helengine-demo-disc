@@ -149,7 +149,6 @@ namespace city.rendering.tools {
                 OrbitCenter = new float3(0f, 0f, 0f),
                 AutoYawSpeedRadians = 0.07f
             });
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;
         }
 
@@ -158,21 +157,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored FPS overlay entity.</returns>
         Entity CreateFpsEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("DirectionalShadowPlazaFps");
-            entity.LayerMask = SceneObjectsLayerMask;
-            FPSComponent fpsComponent = new FPSComponent {
-                Font = PlaceholderFont,
-                FontScale = 2f
-            };
-            entity.AddComponent(fpsComponent);
-            PspFpsComponentOverrideService.Apply(entity);
-            ApplyEditorFontReference(entity, fpsComponent);
-            entity.AddComponent(new DemoDiscLightToggleComponent());
-            DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
-            lightIndicatorOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont());
-            DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new DemoDiscSceneLabelOverlayFactory();
-            sceneLabelOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont(), "7. Shadow Plaza");
-            return entity;
+            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("DirectionalShadowPlazaFps", "7. Shadow Plaza");
         }
 
         /// <summary>

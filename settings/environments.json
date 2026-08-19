@@ -1,0 +1,16 @@
+{
+  "environments": [
+    {
+      "id": "debug",
+      "isProtected": true
+    },
+    {
+      "id": "release",
+      "isProtected": true
+    },
+    {
+      "id": "test",
+      "isProtected": false
+    }
+  ]
+}

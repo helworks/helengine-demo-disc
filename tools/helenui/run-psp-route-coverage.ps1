@@ -8,11 +8,9 @@ param(
 
     [string]$OcrConfigPath = 'C:\dev\helenui\plugins\recognition-cli\recognition-config.sample.json',
 
-    [int]$NavigationTimeoutMilliseconds = 30000,
 
-    [int]$RetryLimit = 2,
+    [int]$RetryLimit = 2
 
-    [int]$RequestTimeoutSeconds = 45
 )
 
 Set-StrictMode -Version Latest
@@ -21,6 +19,7 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $profilePath = Join-Path $projectRoot 'helenui\demodisc.json'
 $reportDirectory = Join-Path $projectRoot 'output\psp'
+$sceneScreenshotDirectory = Join-Path $reportDirectory 'helenui-route-coverage-screenshots'
 $mainMenuSurfaceId = 'surface-demodisc-main-menu'
 
 function Get-OptionalPropertyValue {
@@ -102,12 +101,56 @@ function Invoke-HelenRequest {
 
     $uri = "$($ServiceUrl.TrimEnd('/'))$Path"
     if ($PSBoundParameters.ContainsKey('Body')) {
-        return Invoke-RestMethod -Method $Method -Uri $uri -TimeoutSec $RequestTimeoutSeconds -ContentType 'application/json' -Body ($Body | ConvertTo-Json -Depth 12)
+        return Invoke-RestMethod -Method $Method -Uri $uri -ContentType 'application/json' -Body ($Body | ConvertTo-Json -Depth 12)
     }
 
-    return Invoke-RestMethod -Method $Method -Uri $uri -TimeoutSec $RequestTimeoutSeconds
+    return Invoke-RestMethod -Method $Method -Uri $uri
 }
 
+function Save-SceneScreenshot {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$SessionId,
+
+        [Parameter(Mandatory = $true)]
+        [string]$SurfaceId
+    )
+
+    if ($capturedSceneScreenshots.Contains($SurfaceId)) {
+        return
+    }
+
+    $safeSurfaceId = $SurfaceId -replace '[^A-Za-z0-9._-]', '_'
+    $artifactPath = Join-Path $sceneScreenshotDirectory "$safeSurfaceId.png"
+    $uri = "$($ServiceUrl.TrimEnd('/'))/sessions/$SessionId/latest-image"
+    Invoke-WebRequest -Method Get -Uri $uri -OutFile $artifactPath | Out-Null
+
+    if (-not (Test-Path -LiteralPath $artifactPath -PathType Leaf)) {
+        throw "HelenUI did not provide a screenshot for recognized scene '$SurfaceId'."
+    }
+
+    $capturedSceneScreenshots[$SurfaceId] = [pscustomobject]@{
+        surfaceId = $SurfaceId
+        path = $artifactPath
+    }
+}
+function Wait-ForPpssppTarget {
+    while ($true) {
+        $targetsResponse = Invoke-HelenRequest -Method Get -Path '/targets'
+        $targets = if ($null -ne $targetsResponse.PSObject.Properties['value']) {
+            @($targetsResponse.value)
+        }
+        else {
+            @($targetsResponse)
+        }
+        $target = @($targets | Where-Object { $_.processName -match '^PPSSPP' } | Select-Object -First 1) | Select-Object -First 1
+        if ($null -ne $target) {
+            return $target
+        }
+
+        Start-Sleep -Milliseconds 750
+    }
+}
 function Get-RecognizedGameState {
     param(
         [Parameter(Mandatory = $true)]
@@ -156,26 +199,14 @@ function Wait-ForSurface {
         [string]$ExpectedSurfaceId
     )
 
-    $watch = [System.Diagnostics.Stopwatch]::StartNew()
-    $lastSurfaceId = $null
-    $lastFailure = $null
-    while ($watch.ElapsedMilliseconds -lt $NavigationTimeoutMilliseconds) {
-        try {
-            $state = Get-RecognizedGameState -SessionId $SessionId
-            $lastSurfaceId = $state.SurfaceId
-            if ($lastSurfaceId -eq $ExpectedSurfaceId) {
-                return $state
-            }
-        }
-        catch {
-            $lastFailure = $_.Exception.Message
+    while ($true) {
+        $state = Get-RecognizedGameState -SessionId $SessionId
+        if ($state.SurfaceId -eq $ExpectedSurfaceId) {
+            return $state
         }
 
         Start-Sleep -Milliseconds 750
     }
-
-    $detail = if ($lastFailure) { $lastFailure } else { "last recognized surface '$lastSurfaceId'" }
-    throw "Timed out waiting for '$ExpectedSurfaceId': $detail"
 }
 
 function Get-NavigationTarget {
@@ -204,11 +235,12 @@ function Invoke-Route {
         scopeId = 'game'
         inputClass = 'gamepad'
         targetScreen = Get-NavigationTarget -Route $Route
-        timeoutMs = $NavigationTimeoutMilliseconds
         retryLimit = $RetryLimit
     } | Out-Null
 
-    return Wait-ForSurface -SessionId $SessionId -ExpectedSurfaceId ([string]$Route.TargetSurfaceId)
+    $state = Wait-ForSurface -SessionId $SessionId -ExpectedSurfaceId ([string]$Route.TargetSurfaceId)
+    Save-SceneScreenshot -SessionId $SessionId -SurfaceId $state.SurfaceId
+    return $state
 }
 
 function Ensure-MainMenu {
@@ -278,24 +310,15 @@ foreach ($requiredPath in @($PpssppProfilePath, $OcrConfigPath, $profilePath)) {
     }
 }
 
-$targetsResponse = Invoke-HelenRequest -Method Get -Path '/targets'
-$targets = if ($null -ne $targetsResponse.PSObject.Properties['value']) {
-    @($targetsResponse.value)
-}
-else {
-    @($targetsResponse)
-}
-$target = $targets |
-    Where-Object { $_.processName -match '^PPSSPP' } |
-    Select-Object -First 1
-if ($null -eq $target) {
-    throw 'No running PPSSPP target was discovered by HelenUI.'
-}
+$target = Wait-ForPpssppTarget
+
 
 $sessionId = $null
 $results = [System.Collections.Generic.List[object]]::new()
+$capturedSceneScreenshots = [ordered]@{}
 $runFailure = $null
 try {
+    New-Item -ItemType Directory -Path $sceneScreenshotDirectory -Force | Out-Null
     $session = Invoke-HelenRequest -Method Post -Path '/sessions' -Body @{
         targetId = $target.targetId
         projectPath = $PpssppProfilePath
@@ -313,7 +336,8 @@ try {
     }
 
     foreach ($route in $routePlan) {
-        Ensure-MainMenu -SessionId $sessionId | Out-Null
+        $initialState = Ensure-MainMenu -SessionId $sessionId
+        Save-SceneScreenshot -SessionId $sessionId -SurfaceId $initialState.SurfaceId
         $path = Get-NavigationPath -RoutePlan $routePlan -SourceSurfaceId $mainMenuSurfaceId -TargetSurfaceId ([string]$route.SourceSurfaceId)
         foreach ($pathRoute in $path) {
             Invoke-Route -SessionId $sessionId -Route $pathRoute | Out-Null
@@ -352,6 +376,7 @@ $report = [pscustomobject]@{
     profilePath = $profilePath
     routeCount = $routePlan.Count
     completedRouteCount = @($results | Where-Object { $_.status -eq 'passed' }).Count
+    sceneScreenshots = @($capturedSceneScreenshots.Values)
     results = @($results)
 }
 $report | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $reportDirectory 'helenui-route-coverage.json') -Encoding utf8

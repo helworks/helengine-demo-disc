@@ -1,4 +1,4 @@
-using helengine;
+﻿using helengine;
 using helengine.editor;
 
 namespace city.tests {
@@ -10,25 +10,30 @@ namespace city.tests {
 
         [Fact]
         public void Non_nintendo_ds_fps_components_use_the_standard_two_x_font_scale() {
-            string[] sourcePaths = [
+            string kitSource = File.ReadAllText(Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "DemoDiscSceneUiKitFactory.cs"));
+            Assert.Contains("FPSComponent", kitSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("FontScale = 1f", kitSource, StringComparison.Ordinal);
+            Assert.Contains("FontScale = 2f", kitSource, StringComparison.Ordinal);
+            Assert.Contains("PspFpsComponentOverrideService.Apply", kitSource, StringComparison.Ordinal);
+
+            string[] kitFactorySourcePaths = [
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "AxisTestSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "AxisTest2SceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "ColoredCubeGridSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "CubeTestSceneFactory.cs"),
+                Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "DepthClipProbeSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "DirectionalShadowPlazaSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "GroundCubeProbeSceneFactory.cs"),
+                Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "MatrixRenderSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "physics.tools", "PhysicsSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "ScaledCubeSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "SpotlightStreetSliceSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "TexturedCubeGridSceneFactory.cs")
             ];
-
-            foreach (string sourcePath in sourcePaths) {
+            foreach (string sourcePath in kitFactorySourcePaths) {
                 string source = File.ReadAllText(sourcePath);
-                Assert.Contains("FPSComponent", source, StringComparison.Ordinal);
+                Assert.Contains("DemoDiscSceneUiKitFactory().CreateStandardSceneUi", source, StringComparison.Ordinal);
                 Assert.DoesNotContain("FontScale = 1f", source, StringComparison.Ordinal);
-                Assert.Contains("FontScale = 2f", source, StringComparison.Ordinal);
-                Assert.Contains("PspFpsComponentOverrideService.Apply", source, StringComparison.Ordinal);
             }
         }
 
@@ -78,7 +83,7 @@ namespace city.tests {
 
         [Fact]
         public void Matrix_render_scene_contains_the_standard_fps_component() {
-            const string scenePath = @"C:\dev\helprojs\demodisc\assets\scenes\physics\test_scene_matrix_render.helen";
+            const string scenePath = @"C:\dev\helprojs\demodisc\assets\scenes\rendering\test_scene_matrix_render.helen";
             using FileStream stream = File.OpenRead(scenePath);
             SceneAsset scene = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
             string fpsComponentTypeId = AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(FPSComponent));
@@ -90,19 +95,23 @@ namespace city.tests {
 
         [Fact]
         public void Matrix_render_ui_root_preserves_the_runtime_scene_layer_mask() {
-            const string scenePath = @"C:\dev\helprojs\demodisc\assets\scenes\physics\test_scene_matrix_render.helen";
+            const string scenePath = @"C:\dev\helprojs\demodisc\assets\scenes\rendering\test_scene_matrix_render.helen";
             using FileStream stream = File.OpenRead(scenePath);
             SceneAsset scene = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
-            SceneEntityAsset matrixRenderUi = Assert.Single(
-                EnumerateEntities(scene.RootEntities).Where(entity => string.Equals(entity.Name, "MatrixRenderUi", StringComparison.Ordinal)));
+            SceneEntityAsset[] matrixRenderUiRoots = EnumerateEntities(scene.RootEntities)
+                .Where(entity => string.Equals(entity.Name, "MatrixRenderUi", StringComparison.Ordinal))
+                .ToArray();
 
-            Assert.True(matrixRenderUi.Enabled);
-            Assert.Equal(EditorLayerMasks.SceneObjects, matrixRenderUi.LayerMask);
+            Assert.NotEmpty(matrixRenderUiRoots);
+            Assert.All(matrixRenderUiRoots, matrixRenderUi => {
+                Assert.True(matrixRenderUi.Enabled);
+                Assert.Equal(EditorLayerMasks.SceneObjects, matrixRenderUi.LayerMask);
+            });
         }
 
         [Fact]
         public void Matrix_render_scene_includes_the_shared_fps_ui_font_reference() {
-            const string scenePath = @"C:\dev\helprojs\demodisc\assets\scenes\physics\test_scene_matrix_render.helen";
+            const string scenePath = @"C:\dev\helprojs\demodisc\assets\scenes\rendering\test_scene_matrix_render.helen";
             using FileStream stream = File.OpenRead(scenePath);
             SceneAsset scene = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
 

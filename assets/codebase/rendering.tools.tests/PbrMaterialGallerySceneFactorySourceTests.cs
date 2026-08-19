@@ -8,10 +8,10 @@ namespace city.tests {
             Assert.True(File.Exists(sourcePath), $"Expected '{sourcePath}' to exist.");
             string source = File.ReadAllText(sourcePath);
             Assert.Contains("public const string SceneId = \"scenes/rendering/pbr_material_gallery.helen\";", source, StringComparison.Ordinal);
-            Assert.Contains("public GeneratedAuthoringSceneDefinition CreateSceneDefinition(RuntimeModel planeModel, RuntimeModel sphereModel, RuntimeMaterial groundMaterial, RuntimeMaterial[] galleryMaterials)", source, StringComparison.Ordinal);
+            Assert.Contains("public GeneratedAuthoringSceneDefinition CreateSceneDefinition(string projectRootPath, RuntimeModel planeModel, RuntimeModel sphereModel, RuntimeMaterial groundMaterial, RuntimeMaterial[] galleryMaterials)", source, StringComparison.Ordinal);
             Assert.Contains("new DirectionalLightComponent", source, StringComparison.Ordinal);
             Assert.Contains("new AmbientLightComponent", source, StringComparison.Ordinal);
-            Assert.Contains("DemoDiscSceneLabelOverlayFactory", source, StringComparison.Ordinal);
+            Assert.Contains("DemoDiscSceneUiKitFactory", source, StringComparison.Ordinal);
             Assert.Contains("\"13. PBR Gallery\"", source, StringComparison.Ordinal);
             Assert.Contains("PbrMaterialGalleryMaterialFactory.ResolveIndex", source, StringComparison.Ordinal);
         }

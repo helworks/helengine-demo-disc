@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build Platform Artifacts"
+  short_description: "Canonical Demo Disc platform builds"
+  default_prompt: "Build the requested Demo Disc platform artifact through the canonical platform build script."

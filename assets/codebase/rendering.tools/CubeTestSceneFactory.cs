@@ -140,23 +140,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored UI root entity.</returns>
         Entity CreateUiEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("CubeTestUi");
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.LocalPosition = float3.Zero;
-            entity.LocalScale = float3.One;
-            entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new FPSComponent {
-                Font = ResolveRequiredEditorFont(),
-                FontScale = 2f
-            });
-            PspFpsComponentOverrideService.Apply(entity);
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
-            entity.AddComponent(new DemoDiscLightToggleComponent());
-            DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
-            lightIndicatorOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont());
-            DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new DemoDiscSceneLabelOverlayFactory();
-            sceneLabelOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont(), "1. Cube Test");
-            return entity;
+            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("CubeTestUi", "1. Cube Test");
         }
 
         /// <summary>

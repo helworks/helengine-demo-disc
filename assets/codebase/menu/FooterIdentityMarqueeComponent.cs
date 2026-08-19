@@ -14,11 +14,6 @@ namespace city.menu {
         public float StripWidth { get; set; }
 
         /// <summary>
-        /// Authored text-box width used to determine when the complete line has left the screen.
-        /// </summary>
-        public float TextWidth { get; set; }
-
-        /// <summary>
         /// Constant marquee speed expressed in reference-canvas pixels per second.
         /// </summary>
         public float PixelsPerSecond { get; set; }
@@ -34,11 +29,23 @@ namespace city.menu {
         TextComponent FooterTextComponent;
 
         /// <summary>
+        /// Tight runtime text width expressed in authored reference-canvas pixels.
+        /// </summary>
+        float MeasuredTextWidth;
+
+        /// <summary>
+        /// Tracks whether the runtime footer text has been measured after its font resolved.
+        /// </summary>
+        bool HasMeasuredTextWidth;
+
+        /// <summary>
         /// Initializes one footer marquee with every runtime-resolved reference in a known state, because native builds do not zero-initialize C# instance fields automatically.
         /// </summary>
         public FooterIdentityMarqueeComponent() {
             TextEntity = null;
             FooterTextComponent = null;
+            MeasuredTextWidth = 0f;
+            HasMeasuredTextWidth = false;
         }
 
         /// <summary>
@@ -48,12 +55,12 @@ namespace city.menu {
             base.Update();
 
             ResolveTextEntityWhenNeeded();
-            if (TextEntity == null) {
+            if (TextEntity == null || !EnsureMeasuredTextWidth()) {
                 return;
             }
 
             float2 canvasScale = ResolveCanvasScale();
-            float textWidth = TextWidth * canvasScale.X;
+            float textWidth = MeasuredTextWidth * canvasScale.X;
             double movement = (double)PixelsPerSecond * canvasScale.X * Core.Instance.FrameDeltaSeconds;
             float3 localPosition = TextEntity.LocalPosition;
             float nextPositionX = localPosition.X - (float)movement;
@@ -90,6 +97,23 @@ namespace city.menu {
                 FooterTextComponent.Text = BuildFooterText();
                 return;
             }
+        }
+
+        /// <summary>
+        /// Measures the runtime footer line once its font asset has resolved.
+        /// </summary>
+        /// <returns>True after the complete runtime text width is available.</returns>
+        bool EnsureMeasuredTextWidth() {
+            if (HasMeasuredTextWidth) {
+                return true;
+            } else if (FooterTextComponent == null || FooterTextComponent.Font == null) {
+                return false;
+            }
+
+            MeasuredTextWidth = FooterTextComponent.Font.MeasureTight(FooterTextComponent.Text).Width
+                * FooterTextComponent.FontScale;
+            HasMeasuredTextWidth = true;
+            return true;
         }
 
         /// <summary>

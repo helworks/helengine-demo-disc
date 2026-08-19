@@ -62,7 +62,7 @@ namespace city.tests {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
 
             Assert.Contains("new BoxCollider3DComponent {", source, StringComparison.Ordinal);
-            Assert.Contains("Size = new float3(1.5f, 3f, 1.5f)", source, StringComparison.Ordinal);
+            Assert.Contains("Size = new float3(1.5f / 0.51f, 3f / 0.51f, 1.5f / 0.51f)", source, StringComparison.Ordinal);
             Assert.Contains("IsTrigger = true", source, StringComparison.Ordinal);
         }
 

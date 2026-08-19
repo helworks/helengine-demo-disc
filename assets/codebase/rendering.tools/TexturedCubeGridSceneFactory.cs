@@ -426,17 +426,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("TexturedCubeGridUi");
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.AddComponent(new FPSComponent {
-                Font = ResolveRequiredEditorFont(),
-                FontScale = 2f
-            });
-            PspFpsComponentOverrideService.Apply(entity);
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
-            DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new DemoDiscSceneLabelOverlayFactory();
-            sceneLabelOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont(), "3. Textured Cubes");
-            return entity;
+            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("TexturedCubeGridUi", "3. Textured Cubes");
         }
 
         /// <summary>

@@ -19,8 +19,10 @@ namespace city.rendering.tools {
         /// <param name="pedestalMaterial">Runtime material used by the pedestal.</param>
         /// <param name="galleryMaterials">Twenty-five gallery runtime materials ordered by <see cref="PbrMaterialGalleryMaterialFactory.ResolveIndex"/>.</param>
         /// <returns>Live-authored scene definition for the PBR shadow theater showcase.</returns>
-        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(RuntimeModel cubeModel, RuntimeModel sphereModel, RuntimeMaterial pedestalMaterial, RuntimeMaterial[] galleryMaterials) {
-            if (cubeModel == null) {
+        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(string projectRootPath, RuntimeModel cubeModel, RuntimeModel sphereModel, RuntimeMaterial pedestalMaterial, RuntimeMaterial[] galleryMaterials) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (cubeModel == null) {
                 throw new ArgumentNullException(nameof(cubeModel));
             } else if (sphereModel == null) {
                 throw new ArgumentNullException(nameof(sphereModel));
@@ -36,6 +38,13 @@ namespace city.rendering.tools {
             RuntimeMaterial highRoughnessMetal = galleryMaterials[PbrMaterialGalleryMaterialFactory.ResolveIndex(4, 4)];
             RuntimeMaterial lowRoughnessDielectric = galleryMaterials[PbrMaterialGalleryMaterialFactory.ResolveIndex(0, 1)];
 
+            FontAsset instructionFont = ResolveRequiredEditorFont();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
+            ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
+            consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
+
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
@@ -48,6 +57,8 @@ namespace city.rendering.tools {
                     CreateUiEntity(),
                     CreateDirectionalLightEntity(),
                     CreateSpotLightEntity(),
+                    instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity,
                     CreatePedestalEntity(cubeModel, pedestalMaterial),
                     CreateClusterSphereEntity("PbrShadowTheaterSphereLowRoughMetal", new float3(-1.3f, 1.8f, 0f), sphereModel, lowRoughnessMetal),
                     CreateClusterSphereEntity("PbrShadowTheaterSphereHighRoughMetal", new float3(1.3f, 1.8f, 0f), sphereModel, highRoughnessMetal),
@@ -91,7 +102,6 @@ namespace city.rendering.tools {
                 OrbitCenter = new float3(0f, 1.6f, 0f),
                 AutoYawSpeedRadians = 0.1f
             });
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;
         }
 
@@ -100,16 +110,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("PbrShadowTheaterUi");
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.AddComponent(new FPSComponent {
-                Font = ResolveRequiredEditorFont(),
-                FontScale = 2f
-            });
-            PspFpsComponentOverrideService.Apply(entity);
-            DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new DemoDiscSceneLabelOverlayFactory();
-            sceneLabelOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont(), "15. PBR Shadow Theater");
-            return entity;
+            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("PbrShadowTheaterUi", "15. PBR Shadow Theater");
         }
 
         /// <summary>

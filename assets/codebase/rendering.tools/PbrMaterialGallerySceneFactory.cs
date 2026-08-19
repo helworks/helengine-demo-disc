@@ -34,8 +34,10 @@ namespace city.rendering.tools {
         /// <param name="groundMaterial">Runtime material used by the ground mesh.</param>
         /// <param name="galleryMaterials">Twenty-five runtime materials ordered by <see cref="PbrMaterialGalleryMaterialFactory.ResolveIndex"/>.</param>
         /// <returns>Live-authored scene definition for the PBR material gallery showcase.</returns>
-        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(RuntimeModel planeModel, RuntimeModel sphereModel, RuntimeMaterial groundMaterial, RuntimeMaterial[] galleryMaterials) {
-            if (planeModel == null) {
+        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(string projectRootPath, RuntimeModel planeModel, RuntimeModel sphereModel, RuntimeMaterial groundMaterial, RuntimeMaterial[] galleryMaterials) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (planeModel == null) {
                 throw new ArgumentNullException(nameof(planeModel));
             } else if (sphereModel == null) {
                 throw new ArgumentNullException(nameof(sphereModel));
@@ -47,15 +49,24 @@ namespace city.rendering.tools {
                 throw new ArgumentException("PBR material gallery generation requires twenty-five runtime materials.", nameof(galleryMaterials));
             }
 
+            FontAsset instructionFont = ResolveRequiredEditorFont();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
+            ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
+            consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
+
             Entity[] sphereEntities = CreateSphereEntities(sphereModel, galleryMaterials);
-            Entity[] rootEntities = new Entity[sphereEntities.Length + 6];
+            Entity[] rootEntities = new Entity[sphereEntities.Length + 8];
             rootEntities[0] = CreateCameraEntity();
             rootEntities[1] = CreateUiEntity();
             rootEntities[2] = CreateDirectionalLightEntity();
             rootEntities[3] = CreateDirectionalFillLightEntity();
             rootEntities[4] = CreateAmbientLightEntity();
-            rootEntities[5] = CreateGroundEntity(planeModel, groundMaterial);
-            Array.Copy(sphereEntities, 0, rootEntities, 6, sphereEntities.Length);
+            rootEntities[5] = instructionOverlayEntity;
+            rootEntities[6] = consoleInstructionBlueprintEntity;
+            rootEntities[7] = CreateGroundEntity(planeModel, groundMaterial);
+            Array.Copy(sphereEntities, 0, rootEntities, 8, sphereEntities.Length);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -99,7 +110,10 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
+            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+                OrbitCenter = float3.Zero,
+                AutoYawSpeedRadians = 0f
+            });
             return entity;
         }
 
@@ -108,16 +122,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("PbrMaterialGalleryUi");
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.AddComponent(new FPSComponent {
-                Font = ResolveRequiredEditorFont(),
-                FontScale = 2f
-            });
-            PspFpsComponentOverrideService.Apply(entity);
-            DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new DemoDiscSceneLabelOverlayFactory();
-            sceneLabelOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont(), "13. PBR Gallery");
-            return entity;
+            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("PbrMaterialGalleryUi", "13. PBR Gallery");
         }
 
         /// <summary>

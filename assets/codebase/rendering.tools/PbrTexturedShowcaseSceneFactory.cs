@@ -20,8 +20,10 @@ namespace city.rendering.tools {
         /// <param name="metalMaterial">Runtime scuffed-metal material used by the metal prop.</param>
         /// <param name="woodMaterial">Runtime wood-plank material used by the wood prop.</param>
         /// <returns>Live-authored scene definition for the PBR textured showcase.</returns>
-        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(RuntimeModel cubeModel, RuntimeModel planeModel, RuntimeMaterial groundMaterial, RuntimeMaterial metalMaterial, RuntimeMaterial woodMaterial) {
-            if (cubeModel == null) {
+        public GeneratedAuthoringSceneDefinition CreateSceneDefinition(string projectRootPath, RuntimeModel cubeModel, RuntimeModel planeModel, RuntimeMaterial groundMaterial, RuntimeMaterial metalMaterial, RuntimeMaterial woodMaterial) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (cubeModel == null) {
                 throw new ArgumentNullException(nameof(cubeModel));
             } else if (planeModel == null) {
                 throw new ArgumentNullException(nameof(planeModel));
@@ -32,6 +34,13 @@ namespace city.rendering.tools {
             } else if (woodMaterial == null) {
                 throw new ArgumentNullException(nameof(woodMaterial));
             }
+
+            FontAsset instructionFont = ResolveRequiredEditorFont();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
+            ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
+            consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -44,6 +53,8 @@ namespace city.rendering.tools {
                     CreateCameraEntity(),
                     CreateUiEntity(),
                     CreateDirectionalLightEntity(),
+                    instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity,
                     CreateGroundEntity(planeModel, groundMaterial),
                     CreatePropEntity("PbrTexturedShowcaseMetalProp", new float3(-2.6f, 1.2f, 0f), new float3(2.4f, 2.4f, 2.4f), cubeModel, metalMaterial),
                     CreatePropEntity("PbrTexturedShowcaseWoodProp", new float3(2.6f, 1.2f, 0f), new float3(2.4f, 2.4f, 2.4f), cubeModel, woodMaterial)
@@ -86,7 +97,6 @@ namespace city.rendering.tools {
                 OrbitCenter = new float3(0f, 1.2f, 0f),
                 AutoYawSpeedRadians = 0.08f
             });
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;
         }
 
@@ -95,16 +105,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("PbrTexturedShowcaseUi");
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.AddComponent(new FPSComponent {
-                Font = ResolveRequiredEditorFont(),
-                FontScale = 2f
-            });
-            PspFpsComponentOverrideService.Apply(entity);
-            DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new DemoDiscSceneLabelOverlayFactory();
-            sceneLabelOverlayFactory.AttachToSceneUi(entity, ResolveRequiredEditorFont(), "14. PBR Textures");
-            return entity;
+            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("PbrTexturedShowcaseUi", "14. PBR Textures");
         }
 
         /// <summary>

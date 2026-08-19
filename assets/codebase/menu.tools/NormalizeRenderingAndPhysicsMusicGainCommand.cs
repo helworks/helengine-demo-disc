@@ -15,6 +15,7 @@ namespace city.menu.tools {
             @"assets\scenes\rendering\scaled_cube.helen",
             @"assets\scenes\rendering\scene_memory_probe.helen",
             @"assets\scenes\rendering\spotlight_street_slice.helen",
+            @"assets\scenes\rendering\test_scene_matrix_render.helen",
             @"assets\scenes\rendering\textured_cube_grid.helen",
             @"assets\scenes\physics\test_scene_character_moving_platform.helen",
             @"assets\scenes\physics\test_scene_character_slope.helen",
@@ -23,12 +24,9 @@ namespace city.menu.tools {
             @"assets\scenes\physics\test_scene_dynamic_sphere_stack.helen",
             @"assets\scenes\physics\test_scene_dynamic_stack_boxes.helen",
             @"assets\scenes\physics\test_scene_kinematic_push.helen",
-            @"assets\scenes\physics\test_scene_matrix_render.helen",
             @"assets\scenes\physics\test_scene_mesh_ground_stability.helen",
             @"assets\scenes\physics\test_scene_render_only_slope.helen",
             @"assets\scenes\physics\test_scene_single_falling_cube.helen",
-            @"assets\scenes\physics\test_scene_static_mesh_minimal.helen",
-            @"assets\scenes\physics\test_scene_static_mesh_showcase.helen",
             @"assets\scenes\physics\test_scene_strict_rotated_box_compare.helen",
             @"assets\scenes\physics\test_scene_trigger_volume.helen"
         };

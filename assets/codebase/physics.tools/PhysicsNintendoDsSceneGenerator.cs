@@ -98,6 +98,10 @@ namespace city.physics.tools {
                 throw new ArgumentNullException(nameof(sceneEntry));
             }
 
+            if (string.Equals(sceneEntry.SceneId, "test_scene_matrix_render", StringComparison.Ordinal)) {
+                return;
+            }
+
             if (IsPlayablePhysicsShowcaseScene(sceneEntry)) {
                 RewritePlayablePhysicsShowcaseScene(fullProjectRootPath, sceneEntry);
                 return;
@@ -120,13 +124,8 @@ namespace city.physics.tools {
                 PhysicsSceneFolderRelativePath.Replace('/', Path.DirectorySeparatorChar),
                 sceneEntry.SceneId + ".helen");
             IReadOnlyList<string> supportedPlatformIds = new EditorProjectPlatformsService(fullProjectRootPath).Load().SupportedPlatforms;
-            SceneAsset authoredSceneAsset;
-            if (string.Equals(BuildPhysicsSceneAssetId(sceneEntry.SceneId), PhysicsSceneCatalog.MatrixRenderSceneId, StringComparison.Ordinal)) {
-                authoredSceneAsset = CreateFreshPhysicsSceneAssetWithoutSharedMusic(BuildPhysicsSceneAssetId(sceneEntry.SceneId));
-            } else {
-                authoredSceneAsset = LoadSceneAssetWithoutSharedMusic(authoredScenePath);
-                authoredSceneAsset.RootEntities = RemoveNintendoHandheldOnlyEntities(authoredSceneAsset.RootEntities, supportedPlatformIds);
-            }
+            SceneAsset authoredSceneAsset = LoadSceneAssetWithoutSharedMusic(authoredScenePath);
+            authoredSceneAsset.RootEntities = RemoveNintendoHandheldOnlyEntities(authoredSceneAsset.RootEntities, supportedPlatformIds);
             SceneLoadService sceneLoadService = new SceneLoadService(fullProjectRootPath, persistenceRegistry, referenceResolver);
             IReadOnlyList<EditorEntity> loadedRoots = sceneLoadService.Load(authoredSceneAsset);
             Entity[] rootEntities = new Entity[loadedRoots.Count];
@@ -285,9 +284,7 @@ namespace city.physics.tools {
 
             return string.Equals(sceneEntry.SceneId, "test_scene_dynamic_stack_boxes", StringComparison.Ordinal)
                 || string.Equals(sceneEntry.SceneId, "test_scene_dynamic_sphere_stack", StringComparison.Ordinal)
-                || string.Equals(sceneEntry.SceneId, "test_scene_dynamic_mixed_stack", StringComparison.Ordinal)
-                || string.Equals(sceneEntry.SceneId, "test_scene_static_mesh_showcase", StringComparison.Ordinal)
-                || string.Equals(sceneEntry.SceneId, "test_scene_static_mesh_minimal", StringComparison.Ordinal);
+                || string.Equals(sceneEntry.SceneId, "test_scene_dynamic_mixed_stack", StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -329,22 +326,6 @@ namespace city.physics.tools {
             }
 
             return PhysicsSceneFolderRelativePath + "/" + sceneId + ".helen";
-        }
-
-        /// <summary>
-        /// Builds one fresh generated physics scene asset directly from the current scene factory definitions and strips the shared generated music root before editor scene load materializes the remaining roots.
-        /// </summary>
-        /// <param name="sceneId">Stable physics scene id that should be rebuilt from the live factory definition.</param>
-        /// <returns>Fresh generated physics scene asset without the shared generated music root.</returns>
-        static SceneAsset CreateFreshPhysicsSceneAssetWithoutSharedMusic(string sceneId) {
-            if (string.IsNullOrWhiteSpace(sceneId)) {
-                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
-            }
-
-            PhysicsSceneFactory physicsSceneFactory = new PhysicsSceneFactory();
-            SceneAsset sceneAsset = physicsSceneFactory.CreateSceneAsset(sceneId);
-            StripSharedSceneMusic(sceneAsset);
-            return sceneAsset;
         }
 
         /// <summary>

@@ -17,6 +17,7 @@ namespace city.tests {
             @"assets\scenes\rendering\scaled_cube.helen",
             @"assets\scenes\rendering\scene_memory_probe.helen",
             @"assets\scenes\rendering\spotlight_street_slice.helen",
+            @"assets\scenes\rendering\test_scene_matrix_render.helen",
             @"assets\scenes\rendering\textured_cube_grid.helen"
         };
 
@@ -28,12 +29,9 @@ namespace city.tests {
             @"assets\scenes\physics\test_scene_dynamic_sphere_stack.helen",
             @"assets\scenes\physics\test_scene_dynamic_stack_boxes.helen",
             @"assets\scenes\physics\test_scene_kinematic_push.helen",
-            @"assets\scenes\physics\test_scene_matrix_render.helen",
             @"assets\scenes\physics\test_scene_mesh_ground_stability.helen",
             @"assets\scenes\physics\test_scene_render_only_slope.helen",
             @"assets\scenes\physics\test_scene_single_falling_cube.helen",
-            @"assets\scenes\physics\test_scene_static_mesh_minimal.helen",
-            @"assets\scenes\physics\test_scene_static_mesh_showcase.helen",
             @"assets\scenes\physics\test_scene_strict_rotated_box_compare.helen",
             @"assets\scenes\physics\test_scene_trigger_volume.helen"
         };
@@ -60,14 +58,14 @@ namespace city.tests {
         }
 
         /// <summary>
-        /// Verifies the handheld physics generator identifies the matrix scene with the same canonical asset id used by the scene factory.
+        /// Verifies the handheld physics generator skips the matrix scene because the rendering pipeline authors it, including its handheld augmentation.
         /// </summary>
         [Fact]
-        public void Nintendo_handheld_generator_rebuilds_the_matrix_scene_from_its_canonical_asset_id() {
+        public void Nintendo_handheld_generator_skips_the_rendering_pipeline_matrix_scene() {
             string physicsNintendoDsSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsNintendoDsSceneGenerator.cs");
 
-            Assert.Contains("string.Equals(BuildPhysicsSceneAssetId(sceneEntry.SceneId), PhysicsSceneCatalog.MatrixRenderSceneId, StringComparison.Ordinal)", physicsNintendoDsSource, StringComparison.Ordinal);
-            Assert.Contains("CreateFreshPhysicsSceneAssetWithoutSharedMusic(BuildPhysicsSceneAssetId(sceneEntry.SceneId))", physicsNintendoDsSource, StringComparison.Ordinal);
+            Assert.Contains("string.Equals(sceneEntry.SceneId, \"test_scene_matrix_render\", StringComparison.Ordinal)", physicsNintendoDsSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("CreateFreshPhysicsSceneAssetWithoutSharedMusic", physicsNintendoDsSource, StringComparison.Ordinal);
         }
 
         static void AssertAllScenesAreSilent(IEnumerable<string> relativePaths, string audioSourceComponentTypeId) {

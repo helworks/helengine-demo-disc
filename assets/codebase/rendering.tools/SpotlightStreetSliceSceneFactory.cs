@@ -1,4 +1,4 @@
-using city.menu;
+﻿using city.menu;
 using gameplay.rendering;
 using helengine.editor;
 
@@ -84,13 +84,16 @@ namespace city.rendering.tools {
         /// <param name="racerMaterials">Runtime imported racer materials ordered by imported submesh slot.</param>
         /// <returns>Live-authored scene definition for the spotlight street-slice showcase.</returns>
         public GeneratedAuthoringSceneDefinition CreateSceneDefinition(
+            string projectRootPath,
             RuntimeModel planeModel,
             RuntimeModel cubeModel,
             RuntimeMaterial standardMaterial,
             RuntimeModel lamppostModel,
             RuntimeModel racerModel,
             RuntimeMaterial[] racerMaterials) {
-            if (planeModel == null) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (planeModel == null) {
                 throw new ArgumentNullException(nameof(planeModel));
             } else if (cubeModel == null) {
                 throw new ArgumentNullException(nameof(cubeModel));
@@ -104,6 +107,13 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(racerMaterials));
             }
 
+            FontAsset instructionFont = ResolveRequiredInstructionFont();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
+            ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
+            consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
+
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
@@ -115,6 +125,8 @@ namespace city.rendering.tools {
                     CreateCameraEntity(),
                     CreateFpsEntity(),
                     CreateSpotLightEntity(),
+                    instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity,
                     CreateStreetEntity(planeModel, standardMaterial),
                     CreateStreetEdgeEntity("SpotlightStreetSliceCurbLeft", new float3(-9f, 0.25f, 0f), new float3(1f, 0.5f, 28f), cubeModel, standardMaterial),
                     CreateStreetEdgeEntity("SpotlightStreetSliceCurbRight", new float3(9f, 0.25f, 0f), new float3(1f, 0.5f, 28f), cubeModel, standardMaterial),
@@ -161,7 +173,6 @@ namespace city.rendering.tools {
                 OrbitCenter = new float3(0f, 2f, 0f),
                 AutoYawSpeedRadians = 0.05f
             });
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
             return entity;
         }
 
@@ -170,16 +181,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored FPS overlay entity.</returns>
         Entity CreateFpsEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("SpotlightStreetSliceFps");
-            entity.LayerMask = SceneObjectsLayerMask;
-            FPSComponent fpsComponent = new FPSComponent {
-                Font = PlaceholderFont,
-                FontScale = 2f
-            };
-            entity.AddComponent(fpsComponent);
-            PspFpsComponentOverrideService.Apply(entity);
-            ApplyEditorFontReference(entity, fpsComponent);
-            return entity;
+            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("SpotlightStreetSliceFps", string.Empty);
         }
 
         /// <summary>
@@ -397,8 +399,17 @@ namespace city.rendering.tools {
             float4.CreateFromYawPitchRoll((float)yawRadians, 0f, 0f, out orientation);
             return orientation;
         }
+
+        /// <summary>
+        /// Resolves the editor default font required by the shared instruction overlay.
+        /// </summary>
+        /// <returns>Editor default font asset.</returns>
+        FontAsset ResolveRequiredInstructionFont() {
+            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+                throw new InvalidOperationException("A default editor font must be loaded before the spotlight street-slice scene can be generated.");
+            }
+
+            return editorCore.DefaultFontAssetForEditor;
+        }
     }
 }
-
-
-
