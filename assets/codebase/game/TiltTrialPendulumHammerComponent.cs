@@ -71,7 +71,7 @@ namespace city.game {
         }
 
         /// <summary>
-        /// Advances the pendulum swing by rotating the owning entity around its local Z axis, then feeds the kinematic head body its exact pose and velocities so contact impulses push the player correctly.
+        /// Advances the pendulum swing by rotating the owning entity around its local X axis, then feeds the kinematic head body its exact pose and velocities so contact impulses push the player correctly.
         /// </summary>
         public override void Update() {
             base.Update();
@@ -95,7 +95,7 @@ namespace city.game {
             ElapsedSeconds += (float)frameDeltaSeconds;
 
             float swingAngleRadians = ResolveSwingAngleRadians(ElapsedSeconds, SwingArcDegrees, SwingPeriodSeconds, SwingPhaseRadians);
-            float3 axis = new float3(0f, 0f, 1f);
+            float3 axis = new float3(1f, 0f, 0f);
             float4.CreateFromAxisAngle(ref axis, swingAngleRadians, out float4 swingRotation);
 
             float4 baseOrientation = BaseLocalOrientation;
@@ -115,7 +115,7 @@ namespace city.game {
             }
 
             float swingAngularSpeedRadians = ResolveSwingAngularSpeedRadians(ElapsedSeconds, SwingArcDegrees, SwingPeriodSeconds, SwingPhaseRadians);
-            float3 worldHingeAxis = float4.RotateVector(new float3(0f, 0f, 1f), Parent.Orientation);
+            float3 worldHingeAxis = float4.RotateVector(new float3(1f, 0f, 0f), Parent.Orientation);
             float3 angularVelocity = worldHingeAxis * swingAngularSpeedRadians;
             HeadRigidBody.AngularVelocity = angularVelocity;
             HeadRigidBody.LinearVelocity = float3.Cross(angularVelocity, HeadBodyEntity.Position - Parent.Position);
