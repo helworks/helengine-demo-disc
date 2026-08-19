@@ -251,22 +251,16 @@
                           "selectedBuildProfileId":  "ps2-default",
                           "editorPrebuildCommandIdsByBuildProfileId":  {
                                                                            "ps2-default":  [
-                                                                                               "menu.generate-game-scenes",
                                                                                                "menu.generate-rendering-scenes",
-                                                                                               "menu.regenerate-demo-disc-main-menu",
-                                                                                               "menu.attach-tilt-trial-presentation-blueprints"
+                                                                                               "menu.regenerate-demo-disc-main-menu"
                                                                                            ],
                                                                            "debug":  [
-                                                                                         "menu.generate-game-scenes",
                                                                                          "menu.generate-rendering-scenes",
-                                                                                         "menu.regenerate-demo-disc-main-menu",
-                                                                                         "menu.attach-tilt-trial-presentation-blueprints"
+                                                                                         "menu.regenerate-demo-disc-main-menu"
                                                                                      ],
                                                                            "release":  [
-                                                                                           "menu.generate-game-scenes",
                                                                                            "menu.generate-rendering-scenes",
-                                                                                           "menu.regenerate-demo-disc-main-menu",
-                                                                                           "menu.attach-tilt-trial-presentation-blueprints"
+                                                                                           "menu.regenerate-demo-disc-main-menu"
                                                                                        ],
                                                                            "colored-cube-grid":  [
 
@@ -400,16 +394,12 @@
                           "selectedBuildProfileId":  "debug",
                           "editorPrebuildCommandIdsByBuildProfileId":  {
                                                                            "debug":  [
-                                                                                         "menu.generate-game-scenes",
                                                                                          "menu.generate-rendering-scenes",
-                                                                                         "menu.regenerate-demo-disc-main-menu",
-                                                                                         "menu.attach-tilt-trial-presentation-blueprints"
+                                                                                         "menu.regenerate-demo-disc-main-menu"
                                                                                      ],
                                                                            "release":  [
-                                                                                           "menu.generate-game-scenes",
                                                                                            "menu.generate-rendering-scenes",
-                                                                                           "menu.regenerate-demo-disc-main-menu",
-                                                                                           "menu.attach-tilt-trial-presentation-blueprints"
+                                                                                           "menu.regenerate-demo-disc-main-menu"
                                                                                        ]
                                                                        },
                           "selectedGraphicsProfileId":  "psp-forward",
