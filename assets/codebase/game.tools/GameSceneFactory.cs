@@ -1348,6 +1348,9 @@ namespace city.game.tools {
             coinTextAnchorComponent.SetAnchorDistances(left: 16f, top: 16f);
             coinTextEntity.AddComponent(coinTextAnchorComponent);
             ApplyFontReference(coinTextEntity, coinTextComponent, TiltTrialSpeedHudFontRelativePath);
+            coinTextEntity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+                Role = "TiltTrialCoinText"
+            });
 
             Entity physicsBoundsStatusTextEntity = Core.Instance.EntityFactory.CreateChild(entity, "TiltTrialPhysicsBoundsStatusText");
             physicsBoundsStatusTextEntity.LocalPosition = new float3(16f, 56f, 0f);
