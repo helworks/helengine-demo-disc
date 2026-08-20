@@ -23,14 +23,14 @@ namespace city.rendering.tools {
         const int TextureHeight = 256;
 
         /// <summary>
-        /// Stable grid-cell size.
+        /// Stable grid-cell size; 16 pixels yields a 16x16 cell grid so per-object UV stretching reads far less than the previous 8x8 layout.
         /// </summary>
-        const int GridCellSize = 32;
+        const int GridCellSize = 16;
 
         /// <summary>
         /// Stable grid-line thickness.
         /// </summary>
-        const int GridLineThickness = 3;
+        const int GridLineThickness = 2;
 
         /// <summary>
         /// Writes the lilac grid source texture and returns its imported texture asset id.
@@ -127,9 +127,9 @@ namespace city.rendering.tools {
                 || localY >= GridCellSize - GridLineThickness;
 
             if (isGridLine) {
-                red = 206;
-                green = 181;
-                blue = 235;
+                red = 216;
+                green = 196;
+                blue = 240;
                 return;
             }
 
