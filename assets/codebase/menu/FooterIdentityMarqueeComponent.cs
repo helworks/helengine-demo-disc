@@ -29,7 +29,8 @@ namespace city.menu {
         TextComponent FooterTextComponent;
 
         /// <summary>
-        /// Tight runtime text width expressed in authored reference-canvas pixels.
+        /// Tight runtime text width expressed in active viewport pixels, since <see cref="TextComponent.FontScale"/>
+        /// is already fitted to the viewport by the owning <see cref="ReferenceCanvasFitComponent"/> before it is read here.
         /// </summary>
         float MeasuredTextWidth;
 
@@ -60,7 +61,7 @@ namespace city.menu {
             }
 
             float2 canvasScale = ResolveCanvasScale();
-            float textWidth = MeasuredTextWidth * canvasScale.X;
+            float textWidth = MeasuredTextWidth;
             double movement = (double)PixelsPerSecond * canvasScale.X * Core.Instance.FrameDeltaSeconds;
             float3 localPosition = TextEntity.LocalPosition;
             float nextPositionX = localPosition.X - (float)movement;

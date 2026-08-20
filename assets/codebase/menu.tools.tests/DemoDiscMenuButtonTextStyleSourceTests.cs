@@ -84,7 +84,9 @@ namespace city.menu.tools.tests {
         }
 
         /// <summary>
-        /// Ensures the marquee scales its reset and exit geometry into the active viewport together with its movement speed.
+        /// Ensures the marquee measures its exit width from the already-viewport-fitted <c>FontScale</c> without re-applying
+        /// <c>canvasScale.X</c>, which previously double-scaled the exit test and reset the marquee early off the reference
+        /// resolution (most visibly at 4:3).
         /// </summary>
         [Fact]
         public void Footer_marquee_scales_its_runtime_geometry_to_the_viewport() {
@@ -95,7 +97,8 @@ namespace city.menu.tools.tests {
             Assert.Contains("FooterTextComponent.Font.MeasureTight(FooterTextComponent.Text).Width", marqueeComponentSource, StringComparison.Ordinal);
             Assert.Contains("FooterTextComponent.FontScale", marqueeComponentSource, StringComparison.Ordinal);
             Assert.Contains("MeasuredTextWidth", marqueeComponentSource, StringComparison.Ordinal);
-            Assert.Contains("float textWidth = MeasuredTextWidth * canvasScale.X;", marqueeComponentSource, StringComparison.Ordinal);
+            Assert.Contains("float textWidth = MeasuredTextWidth;", marqueeComponentSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("float textWidth = MeasuredTextWidth * canvasScale.X;", marqueeComponentSource, StringComparison.Ordinal);
             Assert.DoesNotContain("public float TextWidth", marqueeComponentSource, StringComparison.Ordinal);
             Assert.DoesNotContain("TextWidth = 420f", standardFactorySource, StringComparison.Ordinal);
             Assert.Contains("if (nextPositionX + textWidth <= 0f)", marqueeComponentSource, StringComparison.Ordinal);
