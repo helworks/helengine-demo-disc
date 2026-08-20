@@ -112,7 +112,7 @@ namespace city.rendering.tools {
             });
             entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = float3.Zero,
-                AutoYawSpeedRadians = 0f
+                AutoYawSpeedRadians = 0.08f
             });
             return entity;
         }

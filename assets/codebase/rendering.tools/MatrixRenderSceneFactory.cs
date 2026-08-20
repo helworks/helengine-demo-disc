@@ -167,7 +167,7 @@ namespace city.rendering.tools {
         Entity CreateUiEntity() {
             Entity entity = new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("MatrixRenderUi", "6. Matrix Render");
             Entity phaseStatusEntity = Core.Instance.EntityFactory.CreateChild(entity, "MatrixRenderPhaseStatus");
-            phaseStatusEntity.LocalPosition = new float3(16f, 392f, 0f);
+            phaseStatusEntity.LocalPosition = new float3(16f, 112f, 0f);
             phaseStatusEntity.Static = false;
             phaseStatusEntity.AddComponent(new TextComponent {
                 Text = "Operation: Translation",
