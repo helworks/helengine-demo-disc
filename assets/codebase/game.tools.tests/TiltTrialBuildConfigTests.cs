@@ -47,11 +47,11 @@ namespace city.tests {
                 .EnumerateArray()
                 .Single(platform => string.Equals(platform.GetProperty("platformId").GetString(), "windows", StringComparison.Ordinal));
 
-            Assert.Equal("DemoDiscMainMenu", windowsPlatform.GetProperty("selectedSceneIds")[0].GetString());
+            Assert.Equal("DemoDiscMainMenu", windowsPlatform.GetProperty("selectedSceneIds")[2].GetString());
             Assert.Contains(
                 windowsPlatform.GetProperty("sceneOrders").EnumerateArray(),
                 sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), "DemoDiscMainMenu", StringComparison.Ordinal)
-                    && sceneOrder.GetProperty("orderNumber").GetInt32() == 1);
+                    && sceneOrder.GetProperty("orderNumber").GetInt32() == 3);
 
             HashSet<string> selectedSceneIds = new HashSet<string>(
                 windowsPlatform.GetProperty("selectedSceneIds").EnumerateArray().Select(sceneId => sceneId.GetString() ?? string.Empty),
@@ -86,15 +86,15 @@ namespace city.tests {
             Assert.Contains(
                 dsPlatform.GetProperty("sceneOrders").EnumerateArray(),
                 sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), city.game.TiltTrialSceneIds.HandheldLevelSelectSceneId, StringComparison.Ordinal)
-                    && sceneOrder.GetProperty("orderNumber").GetInt32() == 17);
+                    && sceneOrder.GetProperty("orderNumber").GetInt32() == 12);
             Assert.Contains(
                 dsPlatform.GetProperty("sceneOrders").EnumerateArray(),
                 sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), city.game.TiltTrialSceneIds.Level01SceneId, StringComparison.Ordinal)
-                    && sceneOrder.GetProperty("orderNumber").GetInt32() == 18);
+                    && sceneOrder.GetProperty("orderNumber").GetInt32() == 13);
             Assert.Contains(
                 dsPlatform.GetProperty("sceneOrders").EnumerateArray(),
                 sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), city.game.TiltTrialSceneIds.Level05SceneId, StringComparison.Ordinal)
-                    && sceneOrder.GetProperty("orderNumber").GetInt32() == 22);
+                    && sceneOrder.GetProperty("orderNumber").GetInt32() == 17);
         }
 
         /// <summary>

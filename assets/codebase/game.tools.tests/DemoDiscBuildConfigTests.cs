@@ -10,6 +10,7 @@ namespace city.tests {
         /// </summary>
         static readonly string[] CommonNonHandheldSceneIds = [
             "HelenOfCodeSplash",
+            "SceneLoadingScreen",
             "DemoDiscMainMenu",
             "cube_test",
             "colored_cube_grid",
@@ -26,7 +27,10 @@ namespace city.tests {
             "tilt_trial_level_02",
             "tilt_trial_level_03",
             "tilt_trial_level_04",
-            "tilt_trial_level_05"
+            "tilt_trial_level_05",
+            "pbr_material_gallery",
+            "pbr_textured_showcase",
+            "pbr_shadow_theater"
         ];
 
         /// <summary>
@@ -40,10 +44,8 @@ namespace city.tests {
             JsonElement.ArrayEnumerator platforms = document.RootElement.GetProperty("platforms").EnumerateArray();
             foreach (JsonElement platform in platforms) {
                 string platformId = platform.GetProperty("platformId").GetString() ?? string.Empty;
-                if (string.Equals(platformId, "windows", StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(platformId, "ds", StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(platformId, "3ds", StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(platformId, "ps2", StringComparison.OrdinalIgnoreCase)) {
+                if (string.Equals(platformId, "ds", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(platformId, "3ds", StringComparison.OrdinalIgnoreCase)) {
                     continue;
                 }
 
@@ -150,30 +152,6 @@ namespace city.tests {
         }
 
         /// <summary>
-        /// Ensures the dedicated PS2 renderer-performance export contains only the Level 1 render-test scene so startup enters it directly.
-        /// </summary>
-        [Fact]
-        public void Ps2_renderer_performance_export_boots_the_level_01_render_test_scene() {
-            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
-            using JsonDocument document = JsonDocument.Parse(json);
-
-            JsonElement ps2Platform = document.RootElement.GetProperty("platforms").EnumerateArray()
-                .Single(platform => string.Equals(platform.GetProperty("platformId").GetString(), "ps2", StringComparison.Ordinal));
-            string[] selectedSceneIds = ps2Platform.GetProperty("selectedSceneIds")
-                .EnumerateArray()
-                .Select(sceneId => sceneId.GetString() ?? string.Empty)
-                .ToArray();
-            string[] orderedSceneIds = ps2Platform.GetProperty("sceneOrders")
-                .EnumerateArray()
-                .OrderBy(sceneOrder => sceneOrder.GetProperty("orderNumber").GetInt32())
-                .Select(sceneOrder => sceneOrder.GetProperty("sceneId").GetString() ?? string.Empty)
-                .ToArray();
-
-            Assert.Equal(new[] { "test_scene_tilt_trial_level_01_render" }, selectedSceneIds);
-            Assert.Equal(new[] { "test_scene_tilt_trial_level_01_render" }, orderedSceneIds);
-        }
-
-        /// <summary>
         /// Ensures Nintendo DS retains the shared rendering and physics scene package while replacing only the menu and Tilt Trial selector ids.
         /// </summary>
         [Fact]
@@ -188,7 +166,8 @@ namespace city.tests {
                 StringComparer.Ordinal);
 
             foreach (string commonSceneId in CommonNonHandheldSceneIds) {
-                if (string.Equals(commonSceneId, "HelenOfCodeSplash", StringComparison.Ordinal)) {
+                if (string.Equals(commonSceneId, "HelenOfCodeSplash", StringComparison.Ordinal)
+                    || string.Equals(commonSceneId, "SceneLoadingScreen", StringComparison.Ordinal)) {
                     continue;
                 }
 
