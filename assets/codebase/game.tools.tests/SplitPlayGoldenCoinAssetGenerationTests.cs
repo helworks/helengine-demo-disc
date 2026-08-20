@@ -28,10 +28,10 @@ namespace city.tests {
 
             generator.Generate(ProjectRootPath);
 
-            string commonModelPath = Path.Combine(ProjectRootPath, "assets", "models", "games", "split_play", "golden_coin.hasset");
-            string dsModelPath = Path.Combine(ProjectRootPath, "assets", "models", "games", "split_play", "golden_coin_ds.hasset");
-            string materialPath = Path.Combine(ProjectRootPath, "assets", "materials", "games", "split_play", "GoldenCoin.hasset");
-            string blueprintPath = Path.Combine(ProjectRootPath, "assets", "blueprints", "games", "split_play", "GoldenCoin.hblueprint");
+            string commonModelPath = Path.Combine(ProjectRootPath, "assets", "models", "games", "tilt", "golden_coin.hasset");
+            string dsModelPath = Path.Combine(ProjectRootPath, "assets", "models", "games", "tilt", "golden_coin_ds.hasset");
+            string materialPath = Path.Combine(ProjectRootPath, "assets", "materials", "games", "tilt", "GoldenCoin.hasset");
+            string blueprintPath = Path.Combine(ProjectRootPath, "assets", "blueprints", "games", "tilt", "GoldenCoin.hblueprint");
 
             Assert.True(File.Exists(commonModelPath));
             Assert.True(File.Exists(dsModelPath));
@@ -96,14 +96,18 @@ namespace city.tests {
                 commonModel.Normals,
                 normal => normal.Z < -0.8f);
             AssertAllTriangleWindingsAgreeWithNormals(commonModel);
-            Assert.Equal("blueprints/games/split_play/GoldenCoin.hblueprint", blueprint.Id);
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "models/games/split_play/golden_coin.hasset");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "models/games/split_play/golden_coin_ds.hasset");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "materials/games/split_play/GoldenCoin.hasset");
+            Assert.Equal("blueprints/games/tilt/GoldenCoin.hblueprint", blueprint.Id);
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "models/games/tilt/golden_coin.hasset");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "models/games/tilt/golden_coin_ds.hasset");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "materials/games/tilt/GoldenCoin.hasset");
 
             Assert.NotNull(blueprint.RootEntity);
             SceneEntityAsset meshRoot = blueprint.RootEntity;
-            Assert.Equal(3, meshRoot.Components.Count());
+            Assert.Equal(6, meshRoot.Components.Count());
+            Assert.Contains(meshRoot.Components, record => record.ComponentTypeId.Contains("SceneEntityTriggerObserverComponent", StringComparison.Ordinal)
+                && record.ComponentKey == SplitPlayGoldenCoinAssetGenerator.TriggerObserverComponentKey);
+            Assert.Contains(meshRoot.Components, record => record.ComponentTypeId.Contains("RigidBody3DComponent", StringComparison.Ordinal));
+            Assert.Contains(meshRoot.Components, record => record.ComponentTypeId.Contains("BoxCollider3DComponent", StringComparison.Ordinal));
             SceneComponentAssetRecord meshComponent = meshRoot.Components[0];
             ComponentPlatformOverridePayloadService overridePayloadService = new ComponentPlatformOverridePayloadService();
             IReadOnlyList<EntityComponentPlatformOverrideState> overrideStates = overridePayloadService.ReadOverrideStates(meshComponent);
@@ -117,7 +121,7 @@ namespace city.tests {
                     null));
 
             Assert.True(dsOverride.TryGetAssetReference("Model", out SceneAssetReference dsModelReference));
-            Assert.Equal("models/games/split_play/golden_coin_ds.hasset", dsModelReference.RelativePath);
+            Assert.Equal("models/games/tilt/golden_coin_ds.hasset", dsModelReference.RelativePath);
             Assert.False(dsOverride.TryGetAssetReference("Materials[0]", out _));
             Assert.Single(restoredMeshComponent.Materials);
 
@@ -132,7 +136,7 @@ namespace city.tests {
 
         [Fact]
         public void Committed_project_golden_coin_material_matches_the_generated_windows_gold_settings() {
-            string materialPath = @"C:\dev\helprojs\demodisc\assets\materials\games\split_play\GoldenCoin.hasset";
+            string materialPath = @"C:\dev\helprojs\demodisc\assets\materials\games\tilt\GoldenCoin.hasset";
 
             MaterialAssetSettingsService materialSettingsService = new MaterialAssetSettingsService();
             Assert.True(materialSettingsService.TryLoadPlatformSettings(materialPath, "windows", out MaterialAssetProcessorSettings windowsSettings));

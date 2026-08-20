@@ -21,6 +21,21 @@ namespace city.game.tools {
         const string DsMaterialSchemaId = "ds-standard-lit";
         const string StandardShaderAssetId = "ForwardStandardShader";
 
+        /// <summary>
+        /// Stable component key for the blueprint trigger observer so scene entity-reference overrides survive regeneration.
+        /// </summary>
+        public const string TriggerObserverComponentKey = "1a2b3c4d5e6f70819203a4b5c6d7e8f9";
+
+        /// <summary>
+        /// Stable component key for the blueprint kinematic rigid body so scene overrides survive regeneration.
+        /// </summary>
+        public const string RigidBodyComponentKey = "8f7e6d5c4b3a2918070605040302010f";
+
+        /// <summary>
+        /// Stable component key for the blueprint trigger box collider so scene overrides survive regeneration.
+        /// </summary>
+        public const string BoxColliderComponentKey = "0f1e2d3c4b5a69788796a5b4c3d2e1f0";
+
         const string UseCustomShaderFieldId = "use-custom-shader";
         const string ShaderAssetIdFieldId = "shader-asset-id";
         const string RoughnessFieldId = "roughness";
@@ -87,6 +102,17 @@ namespace city.game.tools {
             SceneComponentAssetRecord meshRecord = new ComponentPlatformOverridePayloadService().Wrap(baseRecord, saveState);
             SceneComponentAssetRecord collectibleRecord = AutomaticDescriptor.SerializeComponent(new city.game.TiltTrialCollectibleCoinComponent(), 1, null);
             SceneComponentAssetRecord idleMotionRecord = AutomaticDescriptor.SerializeComponent(new city.game.SplitPlayIdleMotionComponent(), 2, null);
+            SceneComponentAssetRecord observerRecord = SerializeWithStableKey(registry, new global::helengine.SceneEntityTriggerObserverComponent(), 3, TriggerObserverComponentKey);
+            SceneComponentAssetRecord rigidBodyRecord = SerializeWithStableKey(registry, new RigidBody3DComponent {
+                BodyKind = BodyKind3D.Kinematic,
+                UseGravity = false,
+                Mass = 1d
+            }, 4, RigidBodyComponentKey);
+            BoxCollider3DComponent triggerCollider = new BoxCollider3DComponent {
+                Size = new float3(3f, 6f, 3f)
+            };
+            triggerCollider.IsTrigger = true;
+            SceneComponentAssetRecord colliderRecord = SerializeWithStableKey(registry, triggerCollider, 5, BoxColliderComponentKey);
 
             return new BlueprintAsset {
                 Id = SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath,
@@ -98,10 +124,28 @@ namespace city.game.tools {
                     LocalPosition = float3.Zero,
                     LocalScale = float3.One,
                     LocalOrientation = float4.Identity,
-                    Components = [meshRecord, collectibleRecord, idleMotionRecord],
+                    Components = [meshRecord, collectibleRecord, idleMotionRecord, observerRecord, rigidBodyRecord, colliderRecord],
                     Children = Array.Empty<SceneEntityAsset>()
                 },
                 AssetReferences = [commonModelReference, dsModelReference, materialReference]
+            };
+        }
+
+        /// <summary>
+        /// Serializes one blueprint component with a stable component key so scene-owned overrides survive regeneration.
+        /// </summary>
+        /// <param name="registry">Persistence registry used for serialization.</param>
+        /// <param name="component">Component instance to serialize.</param>
+        /// <param name="componentIndex">Zero-based component slot on the blueprint root.</param>
+        /// <param name="componentKey">Stable component key persisted with the record.</param>
+        /// <returns>Serialized component record carrying the stable key.</returns>
+        static SceneComponentAssetRecord SerializeWithStableKey(ComponentPersistenceRegistry registry, Component component, int componentIndex, string componentKey) {
+            SceneComponentAssetRecord record = registry.GetDescriptor(component).SerializeComponent(component, componentIndex, null);
+            return new SceneComponentAssetRecord {
+                ComponentIndex = record.ComponentIndex,
+                ComponentKey = componentKey,
+                ComponentTypeId = record.ComponentTypeId,
+                Payload = record.Payload
             };
         }
 

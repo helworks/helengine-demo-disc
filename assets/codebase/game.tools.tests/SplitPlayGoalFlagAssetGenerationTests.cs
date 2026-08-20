@@ -28,11 +28,11 @@ namespace city.tests {
 
             generator.Generate(ProjectRootPath);
 
-            string commonModelPath = Path.Combine(ProjectRootPath, "assets", "models", "games", "split_play", "goal_flag.hasset");
-            string dsModelPath = Path.Combine(ProjectRootPath, "assets", "models", "games", "split_play", "goal_flag_ds.hasset");
-            string poleMaterialPath = Path.Combine(ProjectRootPath, "assets", "materials", "games", "split_play", "GoalFlagPole.hasset");
-            string bannerMaterialPath = Path.Combine(ProjectRootPath, "assets", "materials", "games", "split_play", "GoalFlagBanner.hasset");
-            string blueprintPath = Path.Combine(ProjectRootPath, "assets", "blueprints", "games", "split_play", "GoalFlag.hblueprint");
+            string commonModelPath = Path.Combine(ProjectRootPath, "assets", "models", "games", "tilt", "goal_flag.hasset");
+            string dsModelPath = Path.Combine(ProjectRootPath, "assets", "models", "games", "tilt", "goal_flag_ds.hasset");
+            string poleMaterialPath = Path.Combine(ProjectRootPath, "assets", "materials", "games", "tilt", "GoalFlagPole.hasset");
+            string bannerMaterialPath = Path.Combine(ProjectRootPath, "assets", "materials", "games", "tilt", "GoalFlagBanner.hasset");
+            string blueprintPath = Path.Combine(ProjectRootPath, "assets", "blueprints", "games", "tilt", "GoalFlag.hblueprint");
 
             Assert.True(File.Exists(commonModelPath));
             Assert.True(File.Exists(dsModelPath));
@@ -59,17 +59,25 @@ namespace city.tests {
             Assert.NotNull(dsModel.Indices16);
             Assert.True(commonModel.Positions.Length > dsModel.Positions.Length);
             Assert.True(commonModel.Indices16.Length > dsModel.Indices16.Length);
+            AssertAllTriangleWindingsAgreeWithNormals(commonModel);
+            AssertAllTriangleWindingsAgreeWithNormals(dsModel);
             Assert.Equal(2, commonModel.Submeshes.Length);
             Assert.Equal(2, dsModel.Submeshes.Length);
-            Assert.Equal("blueprints/games/split_play/GoalFlag.hblueprint", blueprint.Id);
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "models/games/split_play/goal_flag.hasset");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "models/games/split_play/goal_flag_ds.hasset");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "materials/games/split_play/GoalFlagPole.hasset");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "materials/games/split_play/GoalFlagBanner.hasset");
+            Assert.Equal("blueprints/games/tilt/GoalFlag.hblueprint", blueprint.Id);
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "models/games/tilt/goal_flag.hasset");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "models/games/tilt/goal_flag_ds.hasset");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "materials/games/tilt/GoalFlagPole.hasset");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "materials/games/tilt/GoalFlagBanner.hasset");
 
             Assert.NotNull(blueprint.RootEntity);
             SceneEntityAsset root = blueprint.RootEntity;
-            SceneComponentAssetRecord meshComponent = Assert.Single(root.Components);
+            Assert.Equal(5, root.Components.Length);
+            Assert.Contains(root.Components, record => record.ComponentTypeId.Contains("TiltTrialGoalComponent", StringComparison.Ordinal));
+            Assert.Contains(root.Components, record => record.ComponentTypeId.Contains("SceneEntityTriggerObserverComponent", StringComparison.Ordinal)
+                && record.ComponentKey == SplitPlayGoalFlagAssetGenerator.TriggerObserverComponentKey);
+            Assert.Contains(root.Components, record => record.ComponentTypeId.Contains("RigidBody3DComponent", StringComparison.Ordinal));
+            Assert.Contains(root.Components, record => record.ComponentTypeId.Contains("BoxCollider3DComponent", StringComparison.Ordinal));
+            SceneComponentAssetRecord meshComponent = root.Components[0];
             ComponentPlatformOverridePayloadService overridePayloadService = new ComponentPlatformOverridePayloadService();
             IReadOnlyList<EntityComponentPlatformOverrideState> overrideStates = overridePayloadService.ReadOverrideStates(meshComponent);
             EntityComponentPlatformOverrideState dsOverride = Assert.Single(overrideStates, state => state.PlatformId == "ds");
@@ -82,10 +90,44 @@ namespace city.tests {
                     null));
 
             Assert.True(dsOverride.TryGetAssetReference("Model", out SceneAssetReference dsModelReference));
-            Assert.Equal("models/games/split_play/goal_flag_ds.hasset", dsModelReference.RelativePath);
+            Assert.Equal("models/games/tilt/goal_flag_ds.hasset", dsModelReference.RelativePath);
             Assert.False(dsOverride.TryGetAssetReference("Materials[0]", out _));
             Assert.False(dsOverride.TryGetAssetReference("Materials[1]", out _));
             Assert.Equal(2, restoredMeshComponent.Materials.Length);
+        }
+
+        static void AssertAllTriangleWindingsAgreeWithNormals(ModelAsset modelAsset) {
+            Assert.NotNull(modelAsset.Positions);
+            Assert.NotNull(modelAsset.Normals);
+            Assert.NotNull(modelAsset.Indices16);
+
+            for (int index = 0; index < modelAsset.Indices16.Length; index += 3) {
+                float3 positionA = modelAsset.Positions[modelAsset.Indices16[index]];
+                float3 positionB = modelAsset.Positions[modelAsset.Indices16[index + 1]];
+                float3 positionC = modelAsset.Positions[modelAsset.Indices16[index + 2]];
+
+                float3 edgeAB = positionB - positionA;
+                float3 edgeAC = positionC - positionA;
+                float3 triangleNormal = float3.Cross(edgeAB, edgeAC);
+                if (triangleNormal.LengthSquared() <= 0.000001f) {
+                    continue;
+                }
+
+                triangleNormal = float3.Normalize(triangleNormal);
+
+                float3 averagedNormal = modelAsset.Normals[modelAsset.Indices16[index]]
+                    + modelAsset.Normals[modelAsset.Indices16[index + 1]]
+                    + modelAsset.Normals[modelAsset.Indices16[index + 2]];
+                if (averagedNormal.LengthSquared() <= 0.000001f) {
+                    continue;
+                }
+
+                averagedNormal = float3.Normalize(averagedNormal);
+                float alignment = float3.Dot(triangleNormal, averagedNormal);
+                Assert.True(
+                    alignment > 0.05f,
+                    $"Triangle starting at index {index} has winding that disagrees with its vertex normals. Alignment={alignment}.");
+            }
         }
     }
 }

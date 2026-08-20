@@ -28,7 +28,7 @@ namespace city.tests {
             Assert.Contains("CreateStageRootEntity(levelEntry)", source, StringComparison.Ordinal);
             Assert.Contains("CreateTiltTrialLevel01StageRootEntity()", source, StringComparison.Ordinal);
             Assert.Contains("CreateGoalFlagEntity()", source, StringComparison.Ordinal);
-            Assert.Contains("CreateGoalPadEntity(new float3(1.35f, 1.05f, 16.95f), new float3(2f, 2f, 2f));", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("CreateGoalPadEntity(", source, StringComparison.Ordinal);
             Assert.Contains("CreateCollectibleCoinEntity(", source, StringComparison.Ordinal);
             Assert.Contains("SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath", source, StringComparison.Ordinal);
             Assert.Contains("SplitPlayAssetCatalog.GoalFlagBlueprintRelativePath", source, StringComparison.Ordinal);

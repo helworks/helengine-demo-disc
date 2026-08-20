@@ -15,6 +15,26 @@ namespace city.game.tools {
         const string DsMaterialSchemaId = "ds-standard-lit";
         const string StandardShaderAssetId = "ForwardStandardShader";
 
+        /// <summary>
+        /// Stable component key for the blueprint goal component so scene overrides survive regeneration.
+        /// </summary>
+        public const string GoalComponentKey = "5a1f0c9e8d474b6c8f2a3b4c5d6e7f01";
+
+        /// <summary>
+        /// Stable component key for the blueprint trigger observer so scene entity-reference overrides survive regeneration.
+        /// </summary>
+        public const string TriggerObserverComponentKey = "9c8b7a6d5e4f43210fedcba987654321";
+
+        /// <summary>
+        /// Stable component key for the blueprint kinematic rigid body so scene overrides survive regeneration.
+        /// </summary>
+        public const string RigidBodyComponentKey = "3e2d1c0b4a5968778695a4b3c2d1e0f4";
+
+        /// <summary>
+        /// Stable component key for the blueprint trigger box collider so scene overrides survive regeneration.
+        /// </summary>
+        public const string BoxColliderComponentKey = "7f6e5d4c3b2a19080706050403020100";
+
         const string UseCustomShaderFieldId = "use-custom-shader";
         const string ShaderAssetIdFieldId = "shader-asset-id";
         const string RoughnessFieldId = "roughness";
@@ -83,6 +103,19 @@ namespace city.game.tools {
             SceneComponentAssetRecord baseRecord = registry.GetDescriptor(meshComponent).SerializeComponent(meshComponent, 0, saveState);
             SceneComponentAssetRecord meshRecord = new ComponentPlatformOverridePayloadService().Wrap(baseRecord, saveState);
 
+            SceneComponentAssetRecord goalRecord = SerializeWithStableKey(registry, new global::city.game.TiltTrialGoalComponent(), 1, GoalComponentKey);
+            SceneComponentAssetRecord observerRecord = SerializeWithStableKey(registry, new global::helengine.SceneEntityTriggerObserverComponent(), 2, TriggerObserverComponentKey);
+            SceneComponentAssetRecord rigidBodyRecord = SerializeWithStableKey(registry, new RigidBody3DComponent {
+                BodyKind = BodyKind3D.Kinematic,
+                UseGravity = false,
+                Mass = 1d
+            }, 3, RigidBodyComponentKey);
+            BoxCollider3DComponent triggerCollider = new BoxCollider3DComponent {
+                Size = new float3(1f, 2f, 1f)
+            };
+            triggerCollider.IsTrigger = true;
+            SceneComponentAssetRecord colliderRecord = SerializeWithStableKey(registry, triggerCollider, 4, BoxColliderComponentKey);
+
             return new BlueprintAsset {
                 Id = SplitPlayAssetCatalog.GoalFlagBlueprintRelativePath,
                 RootEntity = new SceneEntityAsset {
@@ -93,10 +126,28 @@ namespace city.game.tools {
                     LocalPosition = float3.Zero,
                     LocalScale = float3.One,
                     LocalOrientation = float4.Identity,
-                    Components = [meshRecord],
+                    Components = [meshRecord, goalRecord, observerRecord, rigidBodyRecord, colliderRecord],
                     Children = Array.Empty<SceneEntityAsset>()
                 },
                 AssetReferences = [commonModelReference, dsModelReference, poleMaterialReference, bannerMaterialReference]
+            };
+        }
+
+        /// <summary>
+        /// Serializes one blueprint component with a stable component key so scene-owned overrides survive regeneration.
+        /// </summary>
+        /// <param name="registry">Persistence registry used for serialization.</param>
+        /// <param name="component">Component instance to serialize.</param>
+        /// <param name="componentIndex">Zero-based component slot on the blueprint root.</param>
+        /// <param name="componentKey">Stable component key persisted with the record.</param>
+        /// <returns>Serialized component record carrying the stable key.</returns>
+        static SceneComponentAssetRecord SerializeWithStableKey(ComponentPersistenceRegistry registry, Component component, int componentIndex, string componentKey) {
+            SceneComponentAssetRecord record = registry.GetDescriptor(component).SerializeComponent(component, componentIndex, null);
+            return new SceneComponentAssetRecord {
+                ComponentIndex = record.ComponentIndex,
+                ComponentKey = componentKey,
+                ComponentTypeId = record.ComponentTypeId,
+                Payload = record.Payload
             };
         }
 
@@ -184,7 +235,7 @@ namespace city.game.tools {
             });
 
             int flagIndexStart = indices.Count;
-            AppendPennant(new float3(0f, 1.58f, 0f), 0.72f, 0.38f, flagThickness * 0.5f);
+            AppendPennant(new float3(0f, 1.96f, 0f), 0.72f, 0.38f, flagThickness * 0.5f);
             submeshes.Add(new ModelSubmeshAsset {
                 MaterialSlotName = "BannerMaterial",
                 IndexStart = flagIndexStart,
@@ -224,8 +275,8 @@ namespace city.game.tools {
                     ushort ringA = (ushort)(bottomCenterIndex + 1 + step);
                     ushort ringB = (ushort)(bottomCenterIndex + 1 + ((step + 1) % radialSteps));
                     indices.Add(bottomCenterIndex);
-                    indices.Add(ringB);
                     indices.Add(ringA);
+                    indices.Add(ringB);
                 }
 
                 ushort topCenterIndex = (ushort)positions.Count;
@@ -246,8 +297,8 @@ namespace city.game.tools {
                     ushort ringA = (ushort)(topCenterIndex + 1 + step);
                     ushort ringB = (ushort)(topCenterIndex + 1 + ((step + 1) % radialSteps));
                     indices.Add(topCenterIndex);
-                    indices.Add(ringA);
                     indices.Add(ringB);
+                    indices.Add(ringA);
                 }
 
                 ushort sideStartIndex = (ushort)positions.Count;
@@ -275,12 +326,12 @@ namespace city.game.tools {
                     ushort bottomB = (ushort)(sideStartIndex + nextStep * 2 + 1);
 
                     indices.Add(topA);
-                    indices.Add(bottomA);
                     indices.Add(topB);
+                    indices.Add(bottomA);
 
                     indices.Add(topB);
-                    indices.Add(bottomA);
                     indices.Add(bottomB);
+                    indices.Add(bottomA);
                 }
             }
 
@@ -297,10 +348,10 @@ namespace city.game.tools {
                 AddQuad(frontTop, frontBottom, backBottom, backTop, new float3(-1f, 0f, 0f));
 
                 float3 topEdgeNormal = NormalizeSafe(new float3(flagHeight * 0.45f, flagLength, 0f));
-                AddQuad(backTop, frontTop, frontTip, backTip, new float3(topEdgeNormal.Y, -topEdgeNormal.X, 0f));
+                AddQuad(backTop, backTip, frontTip, frontTop, topEdgeNormal);
 
                 float3 bottomEdgeNormal = NormalizeSafe(new float3(flagHeight * 0.55f, -flagLength, 0f));
-                AddQuad(frontBottom, backBottom, backTip, frontTip, new float3(bottomEdgeNormal.Y, -bottomEdgeNormal.X, 0f));
+                AddQuad(frontBottom, frontTip, backTip, backBottom, bottomEdgeNormal);
             }
 
             void AddQuad(float3 a, float3 b, float3 c, float3 d, float3 normal) {
@@ -319,11 +370,11 @@ namespace city.game.tools {
                 texCoords.Add(new float2(1f, 0f));
 
                 indices.Add(start);
+                indices.Add((ushort)(start + 2));
                 indices.Add((ushort)(start + 1));
-                indices.Add((ushort)(start + 2));
                 indices.Add(start);
-                indices.Add((ushort)(start + 2));
                 indices.Add((ushort)(start + 3));
+                indices.Add((ushort)(start + 2));
             }
 
             void AddTriangle(float3 a, float3 b, float3 c, float3 normal) {
@@ -339,8 +390,8 @@ namespace city.game.tools {
                 texCoords.Add(new float2(1f, 0.5f));
 
                 indices.Add(start);
-                indices.Add((ushort)(start + 1));
                 indices.Add((ushort)(start + 2));
+                indices.Add((ushort)(start + 1));
             }
 
             float3 NormalizeSafe(float3 value) {

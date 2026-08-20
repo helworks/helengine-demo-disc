@@ -1062,7 +1062,7 @@ namespace city.game.tools {
                 ShadowsEnabled = true,
                 ShadowMapMode = ShadowMapMode.Forced,
                 ShadowStrength = 0.95f,
-                ShadowDistance = 72f
+                ShadowDistance = 30f
             });
             return entity;
         }
@@ -1441,7 +1441,7 @@ namespace city.game.tools {
             });
             entity.AddChild(CreateStartPadEntity());
             entity.AddChild(CreateRampEntity());
-            entity.AddChild(CreateGoalPadEntity());
+            entity.AddChild(CreateGoalFlagEntity(new float3(0f, -1.7f, 10.5f)));
             entity.AddChild(CreateLeftWallEntity());
             entity.AddChild(CreateRightWallEntity());
 
@@ -1472,7 +1472,6 @@ namespace city.game.tools {
             entity.AddChild(CreateLevel01BlockerLeftEntity());
             entity.AddChild(CreateLevel01BlockerRightEntity());
             entity.AddChild(CreateLevel01FinalPlatformEntity());
-            entity.AddChild(CreateLevel01GoalPadEntity());
             entity.AddChild(CreateGoalFlagEntity());
             entity.AddChild(CreateCollectibleCoinEntity("Coin01", new float3(0f, 1.35f, -2.2f)));
             entity.AddChild(CreateCollectibleCoinEntity("Coin02", new float3(-0.8f, 1.9f, 4.6f)));
@@ -1729,7 +1728,6 @@ namespace city.game.tools {
             entity.AddChild(CreateKinematicCourseBoxEntity("Level02Straight", new float3(0f, 0.25f, 0.5f), new float3(5.2f, 0.8f, 7f), float4.Identity));
             entity.AddChild(CreateKinematicCourseBoxEntity("Level02Offset", new float3(1.45f, 0.55f, 6.2f), new float3(4f, 0.8f, 5.5f), float4.Identity));
             entity.AddChild(CreateKinematicCourseBoxEntity("Level02Finish", new float3(1.45f, 0.65f, 11.4f), new float3(6f, 0.9f, 5.2f), float4.Identity));
-            entity.AddChild(CreateGoalPadEntity(new float3(1.45f, 1.3f, 13.3f), new float3(2.4f, 2f, 2.4f)));
             entity.AddChild(CreateGoalFlagEntity(new float3(1.45f, 1f, 13f)));
             return RequireEditorEntity(entity, "level 2");
         }
@@ -1747,7 +1745,6 @@ namespace city.game.tools {
             entity.AddChild(CreateKinematicCourseBoxEntity("Level03Finish", new float3(1.35f, 1.35f, 13.7f), new float3(4.6f, 0.9f, 5.2f), float4.Identity));
             entity.AddChild(CreateKinematicCourseBoxEntity("Level03Blocker01", new float3(-1.35f, 1.35f, 1.1f), new float3(0.8f, 1.6f, 0.9f), float4.Identity));
             entity.AddChild(CreateKinematicCourseBoxEntity("Level03Blocker02", new float3(1.25f, 1.7f, 5.9f), new float3(0.8f, 1.6f, 0.9f), float4.Identity));
-            entity.AddChild(CreateGoalPadEntity(new float3(1.35f, 2f, 15.5f), new float3(2.2f, 2f, 2.2f)));
             entity.AddChild(CreateGoalFlagEntity(new float3(1.35f, 1.7f, 15.2f)));
             return RequireEditorEntity(entity, "level 3");
         }
@@ -1766,7 +1763,6 @@ namespace city.game.tools {
             entity.AddChild(CreateKinematicCourseBoxEntity("Level04Blocker01", new float3(1.5f, 1.45f, 0.5f), new float3(0.75f, 1.8f, 0.8f), float4.Identity));
             entity.AddChild(CreateKinematicCourseBoxEntity("Level04Blocker02", new float3(-1.55f, 1.95f, 4.7f), new float3(0.75f, 1.8f, 0.8f), float4.Identity));
             entity.AddChild(CreateKinematicCourseBoxEntity("Level04Blocker03", new float3(1.45f, 2.45f, 8.9f), new float3(0.75f, 1.8f, 0.8f), float4.Identity));
-            entity.AddChild(CreateGoalPadEntity(new float3(-1.25f, 2.5f, 14.4f), new float3(2f, 2f, 2f)));
             entity.AddChild(CreateGoalFlagEntity(new float3(-1.25f, 2.25f, 14.1f)));
             return RequireEditorEntity(entity, "level 4");
         }
@@ -1787,7 +1783,6 @@ namespace city.game.tools {
             entity.AddChild(CreateKinematicCourseBoxEntity("Level05Blocker02", new float3(1.55f, 2f, 3.9f), new float3(0.7f, 2f, 0.75f), float4.Identity));
             entity.AddChild(CreateKinematicCourseBoxEntity("Level05Blocker03", new float3(-1.55f, 2.5f, 7.45f), new float3(0.7f, 2f, 0.75f), float4.Identity));
             entity.AddChild(CreateKinematicCourseBoxEntity("Level05Blocker04", new float3(1.55f, 3f, 11f), new float3(0.7f, 2f, 0.75f), float4.Identity));
-            entity.AddChild(CreateGoalPadEntity(new float3(-1.25f, 3.05f, 15.8f), new float3(1.8f, 2f, 1.8f)));
             entity.AddChild(CreateGoalFlagEntity(new float3(-1.25f, 2.8f, 15.5f)));
             return RequireEditorEntity(entity, "level 5");
         }
@@ -1983,47 +1978,6 @@ namespace city.game.tools {
         /// Creates the finish platform at the far end of the Tilt Trial course.
         /// </summary>
         /// <returns>Generated kinematic stage piece.</returns>
-        Entity CreateGoalPadEntity() {
-            return CreateGoalPadEntity(new float3(0f, -2.2f, 10.5f), new float3(7f, 1f, 6f));
-        }
-
-        /// <summary>
-        /// Creates the tighter finish trigger used by the beginner first level.
-        /// </summary>
-        /// <returns>Generated trigger entity.</returns>
-        Entity CreateLevel01GoalPadEntity() {
-            return CreateGoalPadEntity(new float3(1.35f, 1.05f, 16.95f), new float3(2f, 2f, 2f));
-        }
-
-        /// <summary>
-        /// Creates the finish trigger volume used by Tilt Trial.
-        /// </summary>
-        /// <param name="position">Local trigger position.</param>
-        /// <param name="size">Full trigger size.</param>
-        /// <returns>Generated trigger entity.</returns>
-        Entity CreateGoalPadEntity(float3 position, float3 size) {
-            Entity entity = Core.Instance.EntityFactory.Create("GoalPad");
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.LocalPosition = position;
-            entity.LocalScale = float3.One;
-            entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new global::city.game.TiltTrialGoalComponent());
-            entity.AddComponent(new global::helengine.SceneEntityTriggerObserverComponent());
-            entity.AddComponent(new RigidBody3DComponent {
-                BodyKind = BodyKind3D.Kinematic,
-                UseGravity = false,
-                Mass = 1d
-            });
-            entity.AddComponent(new BoxCollider3DComponent {
-                Size = size
-            });
-            entity.AddComponent(new global::city.game.TiltTrialPhysicsDebugBoxBoundsComponent {
-                Size = size
-            });
-            FindRequiredBoxColliderComponent(entity).IsTrigger = true;
-            return entity;
-        }
-
         /// <summary>
         /// Creates the left guide wall that keeps the player sphere on the authored course.
         /// </summary>
@@ -2090,20 +2044,6 @@ namespace city.game.tools {
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new BlueprintInstanceComponent {
                 BlueprintAssetPath = SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath
-            });
-            entity.AddComponent(new global::helengine.SceneEntityTriggerObserverComponent());
-            entity.AddComponent(new RigidBody3DComponent {
-                BodyKind = BodyKind3D.Kinematic,
-                UseGravity = false,
-                Mass = 1d
-            });
-            entity.AddComponent(new BoxCollider3DComponent {
-                // Authored relative to the 0.51 coin scale so the effective trigger stays 1.5 x 3 x 1.5 world units.
-                Size = new float3(1.5f / 0.51f, 3f / 0.51f, 1.5f / 0.51f),
-                IsTrigger = true
-            });
-            entity.AddComponent(new global::city.game.TiltTrialPhysicsDebugSphereBoundsComponent {
-                Radius = 0.75f
             });
             return entity;
         }
@@ -2246,11 +2186,30 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(playerSphereEntity));
             }
 
-            global::helengine.SceneEntityTriggerObserverComponent goalTriggerObserver = FindRequiredGoalTriggerObserverComponent(stageRootEntity);
             EntitySaveComponent playerSaveComponent = FindRequiredEntitySaveComponent(playerSphereEntity);
-            goalTriggerObserver.TargetEntityReference = new SceneEntityReference {
-                EntityId = playerSaveComponent.EntityId
-            };
+            if (stageRootEntity.Children == null) {
+                throw new InvalidOperationException("Tilt Trial goal configuration requires stage children.");
+            }
+
+            for (int childIndex = 0; childIndex < stageRootEntity.Children.Count; childIndex++) {
+                Entity child = stageRootEntity.Children[childIndex];
+                if (!TryFindComponent<BlueprintInstanceComponent>(child, out BlueprintInstanceComponent blueprintInstance) ||
+                    !string.Equals(blueprintInstance.BlueprintAssetPath, SplitPlayAssetCatalog.GoalFlagBlueprintRelativePath, StringComparison.Ordinal)) {
+                    continue;
+                }
+
+                blueprintInstance.EntityReferenceOverrides = [
+                    new BlueprintEntityReferenceOverrideAsset {
+                        SourceEntityId = 1u,
+                        ComponentKey = SplitPlayGoalFlagAssetGenerator.TriggerObserverComponentKey,
+                        PropertyName = "TargetEntityReference",
+                        TargetEntityId = playerSaveComponent.EntityId
+                    }
+                ];
+                return;
+            }
+
+            throw new InvalidOperationException("Tilt Trial goal configuration requires one goal-flag blueprint instance.");
         }
 
         /// <summary>
@@ -2273,14 +2232,18 @@ namespace city.game.tools {
             for (int childIndex = 0; childIndex < stageRootEntity.Children.Count; childIndex++) {
                 Entity child = stageRootEntity.Children[childIndex];
                 if (!TryFindComponent<BlueprintInstanceComponent>(child, out BlueprintInstanceComponent blueprintInstance) ||
-                    !string.Equals(blueprintInstance.BlueprintAssetPath, SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath, StringComparison.Ordinal) ||
-                    !TryFindComponent<global::helengine.SceneEntityTriggerObserverComponent>(child, out global::helengine.SceneEntityTriggerObserverComponent triggerObserver)) {
+                    !string.Equals(blueprintInstance.BlueprintAssetPath, SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath, StringComparison.Ordinal)) {
                     continue;
                 }
 
-                triggerObserver.TargetEntityReference = new SceneEntityReference {
-                    EntityId = playerSaveComponent.EntityId
-                };
+                blueprintInstance.EntityReferenceOverrides = [
+                    new BlueprintEntityReferenceOverrideAsset {
+                        SourceEntityId = 1u,
+                        ComponentKey = SplitPlayGoldenCoinAssetGenerator.TriggerObserverComponentKey,
+                        PropertyName = "TargetEntityReference",
+                        TargetEntityId = playerSaveComponent.EntityId
+                    }
+                ];
             }
         }
 
@@ -2327,30 +2290,6 @@ namespace city.game.tools {
             }
 
             throw new InvalidOperationException("Tilt Trial UI generation requires a DemoTiltSpeedTextComponent.");
-        }
-
-        /// <summary>
-        /// Resolves the generated goal trigger observer nested beneath the supplied stage root.
-        /// </summary>
-        /// <param name="stageRootEntity">Generated stage root whose goal trigger observer should be returned.</param>
-        /// <returns>Attached goal trigger observer component.</returns>
-        global::helengine.SceneEntityTriggerObserverComponent FindRequiredGoalTriggerObserverComponent(EditorEntity stageRootEntity) {
-            if (stageRootEntity == null) {
-                throw new ArgumentNullException(nameof(stageRootEntity));
-            }
-
-            Entity goalEntity = FindRequiredChildEntityByName(stageRootEntity, "GoalPad");
-            if (goalEntity.Components == null) {
-                throw new InvalidOperationException("Tilt Trial goal generation requires the goal entity to expose initialized components.");
-            }
-
-            for (int componentIndex = 0; componentIndex < goalEntity.Components.Count; componentIndex++) {
-                if (goalEntity.Components[componentIndex] is global::helengine.SceneEntityTriggerObserverComponent goalTriggerObserver) {
-                    return goalTriggerObserver;
-                }
-            }
-
-            throw new InvalidOperationException("Tilt Trial goal generation requires a SceneEntityTriggerObserverComponent.");
         }
 
         /// <summary>

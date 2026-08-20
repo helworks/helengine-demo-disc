@@ -55,15 +55,17 @@ namespace city.tests {
         }
 
         /// <summary>
-        /// Verifies collectible coin instances use a trigger volume that is twice as tall as its horizontal footprint.
+        /// Verifies the coin blueprint carries a trigger volume twice as tall as its horizontal footprint and the factory wires it per instance.
         /// </summary>
         [Fact]
         public void Game_scene_factory_authors_tall_box_trigger_for_collectible_coins() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string factorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string coinGeneratorSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\SplitPlayGoldenCoinAssetGenerator.cs");
 
-            Assert.Contains("new BoxCollider3DComponent {", source, StringComparison.Ordinal);
-            Assert.Contains("Size = new float3(1.5f / 0.51f, 3f / 0.51f, 1.5f / 0.51f)", source, StringComparison.Ordinal);
-            Assert.Contains("IsTrigger = true", source, StringComparison.Ordinal);
+            Assert.Contains("Size = new float3(3f, 6f, 3f)", coinGeneratorSource, StringComparison.Ordinal);
+            Assert.Contains("triggerCollider.IsTrigger = true;", coinGeneratorSource, StringComparison.Ordinal);
+            Assert.Contains("ComponentKey = SplitPlayGoldenCoinAssetGenerator.TriggerObserverComponentKey", factorySource, StringComparison.Ordinal);
+            Assert.Contains("PropertyName = \"TargetEntityReference\"", factorySource, StringComparison.Ordinal);
         }
 
         /// <summary>
