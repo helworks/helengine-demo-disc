@@ -1,14 +1,14 @@
 {
-    "supportedPlatforms":  [
-                               "ps2",
-                               "psp",
-                               "psvita",
-                               "ds",
-                               "3ds",
-                               "windows",
-                               "gamecube",
-                               "wii",
-                               "switch",
-                               "wiiu"
-                           ]
+  "supportedPlatforms": [
+    "3ds",
+    "ds",
+    "gamecube",
+    "ps2",
+    "psp",
+    "psvita",
+    "switch",
+    "wii",
+    "wiiu",
+    "windows"
+  ]
 }
