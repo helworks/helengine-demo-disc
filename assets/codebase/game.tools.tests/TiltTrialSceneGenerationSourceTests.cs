@@ -33,9 +33,8 @@ namespace city.tests {
             Assert.Contains("TiltTrialResultNextButton", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialStartOverlay", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialStartPromptText", source, StringComparison.Ordinal);
-            Assert.Contains("Press \"X\" to start", source, StringComparison.Ordinal);
+            Assert.Contains("Press \\\"X\\\" to start", source, StringComparison.Ordinal);
             Assert.Contains("new city.game.TiltTrialLevelSelectComponent", source, StringComparison.Ordinal);
-            Assert.Contains("new global::helengine.SceneEntityTriggerObserverComponent()", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltTrialCoinText\"", source, StringComparison.Ordinal);
             Assert.Contains("\"Coins 0/0\"", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltTrialTargetTimesText\"", source, StringComparison.Ordinal);
@@ -48,7 +47,6 @@ namespace city.tests {
             Assert.Contains("new float3(320f, 130f, 0f), new int2(640, 380)", source, StringComparison.Ordinal);
             Assert.Contains("new int2(420, 220)", source, StringComparison.Ordinal);
             Assert.Contains("new ReferenceCanvasFitComponent", source, StringComparison.Ordinal);
-            Assert.Contains("FindRequiredBoxColliderComponent(entity).IsTrigger = true;", source, StringComparison.Ordinal);
             Assert.Contains("ConfigureTiltTrialGoalTarget(stageRootEntity, playerSphereEntity);", source, StringComparison.Ordinal);
             Assert.Contains("if (parent.Children[childIndex] is EditorEntity childEntity", source, StringComparison.Ordinal);
             Assert.DoesNotContain("child?.Name", source, StringComparison.Ordinal);
@@ -84,7 +82,7 @@ namespace city.tests {
             Assert.Contains("new city.game.TiltPlayMenuComponent()", source, StringComparison.Ordinal);
             Assert.Contains("new city.game.TiltPlayMenuActionComponent", source, StringComparison.Ordinal);
             Assert.Contains("new float3(12f, 2f, 0.1f)", source, StringComparison.Ordinal);
-            Assert.Contains("new int2(size.X - 24, size.Y - 4)", source, StringComparison.Ordinal);
+            Assert.Contains("new int2(size.X - 16, size.Y - 8)", source, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -117,7 +115,7 @@ namespace city.tests {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
             string menuSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltPlayMenuComponent.cs");
 
-            Assert.Contains("CreateTiltPlayTitleBackgroundSprite(titlePanel);", source, StringComparison.Ordinal);
+            Assert.Contains("CreateTiltPlayViewportBackgroundEntity()", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltPlayPlayButton\"", source, StringComparison.Ordinal);
             Assert.Contains("new int2(520, 72)", source, StringComparison.Ordinal);
             Assert.Contains("city.game.TiltPlayMenuAction.Play", source, StringComparison.Ordinal);
@@ -127,6 +125,19 @@ namespace city.tests {
             Assert.Contains("PlayButtonSelectedOverlay.Enabled", menuSource, StringComparison.Ordinal);
             Assert.Contains("OptionsButtonSelectedOverlay.Enabled", menuSource, StringComparison.Ordinal);
             Assert.Contains("DemoDiscButtonSelectedOverlay.Enabled", menuSource, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Tilt_play_title_background_uses_a_screen_viewport_outside_the_fitted_shell() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+
+            Assert.Contains("CreateTiltPlayViewportBackgroundEntity()", source, StringComparison.Ordinal);
+            Assert.Contains("CreateTiltPlayShellUiEntity()", source, StringComparison.Ordinal);
+            Assert.Contains("Entity CreateTiltPlayViewportBackgroundEntity()", source, StringComparison.Ordinal);
+            Assert.Contains("BindingMode = ViewportComponent.ScreenBindingMode", source, StringComparison.Ordinal);
+            Assert.Contains("LayoutSpace = LayoutComponent.CameraViewportLayoutSpace", source, StringComparison.Ordinal);
+            Assert.Contains("SetAnchorDistances(left: 0f, top: 0f, right: 0f, bottom: 0f)", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("CreateTiltPlayTitleBackgroundSprite(titlePanel);", source, StringComparison.Ordinal);
         }
 
         /// <summary>

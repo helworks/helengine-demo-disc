@@ -257,6 +257,7 @@ namespace city.game.tools {
                 SceneSettings = new SceneSettingsAsset(),
                 RootEntities = [
                     CreateLevelSelectCameraEntity(),
+                    CreateTiltPlayViewportBackgroundEntity(),
                     CreateTiltPlayShellUiEntity()
                 ]
             };
@@ -318,7 +319,6 @@ namespace city.game.tools {
             titlePanel.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
                 Role = "TiltPlayTitlePanel"
             });
-            CreateTiltPlayTitleBackgroundSprite(titlePanel);
             CreateTiltPlayActionButton(titlePanel, "TiltPlayPlayButton", new float3(380f, 398f, 0.1f), new int2(520, 72), city.game.TiltPlayMenuAction.Play, TiltPlayPrimaryButtonTextureRelativePath, TiltPlayPrimaryButtonSelectedTextureRelativePath);
             CreateTiltPlayActionButton(titlePanel, "TiltPlayOptionsButton", new float3(380f, 486f, 0.1f), new int2(250, 52), city.game.TiltPlayMenuAction.Options, TiltPlayOptionsButtonTextureRelativePath, TiltPlayOptionsButtonSelectedTextureRelativePath);
             CreateTiltPlayActionButton(titlePanel, "TiltPlayDemoDiscButton", new float3(650f, 486f, 0.1f), new int2(250, 52), city.game.TiltPlayMenuAction.BackToDemoDisc, TiltPlayDemoDiscButtonTextureRelativePath, TiltPlayDemoDiscButtonSelectedTextureRelativePath);
@@ -341,6 +341,38 @@ namespace city.game.tools {
             }
 
             throw new InvalidOperationException("Tilt Play shell generation requires editor-authored entities.");
+        }
+
+        /// <summary>
+        /// Creates the screen-bound title backdrop that fills the live viewport behind the fitted Tilt Play shell.
+        /// </summary>
+        /// <returns>Generated authoring root for the viewport-sized title backdrop.</returns>
+        EditorEntity CreateTiltPlayViewportBackgroundEntity() {
+            Entity backgroundRoot = Core.Instance.EntityFactory.Create("TiltPlayViewportBackground");
+            backgroundRoot.LayerMask = EditorLayerMasks.SceneObjects;
+            backgroundRoot.AddComponent(new ViewportComponent {
+                BindingMode = ViewportComponent.ScreenBindingMode,
+                FixedSize = new int2(1280, 720)
+            });
+
+            Entity backgroundEntity = CreateTiltPlaySpriteEntity(
+                backgroundRoot,
+                "TiltPlayTitleBackground",
+                new float3(0f, 0f, 0f),
+                new int2(1280, 720),
+                TiltPlayTitleBackgroundTextureRelativePath,
+                0);
+            LayoutComponent backgroundLayoutComponent = new LayoutComponent {
+                LayoutSpace = LayoutComponent.CameraViewportLayoutSpace
+            };
+            backgroundLayoutComponent.SetAnchorDistances(left: 0f, top: 0f, right: 0f, bottom: 0f);
+            backgroundEntity.AddComponent(backgroundLayoutComponent);
+
+            if (backgroundRoot is EditorEntity editorEntity) {
+                return editorEntity;
+            }
+
+            throw new InvalidOperationException("Tilt Play viewport background generation requires an editor-authored root.");
         }
 
         /// <summary>
@@ -722,18 +754,6 @@ namespace city.game.tools {
             });
             CreateUiTextEntity(buttonEntity, name + "Label", new float3(8f, 5f, 0.1f), label, new int2(size.X - 16, size.Y - 8), 0.7f, 3, new byte4(247, 248, 252, 255), TextAlignment.Center);
             return buttonEntity;
-        }
-
-        /// <summary>
-        /// Creates the authored opaque sprite backdrop for the Tilt Trial title screen.
-        /// </summary>
-        /// <param name="parent">Title panel that owns the backdrop sprite.</param>
-        void CreateTiltPlayTitleBackgroundSprite(Entity parent) {
-            if (parent == null) {
-                throw new ArgumentNullException(nameof(parent));
-            }
-
-            CreateTiltPlaySpriteEntity(parent, "TiltPlayTitleBackground", new float3(0f, 0f, 0f), new int2(1280, 720), TiltPlayTitleBackgroundTextureRelativePath, 1);
         }
 
         /// <summary>
