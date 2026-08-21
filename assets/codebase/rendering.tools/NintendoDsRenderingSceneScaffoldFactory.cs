@@ -140,9 +140,11 @@ namespace city.rendering.tools {
         const int NintendoDsLightSwatchSize = 16;
 
         /// <summary>
-        /// Render order used by the scaffold-owned Nintendo DS light swatch so it remains visible above the button body and below its label.
+        /// Render order used by the scaffold-owned Nintendo DS light swatch. It must sit at 220 or above: the DS
+        /// bottom-screen renderer only promotes orders >= 220 to the foreground OBJ priority, and at the base
+        /// priority the earlier-drawn opaque button body wins the hardware tie and hides the swatch.
         /// </summary>
-        const byte NintendoDsLightSwatchRenderOrder = 211;
+        const byte NintendoDsLightSwatchRenderOrder = 222;
 
         /// <summary>
         /// Render order used by the scaffold-owned Nintendo DS back button sprite body.
@@ -644,7 +646,9 @@ namespace city.rendering.tools {
             Entity entity = Core.Instance.EntityFactory.Create("DemoDiscBottomScreenCamera");
             entity.AddComponent(new CameraComponent {
                 CameraDrawOrder = 1,
-                LayerMask = RuntimeLayerMask,
+                // The pointer hit resolver rejects interactables whose entity mask misses the camera mask,
+                // so the bottom camera must render the same SceneObjects layer its buttons live on.
+                LayerMask = PersistedSceneLayerMask,
                 Viewport = new float4(0f, 1f, 1f, 1f),
                 ClearSettings = new CameraClearSettings(
                     true,

@@ -77,11 +77,11 @@ namespace city.rendering.tools {
             RuntimeMaterial tiltTrialCourseMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, TiltTrialCourseMaterialFactory.MaterialRelativePath);
             RuntimeModel tiltTrialClippingProbeModel = LoadImportedModelRuntime(projectRootPath, TiltTrialClippingProbeModelFactory.ModelRelativePath);
             RuntimeMaterial tiltTrialClippingProbeMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, TiltTrialClippingProbeMaterialFactory.MaterialRelativePath);
-            RuntimeModel goldenCoinModel = LoadImportedModelRuntime(projectRootPath, "models/games/split_play/golden_coin.hasset");
-            RuntimeMaterial goldenCoinMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/games/split_play/GoldenCoin.hasset");
-            RuntimeModel goalFlagModel = LoadImportedModelRuntime(projectRootPath, "models/games/split_play/goal_flag.hasset");
-            RuntimeMaterial goalFlagPoleMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/games/split_play/GoalFlagPole.hasset");
-            RuntimeMaterial goalFlagBannerMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/games/split_play/GoalFlagBanner.hasset");
+            RuntimeModel goldenCoinModel = LoadImportedModelRuntime(projectRootPath, "models/games/tilt/golden_coin.hasset");
+            RuntimeMaterial goldenCoinMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/games/tilt/GoldenCoin.hasset");
+            RuntimeModel goalFlagModel = LoadImportedModelRuntime(projectRootPath, "models/games/tilt/goal_flag.hasset");
+            RuntimeMaterial goalFlagPoleMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/games/tilt/GoalFlagPole.hasset");
+            RuntimeMaterial goalFlagBannerMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/games/tilt/GoalFlagBanner.hasset");
             RuntimeMaterial generatedCubeTestSolidMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, ForwardSolidColorMaterialFactory.MaterialRelativePath);
             RuntimeMaterial depthClipProbeMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, DepthClipProbeMaterialFactory.MaterialRelativePath);
             RuntimeMaterial depthClipProbeCenterMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, DepthClipProbeCenterMaterialFactory.MaterialRelativePath);
