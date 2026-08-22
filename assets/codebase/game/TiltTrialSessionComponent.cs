@@ -7,6 +7,7 @@ namespace city.game {
     /// </summary>
     public sealed class TiltTrialSessionComponent : UpdateComponent {
         const int MaxDependencyResolutionDeferralFrames = 8;
+        const short GamepadStickNavigationThreshold = 16384;
 
         /// <summary>
         /// Backing state machine used by the active gameplay session.
@@ -24,6 +25,10 @@ namespace city.game {
         TextComponent TimerTextComponent;
         TextComponent CoinTextComponent;
         TextComponent TargetTimesTextComponent;
+        /// <summary>
+        /// Handheld gameplay HUD panel shown only while the session is actively playing.
+        /// </summary>
+        Entity GameplayPanelEntity;
         /// <summary>
         /// Overlay that blocks the session until the player accepts the Tilt Play start prompt.
         /// </summary>
@@ -43,18 +48,6 @@ namespace city.game {
         /// Handheld Next result button entity resolved from the presentation hierarchy.
         /// </summary>
         Entity ResultsNextButtonEntity;
-        /// <summary>
-        /// Background used to present the selected state of the handheld Retry button.
-        /// </summary>
-        RoundedRectComponent ResultsRetryButtonBackground;
-        /// <summary>
-        /// Background used to present the selected state of the handheld Exit button.
-        /// </summary>
-        RoundedRectComponent ResultsExitButtonBackground;
-        /// <summary>
-        /// Background used to present the selected state of the handheld Next button.
-        /// </summary>
-        RoundedRectComponent ResultsNextButtonBackground;
         Entity FailOverlayEntity;
         TextComponent FailTitleTextComponent;
         TextComponent FailBodyTextComponent;
@@ -89,6 +82,7 @@ namespace city.game {
             TimerTextComponent = null;
             CoinTextComponent = null;
             TargetTimesTextComponent = null;
+            GameplayPanelEntity = null;
             StartOverlayEntity = null;
             ResultsOverlayEntity = null;
             ResultsTitleTextComponent = null;
@@ -96,9 +90,6 @@ namespace city.game {
             ResultsRetryButtonEntity = null;
             ResultsExitButtonEntity = null;
             ResultsNextButtonEntity = null;
-            ResultsRetryButtonBackground = null;
-            ResultsExitButtonBackground = null;
-            ResultsNextButtonBackground = null;
             FailOverlayEntity = null;
             FailTitleTextComponent = null;
             FailBodyTextComponent = null;
@@ -114,6 +105,15 @@ namespace city.game {
             FrozenPlayerOrientation = new float4(0f, 0f, 0f, 1f);
             HasFrozenPlayerPose = false;
             UpdateOrder = 1;
+        }
+
+        /// <summary>
+        /// Resolves whether the handheld gameplay HUD belongs on the current session screen.
+        /// </summary>
+        /// <param name="state">Current Tilt Trial session state.</param>
+        /// <returns><c>true</c> only during active gameplay.</returns>
+        public static bool ShouldShowGameplayPanel(TiltTrialSessionState state) {
+            return state == TiltTrialSessionState.Playing;
         }
 
         /// <summary>
@@ -375,9 +375,9 @@ namespace city.game {
         /// <returns>Selected retry, next-level, or level-select scene id.</returns>
         string ResolveResultAcceptSceneId() {
             if (OverlaySelectionIndex == 0) {
-                return CurrentLevel.SceneId;
-            } else if (OverlaySelectionIndex == 1) {
                 return ResolveNextSceneId(CurrentLevel.LevelId, TiltTrialSceneIds.ResolveLevelSelectSceneId());
+            } else if (OverlaySelectionIndex == 1) {
+                return CurrentLevel.SceneId;
             }
 
             return TiltTrialSceneIds.ResolveLevelSelectSceneId();
@@ -492,9 +492,9 @@ namespace city.game {
                 OverlaySelectionIndex = OverlaySelectionIndex >= 2 ? 0 : OverlaySelectionIndex + 1;
             } else if (WasAcceptPressed()) {
                 if (OverlaySelectionIndex == 0) {
-                    LoadScene(CurrentLevel.SceneId);
-                } else if (OverlaySelectionIndex == 1) {
                     LoadScene(ResolveNextSceneId(CurrentLevel.LevelId, TiltTrialSceneIds.ResolveLevelSelectSceneId()));
+                } else if (OverlaySelectionIndex == 1) {
+                    LoadScene(CurrentLevel.SceneId);
                 } else {
                     LoadScene(TiltTrialSceneIds.ResolveLevelSelectSceneId());
                 }
@@ -504,47 +504,62 @@ namespace city.game {
                 return;
             }
 
-            if (ResultsTitleTextComponent == null || ResultsBodyTextComponent == null) {
+            if (ResultsBodyTextComponent == null) {
                 return;
             }
 
-            ResultsTitleTextComponent.Text = $"Clear - {AwardedMedal}";
+            if (ResultsTitleTextComponent != null) {
+                ResultsTitleTextComponent.Text = $"Clear - {AwardedMedal}";
+            }
             ResultsBodyTextComponent.Text = HasResultActionButtons()
                 ? $"Time {TiltTrialLevelSelectComponent.FormatTimerSeconds(FinalTimeSeconds)}"
-                : $"Time {TiltTrialLevelSelectComponent.FormatTimerSeconds(FinalTimeSeconds)}\n\n{BuildResultsOptionLine(0, "Retry")}\n{BuildResultsOptionLine(1, "Next")}\n{BuildResultsOptionLine(2, "Level Select")}";
+                : $"Time {TiltTrialLevelSelectComponent.FormatTimerSeconds(FinalTimeSeconds)}\n\n{BuildResultsOptionLine(0, "Next")}\n{BuildResultsOptionLine(1, "Retry")}\n{BuildResultsOptionLine(2, "Back to Menu")}";
             ApplyResultButtonSelection();
         }
 
         /// <summary>
         /// Returns whether the active presentation provides all three handheld result controls.
         /// </summary>
-        /// <returns>True when Retry, Exit, and Next button backgrounds are all available.</returns>
+        /// <returns>True when the Next, Retry, and Back to Menu button backgrounds and labels are all available.</returns>
         bool HasResultActionButtons() {
-            return ResultsRetryButtonBackground != null
-                && ResultsExitButtonBackground != null
-                && ResultsNextButtonBackground != null;
+            return TryFindRoundedRectComponent(ResultsNextButtonEntity) != null
+                && TryFindResultButtonLabel(ResultsNextButtonEntity, "TiltTrialResultNextButtonLabel") != null
+                && TryFindRoundedRectComponent(ResultsRetryButtonEntity) != null
+                && TryFindResultButtonLabel(ResultsRetryButtonEntity, "TiltTrialResultRetryButtonLabel") != null
+                && TryFindRoundedRectComponent(ResultsExitButtonEntity) != null
+                && TryFindResultButtonLabel(ResultsExitButtonEntity, "TiltTrialResultExitButtonLabel") != null;
         }
 
         /// <summary>
-        /// Applies the current result selection to the handheld result button backgrounds when present.
+        /// Applies the current result selection by swapping the same background and label colors as the Tilt Trial selector buttons.
         /// </summary>
         void ApplyResultButtonSelection() {
             if (!HasResultActionButtons()) {
                 return;
             }
 
-            ApplyResultButtonSelection(ResultsRetryButtonBackground, OverlaySelectionIndex == 0);
-            ApplyResultButtonSelection(ResultsExitButtonBackground, OverlaySelectionIndex == 1);
-            ApplyResultButtonSelection(ResultsNextButtonBackground, OverlaySelectionIndex == 2);
+            ApplyResultButtonSelection(
+                TryFindRoundedRectComponent(ResultsNextButtonEntity),
+                TryFindResultButtonLabel(ResultsNextButtonEntity, "TiltTrialResultNextButtonLabel"),
+                OverlaySelectionIndex == 0);
+            ApplyResultButtonSelection(
+                TryFindRoundedRectComponent(ResultsRetryButtonEntity),
+                TryFindResultButtonLabel(ResultsRetryButtonEntity, "TiltTrialResultRetryButtonLabel"),
+                OverlaySelectionIndex == 1);
+            ApplyResultButtonSelection(
+                TryFindRoundedRectComponent(ResultsExitButtonEntity),
+                TryFindResultButtonLabel(ResultsExitButtonEntity, "TiltTrialResultExitButtonLabel"),
+                OverlaySelectionIndex == 2);
         }
 
         /// <summary>
-        /// Applies selected or idle colors to one result button background.
+        /// Applies selected or idle Tilt Trial menu colors to one result action button.
         /// </summary>
-        /// <param name="background">Button background to update.</param>
-        /// <param name="isSelected">Whether the button is currently selected.</param>
-        static void ApplyResultButtonSelection(RoundedRectComponent background, bool isSelected) {
-            if (background == null) {
+        /// <param name="background">Rounded button background to update.</param>
+        /// <param name="label">Visible button label to update.</param>
+        /// <param name="isSelected">Whether the button owns the current result selection.</param>
+        static void ApplyResultButtonSelection(RoundedRectComponent background, TextComponent label, bool isSelected) {
+            if (background == null || label == null) {
                 return;
             }
 
@@ -554,6 +569,9 @@ namespace city.game {
             background.BorderColor = isSelected
                 ? new byte4(255, 237, 196, 255)
                 : new byte4(0, 0, 0, 0);
+            label.Color = isSelected
+                ? new byte4(28, 18, 14, 255)
+                : new byte4(247, 248, 252, 255);
         }
 
         void UpdateFailedOverlay() {
@@ -594,6 +612,9 @@ namespace city.game {
             }
             if (TargetTimesTextComponent != null && CurrentLevel != null) {
                 RefreshTargetTimesText();
+            }
+            if (GameplayPanelEntity != null) {
+                GameplayPanelEntity.Enabled = ShouldShowGameplayPanel(SessionStateMachine.CurrentState);
             }
             if (StartOverlayEntity != null) {
                 StartOverlayEntity.Enabled = SessionStateMachine.CurrentState == TiltTrialSessionState.Start;
@@ -767,6 +788,9 @@ namespace city.game {
                 Entity targetTimesTextEntity = TryFindNamedEntity(Parent, "TiltTrialTargetTimesText");
                 TargetTimesTextComponent = TryFindTextComponent(targetTimesTextEntity);
             }
+            if (GameplayPanelEntity == null) {
+                GameplayPanelEntity = TryFindNamedEntity(Parent, "TiltTrialHandheldGameplayPanel");
+            }
             if (StartOverlayEntity == null) {
                 StartOverlayEntity = TryFindNamedEntity(Parent, "TiltTrialStartOverlay");
             }
@@ -792,15 +816,6 @@ namespace city.game {
             }
             if (ResultsNextButtonEntity == null) {
                 ResultsNextButtonEntity = TryFindNamedEntity(ResultsOverlayEntity, "TiltTrialResultNextButton");
-            }
-            if (ResultsRetryButtonBackground == null) {
-                ResultsRetryButtonBackground = TryFindRoundedRectComponent(ResultsRetryButtonEntity);
-            }
-            if (ResultsExitButtonBackground == null) {
-                ResultsExitButtonBackground = TryFindRoundedRectComponent(ResultsExitButtonEntity);
-            }
-            if (ResultsNextButtonBackground == null) {
-                ResultsNextButtonBackground = TryFindRoundedRectComponent(ResultsNextButtonEntity);
             }
             if (FailOverlayEntity == null) {
                 FailOverlayEntity = TryFindNamedEntity(Parent, "TiltTrialFailOverlay");
@@ -838,7 +853,8 @@ namespace city.game {
             }
 #endif
             return city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadLeft)
-                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp);
+                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp)
+                || WasLeftStickUpPressed();
         }
 
         bool WasNavigateNextPressed() {
@@ -849,7 +865,24 @@ namespace city.game {
             }
 #endif
             return city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadRight)
-                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown);
+                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown)
+                || WasLeftStickDownPressed();
+        }
+
+        bool WasLeftStickUpPressed() {
+            InputSystem inputSystem = Core.Instance.Input;
+            short currentStickY = city.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem);
+            short previousStickY = city.menu.DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem);
+            return currentStickY <= -GamepadStickNavigationThreshold
+                && previousStickY > -GamepadStickNavigationThreshold;
+        }
+
+        bool WasLeftStickDownPressed() {
+            InputSystem inputSystem = Core.Instance.Input;
+            short currentStickY = city.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem);
+            short previousStickY = city.menu.DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem);
+            return currentStickY >= GamepadStickNavigationThreshold
+                && previousStickY < GamepadStickNavigationThreshold;
         }
 
         bool WasAcceptPressed() {
@@ -982,12 +1015,17 @@ namespace city.game {
             return null;
         }
 
-        static TextComponent TryFindTextComponent(Entity entity) {
+        /// <summary>
+        /// Finds the rounded background attached directly to one result action button.
+        /// </summary>
+        /// <param name="entity">Result button entity to inspect.</param>
+        /// <returns>Attached rounded background, or <c>null</c> when it is absent.</returns>
+        static RoundedRectComponent TryFindRoundedRectComponent(Entity entity) {
             if (entity == null || entity.Components == null) {
                 return null;
             }
             for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                if (entity.Components[componentIndex] is TextComponent component) {
+                if (entity.Components[componentIndex] is RoundedRectComponent component) {
                     return component;
                 }
             }
@@ -996,16 +1034,21 @@ namespace city.game {
         }
 
         /// <summary>
-        /// Finds the rounded rectangle background directly attached to one presentation button.
+        /// Finds the visible text label belonging to one result action button by its stable presentation role.
         /// </summary>
-        /// <param name="entity">Button entity whose visual background should be inspected.</param>
-        /// <returns>Button background component, or null when the entity does not own one.</returns>
-        static RoundedRectComponent TryFindRoundedRectComponent(Entity entity) {
+        /// <param name="buttonEntity">Result button hierarchy to search.</param>
+        /// <param name="labelRole">Stable role of the requested label entity.</param>
+        /// <returns>Resolved text label, or <c>null</c> when the presentation is incomplete.</returns>
+        static TextComponent TryFindResultButtonLabel(Entity buttonEntity, string labelRole) {
+            return TryFindTextComponent(TryFindNamedEntity(buttonEntity, labelRole));
+        }
+
+        static TextComponent TryFindTextComponent(Entity entity) {
             if (entity == null || entity.Components == null) {
                 return null;
             }
             for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                if (entity.Components[componentIndex] is RoundedRectComponent component) {
+                if (entity.Components[componentIndex] is TextComponent component) {
                     return component;
                 }
             }

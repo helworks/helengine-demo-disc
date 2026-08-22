@@ -82,6 +82,29 @@ namespace city.tests {
             Assert.Equal(new int2(78, 38), resolved.FitDisplaySizeWithin(new int2(78, 45)));
         }
 
+        /// <summary>
+        /// Ensures the DS Accept icon is authored at native OBJ size with no transparent source padding.
+        /// </summary>
+        [Fact]
+        public void Nintendo_ds_accept_icon_is_32_pixels_and_uses_the_full_texture() {
+            const string projectRootPath = @"C:\dev\helprojs\demodisc";
+            const string relativePath = "images/instructions/controls/generated/ds/a.png";
+            string fullPath = Path.Combine(projectRootPath, "assets", relativePath.Replace('/', Path.DirectorySeparatorChar));
+            byte[] header = new byte[24];
+            using (FileStream stream = File.OpenRead(fullPath)) {
+                stream.ReadExactly(header);
+            }
+
+            int width = System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(header.AsSpan(16, 4));
+            int height = System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(header.AsSpan(20, 4));
+            city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
+            city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(projectRootPath, "ds", "a");
+
+            Assert.Equal(32, width);
+            Assert.Equal(32, height);
+            Assert.Equal(new float4(0f, 0f, 1f, 1f), resolved.SourceRect);
+        }
+
         [Fact]
         public void Resolver_throws_for_unknown_platform() {
             city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();

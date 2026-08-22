@@ -104,6 +104,18 @@ namespace city.tests {
         }
 
         /// <summary>
+        /// Ensures the handheld gameplay HUD is absent from the pre-start screen and appears only during active play.
+        /// </summary>
+        [Fact]
+        public void Gameplay_panel_is_visible_only_while_the_session_is_playing() {
+            Assert.False(city.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(city.game.TiltTrialSessionState.Start));
+            Assert.True(city.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(city.game.TiltTrialSessionState.Playing));
+            Assert.False(city.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(city.game.TiltTrialSessionState.Paused));
+            Assert.False(city.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(city.game.TiltTrialSessionState.Results));
+            Assert.False(city.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(city.game.TiltTrialSessionState.Failed));
+        }
+
+        /// <summary>
         /// Ensures session initialization freezes gameplay and only the explicit start branch can release it.
         /// </summary>
         [Fact]
@@ -163,6 +175,91 @@ namespace city.tests {
             Assert.DoesNotContain("dz <=", source, StringComparison.Ordinal);
         }
 
+        /// <summary>
+        /// Ensures the Clear/results overlay accepts left-stick vertical navigation in addition to the D-pad.
+        /// </summary>
+        [Fact]
+        public void Clear_overlay_navigation_accepts_left_stick_vertical_direction() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialSessionComponent.cs");
+
+            Assert.Contains("|| WasLeftStickUpPressed();", source, StringComparison.Ordinal);
+            Assert.Contains("|| WasLeftStickDownPressed();", source, StringComparison.Ordinal);
+            Assert.Contains("bool WasLeftStickUpPressed()", source, StringComparison.Ordinal);
+            Assert.Contains("bool WasLeftStickDownPressed()", source, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Ensures the results selection order matches the visible Next, Retry, and Back to Menu buttons.
+        /// </summary>
+        /// <param name="selectionIndex">Zero-based visible button selection.</param>
+        /// <param name="expectedSceneId">Literal scene id that accepting the selection must load.</param>
+        [Theory]
+        [InlineData(0, "tilt_trial_level_02")]
+        [InlineData(1, "tilt_trial_level_01")]
+        [InlineData(2, "tilt_trial")]
+        public void Result_selection_resolves_next_retry_and_back_to_menu_in_visible_order(int selectionIndex, string expectedSceneId) {
+            city.game.TiltTrialSessionComponent session = new city.game.TiltTrialSessionComponent();
+            city.game.TiltTrialLevelCatalogEntry currentLevel = Assert.Single(
+                city.game.TiltTrialLevelCatalog.CreateEntries(),
+                entry => entry.LevelId == "tilt-trial-01");
+            typeof(city.game.TiltTrialSessionComponent).GetField("CurrentLevel", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .SetValue(session, currentLevel);
+            typeof(city.game.TiltTrialSessionComponent).GetField("OverlaySelectionIndex", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .SetValue(session, selectionIndex);
+            MethodInfo resolveMethod = typeof(city.game.TiltTrialSessionComponent).GetMethod("ResolveResultAcceptSceneId", BindingFlags.Instance | BindingFlags.NonPublic)!;
+
+            string sceneId = Assert.IsType<string>(resolveMethod.Invoke(session, null));
+
+            Assert.Equal(expectedSceneId, sceneId);
+        }
+
+        /// <summary>
+        /// Ensures result focus swaps the same background and label colors used by the working Tilt Trial selector buttons.
+        /// </summary>
+        [Fact]
+        public void Result_selection_swaps_button_background_and_label_colors() {
+            RoundedRectComponent nextBackground = new RoundedRectComponent();
+            RoundedRectComponent retryBackground = new RoundedRectComponent();
+            RoundedRectComponent exitBackground = new RoundedRectComponent();
+            TextComponent nextLabel = new TextComponent();
+            TextComponent retryLabel = new TextComponent();
+            TextComponent exitLabel = new TextComponent();
+            helengine.Entity nextButton = CreateEntity(null, [nextBackground]);
+            helengine.Entity retryButton = CreateEntity(null, [retryBackground]);
+            helengine.Entity exitButton = CreateEntity(null, [exitBackground]);
+            SetChildren(nextButton, [CreateEntity(nextButton, [
+                nextLabel,
+                new city.game.TiltTrialPresentationRoleComponent { Role = "TiltTrialResultNextButtonLabel" }
+            ])]);
+            SetChildren(retryButton, [CreateEntity(retryButton, [
+                retryLabel,
+                new city.game.TiltTrialPresentationRoleComponent { Role = "TiltTrialResultRetryButtonLabel" }
+            ])]);
+            SetChildren(exitButton, [CreateEntity(exitButton, [
+                exitLabel,
+                new city.game.TiltTrialPresentationRoleComponent { Role = "TiltTrialResultExitButtonLabel" }
+            ])]);
+            city.game.TiltTrialSessionComponent session = new city.game.TiltTrialSessionComponent();
+            Type sessionType = typeof(city.game.TiltTrialSessionComponent);
+            sessionType.GetField("ResultsNextButtonEntity", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, nextButton);
+            sessionType.GetField("ResultsRetryButtonEntity", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, retryButton);
+            sessionType.GetField("ResultsExitButtonEntity", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, exitButton);
+            sessionType.GetField("OverlaySelectionIndex", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, 0);
+
+            sessionType.GetMethod("ApplyResultButtonSelection", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(session, null);
+
+            Assert.Equal((byte)255, nextBackground.FillColor.X);
+            Assert.Equal((byte)193, nextBackground.FillColor.Y);
+            Assert.Equal((byte)94, nextBackground.FillColor.Z);
+            Assert.Equal((byte)28, nextLabel.Color.X);
+            Assert.Equal((byte)40, retryBackground.FillColor.X);
+            Assert.Equal((byte)58, retryBackground.FillColor.Y);
+            Assert.Equal((byte)87, retryBackground.FillColor.Z);
+            Assert.Equal((byte)247, retryLabel.Color.X);
+            Assert.Equal((byte)40, exitBackground.FillColor.X);
+            Assert.Equal((byte)247, exitLabel.Color.X);
+        }
+
         static string ResolveTiltTrialSessionComponentSourcePath() {
             DirectoryInfo directory = new DirectoryInfo(AppContext.BaseDirectory);
             while (directory != null) {
@@ -172,6 +269,11 @@ namespace city.tests {
                 }
 
                 directory = directory.Parent;
+            }
+
+            const string checkoutSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialSessionComponent.cs";
+            if (File.Exists(checkoutSourcePath)) {
+                return checkoutSourcePath;
             }
 
             throw new FileNotFoundException("Unable to locate TiltTrialSessionComponent.cs from the active test checkout.");
@@ -185,9 +287,9 @@ namespace city.tests {
                 .SetValue(entity, (ushort)1);
             typeof(helengine.Entity).GetProperty(nameof(helengine.Entity.Parent), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!
                 .SetValue(entity, parent);
-            typeof(helengine.Entity).GetProperty(nameof(helengine.Entity.Components), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!
+            typeof(helengine.Entity).GetField("components", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(entity, components);
-            typeof(helengine.Entity).GetProperty(nameof(helengine.Entity.Children), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!
+            typeof(helengine.Entity).GetField("children", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(entity, new List<helengine.Entity>());
             for (int componentIndex = 0; componentIndex < components.Count; componentIndex++) {
                 typeof(helengine.Component).GetProperty(nameof(helengine.Component.Parent), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!
@@ -202,7 +304,7 @@ namespace city.tests {
         }
 
         static void SetChildren(helengine.Entity entity, List<helengine.Entity> children) {
-            typeof(helengine.Entity).GetProperty(nameof(helengine.Entity.Children), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!
+            typeof(helengine.Entity).GetField("children", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(entity, children);
         }
     }

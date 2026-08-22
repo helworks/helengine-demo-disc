@@ -32,24 +32,44 @@ namespace city.tests {
             Assert.Contains("TiltTrialResultExitButton", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialResultNextButton", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialStartOverlay", source, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialStartPromptText", source, StringComparison.Ordinal);
-            Assert.Contains("Press \\\"X\\\" to start", source, StringComparison.Ordinal);
+            Assert.Contains("CreateTiltTrialStartPrompt", source, StringComparison.Ordinal);
+            Assert.Contains("TiltTrialStartPromptPrefixText", source, StringComparison.Ordinal);
+            Assert.Contains("TiltTrialStartPromptIcon", source, StringComparison.Ordinal);
+            Assert.Contains("TiltTrialStartPromptSuffixText", source, StringComparison.Ordinal);
+            Assert.Contains("RequireIcon(ProjectRootPath, \"windows\", \"enter\")", source, StringComparison.Ordinal);
+            Assert.Contains("CreateTiltTrialStartPromptPlatformOverride", source, StringComparison.Ordinal);
+            Assert.Contains("\"ps2\", \"ps2\", \"cross\"", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("Press \\\"X\\\" to start", source, StringComparison.Ordinal);
             Assert.Contains("new city.game.TiltTrialLevelSelectComponent", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltTrialCoinText\"", source, StringComparison.Ordinal);
             Assert.Contains("\"Coins 0/0\"", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltTrialTargetTimesText\"", source, StringComparison.Ordinal);
             Assert.Contains("\"Targets G18.00 S28.00 B40.00\"", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltTrialLevelSelectTargetTimes\"", source, StringComparison.Ordinal);
-            Assert.Contains("new float3(16f, 8f, 0f), new int2(224, 176)", source, StringComparison.Ordinal);
-            Assert.Contains("new float3(12f, 56f, 0.1f), new int2(200, 30)", source, StringComparison.Ordinal);
-            Assert.Contains("new float3(12f, 91f, 0.1f), new int2(200, 30)", source, StringComparison.Ordinal);
-            Assert.Contains("new float3(12f, 126f, 0.1f), new int2(200, 30)", source, StringComparison.Ordinal);
+            Assert.Contains("Core.Instance.EntityFactory.CreateChild(entity, \"TiltTrialResultsOverlay\")", source, StringComparison.Ordinal);
+            Assert.Contains("resultsOverlayEntity.LocalPosition = new float3(16f, 8f, 0f)", source, StringComparison.Ordinal);
+            Assert.Contains("new float3(12f, 40f, 0.1f), new int2(200, 30)", source, StringComparison.Ordinal);
+            Assert.Contains("new float3(12f, 78f, 0.1f), new int2(200, 30)", source, StringComparison.Ordinal);
+            Assert.Contains("new float3(12f, 116f, 0.1f), new int2(200, 30)", source, StringComparison.Ordinal);
             Assert.Contains("new float3(320f, 130f, 0f), new int2(640, 380)", source, StringComparison.Ordinal);
             Assert.Contains("new int2(420, 220)", source, StringComparison.Ordinal);
             Assert.Contains("new ReferenceCanvasFitComponent", source, StringComparison.Ordinal);
             Assert.Contains("ConfigureTiltTrialGoalTarget(stageRootEntity, playerSphereEntity);", source, StringComparison.Ordinal);
             Assert.Contains("if (parent.Children[childIndex] is EditorEntity childEntity", source, StringComparison.Ordinal);
             Assert.DoesNotContain("child?.Name", source, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Ensures the Nintendo DS start icon is promoted above opaque bottom-screen panel sprites.
+        /// </summary>
+        [Fact]
+        public void Game_scene_factory_promotes_ds_start_icon_to_foreground_obj_priority() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+
+            Assert.Contains("const byte NintendoDsStartPromptIconRenderOrder = 220;", source, StringComparison.Ordinal);
+            Assert.Contains("string.Equals(platformId, NintendoDsPlatformId, StringComparison.Ordinal)", source, StringComparison.Ordinal);
+            Assert.Contains("overrideComponent.RenderOrder2D = NintendoDsStartPromptIconRenderOrder;", source, StringComparison.Ordinal);
+            Assert.Contains("nameof(SpriteComponent.RenderOrder2D)", source, StringComparison.Ordinal);
         }
 
         /// <summary>

@@ -183,6 +183,16 @@ namespace city.game.tools {
         const double TiltTrialRenderTestTessellationMaxEdgeLength = 1d;
 
         /// <summary>
+        /// Stable platform identifier used by Nintendo DS-specific presentation overrides.
+        /// </summary>
+        const string NintendoDsPlatformId = "ds";
+
+        /// <summary>
+        /// Foreground OBJ render order used by the Nintendo DS start icon.
+        /// </summary>
+        const byte NintendoDsStartPromptIconRenderOrder = 220;
+
+        /// <summary>
         /// Stable platform identifier used by the 3DS handheld viewport overrides.
         /// </summary>
         const string Nintendo3DsPlatformId = "3ds";
@@ -685,6 +695,7 @@ namespace city.game.tools {
             ApplyNintendo3DsViewportOverride(entity, viewportComponent, Nintendo3DsBottomScreenWidth, Nintendo3DsBottomScreenHeight, Nintendo3DsBottomScreenWidth, Nintendo3DsBottomScreenHeight);
 
             Entity panelEntity = CreateRoundedPanelEntity(entity, "TiltTrialHandheldGameplayPanel", new float3(6f, 6f, 0f), new int2(244, 180), 6f, 2f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
+            panelEntity.Enabled = false;
             CreateUiTextEntity(panelEntity, "TiltTrialTimerText", new float3(12f, 10f, 0.1f), global::city.game.TiltTrialLevelSelectComponent.FormatTimerSeconds(levelEntry.StartTimeSeconds), new int2(104, 26), 0.8f, 2, new byte4(255, 246, 223, 255), TextAlignment.Left);
             CreateUiTextEntity(panelEntity, "TiltTrialCoinText", new float3(124f, 10f, 0.1f), "Coins 0/0", new int2(106, 26), 0.65f, 2, new byte4(255, 246, 223, 255), TextAlignment.Right);
             CreateUiTextEntity(panelEntity, "TiltTrialTargetTimesText", new float3(12f, 40f, 0.1f), "Targets G00.00 S00.00 B00.00", new int2(220, 18), 0.48f, 2, new byte4(223, 230, 239, 255), TextAlignment.Left);
@@ -710,16 +721,25 @@ namespace city.game.tools {
 
             CreateUiTextEntity(panelEntity, "TiltTrialHandheldGameplayHint", new float3(12f, 145f, 0.1f), "D-PAD MOVE   L/R CAMERA", new int2(220, 20), 0.5f, 2, new byte4(196, 210, 226, 255), TextAlignment.Center);
 
-            Entity startOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialStartOverlay", new float3(16f, 58f, 0f), new int2(224, 68), 6f, 2f, new byte4(18, 27, 43, 245), new byte4(255, 214, 138, 255), 4);
-            CreateUiTextEntity(startOverlayEntity, "TiltTrialStartPromptText", new float3(12f, 22f, 0.1f), "Press \"X\" to start", new int2(200, 24), 0.72f, 5, new byte4(255, 236, 196, 255), TextAlignment.Center);
+            Entity startOverlayEntity = Core.Instance.EntityFactory.CreateChild(entity, "TiltTrialStartOverlay");
+            startOverlayEntity.LocalPosition = new float3(16f, 58f, 0f);
+            startOverlayEntity.Static = false;
+            startOverlayEntity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+                Role = "TiltTrialStartOverlay"
+            });
+            CreateTiltTrialStartPrompt(startOverlayEntity, new float3(12f, 18f, 0.1f), new int2(200, 32), 0.72f, 5, new int2(32, 32));
 
-            Entity resultsOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialResultsOverlay", new float3(16f, 8f, 0f), new int2(224, 176), 6f, 2f, new byte4(18, 27, 43, 245), new byte4(255, 214, 138, 255), 4);
+            Entity resultsOverlayEntity = Core.Instance.EntityFactory.CreateChild(entity, "TiltTrialResultsOverlay");
+            resultsOverlayEntity.LocalPosition = new float3(16f, 8f, 0f);
+            resultsOverlayEntity.Static = false;
+            resultsOverlayEntity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+                Role = "TiltTrialResultsOverlay"
+            });
             resultsOverlayEntity.Enabled = false;
-            CreateUiTextEntity(resultsOverlayEntity, "TiltTrialResultsTitleText", new float3(12f, 8f, 0.1f), "Clear", new int2(200, 20), 0.82f, 5, new byte4(255, 236, 196, 255), TextAlignment.Center);
-            CreateUiTextEntity(resultsOverlayEntity, "TiltTrialResultsBodyText", new float3(12f, 29f, 0.1f), "Time 00.00", new int2(200, 18), 0.58f, 5, new byte4(247, 248, 252, 255), TextAlignment.Center);
-            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultRetryButton", new float3(12f, 56f, 0.1f), new int2(200, 30), "RETRY", city.game.TiltTrialSessionAction.Retry);
-            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultExitButton", new float3(12f, 91f, 0.1f), new int2(200, 30), "EXIT", city.game.TiltTrialSessionAction.LevelSelect);
-            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultNextButton", new float3(12f, 126f, 0.1f), new int2(200, 30), "NEXT", city.game.TiltTrialSessionAction.Next);
+            CreateUiTextEntity(resultsOverlayEntity, "TiltTrialResultsBodyText", new float3(12f, 6f, 0.1f), "Time 00.00", new int2(200, 22), 0.72f, 5, new byte4(247, 248, 252, 255), TextAlignment.Center);
+            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultNextButton", new float3(12f, 40f, 0.1f), new int2(200, 30), "NEXT", city.game.TiltTrialSessionAction.Next);
+            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultRetryButton", new float3(12f, 78f, 0.1f), new int2(200, 30), "RETRY", city.game.TiltTrialSessionAction.Retry);
+            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultExitButton", new float3(12f, 116f, 0.1f), new int2(200, 30), "BACK TO MENU", city.game.TiltTrialSessionAction.LevelSelect);
 
             Entity failOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialFailOverlay", new float3(16f, 26f, 0f), new int2(224, 140), 6f, 2f, new byte4(43, 23, 28, 245), new byte4(214, 112, 112, 255), 4);
             failOverlayEntity.Enabled = false;
@@ -731,6 +751,108 @@ namespace city.game.tools {
             }
 
             throw new InvalidOperationException("Tilt Trial handheld gameplay generation requires an editor-authored HUD root.");
+        }
+
+        /// <summary>
+        /// Creates the shared Tilt Trial start prompt from text siblings around a platform-specific Accept icon.
+        /// </summary>
+        /// <param name="parent">Start overlay that owns the prompt.</param>
+        /// <param name="promptPosition">Top-left position of the prompt row.</param>
+        /// <param name="promptSize">Authored prompt row size.</param>
+        /// <param name="fontScale">Text font scale for the target presentation.</param>
+        /// <param name="renderOrder2D">2D render order shared by the prompt parts.</param>
+        /// <param name="iconBounds">Maximum display bounds for the generated control icon.</param>
+        void CreateTiltTrialStartPrompt(Entity parent, float3 promptPosition, int2 promptSize, float fontScale, byte renderOrder2D, int2 iconBounds) {
+            if (parent == null) {
+                throw new ArgumentNullException(nameof(parent));
+            } else if (promptSize.X <= 0 || promptSize.Y <= 0) {
+                throw new ArgumentOutOfRangeException(nameof(promptSize), "Start prompt dimensions must be positive.");
+            } else if (iconBounds.X <= 0 || iconBounds.Y <= 0) {
+                throw new ArgumentOutOfRangeException(nameof(iconBounds), "Start prompt icon bounds must be positive.");
+            }
+
+            int gap = Math.Max(8, promptSize.X / 32);
+            int iconLeft = (promptSize.X - iconBounds.X) / 2;
+            int prefixWidth = iconLeft - gap;
+            int suffixLeft = iconLeft + iconBounds.X + gap;
+            int suffixWidth = promptSize.X - suffixLeft;
+            if (prefixWidth <= 0 || suffixWidth <= 0) {
+                throw new InvalidOperationException("Start prompt dimensions do not leave room for both text labels and the icon.");
+            }
+
+            byte4 promptColor = new byte4(255, 236, 196, 255);
+            CreateUiTextEntity(
+                parent,
+                "TiltTrialStartPromptPrefixText",
+                new float3(promptPosition.X, promptPosition.Y, promptPosition.Z),
+                "Press",
+                new int2(prefixWidth, promptSize.Y),
+                fontScale,
+                renderOrder2D,
+                promptColor,
+                TextAlignment.Right);
+
+            Entity iconEntity = Core.Instance.EntityFactory.CreateChild(parent, "TiltTrialStartPromptIcon");
+            iconEntity.LocalPosition = new float3(
+                promptPosition.X + iconLeft,
+                promptPosition.Y + Math.Max(0, (promptSize.Y - iconBounds.Y) / 2),
+                promptPosition.Z);
+            iconEntity.Static = false;
+            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(ProjectRootPath, "windows", "enter");
+            SpriteComponent spriteComponent = new SpriteComponent {
+                Size = commonIcon.FitDisplaySizeWithin(iconBounds),
+                SourceRect = commonIcon.SourceRect,
+                RenderOrder2D = renderOrder2D
+            };
+            iconEntity.AddComponent(spriteComponent);
+            ApplyLevelSelectPromptTexture(iconEntity, spriteComponent, commonIcon.SourcePngRelativePath);
+            CreateTiltTrialStartPromptPlatformOverride(iconEntity, spriteComponent, "gamecube", "gamecube", "a", iconBounds);
+            CreateTiltTrialStartPromptPlatformOverride(iconEntity, spriteComponent, "switch", "switch", "a", iconBounds);
+            CreateTiltTrialStartPromptPlatformOverride(iconEntity, spriteComponent, "wiiu", "wii", "a", iconBounds);
+            CreateTiltTrialStartPromptPlatformOverride(iconEntity, spriteComponent, "wii", "wii", "a", iconBounds);
+            CreateTiltTrialStartPromptPlatformOverride(iconEntity, spriteComponent, "ps2", "ps2", "cross", iconBounds);
+            CreateTiltTrialStartPromptPlatformOverride(iconEntity, spriteComponent, "psp", "psp", "cross", iconBounds);
+            CreateTiltTrialStartPromptPlatformOverride(iconEntity, spriteComponent, "psvita", "psvita", "cross", iconBounds);
+            CreateTiltTrialStartPromptPlatformOverride(iconEntity, spriteComponent, NintendoDsPlatformId, NintendoDsPlatformId, "a", iconBounds);
+            CreateTiltTrialStartPromptPlatformOverride(iconEntity, spriteComponent, "3ds", "3ds", "a", iconBounds);
+
+            CreateUiTextEntity(
+                parent,
+                "TiltTrialStartPromptSuffixText",
+                new float3(promptPosition.X + suffixLeft, promptPosition.Y, promptPosition.Z),
+                "to start",
+                new int2(suffixWidth, promptSize.Y),
+                fontScale,
+                renderOrder2D,
+                promptColor,
+                TextAlignment.Left);
+        }
+
+        /// <summary>
+        /// Persists one platform-specific Accept icon override for the Tilt Trial start prompt.
+        /// </summary>
+        /// <param name="entity">Icon entity owning the sprite.</param>
+        /// <param name="commonComponent">Windows sprite component.</param>
+        /// <param name="platformId">Target platform receiving the override.</param>
+        /// <param name="sourcePlatformId">Icon family platform used to resolve the source asset.</param>
+        /// <param name="controlId">Accept control id within the source icon family.</param>
+        /// <param name="iconBounds">Maximum display size for the icon.</param>
+        void CreateTiltTrialStartPromptPlatformOverride(Entity entity, SpriteComponent commonComponent, string platformId, string sourcePlatformId, string controlId, int2 iconBounds) {
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            SpriteComponent overrideComponent = (SpriteComponent)PlatformEditingServiceValue.EnsurePlatformOverrideComponent(commonComponent, saveComponent, platformId);
+            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(ProjectRootPath, sourcePlatformId, controlId);
+            overrideComponent.Size = resolvedIcon.FitDisplaySizeWithin(iconBounds);
+            overrideComponent.SourceRect = string.Equals(platformId, NintendoDsPlatformId, StringComparison.Ordinal)
+                ? new float4(0f, 0f, 1f, 1f)
+                : resolvedIcon.SourceRect;
+            PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.Size));
+            PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.SourceRect));
+            if (string.Equals(platformId, NintendoDsPlatformId, StringComparison.Ordinal)) {
+                overrideComponent.RenderOrder2D = NintendoDsStartPromptIconRenderOrder;
+                PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.RenderOrder2D));
+            }
+            PlatformEditingServiceValue.StoreAssetReference(commonComponent, overrideComponent, saveComponent, platformId, TextureAssetScenePersistenceSupport.TextureReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(resolvedIcon.SourcePngRelativePath));
+            PlatformEditingServiceValue.PersistPlatformOverride(commonComponent, overrideComponent, saveComponent, platformId);
         }
 
         /// <summary>
@@ -924,14 +1046,14 @@ namespace city.game.tools {
                 throw new ArgumentException("Result button label must be provided.", nameof(label));
             }
 
-            Entity buttonEntity = CreateRoundedPanelEntity(parent, name, position, size, 4f, 0f, new byte4(40, 58, 87, 255), new byte4(0, 0, 0, 0), 5);
+            Entity buttonEntity = CreateRoundedPanelEntity(parent, name, position, size, 5f, 0f, new byte4(40, 58, 87, 255), new byte4(0, 0, 0, 0), 5);
             buttonEntity.AddComponent(new InteractableComponent {
                 Size = size
             });
             buttonEntity.AddComponent(new city.game.TiltTrialPresentationActionComponent {
                 Action = action
             });
-            CreateUiTextEntity(buttonEntity, name + "Label", new float3(8f, 4f, 0.1f), label, new int2(size.X - 16, size.Y - 8), 0.62f, 6, new byte4(247, 248, 252, 255), TextAlignment.Center);
+            CreateUiTextEntity(buttonEntity, name + "Label", new float3(8f, 5f, 0.1f), label, new int2(size.X - 16, size.Y - 8), 0.7f, 6, new byte4(247, 248, 252, 255), TextAlignment.Center);
         }
 
         /// <summary>
@@ -1338,7 +1460,7 @@ namespace city.game.tools {
             });
 
             Entity startOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialStartOverlay", new float3(320f, 260f, 0f), new int2(640, 150), 28f, 3f, new byte4(18, 27, 43, 238), new byte4(255, 214, 138, 255), 4);
-            CreateUiTextEntity(startOverlayEntity, "TiltTrialStartPromptText", new float3(36f, 48f, 0.1f), "Press \"X\" to start", new int2(568, 48), 2f, 5, new byte4(255, 236, 196, 255), TextAlignment.Center);
+            CreateTiltTrialStartPrompt(startOverlayEntity, new float3(36f, 48f, 0.1f), new int2(568, 48), 2f, 5, new int2(48, 48));
 
             Entity resultsOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialResultsOverlay", new float3(320f, 130f, 0f), new int2(640, 380), 28f, 3f, new byte4(18, 27, 43, 238), new byte4(255, 214, 138, 255), 4);
             resultsOverlayEntity.Enabled = false;
