@@ -43,9 +43,9 @@ namespace city.rendering.tools {
         const string GameCubeMaterialSchemaId = "gamecube-standard-textured";
 
         /// <summary>
-        /// Stable Nintendo DS textured material schema identifier.
+        /// Stable Nintendo DS untextured material schema identifier.
         /// </summary>
-        const string DsMaterialSchemaId = "ds-standard-textured";
+        const string DsMaterialSchemaId = "ds-standard-lit";
 
         /// <summary>
         /// Stable built-in forward shader asset id used by the editor preview material path.
@@ -228,7 +228,7 @@ namespace city.rendering.tools {
             ConfigurePs2Platform(definition.GetOrCreatePlatform("ps2"), diffuseTextureAssetId);
             ConfigureWindowsPlatform(definition.GetOrCreatePlatform("psp"), diffuseTextureAssetId, roughnessTextureAssetId);
             ConfigureGameCubePlatform(definition.GetOrCreatePlatform("gamecube"), diffuseTextureAssetId);
-            ConfigureDsPlatform(definition.GetOrCreatePlatform("ds"), diffuseTextureAssetId);
+            ConfigureDsPlatform(definition.GetOrCreatePlatform("ds"));
             return definition;
         }
 
@@ -309,20 +309,15 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Populates the Nintendo DS textured material settings.
+        /// Populates the Nintendo DS untextured material settings.
         /// </summary>
         /// <param name="platformDefinition">Generated platform definition to populate.</param>
-        /// <param name="textureAssetId">Imported marble albedo texture asset id.</param>
-        void ConfigureDsPlatform(GeneratedMaterialPlatformDefinition platformDefinition, string textureAssetId) {
+        void ConfigureDsPlatform(GeneratedMaterialPlatformDefinition platformDefinition) {
             if (platformDefinition == null) {
                 throw new ArgumentNullException(nameof(platformDefinition));
-            } else if (string.IsNullOrWhiteSpace(textureAssetId)) {
-                throw new ArgumentException("Texture asset id must be provided.", nameof(textureAssetId));
             }
 
             platformDefinition.SchemaId = DsMaterialSchemaId;
-            platformDefinition.SetFieldValue(TextureIdFieldId, textureAssetId);
-            platformDefinition.SetFieldValue(TextureRelativePathFieldId, "cooked/imported/" + textureAssetId);
             platformDefinition.SetFieldValue(DoubleSidedFieldId, "false");
             platformDefinition.SetFieldValue(VertexColorModeFieldId, "ignore");
             platformDefinition.SetFieldValue(BaseColorFieldId, "#FFFFFFFF");
