@@ -87,12 +87,12 @@ namespace city.game.tools {
             BlueprintWriteService.WriteBlueprint(
                 projectRootPath,
                 RotatingPlatformBlueprintRelativePath,
-                CreateBlueprintAsset());
+                CreateBlueprintAsset(projectRootPath));
         }
 
-        BlueprintAsset CreateBlueprintAsset() {
-            SceneAssetReference modelReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(RotatingPlatformModelRelativePath);
-            SceneAssetReference materialReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(RotatingPlatformMaterialRelativePath);
+        BlueprintAsset CreateBlueprintAsset(string projectRootPath) {
+            SceneAssetReference modelReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, RotatingPlatformModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference materialReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, RotatingPlatformMaterialRelativePath, AssetEntryKind.Material);
 
             MeshComponent meshComponent = new MeshComponent();
             meshComponent.Materials = new RuntimeMaterial[] { null };

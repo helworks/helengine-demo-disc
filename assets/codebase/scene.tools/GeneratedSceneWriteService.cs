@@ -35,20 +35,10 @@ namespace city.scene.tools {
             }
 
             Directory.CreateDirectory(directoryPath);
-            string temporaryScenePath = scenePath + "." + Guid.NewGuid().ToString("N") + ".tmp";
-            try {
-                using (FileStream stream = new FileStream(temporaryScenePath, FileMode.Create, FileAccess.Write, FileShare.None)) {
-                    helengine.editor.AssetSerializer.Serialize(stream, sceneAsset);
-                }
-
-                File.Move(temporaryScenePath, scenePath, true);
-            } catch {
-                if (File.Exists(temporaryScenePath)) {
-                    File.Delete(temporaryScenePath);
-                }
-
-                throw;
-            }
+            new helengine.editor.GeneratedAssetWriteService().WriteAsset(
+                projectRootPath,
+                sceneId,
+                sceneAsset);
         }
 
         /// <summary>

@@ -27,7 +27,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Stable save-state slot name used for serialized mesh material references.
         /// </summary>
-        const string MeshMaterialReferenceName = "Material";
+        const string MeshMaterialReferenceName = "Materials[0]";
 
         /// <summary>
         /// Stable project-relative path to the imported directional-light arrow model source.
@@ -136,7 +136,7 @@ namespace city.rendering.tools {
                     instructionOverlayEntity,
                     consoleInstructionBlueprintEntity,
                     CreateUiEntity(),
-                    CreateDirectionalLightRigEntity(arrowModel, axisMaterials[4]),
+                    CreateDirectionalLightRigEntity(projectRootPath, arrowModel, axisMaterials[4]),
                     CreateFloorEntity(cubeModel, axisMaterials[3]),
                     CreateGroundEntity(cubeModel, axisMaterials[3]),
                     CreateXAxisEntity(cubeModel, axisMaterials[0]),
@@ -207,7 +207,7 @@ namespace city.rendering.tools {
         /// <param name="arrowModel">Runtime model used by the directional-light arrow.</param>
         /// <param name="markerMaterial">Runtime marker material used by the directional-light arrow.</param>
         /// <returns>Live authored directional-light rig entity.</returns>
-        Entity CreateDirectionalLightRigEntity(RuntimeModel arrowModel, RuntimeMaterial markerMaterial) {
+        Entity CreateDirectionalLightRigEntity(string projectRootPath, RuntimeModel arrowModel, RuntimeMaterial markerMaterial) {
             if (arrowModel == null) {
                 throw new ArgumentNullException(nameof(arrowModel));
             } else if (markerMaterial == null) {
@@ -219,7 +219,7 @@ namespace city.rendering.tools {
             entity.LocalPosition = ArrowRigLocalPosition;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = CreateArrowFacingUpOrientation();
-            entity.AddChild(CreateDirectionalLightArrowEntity(arrowModel, markerMaterial));
+            entity.AddChild(CreateDirectionalLightArrowEntity(projectRootPath, arrowModel, markerMaterial));
             return entity;
         }
 
@@ -229,7 +229,7 @@ namespace city.rendering.tools {
         /// <param name="arrowModel">Runtime model used by the arrow mesh.</param>
         /// <param name="markerMaterial">Runtime marker material used by the arrow mesh.</param>
         /// <returns>Live authored directional-light arrow entity.</returns>
-        Entity CreateDirectionalLightArrowEntity(RuntimeModel arrowModel, RuntimeMaterial markerMaterial) {
+        Entity CreateDirectionalLightArrowEntity(string projectRootPath, RuntimeModel arrowModel, RuntimeMaterial markerMaterial) {
             if (arrowModel == null) {
                 throw new ArgumentNullException(nameof(arrowModel));
             } else if (markerMaterial == null) {
@@ -246,7 +246,7 @@ namespace city.rendering.tools {
                 Materials = new[] { markerMaterial },
                 RenderOrder3D = 0
             });
-            ApplyArrowMeshAssetReferences(entity);
+            ApplyArrowMeshAssetReferences(projectRootPath, entity);
             entity.AddComponent(new DirectionalLightComponent {
                 Color = new float4(1f, 1f, 1f, 1f),
                 Intensity = 1.2f,
@@ -266,15 +266,15 @@ namespace city.rendering.tools {
         /// Stores the stable imported arrow-model and marker-material references required by scene serialization.
         /// </summary>
         /// <param name="entity">Arrow entity that owns the generated mesh component.</param>
-        void ApplyArrowMeshAssetReferences(Entity entity) {
+        void ApplyArrowMeshAssetReferences(string projectRootPath, Entity entity) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
             }
 
             MeshComponent meshComponent = FindRequiredComponent<MeshComponent>(entity);
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(meshComponent, MeshModelReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(ArrowModelRelativePath));
-            saveComponent.SetAssetReference(meshComponent, MeshMaterialReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(MarkerMaterialRelativePath));
+            saveComponent.SetAssetReference(meshComponent, MeshModelReferenceName, EditorAssetReferenceFactory.CreateFileReference(projectRootPath, ArrowModelRelativePath, AssetEntryKind.Model));
+            saveComponent.SetAssetReference(meshComponent, MeshMaterialReferenceName, EditorAssetReferenceFactory.CreateFileReference(projectRootPath, MarkerMaterialRelativePath, AssetEntryKind.Material));
         }
 
         /// <summary>

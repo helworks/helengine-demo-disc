@@ -60,7 +60,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Stable file-backed demo-disc body-font reference.</returns>
         public static SceneAssetReference CreateEditorFontReference() {
-            return global::helengine.SceneAssetReferenceFactory.CreateFileSystemFont(BodyFontRelativePath);
+            return global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(BodyFontRelativePath);
         }
 
         /// <summary>

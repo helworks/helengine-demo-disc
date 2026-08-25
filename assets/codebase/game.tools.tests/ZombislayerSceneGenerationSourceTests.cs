@@ -29,8 +29,8 @@ namespace city.tests {
             Assert.Contains("new city.game.ZombislayerFpsControllerComponent()", source, StringComparison.Ordinal);
             Assert.Contains("\"ZombislayerWeapon\"", source, StringComparison.Ordinal);
             Assert.Contains("\"ZombislayerPauseOverlay\"", source, StringComparison.Ordinal);
-            Assert.Contains("global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(ZombislayerAssetCatalog.EnvironmentModelRelativePath)", source, StringComparison.Ordinal);
-            Assert.Contains("global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(ZombislayerAssetCatalog.WeaponModelRelativePath)", source, StringComparison.Ordinal);
+            Assert.Contains("global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(ZombislayerAssetCatalog.EnvironmentModelRelativePath)", source, StringComparison.Ordinal);
+            Assert.Contains("global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(ZombislayerAssetCatalog.WeaponModelRelativePath)", source, StringComparison.Ordinal);
         }
     }
 }

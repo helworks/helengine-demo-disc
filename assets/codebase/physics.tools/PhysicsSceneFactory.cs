@@ -11,6 +11,11 @@ namespace city.physics.tools {
         string CurrentProjectRootPath = string.Empty;
 
         /// <summary>
+        /// Cached authored physics-material references shared by every generated scene in one write pass.
+        /// </summary>
+        readonly Dictionary<string, SceneAssetReference> PhysicsDemoMaterialReferenceCache = new Dictionary<string, SceneAssetReference>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
         /// Stable generated provider identifier used for built-in primitive assets.
         /// </summary>
         const string GeneratedProviderId = EngineGeneratedAssetProvider.ProviderIdValue;
@@ -326,16 +331,6 @@ namespace city.physics.tools {
         const byte SphereColliderComponentPayloadVersion = 1;
 
         /// <summary>
-        /// Current payload version for serialized kinematic-motion component scene records.
-        /// </summary>
-        const byte KinematicMotionComponentPayloadVersion = 1;
-
-        /// <summary>
-        /// Current payload version for serialized character-controller component scene records.
-        /// </summary>
-        const byte CharacterControllerComponentPayloadVersion = 1;
-
-        /// <summary>
         /// Serialized rigid-body kind byte for static bodies.
         /// </summary>
         const byte StaticBodyKindCode = 0;
@@ -364,6 +359,11 @@ namespace city.physics.tools {
         /// Shared payload wrapper used to preserve any component-level override metadata while serializing live editor-authored overlay entities.
         /// </summary>
         readonly ComponentPlatformOverridePayloadService OverridePayloadService;
+
+        /// <summary>
+        /// Shared editor API that canonicalizes file-backed references on manually serialized generated overlay entities.
+        /// </summary>
+        global::helengine.editor.EditorAssetReferenceCanonicalizationService AssetReferenceCanonicalizationService;
 
         /// <summary>
         /// Shared editor-authored scene writer used for the playable physics showcases so their instruction overlays follow the standard city save pipeline.
@@ -433,12 +433,14 @@ namespace city.physics.tools {
             }
 
             CurrentProjectRootPath = Path.GetFullPath(projectRootPath);
+            AssetReferenceCanonicalizationService = new global::helengine.editor.EditorAssetReferenceCanonicalizationService(CurrentProjectRootPath);
             string assetsRootPath = Path.Combine(projectRootPath, "assets");
             if (!Directory.Exists(assetsRootPath)) {
                 throw new DirectoryNotFoundException($"Physics validation scene export requires an assets directory at '{assetsRootPath}'.");
             }
 
             WriteSupportAssets(projectRootPath);
+            InitializePhysicsDemoMaterialReferenceCache();
             DeleteObsoleteStaticMeshScenes(projectRootPath);
 
             string[] sceneIds = PhysicsSceneCatalog.GetSceneIds();
@@ -457,8 +459,10 @@ namespace city.physics.tools {
                 }
 
                 Directory.CreateDirectory(directoryPath);
-                using FileStream stream = File.Create(fullPath);
-                helengine.editor.AssetSerializer.Serialize(stream, sceneAsset);
+                new helengine.editor.GeneratedAssetWriteService().WriteAsset(
+                    projectRootPath,
+                    sceneId,
+                    sceneAsset);
             }
         }
 
@@ -1032,6 +1036,7 @@ namespace city.physics.tools {
                     if (saveComponent.TryGetComponentState(component, out EntityComponentSaveState existingSaveState)) {
                         saveState = existingSaveState;
                         NormalizeGeneratedEditorFontReference(component, saveState);
+                        AssetReferenceCanonicalizationService?.Canonicalize(component, saveState);
                     }
 
                     IComponentPersistenceDescriptor descriptor = PersistenceRegistry.GetDescriptor(component);
@@ -1335,7 +1340,7 @@ namespace city.physics.tools {
         /// Creates the shared generated-asset reference list used by validation scene mesh components.
         /// </summary>
         /// <returns>Stable generated asset reference list.</returns>
-        static SceneAssetReference[] CreateAssetReferences() {
+        SceneAssetReference[] CreateAssetReferences() {
             return new[] {
                 global::helengine.EngineSceneAssetReferenceFactory.CreateCubeModel(),
                 global::helengine.EngineSceneAssetReferenceFactory.CreateSphereModel(),
@@ -1366,7 +1371,7 @@ namespace city.physics.tools {
         /// </summary>
         /// <param name="sphereIndex">Zero-based sphere index.</param>
         /// <returns>Distinct colored material reference for the requested sphere.</returns>
-        static SceneAssetReference CreateSphereStackMaterialReference(int sphereIndex) {
+        SceneAssetReference CreateSphereStackMaterialReference(int sphereIndex) {
             if (sphereIndex < 0) {
                 throw new ArgumentOutOfRangeException(nameof(sphereIndex), "Sphere index must be non-negative.");
             }
@@ -1389,12 +1394,53 @@ namespace city.physics.tools {
         /// </summary>
         /// <param name="relativePath">Relative project asset path.</param>
         /// <returns>Scene asset reference targeting a file-backed asset.</returns>
-        static SceneAssetReference CreatePhysicsDemoMaterialReference(string relativePath) {
+        SceneAssetReference CreatePhysicsDemoMaterialReference(string relativePath) {
             if (string.IsNullOrWhiteSpace(relativePath)) {
                 throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
             }
 
-            return global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(relativePath);
+            if (PhysicsDemoMaterialReferenceCache.TryGetValue(relativePath, out SceneAssetReference cachedReference)) {
+                return cachedReference;
+            }
+
+            SceneAssetReference reference = string.IsNullOrWhiteSpace(CurrentProjectRootPath)
+                ? global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(relativePath)
+                : global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(
+                    CurrentProjectRootPath,
+                    relativePath,
+                    global::helengine.editor.AssetEntryKind.Material);
+            PhysicsDemoMaterialReferenceCache[relativePath] = reference;
+            return reference;
+        }
+
+        /// <summary>
+        /// Resolves every physics material reference before any generated scene is written, avoiding an index refresh over partially-written output.
+        /// </summary>
+        void InitializePhysicsDemoMaterialReferenceCache() {
+            PhysicsDemoMaterialReferenceCache.Clear();
+            string[] relativePaths = {
+                PhysicsDemoGroundMaterialRelativePath,
+                PhysicsDemoNeutralMaterialRelativePath,
+                PhysicsDemoBlueMaterialRelativePath,
+                PhysicsDemoGreenMaterialRelativePath,
+                PhysicsDemoMagentaMaterialRelativePath,
+                PhysicsDemoYellowMaterialRelativePath,
+                PhysicsDemoCyanMaterialRelativePath,
+                PhysicsDemoRedMaterialRelativePath,
+                PhysicsDemoOrangeMaterialRelativePath,
+                PhysicsDemoPurpleMaterialRelativePath,
+                PhysicsDemoSphereStackBlueMaterialRelativePath,
+                PhysicsDemoSphereStackGreenMaterialRelativePath,
+                PhysicsDemoSphereStackMagentaMaterialRelativePath,
+                PhysicsDemoSphereStackYellowMaterialRelativePath,
+                PhysicsDemoSphereStackCyanMaterialRelativePath,
+                PhysicsDemoSphereStackRedMaterialRelativePath,
+                PhysicsDemoSphereStackOrangeMaterialRelativePath,
+                PhysicsDemoSphereStackPurpleMaterialRelativePath
+            };
+            for (int index = 0; index < relativePaths.Length; index++) {
+                CreatePhysicsDemoMaterialReference(relativePaths[index]);
+            }
         }
 
         /// <summary>
@@ -2670,19 +2716,15 @@ namespace city.physics.tools {
                 throw new ArgumentOutOfRangeException(nameof(travelDurationSeconds), "Travel duration must be a finite value greater than zero.");
             }
 
-            using MemoryStream stream = new MemoryStream();
-            using EngineBinaryWriter writer = EngineBinaryWriter.Create(stream, EngineBinaryEndianness.LittleEndian);
-            writer.WriteByte(KinematicMotionComponentPayloadVersion);
-            writer.WriteFloat3(startLocalPosition);
-            writer.WriteFloat3(endLocalPosition);
-            writer.WriteInt64(BitConverter.DoubleToInt64Bits(travelDurationSeconds));
-            writer.WriteByte(pingPong ? (byte)1 : (byte)0);
-
-            return new SceneComponentAssetRecord {
-                ComponentTypeId = "helengine.KinematicMotion3DComponent",
-                ComponentIndex = componentIndex,
-                Payload = stream.ToArray()
+            KinematicMotion3DComponent component = new KinematicMotion3DComponent {
+                StartLocalPosition = startLocalPosition,
+                EndLocalPosition = endLocalPosition,
+                TravelDurationSeconds = travelDurationSeconds,
+                PingPong = pingPong
             };
+            return GeneratedScenePersistenceRegistryFactory.Create()
+                .GetDescriptor(component)
+                .SerializeComponent(component, componentIndex, null);
         }
 
         /// <summary>
@@ -2718,20 +2760,16 @@ namespace city.physics.tools {
                 throw new ArgumentOutOfRangeException(nameof(groundSnapDistance), "Ground snap distance must be a finite value greater than or equal to zero.");
             }
 
-            using MemoryStream stream = new MemoryStream();
-            using EngineBinaryWriter writer = EngineBinaryWriter.Create(stream, EngineBinaryEndianness.LittleEndian);
-            writer.WriteByte(CharacterControllerComponentPayloadVersion);
-            writer.WriteFloat3(desiredMoveDirection);
-            writer.WriteInt64(BitConverter.DoubleToInt64Bits(moveSpeed));
-            writer.WriteInt64(BitConverter.DoubleToInt64Bits(gravityScale));
-            writer.WriteInt64(BitConverter.DoubleToInt64Bits(stepHeight));
-            writer.WriteInt64(BitConverter.DoubleToInt64Bits(groundSnapDistance));
-
-            return new SceneComponentAssetRecord {
-                ComponentTypeId = "helengine.CharacterController3DComponent",
-                ComponentIndex = componentIndex,
-                Payload = stream.ToArray()
+            CharacterController3DComponent component = new CharacterController3DComponent {
+                DesiredMoveDirection = desiredMoveDirection,
+                MoveSpeed = moveSpeed,
+                GravityScale = gravityScale,
+                StepHeight = stepHeight,
+                GroundSnapDistance = groundSnapDistance
             };
+            return GeneratedScenePersistenceRegistryFactory.Create()
+                .GetDescriptor(component)
+                .SerializeComponent(component, componentIndex, null);
         }
 
         /// <summary>

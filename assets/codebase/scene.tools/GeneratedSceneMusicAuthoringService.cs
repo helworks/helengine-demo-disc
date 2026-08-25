@@ -56,7 +56,7 @@ namespace city.scene.tools {
             saveComponent.SetAssetReference(
                 audioSourceComponent,
                 AutomaticComponentAssetReferenceSupport.BuildReferenceName(nameof(AudioSourceComponent.Clip)),
-                global::helengine.SceneAssetReferenceFactory.CreateFileSystemAudio(audioPath));
+                DemoDiscEditorAssetReferenceFactory.CreateAudio(audioPath));
         }
 
         /// <summary>

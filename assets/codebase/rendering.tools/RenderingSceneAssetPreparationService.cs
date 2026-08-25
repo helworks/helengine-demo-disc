@@ -61,6 +61,7 @@ namespace city.rendering.tools {
             DepthClipProbeMaterialFactory depthClipProbeMaterialFactory = new DepthClipProbeMaterialFactory();
             DepthClipProbeCenterMaterialFactory depthClipProbeCenterMaterialFactory = new DepthClipProbeCenterMaterialFactory();
             PbrTexturedShowcaseMaterialFactory pbrTexturedShowcaseMaterialFactory = new PbrTexturedShowcaseMaterialFactory();
+            AxisTestMaterialFactory axisTestMaterialFactory = new AxisTestMaterialFactory();
             forwardSolidColorMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             tiltTrialCourseMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             tiltTrialClippingProbeModelFactory.WriteModelAsset(fullProjectRootPath);
@@ -68,6 +69,7 @@ namespace city.rendering.tools {
             depthClipProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             depthClipProbeCenterMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             pbrTexturedShowcaseMaterialFactory.WriteMaterialAssets(fullProjectRootPath);
+            axisTestMaterialFactory.WriteMaterialAssets(fullProjectRootPath);
             RuntimeModel generatedCubeModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.CubeAssetId);
             RuntimeModel generatedPlaneModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.PlaneAssetId);
             RuntimeModel generatedSphereModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.SphereAssetId);
@@ -92,14 +94,14 @@ namespace city.rendering.tools {
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/Ground.hasset"),
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "materials/rendering/axis_test/Marker.hasset")
             };
+            RuntimeModel lamppostModel = LoadImportedModelRuntime(projectRootPath, "models/riemers/lamppost.x");
+            RuntimeModel racerModel = LoadImportedModelRuntime(projectRootPath, "models/riemers/racer.x");
             RuntimeMaterial[] racerMaterials = new[] {
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "models/riemers/racer/x3ds_mat_ruedas.hasset"),
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "models/riemers/racer/x3ds_mat_Material__0_3.hasset"),
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "models/riemers/racer/x3ds_mat_Material_1_2.hasset"),
                 LoadRuntimeMaterial(bootstrap, projectRootPath, "models/riemers/racer/x3ds_mat_Material_2_1.hasset")
             };
-            RuntimeModel lamppostModel = LoadImportedModelRuntime(projectRootPath, "models/riemers/lamppost.x");
-            RuntimeModel racerModel = LoadImportedModelRuntime(projectRootPath, "models/riemers/racer.x");
             RuntimeMaterial pbrTexturedShowcaseMetalMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, PbrTexturedShowcaseMaterialFactory.MetalMaterialRelativePath);
             RuntimeMaterial pbrTexturedShowcaseWoodMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, PbrTexturedShowcaseMaterialFactory.WoodMaterialRelativePath);
 
@@ -171,12 +173,7 @@ namespace city.rendering.tools {
             string platformId = ResolveMaterialPreviewPlatformId(fullProjectRootPath);
             string fullMaterialPath = Path.GetFullPath(Path.Combine(assetsRootPath, relativeMaterialPath.Replace('/', Path.DirectorySeparatorChar)));
             MaterialAssetSettingsService settingsService = new MaterialAssetSettingsService();
-            ShaderMaterialAsset materialAsset;
-            try {
-                materialAsset = settingsService.LoadMaterialAsset(fullMaterialPath, platformId);
-            } catch (InvalidOperationException) {
-                materialAsset = MigrateLegacyMaterialAsset(fullMaterialPath, bootstrap, settingsService, platformId);
-            }
+            ShaderMaterialAsset materialAsset = settingsService.LoadMaterialAsset(fullMaterialPath, platformId);
             MaterialAssetProcessorSettings platformSettings;
             if (!settingsService.TryLoadPlatformSettings(fullMaterialPath, platformId, out platformSettings) || platformSettings == null) {
                 throw new InvalidOperationException($"Material settings for platform '{platformId}' could not be loaded from '{relativeMaterialPath}'.");
@@ -268,43 +265,6 @@ namespace city.rendering.tools {
             } catch (OverflowException) {
                 return new float4(1f, 1f, 1f, 1f);
             }
-        }
-
-        /// <summary>
-        /// Migrates one legacy binary material asset into the current settings-document format.
-        /// </summary>
-        /// <param name="fullMaterialPath">Absolute path to the material file.</param>
-        /// <param name="bootstrap">Project bootstrap context used to resolve supported platforms.</param>
-        /// <param name="settingsService">Material settings service used to write the migrated document.</param>
-        /// <param name="platformId">Platform whose effective runtime material should be resolved after migration.</param>
-        /// <returns>Runtime-facing material asset loaded from the migrated settings document.</returns>
-        ShaderMaterialAsset MigrateLegacyMaterialAsset(
-            string fullMaterialPath,
-            EditorProjectBootstrapContext bootstrap,
-            MaterialAssetSettingsService settingsService,
-            string platformId) {
-            if (string.IsNullOrWhiteSpace(fullMaterialPath)) {
-                throw new ArgumentException("Material path must be provided.", nameof(fullMaterialPath));
-            } else if (bootstrap == null) {
-                throw new ArgumentNullException(nameof(bootstrap));
-            } else if (settingsService == null) {
-                throw new ArgumentNullException(nameof(settingsService));
-            } else if (string.IsNullOrWhiteSpace(platformId)) {
-                throw new ArgumentException("Platform id must be provided.", nameof(platformId));
-            }
-
-            Asset loadedAsset;
-            using (FileStream stream = new FileStream(fullMaterialPath, FileMode.Open, FileAccess.Read, FileShare.Read)) {
-                loadedAsset = global::helengine.editor.AssetSerializer.Deserialize(stream);
-            }
-
-            if (loadedAsset is not MaterialAsset materialAsset) {
-                throw new InvalidOperationException($"Material document '{fullMaterialPath}' could not be loaded.");
-            }
-
-            settingsService.LoadOrCreate(fullMaterialPath, materialAsset, bootstrap.SupportedPlatforms, bootstrap.ResolveSelectionModel);
-            ShaderMaterialAsset migratedMaterialAsset = settingsService.LoadMaterialAsset(fullMaterialPath, platformId);
-            return migratedMaterialAsset;
         }
 
         /// <summary>

@@ -118,14 +118,14 @@ namespace city.game.tools {
             BlueprintWriteService.WriteBlueprint(
                 projectRootPath,
                 PendulumHammerBlueprintRelativePath,
-                CreateBlueprintAsset());
+                CreateBlueprintAsset(projectRootPath));
         }
 
-        BlueprintAsset CreateBlueprintAsset() {
-            SceneAssetReference commonModelReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(PendulumHammerCommonModelRelativePath);
-            SceneAssetReference dsModelReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(PendulumHammerDsModelRelativePath);
-            SceneAssetReference handleMaterialReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(PendulumHammerHandleMaterialRelativePath);
-            SceneAssetReference headMaterialReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(PendulumHammerHeadMaterialRelativePath);
+        BlueprintAsset CreateBlueprintAsset(string projectRootPath) {
+            SceneAssetReference commonModelReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, PendulumHammerCommonModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference dsModelReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, PendulumHammerDsModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference handleMaterialReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, PendulumHammerHandleMaterialRelativePath, AssetEntryKind.Material);
+            SceneAssetReference headMaterialReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, PendulumHammerHeadMaterialRelativePath, AssetEntryKind.Material);
 
             MeshComponent meshComponent = new MeshComponent();
             meshComponent.Materials = new RuntimeMaterial[] { null, null };

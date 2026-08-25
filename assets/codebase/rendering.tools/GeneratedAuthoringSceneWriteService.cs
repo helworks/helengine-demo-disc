@@ -366,7 +366,7 @@ namespace city.rendering.tools {
             for (int index = 0; index < rootEntity.Components.Count; index++) {
                 if (rootEntity.Components[index] is BlueprintInstanceComponent blueprintInstance
                     && string.Equals(
-                        blueprintInstance.BlueprintAssetPath,
+                        blueprintInstance.BlueprintAssetReference?.RelativePath,
                         ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath,
                         StringComparison.Ordinal)) {
                     return true;

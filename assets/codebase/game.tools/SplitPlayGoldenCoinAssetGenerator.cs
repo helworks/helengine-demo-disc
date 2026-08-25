@@ -79,13 +79,13 @@ namespace city.game.tools {
             BlueprintWriteService.WriteBlueprint(
                 projectRootPath,
                 SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath,
-                CreateBlueprintAsset());
+                CreateBlueprintAsset(projectRootPath));
         }
 
-        BlueprintAsset CreateBlueprintAsset() {
-            SceneAssetReference commonModelReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(SplitPlayAssetCatalog.GoldenCoinCommonModelRelativePath);
-            SceneAssetReference dsModelReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(SplitPlayAssetCatalog.GoldenCoinDsModelRelativePath);
-            SceneAssetReference materialReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath);
+        BlueprintAsset CreateBlueprintAsset(string projectRootPath) {
+            SceneAssetReference commonModelReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, SplitPlayAssetCatalog.GoldenCoinCommonModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference dsModelReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, SplitPlayAssetCatalog.GoldenCoinDsModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference materialReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath, AssetEntryKind.Material);
 
             MeshComponent meshComponent = new MeshComponent();
             meshComponent.Materials = new RuntimeMaterial[] { null };

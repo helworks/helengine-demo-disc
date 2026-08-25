@@ -186,7 +186,7 @@ namespace city.menu.tools {
             saveComponent.SetAssetReference(
                 component,
                 TextureAssetScenePersistenceSupport.TextureReferenceName,
-                global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(texturePath));
+                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(texturePath));
         }
 
         /// <summary>

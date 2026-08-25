@@ -274,7 +274,7 @@ namespace city.rendering.tools {
             new DesktopInstructionPlatformIconSpec("ds", "x", new int2(46, 46)),
             new DesktopInstructionPlatformIconSpec("3ds", "y", new int2(46, 46)),
             new DesktopInstructionPlatformIconSpec("psp", "triangle", new int2(46, 46)),
-            new DesktopInstructionPlatformIconSpec("ps2", "triangle", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("ps2", "circle", new int2(46, 46)),
             new DesktopInstructionPlatformIconSpec("psvita", "triangle", new int2(46, 46)),
             new DesktopInstructionPlatformIconSpec("n64", "face_cluster", new int2(46, 46)),
             new DesktopInstructionPlatformIconSpec("dreamcast", "y", new int2(46, 46)),
@@ -315,7 +315,7 @@ namespace city.rendering.tools {
         /// Console-only light-toggle bindings used by the reusable camera/light Blueprint.
         /// </summary>
         static readonly DesktopInstructionPlatformIconSpec[] ConsoleLightIconSpecs = new[] {
-            new DesktopInstructionPlatformIconSpec("ps2", "triangle", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("ps2", "circle", new int2(46, 46)),
             new DesktopInstructionPlatformIconSpec("gamecube", "y", new int2(46, 46)),
             new DesktopInstructionPlatformIconSpec("wii", "2", new int2(46, 46)),
             new DesktopInstructionPlatformIconSpec("switch", "x", new int2(46, 46)),
@@ -956,7 +956,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
             }
 
-            return global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(relativePath);
+            return global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(relativePath);
         }
     }
 }

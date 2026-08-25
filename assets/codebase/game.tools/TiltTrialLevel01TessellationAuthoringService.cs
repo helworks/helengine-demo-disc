@@ -65,7 +65,7 @@ namespace city.game.tools {
                 ApplyTessellationToRequiredEntity(sceneAsset, TessellatedEntityNames[index]);
             }
 
-            SaveScene(scenePath, sceneAsset);
+            SaveScene(projectRootPath, scenePath, sceneAsset);
         }
 
         /// <summary>
@@ -204,13 +204,12 @@ namespace city.game.tools {
         /// </summary>
         /// <param name="scenePath">Absolute scene file path.</param>
         /// <param name="sceneAsset">Modified scene asset to serialize.</param>
-        void SaveScene(string scenePath, SceneAsset sceneAsset) {
+        void SaveScene(string projectRootPath, string scenePath, SceneAsset sceneAsset) {
             if (sceneAsset == null) {
                 throw new ArgumentNullException(nameof(sceneAsset));
             }
 
-            using FileStream stream = File.Create(scenePath);
-            helengine.editor.AssetSerializer.Serialize(stream, sceneAsset);
+            new helengine.editor.GeneratedAssetWriteService().WriteAsset(projectRootPath, Level01SceneRelativePath.Substring("assets/".Length), sceneAsset);
         }
     }
 }

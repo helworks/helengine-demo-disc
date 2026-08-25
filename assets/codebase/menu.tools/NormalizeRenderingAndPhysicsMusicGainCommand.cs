@@ -77,8 +77,8 @@ namespace city.menu.tools {
                 return;
             }
 
-            using FileStream outputStream = new FileStream(fullScenePath, FileMode.Create, FileAccess.Write, FileShare.None);
-            global::helengine.editor.AssetSerializer.Serialize(outputStream, sceneAsset);
+            string relativePath = Path.GetRelativePath(Path.Combine(projectRootPath, "assets"), fullScenePath).Replace('\\', '/');
+            new global::helengine.editor.GeneratedAssetWriteService().WriteAsset(projectRootPath, relativePath, sceneAsset);
         }
 
         static bool NormalizeEntities(SceneEntityAsset[] entities) {

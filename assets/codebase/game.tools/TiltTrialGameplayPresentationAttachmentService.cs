@@ -42,7 +42,7 @@ namespace city.game.tools {
                 ApplyWindowsOnlyDebugRootOverride(sceneAsset);
                 AddPresentationRoot(fullProjectRootPath, sceneAsset, "TiltTrialConsolePresentation", TiltTrialGameplayPresentationBlueprintGenerator.ConsoleBlueprintRelativePath, CreateConsolePresentationPlatformOverrides());
                 AddPresentationRoot(fullProjectRootPath, sceneAsset, "TiltTrialHandheldPresentation", TiltTrialGameplayPresentationBlueprintGenerator.HandheldBlueprintRelativePath, CreateHandheldOnlyPlatformOverrides());
-                SaveScene(scenePath, sceneAsset);
+                SaveScene(projectRootPath, scenePath, sceneAsset);
             }
         }
 
@@ -158,7 +158,10 @@ namespace city.game.tools {
 
             ComponentPersistenceRegistry registry = GeneratedScenePersistenceRegistryFactory.Create(ScriptTypeResolverValue);
             BlueprintInstanceComponent blueprintInstance = new BlueprintInstanceComponent {
-                BlueprintAssetPath = blueprintPath
+                BlueprintAssetReference = EditorAssetReferenceFactory.CreateFileReference(
+                    projectRootPath,
+                    blueprintPath,
+                    AssetEntryKind.Blueprint)
             };
             BlueprintAsset blueprintAsset = LoadBlueprintAsset(projectRootPath, blueprintPath);
             BlueprintEntityReferenceOverrideService overrideService = new BlueprintEntityReferenceOverrideService(registry);
@@ -207,8 +210,7 @@ namespace city.game.tools {
         /// <param name="blueprintAsset">Blueprint asset to serialize.</param>
         static void SaveBlueprintAsset(string projectRootPath, string blueprintPath, BlueprintAsset blueprintAsset) {
             string blueprintFullPath = Path.Combine(projectRootPath, "assets", blueprintPath.Replace('/', Path.DirectorySeparatorChar));
-            using FileStream stream = File.Create(blueprintFullPath);
-            helengine.editor.AssetSerializer.Serialize(stream, blueprintAsset);
+            new helengine.editor.GeneratedAssetWriteService().WriteAsset(projectRootPath, blueprintPath, blueprintAsset);
         }
 
         /// <summary>
@@ -367,9 +369,9 @@ namespace city.game.tools {
         /// </summary>
         /// <param name="scenePath">Absolute authored scene path.</param>
         /// <param name="sceneAsset">Scene asset to write.</param>
-        static void SaveScene(string scenePath, SceneAsset sceneAsset) {
-            using FileStream stream = File.Create(scenePath);
-            helengine.editor.AssetSerializer.Serialize(stream, sceneAsset);
+        static void SaveScene(string projectRootPath, string scenePath, SceneAsset sceneAsset) {
+            string relativePath = Path.GetRelativePath(Path.Combine(projectRootPath, "assets"), scenePath).Replace('\\', '/');
+            new helengine.editor.GeneratedAssetWriteService().WriteAsset(projectRootPath, relativePath, sceneAsset);
         }
     }
 }

@@ -43,7 +43,7 @@ namespace city.rendering.tools {
             saveComponent.SetAssetReference(
                 labelComponent,
                 FontReferenceName,
-                global::helengine.SceneAssetReferenceFactory.CreateFileSystemFont(SceneLabelFontRelativePath));
+                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(SceneLabelFontRelativePath));
             sceneUiEntity.AddComponent(new city.rendering.DemoDiscDebugSceneLabelComponent());
             saveComponent.GetOrCreateExistencePlatformOverride(NintendoDsPlatformId).Exists = false;
             saveComponent.GetOrCreateExistencePlatformOverride(Nintendo3DsPlatformId).Exists = false;

@@ -1055,7 +1055,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
             }
 
-            return global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(relativePath.Replace('\\', '/'));
+            return global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(relativePath.Replace('\\', '/'));
         }
     }
 }

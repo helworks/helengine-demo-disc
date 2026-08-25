@@ -517,8 +517,9 @@ namespace city.game.tools {
             Entity detailsPanelEntity = CreateRoundedPanelEntity(entity, "TiltTrialLevelSelectDetailsPanel", new float3(6f, 8f, 0f), new int2(244, 176), 5f, 0f, new byte4(0, 0, 0, 0), new byte4(0, 0, 0, 0), 1);
             detailsPanelEntity.Enabled = false;
             CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectName", new float3(12f, 10f, 0.1f), "Level 1", new int2(220, 22), 0.85f, 3, new byte4(247, 248, 252, 255), TextAlignment.Left);
-            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTimer", new float3(12f, 40f, 0.1f), "Limit 99.00", new int2(220, 18), 0.65f, 3, new byte4(255, 214, 138, 255), TextAlignment.Left);
-            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTargetTimes", new float3(12f, 64f, 0.1f), "Targets G18.00 S28.00 B40.00", new int2(220, 18), 0.7f, 3, new byte4(223, 230, 239, 255), TextAlignment.Left);
+            CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTimer", new float3(12f, 40f, 0.1f), "MAX 99.00", new int2(220, 18), 0.65f, 3, new byte4(255, 214, 138, 255), TextAlignment.Left);
+            Entity targetTimesEntity = CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTargetTimes", new float3(12f, 64f, 0.1f), string.Empty, new int2(220, 18), 0.7f, 3, new byte4(223, 230, 239, 255), TextAlignment.Left);
+            targetTimesEntity.Enabled = false;
             IReadOnlyList<global::city.game.TiltTrialLevelCatalogEntry> levelEntries = global::city.game.TiltTrialLevelCatalog.CreateEntries();
             for (int index = 0; index < levelEntries.Count; index++) {
                 int oneBasedIndex = index + 1;
@@ -851,7 +852,7 @@ namespace city.game.tools {
                 overrideComponent.RenderOrder2D = NintendoDsStartPromptIconRenderOrder;
                 PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.RenderOrder2D));
             }
-            PlatformEditingServiceValue.StoreAssetReference(commonComponent, overrideComponent, saveComponent, platformId, TextureAssetScenePersistenceSupport.TextureReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(resolvedIcon.SourcePngRelativePath));
+            PlatformEditingServiceValue.StoreAssetReference(commonComponent, overrideComponent, saveComponent, platformId, TextureAssetScenePersistenceSupport.TextureReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(resolvedIcon.SourcePngRelativePath));
             PlatformEditingServiceValue.PersistPlatformOverride(commonComponent, overrideComponent, saveComponent, platformId);
         }
 
@@ -922,7 +923,7 @@ namespace city.game.tools {
         /// <param name="relativePath">Project-relative texture path.</param>
         void ApplyLevelSelectPromptTexture(Entity entity, SpriteComponent component, string relativePath) {
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(relativePath));
+            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(relativePath));
         }
 
         /// <summary>
@@ -942,7 +943,7 @@ namespace city.game.tools {
             overrideComponent.SourceRect = resolvedIcon.SourceRect;
             PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.Size));
             PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.SourceRect));
-            PlatformEditingServiceValue.StoreAssetReference(commonComponent, overrideComponent, saveComponent, platformId, TextureAssetScenePersistenceSupport.TextureReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(resolvedIcon.SourcePngRelativePath));
+            PlatformEditingServiceValue.StoreAssetReference(commonComponent, overrideComponent, saveComponent, platformId, TextureAssetScenePersistenceSupport.TextureReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(resolvedIcon.SourcePngRelativePath));
             PlatformEditingServiceValue.PersistPlatformOverride(commonComponent, overrideComponent, saveComponent, platformId);
         }
 
@@ -993,7 +994,7 @@ namespace city.game.tools {
                 Role = name
             });
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(spriteEntity);
-            saveComponent.SetAssetReference(spriteComponent, TextureAssetScenePersistenceSupport.TextureReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(textureRelativePath));
+            saveComponent.SetAssetReference(spriteComponent, TextureAssetScenePersistenceSupport.TextureReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(textureRelativePath));
             return spriteEntity;
         }
 
@@ -1755,8 +1756,8 @@ namespace city.game.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(meshComponent, "Model", global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(TiltTrialClippingProbeModelFactory.ModelRelativePath));
-            saveComponent.SetAssetReference(meshComponent, "Materials[0]", global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(TiltTrialClippingProbeMaterialFactory.MaterialRelativePath));
+            saveComponent.SetAssetReference(meshComponent, "Model", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(TiltTrialClippingProbeModelFactory.ModelRelativePath));
+            saveComponent.SetAssetReference(meshComponent, "Materials[0]", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(TiltTrialClippingProbeMaterialFactory.MaterialRelativePath));
         }
 
         /// <summary>
@@ -1838,8 +1839,8 @@ namespace city.game.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(meshComponent, "Model", global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(SplitPlayAssetCatalog.GoldenCoinCommonModelRelativePath));
-            saveComponent.SetAssetReference(meshComponent, "Materials[0]", global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath));
+            saveComponent.SetAssetReference(meshComponent, "Model", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(SplitPlayAssetCatalog.GoldenCoinCommonModelRelativePath));
+            saveComponent.SetAssetReference(meshComponent, "Materials[0]", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath));
         }
 
         /// <summary>
@@ -1855,9 +1856,9 @@ namespace city.game.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(meshComponent, "Model", global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(SplitPlayAssetCatalog.GoalFlagCommonModelRelativePath));
-            saveComponent.SetAssetReference(meshComponent, "Materials[0]", global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath));
-            saveComponent.SetAssetReference(meshComponent, "Materials[1]", global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath));
+            saveComponent.SetAssetReference(meshComponent, "Model", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(SplitPlayAssetCatalog.GoalFlagCommonModelRelativePath));
+            saveComponent.SetAssetReference(meshComponent, "Materials[0]", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath));
+            saveComponent.SetAssetReference(meshComponent, "Materials[1]", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath));
         }
 
         /// <summary>
@@ -2025,7 +2026,7 @@ namespace city.game.tools {
             saveComponent.SetAssetReference(
                 meshComponent,
                 PlayerSphereMaterialReferenceName,
-                global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(TiltTrialPlayerSphereMarbleMaterialRelativePath));
+                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(TiltTrialPlayerSphereMarbleMaterialRelativePath));
         }
 
         /// <summary>
@@ -2185,7 +2186,10 @@ namespace city.game.tools {
             entity.LocalScale = new float3(0.51f, 0.51f, 0.51f);
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new BlueprintInstanceComponent {
-                BlueprintAssetPath = SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath
+                BlueprintAssetReference = EditorAssetReferenceFactory.CreateFileReference(
+                    ProjectRootPath,
+                    SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath,
+                    AssetEntryKind.Blueprint)
             });
             return entity;
         }
@@ -2210,7 +2214,10 @@ namespace city.game.tools {
             entity.LocalScale = new float3(1.2f, 1.2f, 1.2f);
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new BlueprintInstanceComponent {
-                BlueprintAssetPath = SplitPlayAssetCatalog.GoalFlagBlueprintRelativePath
+                BlueprintAssetReference = EditorAssetReferenceFactory.CreateFileReference(
+                    ProjectRootPath,
+                    SplitPlayAssetCatalog.GoalFlagBlueprintRelativePath,
+                    AssetEntryKind.Blueprint)
             });
             return entity;
         }
@@ -2275,7 +2282,7 @@ namespace city.game.tools {
             saveComponent.SetAssetReference(
                 meshComponent,
                 CourseMaterialReferenceName,
-                global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(TiltTrialCourseMaterialRelativePath));
+                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(TiltTrialCourseMaterialRelativePath));
         }
 
         /// <summary>
@@ -2336,7 +2343,7 @@ namespace city.game.tools {
             for (int childIndex = 0; childIndex < stageRootEntity.Children.Count; childIndex++) {
                 Entity child = stageRootEntity.Children[childIndex];
                 if (!TryFindComponent<BlueprintInstanceComponent>(child, out BlueprintInstanceComponent blueprintInstance) ||
-                    !string.Equals(blueprintInstance.BlueprintAssetPath, SplitPlayAssetCatalog.GoalFlagBlueprintRelativePath, StringComparison.Ordinal)) {
+                    !string.Equals(blueprintInstance.BlueprintAssetReference?.RelativePath, SplitPlayAssetCatalog.GoalFlagBlueprintRelativePath, StringComparison.Ordinal)) {
                     continue;
                 }
 
@@ -2374,7 +2381,7 @@ namespace city.game.tools {
             for (int childIndex = 0; childIndex < stageRootEntity.Children.Count; childIndex++) {
                 Entity child = stageRootEntity.Children[childIndex];
                 if (!TryFindComponent<BlueprintInstanceComponent>(child, out BlueprintInstanceComponent blueprintInstance) ||
-                    !string.Equals(blueprintInstance.BlueprintAssetPath, SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath, StringComparison.Ordinal)) {
+                    !string.Equals(blueprintInstance.BlueprintAssetReference?.RelativePath, SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath, StringComparison.Ordinal)) {
                     continue;
                 }
 
@@ -2605,7 +2612,7 @@ namespace city.game.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, "Font", global::helengine.SceneAssetReferenceFactory.CreateFileSystemFont(fontPath));
+            saveComponent.SetAssetReference(component, "Font", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(fontPath));
         }
 
         /// <summary>

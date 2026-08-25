@@ -18,8 +18,10 @@ namespace city.game.tools {
                 relativePath.Replace('/', Path.DirectorySeparatorChar));
             Directory.CreateDirectory(Path.GetDirectoryName(fullPath) ?? throw new InvalidOperationException("Blueprint directory could not be resolved."));
 
-            using FileStream stream = File.Create(fullPath);
-            global::helengine.editor.AssetSerializer.Serialize(stream, blueprintAsset);
+            new global::helengine.editor.GeneratedAssetWriteService().WriteAsset(
+                projectRootPath,
+                relativePath,
+                blueprintAsset);
         }
     }
 }

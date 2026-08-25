@@ -28,7 +28,7 @@ namespace city.tests {
             Assert.Contains("SceneLabelCanvasWidth - SceneLabelRight - SceneLabelWidth", source, StringComparison.Ordinal);
             Assert.Contains("labelEntity.Static = false;", source, StringComparison.Ordinal);
             Assert.Contains("Alignment = TextAlignment.Right", source, StringComparison.Ordinal);
-            Assert.Contains("SceneAssetReferenceFactory.CreateFileSystemFont(SceneLabelFontRelativePath)", source, StringComparison.Ordinal);
+            Assert.Contains("DemoDiscEditorAssetReferenceFactory.CreateFont(SceneLabelFontRelativePath)", source, StringComparison.Ordinal);
             Assert.Contains("const int SceneLabelRenderOrder = 7;", source, StringComparison.Ordinal);
             Assert.Contains("RenderOrder2D = SceneLabelRenderOrder", source, StringComparison.Ordinal);
             Assert.Contains("sceneUiEntity.AddComponent(new city.rendering.DemoDiscDebugSceneLabelComponent())", source, StringComparison.Ordinal);

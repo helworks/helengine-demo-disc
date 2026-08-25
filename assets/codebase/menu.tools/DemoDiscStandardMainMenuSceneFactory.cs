@@ -662,7 +662,7 @@ namespace city.menu.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, FontReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemFont(fontPath));
+            saveComponent.SetAssetReference(component, FontReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(fontPath));
         }
 
         /// <summary>
@@ -681,7 +681,7 @@ namespace city.menu.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, global::helengine.SceneAssetReferenceFactory.CreateFileSystemTexture(texturePath));
+            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(texturePath));
         }
 
         /// <summary>
@@ -703,7 +703,7 @@ namespace city.menu.tools {
             saveComponent.SetAssetReference(
                 component,
                 AutomaticComponentAssetReferenceSupport.BuildReferenceName(nameof(AnimationPlayerComponent.Clip)),
-                global::helengine.SceneAssetReferenceFactory.CreateFileSystemAnimationClip(animationClipPath));
+                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFile(animationClipPath));
         }
 
         /// <summary>

@@ -79,14 +79,14 @@ namespace city.game.tools {
             BlueprintWriteService.WriteBlueprint(
                 projectRootPath,
                 SplitPlayAssetCatalog.GoalFlagBlueprintRelativePath,
-                CreateBlueprintAsset());
+                CreateBlueprintAsset(projectRootPath));
         }
 
-        BlueprintAsset CreateBlueprintAsset() {
-            SceneAssetReference commonModelReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(SplitPlayAssetCatalog.GoalFlagCommonModelRelativePath);
-            SceneAssetReference dsModelReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(SplitPlayAssetCatalog.GoalFlagDsModelRelativePath);
-            SceneAssetReference poleMaterialReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath);
-            SceneAssetReference bannerMaterialReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath);
+        BlueprintAsset CreateBlueprintAsset(string projectRootPath) {
+            SceneAssetReference commonModelReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, SplitPlayAssetCatalog.GoalFlagCommonModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference dsModelReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, SplitPlayAssetCatalog.GoalFlagDsModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference poleMaterialReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath, AssetEntryKind.Material);
+            SceneAssetReference bannerMaterialReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath, AssetEntryKind.Material);
 
             MeshComponent meshComponent = new MeshComponent();
             meshComponent.Materials = new RuntimeMaterial[] { null, null };

@@ -26,7 +26,7 @@ namespace city.tests {
             Assert.Contains("assets.TiltTrialCourseMaterial == null", gameSceneSource, StringComparison.Ordinal);
             Assert.Contains("TiltTrialCourseMaterial = assets.TiltTrialCourseMaterial;", gameSceneSource, StringComparison.Ordinal);
             Assert.Contains("Materials = new[] { TiltTrialCourseMaterial },", gameSceneSource, StringComparison.Ordinal);
-            Assert.Contains("global::helengine.SceneAssetReferenceFactory.CreateFileSystemMaterial(TiltTrialCourseMaterialRelativePath)", gameSceneSource, StringComparison.Ordinal);
+            Assert.Contains("global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(TiltTrialCourseMaterialRelativePath)", gameSceneSource, StringComparison.Ordinal);
             Assert.DoesNotContain("Materials = new[] { GeneratedStandardMaterial },", gameSceneSource, StringComparison.Ordinal);
         }
     }

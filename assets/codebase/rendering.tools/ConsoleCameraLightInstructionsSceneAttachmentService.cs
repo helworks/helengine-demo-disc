@@ -21,7 +21,10 @@ namespace city.rendering.tools {
             Entity root = Core.Instance.EntityFactory.Create("ConsoleCameraLightInstructions");
             root.LayerMask = EditorLayerMasks.SceneObjects;
             root.AddComponent(new BlueprintInstanceComponent {
-                BlueprintAssetPath = ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath
+                BlueprintAssetReference = EditorAssetReferenceFactory.CreateFileReference(
+                    projectRootPath,
+                    ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath,
+                    AssetEntryKind.Blueprint)
             });
 
             EntitySaveComponent saveComponent = EnsureEntitySaveComponent(root);

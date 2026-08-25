@@ -82,7 +82,7 @@ namespace city.game.tools {
         /// <param name="parent">Scene root that should own the environment entity.</param>
         /// <returns>Generated environment entity.</returns>
         Entity CreateEnvironmentEntity(Entity parent) {
-            SceneAssetReference environmentModelReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(ZombislayerAssetCatalog.EnvironmentModelRelativePath);
+            SceneAssetReference environmentModelReference = global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(ZombislayerAssetCatalog.EnvironmentModelRelativePath);
             return CreateImportedMeshEntity(
                 parent,
                 "ZombislayerEnvironment",
@@ -213,7 +213,7 @@ namespace city.game.tools {
         Entity CreateWeaponEntity(Entity parent) {
             float4 orientation;
             float4.CreateFromYawPitchRoll((float)(Math.PI * 0.5d), 0f, 0f, out orientation);
-            SceneAssetReference weaponModelReference = global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(ZombislayerAssetCatalog.WeaponModelRelativePath);
+            SceneAssetReference weaponModelReference = global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(ZombislayerAssetCatalog.WeaponModelRelativePath);
             return CreateImportedMeshEntity(
                 parent,
                 "ZombislayerWeapon",
@@ -432,7 +432,7 @@ namespace city.game.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, "Font", global::helengine.SceneAssetReferenceFactory.CreateFileSystemFont(fontPath));
+            saveComponent.SetAssetReference(component, "Font", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(fontPath));
         }
 
         /// <summary>
