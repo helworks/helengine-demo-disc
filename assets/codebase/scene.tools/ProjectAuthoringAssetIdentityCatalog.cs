@@ -119,8 +119,9 @@ namespace city.scene.tools {
                 return texturedIdentity;
             }
             if (normalizedPath.StartsWith("materials/rendering/pbr_gallery/M", StringComparison.OrdinalIgnoreCase)) {
-                int separator = normalizedPath.IndexOf("R", StringComparison.OrdinalIgnoreCase);
-                if (separator > 0 && int.TryParse(normalizedPath.Substring("materials/rendering/pbr_gallery/M".Length, separator - "materials/rendering/pbr_gallery/M".Length), out int metallic)
+                const string pbrGalleryPrefix = "materials/rendering/pbr_gallery/M";
+                int separator = normalizedPath.IndexOf("R", pbrGalleryPrefix.Length, StringComparison.OrdinalIgnoreCase);
+                if (separator > pbrGalleryPrefix.Length && int.TryParse(normalizedPath.Substring(pbrGalleryPrefix.Length, separator - pbrGalleryPrefix.Length), out int metallic)
                     && int.TryParse(normalizedPath.Substring(separator + 1).Replace(".hasset", string.Empty, StringComparison.OrdinalIgnoreCase), out int roughness)
                     && metallic >= 0 && metallic < 5 && roughness >= 0 && roughness < 5) {
                     return "220000000000000000000000000000" + metallic.ToString("X1") + roughness.ToString("X1");
