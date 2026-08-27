@@ -1,5 +1,4 @@
 using helengine.editor;
-using System.Reflection;
 using city.menu;
 
 namespace city.rendering.tools {
@@ -33,14 +32,23 @@ namespace city.rendering.tools {
         readonly IScriptTypeResolver ScriptTypeResolverValue;
 
         /// <summary>
+        /// Host-owned asset-authoring capability used to resolve file-backed scene references.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringServiceValue;
+
+        /// <summary>
         /// Initializes one generated authored-scene writer.
         /// </summary>
         /// <param name="scriptTypeResolver">Optional resolver used to restore project-authored components during temporary clone loads.</param>
-        public GeneratedAuthoringSceneWriteService(IScriptTypeResolver scriptTypeResolver = null) {
+        /// <param name="assetAuthoringService">Host-owned asset-authoring capability used to resolve source assets.</param>
+        public GeneratedAuthoringSceneWriteService(
+            IScriptTypeResolver scriptTypeResolver = null,
+            IEditorProjectAssetAuthoringService assetAuthoringService = null) {
             NintendoDsRenderingSceneScaffoldFactoryValue = new NintendoDsRenderingSceneScaffoldFactory();
             PlatformSceneAuthoringHelperServiceValue = new PlatformSceneAuthoringHelperService();
             GeneratedSceneEntityCloneServiceValue = new GeneratedSceneEntityCloneService();
             ScriptTypeResolverValue = scriptTypeResolver;
+            AssetAuthoringServiceValue = assetAuthoringService;
         }
 
         /// <summary>
@@ -138,7 +146,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="fullProjectRootPath">Absolute project root path that owns the authored body font source.</param>
         /// <returns>Imported project body font asset.</returns>
-        static FontAsset ResolveRequiredBottomOverlayFont(string fullProjectRootPath) {
+        FontAsset ResolveRequiredBottomOverlayFont(string fullProjectRootPath) {
             if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
             }
@@ -148,10 +156,12 @@ namespace city.rendering.tools {
                 throw new InvalidOperationException("The demo-disc body font reference must resolve to one file-backed source font path.");
             }
 
-            AssetImportManager assetImportManager = CreateGeneratedSceneAssetImportManager(fullProjectRootPath);
-            EditorFileSystemFontResolver fontResolver = new EditorFileSystemFontResolver(assetImportManager);
+            if (AssetAuthoringServiceValue == null) {
+                throw new InvalidOperationException("Generated scene font resolution requires the editor asset-authoring capability.");
+            }
+
             string fullSourcePath = Path.Combine(fullProjectRootPath, "assets", fontReference.RelativePath.Replace('/', Path.DirectorySeparatorChar));
-            return fontResolver.ResolveFontAsset(fullSourcePath);
+            return AssetAuthoringServiceValue.ResolveFontAsset(fullSourcePath);
         }
 
         /// <summary>
@@ -255,64 +265,12 @@ namespace city.rendering.tools {
             }
 
             ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create(ScriptTypeResolverValue);
-            AssetImportManager assetImportManager = CreateGeneratedSceneAssetImportManager(fullProjectRootPath);
-            EditorFileSystemModelResolver fileSystemModelResolver = new EditorFileSystemModelResolver(assetImportManager);
-            EditorFileSystemFontResolver fileSystemFontResolver = new EditorFileSystemFontResolver(assetImportManager);
-            EditorFileSystemTextureResolver fileSystemTextureResolver = new EditorFileSystemTextureResolver(assetImportManager);
-            EditorSceneAssetReferenceResolver referenceResolver = new EditorSceneAssetReferenceResolver(
-                assetImportManager.ContentManager,
-                fullProjectRootPath,
-                fileSystemModelResolver,
-                fileSystemFontResolver,
-                fileSystemTextureResolver);
+            if (AssetAuthoringServiceValue == null) {
+                throw new InvalidOperationException("Generated scene loading requires the editor asset-authoring capability.");
+            }
+
+            EditorSceneAssetReferenceResolver referenceResolver = AssetAuthoringServiceValue.CreateSceneAssetReferenceResolver();
             return new SceneFileLoadService(fullProjectRootPath, persistenceRegistry, referenceResolver);
-        }
-
-        /// <summary>
-        /// Creates the asset import manager used by generated-scene rewrite flows so temporary scene loads can resolve file-backed model, font, and texture references.
-        /// </summary>
-        /// <param name="fullProjectRootPath">Absolute city project root path.</param>
-        /// <returns>Configured asset import manager with the editor host's default importer registrations.</returns>
-        public static AssetImportManager CreateGeneratedSceneAssetImportManager(string fullProjectRootPath) {
-            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
-            }
-
-            string fullAssetsRootPath = Path.Combine(Path.GetFullPath(fullProjectRootPath), "assets");
-            ContentManager assetContentManager = new ContentManager(new HostFileSystemContentStreamSource(fullAssetsRootPath));
-            EditorContentManagerConfiguration.ConfigureEditorContentManager(assetContentManager);
-            AssetImportManager assetImportManager = new AssetImportManager(fullProjectRootPath, assetContentManager);
-            IReadOnlyList<IAssetImporterRegistration> importerRegistrations = ResolveDefaultEditorImporterRegistrations();
-            for (int index = 0; index < importerRegistrations.Count; index++) {
-                IAssetImporterRegistration importerRegistration = importerRegistrations[index];
-                if (importerRegistration == null) {
-                    throw new InvalidOperationException("Default editor importer registrations must not contain null entries.");
-                }
-
-                importerRegistration.Register(assetImportManager);
-            }
-
-            return assetImportManager;
-        }
-
-        /// <summary>
-        /// Resolves the editor host's default importer registration set through reflection so generated scene tooling can share the same importer coverage in headless command mode.
-        /// </summary>
-        /// <returns>Default importer registrations exposed by the editor host.</returns>
-        static IReadOnlyList<IAssetImporterRegistration> ResolveDefaultEditorImporterRegistrations() {
-            Assembly appAssembly = Assembly.Load("helengine.editor.app");
-            Type importerFactoryType = appAssembly.GetType("helengine.editor.app.EditorHostImporterFactory", throwOnError: true);
-            MethodInfo createDefaultMethod = importerFactoryType.GetMethod("CreateDefault", BindingFlags.Public | BindingFlags.Static);
-            if (createDefaultMethod == null) {
-                throw new InvalidOperationException("EditorHostImporterFactory.CreateDefault was not found.");
-            }
-
-            object result = createDefaultMethod.Invoke(null, Array.Empty<object>());
-            if (result is IReadOnlyList<IAssetImporterRegistration> importerRegistrations) {
-                return importerRegistrations;
-            }
-
-            throw new InvalidOperationException("EditorHostImporterFactory.CreateDefault did not return importer registrations.");
         }
 
         /// <summary>

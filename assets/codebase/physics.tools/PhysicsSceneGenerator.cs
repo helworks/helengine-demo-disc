@@ -1,10 +1,21 @@
 using city.rendering.tools;
+using helengine.editor;
 
 namespace city.physics.tools {
-    /// <summary>
-    /// Generates the complete authored physics showcase scene set inside the active city project.
-    /// </summary>
     public sealed class PhysicsSceneGenerator {
+        /// <summary>
+        /// Host-owned capability used by the generated physics scenes to resolve fonts and author import settings.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
+        /// Initializes one authored physics showcase generator.
+        /// </summary>
+        /// <param name="assetAuthoringService">Host-owned capability used by project scene factories.</param>
+        public PhysicsSceneGenerator(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
+
         /// <summary>
         /// Writes the current authored physics showcase scenes into the supplied city project.
         /// </summary>
@@ -23,10 +34,10 @@ namespace city.physics.tools {
             ConsoleCameraLightInstructionsBlueprintGenerator consoleInstructionBlueprintGenerator = new ConsoleCameraLightInstructionsBlueprintGenerator();
             consoleInstructionBlueprintGenerator.Generate(
                 projectRootPath,
-                new DemoSceneInstructionOverlayFactory(),
+                new DemoSceneInstructionOverlayFactory(AssetAuthoringService),
                 editorCore.DefaultFontAssetForEditor);
 
-            PhysicsSceneFactory factory = new PhysicsSceneFactory();
+            PhysicsSceneFactory factory = new PhysicsSceneFactory(AssetAuthoringService);
             factory.WriteScenes(projectRootPath);
         }
     }

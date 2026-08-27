@@ -24,9 +24,9 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService();
+            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.AssetAuthoring);
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(context.ProjectRootPath);
-            CubeTestSceneFactory factory = new CubeTestSceneFactory();
+            CubeTestSceneFactory factory = new CubeTestSceneFactory(context.AssetAuthoring);
             GeneratedAuthoringSceneDefinition sceneDefinition = factory.CreateSceneDefinition(
                 context.ProjectRootPath,
                 assets.GeneratedCubeModel,

@@ -1,12 +1,23 @@
 using helengine;
 using helengine.editor;
-using System.Reflection;
 
 namespace city.rendering.tools {
     /// <summary>
     /// Prepares the runtime assets required by the city rendering showcase generators.
     /// </summary>
     public sealed class RenderingSceneAssetPreparationService {
+        /// <summary>
+        /// Host-owned asset-authoring capability used to resolve imported source assets.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
+        /// Initializes one rendering asset preparation service.
+        /// </summary>
+        /// <param name="assetAuthoringService">Host-owned capability used for settings and source imports.</param>
+        public RenderingSceneAssetPreparationService(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
         /// <summary>
         /// Preferred editor preview platform used when authored material settings need one shader-backed runtime preview path.
         /// </summary>
@@ -56,6 +67,7 @@ namespace city.rendering.tools {
             EditorProjectBootstrapContext bootstrap = EditorProjectBootstrapper.Create(fullProjectRootPath);
             ForwardSolidColorMaterialFactory forwardSolidColorMaterialFactory = new ForwardSolidColorMaterialFactory();
             TiltTrialCourseMaterialFactory tiltTrialCourseMaterialFactory = new TiltTrialCourseMaterialFactory();
+            TiltTrialPlayerSphereWalnutMaterialFactory tiltTrialPlayerSphereWalnutMaterialFactory = new TiltTrialPlayerSphereWalnutMaterialFactory();
             TiltTrialClippingProbeModelFactory tiltTrialClippingProbeModelFactory = new TiltTrialClippingProbeModelFactory();
             TiltTrialClippingProbeMaterialFactory tiltTrialClippingProbeMaterialFactory = new TiltTrialClippingProbeMaterialFactory();
             DepthClipProbeMaterialFactory depthClipProbeMaterialFactory = new DepthClipProbeMaterialFactory();
@@ -63,12 +75,13 @@ namespace city.rendering.tools {
             PbrTexturedShowcaseMaterialFactory pbrTexturedShowcaseMaterialFactory = new PbrTexturedShowcaseMaterialFactory();
             AxisTestMaterialFactory axisTestMaterialFactory = new AxisTestMaterialFactory();
             forwardSolidColorMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
-            tiltTrialCourseMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
+            tiltTrialCourseMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AssetAuthoringService);
+            tiltTrialPlayerSphereWalnutMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AssetAuthoringService);
             tiltTrialClippingProbeModelFactory.WriteModelAsset(fullProjectRootPath);
-            tiltTrialClippingProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
+            tiltTrialClippingProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AssetAuthoringService);
             depthClipProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             depthClipProbeCenterMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
-            pbrTexturedShowcaseMaterialFactory.WriteMaterialAssets(fullProjectRootPath);
+            pbrTexturedShowcaseMaterialFactory.WriteMaterialAssets(fullProjectRootPath, AssetAuthoringService);
             axisTestMaterialFactory.WriteMaterialAssets(fullProjectRootPath);
             RuntimeModel generatedCubeModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.CubeAssetId);
             RuntimeModel generatedPlaneModel = EngineGeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.PlaneAssetId);
@@ -147,10 +160,8 @@ namespace city.rendering.tools {
 
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             string assetsRootPath = Path.Combine(fullProjectRootPath, "assets");
-            AssetImportManager importManager = CreateAssetImportManager(fullProjectRootPath, assetsRootPath);
-            EditorFileSystemModelResolver modelResolver = new EditorFileSystemModelResolver(importManager);
             string fullSourcePath = Path.GetFullPath(Path.Combine(assetsRootPath, relativeSourcePath.Replace('/', Path.DirectorySeparatorChar)));
-            return modelResolver.ResolveRuntimeModel(fullSourcePath);
+            return AssetAuthoringService.ResolveRuntimeModel(fullSourcePath);
         }
 
         /// <summary>
@@ -265,55 +276,6 @@ namespace city.rendering.tools {
             } catch (OverflowException) {
                 return new float4(1f, 1f, 1f, 1f);
             }
-        }
-
-        /// <summary>
-        /// Builds one asset import manager initialized with the editor host's default importer registrations.
-        /// </summary>
-        /// <param name="projectRootPath">Absolute project root path.</param>
-        /// <param name="assetsRootPath">Absolute project assets root path.</param>
-        /// <returns>Configured asset import manager.</returns>
-        AssetImportManager CreateAssetImportManager(string projectRootPath, string assetsRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            } else if (string.IsNullOrWhiteSpace(assetsRootPath)) {
-                throw new ArgumentException("Assets root path must be provided.", nameof(assetsRootPath));
-            }
-
-            ContentManager contentManager = new ContentManager(new HostFileSystemContentStreamSource(assetsRootPath));
-            AssetImportManager importManager = new AssetImportManager(projectRootPath, contentManager);
-            IReadOnlyList<IAssetImporterRegistration> importers = CreateDefaultImporters();
-            for (int index = 0; index < importers.Count; index++) {
-                IAssetImporterRegistration importer = importers[index];
-                if (importer == null) {
-                    throw new InvalidOperationException("Importer registrations must not contain null entries.");
-                }
-
-                importer.Register(importManager);
-            }
-
-            importManager.GenerateMissingImportSettings();
-            return importManager;
-        }
-
-        /// <summary>
-        /// Creates the default importer registrations used by the editor host.
-        /// </summary>
-        /// <returns>Default importer registrations resolved from the editor app assembly.</returns>
-        IReadOnlyList<IAssetImporterRegistration> CreateDefaultImporters() {
-            Assembly appAssembly = Assembly.Load("helengine.editor.app");
-            Type importerFactoryType = appAssembly.GetType("helengine.editor.app.EditorHostImporterFactory", throwOnError: true);
-            MethodInfo createDefaultMethod = importerFactoryType.GetMethod("CreateDefault", BindingFlags.Public | BindingFlags.Static);
-            if (createDefaultMethod == null) {
-                throw new InvalidOperationException("EditorHostImporterFactory.CreateDefault was not found.");
-            }
-
-            object result = createDefaultMethod.Invoke(null, Array.Empty<object>());
-            if (result is not IReadOnlyList<IAssetImporterRegistration> importers) {
-                throw new InvalidOperationException("Editor host importer factory did not return importer registrations.");
-            }
-
-            return importers;
         }
 
         /// <summary>

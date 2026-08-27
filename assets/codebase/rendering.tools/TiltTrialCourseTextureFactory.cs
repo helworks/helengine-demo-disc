@@ -1,6 +1,5 @@
 using helengine;
 using helengine.editor;
-using System.Reflection;
 
 namespace city.rendering.tools {
     /// <summary>
@@ -37,7 +36,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <returns>Imported texture asset id backing the generated source bitmap.</returns>
-        public string WriteTextureAsset(string projectRootPath) {
+        public string WriteTextureAsset(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
@@ -57,11 +56,14 @@ namespace city.rendering.tools {
                 File.WriteAllBytes(fullTexturePath, textureBytes);
             }
 
-            AssetImportManager importManager = CreateAssetImportManager(fullProjectRootPath, assetsRootPath);
+            if (assetAuthoringService == null) {
+                throw new ArgumentNullException(nameof(assetAuthoringService));
+            }
+
             bool settingsFileExists = File.Exists(fullTexturePath + ".hasset");
-            TextureAssetImportSettings settings = importManager.LoadOrCreateTextureImportSettings(fullTexturePath);
+            TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(fullTexturePath);
             if (!settingsFileExists) {
-                importManager.SaveTextureImportSettings(fullTexturePath, settings);
+                assetAuthoringService.SaveTextureImportSettings(fullTexturePath, settings);
             }
             string assetId = settings.Importer.AssetId;
             if (string.IsNullOrWhiteSpace(assetId)) {
@@ -143,55 +145,6 @@ namespace city.rendering.tools {
             red = ClampToByte(backgroundRed + checkerOffset + centerLift);
             green = ClampToByte(backgroundGreen + checkerOffset + centerLift);
             blue = ClampToByte(backgroundBlue + checkerOffset + (centerLift * 2));
-        }
-
-        /// <summary>
-        /// Creates one asset import manager initialized with the editor host's default importer registrations.
-        /// </summary>
-        /// <param name="projectRootPath">Absolute project root path.</param>
-        /// <param name="assetsRootPath">Absolute assets root path.</param>
-        /// <returns>Configured asset import manager.</returns>
-        AssetImportManager CreateAssetImportManager(string projectRootPath, string assetsRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            } else if (string.IsNullOrWhiteSpace(assetsRootPath)) {
-                throw new ArgumentException("Assets root path must be provided.", nameof(assetsRootPath));
-            }
-
-            ContentManager contentManager = new ContentManager(new HostFileSystemContentStreamSource(assetsRootPath));
-            AssetImportManager importManager = new AssetImportManager(projectRootPath, contentManager);
-            IReadOnlyList<IAssetImporterRegistration> importers = CreateDefaultImporters();
-            for (int index = 0; index < importers.Count; index++) {
-                IAssetImporterRegistration importer = importers[index];
-                if (importer == null) {
-                    throw new InvalidOperationException("Importer registrations must not contain null entries.");
-                }
-
-                importer.Register(importManager);
-            }
-
-            importManager.GenerateMissingImportSettings();
-            return importManager;
-        }
-
-        /// <summary>
-        /// Creates the default importer registrations exposed by the editor host assembly.
-        /// </summary>
-        /// <returns>Importer registrations that match the editor host defaults.</returns>
-        IReadOnlyList<IAssetImporterRegistration> CreateDefaultImporters() {
-            Assembly appAssembly = Assembly.Load("helengine.editor.app");
-            Type importerFactoryType = appAssembly.GetType("helengine.editor.app.EditorHostImporterFactory", throwOnError: true);
-            MethodInfo? createDefaultMethod = importerFactoryType.GetMethod("CreateDefault", BindingFlags.Public | BindingFlags.Static);
-            if (createDefaultMethod == null) {
-                throw new InvalidOperationException("EditorHostImporterFactory.CreateDefault was not found.");
-            }
-
-            object? result = createDefaultMethod.Invoke(null, Array.Empty<object>());
-            if (result is not IReadOnlyList<IAssetImporterRegistration> importers) {
-                throw new InvalidOperationException("Editor host importer factory did not return importer registrations.");
-            }
-
-            return importers;
         }
 
         /// <summary>

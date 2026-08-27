@@ -6,6 +6,11 @@ namespace city.physics.tools {
     /// </summary>
     public sealed class PhysicsSceneFactory {
         /// <summary>
+        /// Host-owned capability used to author imported texture settings without exposing editor import internals to the project.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
         /// Active project root used while authoring playable showcase overlays.
         /// </summary>
         string CurrentProjectRootPath = string.Empty;
@@ -373,11 +378,13 @@ namespace city.physics.tools {
         /// <summary>
         /// Initializes the validation-scene factory with a fresh scene-local entity id allocator.
         /// </summary>
-        public PhysicsSceneFactory() {
+        /// <param name="assetAuthoringService">Host-owned capability used to persist generated texture import settings.</param>
+        public PhysicsSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             SceneEntityIdAllocator = new SceneEntityAssetIdAllocator();
             PersistenceRegistry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
             OverridePayloadService = new ComponentPlatformOverridePayloadService();
-            AuthoringSceneWriteService = new city.rendering.tools.GeneratedAuthoringSceneWriteService();
+            AuthoringSceneWriteService = new city.rendering.tools.GeneratedAuthoringSceneWriteService(null, AssetAuthoringService);
         }
 
         /// <summary>
@@ -1120,7 +1127,7 @@ namespace city.physics.tools {
                 throw new InvalidOperationException("Creating the physics showcase instruction overlay requires an active project root path.");
             }
 
-            city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory();
+            city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory(AssetAuthoringService);
             Entity overlayRootEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(CurrentProjectRootPath, ResolveRequiredEditorFont());
             if (overlayRootEntity is not EditorEntity editorOverlayRootEntity) {
                 throw new InvalidOperationException("The physics showcase instruction overlay must be authored through editor entities.");
@@ -1565,7 +1572,7 @@ namespace city.physics.tools {
         /// Writes the shared texture and material assets consumed by the exported physics validation scenes.
         /// </summary>
         /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
-        static void WriteSupportAssets(string projectRootPath) {
+        void WriteSupportAssets(string projectRootPath) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
@@ -1714,7 +1721,7 @@ namespace city.physics.tools {
                 CreateLivePhysicsShowcaseUiEntity(ResolveDemoDiscSceneLabel(normalizedSceneId))
             };
             if (includeDesktopInstructionOverlay) {
-                city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory();
+                city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory(AssetAuthoringService);
                 FontAsset instructionFont = ResolveRequiredEditorFont();
                 Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
                 city.rendering.tools.ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new city.rendering.tools.ConsoleCameraLightInstructionsSceneAttachmentService();
@@ -2033,7 +2040,7 @@ namespace city.physics.tools {
         /// Writes the generated authored source texture, import sidecar, and cached texture asset used by the sphere-stack materials.
         /// </summary>
         /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
-        static void WriteSphereTileTextureAssets(string projectRootPath) {
+        void WriteSphereTileTextureAssets(string projectRootPath) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
@@ -2046,7 +2053,7 @@ namespace city.physics.tools {
         /// Writes the generated sphere-stack tile texture source bitmap and its import-settings sidecar.
         /// </summary>
         /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
-        static void WriteSphereTileTextureSource(string projectRootPath) {
+        void WriteSphereTileTextureSource(string projectRootPath) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
@@ -2060,8 +2067,7 @@ namespace city.physics.tools {
             Directory.CreateDirectory(directoryPath);
             File.WriteAllBytes(fullPath, PhysicsDemoSphereTileTextureBytes);
 
-            AssetImportManager importManager = global::city.rendering.tools.GeneratedAuthoringSceneWriteService.CreateGeneratedSceneAssetImportManager(projectRootPath);
-            importManager.SaveTextureImportSettings(fullPath, CreateSphereTileTextureImportSettings(PhysicsDemoSphereTileTextureBytes));
+            AssetAuthoringService.SaveTextureImportSettings(fullPath, CreateSphereTileTextureImportSettings(PhysicsDemoSphereTileTextureBytes));
         }
 
         /// <summary>

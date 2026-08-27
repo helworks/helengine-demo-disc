@@ -8,6 +8,10 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class CubeTestSceneFactory {
         /// <summary>
+        /// Host-owned capability used to resolve generated control icons and fonts.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        /// <summary>
         /// Stable angular speed used by the rotating cube in radians per second.
         /// </summary>
         const float CubeAngularSpeedRadians = (float)(Math.PI / 2.0);
@@ -20,7 +24,10 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one cube-test scene factory.
         /// </summary>
-        public CubeTestSceneFactory() { }
+        /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
+        public CubeTestSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
 
         /// <summary>
         /// Creates the canonical cube-test live scene definition.
@@ -39,7 +46,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
             Entity cameraEntity = CreateCameraEntity();
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();

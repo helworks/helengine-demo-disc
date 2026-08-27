@@ -1,11 +1,16 @@
 using city.menu;
 using helengine;
+using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
     /// Builds the authored colored cube-grid scene and its generated material assets.
     /// </summary>
     public sealed class ColoredCubeGridSceneFactory {
+        /// <summary>
+        /// Host-owned capability used to resolve generated control icons and fonts.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
         /// <summary>
         /// Stable scene id used by the generated colored cube-grid asset.
         /// </summary>
@@ -141,7 +146,9 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes the colored cube-grid scene factory with the services required for authored output.
         /// </summary>
-        public ColoredCubeGridSceneFactory() {
+        /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
+        public ColoredCubeGridSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             MaterialWriteService = new GeneratedMaterialAssetWriteService();
         }
 
@@ -164,7 +171,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);

@@ -7,6 +7,10 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class DirectionalShadowPlazaSceneFactory {
         /// <summary>
+        /// Host-owned capability used to resolve generated control icons and fonts.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        /// <summary>
         /// Stable scene id used by the generated directional-shadow plaza asset.
         /// </summary>
         public const string SceneId = "scenes/rendering/directional_shadow_plaza.helen";
@@ -39,7 +43,9 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one directional-shadow plaza scene factory.
         /// </summary>
-        public DirectionalShadowPlazaSceneFactory() {
+        /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
+        public DirectionalShadowPlazaSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             PlaceholderFont = new FontAsset(
                 new FontInfo("DirectionalShadowPlazaPlaceholder", 16, 4f),
                 new ManagedRuntimeTexture {
@@ -80,7 +86,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
             Entity cameraEntity = CreateCameraEntity();
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();

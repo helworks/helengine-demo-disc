@@ -6,6 +6,10 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class GroundCubeProbeSceneFactory {
         /// <summary>
+        /// Host-owned capability used to resolve generated control icons and fonts.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        /// <summary>
         /// Stable scene id used by the generated ground-cube probe asset.
         /// </summary>
         public const string SceneId = RenderingSceneGenerator.GroundCubeProbeSceneId;
@@ -13,7 +17,10 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one ground-cube probe scene factory.
         /// </summary>
-        public GroundCubeProbeSceneFactory() { }
+        /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
+        public GroundCubeProbeSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
 
         /// <summary>
         /// Creates the canonical ground-cube probe live scene definition.
@@ -32,7 +39,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);

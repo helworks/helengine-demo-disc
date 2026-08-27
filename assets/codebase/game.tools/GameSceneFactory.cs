@@ -8,6 +8,10 @@ namespace city.game.tools {
     /// </summary>
     public sealed class GameSceneFactory {
         /// <summary>
+        /// Host-owned capability used to resolve generated control icons and fonts.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        /// <summary>
         /// Stable authored material asset id required by the Tilt Trial player sphere.
         /// </summary>
         const string TiltTrialPlayerSphereMarbleMaterialAssetId = "Materials.rendering.tilt_trial.PlayerSphereMarble";
@@ -221,7 +225,8 @@ namespace city.game.tools {
         /// Initializes one game-scene factory backed by the prepared generated runtime assets required by the authored gameplay scenes.
         /// </summary>
         /// <param name="assets">Prepared runtime assets consumed by the generated game scenes.</param>
-        public GameSceneFactory(RenderingSceneGenerationAssets assets, string projectRootPath) {
+        /// <param name="assetAuthoringService">Host-owned capability used by generated control-icon references.</param>
+        public GameSceneFactory(RenderingSceneGenerationAssets assets, string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
             if (assets == null) {
                 throw new ArgumentNullException(nameof(assets));
             } else if (string.IsNullOrWhiteSpace(projectRootPath)) {
@@ -241,6 +246,7 @@ namespace city.game.tools {
             } else if (assets.GoalFlagModel == null || assets.GoalFlagPoleMaterial == null || assets.GoalFlagBannerMaterial == null) {
                 throw new ArgumentException("Game scene generation requires the authored goal-flag model and materials.", nameof(assets));
             }
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
 
             GeneratedCubeModel = assets.GeneratedCubeModel;
             GeneratedSphereModel = assets.GeneratedSphereModel;
@@ -799,7 +805,7 @@ namespace city.game.tools {
                 promptPosition.Y + Math.Max(0, (promptSize.Y - iconBounds.Y) / 2),
                 promptPosition.Z);
             iconEntity.Static = false;
-            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(ProjectRootPath, "windows", "enter");
+            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(ProjectRootPath, "windows", "enter", AssetAuthoringService);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = commonIcon.FitDisplaySizeWithin(iconBounds),
                 SourceRect = commonIcon.SourceRect,
@@ -841,7 +847,7 @@ namespace city.game.tools {
         void CreateTiltTrialStartPromptPlatformOverride(Entity entity, SpriteComponent commonComponent, string platformId, string sourcePlatformId, string controlId, int2 iconBounds) {
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             SpriteComponent overrideComponent = (SpriteComponent)PlatformEditingServiceValue.EnsurePlatformOverrideComponent(commonComponent, saveComponent, platformId);
-            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(ProjectRootPath, sourcePlatformId, controlId);
+            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(ProjectRootPath, sourcePlatformId, controlId, AssetAuthoringService);
             overrideComponent.Size = resolvedIcon.FitDisplaySizeWithin(iconBounds);
             overrideComponent.SourceRect = string.Equals(platformId, NintendoDsPlatformId, StringComparison.Ordinal)
                 ? new float4(0f, 0f, 1f, 1f)
@@ -896,7 +902,7 @@ namespace city.game.tools {
             Entity iconEntity = Core.Instance.EntityFactory.CreateChild(promptEntity, name + "Icon");
             iconEntity.LocalPosition = new float3(10f, 7f, 0.1f);
             iconEntity.LayerMask = EditorLayerMasks.SceneObjects;
-            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(ProjectRootPath, "windows", controlId);
+            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(ProjectRootPath, "windows", controlId, AssetAuthoringService);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = commonIcon.FitDisplaySizeWithin(iconBounds),
                 SourceRect = commonIcon.SourceRect,
@@ -938,7 +944,7 @@ namespace city.game.tools {
         void CreateLevelSelectPromptPlatformOverride(Entity entity, SpriteComponent commonComponent, string platformId, string sourcePlatformId, string controlId, int2 iconBounds) {
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             SpriteComponent overrideComponent = (SpriteComponent)PlatformEditingServiceValue.EnsurePlatformOverrideComponent(commonComponent, saveComponent, platformId);
-            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(ProjectRootPath, sourcePlatformId, controlId);
+            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(ProjectRootPath, sourcePlatformId, controlId, AssetAuthoringService);
             overrideComponent.Size = resolvedIcon.FitDisplaySizeWithin(iconBounds);
             overrideComponent.SourceRect = resolvedIcon.SourceRect;
             PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.Size));

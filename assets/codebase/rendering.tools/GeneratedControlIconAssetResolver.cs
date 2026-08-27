@@ -7,7 +7,11 @@ namespace city.rendering.tools {
     /// Resolves generated control icons into both source paths and imported texture asset ids.
     /// </summary>
     public sealed class GeneratedControlIconAssetResolver {
-        public ResolvedControlIcon RequireIcon(string projectRootPath, string platformId, string controlId) {
+        public ResolvedControlIcon RequireIcon(
+            string projectRootPath,
+            string platformId,
+            string controlId,
+            IEditorProjectAssetAuthoringService assetAuthoringService) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
@@ -23,11 +27,14 @@ namespace city.rendering.tools {
                 throw new InvalidOperationException($"Generated control icon source '{relativePath}' was not found for platform '{platformId}' and control '{controlId}'.");
             }
 
-            AssetImportManager importManager = CreateImportManager(fullProjectRootPath);
+            if (assetAuthoringService == null) {
+                throw new ArgumentNullException(nameof(assetAuthoringService));
+            }
+
             bool settingsFileExists = File.Exists(fullSourcePath + ".hasset");
-            TextureAssetImportSettings settings = importManager.LoadOrCreateTextureImportSettings(fullSourcePath);
+            TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(fullSourcePath);
             if (!settingsFileExists) {
-                importManager.SaveTextureImportSettings(fullSourcePath, settings);
+                assetAuthoringService.SaveTextureImportSettings(fullSourcePath, settings);
             }
             if (settings == null || settings.Importer == null || string.IsNullOrWhiteSpace(settings.Importer.AssetId)) {
                 throw new InvalidOperationException($"Generated control icon '{relativePath}' did not produce a persisted imported texture asset id.");
@@ -292,17 +299,5 @@ namespace city.rendering.tools {
 
         readonly record struct PngAlphaBounds(int Width, int Height, int MinX, int MinY, int MaxX, int MaxY);
 
-        static AssetImportManager CreateImportManager(string fullProjectRootPath) {
-            try {
-                return GeneratedAuthoringSceneWriteService.CreateGeneratedSceneAssetImportManager(fullProjectRootPath);
-            } catch (FileNotFoundException) {
-                // Tests do not load the editor app assembly, but committed texture sidecars are enough
-                // to recover the imported asset ids that scene authoring persists.
-                string fullAssetsRootPath = Path.Combine(fullProjectRootPath, "assets");
-                ContentManager assetContentManager = new ContentManager(new HostFileSystemContentStreamSource(fullAssetsRootPath));
-                EditorContentManagerConfiguration.ConfigureEditorContentManager(assetContentManager);
-                return new AssetImportManager(fullProjectRootPath, assetContentManager);
-            }
-        }
     }
 }

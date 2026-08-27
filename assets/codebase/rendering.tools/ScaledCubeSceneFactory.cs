@@ -8,6 +8,10 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class ScaledCubeSceneFactory {
         /// <summary>
+        /// Host-owned capability used to resolve generated control icons and fonts.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        /// <summary>
         /// Stable scene id used by the generated scaled-cube asset.
         /// </summary>
         public const string SceneId = RenderingSceneGenerator.ScaledCubeSceneId;
@@ -15,7 +19,10 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one scaled-cube scene factory.
         /// </summary>
-        public ScaledCubeSceneFactory() { }
+        /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
+        public ScaledCubeSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
 
         /// <summary>
         /// Creates the canonical scaled-cube live scene definition.
@@ -34,7 +41,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
             Entity cameraEntity = CreateCameraEntity();
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();

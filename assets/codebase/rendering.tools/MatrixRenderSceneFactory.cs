@@ -4,6 +4,10 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class MatrixRenderSceneFactory {
         /// <summary>
+        /// Host-owned capability used to resolve generated control icons and fonts.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        /// <summary>
         /// Stable scene id used by the generated Matrix Render asset.
         /// </summary>
         public const string SceneId = RenderingSceneGenerator.MatrixRenderSceneId;
@@ -71,7 +75,9 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes the Matrix Render scene factory with the services required for authored output.
         /// </summary>
-        public MatrixRenderSceneFactory() {
+        /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
+        public MatrixRenderSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             MaterialWriteService = new GeneratedMaterialAssetWriteService();
         }
 
@@ -89,7 +95,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);

@@ -20,5 +20,13 @@ namespace city.tests {
             Assert.Contains("PbrTexturedShowcaseMetalMaterial = ", source, StringComparison.Ordinal);
             Assert.Contains("PbrTexturedShowcaseWoodMaterial = ", source, StringComparison.Ordinal);
         }
+
+        [Fact]
+        public void Preparation_service_writes_the_authored_walnut_material_through_the_editor_capability() {
+            string sourcePath = Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "RenderingSceneAssetPreparationService.cs");
+            string source = File.ReadAllText(sourcePath);
+            Assert.Contains("TiltTrialPlayerSphereWalnutMaterialFactory", source, StringComparison.Ordinal);
+            Assert.Contains("WriteMaterialAsset(fullProjectRootPath, AssetAuthoringService)", source, StringComparison.Ordinal);
+        }
     }
 }

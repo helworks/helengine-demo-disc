@@ -10,6 +10,10 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class AxisTestSceneFactory {
         /// <summary>
+        /// Host-owned capability used to resolve generated control icons and fonts.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        /// <summary>
         /// Stable scene id used by the generated axis-test showcase.
         /// </summary>
         public const string SceneId = RenderingSceneGenerator.AxisTestSceneId;
@@ -93,7 +97,10 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one axis-test scene factory.
         /// </summary>
-        public AxisTestSceneFactory() { }
+        /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
+        public AxisTestSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
 
         /// <summary>
         /// Creates the live-authored axis-test scene definition.
@@ -117,7 +124,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
             Entity cameraEntity = CreateCameraEntity();
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();

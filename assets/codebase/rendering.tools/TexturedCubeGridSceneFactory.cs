@@ -304,10 +304,16 @@ namespace city.rendering.tools {
         readonly GeneratedMaterialAssetWriteService MaterialWriteService;
 
         /// <summary>
+        /// Host-owned asset-authoring capability used to write generated texture settings and resolve prompt icons.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
         /// Initializes the textured cube-grid scene factory with the descriptors and services required for authored output.
         /// </summary>
-        public TexturedCubeGridSceneFactory() {
+        public TexturedCubeGridSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
             MaterialWriteService = new GeneratedMaterialAssetWriteService();
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
 
         /// <summary>
@@ -344,7 +350,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
             Entity[] cubeEntities = CreateCubeEntities(cubeModel, texturedMaterials);
             Entity[] rootEntities = new Entity[cubeEntities.Length + 5];
             Entity cameraEntity = CreateCameraEntity();
@@ -554,8 +560,7 @@ namespace city.rendering.tools {
             byte[] textureBytes = BuildTextureFileBytes(cubeIndex);
             File.WriteAllBytes(fullPath, textureBytes);
 
-            AssetImportManager importManager = GeneratedAuthoringSceneWriteService.CreateGeneratedSceneAssetImportManager(projectRootPath);
-            importManager.SaveTextureImportSettings(fullPath, CreateTextureImportSettings(cubeIndex, textureBytes));
+            AssetAuthoringService.SaveTextureImportSettings(fullPath, CreateTextureImportSettings(cubeIndex, textureBytes));
             WriteTextureCacheAsset(projectRootPath, cubeIndex);
         }
 

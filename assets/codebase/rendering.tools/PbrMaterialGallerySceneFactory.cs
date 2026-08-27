@@ -1,11 +1,24 @@
 using city.menu;
 using helengine;
+using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
     /// Builds the authored PBR material gallery scene: a five by five sphere grid sweeping metallic and roughness under a three-light rig.
     /// </summary>
     public sealed class PbrMaterialGallerySceneFactory {
+        /// <summary>
+        /// Host-owned capability used to resolve generated control icons and fonts.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
+        /// Initializes one PBR material gallery scene factory.
+        /// </summary>
+        /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
+        public PbrMaterialGallerySceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
         /// <summary>
         /// Stable scene id used by the generated PBR material gallery asset.
         /// </summary>
@@ -50,7 +63,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);

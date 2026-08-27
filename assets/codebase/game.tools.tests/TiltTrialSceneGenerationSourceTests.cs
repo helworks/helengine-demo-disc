@@ -36,7 +36,7 @@ namespace city.tests {
             Assert.Contains("TiltTrialStartPromptPrefixText", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialStartPromptIcon", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialStartPromptSuffixText", source, StringComparison.Ordinal);
-            Assert.Contains("RequireIcon(ProjectRootPath, \"windows\", \"enter\")", source, StringComparison.Ordinal);
+            Assert.Contains("RequireIcon(ProjectRootPath, \"windows\", \"enter\", AssetAuthoringService)", source, StringComparison.Ordinal);
             Assert.Contains("CreateTiltTrialStartPromptPlatformOverride", source, StringComparison.Ordinal);
             Assert.Contains("\"ps2\", \"ps2\", \"cross\"", source, StringComparison.Ordinal);
             Assert.DoesNotContain("Press \\\"X\\\" to start", source, StringComparison.Ordinal);

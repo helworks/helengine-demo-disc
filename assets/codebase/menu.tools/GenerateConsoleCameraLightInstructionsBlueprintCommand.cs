@@ -33,7 +33,7 @@ namespace city.menu.tools {
             ConsoleCameraLightInstructionsBlueprintGenerator generator = new ConsoleCameraLightInstructionsBlueprintGenerator();
             generator.Generate(
                 context.ProjectRootPath,
-                new DemoSceneInstructionOverlayFactory(),
+                new DemoSceneInstructionOverlayFactory(context.AssetAuthoring),
                 editorCore.DefaultFontAssetForEditor);
         }
     }

@@ -22,7 +22,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            GameSceneGenerator generator = new GameSceneGenerator(context.ScriptTypeResolver);
+            GameSceneGenerator generator = new GameSceneGenerator(context.ScriptTypeResolver, context.AssetAuthoring);
             generator.GenerateTiltTrialScene(context.ProjectRootPath);
         }
     }

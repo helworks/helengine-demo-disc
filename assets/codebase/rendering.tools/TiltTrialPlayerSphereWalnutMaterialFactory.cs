@@ -1,6 +1,5 @@
 using helengine;
 using helengine.editor;
-using System.Reflection;
 
 namespace city.rendering.tools {
     /// <summary>
@@ -16,6 +15,11 @@ namespace city.rendering.tools {
         /// Stable material asset identifier used by the Tilt Trial player sphere.
         /// </summary>
         public const string MaterialAssetId = "Materials.rendering.tilt_trial.PlayerSphereWalnut";
+
+        /// <summary>
+        /// Stable embedded identity used by repeatable public generation of the authored material.
+        /// </summary>
+        const string MaterialAuthoringAssetId = "ab41cbf620356bc3526700d53d7e780e";
 
         /// <summary>
         /// Stable project-relative walnut source texture path.
@@ -128,12 +132,12 @@ namespace city.rendering.tools {
         /// Writes the authored walnut material settings required by the Tilt Trial player sphere.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        public void WriteMaterialAsset(string projectRootPath) {
+        public void WriteMaterialAsset(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            string importedTextureAssetId = ResolveTextureAssetId(projectRootPath);
+            string importedTextureAssetId = ResolveTextureAssetId(projectRootPath, assetAuthoringService);
             MaterialWriteService.WriteMaterial(projectRootPath, MaterialRelativePath, CreateDefinition(importedTextureAssetId));
         }
 
@@ -142,15 +146,18 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <returns>Imported texture asset id persisted by the shared editor import pipeline.</returns>
-        string ResolveTextureAssetId(string projectRootPath) {
+        string ResolveTextureAssetId(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
+            if (assetAuthoringService == null) {
+                throw new ArgumentNullException(nameof(assetAuthoringService));
+            }
+
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             string assetsRootPath = Path.Combine(fullProjectRootPath, "assets");
             string sourceTexturePath = Path.Combine(assetsRootPath, TextureRelativePath.Replace('/', Path.DirectorySeparatorChar));
-            AssetImportManager importManager = CreateAssetImportManager(fullProjectRootPath, assetsRootPath);
             bool settingsFileExists = File.Exists(sourceTexturePath + ".hasset");
-            TextureAssetImportSettings settings = importManager.LoadOrCreateTextureImportSettings(sourceTexturePath);
+            TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(sourceTexturePath);
             if (!settingsFileExists) {
-                importManager.SaveTextureImportSettings(sourceTexturePath, settings);
+                assetAuthoringService.SaveTextureImportSettings(sourceTexturePath, settings);
             }
             string assetId = settings.Importer.AssetId;
             if (string.IsNullOrWhiteSpace(assetId)) {
@@ -173,6 +180,7 @@ namespace city.rendering.tools {
             GeneratedMaterialAssetDefinition definition = new GeneratedMaterialAssetDefinition();
             definition.MaterialAsset = new ShaderMaterialAsset {
                 Id = MaterialAssetId,
+                AuthoringAssetId = MaterialAuthoringAssetId,
                 DiffuseTextureAssetId = textureAssetId,
                 RenderState = new MaterialRenderState {
                     // The rolling player sphere can expose backface artifacts with photo textures;
@@ -278,53 +286,5 @@ namespace city.rendering.tools {
             platformDefinition.SetFieldValue(LightingModeFieldId, "lit");
         }
 
-        /// <summary>
-        /// Builds one asset import manager initialized with the editor host's default importer registrations.
-        /// </summary>
-        /// <param name="projectRootPath">Absolute project root path.</param>
-        /// <param name="assetsRootPath">Absolute assets root path.</param>
-        /// <returns>Configured asset import manager.</returns>
-        AssetImportManager CreateAssetImportManager(string projectRootPath, string assetsRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            } else if (string.IsNullOrWhiteSpace(assetsRootPath)) {
-                throw new ArgumentException("Assets root path must be provided.", nameof(assetsRootPath));
-            }
-
-            ContentManager contentManager = new ContentManager(new HostFileSystemContentStreamSource(assetsRootPath));
-            AssetImportManager importManager = new AssetImportManager(projectRootPath, contentManager);
-            IReadOnlyList<IAssetImporterRegistration> importers = CreateDefaultImporters();
-            for (int index = 0; index < importers.Count; index++) {
-                IAssetImporterRegistration importer = importers[index];
-                if (importer == null) {
-                    throw new InvalidOperationException("Importer registrations must not contain null entries.");
-                }
-
-                importer.Register(importManager);
-            }
-
-            importManager.GenerateMissingImportSettings();
-            return importManager;
-        }
-
-        /// <summary>
-        /// Creates the default importer registrations exposed by the editor host assembly.
-        /// </summary>
-        /// <returns>Importer registrations that match the editor host defaults.</returns>
-        IReadOnlyList<IAssetImporterRegistration> CreateDefaultImporters() {
-            Assembly appAssembly = Assembly.Load("helengine.editor.app");
-            Type importerFactoryType = appAssembly.GetType("helengine.editor.app.EditorHostImporterFactory", throwOnError: true);
-            MethodInfo createDefaultMethod = importerFactoryType.GetMethod("CreateDefault", BindingFlags.Public | BindingFlags.Static);
-            if (createDefaultMethod == null) {
-                throw new InvalidOperationException("EditorHostImporterFactory.CreateDefault was not found.");
-            }
-
-            object result = createDefaultMethod.Invoke(null, Array.Empty<object>());
-            if (result is not IReadOnlyList<IAssetImporterRegistration> importers) {
-                throw new InvalidOperationException("Editor host importer factory did not return importer registrations.");
-            }
-
-            return importers;
-        }
     }
 }

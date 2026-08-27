@@ -1,4 +1,5 @@
 using city.menu;
+using helengine.editor;
 using helengine;
 
 namespace city.rendering.tools {
@@ -6,6 +7,18 @@ namespace city.rendering.tools {
     /// Builds the authored PBR textured showcase scene: a scuffed-metal prop and a wood-plank prop lit by one shadow-casting sun.
     /// </summary>
     public sealed class PbrTexturedShowcaseSceneFactory {
+        /// <summary>
+        /// Host-owned capability used to resolve generated control icons and fonts.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
+        /// Initializes one PBR textured showcase scene factory.
+        /// </summary>
+        /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
+        public PbrTexturedShowcaseSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
         /// <summary>
         /// Stable scene id used by the generated PBR textured showcase asset.
         /// </summary>
@@ -36,7 +49,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);

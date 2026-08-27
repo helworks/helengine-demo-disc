@@ -24,7 +24,7 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            PhysicsNintendoDsSceneGenerator generator = new PhysicsNintendoDsSceneGenerator(context.ScriptTypeResolver);
+            PhysicsNintendoDsSceneGenerator generator = new PhysicsNintendoDsSceneGenerator(context.ScriptTypeResolver, context.AssetAuthoring);
             generator.Generate(context.ProjectRootPath);
         }
     }

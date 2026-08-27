@@ -8,6 +8,10 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class SpotlightStreetSliceSceneFactory {
         /// <summary>
+        /// Host-owned capability used to resolve generated control icons and fonts.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        /// <summary>
         /// Stable scene id used by the generated spotlight street-slice asset.
         /// </summary>
         public const string SceneId = "scenes/rendering/spotlight_street_slice.helen";
@@ -60,7 +64,9 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one spotlight street-slice scene factory.
         /// </summary>
-        public SpotlightStreetSliceSceneFactory() {
+        /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
+        public SpotlightStreetSliceSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             PlaceholderFont = new FontAsset(
                 new FontInfo("SpotlightStreetSlicePlaceholder", 16, 4f),
                 new ManagedRuntimeTexture {
@@ -108,7 +114,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredInstructionFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);

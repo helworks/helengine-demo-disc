@@ -1,4 +1,5 @@
 using city.menu;
+using helengine.editor;
 using helengine;
 
 namespace city.rendering.tools {
@@ -6,6 +7,18 @@ namespace city.rendering.tools {
     /// Builds the authored PBR shadow theater scene: a metallic sphere cluster on a pedestal, lit by both a shadow-casting sun and a shadow-casting spotlight.
     /// </summary>
     public sealed class PbrShadowTheaterSceneFactory {
+        /// <summary>
+        /// Host-owned capability used to resolve generated control icons and fonts.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
+        /// Initializes one PBR shadow theater scene factory.
+        /// </summary>
+        /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
+        public PbrShadowTheaterSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
         /// <summary>
         /// Stable scene id used by the generated PBR shadow theater asset.
         /// </summary>
@@ -39,7 +52,7 @@ namespace city.rendering.tools {
             RuntimeMaterial lowRoughnessDielectric = galleryMaterials[PbrMaterialGalleryMaterialFactory.ResolveIndex(0, 1)];
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory();
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);

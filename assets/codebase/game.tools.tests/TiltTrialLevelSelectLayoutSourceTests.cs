@@ -163,7 +163,7 @@ namespace city.tests {
             Assert.DoesNotContain("TiltTrialLevelSelectHint", componentSource, StringComparison.Ordinal);
             Assert.Contains("$\"Limit {FormatTimerSeconds(startTimeSeconds)}\"", componentSource, StringComparison.Ordinal);
             Assert.Contains("GeneratedControlIconAssetResolver", factorySource, StringComparison.Ordinal);
-            Assert.Contains("ControlIconResolver.RequireIcon(ProjectRootPath, \"windows\", controlId)", factorySource, StringComparison.Ordinal);
+            Assert.Contains("ControlIconResolver.RequireIcon(ProjectRootPath, \"windows\", controlId, AssetAuthoringService)", factorySource, StringComparison.Ordinal);
             Assert.Contains("\"enter\", \"PLAY\"", factorySource, StringComparison.Ordinal);
             Assert.Contains("\"escape\", \"MENU\"", factorySource, StringComparison.Ordinal);
         }

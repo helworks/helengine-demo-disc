@@ -1,6 +1,5 @@
 using helengine;
 using helengine.editor;
-using System.Reflection;
 
 namespace city.rendering.tools {
     /// <summary>
@@ -85,20 +84,20 @@ namespace city.rendering.tools {
         /// Writes the authored scuffed-metal and wood-plank material settings required by the textured showcase scene.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        public void WriteMaterialAssets(string projectRootPath) {
+        public void WriteMaterialAssets(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            string metalDiffuseTextureAssetId = ResolveTextureAssetId(projectRootPath, MetalDiffuseTextureRelativePath);
-            string metalRoughnessTextureAssetId = ResolveTextureAssetId(projectRootPath, MetalRoughnessTextureRelativePath);
+            string metalDiffuseTextureAssetId = ResolveTextureAssetId(projectRootPath, MetalDiffuseTextureRelativePath, assetAuthoringService);
+            string metalRoughnessTextureAssetId = ResolveTextureAssetId(projectRootPath, MetalRoughnessTextureRelativePath, assetAuthoringService);
             MaterialWriteService.WriteMaterial(
                 projectRootPath,
                 MetalMaterialRelativePath,
                 CreateDefinition(MetalMaterialAssetId, metalDiffuseTextureAssetId, metalRoughnessTextureAssetId, metallic: "1.0"));
 
-            string woodDiffuseTextureAssetId = ResolveTextureAssetId(projectRootPath, WoodDiffuseTextureRelativePath);
-            string woodRoughnessTextureAssetId = ResolveTextureAssetId(projectRootPath, WoodRoughnessTextureRelativePath);
+            string woodDiffuseTextureAssetId = ResolveTextureAssetId(projectRootPath, WoodDiffuseTextureRelativePath, assetAuthoringService);
+            string woodRoughnessTextureAssetId = ResolveTextureAssetId(projectRootPath, WoodRoughnessTextureRelativePath, assetAuthoringService);
             MaterialWriteService.WriteMaterial(
                 projectRootPath,
                 WoodMaterialRelativePath,
@@ -111,15 +110,18 @@ namespace city.rendering.tools {
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <param name="relativeTexturePath">Project-relative source texture path.</param>
         /// <returns>Imported texture asset id persisted by the shared editor import pipeline.</returns>
-        string ResolveTextureAssetId(string projectRootPath, string relativeTexturePath) {
+        string ResolveTextureAssetId(string projectRootPath, string relativeTexturePath, IEditorProjectAssetAuthoringService assetAuthoringService) {
+            if (assetAuthoringService == null) {
+                throw new ArgumentNullException(nameof(assetAuthoringService));
+            }
+
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             string assetsRootPath = Path.Combine(fullProjectRootPath, "assets");
-            AssetImportManager importManager = CreateAssetImportManager(fullProjectRootPath, assetsRootPath);
             string sourceTexturePath = Path.Combine(assetsRootPath, relativeTexturePath.Replace('/', Path.DirectorySeparatorChar));
             bool settingsFileExists = File.Exists(sourceTexturePath + ".hasset");
-            TextureAssetImportSettings settings = importManager.LoadOrCreateTextureImportSettings(sourceTexturePath);
+            TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(sourceTexturePath);
             if (!settingsFileExists) {
-                importManager.SaveTextureImportSettings(sourceTexturePath, settings);
+                assetAuthoringService.SaveTextureImportSettings(sourceTexturePath, settings);
             }
             string assetId = settings.Importer.AssetId;
             if (string.IsNullOrWhiteSpace(assetId)) {
@@ -214,38 +216,5 @@ namespace city.rendering.tools {
             platformDefinition.SetFieldValue(LightingModeFieldId, "lit");
         }
 
-        /// <summary>
-        /// Builds one asset import manager initialized with the editor host's default importer registrations.
-        /// </summary>
-        AssetImportManager CreateAssetImportManager(string projectRootPath, string assetsRootPath) {
-            ContentManager contentManager = new ContentManager(new HostFileSystemContentStreamSource(assetsRootPath));
-            AssetImportManager importManager = new AssetImportManager(projectRootPath, contentManager);
-            IReadOnlyList<IAssetImporterRegistration> importers = CreateDefaultImporters();
-            for (int index = 0; index < importers.Count; index++) {
-                importers[index].Register(importManager);
-            }
-
-            importManager.GenerateMissingImportSettings();
-            return importManager;
-        }
-
-        /// <summary>
-        /// Creates the default importer registrations exposed by the editor host assembly.
-        /// </summary>
-        IReadOnlyList<IAssetImporterRegistration> CreateDefaultImporters() {
-            Assembly appAssembly = Assembly.Load("helengine.editor.app");
-            Type importerFactoryType = appAssembly.GetType("helengine.editor.app.EditorHostImporterFactory", throwOnError: true);
-            MethodInfo createDefaultMethod = importerFactoryType.GetMethod("CreateDefault", BindingFlags.Public | BindingFlags.Static);
-            if (createDefaultMethod == null) {
-                throw new InvalidOperationException("EditorHostImporterFactory.CreateDefault was not found.");
-            }
-
-            object result = createDefaultMethod.Invoke(null, Array.Empty<object>());
-            if (result is not IReadOnlyList<IAssetImporterRegistration> importers) {
-                throw new InvalidOperationException("Editor host importer factory did not return importer registrations.");
-            }
-
-            return importers;
-        }
     }
 }

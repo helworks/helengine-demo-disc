@@ -1,6 +1,6 @@
 namespace city.rendering.tools {
     /// <summary>
-    /// Describes one shared physics demo material that should be migrated into the per-platform material settings flow.
+    /// Describes one shared physics demo material authored through the per-platform material settings flow.
     /// </summary>
     public sealed class PhysicsDemoMaterialDefinition {
         /// <summary>

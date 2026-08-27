@@ -1,3 +1,6 @@
+using helengine;
+using helengine.editor;
+
 namespace city.tests {
     /// <summary>
     /// Verifies generated control-icon lookup stays manifest-driven and strict.
@@ -57,7 +60,8 @@ namespace city.tests {
             city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
                 @"C:\dev\helprojs\demodisc",
                 "ps2",
-                "r1");
+                "r1",
+                new TestAssetAuthoringService());
 
             Assert.Equal("ps2", resolved.PlatformId);
             Assert.Equal("ps2", resolved.FamilyId);
@@ -73,7 +77,8 @@ namespace city.tests {
             city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
                 @"C:\dev\helprojs\demodisc",
                 "xbox360",
-                "rb");
+                "rb",
+                new TestAssetAuthoringService());
 
             Assert.Equal(32f / 256f, resolved.SourceRect.X, 3);
             Assert.Equal(82f / 256f, resolved.SourceRect.Y, 3);
@@ -98,7 +103,7 @@ namespace city.tests {
             int width = System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(header.AsSpan(16, 4));
             int height = System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(header.AsSpan(20, 4));
             city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
-            city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(projectRootPath, "ds", "a");
+            city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(projectRootPath, "ds", "a", new TestAssetAuthoringService());
 
             Assert.Equal(32, width);
             Assert.Equal(32, height);
@@ -111,10 +116,90 @@ namespace city.tests {
 
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
                 () => {
-                    resolver.RequireIcon(@"C:\dev\helprojs\demodisc", "saturn", "a");
+                    resolver.RequireIcon(@"C:\dev\helprojs\demodisc", "saturn", "a", new TestAssetAuthoringService());
                 });
 
             Assert.Contains("saturn", exception.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Supplies the current typed texture settings needed by resolver tests without constructing editor import internals.
+        /// </summary>
+        sealed class TestAssetAuthoringService : IEditorProjectAssetAuthoringService {
+            /// <summary>
+            /// Loads deterministic current texture settings for one test source.
+            /// </summary>
+            public TextureAssetImportSettings LoadOrCreateTextureImportSettings(string sourcePath) {
+                return new TextureAssetImportSettings {
+                    Importer = new AssetImporterSettings {
+                        ImporterId = "gdi",
+                        AssetId = "test-imported-texture"
+                    }
+                };
+            }
+
+            /// <summary>
+            /// Accepts deterministic test settings without writing editor files.
+            /// </summary>
+            public void SaveTextureImportSettings(string sourcePath, TextureAssetImportSettings settings) { }
+
+            /// <summary>
+            /// Model settings are not used by these tests.
+            /// </summary>
+            public ModelAssetImportSettings LoadOrCreateModelImportSettings(string sourcePath) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Audio settings are not used by these tests.
+            /// </summary>
+            public AudioAssetImportSettings LoadOrCreateAudioImportSettings(string sourcePath) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Sectioned settings are not used by these tests.
+            /// </summary>
+            public AssetImportSettings LoadOrCreateSectionedImportSettings(string sourcePath) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Model settings are not used by these tests.
+            /// </summary>
+            public void SaveModelImportSettings(string sourcePath, ModelAssetImportSettings settings) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Audio settings are not used by these tests.
+            /// </summary>
+            public void SaveAudioImportSettings(string sourcePath, AudioAssetImportSettings settings) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Sectioned settings are not used by these tests.
+            /// </summary>
+            public void SaveSectionedImportSettings(string sourcePath, AssetImportSettings settings) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Runtime model resolution is not used by these tests.
+            /// </summary>
+            public RuntimeModel ResolveRuntimeModel(string sourcePath) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Font resolution is not used by these tests.
+            /// </summary>
+            public FontAsset ResolveFontAsset(string sourcePath) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Texture resolution is not used by these tests.
+            /// </summary>
+            public TextureAsset ResolveTextureAsset(string sourcePath) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Scene reference resolution is not used by these tests.
+            /// </summary>
+            public EditorSceneAssetReferenceResolver CreateSceneAssetReferenceResolver() => throw new NotSupportedException();
+
+            /// <summary>
+            /// Imported texture lookup is not used by these tests.
+            /// </summary>
+            public bool TryLoadImportedTextureAsset(string assetId, out TextureAsset textureAsset) {
+                textureAsset = null;
+                return false;
+            }
         }
     }
 }

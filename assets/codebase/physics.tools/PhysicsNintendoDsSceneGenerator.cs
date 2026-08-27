@@ -27,12 +27,19 @@ namespace city.physics.tools {
         readonly IScriptTypeResolver ScriptTypeResolver;
 
         /// <summary>
+        /// Host-owned capability used to resolve current imported assets while loading canonical scenes.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
         /// Initializes one Nintendo handheld physics scene generator.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to load authored gameplay components from the generated physics scenes.</param>
-        public PhysicsNintendoDsSceneGenerator(IScriptTypeResolver scriptTypeResolver) {
+        /// <param name="assetAuthoringService">Host-owned capability used to resolve current imported scene assets.</param>
+        public PhysicsNintendoDsSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAssetAuthoringService assetAuthoringService) {
             ScriptTypeResolver = scriptTypeResolver ?? throw new ArgumentNullException(nameof(scriptTypeResolver));
-            SceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolver);
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            SceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolver, AssetAuthoringService);
         }
 
         /// <summary>
@@ -108,16 +115,7 @@ namespace city.physics.tools {
             }
 
             ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create(ScriptTypeResolver);
-            AssetImportManager assetImportManager = GeneratedAuthoringSceneWriteService.CreateGeneratedSceneAssetImportManager(fullProjectRootPath);
-            EditorFileSystemModelResolver fileSystemModelResolver = new EditorFileSystemModelResolver(assetImportManager);
-            EditorFileSystemFontResolver fileSystemFontResolver = new EditorFileSystemFontResolver(assetImportManager);
-            EditorFileSystemTextureResolver fileSystemTextureResolver = new EditorFileSystemTextureResolver(assetImportManager);
-            EditorSceneAssetReferenceResolver referenceResolver = new EditorSceneAssetReferenceResolver(
-                assetImportManager.ContentManager,
-                fullProjectRootPath,
-                fileSystemModelResolver,
-                fileSystemFontResolver,
-                fileSystemTextureResolver);
+            EditorSceneAssetReferenceResolver referenceResolver = AssetAuthoringService.CreateSceneAssetReferenceResolver();
             string authoredScenePath = Path.Combine(
                 fullProjectRootPath,
                 "assets",
@@ -299,7 +297,7 @@ namespace city.physics.tools {
                 throw new ArgumentNullException(nameof(sceneEntry));
             }
 
-            PhysicsSceneFactory physicsSceneFactory = new PhysicsSceneFactory();
+            PhysicsSceneFactory physicsSceneFactory = new PhysicsSceneFactory(AssetAuthoringService);
             GeneratedAuthoringSceneDefinition sceneDefinition = physicsSceneFactory.CreatePlayablePhysicsShowcaseSceneDefinition(
                 fullProjectRootPath,
                 sceneEntry.SceneId,

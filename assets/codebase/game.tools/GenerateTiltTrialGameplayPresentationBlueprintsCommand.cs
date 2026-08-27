@@ -24,9 +24,9 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService();
+            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.AssetAuthoring);
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(context.ProjectRootPath);
-            GameSceneFactory sceneFactory = new GameSceneFactory(assets, context.ProjectRootPath);
+            GameSceneFactory sceneFactory = new GameSceneFactory(assets, context.ProjectRootPath, context.AssetAuthoring);
             TiltTrialGameplayPresentationBlueprintGenerator generator = new TiltTrialGameplayPresentationBlueprintGenerator();
             generator.Generate(context.ProjectRootPath, sceneFactory);
         }

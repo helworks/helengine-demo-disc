@@ -10,7 +10,7 @@ namespace city.tests {
         public void Game_scene_generator_writes_zombislayer_gameplay_scene() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
 
-            Assert.Contains("ZombislayerAssetPreparationService zombislayerAssetPreparationService = new ZombislayerAssetPreparationService();", source, StringComparison.Ordinal);
+            Assert.Contains("ZombislayerAssetPreparationService zombislayerAssetPreparationService = new ZombislayerAssetPreparationService(AssetAuthoringService);", source, StringComparison.Ordinal);
             Assert.Contains("ZombislayerGenerationAssets zombislayerAssets = zombislayerAssetPreparationService.Prepare(projectRootPath);", source, StringComparison.Ordinal);
             Assert.Contains("ZombislayerSceneFactory zombislayerSceneFactory = new ZombislayerSceneFactory(zombislayerAssets);", source, StringComparison.Ordinal);
             Assert.Contains("GeneratedAuthoringSceneDefinition zombislayerScene = zombislayerSceneFactory.CreateGameplayScene();", source, StringComparison.Ordinal);

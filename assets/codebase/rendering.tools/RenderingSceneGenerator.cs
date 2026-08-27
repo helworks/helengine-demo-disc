@@ -1,10 +1,15 @@
 using city.scene.tools;
+using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
     /// Generates the complete city rendering showcase scene set inside the active project.
     /// </summary>
     public sealed class RenderingSceneGenerator {
+        /// <summary>
+        /// Host-owned capability used by all generated scene factories to resolve current imported assets and settings.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
         /// <summary>
         /// Stable scene id used by the cube-test showcase.
         /// </summary>
@@ -229,25 +234,27 @@ namespace city.rendering.tools {
         /// Initializes one city rendering scene generator.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
-        public RenderingSceneGenerator(IScriptTypeResolver scriptTypeResolver = null) {
-            AuthoringSceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver);
-            DirectionalShadowPlazaFactory = new DirectionalShadowPlazaSceneFactory();
-            SpotlightStreetSliceFactory = new SpotlightStreetSliceSceneFactory();
-            CubeTestFactory = new CubeTestSceneFactory();
-            GroundCubeProbeFactory = new GroundCubeProbeSceneFactory();
-            ScaledCubeFactory = new ScaledCubeSceneFactory();
-            DepthClipProbeFactory = new DepthClipProbeSceneFactory();
-            ColoredCubeGridFactory = new ColoredCubeGridSceneFactory();
-            TexturedCubeGridFactory = new TexturedCubeGridSceneFactory();
-            AxisTestFactory = new AxisTestSceneFactory();
-            AxisTest2Factory = new AxisTest2SceneFactory();
+        /// <param name="assetAuthoringService">Host-owned capability used by all generated scene factories.</param>
+        public RenderingSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            AuthoringSceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver, AssetAuthoringService);
+            DirectionalShadowPlazaFactory = new DirectionalShadowPlazaSceneFactory(AssetAuthoringService);
+            SpotlightStreetSliceFactory = new SpotlightStreetSliceSceneFactory(AssetAuthoringService);
+            CubeTestFactory = new CubeTestSceneFactory(AssetAuthoringService);
+            GroundCubeProbeFactory = new GroundCubeProbeSceneFactory(AssetAuthoringService);
+            ScaledCubeFactory = new ScaledCubeSceneFactory(AssetAuthoringService);
+            DepthClipProbeFactory = new DepthClipProbeSceneFactory(AssetAuthoringService);
+            ColoredCubeGridFactory = new ColoredCubeGridSceneFactory(AssetAuthoringService);
+            TexturedCubeGridFactory = new TexturedCubeGridSceneFactory(AssetAuthoringService);
+            AxisTestFactory = new AxisTestSceneFactory(AssetAuthoringService);
+            AxisTest2Factory = new AxisTest2SceneFactory(AssetAuthoringService);
             SceneMemoryProbeFactory = new SceneMemoryProbeSceneFactory();
             PbrMaterialGalleryMaterials = new PbrMaterialGalleryMaterialFactory();
-            PbrMaterialGalleryScene = new PbrMaterialGallerySceneFactory();
+            PbrMaterialGalleryScene = new PbrMaterialGallerySceneFactory(AssetAuthoringService);
             PbrTexturedShowcaseMaterials = new PbrTexturedShowcaseMaterialFactory();
-            PbrTexturedShowcaseScene = new PbrTexturedShowcaseSceneFactory();
-            PbrShadowTheaterScene = new PbrShadowTheaterSceneFactory();
-            MatrixRenderFactory = new MatrixRenderSceneFactory();
+            PbrTexturedShowcaseScene = new PbrTexturedShowcaseSceneFactory(AssetAuthoringService);
+            PbrShadowTheaterScene = new PbrShadowTheaterSceneFactory(AssetAuthoringService);
+            MatrixRenderFactory = new MatrixRenderSceneFactory(AssetAuthoringService);
         }
 
         /// <summary>
@@ -295,7 +302,7 @@ namespace city.rendering.tools {
             ConsoleCameraLightInstructionsBlueprintGenerator consoleInstructionBlueprintGenerator = new ConsoleCameraLightInstructionsBlueprintGenerator();
             consoleInstructionBlueprintGenerator.Generate(
                 projectRootPath,
-                new DemoSceneInstructionOverlayFactory(),
+                new DemoSceneInstructionOverlayFactory(AssetAuthoringService),
                 editorCore.DefaultFontAssetForEditor);
 
             DeleteObsoleteRenderMatrixProbeScene(projectRootPath);

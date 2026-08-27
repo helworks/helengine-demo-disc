@@ -1,4 +1,5 @@
 using helengine;
+using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
@@ -161,13 +162,13 @@ namespace city.rendering.tools {
         /// Writes the Tilt Trial course material asset and its platform settings into the supplied project.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        public void WriteMaterialAsset(string projectRootPath) {
+        public void WriteMaterialAsset(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
             TiltTrialCourseTextureFactory textureFactory = new TiltTrialCourseTextureFactory();
-            string textureAssetId = textureFactory.WriteTextureAsset(projectRootPath);
+            string textureAssetId = textureFactory.WriteTextureAsset(projectRootPath, assetAuthoringService);
             MaterialWriteService.WriteMaterial(projectRootPath, MaterialRelativePath, CreateGeneratedMaterialDefinition(textureAssetId));
         }
 

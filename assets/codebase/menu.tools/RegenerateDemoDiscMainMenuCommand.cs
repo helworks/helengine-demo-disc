@@ -23,7 +23,7 @@ namespace city.menu.tools {
             }
 
             new DemoDiscLogoIdleAnimationGenerator().Generate(context.ProjectRootPath);
-            DemoDiscSceneGenerator generator = new DemoDiscSceneGenerator(context.ScriptTypeResolver);
+            DemoDiscSceneGenerator generator = new DemoDiscSceneGenerator(context.ScriptTypeResolver, context.AssetAuthoring);
             generator.Generate(context.ProjectRootPath);
         }
     }

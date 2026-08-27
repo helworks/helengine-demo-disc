@@ -1,11 +1,16 @@
 using city.menu;
 using city.rendering.tools;
+using helengine.editor;
 
 namespace city.menu.tools {
     /// <summary>
     /// Generates the authored demo-disc main menu scene inside the active city project.
     /// </summary>
     public sealed class DemoDiscSceneGenerator {
+        /// <summary>
+        /// Host-owned capability used by the generated scene writer when it resolves file-backed references.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
         /// <summary>
         /// Writer used to persist generated live-authored scenes through the editor scene save pipeline.
         /// </summary>
@@ -35,8 +40,10 @@ namespace city.menu.tools {
         /// Initializes one demo-disc scene generator.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
-        public DemoDiscSceneGenerator(IScriptTypeResolver scriptTypeResolver = null) {
-            SceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver);
+        /// <param name="assetAuthoringService">Host-owned capability used by the generated scene writer.</param>
+        public DemoDiscSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            SceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver, AssetAuthoringService);
             SceneFactory = new DemoDiscMainMenuSceneFactory();
             MenuBuildSceneAuthoringService = new DemoDiscMenuBuildSceneAuthoringService();
             SplashSceneFactory = new HelenOfCodeSplashSceneFactory();

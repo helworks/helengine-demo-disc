@@ -1,10 +1,15 @@
 using city.rendering.tools;
+using helengine.editor;
 
 namespace city.game.tools {
     /// <summary>
     /// Generates the authored city gameplay scene set inside the active project.
     /// </summary>
     public sealed class GameSceneGenerator {
+        /// <summary>
+        /// Host-owned capability used to resolve imported assets and author current settings.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
         /// <summary>
         /// Resolver used to restore project-authored components during temporary handheld clone loads.
         /// </summary>
@@ -14,8 +19,10 @@ namespace city.game.tools {
         /// Initializes one gameplay scene generator.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
-        public GameSceneGenerator(IScriptTypeResolver scriptTypeResolver = null) {
+        /// <param name="assetAuthoringService">Host-owned capability used by project generation services.</param>
+        public GameSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAssetAuthoringService assetAuthoringService) {
             ScriptTypeResolverValue = scriptTypeResolver;
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
 
         /// <summary>
@@ -34,11 +41,11 @@ namespace city.game.tools {
             splitPlayGoldenCoinAssetGenerator.Generate(projectRootPath);
 
             TiltTrialPlayerSphereMarbleMaterialFactory materialFactory = new TiltTrialPlayerSphereMarbleMaterialFactory();
-            materialFactory.WriteMaterialAsset(projectRootPath);
-            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService();
+            materialFactory.WriteMaterialAsset(projectRootPath, AssetAuthoringService);
+            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(AssetAuthoringService);
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(projectRootPath);
-            GameSceneFactory factory = new GameSceneFactory(assets, projectRootPath);
-            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue);
+            GameSceneFactory factory = new GameSceneFactory(assets, projectRootPath, AssetAuthoringService);
+            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue, AssetAuthoringService);
             TiltTrialGameplayPresentationBlueprintGenerator presentationBlueprintGenerator = new TiltTrialGameplayPresentationBlueprintGenerator();
             presentationBlueprintGenerator.Generate(projectRootPath, factory);
             GeneratedAuthoringSceneDefinition tiltTrialLevelSelectScene = factory.CreateTiltTrialScene();
@@ -54,7 +61,7 @@ namespace city.game.tools {
             GeneratedAuthoringSceneDefinition tiltTrialLevel01RenderTestScene = factory.CreateTiltTrialLevel01RenderTestScene();
             sceneWriteService.WriteScene(projectRootPath, tiltTrialLevel01RenderTestScene);
 
-            ZombislayerAssetPreparationService zombislayerAssetPreparationService = new ZombislayerAssetPreparationService();
+            ZombislayerAssetPreparationService zombislayerAssetPreparationService = new ZombislayerAssetPreparationService(AssetAuthoringService);
             ZombislayerGenerationAssets zombislayerAssets = zombislayerAssetPreparationService.Prepare(projectRootPath);
             ZombislayerSceneFactory zombislayerSceneFactory = new ZombislayerSceneFactory(zombislayerAssets);
             GeneratedAuthoringSceneDefinition zombislayerScene = zombislayerSceneFactory.CreateGameplayScene();
@@ -70,10 +77,10 @@ namespace city.game.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService();
+            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(AssetAuthoringService);
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(projectRootPath);
-            GameSceneFactory factory = new GameSceneFactory(assets, projectRootPath);
-            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue);
+            GameSceneFactory factory = new GameSceneFactory(assets, projectRootPath, AssetAuthoringService);
+            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue, AssetAuthoringService);
             GeneratedAuthoringSceneDefinition tiltTrialScene = factory.CreateTiltTrialScene();
             sceneWriteService.WriteScene(projectRootPath, tiltTrialScene);
         }
