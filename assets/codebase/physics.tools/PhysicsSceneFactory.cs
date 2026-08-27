@@ -366,11 +366,6 @@ namespace city.physics.tools {
         readonly ComponentPlatformOverridePayloadService OverridePayloadService;
 
         /// <summary>
-        /// Shared editor API that canonicalizes file-backed references on manually serialized generated overlay entities.
-        /// </summary>
-        global::helengine.editor.EditorAssetReferenceCanonicalizationService AssetReferenceCanonicalizationService;
-
-        /// <summary>
         /// Shared editor-authored scene writer used for the playable physics showcases so their instruction overlays follow the standard city save pipeline.
         /// </summary>
         readonly city.rendering.tools.GeneratedAuthoringSceneWriteService AuthoringSceneWriteService;
@@ -440,7 +435,6 @@ namespace city.physics.tools {
             }
 
             CurrentProjectRootPath = Path.GetFullPath(projectRootPath);
-            AssetReferenceCanonicalizationService = new global::helengine.editor.EditorAssetReferenceCanonicalizationService(CurrentProjectRootPath);
             string assetsRootPath = Path.Combine(projectRootPath, "assets");
             if (!Directory.Exists(assetsRootPath)) {
                 throw new DirectoryNotFoundException($"Physics validation scene export requires an assets directory at '{assetsRootPath}'.");
@@ -466,7 +460,10 @@ namespace city.physics.tools {
                 }
 
                 Directory.CreateDirectory(directoryPath);
-                AssetAuthoringService.WriteNativeAsset(sceneId, sceneAsset);
+                AssetAuthoringService.WriteNativeAsset(
+                    sceneId,
+                    sceneAsset,
+                    city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneId));
             }
         }
 
@@ -1040,7 +1037,7 @@ namespace city.physics.tools {
                     if (saveComponent.TryGetComponentState(component, out EntityComponentSaveState existingSaveState)) {
                         saveState = existingSaveState;
                         NormalizeGeneratedEditorFontReference(component, saveState);
-                        AssetReferenceCanonicalizationService?.Canonicalize(component, saveState);
+                        AssetAuthoringService.CanonicalizeAssetReferences(component, saveState);
                     }
 
                     IComponentPersistenceDescriptor descriptor = PersistenceRegistry.GetDescriptor(component);
@@ -1661,8 +1658,8 @@ namespace city.physics.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             } else if (string.IsNullOrWhiteSpace(sceneId)) {
                 throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
-            } else if (Core.Instance == null || Core.Instance.ContentManager == null) {
-                throw new InvalidOperationException("Writing playable physics showcase scenes requires an active editor content manager.");
+            } else if (Core.Instance == null) {
+                throw new InvalidOperationException("Writing playable physics showcase scenes requires an active editor core.");
             }
 
             CurrentProjectRootPath = Path.GetFullPath(projectRootPath);
@@ -1717,7 +1714,6 @@ namespace city.physics.tools {
                 FontAsset instructionFont = ResolveRequiredEditorFont();
                 Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
                 city.rendering.tools.ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new city.rendering.tools.ConsoleCameraLightInstructionsSceneAttachmentService();
-                consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
                 rootEntities.Insert(1, instructionOverlayEntity);
                 rootEntities.Insert(2, consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService));
             }
@@ -1781,9 +1777,7 @@ namespace city.physics.tools {
 
             SceneEntityAsset scenarioRootEntity = ResolveRequiredPlayablePhysicsShowcaseScenarioRoot(authoredSceneAsset);
             ComponentPersistenceRegistry persistenceRegistry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
-            ContentManager assetContentManager = new ContentManager(new HostFileSystemContentStreamSource(Path.Combine(projectRootPath, "assets")));
-            EditorContentManagerConfiguration.ConfigureSharedAssetContentManager(assetContentManager);
-            EditorSceneAssetReferenceResolver referenceResolver = new EditorSceneAssetReferenceResolver(assetContentManager, projectRootPath);
+            ISceneAssetReferenceResolver referenceResolver = AssetAuthoringService.CreateSceneAssetReferenceResolver();
             SceneLoadService sceneLoadService = new SceneLoadService(persistenceRegistry, referenceResolver);
             SceneAsset scenarioSceneAsset = new SceneAsset {
                 Id = authoredSceneAsset.Id,
@@ -2370,7 +2364,7 @@ namespace city.physics.tools {
                 }
             };
 
-            IReadOnlyList<string> supportedPlatforms = new EditorProjectPlatformsService(projectRootPath).Load().SupportedPlatforms;
+            IReadOnlyList<string> supportedPlatforms = AssetAuthoringService.GetSupportedPlatformIds();
             for (int platformIndex = 0; platformIndex < supportedPlatforms.Count; platformIndex++) {
                 city.rendering.tools.GeneratedMaterialPlatformDefinition platformDefinition = definition.GetOrCreatePlatform(supportedPlatforms[platformIndex]);
                 platformDefinition.SchemaId = StandardShaderSchemaId;

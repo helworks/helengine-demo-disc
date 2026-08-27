@@ -12,7 +12,7 @@ namespace city.tests {
 
             Assert.Contains("ZombislayerAssetPreparationService zombislayerAssetPreparationService = new ZombislayerAssetPreparationService(AssetAuthoringService);", source, StringComparison.Ordinal);
             Assert.Contains("ZombislayerGenerationAssets zombislayerAssets = zombislayerAssetPreparationService.Prepare(projectRootPath);", source, StringComparison.Ordinal);
-            Assert.Contains("ZombislayerSceneFactory zombislayerSceneFactory = new ZombislayerSceneFactory(zombislayerAssets);", source, StringComparison.Ordinal);
+            Assert.Contains("ZombislayerSceneFactory zombislayerSceneFactory = new ZombislayerSceneFactory(zombislayerAssets, AssetAuthoringService);", source, StringComparison.Ordinal);
             Assert.Contains("GeneratedAuthoringSceneDefinition zombislayerScene = zombislayerSceneFactory.CreateGameplayScene();", source, StringComparison.Ordinal);
             Assert.Contains("sceneWriteService.WriteScene(projectRootPath, zombislayerScene);", source, StringComparison.Ordinal);
         }
@@ -29,8 +29,8 @@ namespace city.tests {
             Assert.Contains("new city.game.ZombislayerFpsControllerComponent()", source, StringComparison.Ordinal);
             Assert.Contains("\"ZombislayerWeapon\"", source, StringComparison.Ordinal);
             Assert.Contains("\"ZombislayerPauseOverlay\"", source, StringComparison.Ordinal);
-            Assert.Contains("global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(ZombislayerAssetCatalog.EnvironmentModelRelativePath)", source, StringComparison.Ordinal);
-            Assert.Contains("global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(ZombislayerAssetCatalog.WeaponModelRelativePath)", source, StringComparison.Ordinal);
+            Assert.Contains("AssetAuthoringService.CreateFileReference(ZombislayerAssetCatalog.EnvironmentModelRelativePath, AssetEntryKind.Model)", source, StringComparison.Ordinal);
+            Assert.Contains("AssetAuthoringService.CreateFileReference(ZombislayerAssetCatalog.WeaponModelRelativePath, AssetEntryKind.Model)", source, StringComparison.Ordinal);
         }
     }
 }

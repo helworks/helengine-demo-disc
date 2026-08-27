@@ -50,35 +50,35 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            string projectRootPath = Path.GetFullPath(context.ProjectRootPath);
             for (int index = 0; index < SceneRelativePaths.Length; index++) {
-                NormalizeScene(projectRootPath, SceneRelativePaths[index]);
+                NormalizeScene(context.AssetAuthoring, SceneRelativePaths[index]);
             }
         }
 
-        static void NormalizeScene(string projectRootPath, string sceneRelativePath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+        static void NormalizeScene(IEditorProjectAssetAuthoringService assetAuthoringService, string sceneRelativePath) {
+            if (assetAuthoringService == null) {
+                throw new ArgumentNullException(nameof(assetAuthoringService));
             } else if (string.IsNullOrWhiteSpace(sceneRelativePath)) {
                 throw new ArgumentException("Scene relative path must be provided.", nameof(sceneRelativePath));
             }
 
-            string fullScenePath = Path.Combine(projectRootPath, sceneRelativePath);
-            if (!File.Exists(fullScenePath)) {
-                return;
-            }
-
+            string assetsRelativePath = sceneRelativePath.Substring("assets".Length).TrimStart('\\', '/');
             SceneAsset sceneAsset;
-            using (FileStream stream = File.OpenRead(fullScenePath)) {
-                sceneAsset = (SceneAsset)global::helengine.editor.AssetSerializer.Deserialize(stream);
+            try {
+                sceneAsset = assetAuthoringService.LoadNativeAsset<SceneAsset>(assetsRelativePath);
+            } catch (FileNotFoundException) {
+                return;
             }
 
             if (!NormalizeEntities(sceneAsset.RootEntities ?? Array.Empty<SceneEntityAsset>())) {
                 return;
             }
 
-            string relativePath = Path.GetRelativePath(Path.Combine(projectRootPath, "assets"), fullScenePath).Replace('\\', '/');
-            new global::helengine.editor.GeneratedAssetWriteService().WriteAsset(projectRootPath, relativePath, sceneAsset);
+            string relativeScenePath = assetsRelativePath.Replace('\\', '/');
+            assetAuthoringService.WriteNativeAsset(
+                relativeScenePath,
+                sceneAsset,
+                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(relativeScenePath));
         }
 
         static bool NormalizeEntities(SceneEntityAsset[] entities) {

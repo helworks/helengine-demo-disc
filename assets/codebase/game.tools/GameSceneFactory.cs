@@ -858,7 +858,7 @@ namespace city.game.tools {
                 overrideComponent.RenderOrder2D = NintendoDsStartPromptIconRenderOrder;
                 PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.RenderOrder2D));
             }
-            PlatformEditingServiceValue.StoreAssetReference(commonComponent, overrideComponent, saveComponent, platformId, TextureAssetScenePersistenceSupport.TextureReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(AssetAuthoringService, resolvedIcon.SourcePngRelativePath));
+            PlatformEditingServiceValue.StoreAssetReference(commonComponent, overrideComponent, saveComponent, platformId, TextureAssetScenePersistenceSupport.TextureReferenceName, AssetAuthoringService.CreateFileReference(resolvedIcon.SourcePngRelativePath, AssetEntryKind.Image));
             PlatformEditingServiceValue.PersistPlatformOverride(commonComponent, overrideComponent, saveComponent, platformId);
         }
 
@@ -929,7 +929,7 @@ namespace city.game.tools {
         /// <param name="relativePath">Project-relative texture path.</param>
         void ApplyLevelSelectPromptTexture(Entity entity, SpriteComponent component, string relativePath) {
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(AssetAuthoringService, relativePath));
+            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, AssetAuthoringService.CreateFileReference(relativePath, AssetEntryKind.Image));
         }
 
         /// <summary>
@@ -949,7 +949,7 @@ namespace city.game.tools {
             overrideComponent.SourceRect = resolvedIcon.SourceRect;
             PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.Size));
             PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.SourceRect));
-            PlatformEditingServiceValue.StoreAssetReference(commonComponent, overrideComponent, saveComponent, platformId, TextureAssetScenePersistenceSupport.TextureReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(AssetAuthoringService, resolvedIcon.SourcePngRelativePath));
+            PlatformEditingServiceValue.StoreAssetReference(commonComponent, overrideComponent, saveComponent, platformId, TextureAssetScenePersistenceSupport.TextureReferenceName, AssetAuthoringService.CreateFileReference(resolvedIcon.SourcePngRelativePath, AssetEntryKind.Image));
             PlatformEditingServiceValue.PersistPlatformOverride(commonComponent, overrideComponent, saveComponent, platformId);
         }
 
@@ -1000,7 +1000,7 @@ namespace city.game.tools {
                 Role = name
             });
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(spriteEntity);
-            saveComponent.SetAssetReference(spriteComponent, TextureAssetScenePersistenceSupport.TextureReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(AssetAuthoringService, textureRelativePath));
+            saveComponent.SetAssetReference(spriteComponent, TextureAssetScenePersistenceSupport.TextureReferenceName, AssetAuthoringService.CreateFileReference(textureRelativePath, AssetEntryKind.Image));
             return spriteEntity;
         }
 
@@ -1762,8 +1762,8 @@ namespace city.game.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(meshComponent, "Model", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(AssetAuthoringService, TiltTrialClippingProbeModelFactory.ModelRelativePath));
-            saveComponent.SetAssetReference(meshComponent, "Materials[0]", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(AssetAuthoringService, TiltTrialClippingProbeMaterialFactory.MaterialRelativePath));
+            saveComponent.SetAssetReference(meshComponent, "Model", AssetAuthoringService.CreateFileReference(TiltTrialClippingProbeModelFactory.ModelRelativePath, AssetEntryKind.Model));
+            saveComponent.SetAssetReference(meshComponent, "Materials[0]", AssetAuthoringService.CreateFileReference(TiltTrialClippingProbeMaterialFactory.MaterialRelativePath, AssetEntryKind.Material));
         }
 
         /// <summary>
@@ -1847,8 +1847,8 @@ namespace city.game.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(meshComponent, "Model", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(AssetAuthoringService, SplitPlayAssetCatalog.GoldenCoinCommonModelRelativePath));
-            saveComponent.SetAssetReference(meshComponent, "Materials[0]", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(AssetAuthoringService, SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath));
+            saveComponent.SetAssetReference(meshComponent, "Model", AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoldenCoinCommonModelRelativePath, AssetEntryKind.Model));
+            saveComponent.SetAssetReference(meshComponent, "Materials[0]", AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath, AssetEntryKind.Material));
         }
 
         /// <summary>
@@ -1864,9 +1864,9 @@ namespace city.game.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(meshComponent, "Model", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(AssetAuthoringService, SplitPlayAssetCatalog.GoalFlagCommonModelRelativePath));
-            saveComponent.SetAssetReference(meshComponent, "Materials[0]", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(AssetAuthoringService, SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath));
-            saveComponent.SetAssetReference(meshComponent, "Materials[1]", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(AssetAuthoringService, SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath));
+            saveComponent.SetAssetReference(meshComponent, "Model", AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoalFlagCommonModelRelativePath, AssetEntryKind.Model));
+            saveComponent.SetAssetReference(meshComponent, "Materials[0]", AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath, AssetEntryKind.Material));
+            saveComponent.SetAssetReference(meshComponent, "Materials[1]", AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath, AssetEntryKind.Material));
         }
 
         /// <summary>
@@ -2034,7 +2034,7 @@ namespace city.game.tools {
             saveComponent.SetAssetReference(
                 meshComponent,
                 PlayerSphereMaterialReferenceName,
-                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(AssetAuthoringService, TiltTrialPlayerSphereMarbleMaterialRelativePath));
+                AssetAuthoringService.CreateFileReference(TiltTrialPlayerSphereMarbleMaterialRelativePath, AssetEntryKind.Material));
         }
 
         /// <summary>
@@ -2288,7 +2288,7 @@ namespace city.game.tools {
             saveComponent.SetAssetReference(
                 meshComponent,
                 CourseMaterialReferenceName,
-                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(AssetAuthoringService, TiltTrialCourseMaterialRelativePath));
+                AssetAuthoringService.CreateFileReference(TiltTrialCourseMaterialRelativePath, AssetEntryKind.Material));
         }
 
         /// <summary>
@@ -2618,7 +2618,7 @@ namespace city.game.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, "Font", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(AssetAuthoringService, fontPath));
+            saveComponent.SetAssetReference(component, "Font", AssetAuthoringService.CreateFileReference(fontPath, AssetEntryKind.Font));
         }
 
         /// <summary>

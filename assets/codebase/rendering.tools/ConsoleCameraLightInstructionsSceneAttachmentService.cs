@@ -3,7 +3,7 @@ using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
-    /// Attaches the shared console camera/light Blueprint and prunes the legacy overlay on console targets.
+    /// Attaches the shared console camera/light Blueprint on console targets.
     /// </summary>
     public sealed class ConsoleCameraLightInstructionsSceneAttachmentService {
         /// <summary>
@@ -35,25 +35,6 @@ namespace city.rendering.tools {
                 saveComponent.GetOrCreateExistencePlatformOverride(excludedPlatformIds[index]).Exists = false;
             }
             return root;
-        }
-
-        /// <summary>
-        /// Excludes the legacy duplicated overlay from the console targets while preserving Windows and handheld paths.
-        /// </summary>
-        /// <param name="projectRootPath">Project root used to resolve supported platform ids.</param>
-        /// <param name="legacyOverlayRoot">Existing desktop/handheld overlay root.</param>
-        public void ExcludeLegacyOverlayFromConsoles(string projectRootPath, Entity legacyOverlayRoot) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            } else if (legacyOverlayRoot == null) {
-                throw new ArgumentNullException(nameof(legacyOverlayRoot));
-            }
-
-            EntitySaveComponent saveComponent = EnsureEntitySaveComponent(legacyOverlayRoot);
-            for (int index = 0; index < ConsoleCameraLightInstructionsAssetCatalog.ConsolePlatformIds.Length; index++) {
-                string platformId = ConsoleCameraLightInstructionsAssetCatalog.ConsolePlatformIds[index];
-                saveComponent.GetOrCreateExistencePlatformOverride(platformId).Exists = false;
-            }
         }
 
         /// <summary>

@@ -24,7 +24,8 @@ namespace city.tests {
 
         [Fact]
         public void Generate_writes_coin_models_material_and_blueprint_with_ds_model_override() {
-            SplitPlayGoldenCoinAssetGenerator generator = new SplitPlayGoldenCoinAssetGenerator();
+            SplitPlayGoldenCoinAssetGenerator generator = new SplitPlayGoldenCoinAssetGenerator(
+                new TestEditorProjectAssetAuthoringService(ProjectRootPath));
 
             generator.Generate(ProjectRootPath);
 
@@ -89,6 +90,8 @@ namespace city.tests {
             Assert.True(commonModel.Indices16.Length > dsModel.Indices16.Length);
             Assert.Equal(commonModel.BoundsMin.Z, dsModel.BoundsMin.Z);
             Assert.Equal(commonModel.BoundsMax.Z, dsModel.BoundsMax.Z);
+            Assert.Equal("40000000000000000000000000000002", commonModel.AuthoringAssetId);
+            Assert.Equal("40000000000000000000000000000003", dsModel.AuthoringAssetId);
             Assert.Contains(
                 commonModel.Normals,
                 normal => normal.Z > 0.8f);
@@ -97,6 +100,7 @@ namespace city.tests {
                 normal => normal.Z < -0.8f);
             AssertAllTriangleWindingsAgreeWithNormals(commonModel);
             Assert.Equal("blueprints/games/tilt/GoldenCoin.hblueprint", blueprint.Id);
+            Assert.Equal("40000000000000000000000000000006", blueprint.AuthoringAssetId);
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "models/games/tilt/golden_coin.hasset");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "models/games/tilt/golden_coin_ds.hasset");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "materials/games/tilt/GoldenCoin.hasset");
@@ -132,6 +136,12 @@ namespace city.tests {
             SceneComponentAssetRecord idleMotionComponent = meshRoot.Components[2];
             Assert.Equal(2, idleMotionComponent.ComponentIndex);
             Assert.Contains("SplitPlayIdleMotionComponent", idleMotionComponent.ComponentTypeId, StringComparison.Ordinal);
+
+            byte[] firstModelBytes = File.ReadAllBytes(commonModelPath);
+            byte[] firstBlueprintBytes = File.ReadAllBytes(blueprintPath);
+            generator.Generate(ProjectRootPath);
+            Assert.Equal(firstModelBytes, File.ReadAllBytes(commonModelPath));
+            Assert.Equal(firstBlueprintBytes, File.ReadAllBytes(blueprintPath));
         }
 
         [Fact]

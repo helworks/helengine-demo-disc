@@ -51,8 +51,6 @@ namespace city.physics.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             } else if (Core.Instance == null) {
                 throw new InvalidOperationException("Generating Nintendo handheld physics scenes requires an active editor core.");
-            } else if (Core.Instance.ContentManager == null) {
-                throw new InvalidOperationException("Generating Nintendo handheld physics scenes requires Core.Instance.ContentManager.");
             }
 
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
@@ -115,14 +113,10 @@ namespace city.physics.tools {
             }
 
             ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create(ScriptTypeResolver);
-            EditorSceneAssetReferenceResolver referenceResolver = AssetAuthoringService.CreateSceneAssetReferenceResolver();
-            string authoredScenePath = Path.Combine(
-                fullProjectRootPath,
-                "assets",
-                PhysicsSceneFolderRelativePath.Replace('/', Path.DirectorySeparatorChar),
-                sceneEntry.SceneId + ".helen");
-            IReadOnlyList<string> supportedPlatformIds = new EditorProjectPlatformsService(fullProjectRootPath).Load().SupportedPlatforms;
-            SceneAsset authoredSceneAsset = LoadSceneAssetWithoutSharedMusic(authoredScenePath);
+            ISceneAssetReferenceResolver referenceResolver = AssetAuthoringService.CreateSceneAssetReferenceResolver();
+            IReadOnlyList<string> supportedPlatformIds = AssetAuthoringService.GetSupportedPlatformIds();
+            string authoredSceneRelativePath = PhysicsSceneFolderRelativePath + "/" + sceneEntry.SceneId + ".helen";
+            SceneAsset authoredSceneAsset = LoadSceneAssetWithoutSharedMusic(authoredSceneRelativePath);
             authoredSceneAsset.RootEntities = RemoveNintendoHandheldOnlyEntities(authoredSceneAsset.RootEntities, supportedPlatformIds);
             SceneLoadService sceneLoadService = new SceneLoadService(fullProjectRootPath, persistenceRegistry, referenceResolver);
             IReadOnlyList<EditorEntity> loadedRoots = sceneLoadService.Load(authoredSceneAsset);
@@ -329,16 +323,14 @@ namespace city.physics.tools {
         /// <summary>
         /// Loads one serialized physics scene asset and strips the shared generated music root so the editor scene loader never has to deserialize unsupported audio-backed component members.
         /// </summary>
-        /// <param name="authoredScenePath">Absolute path to the serialized physics scene asset.</param>
+        /// <param name="sceneRelativePath">Assets-relative path to the serialized physics scene asset.</param>
         /// <returns>Deserialized scene asset with the shared generated music root removed.</returns>
-        static SceneAsset LoadSceneAssetWithoutSharedMusic(string authoredScenePath) {
-            if (string.IsNullOrWhiteSpace(authoredScenePath)) {
-                throw new ArgumentException("Scene path must be provided.", nameof(authoredScenePath));
+        SceneAsset LoadSceneAssetWithoutSharedMusic(string sceneRelativePath) {
+            if (string.IsNullOrWhiteSpace(sceneRelativePath)) {
+                throw new ArgumentException("Scene path must be provided.", nameof(sceneRelativePath));
             }
 
-            using FileStream stream = File.OpenRead(authoredScenePath);
-            SceneAsset sceneAsset = global::helengine.editor.AssetSerializer.Deserialize(stream) as SceneAsset
-                ?? throw new InvalidOperationException($"Expected '{authoredScenePath}' to contain a SceneAsset payload.");
+            SceneAsset sceneAsset = AssetAuthoringService.LoadNativeAsset<SceneAsset>(sceneRelativePath);
             StripSharedSceneMusic(sceneAsset);
             return sceneAsset;
         }

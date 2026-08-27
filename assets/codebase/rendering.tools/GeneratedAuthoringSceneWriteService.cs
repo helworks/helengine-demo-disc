@@ -82,8 +82,7 @@ namespace city.rendering.tools {
             }
 
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
-            ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create();
-            SceneSaveService saveService = new SceneSaveService(fullProjectRootPath, persistenceRegistry);
+            ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create(ScriptTypeResolverValue);
             List<Entity> rootsToDispose = new List<Entity>();
 
             try {
@@ -92,7 +91,6 @@ namespace city.rendering.tools {
                 if (sceneDefinition.NintendoDsScene != null) {
                     Entity[] nintendoDsSceneRoots = BuildNintendoHandheldSceneRoots(
                         fullProjectRootPath,
-                        saveService,
                         sceneDefinition);
                     AddUniqueRoots(rootsToDispose, nintendoDsSceneRoots);
                     ExcludeRootsFromNintendoHandheldPlatforms(fullProjectRootPath, sceneDefinition.RootEntities);
@@ -102,11 +100,12 @@ namespace city.rendering.tools {
 
                 SaveSceneAsset(
                     fullProjectRootPath,
-                    saveService,
                     sceneDefinition.SceneId,
                     sceneDefinition.SceneAssetRelativePath,
                     sceneDefinition.SceneSettings,
-                    rootsToWrite);
+                    rootsToWrite,
+                    persistenceRegistry,
+                    sceneDefinition.AuthoringAssetId);
             } finally {
                 DisposeGeneratedRoots(rootsToDispose);
             }
@@ -116,17 +115,13 @@ namespace city.rendering.tools {
         /// Builds the Nintendo handheld root augmentation that should be merged into the canonical scene asset before it is saved.
         /// </summary>
         /// <param name="fullProjectRootPath">Absolute project root path.</param>
-        /// <param name="saveService">Scene save service used to materialize clone roots when the scaffold needs to mutate them.</param>
         /// <param name="sceneDefinition">Generated scene definition being persisted.</param>
         /// <returns>Nintendo handheld-only roots that should be appended to the canonical scene.</returns>
         Entity[] BuildNintendoHandheldSceneRoots(
             string fullProjectRootPath,
-            SceneSaveService saveService,
             GeneratedAuthoringSceneDefinition sceneDefinition) {
             if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
-            } else if (saveService == null) {
-                throw new ArgumentNullException(nameof(saveService));
             } else if (sceneDefinition == null) {
                 throw new ArgumentNullException(nameof(sceneDefinition));
             } else if (sceneDefinition.NintendoDsScene == null) {
@@ -139,12 +134,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset bottomOverlayFont = ResolveRequiredBottomOverlayFont(fullProjectRootPath);
-            Entity[] clonedTopScreenRoots = CloneSceneRoots(
-                fullProjectRootPath,
-                saveService,
-                sceneDefinition.SceneId,
-                sceneDefinition.SceneSettings,
-                sceneDefinition.RootEntities);
+            Entity[] clonedTopScreenRoots = CloneSceneRoots(sceneDefinition.RootEntities);
             return NintendoDsRenderingSceneScaffoldFactoryValue.CreateSceneRoots(
                 clonedTopScreenRoots,
                 sceneDefinition.NintendoDsScene.UseDefaultBottomOverlay,
@@ -180,39 +170,46 @@ namespace city.rendering.tools {
         /// Saves one generated scene asset with the supplied id, settings, and currently live generated roots.
         /// </summary>
         /// <param name="fullProjectRootPath">Absolute project root path.</param>
-        /// <param name="saveService">Scene save service writing the current editor scene.</param>
         /// <param name="sceneId">Project-relative scene id to persist.</param>
         /// <param name="sceneSettings">Scene-level settings to persist.</param>
         /// <param name="generatedRoots">Currently live generated roots visible to the serializer.</param>
         void SaveSceneAsset(
             string fullProjectRootPath,
-            SceneSaveService saveService,
             string sceneId,
             string sceneAssetRelativePath,
             SceneSettingsAsset sceneSettings,
-            Entity[] generatedRoots) {
+            Entity[] generatedRoots,
+            ComponentPersistenceRegistry persistenceRegistry,
+            string authoringAssetId) {
             if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
-            } else if (saveService == null) {
-                throw new ArgumentNullException(nameof(saveService));
             } else if (string.IsNullOrWhiteSpace(sceneId)) {
                 throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
             } else if (!string.IsNullOrWhiteSpace(sceneAssetRelativePath) && Path.IsPathRooted(sceneAssetRelativePath)) {
                 throw new ArgumentException("Scene asset relative path must be project-relative when provided.", nameof(sceneAssetRelativePath));
             } else if (generatedRoots == null) {
                 throw new ArgumentNullException(nameof(generatedRoots));
+            } else if (persistenceRegistry == null) {
+                throw new ArgumentNullException(nameof(persistenceRegistry));
             }
 
             string sceneRelativePathToSave = string.IsNullOrWhiteSpace(sceneAssetRelativePath)
                 ? sceneId
                 : sceneAssetRelativePath;
-            string scenePath = Path.Combine(fullProjectRootPath, "assets", sceneRelativePathToSave.Replace('/', Path.DirectorySeparatorChar));
             NormalizeGeneratedMenuRootInitialPanels(generatedRoots);
             MarkGeneratedRootsAsSceneOwned(generatedRoots);
             EditorEntitySceneOwnershipSnapshot[] hiddenRootSnapshots = HideNonTargetSceneRoots(generatedRoots);
 
             try {
-                saveService.Save(scenePath, sceneSettings ?? new SceneSettingsAsset());
+                string stableIdentity = string.IsNullOrWhiteSpace(authoringAssetId)
+                    ? ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneRelativePathToSave)
+                    : authoringAssetId;
+                AssetAuthoringServiceValue.WriteNativeScene(
+                    sceneRelativePathToSave,
+                    sceneSettings ?? new SceneSettingsAsset(),
+                    generatedRoots,
+                    persistenceRegistry,
+                    stableIdentity);
             } finally {
                 RestoreHiddenUserSceneRoots(hiddenRootSnapshots);
             }
@@ -222,67 +219,15 @@ namespace city.rendering.tools {
         /// Clones one generated scene root set through the editor serialization pipeline so Nintendo handheld scaffolding may mutate copies without rewriting the common authored roots.
         /// </summary>
         /// <param name="fullProjectRootPath">Absolute project root path.</param>
-        /// <param name="saveService">Scene save service used to serialize the supplied roots.</param>
-        /// <param name="sceneId">Stable scene id being cloned.</param>
-        /// <param name="sceneSettings">Scene settings persisted alongside the cloned roots.</param>
         /// <param name="sourceRoots">Root entities that should be cloned.</param>
-        /// <returns>Cloned editor roots loaded back from the temporary scene asset.</returns>
-        EditorEntity[] CloneSceneRoots(
-            string fullProjectRootPath,
-            SceneSaveService saveService,
-            string sceneId,
-            SceneSettingsAsset sceneSettings,
-            Entity[] sourceRoots) {
+        /// <returns>Detached editor roots cloned in memory.</returns>
+        EditorEntity[] CloneSceneRoots(Entity[] sourceRoots) {
             if (sourceRoots == null) {
                 throw new ArgumentNullException(nameof(sourceRoots));
             }
-            _ = fullProjectRootPath;
-            _ = saveService;
-            _ = sceneId;
-            _ = sceneSettings;
-
             EditorEntity[] clonedRoots = GeneratedSceneEntityCloneServiceValue.CloneRoots(sourceRoots);
             AssignFreshGeneratedEntityIds(clonedRoots);
             return clonedRoots;
-        }
-
-        /// <summary>
-        /// Builds the temporary project-relative clone path used by the handheld authoring clone pass.
-        /// </summary>
-        /// <param name="sceneId">Stable scene id being cloned.</param>
-        /// <returns>Project-relative temporary scene path used for the clone pass.</returns>
-        static string BuildTemporaryCloneSceneRelativePath(string sceneId) {
-            if (string.IsNullOrWhiteSpace(sceneId)) {
-                throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
-            }
-
-            string sceneFileName = Path.GetFileNameWithoutExtension(sceneId.Replace('\\', '/'));
-            if (string.IsNullOrWhiteSpace(sceneFileName)) {
-                sceneFileName = "scene";
-            }
-
-            return ".generated-build/scene-clones/" + sceneFileName + "_" + Guid.NewGuid().ToString("N") + ".helen";
-        }
-
-        /// <summary>
-        /// Creates the scene-file load service used by generated-scene clone and rewrite flows, including project script and file-backed asset resolution.
-        /// </summary>
-        /// <param name="fullProjectRootPath">Absolute city project root path.</param>
-        /// <returns>Configured scene-file load service.</returns>
-        SceneFileLoadService CreateSceneFileLoadService(string fullProjectRootPath) {
-            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
-            } else if (Core.Instance == null) {
-                throw new InvalidOperationException("Creating a generated-scene load service requires an active editor core.");
-            }
-
-            ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create(ScriptTypeResolverValue);
-            if (AssetAuthoringServiceValue == null) {
-                throw new InvalidOperationException("Generated scene loading requires the editor asset-authoring capability.");
-            }
-
-            EditorSceneAssetReferenceResolver referenceResolver = AssetAuthoringServiceValue.CreateSceneAssetReferenceResolver();
-            return new SceneFileLoadService(fullProjectRootPath, persistenceRegistry, referenceResolver);
         }
 
         /// <summary>
@@ -316,10 +261,6 @@ namespace city.rendering.tools {
                     editorRootEntity,
                     NintendoHandheldPlatformIds);
 
-                if (string.Equals(editorRootEntity.Name, "DemoSceneInstructionViewport", StringComparison.Ordinal)) {
-                    ConsoleCameraLightInstructionsSceneAttachmentService attachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
-                    attachmentService.ExcludeLegacyOverlayFromConsoles(fullProjectRootPath, editorRootEntity);
-                }
             }
         }
 

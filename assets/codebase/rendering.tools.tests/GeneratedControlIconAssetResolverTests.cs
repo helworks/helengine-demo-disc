@@ -189,9 +189,57 @@ namespace city.tests {
             public TextureAsset ResolveTextureAsset(string sourcePath) => throw new NotSupportedException();
 
             /// <summary>
+            /// Native asset writing is not used by these resolver tests.
+            /// </summary>
+            public void WriteNativeAsset(string relativePath, Asset asset) => throw new NotSupportedException();
+            public void WriteNativeAsset(string relativePath, Asset asset, string authoringAssetId) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Native scene writing is not used by these resolver tests.
+            /// </summary>
+            public void WriteNativeScene(
+                string relativePath,
+                SceneSettingsAsset sceneSettings,
+                Entity[] roots,
+                ComponentPersistenceRegistry persistenceRegistry,
+                string authoringAssetId) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Reference canonicalization is not used by these resolver tests.
+            /// </summary>
+            public bool CanonicalizeAssetReferences(Component component, EntityComponentSaveState saveState) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Native blueprint writing is not used by these resolver tests.
+            /// </summary>
+            public void WriteNativeBlueprint(string relativePath, ComponentPersistenceRegistry persistenceRegistry) => throw new NotSupportedException();
+            public void WriteNativeBlueprint(string relativePath, ComponentPersistenceRegistry persistenceRegistry, string authoringAssetId) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Generated cache writing is not used by these resolver tests.
+            /// </summary>
+            public void WriteGeneratedCacheAsset(string relativePath, Asset asset) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Native material writing is not used by these resolver tests.
+            /// </summary>
+            public void WriteNativeMaterial(string relativePath, GeneratedMaterialAssetDefinition definition) => throw new NotSupportedException();
+            public void WriteNativeMaterial(string relativePath, GeneratedMaterialAssetDefinition definition, string authoringAssetId) => throw new NotSupportedException();
+
+            /// <summary>
+            /// File reference creation is not used by these resolver tests.
+            /// </summary>
+            public SceneAssetReference CreateFileReference(string relativePath, AssetEntryKind expectedKind) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Native asset loading is not used by these resolver tests.
+            /// </summary>
+            public TAsset LoadNativeAsset<TAsset>(string relativePath) where TAsset : Asset => throw new NotSupportedException();
+
+            /// <summary>
             /// Scene reference resolution is not used by these tests.
             /// </summary>
-            public EditorSceneAssetReferenceResolver CreateSceneAssetReferenceResolver() => throw new NotSupportedException();
+            public ISceneAssetReferenceResolver CreateSceneAssetReferenceResolver() => throw new NotSupportedException();
 
             /// <summary>
             /// Imported texture lookup is not used by these tests.
@@ -200,6 +248,7 @@ namespace city.tests {
                 textureAsset = null;
                 return false;
             }
+            public IReadOnlyList<string> GetSupportedPlatformIds() => Array.Empty<string>();
         }
     }
 }

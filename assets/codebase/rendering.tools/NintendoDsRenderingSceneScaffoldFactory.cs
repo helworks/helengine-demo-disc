@@ -7,7 +7,15 @@ namespace city.rendering.tools {
     /// <summary>
     /// Builds the shared Nintendo DS dual-screen scaffold used by generated city rendering showcase companion scenes.
     /// </summary>
-    public sealed class NintendoDsRenderingSceneScaffoldFactory {
+public sealed class NintendoDsRenderingSceneScaffoldFactory {
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
+        /// Initializes the scaffold with the host-owned public asset authoring capability.
+        /// </summary>
+        public NintendoDsRenderingSceneScaffoldFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
         /// <summary>
         /// Fixed font scale used by the Nintendo DS default bottom overlay so debug text and the back button match the physics showcase sizing.
         /// </summary>
@@ -983,7 +991,7 @@ namespace city.rendering.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
+            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringService));
         }
 
         /// <summary>
@@ -1055,7 +1063,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
             }
 
-            return global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(relativePath.Replace('\\', '/'));
+            return global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(AssetAuthoringService, relativePath.Replace('\\', '/'));
         }
     }
 }

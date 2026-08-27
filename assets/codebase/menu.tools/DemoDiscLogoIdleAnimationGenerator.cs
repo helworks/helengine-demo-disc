@@ -45,7 +45,10 @@ namespace city.menu.tools {
                 ]
             };
 
-            AssetAuthoringService.WriteNativeAsset(AnimationRelativePath, animationClip);
+            AssetAuthoringService.WriteNativeAsset(
+                AnimationRelativePath,
+                animationClip,
+                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(AnimationRelativePath));
         }
     }
 }

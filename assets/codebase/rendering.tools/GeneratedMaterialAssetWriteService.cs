@@ -40,7 +40,10 @@ namespace city.rendering.tools {
                 }
             }
 
-            AssetAuthoringService.WriteNativeMaterial(relativePath, editorDefinition);
+            AssetAuthoringService.WriteNativeMaterial(
+                relativePath,
+                editorDefinition,
+                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetMaterialIdentity(relativePath));
         }
     }
 }

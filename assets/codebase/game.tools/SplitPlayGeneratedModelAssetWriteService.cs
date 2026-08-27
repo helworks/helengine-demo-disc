@@ -16,7 +16,10 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(modelAsset));
             }
 
-            AssetAuthoringService.WriteNativeAsset(relativePath, modelAsset);
+            AssetAuthoringService.WriteNativeAsset(
+                relativePath,
+                modelAsset,
+                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(relativePath));
         }
     }
 }

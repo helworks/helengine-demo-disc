@@ -45,7 +45,7 @@ namespace city.game.tools {
             foreach (global::city.game.TiltTrialLevelCatalogEntry levelEntry in global::city.game.TiltTrialLevelCatalog.CreateEntries()) {
                 string scenePath = ResolveAuthoredScenePath(fullProjectRootPath, levelEntry.SceneId);
                 SceneAsset sceneAsset = LoadScene(fullProjectRootPath, scenePath);
-                RemoveLegacyPresentationRoots(sceneAsset);
+                RemoveCurrentPresentationRoots(sceneAsset);
                 ApplyWindowsOnlyDebugRootOverride(sceneAsset);
                 AddPresentationRoot(fullProjectRootPath, sceneAsset, "TiltTrialConsolePresentation", TiltTrialGameplayPresentationBlueprintGenerator.ConsoleBlueprintRelativePath, CreateConsolePresentationPlatformOverrides());
                 AddPresentationRoot(fullProjectRootPath, sceneAsset, "TiltTrialHandheldPresentation", TiltTrialGameplayPresentationBlueprintGenerator.HandheldBlueprintRelativePath, CreateHandheldOnlyPlatformOverrides());
@@ -86,15 +86,15 @@ namespace city.game.tools {
         }
 
         /// <summary>
-        /// Removes only the old generated camera and desktop UI roots, preserving authored level geometry and gameplay roots.
+        /// Removes the current generated presentation roots so rerunning the authoring command is idempotent.
         /// </summary>
         /// <param name="sceneAsset">Scene being updated.</param>
-        void RemoveLegacyPresentationRoots(SceneAsset sceneAsset) {
+        void RemoveCurrentPresentationRoots(SceneAsset sceneAsset) {
             List<SceneEntityAsset> retainedRoots = new List<SceneEntityAsset>();
             SceneEntityAsset[] roots = sceneAsset.RootEntities ?? Array.Empty<SceneEntityAsset>();
             for (int index = 0; index < roots.Length; index++) {
                 SceneEntityAsset root = roots[index];
-                if (root == null || string.Equals(root.Name, "TiltTrialCamera", StringComparison.Ordinal) || string.Equals(root.Name, "TiltTrialUi", StringComparison.Ordinal)
+                if (root == null
                     || string.Equals(root.Name, "TiltTrialConsolePresentation", StringComparison.Ordinal)
                     || string.Equals(root.Name, "TiltTrialHandheldPresentation", StringComparison.Ordinal)) {
                     continue;
@@ -204,7 +204,10 @@ namespace city.game.tools {
         /// <param name="blueprintPath">Project-relative Blueprint asset path.</param>
         /// <param name="blueprintAsset">Blueprint asset to serialize.</param>
         void SaveBlueprintAsset(string blueprintPath, BlueprintAsset blueprintAsset) {
-            AssetAuthoringService.WriteNativeAsset(blueprintPath, blueprintAsset);
+            AssetAuthoringService.WriteNativeAsset(
+                blueprintPath,
+                blueprintAsset,
+                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(blueprintPath));
         }
 
         /// <summary>
@@ -365,7 +368,10 @@ namespace city.game.tools {
         /// <param name="sceneAsset">Scene asset to write.</param>
         void SaveScene(string projectRootPath, string scenePath, SceneAsset sceneAsset) {
             string relativePath = Path.GetRelativePath(Path.Combine(projectRootPath, "assets"), scenePath).Replace('\\', '/');
-            AssetAuthoringService.WriteNativeAsset(relativePath, sceneAsset);
+            AssetAuthoringService.WriteNativeAsset(
+                relativePath,
+                sceneAsset,
+                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(relativePath));
         }
     }
 }

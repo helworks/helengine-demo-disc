@@ -74,7 +74,10 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(assetAuthoringService));
             }
 
-            assetAuthoringService.WriteNativeAsset(ModelRelativePath, CreateModelAsset());
+            assetAuthoringService.WriteNativeAsset(
+                ModelRelativePath,
+                CreateModelAsset(),
+                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(ModelRelativePath));
         }
     }
 }

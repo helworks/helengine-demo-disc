@@ -22,8 +22,8 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            TiltTrialLevel01TessellationAuthoringService service = new TiltTrialLevel01TessellationAuthoringService();
-            service.ApplyToAuthoredLevel01Scene(context.ProjectRootPath);
+            TiltTrialLevel01TessellationAuthoringService service = new TiltTrialLevel01TessellationAuthoringService(context.AssetAuthoring);
+            service.ApplyToAuthoredLevel01Scene();
         }
     }
 }

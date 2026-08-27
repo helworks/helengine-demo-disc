@@ -6,6 +6,10 @@ namespace city.game.tools {
     /// </summary>
     public sealed class TiltTrialLevel01TessellationAuthoringService {
         /// <summary>
+        /// Host-owned capability used to read and rewrite the current authored scene.
+        /// </summary>
+        readonly helengine.editor.IEditorProjectAssetAuthoringService AssetAuthoringService;
+        /// <summary>
         /// Relative authored scene path for the playable first Tilt Trial level.
         /// </summary>
         const string Level01SceneRelativePath = "assets/scenes/games/tilt/tilt_trial_level_01.helen";
@@ -53,19 +57,25 @@ namespace city.game.tools {
         /// <summary>
         /// Applies PS2- and PSP-only tessellation metadata to the authored playable Level 01 scene without replacing its gameplay content.
         /// </summary>
-        /// <param name="projectRootPath">Project root that owns the authored Level 01 scene asset.</param>
-        public void ApplyToAuthoredLevel01Scene(string projectRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            }
+        /// <param name="assetAuthoringService">Host-owned capability used to read and rewrite the authored Level 01 scene asset.</param>
+        public TiltTrialLevel01TessellationAuthoringService(helengine.editor.IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
 
-            string scenePath = Path.Combine(Path.GetFullPath(projectRootPath), Level01SceneRelativePath);
-            SceneAsset sceneAsset = LoadScene(scenePath);
+        /// <summary>
+        /// Applies the configured tessellation metadata to the authored Level 01 scene.
+        /// </summary>
+        public void ApplyToAuthoredLevel01Scene() {
+            SceneAsset sceneAsset = AssetAuthoringService.LoadNativeAsset<SceneAsset>(Level01SceneRelativePath.Substring("assets/".Length));
             for (int index = 0; index < TessellatedEntityNames.Length; index++) {
                 ApplyTessellationToRequiredEntity(sceneAsset, TessellatedEntityNames[index]);
             }
 
-            SaveScene(projectRootPath, scenePath, sceneAsset);
+            string relativePath = Level01SceneRelativePath.Substring("assets/".Length);
+            AssetAuthoringService.WriteNativeAsset(
+                relativePath,
+                sceneAsset,
+                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(relativePath));
         }
 
         /// <summary>
@@ -184,36 +194,5 @@ namespace city.game.tools {
             return null;
         }
 
-        /// <summary>
-        /// Loads one serialized authored Level 01 scene asset.
-        /// </summary>
-        /// <param name="scenePath">Absolute scene file path.</param>
-        /// <returns>Deserialized scene asset.</returns>
-        SceneAsset LoadScene(string scenePath) {
-            if (!File.Exists(scenePath)) {
-                throw new FileNotFoundException("Tilt Trial Level 01 scene was not found.", scenePath);
-            }
-
-            using FileStream stream = File.OpenRead(scenePath);
-            Asset asset = helengine.editor.AssetSerializer.Deserialize(stream);
-            if (asset is SceneAsset sceneAsset) {
-                return sceneAsset;
-            }
-
-            throw new InvalidOperationException("Tilt Trial Level 01 file did not contain a SceneAsset.");
-        }
-
-        /// <summary>
-        /// Writes one modified Level 01 scene asset back to its original authored file path.
-        /// </summary>
-        /// <param name="scenePath">Absolute scene file path.</param>
-        /// <param name="sceneAsset">Modified scene asset to serialize.</param>
-        void SaveScene(string projectRootPath, string scenePath, SceneAsset sceneAsset) {
-            if (sceneAsset == null) {
-                throw new ArgumentNullException(nameof(sceneAsset));
-            }
-
-            new helengine.editor.GeneratedAssetWriteService().WriteAsset(projectRootPath, Level01SceneRelativePath.Substring("assets/".Length), sceneAsset);
-        }
     }
 }

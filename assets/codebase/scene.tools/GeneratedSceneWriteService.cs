@@ -20,7 +20,10 @@ namespace city.scene.tools {
                 throw new ArgumentNullException(nameof(assetAuthoringService));
             }
 
-            assetAuthoringService.WriteNativeAsset(sceneId, sceneAsset);
+            assetAuthoringService.WriteNativeAsset(
+                sceneId,
+                sceneAsset,
+                ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneId));
         }
     }
 }

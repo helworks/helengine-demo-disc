@@ -55,7 +55,10 @@ namespace city.game.tools {
             }
 
             try {
-                AssetAuthoringService.WriteNativeBlueprint(relativePath, GeneratedScenePersistenceRegistryFactory.Create());
+                AssetAuthoringService.WriteNativeBlueprint(
+                    relativePath,
+                    GeneratedScenePersistenceRegistryFactory.Create(),
+                    city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(relativePath));
             } finally {
                 root.Dispose();
             }

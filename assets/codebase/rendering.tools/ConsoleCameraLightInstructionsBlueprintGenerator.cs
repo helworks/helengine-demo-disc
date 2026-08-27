@@ -39,7 +39,9 @@ namespace city.rendering.tools {
             try {
                 AssetAuthoringService.WriteNativeBlueprint(
                     ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath,
-                    GeneratedScenePersistenceRegistryFactory.Create());
+                    GeneratedScenePersistenceRegistryFactory.Create(),
+                    city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(
+                        ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath));
             } finally {
                 root.Dispose();
             }

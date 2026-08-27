@@ -14,6 +14,11 @@ namespace city.rendering.tools {
         public string SceneAssetRelativePath { get; set; }
 
         /// <summary>
+        /// Gets or sets the explicit stable identity embedded in the generated native scene.
+        /// </summary>
+        public string AuthoringAssetId { get; set; }
+
+        /// <summary>
         /// Gets or sets the scene-level settings persisted with the generated scene.
         /// </summary>
         public SceneSettingsAsset SceneSettings { get; set; }

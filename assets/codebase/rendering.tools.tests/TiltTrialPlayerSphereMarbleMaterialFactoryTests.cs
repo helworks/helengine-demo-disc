@@ -10,7 +10,8 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Nintendo_ds_player_sphere_material_is_untextured() {
-            city.rendering.tools.TiltTrialPlayerSphereMarbleMaterialFactory factory = new city.rendering.tools.TiltTrialPlayerSphereMarbleMaterialFactory();
+            city.rendering.tools.TiltTrialPlayerSphereMarbleMaterialFactory factory = new city.rendering.tools.TiltTrialPlayerSphereMarbleMaterialFactory(
+                new city.tests.TestEditorProjectAssetAuthoringService(Path.Combine(Path.GetTempPath(), "city-marble-material-tests", Guid.NewGuid().ToString("N"))));
             MethodInfo createDefinitionMethod = typeof(city.rendering.tools.TiltTrialPlayerSphereMarbleMaterialFactory).GetMethod(
                 "CreateDefinition",
                 BindingFlags.Instance | BindingFlags.NonPublic)!;
@@ -31,7 +32,8 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Walnut_material_definition_uses_a_repeatable_authoring_identity() {
-            city.rendering.tools.TiltTrialPlayerSphereWalnutMaterialFactory factory = new city.rendering.tools.TiltTrialPlayerSphereWalnutMaterialFactory();
+            city.rendering.tools.TiltTrialPlayerSphereWalnutMaterialFactory factory = new city.rendering.tools.TiltTrialPlayerSphereWalnutMaterialFactory(
+                new city.tests.TestEditorProjectAssetAuthoringService(Path.Combine(Path.GetTempPath(), "city-walnut-material-tests", Guid.NewGuid().ToString("N"))));
             MethodInfo createDefinitionMethod = typeof(city.rendering.tools.TiltTrialPlayerSphereWalnutMaterialFactory).GetMethod(
                 "CreateDefinition",
                 BindingFlags.Instance | BindingFlags.NonPublic)!;

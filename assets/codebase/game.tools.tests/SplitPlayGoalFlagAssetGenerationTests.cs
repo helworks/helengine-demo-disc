@@ -24,7 +24,8 @@ namespace city.tests {
 
         [Fact]
         public void Generate_writes_goal_flag_models_materials_and_blueprint_with_ds_model_override() {
-            SplitPlayGoalFlagAssetGenerator generator = new SplitPlayGoalFlagAssetGenerator();
+            SplitPlayGoalFlagAssetGenerator generator = new SplitPlayGoalFlagAssetGenerator(
+                new TestEditorProjectAssetAuthoringService(ProjectRootPath));
 
             generator.Generate(ProjectRootPath);
 
@@ -63,7 +64,10 @@ namespace city.tests {
             AssertAllTriangleWindingsAgreeWithNormals(dsModel);
             Assert.Equal(2, commonModel.Submeshes.Length);
             Assert.Equal(2, dsModel.Submeshes.Length);
+            Assert.Equal("40000000000000000000000000000004", commonModel.AuthoringAssetId);
+            Assert.Equal("40000000000000000000000000000005", dsModel.AuthoringAssetId);
             Assert.Equal("blueprints/games/tilt/GoalFlag.hblueprint", blueprint.Id);
+            Assert.Equal("40000000000000000000000000000007", blueprint.AuthoringAssetId);
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "models/games/tilt/goal_flag.hasset");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "models/games/tilt/goal_flag_ds.hasset");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "materials/games/tilt/GoalFlagPole.hasset");
@@ -94,6 +98,12 @@ namespace city.tests {
             Assert.False(dsOverride.TryGetAssetReference("Materials[0]", out _));
             Assert.False(dsOverride.TryGetAssetReference("Materials[1]", out _));
             Assert.Equal(2, restoredMeshComponent.Materials.Length);
+
+            byte[] firstModelBytes = File.ReadAllBytes(commonModelPath);
+            byte[] firstBlueprintBytes = File.ReadAllBytes(blueprintPath);
+            generator.Generate(ProjectRootPath);
+            Assert.Equal(firstModelBytes, File.ReadAllBytes(commonModelPath));
+            Assert.Equal(firstBlueprintBytes, File.ReadAllBytes(blueprintPath));
         }
 
         static void AssertAllTriangleWindingsAgreeWithNormals(ModelAsset modelAsset) {

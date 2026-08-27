@@ -69,7 +69,7 @@ namespace city.game.tools {
         }
 
         /// <summary>
-        /// Regenerates only the Tilt Trial front-door scene without rewriting the other generated game scenes or shared rendering assets.
+        /// Regenerates the standard and handheld Tilt Trial selector scenes without rewriting gameplay levels or shared rendering assets.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         public void GenerateTiltTrialScene(string projectRootPath) {
@@ -83,6 +83,9 @@ namespace city.game.tools {
             GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue, AssetAuthoringService);
             GeneratedAuthoringSceneDefinition tiltTrialScene = factory.CreateTiltTrialScene();
             sceneWriteService.WriteScene(projectRootPath, tiltTrialScene);
+            TiltTrialHandheldLevelSelectSceneFactory handheldLevelSelectSceneFactory = new TiltTrialHandheldLevelSelectSceneFactory();
+            GeneratedAuthoringSceneDefinition handheldLevelSelectScene = handheldLevelSelectSceneFactory.Create(factory);
+            sceneWriteService.WriteScene(projectRootPath, handheldLevelSelectScene);
         }
     }
 }
