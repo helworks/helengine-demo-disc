@@ -116,7 +116,11 @@ namespace city.rendering.tools {
             string assetsRootPath = Path.Combine(fullProjectRootPath, "assets");
             AssetImportManager importManager = CreateAssetImportManager(fullProjectRootPath, assetsRootPath);
             string sourceTexturePath = Path.Combine(assetsRootPath, relativeTexturePath.Replace('/', Path.DirectorySeparatorChar));
+            bool settingsFileExists = File.Exists(sourceTexturePath + ".hasset");
             TextureAssetImportSettings settings = importManager.LoadOrCreateTextureImportSettings(sourceTexturePath);
+            if (!settingsFileExists) {
+                importManager.SaveTextureImportSettings(sourceTexturePath, settings);
+            }
             string assetId = settings.Importer.AssetId;
             if (string.IsNullOrWhiteSpace(assetId)) {
                 throw new InvalidOperationException($"PBR textured showcase requires a persisted imported texture asset id for '{relativeTexturePath}'.");

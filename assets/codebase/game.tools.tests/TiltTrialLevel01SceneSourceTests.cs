@@ -81,5 +81,43 @@ namespace city.tests {
             Assert.Contains("MeshBakeScaleMemberName = \"MeshBakeScale\"", serviceSource, StringComparison.Ordinal);
             Assert.Contains("pspOverride.SetMemberValue(MeshBakeScaleMemberName, true.ToString(CultureInfo.InvariantCulture))", serviceSource, StringComparison.Ordinal);
         }
+
+        /// <summary>
+        /// Ensures current scene authoring uses the surviving modifier-stack editor API instead of the removed tessellation settings service.
+        /// </summary>
+        [Fact]
+        public void Tessellation_authoring_sources_use_current_modifier_stack_api() {
+            string gameFactorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string levelServiceSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\TiltTrialLevel01TessellationAuthoringService.cs");
+            string depthProbeSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DepthClipProbeSceneFactory.cs");
+            string renderingTextureSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TexturedCubeGridSceneFactory.cs");
+            string physicsTextureSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs");
+            string iconResolverSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\GeneratedControlIconAssetResolver.cs");
+            string courseTextureSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialCourseTextureFactory.cs");
+            string pbrTextureSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\PbrTexturedShowcaseMaterialFactory.cs");
+            string walnutTextureSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialPlayerSphereWalnutMaterialFactory.cs");
+            string marbleTextureSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialPlayerSphereMarbleMaterialFactory.cs");
+            string clippingProbeTextureSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\TiltTrialClippingProbeTextureFactory.cs");
+
+            Assert.DoesNotContain("MeshComponentTessellationSettingsService", gameFactorySource, StringComparison.Ordinal);
+            Assert.DoesNotContain("MeshComponentTessellationSettingsService", levelServiceSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("MeshComponentTessellationSettingsService", depthProbeSource, StringComparison.Ordinal);
+            Assert.Contains("MeshComponentModifierStackService", gameFactorySource, StringComparison.Ordinal);
+            Assert.Contains("MeshComponentModifierStackService", levelServiceSource, StringComparison.Ordinal);
+            Assert.Contains("SetStack", gameFactorySource, StringComparison.Ordinal);
+            Assert.Contains("SetStack", levelServiceSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("AssetImportSettings settings = new AssetImportSettings", renderingTextureSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("AssetImportSettings settings = new AssetImportSettings", physicsTextureSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("TextureAssetImportSettingsBinarySerializer", renderingTextureSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("TextureAssetImportSettingsBinarySerializer", physicsTextureSource, StringComparison.Ordinal);
+            Assert.Contains("SaveTextureImportSettings", renderingTextureSource, StringComparison.Ordinal);
+            Assert.Contains("SaveTextureImportSettings", physicsTextureSource, StringComparison.Ordinal);
+            Assert.Contains("SaveTextureImportSettings", iconResolverSource, StringComparison.Ordinal);
+            Assert.Contains("SaveTextureImportSettings", courseTextureSource, StringComparison.Ordinal);
+            Assert.Contains("SaveTextureImportSettings", pbrTextureSource, StringComparison.Ordinal);
+            Assert.Contains("SaveTextureImportSettings", walnutTextureSource, StringComparison.Ordinal);
+            Assert.Contains("SaveTextureImportSettings", marbleTextureSource, StringComparison.Ordinal);
+            Assert.Contains("SaveTextureImportSettings", clippingProbeTextureSource, StringComparison.Ordinal);
+        }
     }
 }

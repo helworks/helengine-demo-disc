@@ -46,9 +46,9 @@ namespace city.game.tools {
         readonly ComponentPlatformOverridePayloadService OverridePayloadService = new ComponentPlatformOverridePayloadService();
 
         /// <summary>
-        /// Reads and writes detached MeshComponent tessellation settings.
+        /// Reads and writes the current detached MeshComponent modifier stack.
         /// </summary>
-        readonly MeshComponentTessellationSettingsService TessellationSettingsService = new MeshComponentTessellationSettingsService();
+        readonly MeshComponentModifierStackService ModifierStackService = new MeshComponentModifierStackService();
 
         /// <summary>
         /// Applies PS2- and PSP-only tessellation metadata to the authored playable Level 01 scene without replacing its gameplay content.
@@ -88,10 +88,14 @@ namespace city.game.tools {
             int meshComponentIndex = FindRequiredMeshComponentIndex(entity, entityName);
             SceneComponentAssetRecord componentRecord = entity.Components[meshComponentIndex];
             EntityComponentSaveState saveState = CreateSaveStateWithExistingPlatformOverrides(componentRecord);
-            MeshComponentTessellationSettings ps2Settings = new MeshComponentTessellationSettings(true, TessellationMaxEdgeLength);
-            MeshComponentTessellationSettings pspSettings = new MeshComponentTessellationSettings(true, TessellationMaxEdgeLength);
-            TessellationSettingsService.SetForPlatform(saveState, Ps2PlatformId, ps2Settings);
-            TessellationSettingsService.SetForPlatform(saveState, PspPlatformId, pspSettings);
+            MeshComponentModifier ps2Modifier = new MeshComponentModifier(MeshComponentModifier.TessellateKind) {
+                MaxEdgeLength = TessellationMaxEdgeLength
+            };
+            MeshComponentModifier pspModifier = new MeshComponentModifier(MeshComponentModifier.TessellateKind) {
+                MaxEdgeLength = TessellationMaxEdgeLength
+            };
+            ModifierStackService.SetStack(saveState, Ps2PlatformId, new[] { ps2Modifier });
+            ModifierStackService.SetStack(saveState, PspPlatformId, new[] { pspModifier });
             EntityComponentPlatformOverrideState pspOverride = saveState.GetOrCreatePlatformOverride(PspPlatformId);
             pspOverride.SetMemberValue(MeshBakeScaleMemberName, true.ToString(CultureInfo.InvariantCulture));
             SceneComponentAssetRecord baseRecord = OverridePayloadService.UnwrapBaseRecord(componentRecord);

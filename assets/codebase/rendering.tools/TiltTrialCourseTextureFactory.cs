@@ -58,7 +58,11 @@ namespace city.rendering.tools {
             }
 
             AssetImportManager importManager = CreateAssetImportManager(fullProjectRootPath, assetsRootPath);
+            bool settingsFileExists = File.Exists(fullTexturePath + ".hasset");
             TextureAssetImportSettings settings = importManager.LoadOrCreateTextureImportSettings(fullTexturePath);
+            if (!settingsFileExists) {
+                importManager.SaveTextureImportSettings(fullTexturePath, settings);
+            }
             string assetId = settings.Importer.AssetId;
             if (string.IsNullOrWhiteSpace(assetId)) {
                 throw new InvalidOperationException("Tilt Trial lilac grid texture requires one persisted imported texture asset id.");

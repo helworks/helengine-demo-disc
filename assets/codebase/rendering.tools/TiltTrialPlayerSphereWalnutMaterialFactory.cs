@@ -147,7 +147,11 @@ namespace city.rendering.tools {
             string assetsRootPath = Path.Combine(fullProjectRootPath, "assets");
             string sourceTexturePath = Path.Combine(assetsRootPath, TextureRelativePath.Replace('/', Path.DirectorySeparatorChar));
             AssetImportManager importManager = CreateAssetImportManager(fullProjectRootPath, assetsRootPath);
+            bool settingsFileExists = File.Exists(sourceTexturePath + ".hasset");
             TextureAssetImportSettings settings = importManager.LoadOrCreateTextureImportSettings(sourceTexturePath);
+            if (!settingsFileExists) {
+                importManager.SaveTextureImportSettings(sourceTexturePath, settings);
+            }
             string assetId = settings.Importer.AssetId;
             if (string.IsNullOrWhiteSpace(assetId)) {
                 throw new InvalidOperationException("Tilt Trial walnut material requires a persisted imported texture asset id.");

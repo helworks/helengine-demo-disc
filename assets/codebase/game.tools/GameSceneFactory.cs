@@ -163,9 +163,9 @@ namespace city.game.tools {
         readonly string ProjectRootPath;
 
         /// <summary>
-        /// Editor service used to store component-only tessellation metadata for constrained target platforms.
+        /// Editor service used to store current modifier-stack metadata for constrained target platforms.
         /// </summary>
-        readonly MeshComponentTessellationSettingsService MeshComponentTessellationSettingsServiceValue = new MeshComponentTessellationSettingsService();
+        readonly MeshComponentModifierStackService MeshComponentModifierStackServiceValue = new MeshComponentModifierStackService();
 
         /// <summary>
         /// Stable platform identifier used for PlayStation 2-specific scene cooking.
@@ -1774,9 +1774,11 @@ namespace city.game.tools {
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             EntityComponentSaveState saveState = saveComponent.GetOrCreateComponentState(meshComponent);
-            MeshComponentTessellationSettings settings = new MeshComponentTessellationSettings(true, TiltTrialRenderTestTessellationMaxEdgeLength);
-            MeshComponentTessellationSettingsServiceValue.SetForPlatform(saveState, Ps2PlatformId, settings);
-            MeshComponentTessellationSettingsServiceValue.SetForPlatform(saveState, PspPlatformId, settings);
+            MeshComponentModifier modifier = new MeshComponentModifier(MeshComponentModifier.TessellateKind) {
+                MaxEdgeLength = TiltTrialRenderTestTessellationMaxEdgeLength
+            };
+            MeshComponentModifierStackServiceValue.SetStack(saveState, Ps2PlatformId, new[] { modifier });
+            MeshComponentModifierStackServiceValue.SetStack(saveState, PspPlatformId, new[] { modifier });
         }
 
         /// <summary>

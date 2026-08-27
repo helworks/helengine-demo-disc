@@ -22,6 +22,7 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
+            new DemoDiscLogoIdleAnimationGenerator().Generate(context.ProjectRootPath);
             DemoDiscSceneGenerator generator = new DemoDiscSceneGenerator(context.ScriptTypeResolver);
             generator.Generate(context.ProjectRootPath);
         }

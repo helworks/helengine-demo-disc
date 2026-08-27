@@ -554,8 +554,8 @@ namespace city.rendering.tools {
             byte[] textureBytes = BuildTextureFileBytes(cubeIndex);
             File.WriteAllBytes(fullPath, textureBytes);
 
-            using FileStream stream = File.Create(fullPath + ".hasset");
-            AssetImportSettingsBinarySerializer.Serialize(stream, CreateTextureImportSettings(cubeIndex, textureBytes));
+            AssetImportManager importManager = GeneratedAuthoringSceneWriteService.CreateGeneratedSceneAssetImportManager(projectRootPath);
+            importManager.SaveTextureImportSettings(fullPath, CreateTextureImportSettings(cubeIndex, textureBytes));
             WriteTextureCacheAsset(projectRootPath, cubeIndex);
         }
 
@@ -632,22 +632,20 @@ namespace city.rendering.tools {
         /// <param name="cubeIndex">Stable zero-based cube index.</param>
         /// <param name="textureBytes">Texture source bytes written to disk.</param>
         /// <returns>Generated import-settings payload for the texture source.</returns>
-        AssetImportSettings CreateTextureImportSettings(int cubeIndex, byte[] textureBytes) {
+        TextureAssetImportSettings CreateTextureImportSettings(int cubeIndex, byte[] textureBytes) {
             if (cubeIndex < 0 || cubeIndex >= CubeTextureAssetIds.Length) {
                 throw new ArgumentOutOfRangeException(nameof(cubeIndex), "Cube index must address one generated texture.");
             } else if (textureBytes == null) {
                 throw new ArgumentNullException(nameof(textureBytes));
             }
 
-            AssetImportSettings settings = new AssetImportSettings();
+            TextureAssetImportSettings settings = new TextureAssetImportSettings();
             settings.Importer.ImporterId = TextureImporterId;
             settings.Importer.SourceChecksum = ComputeSourceChecksum(textureBytes);
             settings.Importer.AssetId = CubeTextureAssetIds[cubeIndex];
-            settings.Processor.Platforms["ps2"] = new AssetPlatformProcessorSettings {
-                Texture = new TextureAssetProcessorSettings {
-                    ColorFormat = TextureAssetColorFormat.Indexed8,
-                    AlphaPrecision = TextureAssetAlphaPrecision.A8
-                }
+            settings.Processor.Platforms["ps2"] = new TextureAssetProcessorSettings {
+                ColorFormat = TextureAssetColorFormat.Indexed8,
+                AlphaPrecision = TextureAssetAlphaPrecision.A8
             };
             return settings;
         }

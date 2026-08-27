@@ -2060,8 +2060,8 @@ namespace city.physics.tools {
             Directory.CreateDirectory(directoryPath);
             File.WriteAllBytes(fullPath, PhysicsDemoSphereTileTextureBytes);
 
-            using FileStream stream = File.Create(fullPath + ".hasset");
-            AssetImportSettingsBinarySerializer.Serialize(stream, CreateSphereTileTextureImportSettings(PhysicsDemoSphereTileTextureBytes));
+            AssetImportManager importManager = global::city.rendering.tools.GeneratedAuthoringSceneWriteService.CreateGeneratedSceneAssetImportManager(projectRootPath);
+            importManager.SaveTextureImportSettings(fullPath, CreateSphereTileTextureImportSettings(PhysicsDemoSphereTileTextureBytes));
         }
 
         /// <summary>
@@ -2089,12 +2089,12 @@ namespace city.physics.tools {
         /// </summary>
         /// <param name="textureBytes">Generated authored texture bytes whose checksum should be persisted into the sidecar.</param>
         /// <returns>Import settings that match the generated sphere-stack tile texture source.</returns>
-        static AssetImportSettings CreateSphereTileTextureImportSettings(byte[] textureBytes) {
+        static TextureAssetImportSettings CreateSphereTileTextureImportSettings(byte[] textureBytes) {
             if (textureBytes == null) {
                 throw new ArgumentNullException(nameof(textureBytes));
             }
 
-            AssetImportSettings settings = new AssetImportSettings();
+            TextureAssetImportSettings settings = new TextureAssetImportSettings();
             settings.Importer.ImporterId = TextureImporterId;
             settings.Importer.SourceChecksum = ComputeSourceChecksum(textureBytes);
             settings.Importer.AssetId = PhysicsDemoSphereTileTextureAssetId;

@@ -24,7 +24,11 @@ namespace city.rendering.tools {
             }
 
             AssetImportManager importManager = CreateImportManager(fullProjectRootPath);
+            bool settingsFileExists = File.Exists(fullSourcePath + ".hasset");
             TextureAssetImportSettings settings = importManager.LoadOrCreateTextureImportSettings(fullSourcePath);
+            if (!settingsFileExists) {
+                importManager.SaveTextureImportSettings(fullSourcePath, settings);
+            }
             if (settings == null || settings.Importer == null || string.IsNullOrWhiteSpace(settings.Importer.AssetId)) {
                 throw new InvalidOperationException($"Generated control icon '{relativePath}' did not produce a persisted imported texture asset id.");
             }
