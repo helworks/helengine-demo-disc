@@ -243,40 +243,8 @@ namespace city.menu {
             }
 
             BackgroundRectangle = ResolveBackgroundRectangle(BackgroundSpriteEntityReference);
-            LogoSprite = ResolveSpriteReferenceOrAuthoredRole(LogoSpriteEntityReference, "logo", true);
+            LogoSprite = FindRequiredSprite(LogoSpriteEntityReference, "logo");
             SetSpriteAlpha(0);
-        }
-
-        /// <summary>
-        /// Resolves a serialized sprite entity reference, retaining an authored-role fallback for legacy scenes whose reference payload predates stable ids.
-        /// </summary>
-        /// <param name="entityReference">Stable reference identifying the sprite entity.</param>
-        /// <param name="description">Human-readable role of the required sprite.</param>
-        /// <param name="requiresTexture">Whether the authored sprite role must have a loaded texture.</param>
-        /// <returns>The required splash sprite component.</returns>
-        SpriteComponent ResolveSpriteReferenceOrAuthoredRole(SceneEntityReference entityReference, string description, bool requiresTexture) {
-            if (entityReference != null && entityReference.EntityId != 0u) {
-                return FindRequiredSprite(entityReference, description);
-            }
-
-            if (Parent == null || Parent.Children == null) {
-                throw new InvalidOperationException($"Helen of Code splash cannot resolve its authored {description} sprite role.");
-            }
-
-            for (int childIndex = 0; childIndex < Parent.Children.Count; childIndex++) {
-                Entity childEntity = Parent.Children[childIndex];
-                if (childEntity == null || childEntity.Components == null) {
-                    continue;
-                }
-
-                for (int componentIndex = 0; componentIndex < childEntity.Components.Count; componentIndex++) {
-                    if (childEntity.Components[componentIndex] is SpriteComponent spriteComponent && (spriteComponent.Texture != null) == requiresTexture) {
-                        return spriteComponent;
-                    }
-                }
-            }
-
-            throw new InvalidOperationException($"Helen of Code splash could not resolve its authored {description} sprite role.");
         }
 
         /// <summary>
@@ -285,28 +253,7 @@ namespace city.menu {
         /// <param name="entityReference">Stable reference identifying the authored background entity.</param>
         /// <returns>The required background rectangle component.</returns>
         RoundedRectComponent ResolveBackgroundRectangle(SceneEntityReference entityReference) {
-            if (entityReference != null && entityReference.EntityId != 0u) {
-                return FindRequiredBackgroundRectangle(entityReference);
-            }
-
-            if (Parent == null || Parent.Children == null) {
-                throw new InvalidOperationException("Helen of Code splash cannot resolve its authored background role.");
-            }
-
-            for (int childIndex = 0; childIndex < Parent.Children.Count; childIndex++) {
-                Entity childEntity = Parent.Children[childIndex];
-                if (childEntity == null || childEntity.Components == null) {
-                    continue;
-                }
-
-                for (int componentIndex = 0; componentIndex < childEntity.Components.Count; componentIndex++) {
-                    if (childEntity.Components[componentIndex] is RoundedRectComponent backgroundRectangle) {
-                        return backgroundRectangle;
-                    }
-                }
-            }
-
-            throw new InvalidOperationException("Helen of Code splash could not resolve its authored background role.");
+            return FindRequiredBackgroundRectangle(entityReference);
         }
 
         /// <summary>

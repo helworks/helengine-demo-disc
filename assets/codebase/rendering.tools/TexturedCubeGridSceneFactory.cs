@@ -312,8 +312,8 @@ namespace city.rendering.tools {
         /// Initializes the textured cube-grid scene factory with the descriptors and services required for authored output.
         /// </summary>
         public TexturedCubeGridSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService();
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(AssetAuthoringService);
         }
 
         /// <summary>
@@ -357,7 +357,7 @@ namespace city.rendering.tools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
-            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
             rootEntities[0] = cameraEntity;
             rootEntities[1] = instructionOverlayEntity;
             rootEntities[2] = consoleInstructionBlueprintEntity;
@@ -432,7 +432,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
-            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("TexturedCubeGridUi", "3. Textured Cubes");
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("TexturedCubeGridUi", "3. Textured Cubes");
         }
 
         /// <summary>
@@ -561,24 +561,15 @@ namespace city.rendering.tools {
             File.WriteAllBytes(fullPath, textureBytes);
 
             AssetAuthoringService.SaveTextureImportSettings(fullPath, CreateTextureImportSettings(cubeIndex, textureBytes));
-            WriteTextureCacheAsset(projectRootPath, cubeIndex);
+            WriteTextureCacheAsset(cubeIndex);
         }
 
         /// <summary>
         /// Writes one serialized cached <see cref="TextureAsset"/> for the supplied generated source texture so the build pipeline can package it without requiring a separate import pass.
         /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <param name="cubeIndex">Stable zero-based cube index.</param>
-        void WriteTextureCacheAsset(string projectRootPath, int cubeIndex) {
-            string cachePath = Path.Combine(projectRootPath, "cache", CubeTextureAssetIds[cubeIndex]);
-            string directoryPath = Path.GetDirectoryName(cachePath);
-            if (string.IsNullOrWhiteSpace(directoryPath)) {
-                throw new InvalidOperationException($"Could not resolve a texture cache directory for '{CubeTextureAssetIds[cubeIndex]}'.");
-            }
-
-            Directory.CreateDirectory(directoryPath);
-            using FileStream stream = File.Create(cachePath);
-            global::helengine.editor.AssetSerializer.Serialize(stream, CreateTextureAsset(cubeIndex));
+        void WriteTextureCacheAsset(int cubeIndex) {
+            AssetAuthoringService.WriteGeneratedCacheAsset(CubeTextureAssetIds[cubeIndex], CreateTextureAsset(cubeIndex));
         }
 
         /// <summary>
@@ -588,7 +579,7 @@ namespace city.rendering.tools {
         /// <param name="cubeIndex">Stable zero-based cube index.</param>
         void WriteMaterialAsset(string projectRootPath, int cubeIndex) {
             string relativePath = CubeMaterialRelativePaths[cubeIndex];
-            MaterialWriteService.WriteMaterial(projectRootPath, relativePath, CreateGeneratedMaterialDefinition(cubeIndex));
+            MaterialWriteService.WriteMaterial(relativePath, CreateGeneratedMaterialDefinition(cubeIndex));
         }
 
         /// <summary>

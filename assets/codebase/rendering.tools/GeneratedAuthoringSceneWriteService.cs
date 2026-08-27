@@ -39,12 +39,24 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one generated authored-scene writer.
         /// </summary>
-        /// <param name="scriptTypeResolver">Optional resolver used to restore project-authored components during temporary clone loads.</param>
-        /// <param name="assetAuthoringService">Host-owned asset-authoring capability used to resolve source assets.</param>
+        /// <param name="assetAuthoringService">Required host-owned asset-authoring capability used to resolve source assets.</param>
+        public GeneratedAuthoringSceneWriteService(IEditorProjectAssetAuthoringService assetAuthoringService)
+            : this(null, assetAuthoringService) {
+        }
+
+        /// <summary>
+        /// Initializes one generated authored-scene writer with a project component resolver and the required host capability.
+        /// </summary>
+        /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary clone loads.</param>
+        /// <param name="assetAuthoringService">Required host-owned asset-authoring capability used to resolve source assets.</param>
         public GeneratedAuthoringSceneWriteService(
-            IScriptTypeResolver scriptTypeResolver = null,
-            IEditorProjectAssetAuthoringService assetAuthoringService = null) {
-            NintendoDsRenderingSceneScaffoldFactoryValue = new NintendoDsRenderingSceneScaffoldFactory();
+            IScriptTypeResolver scriptTypeResolver,
+            IEditorProjectAssetAuthoringService assetAuthoringService) {
+            if (assetAuthoringService == null) {
+                throw new ArgumentNullException(nameof(assetAuthoringService));
+            }
+
+            NintendoDsRenderingSceneScaffoldFactoryValue = new NintendoDsRenderingSceneScaffoldFactory(assetAuthoringService);
             PlatformSceneAuthoringHelperServiceValue = new PlatformSceneAuthoringHelperService();
             GeneratedSceneEntityCloneServiceValue = new GeneratedSceneEntityCloneService();
             ScriptTypeResolverValue = scriptTypeResolver;
@@ -151,7 +163,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
             }
 
-            SceneAssetReference fontReference = DemoDiscSceneComponentRecordFactory.CreateEditorFontReference();
+            SceneAssetReference fontReference = DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringServiceValue);
             if (fontReference == null || fontReference.SourceKind != SceneAssetReferenceSourceKind.FileSystem || string.IsNullOrWhiteSpace(fontReference.RelativePath)) {
                 throw new InvalidOperationException("The demo-disc body font reference must resolve to one file-backed source font path.");
             }

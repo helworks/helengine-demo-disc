@@ -51,7 +51,7 @@ namespace city.rendering.tools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
-            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -147,7 +147,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored UI root entity.</returns>
         Entity CreateUiEntity() {
-            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("CubeTestUi", "1. Cube Test");
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("CubeTestUi", "1. Cube Test");
         }
 
         /// <summary>

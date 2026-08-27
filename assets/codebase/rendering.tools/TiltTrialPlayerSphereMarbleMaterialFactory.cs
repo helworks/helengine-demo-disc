@@ -139,8 +139,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one marble material factory.
         /// </summary>
-        public TiltTrialPlayerSphereMarbleMaterialFactory() {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService();
+        public TiltTrialPlayerSphereMarbleMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
         }
 
         /// <summary>
@@ -154,7 +154,6 @@ namespace city.rendering.tools {
 
             (string diffuseTextureAssetId, string roughnessTextureAssetId) = ResolveTextureAssetIds(projectRootPath, assetAuthoringService);
             MaterialWriteService.WriteMaterial(
-                projectRootPath,
                 MaterialRelativePath,
                 CreateDefinition(diffuseTextureAssetId, roughnessTextureAssetId));
         }

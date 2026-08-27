@@ -32,7 +32,7 @@ namespace city.menu.tools {
                 context.ProjectRootPath,
                 assets.GeneratedCubeModel,
                 factory.CreateRuntimeMaterials());
-            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(context.ScriptTypeResolver);
+            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(context.ScriptTypeResolver, context.AssetAuthoring);
             sceneWriteService.WriteScene(context.ProjectRootPath, sceneDefinition);
         }
     }

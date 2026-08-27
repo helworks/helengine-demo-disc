@@ -8,6 +8,14 @@ namespace city.menu.tools {
     /// Authors the additive Helen of Code splash scene used before the standard demo-disc menu.
     /// </summary>
     public sealed class HelenOfCodeSplashSceneFactory {
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
+        /// Initializes the splash factory with the host-owned public asset authoring capability.
+        /// </summary>
+        public HelenOfCodeSplashSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
         /// <summary>
         /// Stable scene id used by the startup package and runtime self-unload request.
         /// </summary>
@@ -186,7 +194,7 @@ namespace city.menu.tools {
             saveComponent.SetAssetReference(
                 component,
                 TextureAssetScenePersistenceSupport.TextureReferenceName,
-                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(texturePath));
+                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(AssetAuthoringService, texturePath));
         }
 
         /// <summary>

@@ -31,7 +31,7 @@ namespace city.physics.tools {
                 throw new InvalidOperationException("Physics scene generation requires the editor default font for the console instruction Blueprint.");
             }
 
-            ConsoleCameraLightInstructionsBlueprintGenerator consoleInstructionBlueprintGenerator = new ConsoleCameraLightInstructionsBlueprintGenerator();
+            ConsoleCameraLightInstructionsBlueprintGenerator consoleInstructionBlueprintGenerator = new ConsoleCameraLightInstructionsBlueprintGenerator(AssetAuthoringService);
             consoleInstructionBlueprintGenerator.Generate(
                 projectRootPath,
                 new DemoSceneInstructionOverlayFactory(AssetAuthoringService),

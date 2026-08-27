@@ -249,9 +249,9 @@ namespace city.rendering.tools {
             AxisTestFactory = new AxisTestSceneFactory(AssetAuthoringService);
             AxisTest2Factory = new AxisTest2SceneFactory(AssetAuthoringService);
             SceneMemoryProbeFactory = new SceneMemoryProbeSceneFactory();
-            PbrMaterialGalleryMaterials = new PbrMaterialGalleryMaterialFactory();
+            PbrMaterialGalleryMaterials = new PbrMaterialGalleryMaterialFactory(AssetAuthoringService);
             PbrMaterialGalleryScene = new PbrMaterialGallerySceneFactory(AssetAuthoringService);
-            PbrTexturedShowcaseMaterials = new PbrTexturedShowcaseMaterialFactory();
+            PbrTexturedShowcaseMaterials = new PbrTexturedShowcaseMaterialFactory(AssetAuthoringService);
             PbrTexturedShowcaseScene = new PbrTexturedShowcaseSceneFactory(AssetAuthoringService);
             PbrShadowTheaterScene = new PbrShadowTheaterSceneFactory(AssetAuthoringService);
             MatrixRenderFactory = new MatrixRenderSceneFactory(AssetAuthoringService);
@@ -299,7 +299,7 @@ namespace city.rendering.tools {
                 throw new InvalidOperationException("Rendering scene generation requires the editor default font for the console instruction Blueprint.");
             }
 
-            ConsoleCameraLightInstructionsBlueprintGenerator consoleInstructionBlueprintGenerator = new ConsoleCameraLightInstructionsBlueprintGenerator();
+            ConsoleCameraLightInstructionsBlueprintGenerator consoleInstructionBlueprintGenerator = new ConsoleCameraLightInstructionsBlueprintGenerator(AssetAuthoringService);
             consoleInstructionBlueprintGenerator.Generate(
                 projectRootPath,
                 new DemoSceneInstructionOverlayFactory(AssetAuthoringService),

@@ -87,11 +87,13 @@ namespace city.game.tools {
         readonly SplitPlayGeneratedModelAssetWriteService ModelWriteService;
         readonly SplitPlayGeneratedBlueprintAssetWriteService BlueprintWriteService;
         readonly CityGeneratedMaterialAssetWriteService MaterialWriteService;
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
 
-        public TiltTrialPendulumHammerAssetGenerator() {
-            ModelWriteService = new SplitPlayGeneratedModelAssetWriteService();
-            BlueprintWriteService = new SplitPlayGeneratedBlueprintAssetWriteService();
-            MaterialWriteService = new CityGeneratedMaterialAssetWriteService();
+        public TiltTrialPendulumHammerAssetGenerator(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            ModelWriteService = new SplitPlayGeneratedModelAssetWriteService(AssetAuthoringService);
+            BlueprintWriteService = new SplitPlayGeneratedBlueprintAssetWriteService(AssetAuthoringService);
+            MaterialWriteService = new CityGeneratedMaterialAssetWriteService(AssetAuthoringService);
         }
 
         /// <summary>
@@ -100,32 +102,27 @@ namespace city.game.tools {
         /// <param name="projectRootPath">Project root that owns the assets folder.</param>
         public void Generate(string projectRootPath) {
             ModelWriteService.WriteModel(
-                projectRootPath,
                 PendulumHammerCommonModelRelativePath,
                 CreatePendulumHammerModel(PendulumHammerCommonModelAssetId, 18));
             ModelWriteService.WriteModel(
-                projectRootPath,
                 PendulumHammerDsModelRelativePath,
                 CreatePendulumHammerModel(PendulumHammerDsModelAssetId, 8));
             MaterialWriteService.WriteMaterial(
-                projectRootPath,
                 PendulumHammerHandleMaterialRelativePath,
                 CreateMaterialDefinition(PendulumHammerHandleMaterialAssetId, "#8A5A2BFF", 0.78f, 0.02f, false));
             MaterialWriteService.WriteMaterial(
-                projectRootPath,
                 PendulumHammerHeadMaterialRelativePath,
                 CreateMaterialDefinition(PendulumHammerHeadMaterialAssetId, "#B7BDC9FF", 0.35f, 0.85f, false));
             BlueprintWriteService.WriteBlueprint(
-                projectRootPath,
                 PendulumHammerBlueprintRelativePath,
                 CreateBlueprintAsset(projectRootPath));
         }
 
         BlueprintAsset CreateBlueprintAsset(string projectRootPath) {
-            SceneAssetReference commonModelReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, PendulumHammerCommonModelRelativePath, AssetEntryKind.Model);
-            SceneAssetReference dsModelReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, PendulumHammerDsModelRelativePath, AssetEntryKind.Model);
-            SceneAssetReference handleMaterialReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, PendulumHammerHandleMaterialRelativePath, AssetEntryKind.Material);
-            SceneAssetReference headMaterialReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, PendulumHammerHeadMaterialRelativePath, AssetEntryKind.Material);
+            SceneAssetReference commonModelReference = AssetAuthoringService.CreateFileReference(PendulumHammerCommonModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference dsModelReference = AssetAuthoringService.CreateFileReference(PendulumHammerDsModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference handleMaterialReference = AssetAuthoringService.CreateFileReference(PendulumHammerHandleMaterialRelativePath, AssetEntryKind.Material);
+            SceneAssetReference headMaterialReference = AssetAuthoringService.CreateFileReference(PendulumHammerHeadMaterialRelativePath, AssetEntryKind.Material);
 
             MeshComponent meshComponent = new MeshComponent();
             meshComponent.Materials = new RuntimeMaterial[] { null, null };

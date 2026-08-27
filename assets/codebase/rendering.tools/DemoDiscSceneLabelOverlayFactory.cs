@@ -1,5 +1,6 @@
 namespace city.rendering.tools {
     public sealed class DemoDiscSceneLabelOverlayFactory {
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
         const string LabelEntityName = "DemoDiscSceneLabelText";
         const string FontReferenceName = "Font";
         const string NintendoDsPlatformId = "ds";
@@ -12,6 +13,10 @@ namespace city.rendering.tools {
         const int SceneLabelHeight = 56;
         const float SceneLabelFontScale = 1.35f;
         const int SceneLabelRenderOrder = 7;
+        public DemoDiscSceneLabelOverlayFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
+
         public void AttachToSceneUi(Entity sceneUiEntity, FontAsset font, string labelText) {
             if (sceneUiEntity == null) {
                 throw new ArgumentNullException(nameof(sceneUiEntity));
@@ -43,7 +48,7 @@ namespace city.rendering.tools {
             saveComponent.SetAssetReference(
                 labelComponent,
                 FontReferenceName,
-                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(SceneLabelFontRelativePath));
+                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(AssetAuthoringService, SceneLabelFontRelativePath));
             sceneUiEntity.AddComponent(new city.rendering.DemoDiscDebugSceneLabelComponent());
             saveComponent.GetOrCreateExistencePlatformOverride(NintendoDsPlatformId).Exists = false;
             saveComponent.GetOrCreateExistencePlatformOverride(Nintendo3DsPlatformId).Exists = false;

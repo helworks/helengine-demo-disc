@@ -12,6 +12,11 @@ namespace city.game.tools {
         readonly IScriptTypeResolver ScriptTypeResolverValue;
 
         /// <summary>
+        /// Host-owned capability used to load, reference, and rewrite current native assets.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
         /// Platform ids that should receive only the handheld presentation root.
         /// </summary>
         static readonly string[] HandheldOnlyPlatformIds = ["windows", "ps2", "psp", "gamecube", "wii", "wiiu", "psvita", "switch"];
@@ -20,8 +25,10 @@ namespace city.game.tools {
         /// Initializes one Tilt Trial presentation attachment service.
         /// </summary>
         /// <param name="scriptTypeResolver">Editor resolver for generated project component types.</param>
-        public TiltTrialGameplayPresentationAttachmentService(IScriptTypeResolver scriptTypeResolver = null) {
+        /// <param name="assetAuthoringService">Host-owned capability for current native asset authoring.</param>
+        public TiltTrialGameplayPresentationAttachmentService(IScriptTypeResolver scriptTypeResolver, IEditorProjectAssetAuthoringService assetAuthoringService) {
             ScriptTypeResolverValue = scriptTypeResolver;
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
 
         /// <summary>
@@ -37,12 +44,12 @@ namespace city.game.tools {
             ApplyWindowsOnlyDebugStatusOverrideToConsoleBlueprint(fullProjectRootPath);
             foreach (global::city.game.TiltTrialLevelCatalogEntry levelEntry in global::city.game.TiltTrialLevelCatalog.CreateEntries()) {
                 string scenePath = ResolveAuthoredScenePath(fullProjectRootPath, levelEntry.SceneId);
-                SceneAsset sceneAsset = LoadScene(scenePath);
+                SceneAsset sceneAsset = LoadScene(fullProjectRootPath, scenePath);
                 RemoveLegacyPresentationRoots(sceneAsset);
                 ApplyWindowsOnlyDebugRootOverride(sceneAsset);
                 AddPresentationRoot(fullProjectRootPath, sceneAsset, "TiltTrialConsolePresentation", TiltTrialGameplayPresentationBlueprintGenerator.ConsoleBlueprintRelativePath, CreateConsolePresentationPlatformOverrides());
                 AddPresentationRoot(fullProjectRootPath, sceneAsset, "TiltTrialHandheldPresentation", TiltTrialGameplayPresentationBlueprintGenerator.HandheldBlueprintRelativePath, CreateHandheldOnlyPlatformOverrides());
-                SaveScene(projectRootPath, scenePath, sceneAsset);
+                SaveScene(fullProjectRootPath, scenePath, sceneAsset);
             }
         }
 
@@ -71,14 +78,11 @@ namespace city.game.tools {
         /// </summary>
         /// <param name="scenePath">Absolute scene asset path.</param>
         /// <returns>Loaded scene asset.</returns>
-        SceneAsset LoadScene(string scenePath) {
-            using FileStream stream = File.OpenRead(scenePath);
-            Asset asset = helengine.editor.AssetSerializer.Deserialize(stream);
-            if (asset is SceneAsset sceneAsset) {
-                return sceneAsset;
-            }
-
-            throw new InvalidOperationException($"Authored Tilt Trial file '{scenePath}' did not contain a SceneAsset.");
+        SceneAsset LoadScene(string projectRootPath, string scenePath) {
+            string relativePath = Path.GetRelativePath(
+                Path.Combine(projectRootPath, "assets"),
+                scenePath).Replace('\\', '/');
+            return AssetAuthoringService.LoadNativeAsset<SceneAsset>(relativePath);
         }
 
         /// <summary>
@@ -127,14 +131,14 @@ namespace city.game.tools {
         /// <param name="projectRootPath">Absolute project root that owns the presentation Blueprint.</param>
         void ApplyWindowsOnlyDebugStatusOverrideToConsoleBlueprint(string projectRootPath) {
             string blueprintPath = TiltTrialGameplayPresentationBlueprintGenerator.ConsoleBlueprintRelativePath;
-            BlueprintAsset blueprintAsset = LoadBlueprintAsset(projectRootPath, blueprintPath);
+            BlueprintAsset blueprintAsset = LoadBlueprintAsset(blueprintPath);
             SceneEntityAsset statusText = FindEntityByName(blueprintAsset.RootEntity, "TiltTrialPhysicsBoundsStatusText");
             if (statusText == null) {
                 throw new InvalidOperationException("Tilt Trial console presentation Blueprint is missing the Windows-only physics bounds status row.");
             }
 
             statusText.PlatformExistenceOverrides = CreateWindowsOnlyDebugStatusOverrides();
-            SaveBlueprintAsset(projectRootPath, blueprintPath, blueprintAsset);
+            SaveBlueprintAsset(blueprintPath, blueprintAsset);
         }
 
         /// <summary>
@@ -158,12 +162,11 @@ namespace city.game.tools {
 
             ComponentPersistenceRegistry registry = GeneratedScenePersistenceRegistryFactory.Create(ScriptTypeResolverValue);
             BlueprintInstanceComponent blueprintInstance = new BlueprintInstanceComponent {
-                BlueprintAssetReference = EditorAssetReferenceFactory.CreateFileReference(
-                    projectRootPath,
+                BlueprintAssetReference = AssetAuthoringService.CreateFileReference(
                     blueprintPath,
                     AssetEntryKind.Blueprint)
             };
-            BlueprintAsset blueprintAsset = LoadBlueprintAsset(projectRootPath, blueprintPath);
+            BlueprintAsset blueprintAsset = LoadBlueprintAsset(blueprintPath);
             BlueprintEntityReferenceOverrideService overrideService = new BlueprintEntityReferenceOverrideService(registry);
             overrideService.BindAllEntityReferences(blueprintInstance, blueprintAsset, FindRequiredPlayerEntity(sceneAsset).Id);
             SceneEntityAsset instanceRoot = new SceneEntityAsset {
@@ -191,26 +194,17 @@ namespace city.game.tools {
         /// <param name="projectRootPath">Absolute project root that owns the Blueprint asset.</param>
         /// <param name="blueprintPath">Project-relative Blueprint asset path.</param>
         /// <returns>Loaded presentation Blueprint.</returns>
-        static BlueprintAsset LoadBlueprintAsset(string projectRootPath, string blueprintPath) {
-            string blueprintFullPath = Path.Combine(projectRootPath, "assets", blueprintPath.Replace('/', Path.DirectorySeparatorChar));
-            using FileStream stream = File.OpenRead(blueprintFullPath);
-            Asset asset = helengine.editor.AssetSerializer.Deserialize(stream);
-            if (asset is not BlueprintAsset blueprintAsset) {
-                throw new InvalidOperationException($"Presentation asset '{blueprintPath}' did not deserialize into a BlueprintAsset.");
-            }
-
-            return blueprintAsset;
+        BlueprintAsset LoadBlueprintAsset(string blueprintPath) {
+            return AssetAuthoringService.LoadNativeAsset<BlueprintAsset>(blueprintPath);
         }
 
         /// <summary>
         /// Saves one project-relative presentation Blueprint after applying authoring-time existence overrides.
         /// </summary>
-        /// <param name="projectRootPath">Absolute project root that owns the Blueprint asset.</param>
         /// <param name="blueprintPath">Project-relative Blueprint asset path.</param>
         /// <param name="blueprintAsset">Blueprint asset to serialize.</param>
-        static void SaveBlueprintAsset(string projectRootPath, string blueprintPath, BlueprintAsset blueprintAsset) {
-            string blueprintFullPath = Path.Combine(projectRootPath, "assets", blueprintPath.Replace('/', Path.DirectorySeparatorChar));
-            new helengine.editor.GeneratedAssetWriteService().WriteAsset(projectRootPath, blueprintPath, blueprintAsset);
+        void SaveBlueprintAsset(string blueprintPath, BlueprintAsset blueprintAsset) {
+            AssetAuthoringService.WriteNativeAsset(blueprintPath, blueprintAsset);
         }
 
         /// <summary>
@@ -369,9 +363,9 @@ namespace city.game.tools {
         /// </summary>
         /// <param name="scenePath">Absolute authored scene path.</param>
         /// <param name="sceneAsset">Scene asset to write.</param>
-        static void SaveScene(string projectRootPath, string scenePath, SceneAsset sceneAsset) {
+        void SaveScene(string projectRootPath, string scenePath, SceneAsset sceneAsset) {
             string relativePath = Path.GetRelativePath(Path.Combine(projectRootPath, "assets"), scenePath).Replace('\\', '/');
-            new helengine.editor.GeneratedAssetWriteService().WriteAsset(projectRootPath, relativePath, sceneAsset);
+            AssetAuthoringService.WriteNativeAsset(relativePath, sceneAsset);
         }
     }
 }

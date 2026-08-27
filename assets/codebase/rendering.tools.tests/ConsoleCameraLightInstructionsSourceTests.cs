@@ -19,7 +19,8 @@ namespace city.tests {
             string source = File.ReadAllText(Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "ConsoleCameraLightInstructionsBlueprintGenerator.cs"));
 
             Assert.Contains("CreateConsoleCameraLightInstructionsRoot", source, StringComparison.Ordinal);
-            Assert.Contains("BlueprintSaveService", source, StringComparison.Ordinal);
+            Assert.Contains("WriteNativeBlueprint", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("BlueprintSaveService", source, StringComparison.Ordinal);
             Assert.Contains("ConsoleCameraLightInstructionsBlueprintRelativePath", source, StringComparison.Ordinal);
             Assert.Contains("root.Dispose()", source, StringComparison.Ordinal);
         }

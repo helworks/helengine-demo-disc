@@ -623,7 +623,7 @@ namespace city.rendering.tools {
                 RenderOrder2D = 212,
             };
             textEntity.AddComponent(textComponent);
-            ApplyFontReference(textEntity, textComponent, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
+            ApplyFontReference(textEntity, textComponent, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringService));
         }
 
         /// <summary>
@@ -897,7 +897,7 @@ namespace city.rendering.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
+            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringService));
         }
 
         /// <summary>
@@ -969,7 +969,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
             }
 
-            return global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(relativePath);
+            return global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(AssetAuthoringService, relativePath);
         }
     }
 }

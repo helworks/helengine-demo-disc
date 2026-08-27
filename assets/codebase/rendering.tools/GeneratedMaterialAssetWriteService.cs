@@ -3,22 +3,21 @@ namespace city.rendering.tools {
     /// Writes generated material assets through the public editor material authoring API.
     /// </summary>
     public sealed class GeneratedMaterialAssetWriteService {
-        readonly global::helengine.editor.GeneratedMaterialAssetWriteService EditorWriteService;
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
 
         /// <summary>
         /// Initializes one generated material write service.
         /// </summary>
-        public GeneratedMaterialAssetWriteService() {
-            EditorWriteService = new global::helengine.editor.GeneratedMaterialAssetWriteService();
+        public GeneratedMaterialAssetWriteService(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
 
         /// <summary>
         /// Writes one generated material asset under the project assets folder and persists its per-platform sidecar settings.
         /// </summary>
-        /// <param name="projectRootPath">Absolute or relative project root path.</param>
         /// <param name="relativePath">Project-relative material asset path.</param>
         /// <param name="definition">Generated material definition to write.</param>
-        public void WriteMaterial(string projectRootPath, string relativePath, GeneratedMaterialAssetDefinition definition) {
+        public void WriteMaterial(string relativePath, GeneratedMaterialAssetDefinition definition) {
             if (definition == null) {
                 throw new ArgumentNullException(nameof(definition));
             }
@@ -41,7 +40,7 @@ namespace city.rendering.tools {
                 }
             }
 
-            EditorWriteService.WriteMaterial(projectRootPath, relativePath, editorDefinition);
+            AssetAuthoringService.WriteNativeMaterial(relativePath, editorDefinition);
         }
     }
 }

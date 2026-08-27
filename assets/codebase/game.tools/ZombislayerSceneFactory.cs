@@ -27,10 +27,16 @@ namespace city.game.tools {
         readonly RuntimeModel WeaponModel;
 
         /// <summary>
+        /// Host-owned public capability used to create authored file references.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
         /// Initializes one Zombislayer scene factory backed by the prepared imported runtime assets.
         /// </summary>
         /// <param name="assets">Prepared imported runtime assets.</param>
-        public ZombislayerSceneFactory(ZombislayerGenerationAssets assets) {
+        public ZombislayerSceneFactory(ZombislayerGenerationAssets assets, IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             if (assets == null) {
                 throw new ArgumentNullException(nameof(assets));
             } else if (assets.EnvironmentModel == null) {
@@ -82,7 +88,7 @@ namespace city.game.tools {
         /// <param name="parent">Scene root that should own the environment entity.</param>
         /// <returns>Generated environment entity.</returns>
         Entity CreateEnvironmentEntity(Entity parent) {
-            SceneAssetReference environmentModelReference = global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(ZombislayerAssetCatalog.EnvironmentModelRelativePath);
+            SceneAssetReference environmentModelReference = global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(AssetAuthoringService, ZombislayerAssetCatalog.EnvironmentModelRelativePath);
             return CreateImportedMeshEntity(
                 parent,
                 "ZombislayerEnvironment",
@@ -213,7 +219,7 @@ namespace city.game.tools {
         Entity CreateWeaponEntity(Entity parent) {
             float4 orientation;
             float4.CreateFromYawPitchRoll((float)(Math.PI * 0.5d), 0f, 0f, out orientation);
-            SceneAssetReference weaponModelReference = global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(ZombislayerAssetCatalog.WeaponModelRelativePath);
+            SceneAssetReference weaponModelReference = global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateModel(AssetAuthoringService, ZombislayerAssetCatalog.WeaponModelRelativePath);
             return CreateImportedMeshEntity(
                 parent,
                 "ZombislayerWeapon",
@@ -432,7 +438,7 @@ namespace city.game.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, "Font", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(fontPath));
+            saveComponent.SetAssetReference(component, "Font", global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(AssetAuthoringService, fontPath));
         }
 
         /// <summary>

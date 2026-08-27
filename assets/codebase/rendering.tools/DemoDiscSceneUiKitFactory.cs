@@ -3,6 +3,14 @@ namespace city.rendering.tools {
     /// Builds the standard demo-disc scene UI root so every rendering and physics showcase scene shares one 2D overlay kit.
     /// </summary>
     public sealed class DemoDiscSceneUiKitFactory {
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
+        /// Initializes the shared UI kit with the host-owned public asset authoring capability.
+        /// </summary>
+        public DemoDiscSceneUiKitFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
         /// <summary>
         /// Creates one authored UI root carrying the shared demo-disc overlay kit: FPS diagnostics, return-to-menu handling, the light toggle with its indicator swatch, and the debug-gated scene label.
         /// </summary>
@@ -27,10 +35,10 @@ namespace city.rendering.tools {
             PspFpsComponentOverrideService.Apply(entity);
             entity.AddComponent(new city.menu.DemoDiscReturnToMenuComponent());
             entity.AddComponent(new city.rendering.DemoDiscLightToggleComponent());
-            DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory();
+            DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory(AssetAuthoringService);
             lightIndicatorOverlayFactory.AttachToSceneUi(entity, font);
             if (!string.IsNullOrWhiteSpace(sceneLabel)) {
-                DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new DemoDiscSceneLabelOverlayFactory();
+                DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new DemoDiscSceneLabelOverlayFactory(AssetAuthoringService);
                 sceneLabelOverlayFactory.AttachToSceneUi(entity, font, sceneLabel);
             }
             return entity;

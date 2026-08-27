@@ -114,9 +114,15 @@ namespace city.menu.tools {
         readonly DemoDiscMenuTheme Theme;
 
         /// <summary>
+        /// Host-owned public capability used for authored references and native asset loads.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
         /// Initializes one demo-disc main menu scene factory.
         /// </summary>
-        public DemoDiscHandheldMainMenuSceneFactory() {
+        public DemoDiscHandheldMainMenuSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             Theme = new DemoDiscMenuTheme();
             PlaceholderFont = new FontAsset(
                 new FontInfo("CityDemoDiscPlaceholder", 16, 4f),
@@ -628,7 +634,7 @@ namespace city.menu.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, FontReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(fontPath));
+            saveComponent.SetAssetReference(component, FontReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(AssetAuthoringService, fontPath));
         }
 
         /// <summary>
@@ -647,7 +653,7 @@ namespace city.menu.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(texturePath));
+            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(AssetAuthoringService, texturePath));
         }
 
         /// <summary>
@@ -669,7 +675,7 @@ namespace city.menu.tools {
             saveComponent.SetAssetReference(
                 component,
                 AutomaticComponentAssetReferenceSupport.BuildReferenceName(nameof(AnimationPlayerComponent.Clip)),
-                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFile(animationClipPath));
+                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFile(AssetAuthoringService, animationClipPath));
         }
 
         /// <summary>
@@ -701,25 +707,8 @@ namespace city.menu.tools {
         AnimationClipAsset LoadRequiredAnimationClipAsset(string relativePath) {
             if (string.IsNullOrWhiteSpace(relativePath)) {
                 throw new ArgumentException("Animation clip path must be provided.", nameof(relativePath));
-            } else if (string.IsNullOrWhiteSpace(EditorProjectPaths.AssetsRoot)) {
-                throw new InvalidOperationException("Editor project paths must be initialized before generated animation clips can be loaded.");
             }
-
-            string fullPath = Path.GetFullPath(Path.Combine(EditorProjectPaths.AssetsRoot, relativePath.Replace('/', Path.DirectorySeparatorChar)));
-            string assetsRootPrefix = EnsureTrailingDirectorySeparator(EditorProjectPaths.AssetsRoot);
-            if (!fullPath.StartsWith(assetsRootPrefix, StringComparison.OrdinalIgnoreCase)) {
-                throw new InvalidOperationException("Generated animation clip paths must stay inside the project assets folder.");
-            }
-            if (!File.Exists(fullPath)) {
-                throw new FileNotFoundException("Generated animation clip asset could not be found.", fullPath);
-            }
-
-            using FileStream stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            if (global::helengine.AssetSerializer.Deserialize(stream) is not AnimationClipAsset animationClipAsset) {
-                throw new InvalidOperationException($"Asset '{relativePath}' is not an animation clip.");
-            }
-
-            return animationClipAsset;
+            return AssetAuthoringService.LoadNativeAsset<AnimationClipAsset>(relativePath);
         }
 
         /// <summary>

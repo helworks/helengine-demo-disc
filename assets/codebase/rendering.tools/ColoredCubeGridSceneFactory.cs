@@ -149,7 +149,7 @@ namespace city.rendering.tools {
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
         public ColoredCubeGridSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
-            MaterialWriteService = new GeneratedMaterialAssetWriteService();
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(AssetAuthoringService);
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace city.rendering.tools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
-            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
 
             Entity[] cubeEntities = CreateCubeEntities(cubeModel, coloredMaterials);
             Entity[] rootEntities = new Entity[cubeEntities.Length + 5];
@@ -263,7 +263,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
-            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("ColoredCubeGridUi", "2. Colored Cubes");
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("ColoredCubeGridUi", "2. Colored Cubes");
         }
 
         /// <summary>
@@ -396,7 +396,7 @@ namespace city.rendering.tools {
         /// <param name="cubeIndex">Stable zero-based cube index.</param>
         void WriteMaterialAsset(string projectRootPath, int cubeIndex) {
             string relativePath = CubeMaterialRelativePaths[cubeIndex];
-            MaterialWriteService.WriteMaterial(projectRootPath, relativePath, CreateGeneratedMaterialDefinition(cubeIndex));
+            MaterialWriteService.WriteMaterial(relativePath, CreateGeneratedMaterialDefinition(cubeIndex));
         }
 
         /// <summary>

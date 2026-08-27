@@ -25,7 +25,7 @@ namespace city.menu.tools {
             }
 
             Ps2EmptyStartupProbeSceneFactory sceneFactory = new Ps2EmptyStartupProbeSceneFactory();
-            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService();
+            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(context.AssetAuthoring);
             GeneratedAuthoringSceneDefinition sceneDefinition = sceneFactory.CreateSceneDefinition();
             sceneWriteService.WriteScene(context.ProjectRootPath, sceneDefinition);
         }

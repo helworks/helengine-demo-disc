@@ -6,9 +6,22 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class ConsoleCameraLightInstructionsBlueprintGenerator {
         /// <summary>
+        /// Host-owned capability used to author the current native Blueprint.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
+        /// Initializes one console instruction Blueprint generator.
+        /// </summary>
+        /// <param name="assetAuthoringService">Host-owned capability used to save the current Blueprint.</param>
+        public ConsoleCameraLightInstructionsBlueprintGenerator(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
+
+        /// <summary>
         /// Generates and serializes the shared console instruction root.
         /// </summary>
-        /// <param name="projectRootPath">Project root that owns the assets folder.</param>
+        /// <param name="projectRootPath">Project root used by the overlay factory to resolve generated icon assets.</param>
         /// <param name="overlayFactory">Factory used to author the temporary Blueprint root.</param>
         /// <param name="font">Font used by the Blueprint's camera and light labels.</param>
         public void Generate(string projectRootPath, DemoSceneInstructionOverlayFactory overlayFactory, FontAsset font) {
@@ -24,15 +37,9 @@ namespace city.rendering.tools {
 
             Entity root = overlayFactory.CreateConsoleCameraLightInstructionsRoot(projectRootPath, font);
             try {
-                string fullPath = Path.Combine(
-                    Path.GetFullPath(projectRootPath),
-                    "assets",
-                    ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath.Replace('/', Path.DirectorySeparatorChar));
-                Directory.CreateDirectory(Path.GetDirectoryName(fullPath) ?? throw new InvalidOperationException("Blueprint directory could not be resolved."));
-                BlueprintSaveService saveService = new BlueprintSaveService(
-                    projectRootPath,
+                AssetAuthoringService.WriteNativeBlueprint(
+                    ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath,
                     GeneratedScenePersistenceRegistryFactory.Create());
-                saveService.Save(fullPath);
             } finally {
                 root.Dispose();
             }

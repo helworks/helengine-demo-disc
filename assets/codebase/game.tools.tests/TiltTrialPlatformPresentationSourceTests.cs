@@ -12,7 +12,8 @@ namespace city.tests {
 
             Assert.Contains("TiltTrialConsolePresentation.hblueprint", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialHandheldPresentation.hblueprint", source, StringComparison.Ordinal);
-            Assert.Contains("BlueprintSaveService", source, StringComparison.Ordinal);
+            Assert.Contains("WriteNativeBlueprint", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("BlueprintSaveService", source, StringComparison.Ordinal);
             Assert.DoesNotContain(".helen", source, StringComparison.Ordinal);
         }
 

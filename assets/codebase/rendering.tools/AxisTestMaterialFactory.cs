@@ -22,8 +22,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes the axis material authoring service.
         /// </summary>
-        public AxisTestMaterialFactory() {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService();
+        public AxisTestMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace city.rendering.tools {
                 platform.SchemaId = SchemaId;
                 platform.SetFieldValue(BaseColorFieldId, baseColor);
                 platform.SetFieldValue(TextureIdFieldId, string.Empty);
-                MaterialWriteService.WriteMaterial(projectRootPath, relativePath, definition);
+                MaterialWriteService.WriteMaterial(relativePath, definition);
             }
         }
     }

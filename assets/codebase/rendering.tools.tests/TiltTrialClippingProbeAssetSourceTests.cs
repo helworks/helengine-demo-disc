@@ -18,7 +18,9 @@ namespace city.tests {
             Assert.Contains("public ModelAsset CreateModelAsset()", modelSource, StringComparison.Ordinal);
             Assert.Contains("Id = ModelAssetId,", modelSource, StringComparison.Ordinal);
             Assert.Contains("Path.Combine(Path.GetFullPath(projectRootPath), \"assets\", ModelRelativePath.Replace('/', Path.DirectorySeparatorChar))", modelSource, StringComparison.Ordinal);
-            Assert.Contains("new global::helengine.editor.GeneratedAssetWriteService().WriteAsset", modelSource, StringComparison.Ordinal);
+            Assert.Contains("IEditorProjectAssetAuthoringService", modelSource, StringComparison.Ordinal);
+            Assert.Contains("WriteNativeAsset", modelSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("GeneratedAssetWriteService", modelSource, StringComparison.Ordinal);
             Assert.Equal("newfloat3(-0.5f,0.5f,-0.5f),newfloat3(-0.5f,0.5f,0.5f),newfloat3(0.5f,0.5f,0.5f),newfloat3(0.5f,0.5f,-0.5f)", NormalizeSourceFragment(GetSingleArrayContents(modelSource, "Positions")));
             Assert.Equal(4, global::System.Text.RegularExpressions.Regex.Matches(GetSingleArrayContents(modelSource, "Positions"), @"new\s+float3\(").Count);
             Assert.Equal("newfloat3(0f,1f,0f),newfloat3(0f,1f,0f),newfloat3(0f,1f,0f),newfloat3(0f,1f,0f)", NormalizeSourceFragment(GetSingleArrayContents(modelSource, "Normals")));

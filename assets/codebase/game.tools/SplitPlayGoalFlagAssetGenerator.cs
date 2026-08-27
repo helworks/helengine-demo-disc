@@ -52,41 +52,38 @@ namespace city.game.tools {
         readonly SplitPlayGeneratedModelAssetWriteService ModelWriteService;
         readonly SplitPlayGeneratedBlueprintAssetWriteService BlueprintWriteService;
         readonly CityGeneratedMaterialAssetWriteService MaterialWriteService;
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
 
-        public SplitPlayGoalFlagAssetGenerator() {
-            ModelWriteService = new SplitPlayGeneratedModelAssetWriteService();
-            BlueprintWriteService = new SplitPlayGeneratedBlueprintAssetWriteService();
-            MaterialWriteService = new CityGeneratedMaterialAssetWriteService();
+        public SplitPlayGoalFlagAssetGenerator(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            ModelWriteService = new SplitPlayGeneratedModelAssetWriteService(AssetAuthoringService);
+            BlueprintWriteService = new SplitPlayGeneratedBlueprintAssetWriteService(AssetAuthoringService);
+            MaterialWriteService = new CityGeneratedMaterialAssetWriteService(AssetAuthoringService);
         }
 
         public void Generate(string projectRootPath) {
             ModelWriteService.WriteModel(
-                projectRootPath,
                 SplitPlayAssetCatalog.GoalFlagCommonModelRelativePath,
                 CreateGoalFlagModel(SplitPlayAssetCatalog.GoalFlagCommonModelAssetId, 16));
             ModelWriteService.WriteModel(
-                projectRootPath,
                 SplitPlayAssetCatalog.GoalFlagDsModelRelativePath,
                 CreateGoalFlagModel(SplitPlayAssetCatalog.GoalFlagDsModelAssetId, 6));
             MaterialWriteService.WriteMaterial(
-                projectRootPath,
                 SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath,
                 CreateMaterialDefinition(SplitPlayAssetCatalog.GoalFlagPoleMaterialAssetId, "#FFE5E7EB", 0.42f, 0.60f, false));
             MaterialWriteService.WriteMaterial(
-                projectRootPath,
                 SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath,
                 CreateMaterialDefinition(SplitPlayAssetCatalog.GoalFlagBannerMaterialAssetId, "#FFFF5A5A", 0.62f, 0.05f, false));
             BlueprintWriteService.WriteBlueprint(
-                projectRootPath,
                 SplitPlayAssetCatalog.GoalFlagBlueprintRelativePath,
                 CreateBlueprintAsset(projectRootPath));
         }
 
         BlueprintAsset CreateBlueprintAsset(string projectRootPath) {
-            SceneAssetReference commonModelReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, SplitPlayAssetCatalog.GoalFlagCommonModelRelativePath, AssetEntryKind.Model);
-            SceneAssetReference dsModelReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, SplitPlayAssetCatalog.GoalFlagDsModelRelativePath, AssetEntryKind.Model);
-            SceneAssetReference poleMaterialReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath, AssetEntryKind.Material);
-            SceneAssetReference bannerMaterialReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath, AssetEntryKind.Material);
+            SceneAssetReference commonModelReference = AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoalFlagCommonModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference dsModelReference = AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoalFlagDsModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference poleMaterialReference = AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath, AssetEntryKind.Material);
+            SceneAssetReference bannerMaterialReference = AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath, AssetEntryKind.Material);
 
             MeshComponent meshComponent = new MeshComponent();
             meshComponent.Materials = new RuntimeMaterial[] { null, null };

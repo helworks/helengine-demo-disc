@@ -44,9 +44,9 @@ namespace city.menu.tools {
         public DemoDiscSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAssetAuthoringService assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             SceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver, AssetAuthoringService);
-            SceneFactory = new DemoDiscMainMenuSceneFactory();
+            SceneFactory = new DemoDiscMainMenuSceneFactory(AssetAuthoringService);
             MenuBuildSceneAuthoringService = new DemoDiscMenuBuildSceneAuthoringService();
-            SplashSceneFactory = new HelenOfCodeSplashSceneFactory();
+            SplashSceneFactory = new HelenOfCodeSplashSceneFactory(AssetAuthoringService);
             LoadingScreenFactory = new SceneLoadingScreenFactory();
         }
 

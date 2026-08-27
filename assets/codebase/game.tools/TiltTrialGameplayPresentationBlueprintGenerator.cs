@@ -7,6 +7,11 @@ namespace city.game.tools {
     /// </summary>
     public sealed class TiltTrialGameplayPresentationBlueprintGenerator {
         /// <summary>
+        /// Host-owned capability used to author the current native Blueprints.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
         /// Stable project-relative path for the console gameplay presentation Blueprint.
         /// </summary>
         public const string ConsoleBlueprintRelativePath = "blueprints/games/tilt/TiltTrialConsolePresentation.hblueprint";
@@ -17,40 +22,40 @@ namespace city.game.tools {
         public const string HandheldBlueprintRelativePath = "blueprints/games/tilt/TiltTrialHandheldPresentation.hblueprint";
 
         /// <summary>
+        /// Initializes one gameplay presentation Blueprint generator.
+        /// </summary>
+        /// <param name="assetAuthoringService">Host-owned capability used to save current Blueprints.</param>
+        public TiltTrialGameplayPresentationBlueprintGenerator(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
+
+        /// <summary>
         /// Generates both platform presentation Blueprints beneath the supplied project.
         /// </summary>
-        /// <param name="projectRootPath">Project root that owns the assets folder.</param>
         /// <param name="sceneFactory">Factory used to author presentation roots.</param>
-        public void Generate(string projectRootPath, GameSceneFactory sceneFactory) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            } else if (sceneFactory == null) {
+        public void Generate(GameSceneFactory sceneFactory) {
+            if (sceneFactory == null) {
                 throw new ArgumentNullException(nameof(sceneFactory));
             } else if (Core.Instance == null) {
                 throw new InvalidOperationException("Tilt Trial presentation generation requires an active editor core.");
             }
 
-            WriteBlueprint(projectRootPath, ConsoleBlueprintRelativePath, sceneFactory.CreateTiltTrialConsolePresentationRoot());
-            WriteBlueprint(projectRootPath, HandheldBlueprintRelativePath, sceneFactory.CreateTiltTrialHandheldPresentationRoot());
+            WriteBlueprint(ConsoleBlueprintRelativePath, sceneFactory.CreateTiltTrialConsolePresentationRoot());
+            WriteBlueprint(HandheldBlueprintRelativePath, sceneFactory.CreateTiltTrialHandheldPresentationRoot());
         }
 
         /// <summary>
         /// Saves one generated presentation root through the editor Blueprint serializer and disposes the temporary authoring hierarchy.
         /// </summary>
-        /// <param name="projectRootPath">Project root that owns the assets folder.</param>
         /// <param name="relativePath">Project-relative Blueprint output path.</param>
         /// <param name="root">Temporary presentation root to serialize.</param>
-        void WriteBlueprint(string projectRootPath, string relativePath, EditorEntity root) {
+        void WriteBlueprint(string relativePath, EditorEntity root) {
             if (root == null) {
                 throw new ArgumentNullException(nameof(root));
             }
 
             try {
-                string fullPath = Path.Combine(Path.GetFullPath(projectRootPath), "assets", relativePath.Replace('/', Path.DirectorySeparatorChar));
-                BlueprintSaveService saveService = new BlueprintSaveService(
-                    projectRootPath,
-                    GeneratedScenePersistenceRegistryFactory.Create());
-                saveService.Save(fullPath);
+                AssetAuthoringService.WriteNativeBlueprint(relativePath, GeneratedScenePersistenceRegistryFactory.Create());
             } finally {
                 root.Dispose();
             }

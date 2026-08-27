@@ -124,8 +124,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one walnut material factory.
         /// </summary>
-        public TiltTrialPlayerSphereWalnutMaterialFactory() {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService();
+        public TiltTrialPlayerSphereWalnutMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace city.rendering.tools {
             }
 
             string importedTextureAssetId = ResolveTextureAssetId(projectRootPath, assetAuthoringService);
-            MaterialWriteService.WriteMaterial(projectRootPath, MaterialRelativePath, CreateDefinition(importedTextureAssetId));
+            MaterialWriteService.WriteMaterial(MaterialRelativePath, CreateDefinition(importedTextureAssetId));
         }
 
         /// <summary>

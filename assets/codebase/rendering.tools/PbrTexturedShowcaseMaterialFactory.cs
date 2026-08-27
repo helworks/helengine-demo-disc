@@ -76,8 +76,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one PBR textured showcase material factory.
         /// </summary>
-        public PbrTexturedShowcaseMaterialFactory() {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService();
+        public PbrTexturedShowcaseMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
         }
 
         /// <summary>
@@ -92,14 +92,12 @@ namespace city.rendering.tools {
             string metalDiffuseTextureAssetId = ResolveTextureAssetId(projectRootPath, MetalDiffuseTextureRelativePath, assetAuthoringService);
             string metalRoughnessTextureAssetId = ResolveTextureAssetId(projectRootPath, MetalRoughnessTextureRelativePath, assetAuthoringService);
             MaterialWriteService.WriteMaterial(
-                projectRootPath,
                 MetalMaterialRelativePath,
                 CreateDefinition(MetalMaterialAssetId, metalDiffuseTextureAssetId, metalRoughnessTextureAssetId, metallic: "1.0"));
 
             string woodDiffuseTextureAssetId = ResolveTextureAssetId(projectRootPath, WoodDiffuseTextureRelativePath, assetAuthoringService);
             string woodRoughnessTextureAssetId = ResolveTextureAssetId(projectRootPath, WoodRoughnessTextureRelativePath, assetAuthoringService);
             MaterialWriteService.WriteMaterial(
-                projectRootPath,
                 WoodMaterialRelativePath,
                 CreateDefinition(WoodMaterialAssetId, woodDiffuseTextureAssetId, woodRoughnessTextureAssetId, metallic: "0.0"));
         }

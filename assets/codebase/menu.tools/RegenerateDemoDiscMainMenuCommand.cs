@@ -22,7 +22,7 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            new DemoDiscLogoIdleAnimationGenerator().Generate(context.ProjectRootPath);
+            new DemoDiscLogoIdleAnimationGenerator(context.AssetAuthoring).Generate();
             DemoDiscSceneGenerator generator = new DemoDiscSceneGenerator(context.ScriptTypeResolver, context.AssetAuthoring);
             generator.Generate(context.ProjectRootPath);
         }

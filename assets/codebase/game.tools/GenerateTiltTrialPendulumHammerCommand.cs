@@ -22,7 +22,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            TiltTrialPendulumHammerAssetGenerator generator = new TiltTrialPendulumHammerAssetGenerator();
+            TiltTrialPendulumHammerAssetGenerator generator = new TiltTrialPendulumHammerAssetGenerator(context.AssetAuthoring);
             generator.Generate(context.ProjectRootPath);
         }
     }

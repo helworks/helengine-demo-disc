@@ -59,8 +59,8 @@ namespace city.rendering.tools {
         /// Creates the stable file-backed demo-disc body-font reference used by non-FPS showcase overlays and labels.
         /// </summary>
         /// <returns>Stable file-backed demo-disc body-font reference.</returns>
-        public static SceneAssetReference CreateEditorFontReference() {
-            return global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(BodyFontRelativePath);
+        public static SceneAssetReference CreateEditorFontReference(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            return global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(assetAuthoringService, BodyFontRelativePath);
         }
 
         /// <summary>

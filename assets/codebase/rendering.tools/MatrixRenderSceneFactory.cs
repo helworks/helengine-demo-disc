@@ -78,7 +78,7 @@ namespace city.rendering.tools {
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
         public MatrixRenderSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
-            MaterialWriteService = new GeneratedMaterialAssetWriteService();
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(AssetAuthoringService);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace city.rendering.tools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
-            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -128,7 +128,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            MaterialWriteService.WriteMaterial(projectRootPath, HeroMaterialRelativePath, CreateGeneratedMaterialDefinition());
+            MaterialWriteService.WriteMaterial(HeroMaterialRelativePath, CreateGeneratedMaterialDefinition());
         }
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
-            Entity entity = new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("MatrixRenderUi", "6. Matrix Render");
+            Entity entity = new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("MatrixRenderUi", "6. Matrix Render");
             Entity phaseStatusEntity = Core.Instance.EntityFactory.CreateChild(entity, "MatrixRenderPhaseStatus");
             phaseStatusEntity.LocalPosition = new float3(16f, 112f, 0f);
             phaseStatusEntity.Static = false;

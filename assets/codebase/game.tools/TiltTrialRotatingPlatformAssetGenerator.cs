@@ -65,10 +65,13 @@ namespace city.game.tools {
         readonly SplitPlayGeneratedBlueprintAssetWriteService BlueprintWriteService;
         readonly CityGeneratedMaterialAssetWriteService MaterialWriteService;
 
-        public TiltTrialRotatingPlatformAssetGenerator() {
-            ModelWriteService = new SplitPlayGeneratedModelAssetWriteService();
-            BlueprintWriteService = new SplitPlayGeneratedBlueprintAssetWriteService();
-            MaterialWriteService = new CityGeneratedMaterialAssetWriteService();
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        public TiltTrialRotatingPlatformAssetGenerator(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            ModelWriteService = new SplitPlayGeneratedModelAssetWriteService(AssetAuthoringService);
+            BlueprintWriteService = new SplitPlayGeneratedBlueprintAssetWriteService(AssetAuthoringService);
+            MaterialWriteService = new CityGeneratedMaterialAssetWriteService(AssetAuthoringService);
         }
 
         /// <summary>
@@ -77,22 +80,19 @@ namespace city.game.tools {
         /// <param name="projectRootPath">Project root that owns the assets folder.</param>
         public void Generate(string projectRootPath) {
             ModelWriteService.WriteModel(
-                projectRootPath,
                 RotatingPlatformModelRelativePath,
                 CreateRotatingPlatformModel(RotatingPlatformModelAssetId));
             MaterialWriteService.WriteMaterial(
-                projectRootPath,
                 RotatingPlatformMaterialRelativePath,
                 CreateMaterialDefinition(RotatingPlatformMaterialAssetId, "#5C8DC9FF", 0.55f, 0.05f, false));
             BlueprintWriteService.WriteBlueprint(
-                projectRootPath,
                 RotatingPlatformBlueprintRelativePath,
                 CreateBlueprintAsset(projectRootPath));
         }
 
         BlueprintAsset CreateBlueprintAsset(string projectRootPath) {
-            SceneAssetReference modelReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, RotatingPlatformModelRelativePath, AssetEntryKind.Model);
-            SceneAssetReference materialReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, RotatingPlatformMaterialRelativePath, AssetEntryKind.Material);
+            SceneAssetReference modelReference = AssetAuthoringService.CreateFileReference(RotatingPlatformModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference materialReference = AssetAuthoringService.CreateFileReference(RotatingPlatformMaterialRelativePath, AssetEntryKind.Material);
 
             MeshComponent meshComponent = new MeshComponent();
             meshComponent.Materials = new RuntimeMaterial[] { null };

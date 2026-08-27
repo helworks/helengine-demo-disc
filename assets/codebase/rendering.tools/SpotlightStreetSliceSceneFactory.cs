@@ -118,7 +118,7 @@ namespace city.rendering.tools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
-            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -187,7 +187,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored FPS overlay entity.</returns>
         Entity CreateFpsEntity() {
-            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("SpotlightStreetSliceFps", string.Empty);
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("SpotlightStreetSliceFps", string.Empty);
         }
 
         /// <summary>
@@ -353,14 +353,14 @@ namespace city.rendering.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, MeshModelReferenceName, EditorAssetReferenceFactory.CreateFileReference(projectRootPath, modelRelativePath, AssetEntryKind.Model));
+            saveComponent.SetAssetReference(component, MeshModelReferenceName, AssetAuthoringService.CreateFileReference(modelRelativePath, AssetEntryKind.Model));
             for (int materialIndex = 0; materialIndex < materialRelativePaths.Length; materialIndex++) {
                 string materialRelativePath = materialRelativePaths[materialIndex];
                 if (string.IsNullOrWhiteSpace(materialRelativePath)) {
                     throw new InvalidOperationException("Imported mesh material paths must be provided for every authored slot.");
                 }
 
-                saveComponent.SetAssetReference(component, BuildMaterialReferenceName(materialIndex), EditorAssetReferenceFactory.CreateFileReference(projectRootPath, materialRelativePath, AssetEntryKind.Material));
+                saveComponent.SetAssetReference(component, BuildMaterialReferenceName(materialIndex), AssetAuthoringService.CreateFileReference(materialRelativePath, AssetEntryKind.Material));
             }
         }
 

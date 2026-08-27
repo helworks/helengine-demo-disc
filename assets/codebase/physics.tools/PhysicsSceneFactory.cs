@@ -466,10 +466,7 @@ namespace city.physics.tools {
                 }
 
                 Directory.CreateDirectory(directoryPath);
-                new helengine.editor.GeneratedAssetWriteService().WriteAsset(
-                    projectRootPath,
-                    sceneId,
-                    sceneAsset);
+                AssetAuthoringService.WriteNativeAsset(sceneId, sceneAsset);
             }
         }
 
@@ -1410,12 +1407,7 @@ namespace city.physics.tools {
                 return cachedReference;
             }
 
-            SceneAssetReference reference = string.IsNullOrWhiteSpace(CurrentProjectRootPath)
-                ? global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateMaterial(relativePath)
-                : global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(
-                    CurrentProjectRootPath,
-                    relativePath,
-                    global::helengine.editor.AssetEntryKind.Material);
+            SceneAssetReference reference = AssetAuthoringService.CreateFileReference(relativePath, global::helengine.editor.AssetEntryKind.Material);
             PhysicsDemoMaterialReferenceCache[relativePath] = reference;
             return reference;
         }
@@ -1727,7 +1719,7 @@ namespace city.physics.tools {
                 city.rendering.tools.ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new city.rendering.tools.ConsoleCameraLightInstructionsSceneAttachmentService();
                 consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
                 rootEntities.Insert(1, instructionOverlayEntity);
-                rootEntities.Insert(2, consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath));
+                rootEntities.Insert(2, consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService));
             }
 
             IReadOnlyList<EditorEntity> scenarioRoots = LoadPlayablePhysicsShowcaseScenarioRoots(projectRootPath, authoredSceneAsset);
@@ -1869,7 +1861,7 @@ namespace city.physics.tools {
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
         EditorEntity CreateLivePhysicsShowcaseUiEntity(string sceneLabel) {
-            Entity entity = new city.rendering.tools.DemoDiscSceneUiKitFactory().CreateStandardSceneUi("ShowcaseUi", sceneLabel);
+            Entity entity = new city.rendering.tools.DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("ShowcaseUi", sceneLabel);
             if (entity is EditorEntity editorEntity) {
                 return editorEntity;
             }
@@ -1968,7 +1960,7 @@ namespace city.physics.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
+            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringService));
         }
 
         /// <summary>
@@ -2012,7 +2004,7 @@ namespace city.physics.tools {
                 "Font",
                 useEditorUiFont
                     ? DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference()
-                    : DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
+                    : DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringService));
         }
 
         /// <summary>
@@ -2046,7 +2038,7 @@ namespace city.physics.tools {
             }
 
             WriteSphereTileTextureSource(projectRootPath);
-            WriteSphereTileTextureCacheAsset(projectRootPath);
+            WriteSphereTileTextureCacheAsset();
         }
 
         /// <summary>
@@ -2073,21 +2065,10 @@ namespace city.physics.tools {
         /// <summary>
         /// Writes the cached runtime texture asset paired with the generated sphere-stack tile texture source.
         /// </summary>
-        /// <param name="projectRootPath">Absolute project root path that owns the `cache` directory.</param>
-        static void WriteSphereTileTextureCacheAsset(string projectRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            }
-
-            string cachePath = Path.Combine(projectRootPath, "cache", PhysicsDemoSphereTileTextureAssetId);
-            string directoryPath = Path.GetDirectoryName(cachePath);
-            if (string.IsNullOrWhiteSpace(directoryPath)) {
-                throw new InvalidOperationException($"Could not resolve a texture cache directory for '{PhysicsDemoSphereTileTextureAssetId}'.");
-            }
-
-            Directory.CreateDirectory(directoryPath);
-            using FileStream stream = File.Create(cachePath);
-            global::helengine.editor.AssetSerializer.Serialize(stream, CreateSphereTileTextureAsset());
+        void WriteSphereTileTextureCacheAsset() {
+            AssetAuthoringService.WriteGeneratedCacheAsset(
+                PhysicsDemoSphereTileTextureAssetId,
+                CreateSphereTileTextureAsset());
         }
 
         /// <summary>
@@ -2128,7 +2109,7 @@ namespace city.physics.tools {
         /// <param name="surfaceColor">Authored standard material base color.</param>
         /// <param name="castsShadows">True when the material should cast dynamic shadows where supported.</param>
         /// <param name="receivesShadows">True when the material should receive dynamic shadows where supported.</param>
-        static void WriteTexturedMaterialAsset(string projectRootPath, string relativePath, string assetId, float4 surfaceColor, bool castsShadows, bool receivesShadows) {
+        void WriteTexturedMaterialAsset(string projectRootPath, string relativePath, string assetId, float4 surfaceColor, bool castsShadows, bool receivesShadows) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
@@ -2197,8 +2178,8 @@ namespace city.physics.tools {
             dsSettings.SetFieldValue(BaseColorFieldId, baseColor);
             dsSettings.SetFieldValue(LightingModeFieldId, "lit");
 
-            city.rendering.tools.GeneratedMaterialAssetWriteService writeService = new city.rendering.tools.GeneratedMaterialAssetWriteService();
-            writeService.WriteMaterial(projectRootPath, relativePath, definition);
+            city.rendering.tools.GeneratedMaterialAssetWriteService writeService = new city.rendering.tools.GeneratedMaterialAssetWriteService(AssetAuthoringService);
+            writeService.WriteMaterial(relativePath, definition);
         }
 
         /// <summary>
@@ -2369,7 +2350,7 @@ namespace city.physics.tools {
         /// <param name="relativePath">Relative project asset path for the material file.</param>
         /// <param name="assetId">Serialized material asset identifier.</param>
         /// <param name="surfaceColor">Authored standard material base color.</param>
-        static void WriteMaterialAsset(string projectRootPath, string relativePath, string assetId, float4 surfaceColor, bool castsShadows, bool receivesShadows) {
+        void WriteMaterialAsset(string projectRootPath, string relativePath, string assetId, float4 surfaceColor, bool castsShadows, bool receivesShadows) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
@@ -2400,8 +2381,8 @@ namespace city.physics.tools {
                 platformDefinition.SetFieldValue(BaseColorFieldId, ConvertColorToHtml(surfaceColor));
             }
 
-            city.rendering.tools.GeneratedMaterialAssetWriteService writeService = new city.rendering.tools.GeneratedMaterialAssetWriteService();
-            writeService.WriteMaterial(projectRootPath, relativePath, definition);
+            city.rendering.tools.GeneratedMaterialAssetWriteService writeService = new city.rendering.tools.GeneratedMaterialAssetWriteService(AssetAuthoringService);
+            writeService.WriteMaterial(relativePath, definition);
         }
 
         /// <summary>

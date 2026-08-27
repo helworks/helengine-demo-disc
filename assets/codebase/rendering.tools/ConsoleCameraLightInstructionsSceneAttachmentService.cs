@@ -10,10 +10,13 @@ namespace city.rendering.tools {
         /// Creates a Blueprint instance root constrained to the console platform set.
         /// </summary>
         /// <param name="projectRootPath">Project root used to resolve supported platform ids.</param>
+        /// <param name="assetAuthoringService">Host-owned public capability used to create the Blueprint reference.</param>
         /// <returns>Live Blueprint instance root.</returns>
-        public Entity CreateBlueprintInstanceRoot(string projectRootPath) {
+        public Entity CreateBlueprintInstanceRoot(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            } else if (assetAuthoringService == null) {
+                throw new ArgumentNullException(nameof(assetAuthoringService));
             } else if (Core.Instance == null) {
                 throw new InvalidOperationException("Console camera/light attachment requires an active editor core.");
             }
@@ -21,8 +24,7 @@ namespace city.rendering.tools {
             Entity root = Core.Instance.EntityFactory.Create("ConsoleCameraLightInstructions");
             root.LayerMask = EditorLayerMasks.SceneObjects;
             root.AddComponent(new BlueprintInstanceComponent {
-                BlueprintAssetReference = EditorAssetReferenceFactory.CreateFileReference(
-                    projectRootPath,
+                BlueprintAssetReference = assetAuthoringService.CreateFileReference(
                     ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath,
                     AssetEntryKind.Blueprint)
             });

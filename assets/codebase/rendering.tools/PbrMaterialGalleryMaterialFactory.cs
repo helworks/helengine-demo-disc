@@ -93,8 +93,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one PBR material gallery material factory.
         /// </summary>
-        public PbrMaterialGalleryMaterialFactory() {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService();
+        public PbrMaterialGalleryMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
         }
 
         /// <summary>
@@ -212,7 +212,7 @@ namespace city.rendering.tools {
         /// <param name="roughnessIndex">Zero-based roughness step index.</param>
         void WriteMaterialAsset(string projectRootPath, int metallicIndex, int roughnessIndex) {
             string relativePath = BuildMaterialRelativePath(metallicIndex, roughnessIndex);
-            MaterialWriteService.WriteMaterial(projectRootPath, relativePath, CreateGeneratedMaterialDefinition(metallicIndex, roughnessIndex));
+            MaterialWriteService.WriteMaterial(relativePath, CreateGeneratedMaterialDefinition(metallicIndex, roughnessIndex));
         }
 
         /// <summary>

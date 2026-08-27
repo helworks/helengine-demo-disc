@@ -5,6 +5,14 @@ namespace city.rendering.tools {
     /// Authors the shared top-left light indicator row used by the rendering demo-disc scenes.
     /// </summary>
     public sealed class DemoDiscLightIndicatorOverlayFactory {
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
+        /// Initializes the light indicator authoring factory with the host-owned public capability.
+        /// </summary>
+        public DemoDiscLightIndicatorOverlayFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
         /// <summary>
         /// Stable entity name used by the screen-bound viewport root that hosts the light indicator row.
         /// </summary>
@@ -155,7 +163,7 @@ namespace city.rendering.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, FontReferenceName, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference());
+            saveComponent.SetAssetReference(component, FontReferenceName, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringService));
         }
 
         /// <summary>

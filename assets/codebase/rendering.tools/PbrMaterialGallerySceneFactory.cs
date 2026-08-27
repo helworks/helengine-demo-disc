@@ -67,7 +67,7 @@ namespace city.rendering.tools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
-            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
 
             Entity[] sphereEntities = CreateSphereEntities(sphereModel, galleryMaterials);
             Entity[] rootEntities = new Entity[sphereEntities.Length + 8];
@@ -135,7 +135,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
-            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("PbrMaterialGalleryUi", "13. PBR Gallery");
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("PbrMaterialGalleryUi", "13. PBR Gallery");
         }
 
         /// <summary>

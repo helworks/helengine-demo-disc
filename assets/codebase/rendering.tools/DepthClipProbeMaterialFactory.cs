@@ -118,8 +118,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one depth-clip-probe solid-color material factory.
         /// </summary>
-        public DepthClipProbeMaterialFactory() {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService();
+        public DepthClipProbeMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            MaterialWriteService.WriteMaterial(projectRootPath, MaterialRelativePath, CreateGeneratedMaterialDefinition());
+            MaterialWriteService.WriteMaterial(MaterialRelativePath, CreateGeneratedMaterialDefinition());
         }
 
         /// <summary>

@@ -56,36 +56,34 @@ namespace city.game.tools {
         readonly SplitPlayGeneratedModelAssetWriteService ModelWriteService;
         readonly SplitPlayGeneratedBlueprintAssetWriteService BlueprintWriteService;
         readonly CityGeneratedMaterialAssetWriteService MaterialWriteService;
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
 
-        public SplitPlayGoldenCoinAssetGenerator() {
-            ModelWriteService = new SplitPlayGeneratedModelAssetWriteService();
-            BlueprintWriteService = new SplitPlayGeneratedBlueprintAssetWriteService();
-            MaterialWriteService = new CityGeneratedMaterialAssetWriteService();
+        public SplitPlayGoldenCoinAssetGenerator(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            ModelWriteService = new SplitPlayGeneratedModelAssetWriteService(AssetAuthoringService);
+            BlueprintWriteService = new SplitPlayGeneratedBlueprintAssetWriteService(AssetAuthoringService);
+            MaterialWriteService = new CityGeneratedMaterialAssetWriteService(AssetAuthoringService);
         }
 
         public void Generate(string projectRootPath) {
             ModelWriteService.WriteModel(
-                projectRootPath,
                 SplitPlayAssetCatalog.GoldenCoinCommonModelRelativePath,
                 CreateCylinderModel(SplitPlayAssetCatalog.GoldenCoinCommonModelAssetId, 20));
             ModelWriteService.WriteModel(
-                projectRootPath,
                 SplitPlayAssetCatalog.GoldenCoinDsModelRelativePath,
                 CreateCylinderModel(SplitPlayAssetCatalog.GoldenCoinDsModelAssetId, 10));
             MaterialWriteService.WriteMaterial(
-                projectRootPath,
                 SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath,
                 CreateMaterialDefinition());
             BlueprintWriteService.WriteBlueprint(
-                projectRootPath,
                 SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath,
                 CreateBlueprintAsset(projectRootPath));
         }
 
         BlueprintAsset CreateBlueprintAsset(string projectRootPath) {
-            SceneAssetReference commonModelReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, SplitPlayAssetCatalog.GoldenCoinCommonModelRelativePath, AssetEntryKind.Model);
-            SceneAssetReference dsModelReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, SplitPlayAssetCatalog.GoldenCoinDsModelRelativePath, AssetEntryKind.Model);
-            SceneAssetReference materialReference = global::helengine.editor.EditorAssetReferenceFactory.CreateFileReference(projectRootPath, SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath, AssetEntryKind.Material);
+            SceneAssetReference commonModelReference = AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoldenCoinCommonModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference dsModelReference = AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoldenCoinDsModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference materialReference = AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath, AssetEntryKind.Material);
 
             MeshComponent meshComponent = new MeshComponent();
             meshComponent.Materials = new RuntimeMaterial[] { null };

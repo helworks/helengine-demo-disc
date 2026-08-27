@@ -5,6 +5,14 @@ namespace city.scene.tools {
     /// Authors the shared looping background-music root used by generated showcase scenes.
     /// </summary>
     public sealed class GeneratedSceneMusicAuthoringService {
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
+        /// Initializes the shared music authoring service with the host-owned public capability.
+        /// </summary>
+        public GeneratedSceneMusicAuthoringService(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
         /// <summary>
         /// Stable project-relative music asset path used by the rendering and physics showcase scenes.
         /// </summary>
@@ -56,7 +64,7 @@ namespace city.scene.tools {
             saveComponent.SetAssetReference(
                 audioSourceComponent,
                 AutomaticComponentAssetReferenceSupport.BuildReferenceName(nameof(AudioSourceComponent.Clip)),
-                DemoDiscEditorAssetReferenceFactory.CreateAudio(audioPath));
+                DemoDiscEditorAssetReferenceFactory.CreateAudio(AssetAuthoringService, audioPath));
         }
 
         /// <summary>

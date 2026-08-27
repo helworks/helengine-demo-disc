@@ -129,7 +129,7 @@ namespace city.rendering.tools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             consoleInstructionAttachmentService.ExcludeLegacyOverlayFromConsoles(projectRootPath, instructionOverlayEntity);
-            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath);
+            Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -205,7 +205,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
-            return new DemoDiscSceneUiKitFactory().CreateStandardSceneUi("AxisTestUi", "4. Axis 1");
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("AxisTestUi", "4. Axis 1");
         }
 
         /// <summary>
@@ -280,8 +280,8 @@ namespace city.rendering.tools {
 
             MeshComponent meshComponent = FindRequiredComponent<MeshComponent>(entity);
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(meshComponent, MeshModelReferenceName, EditorAssetReferenceFactory.CreateFileReference(projectRootPath, ArrowModelRelativePath, AssetEntryKind.Model));
-            saveComponent.SetAssetReference(meshComponent, MeshMaterialReferenceName, EditorAssetReferenceFactory.CreateFileReference(projectRootPath, MarkerMaterialRelativePath, AssetEntryKind.Material));
+            saveComponent.SetAssetReference(meshComponent, MeshModelReferenceName, AssetAuthoringService.CreateFileReference(ArrowModelRelativePath, AssetEntryKind.Model));
+            saveComponent.SetAssetReference(meshComponent, MeshMaterialReferenceName, AssetAuthoringService.CreateFileReference(MarkerMaterialRelativePath, AssetEntryKind.Material));
         }
 
         /// <summary>

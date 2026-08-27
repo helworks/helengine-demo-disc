@@ -22,7 +22,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            TiltTrialGameplayPresentationAttachmentService service = new TiltTrialGameplayPresentationAttachmentService(context.ScriptTypeResolver);
+            TiltTrialGameplayPresentationAttachmentService service = new TiltTrialGameplayPresentationAttachmentService(context.ScriptTypeResolver, context.AssetAuthoring);
             service.AttachToAuthoredGameplayScenes(context.ProjectRootPath);
         }
     }

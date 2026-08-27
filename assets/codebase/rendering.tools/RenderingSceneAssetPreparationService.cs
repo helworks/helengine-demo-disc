@@ -65,19 +65,19 @@ namespace city.rendering.tools {
 
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             EditorProjectBootstrapContext bootstrap = EditorProjectBootstrapper.Create(fullProjectRootPath);
-            ForwardSolidColorMaterialFactory forwardSolidColorMaterialFactory = new ForwardSolidColorMaterialFactory();
-            TiltTrialCourseMaterialFactory tiltTrialCourseMaterialFactory = new TiltTrialCourseMaterialFactory();
-            TiltTrialPlayerSphereWalnutMaterialFactory tiltTrialPlayerSphereWalnutMaterialFactory = new TiltTrialPlayerSphereWalnutMaterialFactory();
+            ForwardSolidColorMaterialFactory forwardSolidColorMaterialFactory = new ForwardSolidColorMaterialFactory(AssetAuthoringService);
+            TiltTrialCourseMaterialFactory tiltTrialCourseMaterialFactory = new TiltTrialCourseMaterialFactory(AssetAuthoringService);
+            TiltTrialPlayerSphereWalnutMaterialFactory tiltTrialPlayerSphereWalnutMaterialFactory = new TiltTrialPlayerSphereWalnutMaterialFactory(AssetAuthoringService);
             TiltTrialClippingProbeModelFactory tiltTrialClippingProbeModelFactory = new TiltTrialClippingProbeModelFactory();
-            TiltTrialClippingProbeMaterialFactory tiltTrialClippingProbeMaterialFactory = new TiltTrialClippingProbeMaterialFactory();
-            DepthClipProbeMaterialFactory depthClipProbeMaterialFactory = new DepthClipProbeMaterialFactory();
-            DepthClipProbeCenterMaterialFactory depthClipProbeCenterMaterialFactory = new DepthClipProbeCenterMaterialFactory();
-            PbrTexturedShowcaseMaterialFactory pbrTexturedShowcaseMaterialFactory = new PbrTexturedShowcaseMaterialFactory();
-            AxisTestMaterialFactory axisTestMaterialFactory = new AxisTestMaterialFactory();
+            TiltTrialClippingProbeMaterialFactory tiltTrialClippingProbeMaterialFactory = new TiltTrialClippingProbeMaterialFactory(AssetAuthoringService);
+            DepthClipProbeMaterialFactory depthClipProbeMaterialFactory = new DepthClipProbeMaterialFactory(AssetAuthoringService);
+            DepthClipProbeCenterMaterialFactory depthClipProbeCenterMaterialFactory = new DepthClipProbeCenterMaterialFactory(AssetAuthoringService);
+            PbrTexturedShowcaseMaterialFactory pbrTexturedShowcaseMaterialFactory = new PbrTexturedShowcaseMaterialFactory(AssetAuthoringService);
+            AxisTestMaterialFactory axisTestMaterialFactory = new AxisTestMaterialFactory(AssetAuthoringService);
             forwardSolidColorMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             tiltTrialCourseMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AssetAuthoringService);
             tiltTrialPlayerSphereWalnutMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AssetAuthoringService);
-            tiltTrialClippingProbeModelFactory.WriteModelAsset(fullProjectRootPath);
+            tiltTrialClippingProbeModelFactory.WriteModelAsset(AssetAuthoringService);
             tiltTrialClippingProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AssetAuthoringService);
             depthClipProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             depthClipProbeCenterMaterialFactory.WriteMaterialAsset(fullProjectRootPath);

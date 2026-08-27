@@ -154,8 +154,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes the generated material writer required by the clipping probe material factory.
         /// </summary>
-        public TiltTrialClippingProbeMaterialFactory() {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService();
+        public TiltTrialClippingProbeMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace city.rendering.tools {
 
             TiltTrialClippingProbeTextureFactory textureFactory = new TiltTrialClippingProbeTextureFactory();
             string textureAssetId = textureFactory.WriteTextureAsset(projectRootPath, assetAuthoringService);
-            MaterialWriteService.WriteMaterial(projectRootPath, MaterialRelativePath, CreateGeneratedMaterialDefinition(textureAssetId));
+            MaterialWriteService.WriteMaterial(MaterialRelativePath, CreateGeneratedMaterialDefinition(textureAssetId));
         }
 
         /// <summary>

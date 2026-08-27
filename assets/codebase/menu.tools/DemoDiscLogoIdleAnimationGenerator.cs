@@ -7,18 +7,27 @@ namespace city.menu.tools {
     /// </summary>
     public sealed class DemoDiscLogoIdleAnimationGenerator {
         /// <summary>
+        /// Host-owned capability used to author the current native animation asset.
+        /// </summary>
+        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+
+        /// <summary>
         /// Project-relative path of the native demo-disc logo animation clip.
         /// </summary>
         public const string AnimationRelativePath = "animations/DemoDiscLogoIdle.hanim";
 
         /// <summary>
-        /// Writes one current-format demo-disc logo animation clip beneath the project assets folder.
+        /// Initializes one logo animation author.
         /// </summary>
-        /// <param name="projectRootPath">Project root that owns the assets directory.</param>
-        public void Generate(string projectRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            }
+        /// <param name="assetAuthoringService">Host-owned capability used to author the current native animation asset.</param>
+        public DemoDiscLogoIdleAnimationGenerator(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
+
+        /// <summary>
+        /// Writes one current-format demo-disc logo animation clip through the public editor asset API.
+        /// </summary>
+        public void Generate() {
 
             AnimationClipAsset animationClip = new AnimationClipAsset {
                 Id = "Animations/DemoDiscLogoIdle.animation",
@@ -36,7 +45,7 @@ namespace city.menu.tools {
                 ]
             };
 
-            new GeneratedAssetWriteService().WriteAsset(projectRootPath, AnimationRelativePath, animationClip);
+            AssetAuthoringService.WriteNativeAsset(AnimationRelativePath, animationClip);
         }
     }
 }

@@ -66,25 +66,15 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Serializes the top-face-only probe model into its deterministic project asset location.
+        /// Writes the top-face-only probe model through the public editor asset API.
         /// </summary>
-        /// <param name="projectRootPath">Absolute or relative DemoDisc project root path.</param>
-        public void WriteModelAsset(string projectRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+        /// <param name="assetAuthoringService">Host-owned capability used to author the native model.</param>
+        public void WriteModelAsset(IEditorProjectAssetAuthoringService assetAuthoringService) {
+            if (assetAuthoringService == null) {
+                throw new ArgumentNullException(nameof(assetAuthoringService));
             }
 
-            string fullModelPath = Path.Combine(Path.GetFullPath(projectRootPath), "assets", ModelRelativePath.Replace('/', Path.DirectorySeparatorChar));
-            string modelDirectoryPath = Path.GetDirectoryName(fullModelPath);
-            if (string.IsNullOrWhiteSpace(modelDirectoryPath)) {
-                throw new InvalidOperationException($"Could not resolve a model directory for '{ModelRelativePath}'.");
-            }
-
-            Directory.CreateDirectory(modelDirectoryPath);
-            new global::helengine.editor.GeneratedAssetWriteService().WriteAsset(
-                projectRootPath,
-                ModelRelativePath,
-                CreateModelAsset());
+            assetAuthoringService.WriteNativeAsset(ModelRelativePath, CreateModelAsset());
         }
     }
 }
