@@ -44,9 +44,7 @@ namespace city.scene.tools {
                 ["scenes/games/tilt/tilt_trial_level_03.helen"] = "10000000000000000000000000000035",
                 ["scenes/games/tilt/tilt_trial_level_04.helen"] = "10000000000000000000000000000036",
                 ["scenes/games/tilt/tilt_trial_level_05.helen"] = "10000000000000000000000000000037",
-                ["scenes/games/zombislayer.helen"] = "10000000000000000000000000000038",
-                ["zombislayer.helen"] = "10000000000000000000000000000038",
-                ["zombislayer"] = "10000000000000000000000000000038"
+                ["scenes/games/zombislayer.helen"] = "10000000000000000000000000000038"
             };
 
         static readonly IReadOnlyDictionary<string, string> NativeAssetIdentities =

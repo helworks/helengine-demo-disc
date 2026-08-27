@@ -7,6 +7,11 @@ namespace city.game.tools {
     /// </summary>
     public sealed class ZombislayerSceneFactory {
         /// <summary>
+        /// Stable authored asset path used by the generated Zombislayer gameplay scene while preserving its runtime id.
+        /// </summary>
+        const string GameplaySceneAssetRelativePath = "scenes/games/zombislayer.helen";
+
+        /// <summary>
         /// Stable authored source-font path used by the Zombislayer pause overlay.
         /// </summary>
         const string PauseOverlayFontRelativePath = "Fonts/Fredoka.ttf";
@@ -62,6 +67,7 @@ namespace city.game.tools {
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = GameSceneCatalog.ZombislayerSceneId,
+                SceneAssetRelativePath = GameplaySceneAssetRelativePath,
                 SceneSettings = new SceneSettingsAsset(),
                 RootEntities = [
                     sceneRootEntity
