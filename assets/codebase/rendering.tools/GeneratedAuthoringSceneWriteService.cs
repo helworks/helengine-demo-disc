@@ -202,7 +202,7 @@ namespace city.rendering.tools {
 
             try {
                 string stableIdentity = string.IsNullOrWhiteSpace(authoringAssetId)
-                    ? ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneRelativePathToSave)
+                    ? global::city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneRelativePathToSave)
                     : authoringAssetId;
                 AssetAuthoringServiceValue.WriteNativeScene(
                     sceneRelativePathToSave,

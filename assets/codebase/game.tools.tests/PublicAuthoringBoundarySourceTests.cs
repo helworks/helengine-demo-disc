@@ -48,6 +48,9 @@ namespace city.tests {
         [Fact]
         public void Generated_native_writers_supply_explicit_project_identities() {
             string codebasePath = Path.Combine(@"C:\dev\helprojs\demodisc", "assets", "codebase");
+            string generatedSceneWriterSource = File.ReadAllText(Path.Combine(codebasePath, "rendering.tools", "GeneratedAuthoringSceneWriteService.cs"));
+            Assert.Contains("global::city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity", generatedSceneWriterSource, StringComparison.Ordinal);
+
             string[] productionSourcePaths = Directory.GetFiles(codebasePath, "*.cs", SearchOption.AllDirectories)
                 .Where(path => !path.Contains(".tests", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
