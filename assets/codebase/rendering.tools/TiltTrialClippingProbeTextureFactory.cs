@@ -79,14 +79,14 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(transaction));
             }
 
-            TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(
-                Path.Combine(assetAuthoringService.ProjectRootPath, "assets", TextureRelativePath.Replace('/', Path.DirectorySeparatorChar)));
+            TextureAssetImportSettings settingsIntent = new TextureAssetImportSettings();
+            settingsIntent.Importer.ImporterId = "gdi";
             string assetId = GeneratedFileTransactionWriter.WriteTexture(
                 assetAuthoringService,
                 transaction,
                 TextureRelativePath,
                 textureBytes,
-                settings);
+                settingsIntent);
             if (string.IsNullOrWhiteSpace(assetId)) {
                 throw new InvalidOperationException("The clipping probe atlas requires one persisted imported texture asset id.");
             }

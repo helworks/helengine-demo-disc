@@ -156,12 +156,16 @@ namespace city.rendering.tools {
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             string assetsRootPath = Path.Combine(fullProjectRootPath, "assets");
             string sourceTexturePath = Path.Combine(assetsRootPath, TextureRelativePath.Replace('/', Path.DirectorySeparatorChar));
-            TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(sourceTexturePath);
-            GeneratedFileTransactionWriter.WriteTextureImportSettings(
-                assetAuthoringService,
-                Transaction,
+            if (!File.Exists(sourceTexturePath)) {
+                throw new FileNotFoundException("Tilt Trial walnut source texture was not found.", sourceTexturePath);
+            }
+            TextureAssetImportSettings settingsIntent = new TextureAssetImportSettings();
+            settingsIntent.Importer.ImporterId = "gdi";
+            TextureAssetImportSettings settings = assetAuthoringService.WriteGeneratedTexture(
                 TextureRelativePath,
-                settings);
+                File.ReadAllBytes(sourceTexturePath),
+                settingsIntent,
+                Transaction);
             string assetId = settings.Importer.AssetId;
             if (string.IsNullOrWhiteSpace(assetId)) {
                 throw new InvalidOperationException("Tilt Trial walnut material requires a persisted imported texture asset id.");

@@ -118,12 +118,16 @@ namespace city.rendering.tools {
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             string assetsRootPath = Path.Combine(fullProjectRootPath, "assets");
             string sourceTexturePath = Path.Combine(assetsRootPath, relativeTexturePath.Replace('/', Path.DirectorySeparatorChar));
-            TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(sourceTexturePath);
-            GeneratedFileTransactionWriter.WriteTextureImportSettings(
-                assetAuthoringService,
-                Transaction,
+            if (!File.Exists(sourceTexturePath)) {
+                throw new FileNotFoundException("PBR textured showcase source texture was not found.", sourceTexturePath);
+            }
+            TextureAssetImportSettings settingsIntent = new TextureAssetImportSettings();
+            settingsIntent.Importer.ImporterId = "gdi";
+            TextureAssetImportSettings settings = assetAuthoringService.WriteGeneratedTexture(
                 relativeTexturePath,
-                settings);
+                File.ReadAllBytes(sourceTexturePath),
+                settingsIntent,
+                Transaction);
             string assetId = settings.Importer.AssetId;
             if (string.IsNullOrWhiteSpace(assetId)) {
                 throw new InvalidOperationException($"PBR textured showcase requires a persisted imported texture asset id for '{relativeTexturePath}'.");

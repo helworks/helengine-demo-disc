@@ -153,7 +153,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Relative source path must be provided.", nameof(relativeSourcePath));
             }
 
-            return AuthoringSession.LoadImportedRuntimeModel(relativeSourcePath);
+            return AuthoringSession.LoadImportedRuntimeModel(relativeSourcePath, Transaction);
         }
 
         /// <summary>

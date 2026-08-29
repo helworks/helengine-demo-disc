@@ -34,12 +34,16 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(transaction));
             }
 
-            TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(fullSourcePath);
-            GeneratedFileTransactionWriter.WriteTextureImportSettings(
-                assetAuthoringService,
-                transaction,
+            TextureAssetImportSettings settingsIntent = new TextureAssetImportSettings();
+            settingsIntent.Importer.ImporterId = "gdi";
+            TextureAssetImportSettings settings = assetAuthoringService.WriteGeneratedTexture(
                 relativePath,
-                settings);
+                File.ReadAllBytes(fullSourcePath),
+                settingsIntent,
+                transaction);
+            if (settings == null || settings.Importer == null) {
+                throw new InvalidOperationException($"Generated control icon '{relativePath}' did not produce prepared texture settings.");
+            }
             if (settings == null || settings.Importer == null || string.IsNullOrWhiteSpace(settings.Importer.AssetId)) {
                 throw new InvalidOperationException($"Generated control icon '{relativePath}' did not produce a persisted imported texture asset id.");
             }

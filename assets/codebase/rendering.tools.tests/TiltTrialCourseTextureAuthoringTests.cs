@@ -31,7 +31,9 @@ namespace city.tests {
 
             Assert.Contains("fileBytes[0] = (byte)'B';", textureFactorySource, StringComparison.Ordinal);
             Assert.Contains("fileBytes[1] = (byte)'M';", textureFactorySource, StringComparison.Ordinal);
-            Assert.Contains("TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(", textureFactorySource, StringComparison.Ordinal);
+            Assert.DoesNotContain("LoadOrCreateTextureImportSettings", textureFactorySource, StringComparison.Ordinal);
+            Assert.Contains("TextureAssetImportSettings settingsIntent = new TextureAssetImportSettings();", textureFactorySource, StringComparison.Ordinal);
+            Assert.Contains("settingsIntent.Importer.ImporterId = \"gdi\";", textureFactorySource, StringComparison.Ordinal);
             Assert.Contains("string assetId = GeneratedFileTransactionWriter.WriteTexture(", textureFactorySource, StringComparison.Ordinal);
             Assert.Contains("GeneratedFileTransactionWriter.WriteTexture(", textureFactorySource, StringComparison.Ordinal);
         }
