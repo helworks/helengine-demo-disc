@@ -34,14 +34,14 @@ namespace city.rendering.tools {
         /// <summary>
         /// Host-owned asset-authoring capability used to resolve file-backed scene references.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringServiceValue;
+        readonly IEditorProjectAuthoringSession AuthoringSession;
 
         /// <summary>
         /// Initializes one generated authored-scene writer.
         /// </summary>
         /// <param name="assetAuthoringService">Required host-owned asset-authoring capability used to resolve source assets.</param>
-        public GeneratedAuthoringSceneWriteService(IEditorProjectAssetAuthoringService assetAuthoringService)
-            : this(null, assetAuthoringService) {
+        public GeneratedAuthoringSceneWriteService(IEditorProjectAuthoringSession authoringSession)
+            : this(null, authoringSession) {
         }
 
         /// <summary>
@@ -51,16 +51,16 @@ namespace city.rendering.tools {
         /// <param name="assetAuthoringService">Required host-owned asset-authoring capability used to resolve source assets.</param>
         public GeneratedAuthoringSceneWriteService(
             IScriptTypeResolver scriptTypeResolver,
-            IEditorProjectAssetAuthoringService assetAuthoringService) {
-            if (assetAuthoringService == null) {
-                throw new ArgumentNullException(nameof(assetAuthoringService));
+            IEditorProjectAuthoringSession authoringSession) {
+            if (authoringSession == null) {
+                throw new ArgumentNullException(nameof(authoringSession));
             }
 
-            NintendoDsRenderingSceneScaffoldFactoryValue = new NintendoDsRenderingSceneScaffoldFactory(assetAuthoringService);
+            AuthoringSession = authoringSession;
+            NintendoDsRenderingSceneScaffoldFactoryValue = new NintendoDsRenderingSceneScaffoldFactory(authoringSession);
             PlatformSceneAuthoringHelperServiceValue = new PlatformSceneAuthoringHelperService();
-            GeneratedSceneEntityCloneServiceValue = new GeneratedSceneEntityCloneService();
+            GeneratedSceneEntityCloneServiceValue = new GeneratedSceneEntityCloneService(authoringSession);
             ScriptTypeResolverValue = scriptTypeResolver;
-            AssetAuthoringServiceValue = assetAuthoringService;
         }
 
         /// <summary>
@@ -82,6 +82,9 @@ namespace city.rendering.tools {
             }
 
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
+            if (!string.Equals(fullProjectRootPath, Path.GetFullPath(AuthoringSession.ProjectRootPath), StringComparison.OrdinalIgnoreCase)) {
+                throw new InvalidOperationException("Generated scene writes must use the authoring session project root.");
+            }
             ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create(ScriptTypeResolverValue);
             List<Entity> rootsToDispose = new List<Entity>();
 
@@ -153,17 +156,13 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
             }
 
-            SceneAssetReference fontReference = DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringServiceValue);
+            SceneAssetReference fontReference = DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AuthoringSession);
             if (fontReference == null || fontReference.SourceKind != SceneAssetReferenceSourceKind.FileSystem || string.IsNullOrWhiteSpace(fontReference.RelativePath)) {
                 throw new InvalidOperationException("The demo-disc body font reference must resolve to one file-backed source font path.");
             }
 
-            if (AssetAuthoringServiceValue == null) {
-                throw new InvalidOperationException("Generated scene font resolution requires the editor asset-authoring capability.");
-            }
-
             string fullSourcePath = Path.Combine(fullProjectRootPath, "assets", fontReference.RelativePath.Replace('/', Path.DirectorySeparatorChar));
-            return AssetAuthoringServiceValue.ResolveFontAsset(fullSourcePath);
+            return AuthoringSession.ResolveFontAsset(fullSourcePath);
         }
 
         /// <summary>
@@ -204,11 +203,11 @@ namespace city.rendering.tools {
                 string stableIdentity = string.IsNullOrWhiteSpace(authoringAssetId)
                     ? global::city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneRelativePathToSave)
                     : authoringAssetId;
-                AssetAuthoringServiceValue.WriteNativeScene(
-                    sceneRelativePathToSave,
+                using SceneSaveService sceneSaveService = new SceneSaveService(AuthoringSession, persistenceRegistry);
+                sceneSaveService.Save(
+                    Path.Combine(fullProjectRootPath, "assets", sceneRelativePathToSave.Replace('/', Path.DirectorySeparatorChar)),
                     sceneSettings ?? new SceneSettingsAsset(),
                     generatedRoots,
-                    persistenceRegistry,
                     stableIdentity);
             } finally {
                 RestoreHiddenUserSceneRoots(hiddenRootSnapshots);
@@ -382,8 +381,8 @@ namespace city.rendering.tools {
         /// Resolves the active editor-owned scene entity id allocator required for cloned handheld augmentation roots.
         /// </summary>
         /// <returns>Active editor-owned scene entity id allocator.</returns>
-        static EditorSceneEntityIdAllocator ResolveRequiredSceneEntityIdAllocator() {
-            if (Core.Instance is not EditorCore editorCore) {
+        EditorSceneEntityIdAllocator ResolveRequiredSceneEntityIdAllocator() {
+            if (AuthoringSession.OwningCore is not EditorCore editorCore) {
                 throw new InvalidOperationException("Cloning generated handheld scene roots requires an active EditorCore.");
             } else if (editorCore.SceneEntityIdAllocator == null) {
                 throw new InvalidOperationException("Cloning generated handheld scene roots requires EditorCore.SceneEntityIdAllocator.");
@@ -589,7 +588,7 @@ namespace city.rendering.tools {
             }
 
             List<EditorEntitySceneOwnershipSnapshot> snapshots = new List<EditorEntitySceneOwnershipSnapshot>();
-            List<Entity> liveEntities = Core.Instance.ObjectManager.Entities;
+            List<Entity> liveEntities = AuthoringSession.OwningCore.ObjectManager.Entities;
             for (int index = 0; index < liveEntities.Count; index++) {
                 if (liveEntities[index] is not EditorEntity editorEntity) {
                     continue;

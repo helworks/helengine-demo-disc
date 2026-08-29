@@ -10,13 +10,13 @@ namespace city.rendering.tools {
         /// <summary>
         /// Host-owned capability used to resolve generated control icons and fonts.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
         /// <summary>
         /// Initializes one PBR material gallery scene factory.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
-        public PbrMaterialGallerySceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public PbrMaterialGallerySceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
         /// <summary>
@@ -99,7 +99,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(0f, -0.42f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("PbrMaterialGalleryCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("PbrMaterialGalleryCamera");
             entity.LocalPosition = new float3(0f, 10f, 16f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = orientation;
@@ -145,7 +145,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(-0.6f, -0.95f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("PbrMaterialGallerySun");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("PbrMaterialGallerySun");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 8f, 0f);
             entity.LocalOrientation = orientation;
@@ -168,7 +168,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(2.45f, -0.32f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("PbrMaterialGalleryFill");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("PbrMaterialGalleryFill");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 6f, 0f);
             entity.LocalOrientation = orientation;
@@ -188,7 +188,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored ambient-light entity.</returns>
         Entity CreateAmbientLightEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("PbrMaterialGalleryAmbient");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("PbrMaterialGalleryAmbient");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalOrientation = float4.Identity;
@@ -209,7 +209,7 @@ namespace city.rendering.tools {
         /// <param name="material">Runtime material used by the mesh.</param>
         /// <returns>Live authored ground entity.</returns>
         Entity CreateGroundEntity(RuntimeModel model, RuntimeMaterial material) {
-            Entity entity = Core.Instance.EntityFactory.Create("PbrMaterialGalleryGround");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("PbrMaterialGalleryGround");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = new float3(14f, 1f, 14f);
@@ -251,7 +251,7 @@ namespace city.rendering.tools {
         /// <param name="localPosition">Authored local position for the sphere.</param>
         /// <returns>Live authored sphere entity.</returns>
         Entity CreateSphereEntity(int flatIndex, RuntimeModel sphereModel, RuntimeMaterial material, float3 localPosition) {
-            Entity entity = Core.Instance.EntityFactory.Create("PbrMaterialGallerySphere" + flatIndex.ToString("00"));
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("PbrMaterialGallerySphere" + flatIndex.ToString("00"));
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = localPosition;
             entity.LocalScale = new float3(SphereScale, SphereScale, SphereScale);
@@ -269,11 +269,11 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Editor font asset required by the FPS component.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+            if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the PBR material gallery scene can be generated.");
             }
 
-            return editorCore.DefaultFontAssetForEditor;
+            return AssetAuthoringService.RendererResources.DefaultFontAsset;
         }
     }
 }

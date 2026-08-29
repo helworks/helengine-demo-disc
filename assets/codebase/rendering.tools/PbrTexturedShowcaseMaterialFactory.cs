@@ -76,7 +76,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one PBR textured showcase material factory.
         /// </summary>
-        public PbrTexturedShowcaseMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public PbrTexturedShowcaseMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
         }
 
@@ -84,7 +84,7 @@ namespace city.rendering.tools {
         /// Writes the authored scuffed-metal and wood-plank material settings required by the textured showcase scene.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        public void WriteMaterialAssets(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public void WriteMaterialAssets(string projectRootPath, IEditorProjectAuthoringSession assetAuthoringService) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
@@ -108,7 +108,7 @@ namespace city.rendering.tools {
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <param name="relativeTexturePath">Project-relative source texture path.</param>
         /// <returns>Imported texture asset id persisted by the shared editor import pipeline.</returns>
-        string ResolveTextureAssetId(string projectRootPath, string relativeTexturePath, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        string ResolveTextureAssetId(string projectRootPath, string relativeTexturePath, IEditorProjectAuthoringSession assetAuthoringService) {
             if (assetAuthoringService == null) {
                 throw new ArgumentNullException(nameof(assetAuthoringService));
             }

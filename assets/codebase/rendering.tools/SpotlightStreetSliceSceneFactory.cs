@@ -10,7 +10,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Host-owned capability used to resolve generated control icons and fonts.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
         /// <summary>
         /// Stable scene id used by the generated spotlight street-slice asset.
         /// </summary>
@@ -65,7 +65,7 @@ namespace city.rendering.tools {
         /// Initializes one spotlight street-slice scene factory.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
-        public SpotlightStreetSliceSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public SpotlightStreetSliceSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             PlaceholderFont = new FontAsset(
                 new FontInfo("SpotlightStreetSlicePlaceholder", 16, 4f),
@@ -151,7 +151,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(0f, -0.24f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("SpotlightStreetSliceCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("SpotlightStreetSliceCamera");
             entity.LocalPosition = new float3(0f, 12f, 28f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = orientation;
@@ -197,7 +197,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(0.28f, -1.22f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("SpotlightStreetSliceLight");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("SpotlightStreetSliceLight");
             entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = new float3(-3.2f, 9.5f, -1.4f);
             entity.LocalScale = float3.One;
@@ -268,7 +268,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(materialRelativePaths));
             }
 
-            Entity entity = Core.Instance.EntityFactory.Create(name);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create(name);
             entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = localPosition;
             entity.LocalScale = localScale;
@@ -301,7 +301,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(materials));
             }
 
-            Entity entity = Core.Instance.EntityFactory.Create(name);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create(name);
             entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = localPosition;
             entity.LocalScale = localScale;
@@ -415,11 +415,11 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Editor default font asset.</returns>
         FontAsset ResolveRequiredInstructionFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+            if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the spotlight street-slice scene can be generated.");
             }
 
-            return editorCore.DefaultFontAssetForEditor;
+            return AssetAuthoringService.RendererResources.DefaultFontAsset;
         }
     }
 }

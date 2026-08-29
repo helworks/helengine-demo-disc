@@ -62,7 +62,7 @@ namespace city.menu.tools.tests {
             Assert.Contains("Entity cameraEntity = CreateCameraEntity();", source, StringComparison.Ordinal);
             Assert.Contains("CreateSplashRootEntity(cameraEntity, backgroundEntity)", source, StringComparison.Ordinal);
             Assert.Contains("Entity CreateSplashRootEntity(Entity parent, Entity backgroundEntity)", source, StringComparison.Ordinal);
-            Assert.Contains("Core.Instance.EntityFactory.CreateChild(parent, SceneId)", source, StringComparison.Ordinal);
+            Assert.Contains("AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, SceneId)", source, StringComparison.Ordinal);
             Assert.Contains("BindingMode = ViewportComponent.AncestorCameraBindingMode", source, StringComparison.Ordinal);
         }
 

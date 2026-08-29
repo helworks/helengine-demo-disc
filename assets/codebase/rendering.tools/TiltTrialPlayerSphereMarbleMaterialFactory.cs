@@ -139,7 +139,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one marble material factory.
         /// </summary>
-        public TiltTrialPlayerSphereMarbleMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public TiltTrialPlayerSphereMarbleMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
         }
 
@@ -147,7 +147,7 @@ namespace city.rendering.tools {
         /// Writes the authored marble material settings required by the Tilt Trial player sphere.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        public void WriteMaterialAsset(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public void WriteMaterialAsset(string projectRootPath, IEditorProjectAuthoringSession assetAuthoringService) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
@@ -163,7 +163,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <returns>Imported diffuse and roughness texture asset ids persisted by the shared editor import pipeline.</returns>
-        (string DiffuseTextureAssetId, string RoughnessTextureAssetId) ResolveTextureAssetIds(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        (string DiffuseTextureAssetId, string RoughnessTextureAssetId) ResolveTextureAssetIds(string projectRootPath, IEditorProjectAuthoringSession assetAuthoringService) {
             if (assetAuthoringService == null) {
                 throw new ArgumentNullException(nameof(assetAuthoringService));
             }
@@ -182,7 +182,7 @@ namespace city.rendering.tools {
         /// <param name="assetsRootPath">Absolute assets root path.</param>
         /// <param name="relativeTexturePath">Project-relative source texture path.</param>
         /// <returns>Imported texture asset id persisted by the shared editor import pipeline.</returns>
-        string ResolveTextureAssetId(IEditorProjectAssetAuthoringService assetAuthoringService, string assetsRootPath, string relativeTexturePath) {
+        string ResolveTextureAssetId(IEditorProjectAuthoringSession assetAuthoringService, string assetsRootPath, string relativeTexturePath) {
             if (assetAuthoringService == null) {
                 throw new ArgumentNullException(nameof(assetAuthoringService));
             } else if (string.IsNullOrWhiteSpace(assetsRootPath)) {

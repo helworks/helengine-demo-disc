@@ -34,14 +34,14 @@ namespace city.game.tools {
         /// <summary>
         /// Host-owned public capability used to create authored file references.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AuthoringSession;
 
         /// <summary>
         /// Initializes one Zombislayer scene factory backed by the prepared imported runtime assets.
         /// </summary>
         /// <param name="assets">Prepared imported runtime assets.</param>
-        public ZombislayerSceneFactory(ZombislayerGenerationAssets assets, IEditorProjectAssetAuthoringService assetAuthoringService) {
-            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        public ZombislayerSceneFactory(ZombislayerGenerationAssets assets, IEditorProjectAuthoringSession authoringSession) {
+            AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
             if (assets == null) {
                 throw new ArgumentNullException(nameof(assets));
             } else if (assets.EnvironmentModel == null) {
@@ -80,7 +80,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated root entity.</returns>
         Entity CreateSceneRootEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("ZombislayerSceneRoot");
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.Create("ZombislayerSceneRoot");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
@@ -94,7 +94,7 @@ namespace city.game.tools {
         /// <param name="parent">Scene root that should own the environment entity.</param>
         /// <returns>Generated environment entity.</returns>
         Entity CreateEnvironmentEntity(Entity parent) {
-            SceneAssetReference environmentModelReference = AssetAuthoringService.CreateFileReference(ZombislayerAssetCatalog.EnvironmentModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference environmentModelReference = AuthoringSession.CreateFileReference(ZombislayerAssetCatalog.EnvironmentModelRelativePath, AssetEntryKind.Model);
             return CreateImportedMeshEntity(
                 parent,
                 "ZombislayerEnvironment",
@@ -119,7 +119,7 @@ namespace city.game.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(-0.72f, -0.58f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, "ZombislayerSun");
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, "ZombislayerSun");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 12f, 0f);
             entity.LocalScale = float3.One;
@@ -145,7 +145,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(parent));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, "ZombislayerPlayerRoot");
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, "ZombislayerPlayerRoot");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 1.65f, 0f);
             entity.LocalScale = float3.One;
@@ -172,7 +172,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(parent));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, city.game.ZombislayerFpsControllerComponent.CameraPivotEntityName);
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, city.game.ZombislayerFpsControllerComponent.CameraPivotEntityName);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
@@ -190,7 +190,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(parent));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, "ZombislayerCamera");
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, "ZombislayerCamera");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
@@ -225,7 +225,7 @@ namespace city.game.tools {
         Entity CreateWeaponEntity(Entity parent) {
             float4 orientation;
             float4.CreateFromYawPitchRoll((float)(Math.PI * 0.5d), 0f, 0f, out orientation);
-            SceneAssetReference weaponModelReference = AssetAuthoringService.CreateFileReference(ZombislayerAssetCatalog.WeaponModelRelativePath, AssetEntryKind.Model);
+            SceneAssetReference weaponModelReference = AuthoringSession.CreateFileReference(ZombislayerAssetCatalog.WeaponModelRelativePath, AssetEntryKind.Model);
             return CreateImportedMeshEntity(
                 parent,
                 "ZombislayerWeapon",
@@ -247,7 +247,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(parent));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, city.game.ZombislayerFpsControllerComponent.SessionRootEntityName);
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, city.game.ZombislayerFpsControllerComponent.SessionRootEntityName);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
@@ -331,7 +331,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(modelReference));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, name);
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, name);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = localPosition;
             entity.LocalScale = localScale;
@@ -365,7 +365,7 @@ namespace city.game.tools {
                 throw new ArgumentException("Entity name must be provided.", nameof(entityName));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, entityName);
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
             entity.Static = false;
             entity.AddComponent(new RoundedRectComponent {
@@ -399,7 +399,7 @@ namespace city.game.tools {
                 throw new ArgumentException("Entity name must be provided.", nameof(entityName));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, entityName);
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
             entity.Static = false;
             TextComponent textComponent = new TextComponent {
@@ -421,11 +421,11 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Loaded default editor font.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+            if (AuthoringSession.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the Zombislayer scene can be generated.");
             }
 
-            return editorCore.DefaultFontAssetForEditor;
+            return AuthoringSession.RendererResources.DefaultFontAsset;
         }
 
         /// <summary>
@@ -444,7 +444,7 @@ namespace city.game.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, "Font", AssetAuthoringService.CreateFileReference(fontPath, AssetEntryKind.Font));
+            saveComponent.SetAssetReference(component, "Font", AuthoringSession.CreateFileReference(fontPath, AssetEntryKind.Font));
         }
 
         /// <summary>

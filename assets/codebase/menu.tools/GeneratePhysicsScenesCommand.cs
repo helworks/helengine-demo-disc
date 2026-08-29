@@ -24,7 +24,7 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            PhysicsSceneGenerator generator = new PhysicsSceneGenerator(context.AssetAuthoring);
+            PhysicsSceneGenerator generator = new PhysicsSceneGenerator(context.Authoring);
             generator.Generate(context.ProjectRootPath);
         }
     }

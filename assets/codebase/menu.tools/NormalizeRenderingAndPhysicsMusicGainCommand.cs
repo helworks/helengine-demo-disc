@@ -50,14 +50,21 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
+            using EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
             for (int index = 0; index < SceneRelativePaths.Length; index++) {
-                NormalizeScene(context.AssetAuthoring, SceneRelativePaths[index]);
+                NormalizeScene(context.Authoring, transaction, SceneRelativePaths[index]);
             }
+            transaction.Commit();
         }
 
-        static void NormalizeScene(IEditorProjectAssetAuthoringService assetAuthoringService, string sceneRelativePath) {
+        static void NormalizeScene(
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction,
+            string sceneRelativePath) {
             if (assetAuthoringService == null) {
                 throw new ArgumentNullException(nameof(assetAuthoringService));
+            } else if (transaction == null) {
+                throw new ArgumentNullException(nameof(transaction));
             } else if (string.IsNullOrWhiteSpace(sceneRelativePath)) {
                 throw new ArgumentException("Scene relative path must be provided.", nameof(sceneRelativePath));
             }
@@ -75,10 +82,7 @@ namespace city.menu.tools {
             }
 
             string relativeScenePath = assetsRelativePath.Replace('\\', '/');
-            assetAuthoringService.WriteNativeAsset(
-                relativeScenePath,
-                sceneAsset,
-                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(relativeScenePath));
+            transaction.WriteAsset(relativeScenePath, sceneAsset);
         }
 
         static bool NormalizeEntities(SceneEntityAsset[] entities) {

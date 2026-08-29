@@ -17,8 +17,7 @@ namespace city.tests {
             Assert.Equal("64", GetSingleIntegerConstantValue(modelSource, "TextureHeight"));
             Assert.Contains("public ModelAsset CreateModelAsset()", modelSource, StringComparison.Ordinal);
             Assert.Contains("Id = ModelAssetId,", modelSource, StringComparison.Ordinal);
-            Assert.Contains("Path.Combine(Path.GetFullPath(projectRootPath), \"assets\", ModelRelativePath.Replace('/', Path.DirectorySeparatorChar))", modelSource, StringComparison.Ordinal);
-            Assert.Contains("IEditorProjectAssetAuthoringService", modelSource, StringComparison.Ordinal);
+            Assert.Contains("IEditorProjectAuthoringSession", modelSource, StringComparison.Ordinal);
             Assert.Contains("WriteNativeAsset", modelSource, StringComparison.Ordinal);
             Assert.DoesNotContain("GeneratedAssetWriteService", modelSource, StringComparison.Ordinal);
             Assert.Equal("newfloat3(-0.5f,0.5f,-0.5f),newfloat3(-0.5f,0.5f,0.5f),newfloat3(0.5f,0.5f,0.5f),newfloat3(0.5f,0.5f,-0.5f)", NormalizeSourceFragment(GetSingleArrayContents(modelSource, "Positions")));

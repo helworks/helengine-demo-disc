@@ -64,7 +64,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative DemoDisc project root path.</param>
         /// <returns>Imported texture asset id created by the editor's registered importers.</returns>
-        public string WriteTextureAsset(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public string WriteTextureAsset(string projectRootPath, IEditorProjectAuthoringSession assetAuthoringService) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }

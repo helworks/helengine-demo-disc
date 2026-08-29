@@ -10,20 +10,22 @@ namespace city.scene.tools {
         /// </summary>
         /// <param name="sceneId">Project-relative scene id, such as `scenes/rendering/directional_shadow_plaza.helen`.</param>
         /// <param name="sceneAsset">Fully-authored scene asset to serialize.</param>
-        /// <param name="assetAuthoringService">Host-owned capability used to write the current native scene.</param>
-        public void WriteScene(string sceneId, SceneAsset sceneAsset, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        /// <param name="authoringSession">Project-scoped authoring session used to write the current native scene.</param>
+        public void WriteScene(string sceneId, SceneAsset sceneAsset, IEditorProjectAuthoringSession authoringSession) {
             if (string.IsNullOrWhiteSpace(sceneId)) {
                 throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
             } else if (sceneAsset == null) {
                 throw new ArgumentNullException(nameof(sceneAsset));
-            } else if (assetAuthoringService == null) {
-                throw new ArgumentNullException(nameof(assetAuthoringService));
+            } else if (authoringSession == null) {
+                throw new ArgumentNullException(nameof(authoringSession));
             }
 
-            assetAuthoringService.WriteNativeAsset(
-                sceneId,
-                sceneAsset,
-                ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneId));
+            string stableIdentity = ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneId);
+            sceneAsset.AuthoringAssetId = stableIdentity;
+            sceneAsset.FormerAuthoringAssetIds = Array.Empty<string>();
+            using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
+            transaction.WriteAsset(sceneId, sceneAsset);
+            transaction.Commit();
         }
     }
 }

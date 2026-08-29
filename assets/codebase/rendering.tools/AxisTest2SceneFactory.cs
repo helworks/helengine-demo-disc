@@ -12,7 +12,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Host-owned capability used to resolve generated control icons and fonts.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
         /// <summary>
         /// Stable scene id used by the generated axis-test-2 showcase.
         /// </summary>
@@ -98,7 +98,7 @@ namespace city.rendering.tools {
         /// Initializes one axis-test-2 scene factory.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
-        public AxisTest2SceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public AxisTest2SceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
 
@@ -161,7 +161,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Runtime directional-light arrow model.</returns>
         public RuntimeModel CreateArrowRuntimeModel() {
-            return Core.Instance.RenderManager3D.BuildModelFromRaw(CreateArrowModelAsset());
+            return AssetAuthoringService.OwningCore.RenderManager3D.BuildModelFromRaw(CreateArrowModelAsset());
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll((float)(Math.PI * 0.5), 0f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("AxisTest2Camera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("AxisTest2Camera");
             entity.LocalPosition = new float3(30f, 6f, 5f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = orientation;
@@ -223,7 +223,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(markerMaterial));
             }
 
-            Entity entity = Core.Instance.EntityFactory.Create("AxisTest2SunRig");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("AxisTest2SunRig");
             entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = ArrowRigLocalPosition;
             entity.LocalScale = float3.One;
@@ -245,7 +245,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(markerMaterial));
             }
 
-            Entity entity = Core.Instance.EntityFactory.Create("AxisTest2SunArrow");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("AxisTest2SunArrow");
             entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = new float3(ArrowVisualScale, ArrowVisualScale, ArrowVisualScale);
@@ -394,7 +394,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(material));
             }
 
-            Entity entity = Core.Instance.EntityFactory.Create(name);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create(name);
             entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = localPosition;
             entity.LocalScale = localScale;
@@ -555,11 +555,11 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Loaded default editor font.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+            if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the scene can be generated.");
             }
 
-            return editorCore.DefaultFontAssetForEditor;
+            return AssetAuthoringService.RendererResources.DefaultFontAsset;
         }
 
         /// <summary>

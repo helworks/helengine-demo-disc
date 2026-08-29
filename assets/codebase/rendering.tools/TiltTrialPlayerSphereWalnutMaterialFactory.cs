@@ -124,7 +124,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one walnut material factory.
         /// </summary>
-        public TiltTrialPlayerSphereWalnutMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public TiltTrialPlayerSphereWalnutMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
         }
 
@@ -132,7 +132,7 @@ namespace city.rendering.tools {
         /// Writes the authored walnut material settings required by the Tilt Trial player sphere.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        public void WriteMaterialAsset(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public void WriteMaterialAsset(string projectRootPath, IEditorProjectAuthoringSession assetAuthoringService) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
@@ -146,7 +146,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <returns>Imported texture asset id persisted by the shared editor import pipeline.</returns>
-        string ResolveTextureAssetId(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        string ResolveTextureAssetId(string projectRootPath, IEditorProjectAuthoringSession assetAuthoringService) {
             if (assetAuthoringService == null) {
                 throw new ArgumentNullException(nameof(assetAuthoringService));
             }
@@ -180,7 +180,6 @@ namespace city.rendering.tools {
             GeneratedMaterialAssetDefinition definition = new GeneratedMaterialAssetDefinition();
             definition.MaterialAsset = new ShaderMaterialAsset {
                 Id = MaterialAssetId,
-                AuthoringAssetId = MaterialAuthoringAssetId,
                 DiffuseTextureAssetId = textureAssetId,
                 RenderState = new MaterialRenderState {
                     // The rolling player sphere can expose backface artifacts with photo textures;

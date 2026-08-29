@@ -14,8 +14,8 @@ namespace city.menu.tools.tests {
             string generatorSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\menu.tools\DemoDiscLogoIdleAnimationGenerator.cs");
 
             Assert.Contains("DemoDiscLogoIdleAnimationGenerator", commandSource, StringComparison.Ordinal);
-            Assert.Contains("IEditorProjectAssetAuthoringService", generatorSource, StringComparison.Ordinal);
-            Assert.Contains("WriteNativeAsset", generatorSource, StringComparison.Ordinal);
+            Assert.Contains("IEditorProjectAuthoringSession", generatorSource, StringComparison.Ordinal);
+            Assert.Contains("WriteAsset", generatorSource, StringComparison.Ordinal);
             Assert.DoesNotContain("GeneratedAssetWriteService", generatorSource, StringComparison.Ordinal);
             Assert.Contains("RotationTracks", generatorSource, StringComparison.Ordinal);
             Assert.DoesNotContain("EditorAssetBinarySerializer", generatorSource, StringComparison.Ordinal);

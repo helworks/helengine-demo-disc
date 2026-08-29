@@ -9,7 +9,7 @@ namespace city.game.tools {
         /// <summary>
         /// Host-owned capability used to author the current native Blueprints.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
         /// <summary>
         /// Stable project-relative path for the console gameplay presentation Blueprint.
@@ -25,7 +25,7 @@ namespace city.game.tools {
         /// Initializes one gameplay presentation Blueprint generator.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used to save current Blueprints.</param>
-        public TiltTrialGameplayPresentationBlueprintGenerator(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public TiltTrialGameplayPresentationBlueprintGenerator(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
 
@@ -36,7 +36,7 @@ namespace city.game.tools {
         public void Generate(GameSceneFactory sceneFactory) {
             if (sceneFactory == null) {
                 throw new ArgumentNullException(nameof(sceneFactory));
-            } else if (Core.Instance == null) {
+            } else if (AssetAuthoringService.OwningCore == null) {
                 throw new InvalidOperationException("Tilt Trial presentation generation requires an active editor core.");
             }
 

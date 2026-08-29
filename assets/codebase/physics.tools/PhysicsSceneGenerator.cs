@@ -6,13 +6,13 @@ namespace city.physics.tools {
         /// <summary>
         /// Host-owned capability used by the generated physics scenes to resolve fonts and author import settings.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
         /// <summary>
         /// Initializes one authored physics showcase generator.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by project scene factories.</param>
-        public PhysicsSceneGenerator(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public PhysicsSceneGenerator(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
 
@@ -25,9 +25,8 @@ namespace city.physics.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            if (Core.Instance is not EditorCore editorCore) {
-                throw new InvalidOperationException("Physics scene generation requires an editor core for the console instruction Blueprint.");
-            } else if (editorCore.DefaultFontAssetForEditor == null) {
+            FontAsset editorFont = AssetAuthoringService.RendererResources.DefaultFontAsset;
+            if (editorFont == null) {
                 throw new InvalidOperationException("Physics scene generation requires the editor default font for the console instruction Blueprint.");
             }
 
@@ -35,7 +34,7 @@ namespace city.physics.tools {
             consoleInstructionBlueprintGenerator.Generate(
                 projectRootPath,
                 new DemoSceneInstructionOverlayFactory(AssetAuthoringService),
-                editorCore.DefaultFontAssetForEditor);
+                editorFont);
 
             PhysicsSceneFactory factory = new PhysicsSceneFactory(AssetAuthoringService);
             factory.WriteScenes(projectRootPath);

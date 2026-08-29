@@ -36,7 +36,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <returns>Imported texture asset id backing the generated source bitmap.</returns>
-        public string WriteTextureAsset(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public string WriteTextureAsset(string projectRootPath, IEditorProjectAuthoringSession assetAuthoringService) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }

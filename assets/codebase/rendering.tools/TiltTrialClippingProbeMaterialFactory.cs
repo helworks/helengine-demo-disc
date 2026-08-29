@@ -154,7 +154,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes the generated material writer required by the clipping probe material factory.
         /// </summary>
-        public TiltTrialClippingProbeMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public TiltTrialClippingProbeMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
         }
 
@@ -162,7 +162,7 @@ namespace city.rendering.tools {
         /// Writes the clipping probe material after persisting the imported face-color atlas.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative DemoDisc project root path.</param>
-        public void WriteMaterialAsset(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public void WriteMaterialAsset(string projectRootPath, IEditorProjectAuthoringSession assetAuthoringService) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }

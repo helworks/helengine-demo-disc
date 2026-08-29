@@ -9,7 +9,7 @@ namespace city.game.tools {
         /// <summary>
         /// Host-owned capability used to resolve imported assets and author current settings.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
         /// <summary>
         /// Resolver used to restore project-authored components during temporary handheld clone loads.
         /// </summary>
@@ -20,7 +20,7 @@ namespace city.game.tools {
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
         /// <param name="assetAuthoringService">Host-owned capability used by project generation services.</param>
-        public GameSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public GameSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAuthoringSession assetAuthoringService) {
             ScriptTypeResolverValue = scriptTypeResolver;
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
@@ -62,7 +62,7 @@ namespace city.game.tools {
             sceneWriteService.WriteScene(projectRootPath, tiltTrialLevel01RenderTestScene);
 
             ZombislayerAssetPreparationService zombislayerAssetPreparationService = new ZombislayerAssetPreparationService(AssetAuthoringService);
-            ZombislayerGenerationAssets zombislayerAssets = zombislayerAssetPreparationService.Prepare(projectRootPath);
+            ZombislayerGenerationAssets zombislayerAssets = zombislayerAssetPreparationService.Prepare();
             ZombislayerSceneFactory zombislayerSceneFactory = new ZombislayerSceneFactory(zombislayerAssets, AssetAuthoringService);
             GeneratedAuthoringSceneDefinition zombislayerScene = zombislayerSceneFactory.CreateGameplayScene();
             sceneWriteService.WriteScene(projectRootPath, zombislayerScene);

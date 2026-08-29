@@ -26,7 +26,7 @@ namespace city.tests {
             string sourcePath = Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "RenderingSceneAssetPreparationService.cs");
             string source = File.ReadAllText(sourcePath);
             Assert.Contains("TiltTrialPlayerSphereWalnutMaterialFactory", source, StringComparison.Ordinal);
-            Assert.Contains("WriteMaterialAsset(fullProjectRootPath, AssetAuthoringService)", source, StringComparison.Ordinal);
+            Assert.Contains("WriteMaterialAsset(fullProjectRootPath, AuthoringSession)", source, StringComparison.Ordinal);
         }
     }
 }

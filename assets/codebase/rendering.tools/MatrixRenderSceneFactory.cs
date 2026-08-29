@@ -6,7 +6,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Host-owned capability used to resolve generated control icons and fonts.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AuthoringSession;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
         /// <summary>
         /// Stable scene id used by the generated Matrix Render asset.
         /// </summary>
@@ -76,8 +77,9 @@ namespace city.rendering.tools {
         /// Initializes the Matrix Render scene factory with the services required for authored output.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
-        public MatrixRenderSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
-            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        public MatrixRenderSceneFactory(IEditorProjectAuthoringSession authoringSession) {
+            AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
+            AssetAuthoringService = AuthoringSession;
             MaterialWriteService = new GeneratedMaterialAssetWriteService(AssetAuthoringService);
         }
 
@@ -135,7 +137,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored camera entity.</returns>
         Entity CreateCameraEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("MatrixRenderCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("MatrixRenderCamera");
             entity.LocalPosition = new float3(0f, 3.5f, 10.5f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = CreateYawPitchRollDegrees(0.0, -18.0, 0.0);
@@ -171,7 +173,7 @@ namespace city.rendering.tools {
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
             Entity entity = new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("MatrixRenderUi", "6. Matrix Render");
-            Entity phaseStatusEntity = Core.Instance.EntityFactory.CreateChild(entity, "MatrixRenderPhaseStatus");
+            Entity phaseStatusEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(entity, "MatrixRenderPhaseStatus");
             phaseStatusEntity.LocalPosition = new float3(16f, 112f, 0f);
             phaseStatusEntity.Static = false;
             phaseStatusEntity.AddComponent(new TextComponent {
@@ -191,7 +193,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored directional light entity.</returns>
         Entity CreateKeyLightEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("MatrixRenderKeyLight");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("MatrixRenderKeyLight");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(-3f, 5f, 4f);
             entity.LocalScale = float3.One;
@@ -213,7 +215,7 @@ namespace city.rendering.tools {
         /// <param name="heroMaterial">Generated hero runtime material.</param>
         /// <returns>Live authored hero cube entity.</returns>
         Entity CreateHeroEntity(RuntimeModel cubeModel, RuntimeMaterial heroMaterial) {
-            Entity entity = Core.Instance.EntityFactory.Create("HeroMotionCube");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("HeroMotionCube");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = new float3(2f, 2f, 2f);
@@ -249,7 +251,7 @@ namespace city.rendering.tools {
                 CastsShadows = true,
                 ReceivesShadows = true
             };
-            ShaderAsset shaderAsset = helengine.editor.EditorBuiltInShaderAssetLibrary.LoadShaderAsset(Core.Instance.RenderManager3D, StandardShaderSourceFileName);
+            ShaderAsset shaderAsset = AuthoringSession.LoadBuiltInShaderAsset(StandardShaderSourceFileName);
             materialAsset.ConstantBuffers = new[] {
                 new MaterialConstantBufferAsset {
                     Name = helengine.editor.StandardMaterialBaseColorDefaults.BaseColorBufferName,
@@ -257,8 +259,8 @@ namespace city.rendering.tools {
                 }
             };
 
-            RuntimeMaterial runtimeMaterial = Core.Instance.RenderManager3D.BuildMaterialFromRaw(materialAsset, shaderAsset);
-            StandardMaterialTextureBindingDefaults.Apply(ShaderRuntimeMaterialAccess.Require(runtimeMaterial));
+            RuntimeMaterial runtimeMaterial = AuthoringSession.OwningCore.RenderManager3D.BuildMaterialFromRaw(materialAsset, shaderAsset);
+            StandardMaterialTextureBindingDefaults.Apply(ShaderRuntimeMaterialAccess.Require(runtimeMaterial), AuthoringSession.OwningCore.RenderManager2D);
             return runtimeMaterial;
         }
 
@@ -353,11 +355,11 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Editor font asset.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+            if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the Matrix Render scene can be generated.");
             }
 
-            return editorCore.DefaultFontAssetForEditor;
+            return AssetAuthoringService.RendererResources.DefaultFontAsset;
         }
     }
 }

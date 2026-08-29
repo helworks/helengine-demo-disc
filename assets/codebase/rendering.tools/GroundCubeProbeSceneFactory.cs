@@ -8,7 +8,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Host-owned capability used to resolve generated control icons and fonts.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
         /// <summary>
         /// Stable scene id used by the generated ground-cube probe asset.
         /// </summary>
@@ -18,7 +18,7 @@ namespace city.rendering.tools {
         /// Initializes one ground-cube probe scene factory.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
-        public GroundCubeProbeSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public GroundCubeProbeSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
 
@@ -70,7 +70,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(0f, -0.32f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("GroundCubeProbeCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("GroundCubeProbeCamera");
             entity.LocalPosition = new float3(0f, 10f, 28f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = orientation;
@@ -116,7 +116,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(-0.65f, -0.85f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("GroundCubeProbeSun");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("GroundCubeProbeSun");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 8f, 0f);
             entity.LocalScale = float3.One;
@@ -139,7 +139,7 @@ namespace city.rendering.tools {
         /// <param name="standardMaterial">Generated standard runtime material assigned to the mesh.</param>
         /// <returns>Live authored ground entity.</returns>
         Entity CreateGroundEntity(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
-            Entity entity = Core.Instance.EntityFactory.Create("GroundCubeProbeGround");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("GroundCubeProbeGround");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, -0.5f, 0f);
             entity.LocalScale = new float3(15f, 1f, 15f);
@@ -161,7 +161,7 @@ namespace city.rendering.tools {
         /// <param name="standardMaterial">Generated standard runtime material assigned to the mesh.</param>
         /// <returns>Live authored elevated cube entity.</returns>
         Entity CreateCubeEntity(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
-            Entity entity = Core.Instance.EntityFactory.Create("GroundCubeProbeCube");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("GroundCubeProbeCube");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 10f, 0f);
             entity.LocalScale = float3.One;
@@ -216,11 +216,11 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Loaded default editor font.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+            if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the ground-cube probe scene can be generated.");
             }
 
-            return editorCore.DefaultFontAssetForEditor;
+            return AssetAuthoringService.RendererResources.DefaultFontAsset;
         }
     }
 }

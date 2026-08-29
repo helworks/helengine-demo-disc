@@ -116,12 +116,12 @@ namespace city.menu.tools {
         /// <summary>
         /// Host-owned public capability used for authored references and native asset loads.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
         /// <summary>
         /// Initializes one demo-disc main menu scene factory.
         /// </summary>
-        public DemoDiscHandheldMainMenuSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public DemoDiscHandheldMainMenuSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             Theme = new DemoDiscMenuTheme();
             PlaceholderFont = new FontAsset(
@@ -187,7 +187,7 @@ namespace city.menu.tools {
                 throw new ArgumentException("Font path must be provided.", nameof(fontPath));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, entityName);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
             entity.Static = isStatic;
 
@@ -230,7 +230,7 @@ namespace city.menu.tools {
                 throw new ArgumentException("Entity name must be provided.", nameof(entityName));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, entityName);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
             entity.AddComponent(new RoundedRectComponent {
                 Size = size,
@@ -269,7 +269,7 @@ namespace city.menu.tools {
         /// <param name="definition">Menu definition that provides branding colors and artwork.</param>
         /// <returns>Top-screen camera root.</returns>
         Entity CreateNintendoDsTopScreenCameraEntity(MenuDefinition definition) {
-            Entity entity = Core.Instance.EntityFactory.Create("DemoDiscTopScreenCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("DemoDiscTopScreenCamera");
             entity.AddComponent(new CameraComponent {
                 CameraDrawOrder = 0,
                 LayerMask = EditorLayerMasks.SceneObjects,
@@ -282,7 +282,7 @@ namespace city.menu.tools {
                 }
             });
 
-            Entity topScreenRootEntity = Core.Instance.EntityFactory.CreateChild(entity, "DemoDiscTopScreenRoot");
+            Entity topScreenRootEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(entity, "DemoDiscTopScreenRoot");
             topScreenRootEntity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.AncestorCameraBindingMode,
                 FixedSize = new int2(NintendoDsScreenWidth, NintendoDsScreenHeight),
@@ -308,7 +308,7 @@ namespace city.menu.tools {
         /// <param name="definition">Menu definition used to author the bottom-screen menu hierarchy.</param>
         /// <returns>Bottom-screen camera root.</returns>
         Entity CreateNintendoDsBottomScreenCameraEntity(string providerTypeName, MenuDefinition definition) {
-            Entity entity = Core.Instance.EntityFactory.Create("DemoDiscBottomScreenCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("DemoDiscBottomScreenCamera");
             entity.AddComponent(new CameraComponent {
                 CameraDrawOrder = 1,
                 LayerMask = EditorLayerMasks.SceneObjects,
@@ -321,7 +321,7 @@ namespace city.menu.tools {
                 }
             });
 
-            Entity menuRootEntity = Core.Instance.EntityFactory.CreateChild(entity, "DemoDiscMenuRoot");
+            Entity menuRootEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(entity, "DemoDiscMenuRoot");
             menuRootEntity.AddComponent(new MenuComponent {
                 ProviderTypeName = providerTypeName,
                 InitialPanelId = definition.InitialPanelId
@@ -334,7 +334,7 @@ namespace city.menu.tools {
                 ReferenceHeight = NintendoDsScreenHeight
             });
 
-            Entity generatedRootEntity = Core.Instance.EntityFactory.CreateChild(menuRootEntity, DemoMenuLayout.GeneratedRootEntityName);
+            Entity generatedRootEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(menuRootEntity, DemoMenuLayout.GeneratedRootEntityName);
             for (int panelIndex = 0; panelIndex < definition.Panels.Length; panelIndex++) {
                 CreateNintendoDsPanelEntity(generatedRootEntity, definition, definition.Panels[panelIndex]);
             }
@@ -371,7 +371,7 @@ namespace city.menu.tools {
 
             int displayWidth = ResolveNintendoDsLogoWidth(overlayImage);
             int displayHeight = ResolveNintendoDsLogoHeight(overlayImage, displayWidth);
-            Entity entity = Core.Instance.EntityFactory.CreateChild(topScreenRootEntity, "DemoDiscOverlayImage");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(topScreenRootEntity, "DemoDiscOverlayImage");
             entity.LocalPosition = new float3((NintendoDsScreenWidth - displayWidth) * 0.5f, NintendoDsLogoTopInset, 0f);
             entity.LocalScale = new float3(1f, 1f, 1f);
             entity.LocalOrientation = float4.Identity;
@@ -404,7 +404,7 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(definition));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(topScreenRootEntity, "DemoDiscPlatformInfoOverlay");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(topScreenRootEntity, "DemoDiscPlatformInfoOverlay");
             entity.LocalPosition = new float3(0f, 0f, 0.1f);
             entity.AddComponent(new PlatformInfoTextComponent());
 
@@ -436,7 +436,7 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(panelDefinition));
             }
 
-            Entity panelEntity = Core.Instance.EntityFactory.CreateChild(generatedRootEntity, $"Panel-{panelDefinition.PanelId}");
+            Entity panelEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(generatedRootEntity, $"Panel-{panelDefinition.PanelId}");
             panelEntity.LayerMask = NintendoDsMenuMetadataLayerMask;
             panelEntity.LocalPosition = new float3(0f, 0f, 0f);
             panelEntity.Enabled = string.Equals(panelDefinition.PanelId, definition.InitialPanelId, StringComparison.Ordinal);
@@ -444,14 +444,14 @@ namespace city.menu.tools {
                 PanelId = panelDefinition.PanelId
             });
 
-            Entity itemsViewportEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, $"Panel-{panelDefinition.PanelId}-ItemsViewport");
+            Entity itemsViewportEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(panelEntity, $"Panel-{panelDefinition.PanelId}-ItemsViewport");
             itemsViewportEntity.LayerMask = NintendoDsMenuMetadataLayerMask;
             itemsViewportEntity.LocalPosition = new float3(0f, 6f, 0f);
             itemsViewportEntity.AddComponent(new ClipRectComponent {
                 Size = BuildNintendoDsItemsViewportSize(panelDefinition)
             });
 
-            Entity itemsRootEntity = Core.Instance.EntityFactory.CreateChild(itemsViewportEntity, $"Panel-{panelDefinition.PanelId}-ItemsRoot");
+            Entity itemsRootEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(itemsViewportEntity, $"Panel-{panelDefinition.PanelId}-ItemsRoot");
             itemsRootEntity.LayerMask = NintendoDsMenuMetadataLayerMask;
             itemsRootEntity.AddComponent(new ScrollComponent {
                 Size = BuildNintendoDsItemsViewportSize(panelDefinition),
@@ -496,7 +496,7 @@ namespace city.menu.tools {
             byte4 idleFillColor = ResolveNintendoDsOpaqueCompositeColor(definition.AccentColor, definition.SurfaceColor);
             byte4 selectedFillColor = definition.SurfaceBorderColor;
 
-            Entity itemEntity = Core.Instance.EntityFactory.CreateChild(itemsRootEntity, $"Item-{itemDefinition.ItemId}");
+            Entity itemEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(itemsRootEntity, $"Item-{itemDefinition.ItemId}");
             itemEntity.LayerMask = NintendoDsMenuMetadataLayerMask;
             itemEntity.LocalPosition = new float3(0f, visibleIndex * (NintendoDsButtonHeight + NintendoDsButtonSpacing), 0f);
             itemEntity.AddComponent(new MenuItemComponent {
@@ -634,7 +634,7 @@ namespace city.menu.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, FontReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(AssetAuthoringService, fontPath));
+            saveComponent.SetAssetReference(component, FontReferenceName, AssetAuthoringService.CreateFileReference(fontPath, AssetEntryKind.Font));
         }
 
         /// <summary>
@@ -653,7 +653,7 @@ namespace city.menu.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(AssetAuthoringService, texturePath));
+            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, AssetAuthoringService.CreateFileReference(texturePath, AssetEntryKind.Image));
         }
 
         /// <summary>
@@ -675,7 +675,7 @@ namespace city.menu.tools {
             saveComponent.SetAssetReference(
                 component,
                 AutomaticComponentAssetReferenceSupport.BuildReferenceName(nameof(AnimationPlayerComponent.Clip)),
-                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFile(AssetAuthoringService, animationClipPath));
+                AssetAuthoringService.CreateFileReference(animationClipPath, AssetEntryKind.File));
         }
 
         /// <summary>

@@ -22,7 +22,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            TiltTrialLevel01TessellationAuthoringService service = new TiltTrialLevel01TessellationAuthoringService(context.AssetAuthoring);
+            TiltTrialLevel01TessellationAuthoringService service = new TiltTrialLevel01TessellationAuthoringService(context.Authoring);
             service.ApplyToAuthoredLevel01Scene();
         }
     }

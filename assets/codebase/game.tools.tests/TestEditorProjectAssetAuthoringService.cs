@@ -5,11 +5,21 @@ namespace city.tests {
     /// <summary>
     /// Provides a current-format test double for the public project asset-authoring capability.
     /// </summary>
-    public sealed class TestEditorProjectAssetAuthoringService : IEditorProjectAssetAuthoringService {
+    public sealed class TestEditorProjectAssetAuthoringService : IEditorProjectAuthoringSession {
         /// <summary>
         /// Gets the temporary project root that receives authored test assets.
         /// </summary>
         public string ProjectRootPath { get; }
+
+        // This fixture exercises detached authored-file generation.  The
+        // session-only graph members are intentionally unavailable because no
+        // renderer/import graph is needed by these asset-only tests.
+        public Core OwningCore => throw new NotSupportedException("The detached authoring fixture has no runtime core.");
+        public GeneratedAssetProviderRegistry GeneratedAssetProviders => throw new NotSupportedException("The detached authoring fixture has no generated provider graph.");
+        public EngineGeneratedModelCache GeneratedModelCache => throw new NotSupportedException("The detached authoring fixture has no generated model cache.");
+        public EngineGeneratedMaterialCache GeneratedMaterialCache => throw new NotSupportedException("The detached authoring fixture has no generated material cache.");
+        public EditorSessionRendererResources RendererResources => throw new NotSupportedException("The detached authoring fixture has no renderer resources.");
+        public EditorAssetRepairReport RepairReport { get; } = new EditorAssetRepairReport();
 
         /// <summary>
         /// Initializes one test authoring capability rooted at the supplied temporary project.
@@ -23,6 +33,30 @@ namespace city.tests {
             ProjectRootPath = Path.GetFullPath(projectRootPath);
             Directory.CreateDirectory(Path.Combine(ProjectRootPath, "assets"));
         }
+
+        public SceneAssetReference CreateReference(string relativePath, AssetEntryKind expectedKind) => CreateFileReference(relativePath, expectedKind);
+        public AssetReferenceResolution ResolveReference(SceneAssetReference reference, AssetEntryKind expectedKind) => throw new NotSupportedException("Reference resolution is not used by this detached asset fixture.");
+        public RuntimeModel LoadImportedRuntimeModel(string relativePath) => throw new NotSupportedException("Imported model loading is not used by this detached asset fixture.");
+        public ShaderAsset LoadBuiltInShaderAsset(string shaderFileName) => throw new NotSupportedException("Shader loading is not used by this detached asset fixture.");
+        public EditorAssetWriteResult WriteAsset(string relativePath, Asset asset) {
+            if (asset == null) {
+                throw new ArgumentNullException(nameof(asset));
+            }
+
+            WriteNativeAsset(relativePath, asset);
+            string fullPath = ResolveAssetPath(relativePath);
+            string contentHash = "sha256:" + Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(fullPath))).ToLowerInvariant();
+            return new EditorAssetWriteResult(
+                relativePath.Replace('\\', '/'),
+                fullPath,
+                asset.AuthoringAssetId,
+                contentHash,
+                EditorAssetWriteDisposition.Changed,
+                false);
+        }
+        public EditorAuthoringTransaction BeginTransaction() => throw new NotSupportedException("Transactions are not used by this detached asset fixture.");
+        public void RefreshExternalChanges() { }
+        public void Dispose() { }
 
         /// <inheritdoc />
         public TextureAssetImportSettings LoadOrCreateTextureImportSettings(string sourcePath) {
@@ -190,7 +224,7 @@ namespace city.tests {
                 throw new FileNotFoundException("The test capability cannot reference an asset that was not written.", fullPath);
             }
 
-            string assetId = new AssetIdentityMetadataService().Load(fullPath).AssetId;
+            string assetId = new AssetIdentityMetadataService(ProjectRootPath).Load(fullPath).AssetId;
             string contentHash = "sha256:" + Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(fullPath))).ToLowerInvariant();
             return global::helengine.SceneAssetReferenceFactory.CreateFileSystemReference(
                 assetId,

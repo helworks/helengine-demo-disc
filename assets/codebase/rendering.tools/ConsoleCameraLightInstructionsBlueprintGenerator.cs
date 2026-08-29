@@ -8,13 +8,13 @@ namespace city.rendering.tools {
         /// <summary>
         /// Host-owned capability used to author the current native Blueprint.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
         /// <summary>
         /// Initializes one console instruction Blueprint generator.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used to save the current Blueprint.</param>
-        public ConsoleCameraLightInstructionsBlueprintGenerator(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public ConsoleCameraLightInstructionsBlueprintGenerator(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
 
@@ -31,7 +31,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(overlayFactory));
             } else if (font == null) {
                 throw new ArgumentNullException(nameof(font));
-            } else if (Core.Instance == null) {
+            } else if (AssetAuthoringService.OwningCore == null) {
                 throw new InvalidOperationException("Console camera/light Blueprint generation requires an active editor core.");
             }
 

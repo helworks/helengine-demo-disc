@@ -8,12 +8,12 @@ namespace city.menu.tools {
     /// Authors the additive Helen of Code splash scene used before the standard demo-disc menu.
     /// </summary>
     public sealed class HelenOfCodeSplashSceneFactory {
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
         /// <summary>
         /// Initializes the splash factory with the host-owned public asset authoring capability.
         /// </summary>
-        public HelenOfCodeSplashSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public HelenOfCodeSplashSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
         /// <summary>
@@ -63,7 +63,7 @@ namespace city.menu.tools {
         /// </summary>
         /// <returns>Authored splash overlay camera.</returns>
         Entity CreateCameraEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("HelenOfCodeSplashCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("HelenOfCodeSplashCamera");
             entity.LayerMask = SplashRuntimeLayerMask;
             entity.AddComponent(new CameraComponent {
                 CameraDrawOrder = SplashCameraDrawOrder,
@@ -90,7 +90,7 @@ namespace city.menu.tools {
         /// </summary>
         /// <returns>Authored splash root entity.</returns>
         Entity CreateSplashRootEntity(Entity parent, Entity backgroundEntity) {
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, SceneId);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, SceneId);
             entity.LayerMask = SplashRuntimeLayerMask;
             entity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.AncestorCameraBindingMode,
@@ -114,7 +114,7 @@ namespace city.menu.tools {
         /// </summary>
         /// <param name="parent">Splash root entity that owns the background.</param>
         Entity CreateBackgroundEntity(Entity parent) {
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, "HelenOfCodeSplashBackground");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, "HelenOfCodeSplashBackground");
             entity.LayerMask = SplashRuntimeLayerMask;
             entity.LocalPosition = new float3(0f, 0f, 0f);
             entity.AddComponent(new RoundedRectComponent {
@@ -135,7 +135,7 @@ namespace city.menu.tools {
         Entity CreateLogoEntity(Entity parent) {
             int logoSize = (int)Math.Round(DemoMenuLayout.CanvasHeight * 0.9d);
             int logoOffset = (DemoMenuLayout.CanvasHeight - logoSize) / 2;
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, "HelenOfCodeSplashLogo");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, "HelenOfCodeSplashLogo");
             entity.LayerMask = SplashRuntimeLayerMask;
             entity.LocalPosition = new float3(
                 (DemoMenuLayout.CanvasWidth - logoSize) / 2f,
@@ -163,7 +163,7 @@ namespace city.menu.tools {
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             if (saveComponent.EntityId == 0u) {
-                if (Core.Instance is not EditorCore editorCore || editorCore.SceneEntityIdAllocator == null) {
+                if (AssetAuthoringService.OwningCore is not EditorCore editorCore || editorCore.SceneEntityIdAllocator == null) {
                     throw new InvalidOperationException("Generated splash sprite references require an active editor scene-entity id allocator.");
                 }
 
@@ -194,7 +194,7 @@ namespace city.menu.tools {
             saveComponent.SetAssetReference(
                 component,
                 TextureAssetScenePersistenceSupport.TextureReferenceName,
-                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(AssetAuthoringService, texturePath));
+                AssetAuthoringService.CreateFileReference(texturePath, AssetEntryKind.Image));
         }
 
         /// <summary>

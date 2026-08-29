@@ -10,13 +10,13 @@ namespace city.rendering.tools {
         /// <summary>
         /// Host-owned capability used to resolve generated control icons and fonts.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
         /// <summary>
         /// Initializes one PBR shadow theater scene factory.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
-        public PbrShadowTheaterSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public PbrShadowTheaterSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
         /// <summary>
@@ -87,7 +87,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(0f, -0.32f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("PbrShadowTheaterCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("PbrShadowTheaterCamera");
             entity.LocalPosition = new float3(0f, 6f, 11f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = orientation;
@@ -133,7 +133,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(-0.9f, -0.7f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("PbrShadowTheaterSun");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("PbrShadowTheaterSun");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 7f, 0f);
             entity.LocalOrientation = orientation;
@@ -156,7 +156,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(1.9f, -0.95f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("PbrShadowTheaterSpotlight");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("PbrShadowTheaterSpotlight");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(-3.5f, 6f, 3f);
             entity.LocalScale = float3.One;
@@ -181,7 +181,7 @@ namespace city.rendering.tools {
         /// <param name="material">Runtime material used by the mesh.</param>
         /// <returns>Live authored pedestal entity.</returns>
         Entity CreatePedestalEntity(RuntimeModel model, RuntimeMaterial material) {
-            Entity entity = Core.Instance.EntityFactory.Create("PbrShadowTheaterPedestal");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("PbrShadowTheaterPedestal");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 0.5f, 0f);
             entity.LocalScale = new float3(6f, 1f, 6f);
@@ -203,7 +203,7 @@ namespace city.rendering.tools {
         /// <param name="material">Runtime material used by the mesh.</param>
         /// <returns>Live authored cluster sphere entity.</returns>
         Entity CreateClusterSphereEntity(string name, float3 localPosition, RuntimeModel model, RuntimeMaterial material) {
-            Entity entity = Core.Instance.EntityFactory.Create(name);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create(name);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = localPosition;
             entity.LocalScale = new float3(1.6f, 1.6f, 1.6f);
@@ -221,11 +221,11 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Editor font asset required by the FPS component.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+            if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the PBR shadow theater scene can be generated.");
             }
 
-            return editorCore.DefaultFontAssetForEditor;
+            return AssetAuthoringService.RendererResources.DefaultFontAsset;
         }
     }
 }

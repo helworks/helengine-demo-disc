@@ -24,8 +24,8 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            Ps2EmptyStartupProbeSceneFactory sceneFactory = new Ps2EmptyStartupProbeSceneFactory();
-            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(context.AssetAuthoring);
+            Ps2EmptyStartupProbeSceneFactory sceneFactory = new Ps2EmptyStartupProbeSceneFactory(context.Authoring);
+            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(context.Authoring);
             GeneratedAuthoringSceneDefinition sceneDefinition = sceneFactory.CreateSceneDefinition();
             sceneWriteService.WriteScene(context.ProjectRootPath, sceneDefinition);
         }

@@ -3,13 +3,13 @@ namespace city.rendering.tools {
     /// Writes generated material assets through the public editor material authoring API.
     /// </summary>
     public sealed class GeneratedMaterialAssetWriteService {
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AuthoringSession;
 
         /// <summary>
         /// Initializes one generated material write service.
         /// </summary>
-        public GeneratedMaterialAssetWriteService(IEditorProjectAssetAuthoringService assetAuthoringService) {
-            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        public GeneratedMaterialAssetWriteService(IEditorProjectAuthoringSession authoringSession) {
+            AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace city.rendering.tools {
                 }
             }
 
-            AssetAuthoringService.WriteNativeMaterial(
+            AuthoringSession.WriteNativeMaterial(
                 relativePath,
                 editorDefinition,
                 city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetMaterialIdentity(relativePath));

@@ -24,17 +24,17 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            if (Core.Instance is not EditorCore editorCore) {
+            if (context.Authoring.OwningCore is not EditorCore editorCore) {
                 throw new InvalidOperationException("Console camera/light Blueprint generation requires an editor core.");
-            } else if (editorCore.DefaultFontAssetForEditor == null) {
+            } else if (context.Authoring.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("Console camera/light Blueprint generation requires the editor default font.");
             }
 
-            ConsoleCameraLightInstructionsBlueprintGenerator generator = new ConsoleCameraLightInstructionsBlueprintGenerator(context.AssetAuthoring);
+            ConsoleCameraLightInstructionsBlueprintGenerator generator = new ConsoleCameraLightInstructionsBlueprintGenerator(context.Authoring);
             generator.Generate(
                 context.ProjectRootPath,
-                new DemoSceneInstructionOverlayFactory(context.AssetAuthoring),
-                editorCore.DefaultFontAssetForEditor);
+                new DemoSceneInstructionOverlayFactory(context.Authoring),
+                context.Authoring.RendererResources.DefaultFontAsset);
         }
     }
 }

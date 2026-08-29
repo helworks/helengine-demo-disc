@@ -10,7 +10,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Host-owned capability used to resolve generated control icons and fonts.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
         /// <summary>
         /// Stable scene id used by the generated depth-clip-probe asset.
         /// </summary>
@@ -20,7 +20,7 @@ namespace city.rendering.tools {
         /// Initializes one depth-clip-probe scene factory.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
-        public DepthClipProbeSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public DepthClipProbeSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
 
@@ -71,7 +71,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(0f, -0.28f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("DepthClipProbeCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("DepthClipProbeCamera");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 3f, 7f);
             entity.LocalScale = float3.One;
@@ -112,7 +112,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(-0.65f, -0.85f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("DepthClipProbeSun");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("DepthClipProbeSun");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 4f, 0f);
             entity.LocalScale = float3.One;
@@ -135,7 +135,7 @@ namespace city.rendering.tools {
         /// <param name="standardMaterial">Generated standard runtime material assigned to the mesh.</param>
         /// <returns>Live authored wide-box entity.</returns>
         Entity CreateWideBoxEntity(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
-            Entity entity = Core.Instance.EntityFactory.Create("DepthClipProbeWideBox");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("DepthClipProbeWideBox");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = new float3(5f, 1f, 5f);
@@ -156,7 +156,7 @@ namespace city.rendering.tools {
         /// <param name="standardMaterial">Generated standard runtime material assigned to the mesh.</param>
         /// <returns>Live authored tall-box entity.</returns>
         Entity CreateTallBoxEntity(RuntimeModel cubeModel, RuntimeMaterial standardMaterial) {
-            Entity entity = Core.Instance.EntityFactory.Create("DepthClipProbeTallBox");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("DepthClipProbeTallBox");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = new float3(1f, 5f, 1f);
@@ -174,11 +174,11 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Editor font asset used by the FPS overlay.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+            if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the depth-clip-probe scene can be generated.");
             }
 
-            return editorCore.DefaultFontAssetForEditor;
+            return AssetAuthoringService.RendererResources.DefaultFontAsset;
         }
     }
 }

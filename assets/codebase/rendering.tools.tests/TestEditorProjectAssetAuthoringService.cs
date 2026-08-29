@@ -5,16 +5,33 @@ namespace city.tests {
     /// <summary>
     /// Provides a minimal public authoring capability for material-definition unit tests.
     /// </summary>
-    public sealed class TestEditorProjectAssetAuthoringService : IEditorProjectAssetAuthoringService {
+    public sealed class TestEditorProjectAssetAuthoringService : IEditorProjectAuthoringSession {
+        public string ProjectRootPath { get; }
+        public Core OwningCore => throw Unsupported();
+        public GeneratedAssetProviderRegistry GeneratedAssetProviders => throw Unsupported();
+        public EngineGeneratedModelCache GeneratedModelCache => throw Unsupported();
+        public EngineGeneratedMaterialCache GeneratedMaterialCache => throw Unsupported();
+        public EditorSessionRendererResources RendererResources => throw Unsupported();
+        public EditorAssetRepairReport RepairReport { get; } = new EditorAssetRepairReport();
         /// <summary>
         /// Initializes a capability that intentionally rejects project I/O because the test only inspects authored definitions.
         /// </summary>
-        /// <param name="projectRootPath">Unused test project root retained for call-site clarity.</param>
+        /// <param name="projectRootPath">Test project root retained for call-site clarity.</param>
         public TestEditorProjectAssetAuthoringService(string projectRootPath) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
+            ProjectRootPath = Path.GetFullPath(projectRootPath);
         }
+
+        public SceneAssetReference CreateReference(string relativePath, AssetEntryKind expectedKind) => CreateFileReference(relativePath, expectedKind);
+        public AssetReferenceResolution ResolveReference(SceneAssetReference reference, AssetEntryKind expectedKind) => throw Unsupported();
+        public RuntimeModel LoadImportedRuntimeModel(string relativePath) => throw Unsupported();
+        public ShaderAsset LoadBuiltInShaderAsset(string shaderFileName) => throw Unsupported();
+        public EditorAssetWriteResult WriteAsset(string relativePath, Asset asset) => throw Unsupported();
+        public EditorAuthoringTransaction BeginTransaction() => throw Unsupported();
+        public void RefreshExternalChanges() { }
+        public void Dispose() { }
 
         /// <inheritdoc />
         public TextureAssetImportSettings LoadOrCreateTextureImportSettings(string sourcePath) => throw Unsupported();

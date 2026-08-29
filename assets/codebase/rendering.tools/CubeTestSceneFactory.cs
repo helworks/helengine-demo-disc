@@ -10,7 +10,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Host-owned capability used to resolve generated control icons and fonts.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
         /// <summary>
         /// Stable angular speed used by the rotating cube in radians per second.
         /// </summary>
@@ -25,7 +25,7 @@ namespace city.rendering.tools {
         /// Initializes one cube-test scene factory.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
-        public CubeTestSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public CubeTestSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
 
@@ -75,7 +75,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored camera entity.</returns>
         Entity CreateCameraEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("CubeTestCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("CubeTestCamera");
             entity.LocalPosition = new float3(0f, 0f, 5f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = CreateCameraOrientation();
@@ -125,7 +125,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(-0.65f, -0.85f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("CubeTestSun");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("CubeTestSun");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 4f, 0f);
             entity.LocalScale = float3.One;
@@ -156,7 +156,7 @@ namespace city.rendering.tools {
         /// <param name="solidColorMaterial">Generated shared solid-color runtime material assigned to the mesh.</param>
         /// <returns>Live authored cube entity.</returns>
         Entity CreateCubeEntity(RuntimeModel cubeModel, RuntimeMaterial solidColorMaterial) {
-            Entity entity = Core.Instance.EntityFactory.Create("CubeTestCube");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("CubeTestCube");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 0f, 0f);
             entity.LocalScale = new float3(1f, 1f, 1f);
@@ -180,11 +180,11 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Loaded default editor font.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+            if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the cube-test scene can be generated.");
             }
 
-            return editorCore.DefaultFontAssetForEditor;
+            return AssetAuthoringService.RendererResources.DefaultFontAsset;
         }
     }
 }

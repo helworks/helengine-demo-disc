@@ -21,8 +21,8 @@ namespace city.tests {
         public void Zombislayer_asset_preparation_service_loads_environment_and_weapon_models() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\ZombislayerAssetPreparationService.cs");
 
-            Assert.Contains("LoadImportedModelRuntime(projectRootPath, ZombislayerAssetCatalog.EnvironmentModelRelativePath)", source, StringComparison.Ordinal);
-            Assert.Contains("LoadImportedModelRuntime(projectRootPath, ZombislayerAssetCatalog.WeaponModelRelativePath)", source, StringComparison.Ordinal);
+            Assert.Contains("AuthoringSession.LoadImportedRuntimeModel(ZombislayerAssetCatalog.EnvironmentModelRelativePath)", source, StringComparison.Ordinal);
+            Assert.Contains("AuthoringSession.LoadImportedRuntimeModel(ZombislayerAssetCatalog.WeaponModelRelativePath)", source, StringComparison.Ordinal);
             Assert.Contains("return new ZombislayerGenerationAssets", source, StringComparison.Ordinal);
         }
     }

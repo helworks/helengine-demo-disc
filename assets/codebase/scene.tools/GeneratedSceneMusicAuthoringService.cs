@@ -5,13 +5,13 @@ namespace city.scene.tools {
     /// Authors the shared looping background-music root used by generated showcase scenes.
     /// </summary>
     public sealed class GeneratedSceneMusicAuthoringService {
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AuthoringSession;
 
         /// <summary>
         /// Initializes the shared music authoring service with the host-owned public capability.
         /// </summary>
-        public GeneratedSceneMusicAuthoringService(IEditorProjectAssetAuthoringService assetAuthoringService) {
-            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        public GeneratedSceneMusicAuthoringService(IEditorProjectAuthoringSession authoringSession) {
+            AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
         }
         /// <summary>
         /// Stable project-relative music asset path used by the rendering and physics showcase scenes.
@@ -28,7 +28,7 @@ namespace city.scene.tools {
         /// </summary>
         /// <returns>Live editor-authored music root.</returns>
         public EditorEntity CreateRenderingAndPhysicsMusicEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("SceneMusic");
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.Create("SceneMusic");
             AudioSourceComponent audioSource = new AudioSourceComponent {
                 Clip = new AudioAsset(),
                 PlayOnStart = true,
@@ -64,7 +64,7 @@ namespace city.scene.tools {
             saveComponent.SetAssetReference(
                 audioSourceComponent,
                 AutomaticComponentAssetReferenceSupport.BuildReferenceName(nameof(AudioSourceComponent.Clip)),
-                DemoDiscEditorAssetReferenceFactory.CreateAudio(AssetAuthoringService, audioPath));
+                AuthoringSession.CreateFileReference(audioPath, AssetEntryKind.Audio));
         }
 
         /// <summary>

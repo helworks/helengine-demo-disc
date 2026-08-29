@@ -11,7 +11,7 @@ namespace city.tests {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
 
             Assert.Contains("ZombislayerAssetPreparationService zombislayerAssetPreparationService = new ZombislayerAssetPreparationService(AssetAuthoringService);", source, StringComparison.Ordinal);
-            Assert.Contains("ZombislayerGenerationAssets zombislayerAssets = zombislayerAssetPreparationService.Prepare(projectRootPath);", source, StringComparison.Ordinal);
+            Assert.Contains("ZombislayerGenerationAssets zombislayerAssets = zombislayerAssetPreparationService.Prepare();", source, StringComparison.Ordinal);
             Assert.Contains("ZombislayerSceneFactory zombislayerSceneFactory = new ZombislayerSceneFactory(zombislayerAssets, AssetAuthoringService);", source, StringComparison.Ordinal);
             Assert.Contains("GeneratedAuthoringSceneDefinition zombislayerScene = zombislayerSceneFactory.CreateGameplayScene();", source, StringComparison.Ordinal);
             Assert.Contains("sceneWriteService.WriteScene(projectRootPath, zombislayerScene);", source, StringComparison.Ordinal);
@@ -29,8 +29,8 @@ namespace city.tests {
             Assert.Contains("new city.game.ZombislayerFpsControllerComponent()", source, StringComparison.Ordinal);
             Assert.Contains("\"ZombislayerWeapon\"", source, StringComparison.Ordinal);
             Assert.Contains("\"ZombislayerPauseOverlay\"", source, StringComparison.Ordinal);
-            Assert.Contains("AssetAuthoringService.CreateFileReference(ZombislayerAssetCatalog.EnvironmentModelRelativePath, AssetEntryKind.Model)", source, StringComparison.Ordinal);
-            Assert.Contains("AssetAuthoringService.CreateFileReference(ZombislayerAssetCatalog.WeaponModelRelativePath, AssetEntryKind.Model)", source, StringComparison.Ordinal);
+            Assert.Contains("AuthoringSession.CreateFileReference(ZombislayerAssetCatalog.EnvironmentModelRelativePath, AssetEntryKind.Model)", source, StringComparison.Ordinal);
+            Assert.Contains("AuthoringSession.CreateFileReference(ZombislayerAssetCatalog.WeaponModelRelativePath, AssetEntryKind.Model)", source, StringComparison.Ordinal);
             Assert.Contains("const string GameplaySceneAssetRelativePath = \"scenes/games/zombislayer.helen\";", source, StringComparison.Ordinal);
             Assert.Contains("SceneId = GameSceneCatalog.ZombislayerSceneId", source, StringComparison.Ordinal);
             Assert.Contains("SceneAssetRelativePath = GameplaySceneAssetRelativePath", source, StringComparison.Ordinal);

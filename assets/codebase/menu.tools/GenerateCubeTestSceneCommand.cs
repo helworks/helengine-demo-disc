@@ -24,14 +24,14 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.AssetAuthoring);
+            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.Authoring);
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(context.ProjectRootPath);
-            CubeTestSceneFactory factory = new CubeTestSceneFactory(context.AssetAuthoring);
+            CubeTestSceneFactory factory = new CubeTestSceneFactory(context.Authoring);
             GeneratedAuthoringSceneDefinition sceneDefinition = factory.CreateSceneDefinition(
                 context.ProjectRootPath,
                 assets.GeneratedCubeModel,
                 assets.GeneratedCubeTestSolidMaterial);
-            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(context.ScriptTypeResolver, context.AssetAuthoring);
+            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(context.ScriptTypeResolver, context.Authoring);
             sceneWriteService.WriteScene(context.ProjectRootPath, sceneDefinition);
         }
     }

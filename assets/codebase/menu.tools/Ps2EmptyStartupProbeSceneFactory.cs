@@ -1,4 +1,5 @@
 using city.rendering.tools;
+using helengine.editor;
 
 namespace city.menu.tools {
     /// <summary>
@@ -6,9 +7,15 @@ namespace city.menu.tools {
     /// </summary>
     public sealed class Ps2EmptyStartupProbeSceneFactory {
         /// <summary>
+        /// Session-owned authoring graph used for the temporary probe entities.
+        /// </summary>
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        /// <summary>
         /// Initializes one empty-startup probe scene factory.
         /// </summary>
-        public Ps2EmptyStartupProbeSceneFactory() { }
+        public Ps2EmptyStartupProbeSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
 
         /// <summary>
         /// Creates one camera-only authored scene definition that reuses the demo-disc main menu scene id.
@@ -29,7 +36,7 @@ namespace city.menu.tools {
         /// </summary>
         /// <returns>Camera entity that clears the frame and renders no scene content.</returns>
         Entity CreateCameraEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("Ps2EmptyStartupProbeCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("Ps2EmptyStartupProbeCamera");
             entity.LocalPosition = new float3(0f, 0f, 0f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;

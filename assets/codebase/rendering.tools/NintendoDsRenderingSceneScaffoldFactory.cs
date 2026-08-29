@@ -8,12 +8,12 @@ namespace city.rendering.tools {
     /// Builds the shared Nintendo DS dual-screen scaffold used by generated city rendering showcase companion scenes.
     /// </summary>
 public sealed class NintendoDsRenderingSceneScaffoldFactory {
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
         /// <summary>
         /// Initializes the scaffold with the host-owned public asset authoring capability.
         /// </summary>
-        public NintendoDsRenderingSceneScaffoldFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public NintendoDsRenderingSceneScaffoldFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
         /// <summary>
@@ -198,7 +198,7 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
 
             Entity[] filteredTopScreenRoots = FilterTopScreenRoots(topScreenRoots);
             Entity bottomScreenCameraEntity = CreateBottomScreenCameraEntity();
-            Entity bottomScreenViewportRoot = Core.Instance.EntityFactory.CreateChild(bottomScreenCameraEntity, "DemoDiscBottomScreenRoot");
+            Entity bottomScreenViewportRoot = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(bottomScreenCameraEntity, "DemoDiscBottomScreenRoot");
             bottomScreenViewportRoot.LayerMask = PersistedSceneLayerMask;
             bottomScreenViewportRoot.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.AncestorCameraBindingMode,
@@ -508,7 +508,7 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
 
             Entity fpsEntity = fpsIndex == 0
                 ? bottomScreenViewportRoot
-                : Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, BuildBottomScreenFpsEntityName(fpsIndex));
+                : AssetAuthoringService.OwningCore.EntityFactory.CreateChild(bottomScreenViewportRoot, BuildBottomScreenFpsEntityName(fpsIndex));
             fpsEntity.LayerMask = PersistedSceneLayerMask;
             fpsEntity.LocalPosition = float3.Zero;
             fpsEntity.LocalScale = float3.One;
@@ -651,7 +651,7 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
         /// </summary>
         /// <returns>Bottom-screen camera entity.</returns>
         Entity CreateBottomScreenCameraEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("DemoDiscBottomScreenCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("DemoDiscBottomScreenCamera");
             entity.AddComponent(new CameraComponent {
                 CameraDrawOrder = 1,
                 // The pointer hit resolver rejects interactables whose entity mask misses the camera mask,
@@ -686,7 +686,7 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
                 throw new ArgumentNullException(nameof(bottomOverlayFont));
             }
 
-            Entity lightButtonEntity = Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenLightButton");
+            Entity lightButtonEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenLightButton");
             lightButtonEntity.LocalPosition = new float3(NintendoDsBackButtonLeft, NintendoDsLightButtonTop, 0f);
             lightButtonEntity.LayerMask = PersistedSceneLayerMask;
             lightButtonEntity.Static = true;
@@ -700,7 +700,7 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
             lightButtonEntity.AddComponent(interactableComponent);
             lightButtonEntity.AddComponent(new NintendoDsLightToggleOverlayComponent());
 
-            Entity lightButtonLabelEntity = Core.Instance.EntityFactory.CreateChild(lightButtonEntity, "DemoDiscBottomScreenLightButtonLabel");
+            Entity lightButtonLabelEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(lightButtonEntity, "DemoDiscBottomScreenLightButtonLabel");
             lightButtonLabelEntity.LocalPosition = new float3(NintendoDsLightButtonLabelLeft, NintendoDsLightButtonLabelTop, 0f);
             lightButtonLabelEntity.LayerMask = PersistedSceneLayerMask;
             lightButtonLabelEntity.Static = true;
@@ -718,7 +718,7 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
             ApplyFontReference(lightButtonLabelEntity, labelComponent);
             ApplyNintendo3DsButtonLabelOverride(lightButtonLabelEntity, labelComponent);
 
-            Entity lightSwatchEntity = Core.Instance.EntityFactory.CreateChild(lightButtonEntity, "DemoDiscBottomScreenLightSwatch");
+            Entity lightSwatchEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(lightButtonEntity, "DemoDiscBottomScreenLightSwatch");
             lightSwatchEntity.LocalPosition = new float3(NintendoDsLightSwatchLeft, NintendoDsLightSwatchTop, 0.1f);
             lightSwatchEntity.LayerMask = PersistedSceneLayerMask;
             lightSwatchEntity.Static = true;
@@ -744,7 +744,7 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
                 throw new ArgumentNullException(nameof(bottomOverlayFont));
             }
 
-            Entity backButtonEntity = Core.Instance.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenBackButton");
+            Entity backButtonEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenBackButton");
             backButtonEntity.LocalPosition = new float3(NintendoDsBackButtonLeft, NintendoDsBackButtonTop, 0f);
             backButtonEntity.LayerMask = PersistedSceneLayerMask;
             backButtonEntity.Static = true;
@@ -758,7 +758,7 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
             backButtonEntity.AddComponent(interactableComponent);
             backButtonEntity.AddComponent(new NintendoDsReturnOverlayComponent());
 
-            Entity backButtonLabelEntity = Core.Instance.EntityFactory.CreateChild(backButtonEntity, "DemoDiscBottomScreenBackButtonLabel");
+            Entity backButtonLabelEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(backButtonEntity, "DemoDiscBottomScreenBackButtonLabel");
             backButtonLabelEntity.LocalPosition = new float3(NintendoDsBackButtonLabelLeft, NintendoDsBackButtonLabelTop, 0f);
             backButtonLabelEntity.LayerMask = PersistedSceneLayerMask;
             backButtonLabelEntity.Static = true;
@@ -805,7 +805,7 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
                 throw new ArgumentNullException(nameof(buttonEntity));
             }
 
-            Entity borderEntity = Core.Instance.EntityFactory.CreateChild(buttonEntity, "Border");
+            Entity borderEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(buttonEntity, "Border");
             borderEntity.LocalPosition = new float3(0f, 0f, 0.1f);
             borderEntity.LayerMask = PersistedSceneLayerMask;
             borderEntity.Static = true;
@@ -991,7 +991,7 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringService));
+            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference((IEditorProjectAuthoringSession)AssetAuthoringService));
         }
 
         /// <summary>
@@ -1063,7 +1063,7 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
                 throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
             }
 
-            return global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(AssetAuthoringService, relativePath.Replace('\\', '/'));
+            return ((IEditorProjectAuthoringSession)AssetAuthoringService).CreateFileReference(relativePath.Replace('\\', '/'), AssetEntryKind.Image);
         }
     }
 }

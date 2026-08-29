@@ -116,12 +116,12 @@ namespace city.menu.tools {
         /// <summary>
         /// Host-owned public capability used for authored references and native asset loads.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
         /// <summary>
         /// Initializes one demo-disc main menu scene factory.
         /// </summary>
-        public DemoDiscStandardMainMenuSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public DemoDiscStandardMainMenuSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             Theme = new DemoDiscMenuTheme();
             PlaceholderFont = new FontAsset(
@@ -169,7 +169,7 @@ namespace city.menu.tools {
         /// </summary>
         /// <returns>Live-authored camera entity.</returns>
         Entity CreateCameraEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("DemoDiscCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("DemoDiscCamera");
             entity.AddComponent(new CameraComponent {
                 CameraDrawOrder = 0,
                 LayerMask = EditorLayerMasks.SceneObjects,
@@ -197,7 +197,7 @@ namespace city.menu.tools {
         /// <param name="definition">Menu definition used to author the live hierarchy.</param>
         /// <returns>Live-authored menu root entity.</returns>
         Entity CreateMenuRootEntity(string providerTypeName, MenuDefinition definition) {
-            Entity entity = Core.Instance.EntityFactory.Create("DemoDiscMenuRoot");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("DemoDiscMenuRoot");
             entity.AddComponent(new MenuComponent {
                 ProviderTypeName = providerTypeName,
                 InitialPanelId = definition.InitialPanelId
@@ -211,7 +211,7 @@ namespace city.menu.tools {
                 ReferenceHeight = DemoMenuLayout.CanvasHeight
             });
 
-            Entity generatedRootEntity = Core.Instance.EntityFactory.CreateChild(entity, DemoMenuLayout.GeneratedRootEntityName);
+            Entity generatedRootEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(entity, DemoMenuLayout.GeneratedRootEntityName);
 
             CreateAnimatedBackgroundEntity(generatedRootEntity, definition);
 
@@ -245,7 +245,7 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(panelDefinition));
             }
 
-            Entity panelEntity = Core.Instance.EntityFactory.CreateChild(generatedRootEntity, $"Panel-{panelDefinition.PanelId}");
+            Entity panelEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(generatedRootEntity, $"Panel-{panelDefinition.PanelId}");
             panelEntity.LocalPosition = new float3(0f, 0f, 0f);
             panelEntity.Enabled = string.Equals(panelDefinition.PanelId, definition.InitialPanelId, StringComparison.Ordinal);
 
@@ -274,7 +274,7 @@ namespace city.menu.tools {
             backgroundLayoutComponent.SetAnchorDistances(left: 0f, top: 0f, bottom: 0f);
             backgroundEntity.AddComponent(backgroundLayoutComponent);
 
-            Entity itemsViewportEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, $"Panel-{panelDefinition.PanelId}-ItemsViewport");
+            Entity itemsViewportEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(panelEntity, $"Panel-{panelDefinition.PanelId}-ItemsViewport");
             itemsViewportEntity.LocalPosition = new float3(0f, ItemsViewportTop, 0f);
             itemsViewportEntity.AddComponent(new ClipRectComponent {
                 Size = BuildItemsViewportSize(panelDefinition)
@@ -285,7 +285,7 @@ namespace city.menu.tools {
             itemsViewportLayoutComponent.SetAnchorDistances(left: 0f, top: ItemsViewportTop, bottom: 0f);
             itemsViewportEntity.AddComponent(itemsViewportLayoutComponent);
 
-            Entity itemsRootEntity = Core.Instance.EntityFactory.CreateChild(itemsViewportEntity, $"Panel-{panelDefinition.PanelId}-ItemsRoot");
+            Entity itemsRootEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(itemsViewportEntity, $"Panel-{panelDefinition.PanelId}-ItemsRoot");
             itemsRootEntity.AddComponent(new ScrollComponent {
                 Size = BuildItemsViewportSize(panelDefinition),
                 ItemCount = CountEnabledItems(panelDefinition),
@@ -340,7 +340,7 @@ namespace city.menu.tools {
             byte4 selectedFillColor = definition.AccentColor;
             byte4 selectedBorderColor = definition.AccentSecondaryColor;
 
-            Entity itemEntity = Core.Instance.EntityFactory.CreateChild(itemsRootEntity, $"Item-{itemDefinition.ItemId}");
+            Entity itemEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(itemsRootEntity, $"Item-{itemDefinition.ItemId}");
             itemEntity.LocalPosition = new float3(0f, visibleIndex * (DemoMenuLayout.ButtonHeight + DemoMenuLayout.ButtonSpacing), 0f);
             itemEntity.AddComponent(new MenuItemComponent {
                 PanelId = panelDefinition.PanelId,
@@ -402,7 +402,7 @@ namespace city.menu.tools {
                 throw new ArgumentException("Font path must be provided.", nameof(fontPath));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, entityName);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
             entity.Static = isStatic;
 
@@ -438,11 +438,11 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(definition));
             }
 
-            Entity backgroundEntity = Core.Instance.EntityFactory.CreateChild(generatedRootEntity, "DemoDiscAnimatedBackground");
+            Entity backgroundEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(generatedRootEntity, "DemoDiscAnimatedBackground");
             backgroundEntity.Static = false;
-            Entity gridEntity = Core.Instance.EntityFactory.CreateChild(backgroundEntity, "DemoDiscAnimatedBackgroundGrid");
+            Entity gridEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(backgroundEntity, "DemoDiscAnimatedBackgroundGrid");
             gridEntity.Static = false;
-            Entity scanlineEntity = Core.Instance.EntityFactory.CreateChild(backgroundEntity, "DemoDiscAnimatedBackgroundScanlines");
+            Entity scanlineEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(backgroundEntity, "DemoDiscAnimatedBackgroundScanlines");
             scanlineEntity.Static = false;
             byte4 gridColor = new byte4(126, 87, 164, 28);
             byte4 scanlineColor = new byte4(224, 193, 255, 12);
@@ -490,7 +490,7 @@ namespace city.menu.tools {
                 throw new ArgumentException("Font path must be provided.", nameof(fontPath));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, entityName);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
             entity.Static = isStatic;
 
@@ -531,7 +531,7 @@ namespace city.menu.tools {
                 throw new ArgumentException("Entity name must be provided.", nameof(entityName));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, entityName);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
             entity.AddComponent(new RoundedRectComponent {
                 Size = size,
@@ -557,7 +557,7 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(overlayImage));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(generatedRootEntity, "DemoDiscOverlayImage");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(generatedRootEntity, "DemoDiscOverlayImage");
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = new int2(overlayImage.Width, overlayImage.Height),
                 RenderOrder2D = 31,
@@ -595,7 +595,7 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(platformInfoOverlay));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(generatedRootEntity, "DemoDiscPlatformInfoOverlay");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(generatedRootEntity, "DemoDiscPlatformInfoOverlay");
             LayoutComponent anchorComponent = new LayoutComponent();
             anchorComponent.LayoutSpace = LayoutComponent.CameraViewportLayoutSpace;
             anchorComponent.SetAnchorDistances(right: platformInfoOverlay.RightMargin, top: platformInfoOverlay.TopMargin);
@@ -640,7 +640,7 @@ namespace city.menu.tools {
         SceneEntityReference CreateEntityReference(Entity entity) {
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             if (saveComponent.EntityId == 0u) {
-                if (Core.Instance is not EditorCore editorCore || editorCore.SceneEntityIdAllocator == null) {
+                if (AssetAuthoringService.OwningCore is not EditorCore editorCore || editorCore.SceneEntityIdAllocator == null) {
                     throw new InvalidOperationException("Generated scene entity references require an initialized editor scene id allocator.");
                 }
 
@@ -668,7 +668,7 @@ namespace city.menu.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, FontReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFont(AssetAuthoringService, fontPath));
+            saveComponent.SetAssetReference(component, FontReferenceName, AssetAuthoringService.CreateFileReference(fontPath, AssetEntryKind.Font));
         }
 
         /// <summary>
@@ -687,7 +687,7 @@ namespace city.menu.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(AssetAuthoringService, texturePath));
+            saveComponent.SetAssetReference(component, TextureAssetScenePersistenceSupport.TextureReferenceName, AssetAuthoringService.CreateFileReference(texturePath, AssetEntryKind.Image));
         }
 
         /// <summary>
@@ -709,7 +709,7 @@ namespace city.menu.tools {
             saveComponent.SetAssetReference(
                 component,
                 AutomaticComponentAssetReferenceSupport.BuildReferenceName(nameof(AnimationPlayerComponent.Clip)),
-                global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateFile(AssetAuthoringService, animationClipPath));
+                AssetAuthoringService.CreateFileReference(animationClipPath, AssetEntryKind.File));
         }
 
         /// <summary>

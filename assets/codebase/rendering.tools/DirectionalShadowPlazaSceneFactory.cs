@@ -9,7 +9,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Host-owned capability used to resolve generated control icons and fonts.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
         /// <summary>
         /// Stable scene id used by the generated directional-shadow plaza asset.
         /// </summary>
@@ -44,7 +44,7 @@ namespace city.rendering.tools {
         /// Initializes one directional-shadow plaza scene factory.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
-        public DirectionalShadowPlazaSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public DirectionalShadowPlazaSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             PlaceholderFont = new FontAsset(
                 new FontInfo("DirectionalShadowPlazaPlaceholder", 16, 4f),
@@ -127,7 +127,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(0f, -0.28f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("DirectionalShadowPlazaCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("DirectionalShadowPlazaCamera");
             entity.LocalPosition = new float3(0f, 24f, 64f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = orientation;
@@ -173,7 +173,7 @@ namespace city.rendering.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(0f, -0.72f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("DirectionalShadowPlazaSun");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("DirectionalShadowPlazaSun");
             entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = new float3(0f, 18f, 0f);
             entity.LocalScale = float3.One;
@@ -258,7 +258,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(material));
             }
 
-            Entity entity = Core.Instance.EntityFactory.Create(name);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create(name);
             entity.LayerMask = SceneObjectsLayerMask;
             entity.LocalPosition = localPosition;
             entity.LocalScale = localScale;
@@ -276,12 +276,11 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Editor font asset used by the generated overlays.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            EditorCore editorCore = Core.Instance as EditorCore;
-            if (editorCore == null || editorCore.DefaultFontAssetForEditor == null) {
+            if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the directional-shadow plaza scene can be generated.");
             }
 
-            return editorCore.DefaultFontAssetForEditor;
+            return AssetAuthoringService.RendererResources.DefaultFontAsset;
         }
 
         /// <summary>

@@ -24,7 +24,7 @@ namespace city.menu.tools {
         /// <summary>
         /// Initializes one coordinator over the standard and handheld scene builders.
         /// </summary>
-        public DemoDiscMainMenuSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public DemoDiscMainMenuSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             StandardSceneFactory = new DemoDiscStandardMainMenuSceneFactory(assetAuthoringService);
             HandheldSceneFactory = new DemoDiscHandheldMainMenuSceneFactory(assetAuthoringService);
         }

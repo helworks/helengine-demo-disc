@@ -306,13 +306,15 @@ namespace city.rendering.tools {
         /// <summary>
         /// Host-owned asset-authoring capability used to write generated texture settings and resolve prompt icons.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AuthoringSession;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
         /// <summary>
         /// Initializes the textured cube-grid scene factory with the descriptors and services required for authored output.
         /// </summary>
-        public TexturedCubeGridSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
-            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        public TexturedCubeGridSceneFactory(IEditorProjectAuthoringSession authoringSession) {
+            AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
+            AssetAuthoringService = AuthoringSession;
             MaterialWriteService = new GeneratedMaterialAssetWriteService(AssetAuthoringService);
         }
 
@@ -398,7 +400,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live authored camera entity.</returns>
         Entity CreateCameraEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("TexturedCubeGridCamera");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("TexturedCubeGridCamera");
             entity.LocalPosition = new float3(0f, 0f, 18f);
             entity.AddComponent(new CameraComponent {
                 CameraDrawOrder = 0,
@@ -441,7 +443,7 @@ namespace city.rendering.tools {
         Entity CreateDirectionalLightEntity() {
             float4 orientation;
             float4.CreateFromYawPitchRoll(-0.65f, -0.85f, 0f, out orientation);
-            Entity entity = Core.Instance.EntityFactory.Create("TexturedCubeGridSun");
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("TexturedCubeGridSun");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 6f, 0f);
             entity.LocalOrientation = orientation;
@@ -501,7 +503,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(material));
             }
 
-            Entity entity = Core.Instance.EntityFactory.Create(CreateCubeEntityName(cubeIndex));
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create(CreateCubeEntityName(cubeIndex));
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = localPosition;
             entity.LocalScale = new float3(1.5f, 1.5f, 1.5f);
@@ -730,8 +732,8 @@ namespace city.rendering.tools {
             }
 
             ShaderMaterialAsset materialAsset = CreatePreviewMaterialAsset(cubeIndex);
-            ShaderAsset shaderAsset = helengine.editor.EditorBuiltInShaderAssetLibrary.LoadShaderAsset(Core.Instance.RenderManager3D, StandardShaderSourceFileName);
-            RuntimeMaterial runtimeMaterial = Core.Instance.RenderManager3D.BuildMaterialFromRaw(materialAsset, shaderAsset);
+            ShaderAsset shaderAsset = AuthoringSession.LoadBuiltInShaderAsset(StandardShaderSourceFileName);
+            RuntimeMaterial runtimeMaterial = AuthoringSession.OwningCore.RenderManager3D.BuildMaterialFromRaw(materialAsset, shaderAsset);
             ShaderRuntimeMaterial shaderRuntimeMaterial = ShaderRuntimeMaterialAccess.Require(runtimeMaterial);
 
             int diffuseTextureBindingIndex = shaderRuntimeMaterial.Layout.FindTextureBindingIndex(StandardMaterialTextureBindingDefaults.DiffuseTextureBindingName);
@@ -739,9 +741,9 @@ namespace city.rendering.tools {
                 throw new InvalidOperationException("The generated standard material must expose a diffuse texture binding.");
             }
 
-            RuntimeTexture runtimeTexture = Core.Instance.RenderManager2D.BuildTextureFromRaw(CreateTextureAsset(cubeIndex));
+            RuntimeTexture runtimeTexture = AuthoringSession.OwningCore.RenderManager2D.BuildTextureFromRaw(CreateTextureAsset(cubeIndex));
             shaderRuntimeMaterial.Properties.SetTexture(diffuseTextureBindingIndex, runtimeTexture);
-            StandardMaterialTextureBindingDefaults.Apply(shaderRuntimeMaterial);
+            StandardMaterialTextureBindingDefaults.Apply(shaderRuntimeMaterial, AuthoringSession.OwningCore.RenderManager2D);
             return runtimeMaterial;
         }
 
@@ -750,11 +752,11 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Editor font asset required by the FPS component.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+            if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the textured cube-grid scene can be generated.");
             }
 
-            return editorCore.DefaultFontAssetForEditor;
+            return AssetAuthoringService.RendererResources.DefaultFontAsset;
         }
 
         /// <summary>

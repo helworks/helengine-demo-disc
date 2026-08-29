@@ -5,12 +5,12 @@ namespace city.rendering.tools {
     /// Authors the shared top-left light indicator row used by the rendering demo-disc scenes.
     /// </summary>
     public sealed class DemoDiscLightIndicatorOverlayFactory {
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
         /// <summary>
         /// Initializes the light indicator authoring factory with the host-owned public capability.
         /// </summary>
-        public DemoDiscLightIndicatorOverlayFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public DemoDiscLightIndicatorOverlayFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
         /// <summary>
@@ -116,14 +116,14 @@ namespace city.rendering.tools {
             }
 
             ushort overlayLayerMask = sceneUiEntity.LayerMask;
-            Entity viewportEntity = Core.Instance.EntityFactory.CreateChild(sceneUiEntity, IndicatorViewportEntityName);
+            Entity viewportEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(sceneUiEntity, IndicatorViewportEntityName);
             viewportEntity.LayerMask = overlayLayerMask;
             viewportEntity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
                 FixedSize = new int2(ReferenceViewportWidth, ReferenceViewportHeight)
             });
 
-            Entity labelEntity = Core.Instance.EntityFactory.CreateChild(viewportEntity, IndicatorLabelEntityName);
+            Entity labelEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(viewportEntity, IndicatorLabelEntityName);
             labelEntity.LocalPosition = new float3(IndicatorLabelLeft, IndicatorLabelTop, 0.1f);
             labelEntity.LayerMask = overlayLayerMask;
             TextComponent labelComponent = new TextComponent {
@@ -137,7 +137,7 @@ namespace city.rendering.tools {
             labelEntity.AddComponent(labelComponent);
             ApplyEditorFontReference(labelEntity, labelComponent);
 
-            Entity swatchEntity = Core.Instance.EntityFactory.CreateChild(viewportEntity, IndicatorSwatchEntityName);
+            Entity swatchEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(viewportEntity, IndicatorSwatchEntityName);
             swatchEntity.LocalPosition = new float3(IndicatorSwatchLeft, IndicatorSwatchTop, 0.1f);
             swatchEntity.LayerMask = overlayLayerMask;
             swatchEntity.AddComponent(new RoundedRectComponent {

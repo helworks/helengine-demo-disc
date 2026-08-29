@@ -166,6 +166,27 @@ namespace city.tests {
         }
 
         /// <summary>
+        /// Ensures the generated handheld selector shows one maximum duration and keeps the medal-threshold text entity hidden.
+        /// </summary>
+        [Fact]
+        public void Handheld_level_selector_presents_only_the_maximum_time() {
+            const string scenePath = @"C:\dev\helprojs\demodisc\assets\scenes\games\tilt\tilt_trial_ds.helen";
+            using FileStream stream = File.OpenRead(scenePath);
+            SceneAsset sceneAsset = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
+            SceneEntityAsset[] entities = sceneAsset.RootEntities.SelectMany(EnumerateEntities).ToArray();
+            SceneEntityAsset maximumTimeEntity = Assert.Single(entities, entity => entity.Name == "TiltTrialLevelSelectTimer");
+            SceneEntityAsset targetTimesEntity = Assert.Single(entities, entity => entity.Name == "TiltTrialLevelSelectTargetTimes");
+            string textTypeId = global::helengine.editor.AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(TextComponent));
+            ComponentPersistenceRegistry registry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
+            TextComponent maximumTimeText = DeserializeTextComponent(maximumTimeEntity, textTypeId, registry);
+            TextComponent targetTimesText = DeserializeTextComponent(targetTimesEntity, textTypeId, registry);
+
+            Assert.Equal("MAX 99.00", maximumTimeText.Text);
+            Assert.False(targetTimesEntity.Enabled);
+            Assert.Equal(string.Empty, targetTimesText.Text);
+        }
+
+        /// <summary>
         /// Ensures the Windows-only physics bounds debug root is excluded from handheld scene cooks.
         /// </summary>
         [Fact]
@@ -207,6 +228,29 @@ namespace city.tests {
                     yield return descendant;
                 }
             }
+        }
+
+        /// <summary>
+        /// Deserializes the single text component owned by one generated scene entity.
+        /// </summary>
+        /// <param name="entity">Generated entity that owns the text record.</param>
+        /// <param name="textTypeId">Stable automatic text-component type id.</param>
+        /// <param name="registry">Persistence registry used to materialize the component.</param>
+        /// <returns>Deserialized text component.</returns>
+        static TextComponent DeserializeTextComponent(SceneEntityAsset entity, string textTypeId, ComponentPersistenceRegistry registry) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (string.IsNullOrWhiteSpace(textTypeId)) {
+                throw new ArgumentException("Text component type id must be provided.", nameof(textTypeId));
+            } else if (registry == null) {
+                throw new ArgumentNullException(nameof(registry));
+            }
+
+            SceneComponentAssetRecord record = Assert.Single(entity.Components, component => component.ComponentTypeId == textTypeId);
+            return Assert.IsType<TextComponent>(registry.GetDescriptor(record.ComponentTypeId).DeserializeComponent(
+                record,
+                new EntitySaveComponent(),
+                null));
         }
     }
 }

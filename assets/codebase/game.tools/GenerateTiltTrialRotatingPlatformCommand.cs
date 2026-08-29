@@ -22,7 +22,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            TiltTrialRotatingPlatformAssetGenerator generator = new TiltTrialRotatingPlatformAssetGenerator(context.AssetAuthoring);
+            TiltTrialRotatingPlatformAssetGenerator generator = new TiltTrialRotatingPlatformAssetGenerator(context.Authoring);
             generator.Generate(context.ProjectRootPath);
         }
     }

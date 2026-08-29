@@ -9,6 +9,10 @@ namespace city.menu.tools {
     /// </summary>
     public sealed class SceneLoadingScreenFactory {
         /// <summary>
+        /// Session-owned authoring graph used for every generated entity and id allocation.
+        /// </summary>
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        /// <summary>
         /// Stable authored scene path used by the runtime catalog.
         /// </summary>
         public const string SceneId = "Scenes/SceneLoadingScreen.helen";
@@ -24,11 +28,18 @@ namespace city.menu.tools {
         const byte LoadingScreenCameraDrawOrder = byte.MaxValue - 1;
 
         /// <summary>
+        /// Initializes one loading-screen factory over an explicit authoring graph.
+        /// </summary>
+        public SceneLoadingScreenFactory(IEditorProjectAuthoringSession assetAuthoringService) {
+            AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+        }
+
+        /// <summary>
         /// Creates the persistent loading-scene definition.
         /// </summary>
         /// <returns>Generated authored loading scene.</returns>
         public GeneratedAuthoringSceneDefinition CreateSceneDefinition() {
-            Entity camera = Core.Instance.EntityFactory.Create("SceneLoadingScreenCamera");
+            Entity camera = AssetAuthoringService.OwningCore.EntityFactory.Create("SceneLoadingScreenCamera");
             camera.LayerMask = RuntimeLayerMask;
             camera.AddComponent(new CameraComponent {
                 CameraDrawOrder = LoadingScreenCameraDrawOrder,
@@ -38,7 +49,7 @@ namespace city.menu.tools {
             });
 
             Entity background = CreateRectangle(camera, "LoadingBackground", new float3(0f, 0f, 0f), new int2(DemoMenuLayout.CanvasWidth, DemoMenuLayout.CanvasHeight), 1, new byte4(0, 0, 0, 0));
-            Entity root = Core.Instance.EntityFactory.CreateChild(camera, SceneId);
+            Entity root = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(camera, SceneId);
             root.LayerMask = RuntimeLayerMask;
             root.AddComponent(new ViewportComponent { BindingMode = ViewportComponent.AncestorCameraBindingMode, FixedSize = new int2(DemoMenuLayout.CanvasWidth, DemoMenuLayout.CanvasHeight) });
             root.AddComponent(new ReferenceCanvasFitComponent { ReferenceWidth = DemoMenuLayout.CanvasWidth, ReferenceHeight = DemoMenuLayout.CanvasHeight });
@@ -69,7 +80,7 @@ namespace city.menu.tools {
         /// <param name="color">Initial transparent rectangle color.</param>
         /// <returns>Created rectangle entity with a stable persisted scene id.</returns>
         Entity CreateRectangle(Entity parent, string name, float3 position, int2 size, byte renderOrder, byte4 color) {
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, name);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, name);
             entity.LayerMask = RuntimeLayerMask;
             entity.LocalPosition = position;
             entity.AddComponent(new RoundedRectComponent { Size = size, Radius = 0f, BorderThickness = 1f, FillColor = color, BorderColor = color, RenderOrder2D = renderOrder });
@@ -88,7 +99,7 @@ namespace city.menu.tools {
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             if (saveComponent.EntityId == 0u) {
-                if (Core.Instance is not EditorCore editorCore || editorCore.SceneEntityIdAllocator == null) {
+                if (AssetAuthoringService.OwningCore is not EditorCore editorCore || editorCore.SceneEntityIdAllocator == null) {
                     throw new InvalidOperationException("Generated loading-screen references require an active editor scene-entity id allocator.");
                 }
 

@@ -184,13 +184,13 @@ namespace city.rendering.tools {
         /// <summary>
         /// Host-owned asset-authoring capability used to resolve generated control icons.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
         /// <summary>
         /// Initializes one instruction overlay factory with the host asset-authoring capability.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used to resolve generated icon assets.</param>
-        public DemoSceneInstructionOverlayFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public DemoSceneInstructionOverlayFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
 
@@ -416,7 +416,7 @@ namespace city.rendering.tools {
                 throw new ArgumentOutOfRangeException(nameof(panelWidth));
             }
 
-            Entity viewportRootEntity = Core.Instance.EntityFactory.Create(viewportName);
+            Entity viewportRootEntity = AssetAuthoringService.OwningCore.EntityFactory.Create(viewportName);
             viewportRootEntity.LayerMask = DesktopOverlayLayerMask;
             viewportRootEntity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
@@ -426,7 +426,7 @@ namespace city.rendering.tools {
                 ReferenceHeight = DesktopViewportHeight
             });
 
-            panelEntity = Core.Instance.EntityFactory.CreateChild(viewportRootEntity, panelName);
+            panelEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(viewportRootEntity, panelName);
             panelEntity.LocalPosition = new float3(DesktopInstructionPanelLeft, DesktopInstructionPanelTop, 0f);
             panelEntity.LayerMask = DesktopOverlayLayerMask;
             panelEntity.AddComponent(new RoundedRectComponent {
@@ -494,7 +494,7 @@ namespace city.rendering.tools {
                 CreateInstructionIconEntity(projectRootPath, panelEntity, "CameraIconSecondary", DesktopInstructionCameraSecondaryIconLeft, topOffset, cameraSlotSpecs, 1, 201, commonPlatformId);
             }
 
-            Entity textEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, "CameraText");
+            Entity textEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(panelEntity, "CameraText");
             textEntity.LocalPosition = new float3(DesktopInstructionLabelLeft, topOffset + textTopAdjustment, 0.1f);
             textEntity.LayerMask = DesktopOverlayLayerMask;
             TextComponent textComponent = new TextComponent {
@@ -568,7 +568,7 @@ namespace city.rendering.tools {
 
             CreateInstructionIconEntity(projectRootPath, panelEntity, iconEntityName, DesktopInstructionIconLeft, topOffset, specs, 201, commonPlatformId);
 
-            Entity textEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, iconEntityName + "Text");
+            Entity textEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(panelEntity, iconEntityName + "Text");
             textEntity.LocalPosition = new float3(DesktopInstructionLabelLeft, topOffset + textTopAdjustment, 0.1f);
             textEntity.LayerMask = DesktopOverlayLayerMask;
             TextComponent textComponent = new TextComponent {
@@ -601,7 +601,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Instruction text must be provided.", nameof(text));
             }
 
-            Entity iconEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, text.Replace(" ", string.Empty) + "Icon");
+            Entity iconEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(panelEntity, text.Replace(" ", string.Empty) + "Icon");
             iconEntity.LocalPosition = new float3(NintendoDsInstructionIconLeft, topOffset, 0.1f);
             iconEntity.LayerMask = NintendoDsOverlayLayerMask;
             SpriteComponent spriteComponent = new SpriteComponent {
@@ -611,7 +611,7 @@ namespace city.rendering.tools {
             iconEntity.AddComponent(spriteComponent);
             ApplyTextureReference(iconEntity, spriteComponent, texturePath);
 
-            Entity textEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, text.Replace(" ", string.Empty) + "Text");
+            Entity textEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(panelEntity, text.Replace(" ", string.Empty) + "Text");
             textEntity.LocalPosition = new float3(NintendoDsInstructionTextLeft, topOffset + NintendoDsInstructionTextTopAdjustment, 0.1f);
             textEntity.LayerMask = NintendoDsOverlayLayerMask;
             TextComponent textComponent = new TextComponent {
@@ -623,7 +623,7 @@ namespace city.rendering.tools {
                 RenderOrder2D = 212,
             };
             textEntity.AddComponent(textComponent);
-            ApplyFontReference(textEntity, textComponent, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringService));
+            ApplyFontReference(textEntity, textComponent, DemoDiscSceneComponentRecordFactory.CreateEditorFontReference((IEditorProjectAuthoringSession)AssetAuthoringService));
         }
 
         /// <summary>
@@ -654,7 +654,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Desktop instruction icon specs must be provided.", nameof(specs));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(panelEntity, entityName);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(panelEntity, entityName);
             entity.LocalPosition = new float3(leftOffset, topOffset, 0.1f);
             entity.LayerMask = DesktopOverlayLayerMask;
             DesktopInstructionPlatformIconSpec commonSpec = FindRequiredCommonSpec(specs, commonPlatformId);
@@ -710,7 +710,7 @@ namespace city.rendering.tools {
                 throw new ArgumentOutOfRangeException(nameof(slotIndex));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(panelEntity, entityName);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(panelEntity, entityName);
             entity.LocalPosition = new float3(leftOffset, topOffset, 0.1f);
             entity.LayerMask = DesktopOverlayLayerMask;
 
@@ -897,7 +897,7 @@ namespace city.rendering.tools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringService));
+            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference((IEditorProjectAuthoringSession)AssetAuthoringService));
         }
 
         /// <summary>
@@ -969,7 +969,7 @@ namespace city.rendering.tools {
                 throw new ArgumentException("Relative path must be provided.", nameof(relativePath));
             }
 
-            return global::city.scene.tools.DemoDiscEditorAssetReferenceFactory.CreateImage(AssetAuthoringService, relativePath);
+            return ((IEditorProjectAuthoringSession)AssetAuthoringService).CreateFileReference(relativePath, AssetEntryKind.Image);
         }
     }
 }

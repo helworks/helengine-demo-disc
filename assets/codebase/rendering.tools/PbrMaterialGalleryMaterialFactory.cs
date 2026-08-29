@@ -88,13 +88,15 @@ namespace city.rendering.tools {
         /// <summary>
         /// Service used to persist generated authored material assets plus their per-platform material settings.
         /// </summary>
+        readonly IEditorProjectAuthoringSession AuthoringSession;
         readonly GeneratedMaterialAssetWriteService MaterialWriteService;
 
         /// <summary>
         /// Initializes one PBR material gallery material factory.
         /// </summary>
-        public PbrMaterialGalleryMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
+        public PbrMaterialGalleryMaterialFactory(IEditorProjectAuthoringSession authoringSession) {
+            AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(AuthoringSession);
         }
 
         /// <summary>
@@ -179,7 +181,7 @@ namespace city.rendering.tools {
                 CastsShadows = true,
                 ReceivesShadows = true
             };
-            ShaderAsset shaderAsset = helengine.editor.EditorBuiltInShaderAssetLibrary.LoadShaderAsset(Core.Instance.RenderManager3D, StandardShaderSourceFileName);
+            ShaderAsset shaderAsset = AuthoringSession.LoadBuiltInShaderAsset(StandardShaderSourceFileName);
             materialAsset.ConstantBuffers = new[] {
                 new MaterialConstantBufferAsset {
                     Name = StandardMaterialBaseColorDefaults.BaseColorBufferName,
@@ -199,8 +201,8 @@ namespace city.rendering.tools {
                 }
             };
 
-            RuntimeMaterial runtimeMaterial = Core.Instance.RenderManager3D.BuildMaterialFromRaw(materialAsset, shaderAsset);
-            StandardMaterialTextureBindingDefaults.Apply(ShaderRuntimeMaterialAccess.Require(runtimeMaterial));
+            RuntimeMaterial runtimeMaterial = AuthoringSession.OwningCore.RenderManager3D.BuildMaterialFromRaw(materialAsset, shaderAsset);
+            StandardMaterialTextureBindingDefaults.Apply(ShaderRuntimeMaterialAccess.Require(runtimeMaterial), AuthoringSession.OwningCore.RenderManager2D);
             return runtimeMaterial;
         }
 

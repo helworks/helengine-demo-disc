@@ -118,7 +118,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one shared solid-color material factory.
         /// </summary>
-        public ForwardSolidColorMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public ForwardSolidColorMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
         }
 

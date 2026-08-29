@@ -8,7 +8,7 @@ namespace city.physics.tools {
         /// <summary>
         /// Host-owned capability used to author imported texture settings without exposing editor import internals to the project.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
         /// <summary>
         /// Active project root used while authoring playable showcase overlays.
@@ -374,7 +374,7 @@ namespace city.physics.tools {
         /// Initializes the validation-scene factory with a fresh scene-local entity id allocator.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used to persist generated texture import settings.</param>
-        public PhysicsSceneFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public PhysicsSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             SceneEntityIdAllocator = new SceneEntityAssetIdAllocator();
             PersistenceRegistry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
@@ -1115,7 +1115,7 @@ namespace city.physics.tools {
         /// </summary>
         /// <returns>Live editor-authored overlay root entity ready for serialization.</returns>
         EditorEntity CreatePhysicsShowcaseDesktopInstructionOverlayRoot() {
-            if (Core.Instance == null || Core.Instance.EntityFactory == null) {
+            if (AssetAuthoringService.OwningCore == null || AssetAuthoringService.OwningCore.EntityFactory == null) {
                 throw new InvalidOperationException("Creating the physics showcase instruction overlay requires an active editor entity factory.");
             } else if (string.IsNullOrWhiteSpace(CurrentProjectRootPath)) {
                 throw new InvalidOperationException("Creating the physics showcase instruction overlay requires an active project root path.");
@@ -1658,7 +1658,7 @@ namespace city.physics.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             } else if (string.IsNullOrWhiteSpace(sceneId)) {
                 throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
-            } else if (Core.Instance == null) {
+            } else if (AssetAuthoringService.OwningCore == null) {
                 throw new InvalidOperationException("Writing playable physics showcase scenes requires an active editor core.");
             }
 
@@ -1778,7 +1778,11 @@ namespace city.physics.tools {
             SceneEntityAsset scenarioRootEntity = ResolveRequiredPlayablePhysicsShowcaseScenarioRoot(authoredSceneAsset);
             ComponentPersistenceRegistry persistenceRegistry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
             ISceneAssetReferenceResolver referenceResolver = AssetAuthoringService.CreateSceneAssetReferenceResolver();
-            SceneLoadService sceneLoadService = new SceneLoadService(persistenceRegistry, referenceResolver);
+            SceneLoadService sceneLoadService = new SceneLoadService(
+                persistenceRegistry,
+                referenceResolver,
+                AssetAuthoringService.GeneratedMaterialCache,
+                AssetAuthoringService.RendererResources);
             SceneAsset scenarioSceneAsset = new SceneAsset {
                 Id = authoredSceneAsset.Id,
                 SceneSettings = authoredSceneAsset.SceneSettings,
@@ -1826,7 +1830,7 @@ namespace city.physics.tools {
                 throw new ArgumentException("Camera entity name must be provided.", nameof(entityName));
             }
 
-            Entity entity = Core.Instance.EntityFactory.Create(entityName);
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create(entityName);
             entity.LocalPosition = position;
             entity.LocalOrientation = orientation;
 
@@ -1988,9 +1992,9 @@ namespace city.physics.tools {
                 throw new ArgumentNullException(nameof(saveState));
             } else if (font == null) {
                 return;
-            } else if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+            } else if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {
                 return;
-            } else if (!ReferenceEquals(font, editorCore.DefaultFontAssetForEditor)) {
+            } else if (!ReferenceEquals(font, AssetAuthoringService.RendererResources.DefaultFontAsset)) {
                 return;
             }
 
@@ -2625,11 +2629,11 @@ namespace city.physics.tools {
         /// </summary>
         /// <returns>Loaded editor font asset.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+            if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the physics showcase scenes can be generated.");
             }
 
-            return editorCore.DefaultFontAssetForEditor;
+            return AssetAuthoringService.RendererResources.DefaultFontAsset;
         }
 
         /// <summary>

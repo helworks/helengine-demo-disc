@@ -24,9 +24,9 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.AssetAuthoring);
+            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.Authoring);
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(context.ProjectRootPath);
-            RenderingSceneGenerator generator = new RenderingSceneGenerator(context.ScriptTypeResolver, context.AssetAuthoring);
+            RenderingSceneGenerator generator = new RenderingSceneGenerator(context.ScriptTypeResolver, context.Authoring);
             generator.Generate(context.ProjectRootPath, assets);
         }
     }

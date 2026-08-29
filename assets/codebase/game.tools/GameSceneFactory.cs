@@ -10,7 +10,12 @@ namespace city.game.tools {
         /// <summary>
         /// Host-owned capability used to resolve generated control icons and fonts.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
+
+        /// <summary>
+        /// Core that owns every entity created by this generated scene factory.
+        /// </summary>
+        readonly Core OwningCore;
         /// <summary>
         /// Stable authored material asset id required by the Tilt Trial player sphere.
         /// </summary>
@@ -226,7 +231,7 @@ namespace city.game.tools {
         /// </summary>
         /// <param name="assets">Prepared runtime assets consumed by the generated game scenes.</param>
         /// <param name="assetAuthoringService">Host-owned capability used by generated control-icon references.</param>
-        public GameSceneFactory(RenderingSceneGenerationAssets assets, string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public GameSceneFactory(RenderingSceneGenerationAssets assets, string projectRootPath, IEditorProjectAuthoringSession assetAuthoringService) {
             if (assets == null) {
                 throw new ArgumentNullException(nameof(assets));
             } else if (string.IsNullOrWhiteSpace(projectRootPath)) {
@@ -247,6 +252,7 @@ namespace city.game.tools {
                 throw new ArgumentException("Game scene generation requires the authored goal-flag model and materials.", nameof(assets));
             }
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            OwningCore = AssetAuthoringService.OwningCore ?? throw new ArgumentException("Game scene generation requires an owning core.", nameof(assetAuthoringService));
 
             GeneratedCubeModel = assets.GeneratedCubeModel;
             GeneratedSphereModel = assets.GeneratedSphereModel;
@@ -318,7 +324,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated authoring root for the Tilt Play front-door UI.</returns>
         EditorEntity CreateTiltPlayShellUiEntity() {
-            Entity shell = Core.Instance.EntityFactory.Create("TiltPlayShellUi");
+            Entity shell = OwningCore.EntityFactory.Create("TiltPlayShellUi");
             shell.LayerMask = EditorLayerMasks.SceneObjects;
             shell.AddComponent(new city.game.TiltPlayMenuComponent());
             shell.AddComponent(new ViewportComponent {
@@ -330,7 +336,7 @@ namespace city.game.tools {
                 ReferenceHeight = 720
             });
 
-            Entity titlePanel = Core.Instance.EntityFactory.CreateChild(shell, "TiltPlayTitlePanel");
+            Entity titlePanel = OwningCore.EntityFactory.CreateChild(shell, "TiltPlayTitlePanel");
             titlePanel.LayerMask = EditorLayerMasks.SceneObjects;
             titlePanel.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
                 Role = "TiltPlayTitlePanel"
@@ -364,7 +370,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated authoring root for the viewport-sized title backdrop.</returns>
         EditorEntity CreateTiltPlayViewportBackgroundEntity() {
-            Entity backgroundRoot = Core.Instance.EntityFactory.Create("TiltPlayViewportBackground");
+            Entity backgroundRoot = OwningCore.EntityFactory.Create("TiltPlayViewportBackground");
             backgroundRoot.LayerMask = EditorLayerMasks.SceneObjects;
             backgroundRoot.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
@@ -433,7 +439,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Bottom-screen camera containing the game-owned selector viewport.</returns>
         Entity CreateTiltTrialHandheldLevelSelectBottomScreenCameraEntity() {
-            Entity cameraEntity = Core.Instance.EntityFactory.Create("TiltTrialHandheldLevelSelectBottomScreenCamera");
+            Entity cameraEntity = OwningCore.EntityFactory.Create("TiltTrialHandheldLevelSelectBottomScreenCamera");
             cameraEntity.LayerMask = EditorLayerMasks.SceneObjects;
             cameraEntity.AddComponent(new CameraComponent {
                 CameraDrawOrder = 1,
@@ -453,7 +459,7 @@ namespace city.game.tools {
                 }
             });
 
-            Entity viewportRoot = Core.Instance.EntityFactory.CreateChild(cameraEntity, "TiltTrialHandheldLevelSelectBottomScreenRoot");
+            Entity viewportRoot = OwningCore.EntityFactory.CreateChild(cameraEntity, "TiltTrialHandheldLevelSelectBottomScreenRoot");
             viewportRoot.LayerMask = EditorLayerMasks.SceneObjects;
             ViewportComponent viewportComponent = new ViewportComponent {
                 BindingMode = ViewportComponent.AncestorCameraBindingMode,
@@ -478,7 +484,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(parent));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, "TiltTrialHandheldLevelSelectTopInfo");
+            Entity entity = OwningCore.EntityFactory.CreateChild(parent, "TiltTrialHandheldLevelSelectTopInfo");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             ViewportComponent viewportComponent = new ViewportComponent {
                 BindingMode = ViewportComponent.AncestorCameraBindingMode,
@@ -503,7 +509,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Bottom-screen selector root.</returns>
         EditorEntity CreateHandheldLevelSelectUiEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialHandheldLevelSelectUi");
+            Entity entity = OwningCore.EntityFactory.Create("TiltTrialHandheldLevelSelectUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
             entity.AddComponent(new city.game.TiltTrialLevelSelectComponent {
@@ -596,7 +602,7 @@ namespace city.game.tools {
         /// <param name="name">Stable presentation root name.</param>
         /// <returns>Empty editor presentation root.</returns>
         EditorEntity CreatePresentationRoot(string name) {
-            Entity entity = Core.Instance.EntityFactory.Create(name);
+            Entity entity = OwningCore.EntityFactory.Create(name);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
@@ -618,7 +624,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(levelEntry));
             }
 
-            Entity controllerEntity = Core.Instance.EntityFactory.Create("TiltTrialHandheldGameplayController");
+            Entity controllerEntity = OwningCore.EntityFactory.Create("TiltTrialHandheldGameplayController");
             controllerEntity.LayerMask = EditorLayerMasks.SceneObjects;
             controllerEntity.AddComponent(new city.game.TiltTrialSessionComponent());
             controllerEntity.AddChild(CreateHandheldGameplayBottomScreenCameraEntity(levelEntry));
@@ -639,7 +645,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(levelEntry));
             }
 
-            Entity cameraEntity = Core.Instance.EntityFactory.Create("TiltTrialHandheldGameplayBottomScreenCamera");
+            Entity cameraEntity = OwningCore.EntityFactory.Create("TiltTrialHandheldGameplayBottomScreenCamera");
             cameraEntity.LayerMask = EditorLayerMasks.SceneObjects;
             cameraEntity.AddComponent(new CameraComponent {
                 CameraDrawOrder = 1,
@@ -659,7 +665,7 @@ namespace city.game.tools {
                 }
             });
 
-            Entity viewportRoot = Core.Instance.EntityFactory.CreateChild(cameraEntity, "TiltTrialHandheldGameplayBottomScreenRoot");
+            Entity viewportRoot = OwningCore.EntityFactory.CreateChild(cameraEntity, "TiltTrialHandheldGameplayBottomScreenRoot");
             viewportRoot.LayerMask = EditorLayerMasks.SceneObjects;
             ViewportComponent viewportComponent = new ViewportComponent {
                 BindingMode = ViewportComponent.AncestorCameraBindingMode,
@@ -689,7 +695,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(levelEntry));
             }
 
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialHandheldGameplayUi");
+            Entity entity = OwningCore.EntityFactory.Create("TiltTrialHandheldGameplayUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             ViewportComponent viewportComponent = new ViewportComponent {
                 BindingMode = ViewportComponent.AncestorCameraBindingMode,
@@ -707,7 +713,7 @@ namespace city.game.tools {
             CreateUiTextEntity(panelEntity, "TiltTrialCoinText", new float3(124f, 10f, 0.1f), "Coins 0/0", new int2(106, 26), 0.65f, 2, new byte4(255, 246, 223, 255), TextAlignment.Right);
             CreateUiTextEntity(panelEntity, "TiltTrialTargetTimesText", new float3(12f, 40f, 0.1f), "Targets G00.00 S00.00 B00.00", new int2(220, 18), 0.48f, 2, new byte4(223, 230, 239, 255), TextAlignment.Left);
 
-            Entity speedTextEntity = Core.Instance.EntityFactory.CreateChild(panelEntity, "TiltTrialSpeedText");
+            Entity speedTextEntity = OwningCore.EntityFactory.CreateChild(panelEntity, "TiltTrialSpeedText");
             speedTextEntity.LocalPosition = new float3(12f, 66f, 0.1f);
             speedTextEntity.Static = false;
             TextComponent speedTextComponent = new TextComponent {
@@ -728,7 +734,7 @@ namespace city.game.tools {
 
             CreateUiTextEntity(panelEntity, "TiltTrialHandheldGameplayHint", new float3(12f, 145f, 0.1f), "D-PAD MOVE   L/R CAMERA", new int2(220, 20), 0.5f, 2, new byte4(196, 210, 226, 255), TextAlignment.Center);
 
-            Entity startOverlayEntity = Core.Instance.EntityFactory.CreateChild(entity, "TiltTrialStartOverlay");
+            Entity startOverlayEntity = OwningCore.EntityFactory.CreateChild(entity, "TiltTrialStartOverlay");
             startOverlayEntity.LocalPosition = new float3(16f, 58f, 0f);
             startOverlayEntity.Static = false;
             startOverlayEntity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
@@ -736,7 +742,7 @@ namespace city.game.tools {
             });
             CreateTiltTrialStartPrompt(startOverlayEntity, new float3(12f, 18f, 0.1f), new int2(200, 32), 0.72f, 5, new int2(32, 32));
 
-            Entity resultsOverlayEntity = Core.Instance.EntityFactory.CreateChild(entity, "TiltTrialResultsOverlay");
+            Entity resultsOverlayEntity = OwningCore.EntityFactory.CreateChild(entity, "TiltTrialResultsOverlay");
             resultsOverlayEntity.LocalPosition = new float3(16f, 8f, 0f);
             resultsOverlayEntity.Static = false;
             resultsOverlayEntity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
@@ -799,7 +805,7 @@ namespace city.game.tools {
                 promptColor,
                 TextAlignment.Right);
 
-            Entity iconEntity = Core.Instance.EntityFactory.CreateChild(parent, "TiltTrialStartPromptIcon");
+            Entity iconEntity = OwningCore.EntityFactory.CreateChild(parent, "TiltTrialStartPromptIcon");
             iconEntity.LocalPosition = new float3(
                 promptPosition.X + iconLeft,
                 promptPosition.Y + Math.Max(0, (promptSize.Y - iconBounds.Y) / 2),
@@ -896,10 +902,10 @@ namespace city.game.tools {
         /// <returns>Generated prompt entity.</returns>
         Entity CreateLevelSelectActionPrompt(Entity parent, string name, float3 position, string controlId, string label) {
             int2 iconBounds = new int2(56, 48);
-            Entity promptEntity = Core.Instance.EntityFactory.CreateChild(parent, name);
+            Entity promptEntity = OwningCore.EntityFactory.CreateChild(parent, name);
             promptEntity.LocalPosition = position;
             promptEntity.LayerMask = EditorLayerMasks.SceneObjects;
-            Entity iconEntity = Core.Instance.EntityFactory.CreateChild(promptEntity, name + "Icon");
+            Entity iconEntity = OwningCore.EntityFactory.CreateChild(promptEntity, name + "Icon");
             iconEntity.LocalPosition = new float3(10f, 7f, 0.1f);
             iconEntity.LayerMask = EditorLayerMasks.SceneObjects;
             ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(ProjectRootPath, "windows", controlId, AssetAuthoringService);
@@ -988,7 +994,7 @@ namespace city.game.tools {
         /// <param name="renderOrder">2D render order within the title screen.</param>
         /// <returns>Created sprite entity.</returns>
         Entity CreateTiltPlaySpriteEntity(Entity parent, string name, float3 position, int2 size, string textureRelativePath, byte renderOrder) {
-            Entity spriteEntity = Core.Instance.EntityFactory.CreateChild(parent, name);
+            Entity spriteEntity = OwningCore.EntityFactory.CreateChild(parent, name);
             spriteEntity.LocalPosition = position;
             spriteEntity.LayerMask = EditorLayerMasks.SceneObjects;
             SpriteComponent spriteComponent = new SpriteComponent {
@@ -1120,7 +1126,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated selector camera entity.</returns>
         Entity CreateLevelSelectCameraEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialLevelSelectCamera");
+            Entity entity = OwningCore.EntityFactory.Create("TiltTrialLevelSelectCamera");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
@@ -1155,7 +1161,7 @@ namespace city.game.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(MathF.PI, -0.42f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialCamera");
+            Entity entity = OwningCore.EntityFactory.Create("TiltTrialCamera");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 2.74425f, -10.92f);
             entity.LocalScale = float3.One;
@@ -1200,7 +1206,7 @@ namespace city.game.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(-0.6f, -0.95f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialSun");
+            Entity entity = OwningCore.EntityFactory.Create("TiltTrialSun");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 8f, 0f);
             entity.LocalScale = float3.One;
@@ -1224,7 +1230,7 @@ namespace city.game.tools {
             float4 orientation;
             float4.CreateFromYawPitchRoll(2.45f, -0.32f, 0f, out orientation);
 
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialFill");
+            Entity entity = OwningCore.EntityFactory.Create("TiltTrialFill");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 6f, 0f);
             entity.LocalScale = float3.One;
@@ -1245,7 +1251,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated ambient-light entity.</returns>
         Entity CreateAmbientLightEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialAmbient");
+            Entity entity = OwningCore.EntityFactory.Create("TiltTrialAmbient");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
@@ -1266,7 +1272,7 @@ namespace city.game.tools {
         /// <param name="useOwnViewport">Whether the selector is a standalone scene root that must fit itself to the live viewport.</param>
         /// <returns>Generated selector UI root entity.</returns>
         EditorEntity CreateLevelSelectUiEntity(bool useOwnViewport) {
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialLevelSelectUi");
+            Entity entity = OwningCore.EntityFactory.Create("TiltTrialLevelSelectUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.AddComponent(new city.game.TiltTrialLevelSelectComponent {
                 UseDetailsStage = false
@@ -1405,7 +1411,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(levelEntry));
             }
 
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialLevelMetadata");
+            Entity entity = OwningCore.EntityFactory.Create("TiltTrialLevelMetadata");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.AddComponent(new city.game.TiltTrialLevelSettingsComponent {
                 LevelId = levelEntry.LevelId,
@@ -1425,7 +1431,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated UI root entity.</returns>
         EditorEntity CreateGameplayUiEntity(global::city.game.TiltTrialLevelCatalogEntry levelEntry) {
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialUi");
+            Entity entity = OwningCore.EntityFactory.Create("TiltTrialUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.AddComponent(new city.game.TiltTrialSessionComponent());
             entity.AddComponent(new ViewportComponent {
@@ -1443,7 +1449,7 @@ namespace city.game.tools {
 
             CreateUiTextEntity(entity, "TiltTrialTimerText", new float3(530f, 16f, 0f), global::city.game.TiltTrialLevelSelectComponent.FormatTimerSeconds(levelEntry.StartTimeSeconds), new int2(220, 56), 2.2f, 1, new byte4(255, 246, 223, 255), TextAlignment.Center);
 
-            Entity speedTextEntity = Core.Instance.EntityFactory.CreateChild(entity, "TiltTrialSpeedText");
+            Entity speedTextEntity = OwningCore.EntityFactory.CreateChild(entity, "TiltTrialSpeedText");
             speedTextEntity.LocalPosition = new float3(16f, 600f, 0f);
             speedTextEntity.Static = false;
             TextComponent speedTextComponent = new TextComponent {
@@ -1479,7 +1485,7 @@ namespace city.game.tools {
             CreateUiTextEntity(failOverlayEntity, "TiltTrialFailTitleText", new float3(36f, 28f, 0.1f), "Time Up", new int2(280, 42), 2f, 5, new byte4(255, 223, 223, 255), TextAlignment.Left);
             CreateUiTextEntity(failOverlayEntity, "TiltTrialFailBodyText", new float3(36f, 86f, 0.1f), "Retry", new int2(320, 96), 1.35f, 5, new byte4(247, 248, 252, 255), TextAlignment.Left);
 
-            Entity coinTextEntity = Core.Instance.EntityFactory.CreateChild(entity, "TiltTrialCoinText");
+            Entity coinTextEntity = OwningCore.EntityFactory.CreateChild(entity, "TiltTrialCoinText");
             coinTextEntity.LocalPosition = new float3(16f, 16f, 0f);
             coinTextEntity.Static = false;
             TextComponent coinTextComponent = new TextComponent {
@@ -1501,7 +1507,7 @@ namespace city.game.tools {
                 Role = "TiltTrialCoinText"
             });
 
-            Entity physicsBoundsStatusTextEntity = Core.Instance.EntityFactory.CreateChild(entity, "TiltTrialPhysicsBoundsStatusText");
+            Entity physicsBoundsStatusTextEntity = OwningCore.EntityFactory.CreateChild(entity, "TiltTrialPhysicsBoundsStatusText");
             physicsBoundsStatusTextEntity.LocalPosition = new float3(16f, 56f, 0f);
             physicsBoundsStatusTextEntity.Static = false;
             TextComponent physicsBoundsStatusTextComponent = new TextComponent {
@@ -1539,7 +1545,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated debug-root entity.</returns>
         Entity CreatePhysicsBoundsDebugEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialPhysicsBoundsDebug");
+            Entity entity = OwningCore.EntityFactory.Create("TiltTrialPhysicsBoundsDebug");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
@@ -1579,7 +1585,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated editor stage root.</returns>
         EditorEntity CreateStageRootEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("StageRoot");
+            Entity entity = OwningCore.EntityFactory.Create("StageRoot");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
@@ -1606,7 +1612,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated editor stage root for level 1.</returns>
         EditorEntity CreateTiltTrialLevel01StageRootEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("StageRoot");
+            Entity entity = OwningCore.EntityFactory.Create("StageRoot");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
@@ -1644,7 +1650,7 @@ namespace city.game.tools {
         EditorEntity CreateLevel01RenderTestCameraEntity() {
             float4 orientation;
             float4.CreateFromYawPitchRoll(0.6435011f, -0.3805064f, 0f, out orientation);
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialLevel01RenderTestCamera");
+            Entity entity = OwningCore.EntityFactory.Create("TiltTrialLevel01RenderTestCamera");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(6f, 4f, 8f);
             entity.LocalScale = float3.One;
@@ -1676,7 +1682,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated FPS overlay entity.</returns>
         EditorEntity CreateLevel01RenderTestFpsEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("TiltTrialLevel01RenderTestFps");
+            Entity entity = OwningCore.EntityFactory.Create("TiltTrialLevel01RenderTestFps");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             FPSComponent fpsComponent = new FPSComponent {
                 Font = ResolveRequiredEditorFont(),
@@ -1692,7 +1698,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated render-only stage root.</returns>
         EditorEntity CreateLevel01RenderOnlyStageRootEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("Ps2ClippingProbe");
+            Entity entity = OwningCore.EntityFactory.Create("Ps2ClippingProbe");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
@@ -1706,7 +1712,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated visual-only player sphere entity.</returns>
         Entity CreateLevel01RenderOnlyPlayerSphereEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("PlayerSphere");
+            Entity entity = OwningCore.EntityFactory.Create("PlayerSphere");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 1.2f, -7f);
             entity.LocalScale = float3.One;
@@ -1734,7 +1740,7 @@ namespace city.game.tools {
                 throw new ArgumentException("Render-only course box names must be provided.", nameof(name));
             }
 
-            Entity entity = Core.Instance.EntityFactory.Create(name);
+            Entity entity = OwningCore.EntityFactory.Create(name);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = position;
             entity.LocalScale = scale;
@@ -1798,7 +1804,7 @@ namespace city.game.tools {
                 throw new ArgumentException("Render-only coin names must be provided.", nameof(name));
             }
 
-            Entity entity = Core.Instance.EntityFactory.Create(name);
+            Entity entity = OwningCore.EntityFactory.Create(name);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = position;
             entity.LocalScale = new float3(0.51f, 0.51f, 0.51f);
@@ -1819,7 +1825,7 @@ namespace city.game.tools {
         /// <param name="position">Local position.</param>
         /// <returns>Generated visual-only goal flag entity.</returns>
         Entity CreateLevel01RenderOnlyGoalFlagEntity(float3 position) {
-            Entity entity = Core.Instance.EntityFactory.Create("GoalFlag");
+            Entity entity = OwningCore.EntityFactory.Create("GoalFlag");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = position;
             entity.LocalScale = new float3(1.2f, 1.2f, 1.2f);
@@ -1946,7 +1952,7 @@ namespace city.game.tools {
         /// <param name="wallX">Absolute guide-wall center offset.</param>
         /// <returns>Generated stage root.</returns>
         Entity CreateTiltTrialStageRoot(string name, float maximumPlanarSpeed, float wallX) {
-            Entity entity = Core.Instance.EntityFactory.Create(name);
+            Entity entity = OwningCore.EntityFactory.Create(name);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
@@ -1979,7 +1985,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated editor sphere entity.</returns>
         EditorEntity CreatePlayerSphereEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("PlayerSphere");
+            Entity entity = OwningCore.EntityFactory.Create("PlayerSphere");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 1.2f, -7f);
             entity.LocalScale = float3.One;
@@ -2042,7 +2048,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Generated floor entity.</returns>
         Entity CreateCatchFloorEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("CatchFloor");
+            Entity entity = OwningCore.EntityFactory.Create("CatchFloor");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, -14f, 0f);
             entity.LocalScale = new float3(24f, 1f, 24f);
@@ -2188,7 +2194,7 @@ namespace city.game.tools {
                 throw new ArgumentException("Collectible coin name must be provided.", nameof(name));
             }
 
-            Entity entity = Core.Instance.EntityFactory.Create(name);
+            Entity entity = OwningCore.EntityFactory.Create(name);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = position;
             entity.LocalScale = new float3(0.51f, 0.51f, 0.51f);
@@ -2215,7 +2221,7 @@ namespace city.game.tools {
         /// <param name="position">Local position of the flag.</param>
         /// <returns>Generated finish flag entity.</returns>
         Entity CreateGoalFlagEntity(float3 position) {
-            Entity entity = Core.Instance.EntityFactory.Create("GoalFlag");
+            Entity entity = OwningCore.EntityFactory.Create("GoalFlag");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = position;
             entity.LocalScale = new float3(1.2f, 1.2f, 1.2f);
@@ -2242,7 +2248,7 @@ namespace city.game.tools {
                 throw new ArgumentException("Course box names must be provided.", nameof(name));
             }
 
-            Entity entity = Core.Instance.EntityFactory.Create(name);
+            Entity entity = OwningCore.EntityFactory.Create(name);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = position;
             entity.LocalScale = scale;
@@ -2533,7 +2539,7 @@ namespace city.game.tools {
                 throw new ArgumentException("Entity name must be provided.", nameof(entityName));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, entityName);
+            Entity entity = OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
             entity.Static = false;
             entity.AddComponent(new RoundedRectComponent {
@@ -2570,7 +2576,7 @@ namespace city.game.tools {
                 throw new ArgumentException("Entity name must be provided.", nameof(entityName));
             }
 
-            Entity entity = Core.Instance.EntityFactory.CreateChild(parent, entityName);
+            Entity entity = OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
             entity.Static = false;
             TextComponent textComponent = new TextComponent {
@@ -2595,11 +2601,11 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Loaded default editor font.</returns>
         FontAsset ResolveRequiredEditorFont() {
-            if (Core.Instance is not EditorCore editorCore || editorCore.DefaultFontAssetForEditor == null) {
+            if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before the Tilt Trial scene can be generated.");
             }
 
-            return editorCore.DefaultFontAssetForEditor;
+            return AssetAuthoringService.RendererResources.DefaultFontAsset;
         }
 
         /// <summary>

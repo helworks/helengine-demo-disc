@@ -154,7 +154,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one Tilt Trial course material factory.
         /// </summary>
-        public TiltTrialCourseMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public TiltTrialCourseMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
         }
 
@@ -162,7 +162,7 @@ namespace city.rendering.tools {
         /// Writes the Tilt Trial course material asset and its platform settings into the supplied project.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        public void WriteMaterialAsset(string projectRootPath, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public void WriteMaterialAsset(string projectRootPath, IEditorProjectAuthoringSession assetAuthoringService) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }

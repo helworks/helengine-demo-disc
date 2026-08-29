@@ -9,7 +9,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Host-owned capability used by all generated scene factories to resolve current imported assets and settings.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
         /// <summary>
         /// Stable scene id used by the cube-test showcase.
         /// </summary>
@@ -235,7 +235,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
         /// <param name="assetAuthoringService">Host-owned capability used by all generated scene factories.</param>
-        public RenderingSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public RenderingSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             AuthoringSceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver, AssetAuthoringService);
             DirectionalShadowPlazaFactory = new DirectionalShadowPlazaSceneFactory(AssetAuthoringService);
@@ -248,7 +248,7 @@ namespace city.rendering.tools {
             TexturedCubeGridFactory = new TexturedCubeGridSceneFactory(AssetAuthoringService);
             AxisTestFactory = new AxisTestSceneFactory(AssetAuthoringService);
             AxisTest2Factory = new AxisTest2SceneFactory(AssetAuthoringService);
-            SceneMemoryProbeFactory = new SceneMemoryProbeSceneFactory();
+            SceneMemoryProbeFactory = new SceneMemoryProbeSceneFactory(AssetAuthoringService);
             PbrMaterialGalleryMaterials = new PbrMaterialGalleryMaterialFactory(AssetAuthoringService);
             PbrMaterialGalleryScene = new PbrMaterialGallerySceneFactory(AssetAuthoringService);
             PbrTexturedShowcaseMaterials = new PbrTexturedShowcaseMaterialFactory(AssetAuthoringService);
@@ -293,7 +293,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(assets));
             }
 
-            if (Core.Instance is not EditorCore editorCore) {
+            if (AssetAuthoringService.OwningCore is not EditorCore editorCore) {
                 throw new InvalidOperationException("Rendering scene generation requires an editor core for the console instruction Blueprint.");
             } else if (editorCore.DefaultFontAssetForEditor == null) {
                 throw new InvalidOperationException("Rendering scene generation requires the editor default font for the console instruction Blueprint.");

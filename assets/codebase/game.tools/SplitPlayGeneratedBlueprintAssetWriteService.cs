@@ -3,9 +3,9 @@ namespace city.game.tools {
     /// Writes one generated blueprint asset beneath the city project assets tree.
     /// </summary>
     public sealed class SplitPlayGeneratedBlueprintAssetWriteService {
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
-        public SplitPlayGeneratedBlueprintAssetWriteService(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public SplitPlayGeneratedBlueprintAssetWriteService(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
 
@@ -16,10 +16,9 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(blueprintAsset));
             }
 
-            AssetAuthoringService.WriteNativeAsset(
-                relativePath,
-                blueprintAsset,
-                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(relativePath));
+            blueprintAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(relativePath);
+            blueprintAsset.FormerAuthoringAssetIds = Array.Empty<string>();
+            AssetAuthoringService.WriteAsset(relativePath, blueprintAsset);
         }
     }
 }

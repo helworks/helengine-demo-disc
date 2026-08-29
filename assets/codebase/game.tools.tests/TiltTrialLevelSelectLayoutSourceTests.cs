@@ -113,7 +113,7 @@ namespace city.tests {
             Assert.Contains("CreateLevelSelectActionPrompt(entity, \"TiltTrialLevelSelectPlayPrompt\", new float3(848f, 638f, 0f)", desktopMethodSource, StringComparison.Ordinal);
             Assert.Contains("CreateLevelSelectActionPrompt(entity, \"TiltTrialLevelSelectMenuPrompt\", new float3(1056f, 638f, 0f)", desktopMethodSource, StringComparison.Ordinal);
             Assert.Contains("int2 iconBounds = new int2(56, 48)", source, StringComparison.Ordinal);
-            Assert.Contains("Core.Instance.EntityFactory.CreateChild(parent, name)", source, StringComparison.Ordinal);
+            Assert.Contains("OwningCore.EntityFactory.CreateChild(parent, name)", source, StringComparison.Ordinal);
             Assert.Contains("new float3(392f, 28f, 0f)", desktopMethodSource, StringComparison.Ordinal);
             Assert.Contains("GeneratedControlIconAssetResolver", source, StringComparison.Ordinal);
             Assert.Contains("CreateFileSystemTexture(resolvedIcon.SourcePngRelativePath)", source, StringComparison.Ordinal);

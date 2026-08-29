@@ -1,8 +1,11 @@
+using helengine.editor;
+
 namespace city.rendering.tools {
     /// <summary>
     /// Builds one persistent authored scene that drives a fixed main-menu versus cube-test memory probe sequence.
     /// </summary>
     public sealed class SceneMemoryProbeSceneFactory {
+        readonly IEditorProjectAuthoringSession AuthoringSession;
         /// <summary>
         /// Stable scene id used by the generated scene-memory probe asset.
         /// </summary>
@@ -36,7 +39,9 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one scene-memory probe scene factory.
         /// </summary>
-        public SceneMemoryProbeSceneFactory() { }
+        public SceneMemoryProbeSceneFactory(IEditorProjectAuthoringSession authoringSession) {
+            AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
+        }
 
         /// <summary>
         /// Creates the authored persistent probe scene definition.
@@ -59,7 +64,7 @@ namespace city.rendering.tools {
         /// </summary>
         /// <returns>Live-authored probe root entity.</returns>
         Entity CreateProbeRootEntity() {
-            Entity entity = Core.Instance.EntityFactory.Create("SceneMemoryProbeRoot");
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.Create("SceneMemoryProbeRoot");
             entity.AddComponent(new SceneMemoryProbeComponent {
                 ProbeName = ProbeName,
                 StartAutomatically = true,

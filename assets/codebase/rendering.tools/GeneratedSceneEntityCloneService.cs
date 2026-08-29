@@ -1,10 +1,16 @@
 using System.Reflection;
+using helengine.editor;
 
 namespace city.rendering.tools {
     /// <summary>
     /// Clones generated editor-scene entity graphs in memory so handheld scaffold generation can mutate private copies without round-tripping through scene load services.
     /// </summary>
     public sealed class GeneratedSceneEntityCloneService {
+        readonly IEditorProjectAuthoringSession AuthoringSession;
+
+        public GeneratedSceneEntityCloneService(IEditorProjectAuthoringSession authoringSession) {
+            AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
+        }
         /// <summary>
         /// Clones the supplied generated scene roots, including editor save metadata required by the scene save pipeline.
         /// </summary>
@@ -13,10 +19,10 @@ namespace city.rendering.tools {
         public EditorEntity[] CloneRoots(IReadOnlyList<Entity> sourceRoots) {
             if (sourceRoots == null) {
                 throw new ArgumentNullException(nameof(sourceRoots));
-            } else if (Core.Instance == null) {
+            } else if (AuthoringSession.OwningCore == null) {
                 throw new InvalidOperationException("Cloning generated scene roots requires an active editor core.");
-            } else if (Core.Instance.EntityFactory == null) {
-                throw new InvalidOperationException("Cloning generated scene roots requires Core.Instance.EntityFactory.");
+            } else if (AuthoringSession.OwningCore.EntityFactory == null) {
+                throw new InvalidOperationException("Cloning generated scene roots requires an owning entity factory.");
             }
 
             List<EditorEntity> clonedRoots = new List<EditorEntity>(sourceRoots.Count);
@@ -68,7 +74,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(sourceEntity));
             }
 
-            EditorEntity clonedEntity = Core.Instance.EntityFactory.Create(sourceEntity.Name) as EditorEntity;
+            EditorEntity clonedEntity = AuthoringSession.OwningCore.EntityFactory.Create(sourceEntity.Name) as EditorEntity;
             if (clonedEntity == null) {
                 throw new InvalidOperationException("EntityFactory.Create must return an EditorEntity for generated scene cloning.");
             }

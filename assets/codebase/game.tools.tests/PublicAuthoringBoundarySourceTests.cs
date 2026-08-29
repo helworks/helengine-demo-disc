@@ -14,7 +14,7 @@ namespace city.tests {
             Assert.DoesNotContain("DemoDiscEditorAssetReferenceFactory", gameSceneFactorySource, StringComparison.Ordinal);
             Assert.DoesNotContain("DemoDiscEditorAssetReferenceFactory", zombislayerSceneFactorySource, StringComparison.Ordinal);
             Assert.Contains("AssetAuthoringService.CreateFileReference", gameSceneFactorySource, StringComparison.Ordinal);
-            Assert.Contains("AssetAuthoringService.CreateFileReference", zombislayerSceneFactorySource, StringComparison.Ordinal);
+            Assert.Contains("AuthoringSession.CreateFileReference", zombislayerSceneFactorySource, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -39,6 +39,38 @@ namespace city.tests {
                 Assert.DoesNotContain("new EditorSceneAssetReferenceResolver", source, StringComparison.Ordinal);
                 Assert.DoesNotContain("RemoveLegacyPresentationRoots", source, StringComparison.Ordinal);
                 Assert.DoesNotContain("ExcludeLegacyOverlayFromConsoles", source, StringComparison.Ordinal);
+            }
+        }
+
+        /// <summary>
+        /// Ensures project-authored code cannot recreate the editor host's private
+        /// import, identity, serializer, or project-path graph.
+        /// </summary>
+        [Fact]
+        public void Production_code_does_not_recreate_editor_host_authoring_services() {
+            string codebasePath = Path.Combine(@"C:\dev\helprojs\demodisc", "assets", "codebase");
+            string[] forbiddenFragments = {
+                "Assembly.Load(\"helengine.editor.app\")",
+                "EditorHostImporterFactory",
+                "new AssetImportManager",
+                "AssetSerializer.Serialize",
+                "new EditorAssetReferenceResolver",
+                "new GeneratedAssetWriteService",
+                "EditorProjectPaths",
+                "Assembly.LoadFrom(",
+                "Type.GetType(\"helengine.editor"
+            };
+
+            string[] productionSourcePaths = Directory.GetFiles(codebasePath, "*.cs", SearchOption.AllDirectories)
+                .Where(path => !path.Contains(".tests", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            Assert.NotEmpty(productionSourcePaths);
+
+            foreach (string sourcePath in productionSourcePaths) {
+                string source = File.ReadAllText(sourcePath);
+                foreach (string forbiddenFragment in forbiddenFragments) {
+                    Assert.DoesNotContain(forbiddenFragment, source, StringComparison.Ordinal);
+                }
             }
         }
 

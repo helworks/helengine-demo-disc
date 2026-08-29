@@ -56,9 +56,9 @@ namespace city.game.tools {
         readonly SplitPlayGeneratedModelAssetWriteService ModelWriteService;
         readonly SplitPlayGeneratedBlueprintAssetWriteService BlueprintWriteService;
         readonly CityGeneratedMaterialAssetWriteService MaterialWriteService;
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
-        public SplitPlayGoldenCoinAssetGenerator(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public SplitPlayGoldenCoinAssetGenerator(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             ModelWriteService = new SplitPlayGeneratedModelAssetWriteService(AssetAuthoringService);
             BlueprintWriteService = new SplitPlayGeneratedBlueprintAssetWriteService(AssetAuthoringService);

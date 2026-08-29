@@ -87,9 +87,9 @@ namespace city.game.tools {
         readonly SplitPlayGeneratedModelAssetWriteService ModelWriteService;
         readonly SplitPlayGeneratedBlueprintAssetWriteService BlueprintWriteService;
         readonly CityGeneratedMaterialAssetWriteService MaterialWriteService;
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
-        public TiltTrialPendulumHammerAssetGenerator(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public TiltTrialPendulumHammerAssetGenerator(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             ModelWriteService = new SplitPlayGeneratedModelAssetWriteService(AssetAuthoringService);
             BlueprintWriteService = new SplitPlayGeneratedBlueprintAssetWriteService(AssetAuthoringService);

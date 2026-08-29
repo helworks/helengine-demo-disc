@@ -49,7 +49,7 @@ namespace city.tests {
                 dsModel = Assert.IsType<ModelAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
             }
 
-            MaterialAssetSettingsService materialSettingsService = new MaterialAssetSettingsService();
+            MaterialAssetSettingsService materialSettingsService = new MaterialAssetSettingsService(ProjectRootPath);
             Assert.True(materialSettingsService.TryLoadPlatformSettings(materialPath, "windows", out MaterialAssetProcessorSettings windowsSettings));
             Assert.Equal("#FFE27AFF", windowsSettings.FieldValues["base-color"]);
             Assert.Equal("#FFD54A33", windowsSettings.FieldValues["emissive-color"]);
@@ -148,7 +148,8 @@ namespace city.tests {
         public void Committed_project_golden_coin_material_matches_the_generated_windows_gold_settings() {
             string materialPath = @"C:\dev\helprojs\demodisc\assets\materials\games\tilt\GoldenCoin.hasset";
 
-            MaterialAssetSettingsService materialSettingsService = new MaterialAssetSettingsService();
+            string committedProjectRoot = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(materialPath), "..", "..", "..", ".."));
+            MaterialAssetSettingsService materialSettingsService = new MaterialAssetSettingsService(committedProjectRoot);
             Assert.True(materialSettingsService.TryLoadPlatformSettings(materialPath, "windows", out MaterialAssetProcessorSettings windowsSettings));
             Assert.Equal("#FFE27AFF", windowsSettings.FieldValues["base-color"]);
             Assert.Equal("#FFD54A33", windowsSettings.FieldValues["emissive-color"]);

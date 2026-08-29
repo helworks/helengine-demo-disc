@@ -24,10 +24,10 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.AssetAuthoring);
+            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.Authoring);
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(context.ProjectRootPath);
-            GameSceneFactory sceneFactory = new GameSceneFactory(assets, context.ProjectRootPath, context.AssetAuthoring);
-            TiltTrialGameplayPresentationBlueprintGenerator generator = new TiltTrialGameplayPresentationBlueprintGenerator(context.AssetAuthoring);
+            GameSceneFactory sceneFactory = new GameSceneFactory(assets, context.ProjectRootPath, context.Authoring);
+            TiltTrialGameplayPresentationBlueprintGenerator generator = new TiltTrialGameplayPresentationBlueprintGenerator(context.Authoring);
             generator.Generate(sceneFactory);
         }
     }

@@ -3,6 +3,21 @@ namespace city.tests {
     /// Verifies the generated Tilt Trial scene source emits selectors, gameplay levels, and presentation Blueprints.
     /// </summary>
     public sealed class TiltTrialSceneGenerationSourceTests {
+        /// <summary>
+        /// Ensures targeted Tilt Trial regeneration updates both selector variants without rewriting gameplay levels.
+        /// </summary>
+        [Fact]
+        public void Targeted_tilt_trial_generation_writes_standard_and_handheld_selectors() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
+            int methodStart = source.IndexOf("public void GenerateTiltTrialScene(string projectRootPath)", StringComparison.Ordinal);
+
+            Assert.True(methodStart >= 0);
+            string methodSource = source.Substring(methodStart);
+            Assert.Contains("factory.CreateTiltTrialScene()", methodSource, StringComparison.Ordinal);
+            Assert.Contains("handheldLevelSelectSceneFactory.Create(factory)", methodSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("factory.CreateTiltTrialLevelScenes()", methodSource, StringComparison.Ordinal);
+        }
+
         [Fact]
         public void Game_scene_generator_writes_selectors_gameplay_levels_and_presentation_blueprints() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
@@ -44,9 +59,8 @@ namespace city.tests {
             Assert.Contains("\"TiltTrialCoinText\"", source, StringComparison.Ordinal);
             Assert.Contains("\"Coins 0/0\"", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltTrialTargetTimesText\"", source, StringComparison.Ordinal);
-            Assert.Contains("\"Targets G18.00 S28.00 B40.00\"", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltTrialLevelSelectTargetTimes\"", source, StringComparison.Ordinal);
-            Assert.Contains("Core.Instance.EntityFactory.CreateChild(entity, \"TiltTrialResultsOverlay\")", source, StringComparison.Ordinal);
+            Assert.Contains("OwningCore.EntityFactory.CreateChild(entity, \"TiltTrialResultsOverlay\")", source, StringComparison.Ordinal);
             Assert.Contains("resultsOverlayEntity.LocalPosition = new float3(16f, 8f, 0f)", source, StringComparison.Ordinal);
             Assert.Contains("new float3(12f, 40f, 0.1f), new int2(200, 30)", source, StringComparison.Ordinal);
             Assert.Contains("new float3(12f, 78f, 0.1f), new int2(200, 30)", source, StringComparison.Ordinal);

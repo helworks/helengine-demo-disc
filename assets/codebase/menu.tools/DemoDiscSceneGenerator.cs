@@ -10,7 +10,7 @@ namespace city.menu.tools {
         /// <summary>
         /// Host-owned capability used by the generated scene writer when it resolves file-backed references.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
         /// <summary>
         /// Writer used to persist generated live-authored scenes through the editor scene save pipeline.
         /// </summary>
@@ -41,13 +41,13 @@ namespace city.menu.tools {
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
         /// <param name="assetAuthoringService">Host-owned capability used by the generated scene writer.</param>
-        public DemoDiscSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public DemoDiscSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             SceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver, AssetAuthoringService);
             SceneFactory = new DemoDiscMainMenuSceneFactory(AssetAuthoringService);
             MenuBuildSceneAuthoringService = new DemoDiscMenuBuildSceneAuthoringService();
             SplashSceneFactory = new HelenOfCodeSplashSceneFactory(AssetAuthoringService);
-            LoadingScreenFactory = new SceneLoadingScreenFactory();
+            LoadingScreenFactory = new SceneLoadingScreenFactory(AssetAuthoringService);
         }
 
         /// <summary>

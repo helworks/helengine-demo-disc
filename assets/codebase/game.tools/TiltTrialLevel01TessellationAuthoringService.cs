@@ -8,7 +8,7 @@ namespace city.game.tools {
         /// <summary>
         /// Host-owned capability used to read and rewrite the current authored scene.
         /// </summary>
-        readonly helengine.editor.IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly helengine.editor.IEditorProjectAuthoringSession AssetAuthoringService;
         /// <summary>
         /// Relative authored scene path for the playable first Tilt Trial level.
         /// </summary>
@@ -58,7 +58,7 @@ namespace city.game.tools {
         /// Applies PS2- and PSP-only tessellation metadata to the authored playable Level 01 scene without replacing its gameplay content.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used to read and rewrite the authored Level 01 scene asset.</param>
-        public TiltTrialLevel01TessellationAuthoringService(helengine.editor.IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public TiltTrialLevel01TessellationAuthoringService(helengine.editor.IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
 

@@ -29,14 +29,14 @@ namespace city.physics.tools {
         /// <summary>
         /// Host-owned capability used to resolve current imported assets while loading canonical scenes.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
         /// <summary>
         /// Initializes one Nintendo handheld physics scene generator.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to load authored gameplay components from the generated physics scenes.</param>
         /// <param name="assetAuthoringService">Host-owned capability used to resolve current imported scene assets.</param>
-        public PhysicsNintendoDsSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public PhysicsNintendoDsSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAuthoringSession assetAuthoringService) {
             ScriptTypeResolver = scriptTypeResolver ?? throw new ArgumentNullException(nameof(scriptTypeResolver));
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             SceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolver, AssetAuthoringService);
@@ -49,7 +49,7 @@ namespace city.physics.tools {
         public void Generate(string projectRootPath) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            } else if (Core.Instance == null) {
+            } else if (AssetAuthoringService.OwningCore == null) {
                 throw new InvalidOperationException("Generating Nintendo handheld physics scenes requires an active editor core.");
             }
 
@@ -118,7 +118,12 @@ namespace city.physics.tools {
             string authoredSceneRelativePath = PhysicsSceneFolderRelativePath + "/" + sceneEntry.SceneId + ".helen";
             SceneAsset authoredSceneAsset = LoadSceneAssetWithoutSharedMusic(authoredSceneRelativePath);
             authoredSceneAsset.RootEntities = RemoveNintendoHandheldOnlyEntities(authoredSceneAsset.RootEntities, supportedPlatformIds);
-            SceneLoadService sceneLoadService = new SceneLoadService(fullProjectRootPath, persistenceRegistry, referenceResolver);
+            SceneLoadService sceneLoadService = new SceneLoadService(
+                fullProjectRootPath,
+                persistenceRegistry,
+                referenceResolver,
+                AssetAuthoringService.GeneratedMaterialCache,
+                AssetAuthoringService.RendererResources);
             IReadOnlyList<EditorEntity> loadedRoots = sceneLoadService.Load(authoredSceneAsset);
             Entity[] rootEntities = new Entity[loadedRoots.Count];
             for (int index = 0; index < loadedRoots.Count; index++) {

@@ -22,7 +22,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes the axis material authoring service.
         /// </summary>
-        public AxisTestMaterialFactory(IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public AxisTestMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
         }
 
