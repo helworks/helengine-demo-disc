@@ -69,15 +69,20 @@ namespace city.rendering.tools {
         /// Writes the top-face-only probe model through the public editor asset API.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used to author the native model.</param>
-        public void WriteModelAsset(IEditorProjectAuthoringSession assetAuthoringService) {
+        public void WriteModelAsset(
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             if (assetAuthoringService == null) {
                 throw new ArgumentNullException(nameof(assetAuthoringService));
             }
+            if (transaction == null) {
+                throw new ArgumentNullException(nameof(transaction));
+            }
 
-            assetAuthoringService.WriteNativeAsset(
-                ModelRelativePath,
-                CreateModelAsset(),
-                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(ModelRelativePath));
+            ModelAsset modelAsset = CreateModelAsset();
+            modelAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(ModelRelativePath);
+            modelAsset.FormerAuthoringAssetIds = Array.Empty<string>();
+            transaction.WriteAsset(ModelRelativePath, modelAsset);
         }
     }
 }

@@ -118,8 +118,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one depth-clip-probe solid-color material factory.
         /// </summary>
-        public DepthClipProbeMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService) {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
+        public DepthClipProbeMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService, EditorAuthoringTransaction transaction) {
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService, transaction);
         }
 
         /// <summary>

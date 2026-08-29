@@ -37,12 +37,9 @@ namespace city.rendering.tools {
         readonly IEditorProjectAuthoringSession AuthoringSession;
 
         /// <summary>
-        /// Initializes one generated authored-scene writer.
+        /// Caller-owned transaction that publishes every generated scene output atomically.
         /// </summary>
-        /// <param name="assetAuthoringService">Required host-owned asset-authoring capability used to resolve source assets.</param>
-        public GeneratedAuthoringSceneWriteService(IEditorProjectAuthoringSession authoringSession)
-            : this(null, authoringSession) {
-        }
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Initializes one generated authored-scene writer with a project component resolver and the required host capability.
@@ -51,12 +48,14 @@ namespace city.rendering.tools {
         /// <param name="assetAuthoringService">Required host-owned asset-authoring capability used to resolve source assets.</param>
         public GeneratedAuthoringSceneWriteService(
             IScriptTypeResolver scriptTypeResolver,
-            IEditorProjectAuthoringSession authoringSession) {
+            IEditorProjectAuthoringSession authoringSession,
+            EditorAuthoringTransaction transaction) {
             if (authoringSession == null) {
                 throw new ArgumentNullException(nameof(authoringSession));
             }
 
             AuthoringSession = authoringSession;
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
             NintendoDsRenderingSceneScaffoldFactoryValue = new NintendoDsRenderingSceneScaffoldFactory(authoringSession);
             PlatformSceneAuthoringHelperServiceValue = new PlatformSceneAuthoringHelperService();
             GeneratedSceneEntityCloneServiceValue = new GeneratedSceneEntityCloneService(authoringSession);
@@ -66,12 +65,9 @@ namespace city.rendering.tools {
         /// <summary>
         /// Writes one generated live-authored scene into the supplied city project.
         /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <param name="sceneDefinition">Generated scene definition to persist.</param>
-        public void WriteScene(string projectRootPath, GeneratedAuthoringSceneDefinition sceneDefinition) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            } else if (sceneDefinition == null) {
+        public void WriteScene(GeneratedAuthoringSceneDefinition sceneDefinition) {
+            if (sceneDefinition == null) {
                 throw new ArgumentNullException(nameof(sceneDefinition));
             } else if (string.IsNullOrWhiteSpace(sceneDefinition.SceneId)) {
                 throw new ArgumentException("Scene id must be provided.", nameof(sceneDefinition));
@@ -81,10 +77,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(sceneDefinition));
             }
 
-            string fullProjectRootPath = Path.GetFullPath(projectRootPath);
-            if (!string.Equals(fullProjectRootPath, Path.GetFullPath(AuthoringSession.ProjectRootPath), StringComparison.OrdinalIgnoreCase)) {
-                throw new InvalidOperationException("Generated scene writes must use the authoring session project root.");
-            }
+            string fullProjectRootPath = Path.GetFullPath(AuthoringSession.ProjectRootPath);
             ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create(ScriptTypeResolverValue);
             List<Entity> rootsToDispose = new List<Entity>();
 
@@ -208,7 +201,8 @@ namespace city.rendering.tools {
                     Path.Combine(fullProjectRootPath, "assets", sceneRelativePathToSave.Replace('/', Path.DirectorySeparatorChar)),
                     sceneSettings ?? new SceneSettingsAsset(),
                     generatedRoots,
-                    stableIdentity);
+                    stableIdentity,
+                    Transaction);
             } finally {
                 RestoreHiddenUserSceneRoots(hiddenRootSnapshots);
             }

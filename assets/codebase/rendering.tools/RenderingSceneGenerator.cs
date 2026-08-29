@@ -10,6 +10,7 @@ namespace city.rendering.tools {
         /// Host-owned capability used by all generated scene factories to resolve current imported assets and settings.
         /// </summary>
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
         /// <summary>
         /// Stable scene id used by the cube-test showcase.
         /// </summary>
@@ -235,26 +236,30 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
         /// <param name="assetAuthoringService">Host-owned capability used by all generated scene factories.</param>
-        public RenderingSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAuthoringSession assetAuthoringService) {
+        public RenderingSceneGenerator(
+            IScriptTypeResolver scriptTypeResolver,
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
-            AuthoringSceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver, AssetAuthoringService);
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
+            AuthoringSceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver, AssetAuthoringService, Transaction);
             DirectionalShadowPlazaFactory = new DirectionalShadowPlazaSceneFactory(AssetAuthoringService);
             SpotlightStreetSliceFactory = new SpotlightStreetSliceSceneFactory(AssetAuthoringService);
             CubeTestFactory = new CubeTestSceneFactory(AssetAuthoringService);
             GroundCubeProbeFactory = new GroundCubeProbeSceneFactory(AssetAuthoringService);
             ScaledCubeFactory = new ScaledCubeSceneFactory(AssetAuthoringService);
             DepthClipProbeFactory = new DepthClipProbeSceneFactory(AssetAuthoringService);
-            ColoredCubeGridFactory = new ColoredCubeGridSceneFactory(AssetAuthoringService);
-            TexturedCubeGridFactory = new TexturedCubeGridSceneFactory(AssetAuthoringService);
+            ColoredCubeGridFactory = new ColoredCubeGridSceneFactory(AssetAuthoringService, Transaction);
+            TexturedCubeGridFactory = new TexturedCubeGridSceneFactory(AssetAuthoringService, Transaction);
             AxisTestFactory = new AxisTestSceneFactory(AssetAuthoringService);
             AxisTest2Factory = new AxisTest2SceneFactory(AssetAuthoringService);
             SceneMemoryProbeFactory = new SceneMemoryProbeSceneFactory(AssetAuthoringService);
-            PbrMaterialGalleryMaterials = new PbrMaterialGalleryMaterialFactory(AssetAuthoringService);
+            PbrMaterialGalleryMaterials = new PbrMaterialGalleryMaterialFactory(AssetAuthoringService, Transaction);
             PbrMaterialGalleryScene = new PbrMaterialGallerySceneFactory(AssetAuthoringService);
-            PbrTexturedShowcaseMaterials = new PbrTexturedShowcaseMaterialFactory(AssetAuthoringService);
+            PbrTexturedShowcaseMaterials = new PbrTexturedShowcaseMaterialFactory(AssetAuthoringService, Transaction);
             PbrTexturedShowcaseScene = new PbrTexturedShowcaseSceneFactory(AssetAuthoringService);
             PbrShadowTheaterScene = new PbrShadowTheaterSceneFactory(AssetAuthoringService);
-            MatrixRenderFactory = new MatrixRenderSceneFactory(AssetAuthoringService);
+            MatrixRenderFactory = new MatrixRenderSceneFactory(AssetAuthoringService, Transaction);
         }
 
         /// <summary>
@@ -299,15 +304,12 @@ namespace city.rendering.tools {
                 throw new InvalidOperationException("Rendering scene generation requires the editor default font for the console instruction Blueprint.");
             }
 
-            ConsoleCameraLightInstructionsBlueprintGenerator consoleInstructionBlueprintGenerator = new ConsoleCameraLightInstructionsBlueprintGenerator(AssetAuthoringService);
+            ConsoleCameraLightInstructionsBlueprintGenerator consoleInstructionBlueprintGenerator = new ConsoleCameraLightInstructionsBlueprintGenerator(AssetAuthoringService, Transaction);
             consoleInstructionBlueprintGenerator.Generate(
                 projectRootPath,
                 new DemoSceneInstructionOverlayFactory(AssetAuthoringService),
                 editorCore.DefaultFontAssetForEditor);
 
-            DeleteObsoleteRenderMatrixProbeScene(projectRootPath);
-            DeleteObsoletePhysicsMatrixRenderScene(projectRootPath);
-            DeleteObsoleteNintendoHandheldCompanionScenes(projectRootPath);
             GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedCubeTestSolidMaterial);
             GeneratedAuthoringSceneDefinition groundCubeProbeSceneDefinition = GroundCubeProbeFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
             GeneratedAuthoringSceneDefinition scaledCubeSceneDefinition = ScaledCubeFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
@@ -330,82 +332,22 @@ namespace city.rendering.tools {
             TexturedCubeGridFactory.WriteAssets(projectRootPath);
             coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
             texturedCubeGridSceneDefinition = TexturedCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, TexturedCubeGridFactory.CreateRuntimeMaterials(assets.GeneratedStandardMaterial));
-            AuthoringSceneWriteService.WriteScene(projectRootPath, cubeTestSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, groundCubeProbeSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, scaledCubeSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, depthClipProbeSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, coloredCubeGridSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, texturedCubeGridSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, axisTestSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, axisTest2SceneDefinition);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, sceneMemoryProbeSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, directionalShadowPlazaSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, spotlightStreetSliceSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, pbrMaterialGallerySceneDefinition);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, pbrTexturedShowcaseSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, pbrShadowTheaterSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, matrixRenderSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(cubeTestSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(groundCubeProbeSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(scaledCubeSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(depthClipProbeSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(coloredCubeGridSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(texturedCubeGridSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(axisTestSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(axisTest2SceneDefinition);
+            AuthoringSceneWriteService.WriteScene(sceneMemoryProbeSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(directionalShadowPlazaSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(spotlightStreetSliceSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(pbrMaterialGallerySceneDefinition);
+            AuthoringSceneWriteService.WriteScene(pbrTexturedShowcaseSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(pbrShadowTheaterSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(matrixRenderSceneDefinition);
         }
 
-        /// <summary>
-        /// Deletes the obsolete physics-pipeline Matrix Render scene so the moved rendering-pipeline asset stays the only discoverable copy.
-        /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        static void DeleteObsoletePhysicsMatrixRenderScene(string projectRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            }
-
-            string obsoleteScenePath = Path.Combine(Path.GetFullPath(projectRootPath), "assets", ObsoletePhysicsMatrixRenderSceneRelativePath.Replace('/', Path.DirectorySeparatorChar));
-            if (File.Exists(obsoleteScenePath)) {
-                File.Delete(obsoleteScenePath);
-            }
-        }
-
-        /// <summary>
-        /// Deletes the obsolete generated Matrix Probe scene so stale authored output cannot be packaged after the feature removal.
-        /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        static void DeleteObsoleteRenderMatrixProbeScene(string projectRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            }
-
-            string obsoleteScenePath = Path.Combine(Path.GetFullPath(projectRootPath), "assets", "scenes", "rendering", "test_scene_render_matrix_probe.helen");
-            if (File.Exists(obsoleteScenePath)) {
-                File.Delete(obsoleteScenePath);
-            }
-        }
-
-        /// <summary>
-        /// Deletes the obsolete Nintendo handheld companion rendering scenes so stale generated output does not remain discoverable in the project scene catalog.
-        /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        static void DeleteObsoleteNintendoHandheldCompanionScenes(string projectRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            }
-
-            string fullProjectRootPath = Path.GetFullPath(projectRootPath);
-            string[] obsoleteRelativePaths = [
-                CubeTestNintendoDsSceneId,
-                ColoredCubeGridNintendoDsSceneId,
-                ScaledCubeNintendoDsSceneId,
-                DirectionalShadowPlazaNintendoDsSceneId,
-                GroundCubeProbeNintendoDsSceneId,
-                TexturedCubeGridNintendoDsSceneId,
-                SpotlightStreetSliceNintendoDsSceneId,
-                AxisTestNintendoDsSceneId,
-                AxisTest2NintendoDsSceneId,
-                SceneMemoryProbeNintendoDsSceneId
-            ];
-
-            for (int index = 0; index < obsoleteRelativePaths.Length; index++) {
-                string obsoleteScenePath = Path.Combine(fullProjectRootPath, "assets", obsoleteRelativePaths[index].Replace('/', Path.DirectorySeparatorChar));
-                if (File.Exists(obsoleteScenePath)) {
-                    File.Delete(obsoleteScenePath);
-                }
-            }
-        }
     }
 }

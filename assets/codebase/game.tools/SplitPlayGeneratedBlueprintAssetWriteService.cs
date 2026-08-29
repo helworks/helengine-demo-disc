@@ -4,9 +4,13 @@ namespace city.game.tools {
     /// </summary>
     public sealed class SplitPlayGeneratedBlueprintAssetWriteService {
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
 
-        public SplitPlayGeneratedBlueprintAssetWriteService(IEditorProjectAuthoringSession assetAuthoringService) {
+        public SplitPlayGeneratedBlueprintAssetWriteService(
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
 
         public void WriteBlueprint(string relativePath, BlueprintAsset blueprintAsset) {
@@ -18,7 +22,7 @@ namespace city.game.tools {
 
             blueprintAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(relativePath);
             blueprintAsset.FormerAuthoringAssetIds = Array.Empty<string>();
-            AssetAuthoringService.WriteAsset(relativePath, blueprintAsset);
+            Transaction.WriteAsset(relativePath, blueprintAsset);
         }
     }
 }

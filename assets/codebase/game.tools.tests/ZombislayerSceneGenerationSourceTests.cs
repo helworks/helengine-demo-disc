@@ -14,7 +14,7 @@ namespace city.tests {
             Assert.Contains("ZombislayerGenerationAssets zombislayerAssets = zombislayerAssetPreparationService.Prepare();", source, StringComparison.Ordinal);
             Assert.Contains("ZombislayerSceneFactory zombislayerSceneFactory = new ZombislayerSceneFactory(zombislayerAssets, AssetAuthoringService);", source, StringComparison.Ordinal);
             Assert.Contains("GeneratedAuthoringSceneDefinition zombislayerScene = zombislayerSceneFactory.CreateGameplayScene();", source, StringComparison.Ordinal);
-            Assert.Contains("sceneWriteService.WriteScene(projectRootPath, zombislayerScene);", source, StringComparison.Ordinal);
+            Assert.Contains("sceneWriteService.WriteScene(zombislayerScene);", source, StringComparison.Ordinal);
         }
 
         /// <summary>

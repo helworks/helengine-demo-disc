@@ -10,6 +10,7 @@ namespace city.game.tools {
         /// Host-owned capability used to author the current native Blueprints.
         /// </summary>
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Stable project-relative path for the console gameplay presentation Blueprint.
@@ -25,8 +26,11 @@ namespace city.game.tools {
         /// Initializes one gameplay presentation Blueprint generator.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used to save current Blueprints.</param>
-        public TiltTrialGameplayPresentationBlueprintGenerator(IEditorProjectAuthoringSession assetAuthoringService) {
+        public TiltTrialGameplayPresentationBlueprintGenerator(
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
 
         /// <summary>
@@ -58,7 +62,8 @@ namespace city.game.tools {
                 AssetAuthoringService.WriteNativeBlueprint(
                     relativePath,
                     GeneratedScenePersistenceRegistryFactory.Create(),
-                    city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(relativePath));
+                    city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(relativePath),
+                    Transaction);
             } finally {
                 root.Dispose();
             }

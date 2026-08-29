@@ -22,8 +22,10 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            TiltTrialGameplayPresentationAttachmentService service = new TiltTrialGameplayPresentationAttachmentService(context.ScriptTypeResolver, context.Authoring);
+            using helengine.editor.EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
+            TiltTrialGameplayPresentationAttachmentService service = new TiltTrialGameplayPresentationAttachmentService(context.ScriptTypeResolver, context.Authoring, transaction);
             service.AttachToAuthoredGameplayScenes(context.ProjectRootPath);
+            transaction.Commit();
         }
     }
 }

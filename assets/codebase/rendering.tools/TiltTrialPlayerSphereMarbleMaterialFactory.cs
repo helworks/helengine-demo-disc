@@ -139,8 +139,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one marble material factory.
         /// </summary>
-        public TiltTrialPlayerSphereMarbleMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService) {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
+        public TiltTrialPlayerSphereMarbleMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService, EditorAuthoringTransaction transaction) {
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService, transaction);
         }
 
         /// <summary>

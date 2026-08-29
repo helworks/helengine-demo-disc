@@ -10,13 +10,17 @@ namespace city.rendering.tools {
         /// Host-owned asset-authoring capability used to resolve imported source assets.
         /// </summary>
         readonly IEditorProjectAuthoringSession AuthoringSession;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Initializes one rendering asset preparation service.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used for settings and source imports.</param>
-        public RenderingSceneAssetPreparationService(IEditorProjectAuthoringSession authoringSession) {
+        public RenderingSceneAssetPreparationService(
+            IEditorProjectAuthoringSession authoringSession,
+            EditorAuthoringTransaction transaction) {
             AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
         /// <summary>
         /// Preferred editor preview platform used when authored material settings need one shader-backed runtime preview path.
@@ -64,19 +68,19 @@ namespace city.rendering.tools {
             }
 
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
-            ForwardSolidColorMaterialFactory forwardSolidColorMaterialFactory = new ForwardSolidColorMaterialFactory(AuthoringSession);
-            TiltTrialCourseMaterialFactory tiltTrialCourseMaterialFactory = new TiltTrialCourseMaterialFactory(AuthoringSession);
-            TiltTrialPlayerSphereWalnutMaterialFactory tiltTrialPlayerSphereWalnutMaterialFactory = new TiltTrialPlayerSphereWalnutMaterialFactory(AuthoringSession);
+            ForwardSolidColorMaterialFactory forwardSolidColorMaterialFactory = new ForwardSolidColorMaterialFactory(AuthoringSession, Transaction);
+            TiltTrialCourseMaterialFactory tiltTrialCourseMaterialFactory = new TiltTrialCourseMaterialFactory(AuthoringSession, Transaction);
+            TiltTrialPlayerSphereWalnutMaterialFactory tiltTrialPlayerSphereWalnutMaterialFactory = new TiltTrialPlayerSphereWalnutMaterialFactory(AuthoringSession, Transaction);
             TiltTrialClippingProbeModelFactory tiltTrialClippingProbeModelFactory = new TiltTrialClippingProbeModelFactory();
-            TiltTrialClippingProbeMaterialFactory tiltTrialClippingProbeMaterialFactory = new TiltTrialClippingProbeMaterialFactory(AuthoringSession);
-            DepthClipProbeMaterialFactory depthClipProbeMaterialFactory = new DepthClipProbeMaterialFactory(AuthoringSession);
-            DepthClipProbeCenterMaterialFactory depthClipProbeCenterMaterialFactory = new DepthClipProbeCenterMaterialFactory(AuthoringSession);
-            PbrTexturedShowcaseMaterialFactory pbrTexturedShowcaseMaterialFactory = new PbrTexturedShowcaseMaterialFactory(AuthoringSession);
-            AxisTestMaterialFactory axisTestMaterialFactory = new AxisTestMaterialFactory(AuthoringSession);
+            TiltTrialClippingProbeMaterialFactory tiltTrialClippingProbeMaterialFactory = new TiltTrialClippingProbeMaterialFactory(AuthoringSession, Transaction);
+            DepthClipProbeMaterialFactory depthClipProbeMaterialFactory = new DepthClipProbeMaterialFactory(AuthoringSession, Transaction);
+            DepthClipProbeCenterMaterialFactory depthClipProbeCenterMaterialFactory = new DepthClipProbeCenterMaterialFactory(AuthoringSession, Transaction);
+            PbrTexturedShowcaseMaterialFactory pbrTexturedShowcaseMaterialFactory = new PbrTexturedShowcaseMaterialFactory(AuthoringSession, Transaction);
+            AxisTestMaterialFactory axisTestMaterialFactory = new AxisTestMaterialFactory(AuthoringSession, Transaction);
             forwardSolidColorMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             tiltTrialCourseMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AuthoringSession);
             tiltTrialPlayerSphereWalnutMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AuthoringSession);
-            tiltTrialClippingProbeModelFactory.WriteModelAsset(AuthoringSession);
+            tiltTrialClippingProbeModelFactory.WriteModelAsset(AuthoringSession, Transaction);
             tiltTrialClippingProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AuthoringSession);
             depthClipProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             depthClipProbeCenterMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
@@ -191,7 +195,7 @@ namespace city.rendering.tools {
                 return BuildPreviewRuntimeMaterial(materialAsset, platformSettings);
             }
 
-            ShaderAsset shaderAsset = AuthoringSession.LoadBuiltInShaderAsset(materialAsset.ShaderAssetId);
+            ShaderAsset shaderAsset = AuthoringSession.LoadBuiltInShaderAssetById(materialAsset.ShaderAssetId);
             return AuthoringSession.OwningCore.RenderManager3D.BuildMaterialFromRaw(materialAsset, shaderAsset);
         }
 
@@ -208,7 +212,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(platformSettings));
             }
 
-            ShaderAsset shaderAsset = AuthoringSession.LoadBuiltInShaderAsset(StandardShaderSourceFileName);
+            ShaderAsset shaderAsset = AuthoringSession.LoadBuiltInShaderAssetById(StandardShaderAssetId);
             ShaderMaterialAsset previewMaterialAsset = new ShaderMaterialAsset {
                 Id = materialAsset.Id,
                 ShaderAssetId = StandardShaderAssetId,

@@ -11,6 +11,7 @@ namespace city.menu.tools {
         /// Host-owned capability used by the generated scene writer when it resolves file-backed references.
         /// </summary>
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
         /// <summary>
         /// Writer used to persist generated live-authored scenes through the editor scene save pipeline.
         /// </summary>
@@ -41,9 +42,13 @@ namespace city.menu.tools {
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
         /// <param name="assetAuthoringService">Host-owned capability used by the generated scene writer.</param>
-        public DemoDiscSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAuthoringSession assetAuthoringService) {
+        public DemoDiscSceneGenerator(
+            IScriptTypeResolver scriptTypeResolver,
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
-            SceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver, AssetAuthoringService);
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
+            SceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver, AssetAuthoringService, Transaction);
             SceneFactory = new DemoDiscMainMenuSceneFactory(AssetAuthoringService);
             MenuBuildSceneAuthoringService = new DemoDiscMenuBuildSceneAuthoringService();
             SplashSceneFactory = new HelenOfCodeSplashSceneFactory(AssetAuthoringService);
@@ -59,34 +64,18 @@ namespace city.menu.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            DeleteObsoleteNintendoHandheldCompanionScene(projectRootPath);
             DemoDiscMenuDefinitionProvider provider = new DemoDiscMenuDefinitionProvider();
             MenuDefinition definition = provider.CreateMenuDefinition();
             string providerTypeName = BuildProviderTypeName(typeof(DemoDiscMenuDefinitionProvider));
-            SceneWriteService.WriteScene(projectRootPath, SplashSceneFactory.CreateSceneDefinition());
-            SceneWriteService.WriteScene(projectRootPath, LoadingScreenFactory.CreateSceneDefinition());
+            SceneWriteService.WriteScene(SplashSceneFactory.CreateSceneDefinition());
+            SceneWriteService.WriteScene(LoadingScreenFactory.CreateSceneDefinition());
             GeneratedAuthoringSceneDefinition standardSceneDefinition = SceneFactory.CreateStandardSceneDefinition(providerTypeName, definition);
             MenuBuildSceneAuthoringService.ApplyBuildSceneAvailability(projectRootPath, standardSceneDefinition, definition);
-            SceneWriteService.WriteScene(projectRootPath, standardSceneDefinition);
+            SceneWriteService.WriteScene(standardSceneDefinition);
 
             GeneratedAuthoringSceneDefinition handheldSceneDefinition = SceneFactory.CreateHandheldSceneDefinition(providerTypeName, definition);
             MenuBuildSceneAuthoringService.ApplyBuildSceneAvailability(projectRootPath, handheldSceneDefinition, definition);
-            SceneWriteService.WriteScene(projectRootPath, handheldSceneDefinition);
-        }
-
-        /// <summary>
-        /// Deletes the obsolete Nintendo handheld companion menu scene so stale generated output does not remain discoverable in the project scene catalog.
-        /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        static void DeleteObsoleteNintendoHandheldCompanionScene(string projectRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            }
-
-            string obsoleteScenePath = Path.Combine(Path.GetFullPath(projectRootPath), "assets", "scenes", "DemoDiscMainMenuDs.helen");
-            if (File.Exists(obsoleteScenePath)) {
-                File.Delete(obsoleteScenePath);
-            }
+            SceneWriteService.WriteScene(handheldSceneDefinition);
         }
 
         /// <summary>

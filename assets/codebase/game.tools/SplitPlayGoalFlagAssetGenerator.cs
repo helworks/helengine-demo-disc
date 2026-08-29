@@ -54,11 +54,13 @@ namespace city.game.tools {
         readonly CityGeneratedMaterialAssetWriteService MaterialWriteService;
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
-        public SplitPlayGoalFlagAssetGenerator(IEditorProjectAuthoringSession assetAuthoringService) {
+        public SplitPlayGoalFlagAssetGenerator(
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
-            ModelWriteService = new SplitPlayGeneratedModelAssetWriteService(AssetAuthoringService);
-            BlueprintWriteService = new SplitPlayGeneratedBlueprintAssetWriteService(AssetAuthoringService);
-            MaterialWriteService = new CityGeneratedMaterialAssetWriteService(AssetAuthoringService);
+            ModelWriteService = new SplitPlayGeneratedModelAssetWriteService(AssetAuthoringService, transaction);
+            BlueprintWriteService = new SplitPlayGeneratedBlueprintAssetWriteService(AssetAuthoringService, transaction);
+            MaterialWriteService = new CityGeneratedMaterialAssetWriteService(AssetAuthoringService, transaction);
         }
 
         public void Generate(string projectRootPath) {

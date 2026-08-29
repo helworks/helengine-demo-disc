@@ -24,10 +24,15 @@ namespace city.tests {
 
         [Fact]
         public void Generate_writes_goal_flag_models_materials_and_blueprint_with_ds_model_override() {
+            using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(ProjectRootPath);
+            IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(ProjectRootPath);
+            using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
             SplitPlayGoalFlagAssetGenerator generator = new SplitPlayGoalFlagAssetGenerator(
-                new TestEditorProjectAssetAuthoringService(ProjectRootPath));
+                authoringSession,
+                transaction);
 
             generator.Generate(ProjectRootPath);
+            transaction.Commit();
 
             string commonModelPath = Path.Combine(ProjectRootPath, "assets", "models", "games", "tilt", "goal_flag.hasset");
             string dsModelPath = Path.Combine(ProjectRootPath, "assets", "models", "games", "tilt", "goal_flag_ds.hasset");
@@ -101,7 +106,9 @@ namespace city.tests {
 
             byte[] firstModelBytes = File.ReadAllBytes(commonModelPath);
             byte[] firstBlueprintBytes = File.ReadAllBytes(blueprintPath);
-            generator.Generate(ProjectRootPath);
+            using EditorAuthoringTransaction secondTransaction = authoringSession.BeginTransaction();
+            new SplitPlayGoalFlagAssetGenerator(authoringSession, secondTransaction).Generate(ProjectRootPath);
+            secondTransaction.Commit();
             Assert.Equal(firstModelBytes, File.ReadAllBytes(commonModelPath));
             Assert.Equal(firstBlueprintBytes, File.ReadAllBytes(blueprintPath));
         }

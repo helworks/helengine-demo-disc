@@ -74,6 +74,35 @@ namespace city.tests {
             }
         }
 
+        [Fact]
+        public void Every_editor_generation_command_owns_one_atomic_authoring_transaction() {
+            string codebasePath = Path.Combine(@"C:\dev\helprojs\demodisc", "assets", "codebase");
+            string[] commandSources = Directory.GetFiles(codebasePath, "*.cs", SearchOption.AllDirectories)
+                .Where(path => !path.Contains(".tests", StringComparison.OrdinalIgnoreCase))
+                .Where(path => File.ReadAllText(path).Contains(": IEditorCommand", StringComparison.Ordinal))
+                .ToArray();
+
+            Assert.NotEmpty(commandSources);
+            foreach (string sourcePath in commandSources) {
+                string source = File.ReadAllText(sourcePath);
+                Assert.Equal(1, CountOccurrences(source, ".BeginTransaction()"));
+                Assert.Equal(1, CountOccurrences(source, ".Commit()"));
+                Assert.DoesNotContain("new SceneSaveService", source, StringComparison.Ordinal);
+                Assert.DoesNotContain("new BlueprintSaveService", source, StringComparison.Ordinal);
+                Assert.DoesNotContain("new MaterialAssetSettingsService", source, StringComparison.Ordinal);
+            }
+        }
+
+        static int CountOccurrences(string source, string value) {
+            int count = 0;
+            int offset = 0;
+            while ((offset = source.IndexOf(value, offset, StringComparison.Ordinal)) >= 0) {
+                count++;
+                offset += value.Length;
+            }
+            return count;
+        }
+
         /// <summary>
         /// Ensures every generated native writer call supplies the project-owned stable identity catalog.
         /// </summary>

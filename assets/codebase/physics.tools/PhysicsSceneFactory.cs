@@ -9,6 +9,7 @@ namespace city.physics.tools {
         /// Host-owned capability used to author imported texture settings without exposing editor import internals to the project.
         /// </summary>
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Active project root used while authoring playable showcase overlays.
@@ -374,12 +375,15 @@ namespace city.physics.tools {
         /// Initializes the validation-scene factory with a fresh scene-local entity id allocator.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used to persist generated texture import settings.</param>
-        public PhysicsSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
+        public PhysicsSceneFactory(
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
             SceneEntityIdAllocator = new SceneEntityAssetIdAllocator();
             PersistenceRegistry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
             OverridePayloadService = new ComponentPlatformOverridePayloadService();
-            AuthoringSceneWriteService = new city.rendering.tools.GeneratedAuthoringSceneWriteService(null, AssetAuthoringService);
+            AuthoringSceneWriteService = new city.rendering.tools.GeneratedAuthoringSceneWriteService(null, AssetAuthoringService, Transaction);
         }
 
         /// <summary>
@@ -442,7 +446,6 @@ namespace city.physics.tools {
 
             WriteSupportAssets(projectRootPath);
             InitializePhysicsDemoMaterialReferenceCache();
-            DeleteObsoleteStaticMeshScenes(projectRootPath);
 
             string[] sceneIds = PhysicsSceneCatalog.GetSceneIds();
             for (int index = 0; index < sceneIds.Length; index++) {
@@ -460,31 +463,9 @@ namespace city.physics.tools {
                 }
 
                 Directory.CreateDirectory(directoryPath);
-                AssetAuthoringService.WriteNativeAsset(
-                    sceneId,
-                    sceneAsset,
-                    city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneId));
-            }
-        }
-
-        /// <summary>
-        /// Deletes the retired static-mesh showcase scenes so stale generated output does not remain discoverable in the project scene catalog.
-        /// </summary>
-        /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
-        static void DeleteObsoleteStaticMeshScenes(string projectRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            }
-
-            string[] obsoleteRelativePaths = [
-                "scenes/physics/test_scene_static_mesh_showcase.helen",
-                "scenes/physics/test_scene_static_mesh_minimal.helen"
-            ];
-            for (int index = 0; index < obsoleteRelativePaths.Length; index++) {
-                string obsoleteScenePath = Path.Combine(Path.GetFullPath(projectRootPath), "assets", obsoleteRelativePaths[index].Replace('/', Path.DirectorySeparatorChar));
-                if (File.Exists(obsoleteScenePath)) {
-                    File.Delete(obsoleteScenePath);
-                }
+                sceneAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneId);
+                sceneAsset.FormerAuthoringAssetIds = Array.Empty<string>();
+                Transaction.WriteAsset(sceneId, sceneAsset);
             }
         }
 
@@ -1566,7 +1547,6 @@ namespace city.physics.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            DeleteObsoletePhysicsDemoShaderAsset(projectRootPath);
             WriteSphereTileTextureAssets(projectRootPath);
             WriteMaterialAsset(projectRootPath, PhysicsDemoGroundMaterialRelativePath, "PhysicsDemoGround", new float4(0.77f, 0.80f, 0.84f, 1.0f), false, true);
             WriteMaterialAsset(projectRootPath, PhysicsDemoNeutralMaterialRelativePath, "PhysicsDemoNeutral", new float4(0.77f, 0.80f, 0.84f, 1.0f), true, true);
@@ -1586,25 +1566,6 @@ namespace city.physics.tools {
             WriteTexturedMaterialAsset(projectRootPath, PhysicsDemoSphereStackRedMaterialRelativePath, "PhysicsDemoSphereStackRed", new float4(0.90f, 0.32f, 0.29f, 1.0f), true, true);
             WriteTexturedMaterialAsset(projectRootPath, PhysicsDemoSphereStackOrangeMaterialRelativePath, "PhysicsDemoSphereStackOrange", new float4(0.95f, 0.52f, 0.22f, 1.0f), true, true);
             WriteTexturedMaterialAsset(projectRootPath, PhysicsDemoSphereStackPurpleMaterialRelativePath, "PhysicsDemoSphereStackPurple", new float4(0.55f, 0.43f, 0.92f, 1.0f), true, true);
-        }
-
-        /// <summary>
-        /// Deletes the obsolete custom shader generated by older physics demo material exports.
-        /// </summary>
-        /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
-        static void DeleteObsoletePhysicsDemoShaderAsset(string projectRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            }
-
-            string shaderFullPath = Path.Combine(projectRootPath, "assets", "Shaders", "physics", "PhysicsDemoMesh.hlsl");
-            string shaderSettingsFullPath = shaderFullPath + ".hasset";
-            if (File.Exists(shaderFullPath)) {
-                File.Delete(shaderFullPath);
-            }
-            if (File.Exists(shaderSettingsFullPath)) {
-                File.Delete(shaderSettingsFullPath);
-            }
         }
 
         /// <summary>
@@ -1640,7 +1601,7 @@ namespace city.physics.tools {
         /// <param name="sceneId">Stable playable scene id to write.</param>
         void WritePlayablePhysicsShowcaseScene(string projectRootPath, string sceneId) {
             city.rendering.tools.GeneratedAuthoringSceneDefinition sceneDefinition = CreatePlayablePhysicsShowcaseSceneDefinition(projectRootPath, sceneId, true);
-            AuthoringSceneWriteService.WriteScene(projectRootPath, sceneDefinition);
+            AuthoringSceneWriteService.WriteScene(sceneDefinition);
         }
 
         /// <summary>
@@ -2176,7 +2137,7 @@ namespace city.physics.tools {
             dsSettings.SetFieldValue(BaseColorFieldId, baseColor);
             dsSettings.SetFieldValue(LightingModeFieldId, "lit");
 
-            city.rendering.tools.GeneratedMaterialAssetWriteService writeService = new city.rendering.tools.GeneratedMaterialAssetWriteService(AssetAuthoringService);
+            city.rendering.tools.GeneratedMaterialAssetWriteService writeService = new city.rendering.tools.GeneratedMaterialAssetWriteService(AssetAuthoringService, Transaction);
             writeService.WriteMaterial(relativePath, definition);
         }
 
@@ -2379,8 +2340,8 @@ namespace city.physics.tools {
                 platformDefinition.SetFieldValue(BaseColorFieldId, ConvertColorToHtml(surfaceColor));
             }
 
-            city.rendering.tools.GeneratedMaterialAssetWriteService writeService = new city.rendering.tools.GeneratedMaterialAssetWriteService(AssetAuthoringService);
-            writeService.WriteMaterial(relativePath, definition);
+            new city.rendering.tools.GeneratedMaterialAssetWriteService(AssetAuthoringService, Transaction)
+                .WriteMaterial(relativePath, definition);
         }
 
         /// <summary>

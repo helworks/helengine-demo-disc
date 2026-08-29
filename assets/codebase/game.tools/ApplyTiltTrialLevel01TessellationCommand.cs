@@ -22,8 +22,10 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            TiltTrialLevel01TessellationAuthoringService service = new TiltTrialLevel01TessellationAuthoringService(context.Authoring);
+            using helengine.editor.EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
+            TiltTrialLevel01TessellationAuthoringService service = new TiltTrialLevel01TessellationAuthoringService(context.Authoring, transaction);
             service.ApplyToAuthoredLevel01Scene();
+            transaction.Commit();
         }
     }
 }

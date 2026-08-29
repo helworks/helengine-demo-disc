@@ -1,4 +1,5 @@
 using city.rendering.tools;
+using helengine.editor;
 
 namespace city.menu.tools {
     /// <summary>
@@ -30,11 +31,13 @@ namespace city.menu.tools {
                 throw new InvalidOperationException("Console camera/light Blueprint generation requires the editor default font.");
             }
 
-            ConsoleCameraLightInstructionsBlueprintGenerator generator = new ConsoleCameraLightInstructionsBlueprintGenerator(context.Authoring);
+            using EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
+            ConsoleCameraLightInstructionsBlueprintGenerator generator = new ConsoleCameraLightInstructionsBlueprintGenerator(context.Authoring, transaction);
             generator.Generate(
                 context.ProjectRootPath,
                 new DemoSceneInstructionOverlayFactory(context.Authoring),
                 context.Authoring.RendererResources.DefaultFontAsset);
+            transaction.Commit();
         }
     }
 }

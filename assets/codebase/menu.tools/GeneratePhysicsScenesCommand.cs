@@ -1,4 +1,5 @@
 using city.physics.tools;
+using helengine.editor;
 
 namespace city.menu.tools {
     /// <summary>
@@ -24,8 +25,10 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            PhysicsSceneGenerator generator = new PhysicsSceneGenerator(context.Authoring);
+            using EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
+            PhysicsSceneGenerator generator = new PhysicsSceneGenerator(context.Authoring, transaction);
             generator.Generate(context.ProjectRootPath);
+            transaction.Commit();
         }
     }
 }

@@ -9,6 +9,7 @@ namespace city.game.tools {
         /// Host-owned capability used to read and rewrite the current authored scene.
         /// </summary>
         readonly helengine.editor.IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly helengine.editor.EditorAuthoringTransaction Transaction;
         /// <summary>
         /// Relative authored scene path for the playable first Tilt Trial level.
         /// </summary>
@@ -58,8 +59,11 @@ namespace city.game.tools {
         /// Applies PS2- and PSP-only tessellation metadata to the authored playable Level 01 scene without replacing its gameplay content.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used to read and rewrite the authored Level 01 scene asset.</param>
-        public TiltTrialLevel01TessellationAuthoringService(helengine.editor.IEditorProjectAuthoringSession assetAuthoringService) {
+        public TiltTrialLevel01TessellationAuthoringService(
+            helengine.editor.IEditorProjectAuthoringSession assetAuthoringService,
+            helengine.editor.EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
 
         /// <summary>
@@ -72,10 +76,9 @@ namespace city.game.tools {
             }
 
             string relativePath = Level01SceneRelativePath.Substring("assets/".Length);
-            AssetAuthoringService.WriteNativeAsset(
-                relativePath,
-                sceneAsset,
-                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(relativePath));
+            sceneAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(relativePath);
+            sceneAsset.FormerAuthoringAssetIds = Array.Empty<string>();
+            Transaction.WriteAsset(relativePath, sceneAsset);
         }
 
         /// <summary>

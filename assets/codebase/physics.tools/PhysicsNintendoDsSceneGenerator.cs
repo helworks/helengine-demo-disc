@@ -1,5 +1,6 @@
 using city.menu;
 using city.rendering.tools;
+using helengine.editor;
 
 namespace city.physics.tools {
     /// <summary>
@@ -30,16 +31,21 @@ namespace city.physics.tools {
         /// Host-owned capability used to resolve current imported assets while loading canonical scenes.
         /// </summary>
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Initializes one Nintendo handheld physics scene generator.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to load authored gameplay components from the generated physics scenes.</param>
         /// <param name="assetAuthoringService">Host-owned capability used to resolve current imported scene assets.</param>
-        public PhysicsNintendoDsSceneGenerator(IScriptTypeResolver scriptTypeResolver, IEditorProjectAuthoringSession assetAuthoringService) {
+        public PhysicsNintendoDsSceneGenerator(
+            IScriptTypeResolver scriptTypeResolver,
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             ScriptTypeResolver = scriptTypeResolver ?? throw new ArgumentNullException(nameof(scriptTypeResolver));
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
-            SceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolver, AssetAuthoringService);
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
+            SceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolver, AssetAuthoringService, Transaction);
         }
 
         /// <summary>
@@ -56,38 +62,8 @@ namespace city.physics.tools {
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             DemoDiscSceneCatalog sceneCatalog = new DemoDiscSceneCatalog();
             IReadOnlyList<DemoDiscPhysicsSceneEntry> physicsSceneEntries = sceneCatalog.CreatePhysicsNintendoHandheldSceneEntries();
-            DeleteObsoleteNintendoHandheldCompanionScenes(fullProjectRootPath, physicsSceneEntries);
             for (int index = 0; index < physicsSceneEntries.Count; index++) {
                 RewriteSceneWithNintendoHandheldAugmentation(fullProjectRootPath, physicsSceneEntries[index]);
-            }
-        }
-
-        /// <summary>
-        /// Deletes the obsolete Nintendo handheld companion physics scenes so stale generated output does not remain discoverable in the project scene catalog.
-        /// </summary>
-        /// <param name="fullProjectRootPath">Absolute city project root path.</param>
-        static void DeleteObsoleteNintendoHandheldCompanionScenes(string fullProjectRootPath, IReadOnlyList<DemoDiscPhysicsSceneEntry> physicsSceneEntries) {
-            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
-            } else if (physicsSceneEntries == null) {
-                throw new ArgumentNullException(nameof(physicsSceneEntries));
-            }
-
-            for (int index = 0; index < physicsSceneEntries.Count; index++) {
-                string obsoleteScenePath = Path.Combine(
-                    fullProjectRootPath,
-                    "assets",
-                    "scenes",
-                    "physics",
-                    physicsSceneEntries[index].SceneId + "_ds.helen");
-                if (File.Exists(obsoleteScenePath)) {
-                    File.Delete(obsoleteScenePath);
-                }
-            }
-
-            string obsoleteMatrixProbeScenePath = Path.Combine(fullProjectRootPath, "assets", "scenes", "physics", "test_scene_render_matrix_probe_ds.helen");
-            if (File.Exists(obsoleteMatrixProbeScenePath)) {
-                File.Delete(obsoleteMatrixProbeScenePath);
             }
         }
 
@@ -131,7 +107,7 @@ namespace city.physics.tools {
             }
 
             try {
-                SceneWriteService.WriteScene(fullProjectRootPath, new GeneratedAuthoringSceneDefinition {
+                SceneWriteService.WriteScene(new GeneratedAuthoringSceneDefinition {
                     SceneId = BuildPhysicsSceneAssetId(sceneEntry.SceneId),
                     SceneSettings = authoredSceneAsset.SceneSettings,
                     RootEntities = rootEntities,
@@ -296,7 +272,7 @@ namespace city.physics.tools {
                 throw new ArgumentNullException(nameof(sceneEntry));
             }
 
-            PhysicsSceneFactory physicsSceneFactory = new PhysicsSceneFactory(AssetAuthoringService);
+            PhysicsSceneFactory physicsSceneFactory = new PhysicsSceneFactory(AssetAuthoringService, Transaction);
             GeneratedAuthoringSceneDefinition sceneDefinition = physicsSceneFactory.CreatePlayablePhysicsShowcaseSceneDefinition(
                 fullProjectRootPath,
                 sceneEntry.SceneId,
@@ -306,7 +282,7 @@ namespace city.physics.tools {
                 BottomScreenRootEntities = Array.Empty<Entity>()
             };
             try {
-                SceneWriteService.WriteScene(fullProjectRootPath, sceneDefinition);
+                SceneWriteService.WriteScene(sceneDefinition);
             } finally {
                 DisposeRoots(sceneDefinition.RootEntities);
             }

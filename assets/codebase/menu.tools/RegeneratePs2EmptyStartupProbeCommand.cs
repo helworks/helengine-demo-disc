@@ -1,4 +1,5 @@
 using city.rendering.tools;
+using helengine.editor;
 
 namespace city.menu.tools {
     /// <summary>
@@ -24,10 +25,12 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
+            using EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
             Ps2EmptyStartupProbeSceneFactory sceneFactory = new Ps2EmptyStartupProbeSceneFactory(context.Authoring);
-            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(context.Authoring);
+            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(null, context.Authoring, transaction);
             GeneratedAuthoringSceneDefinition sceneDefinition = sceneFactory.CreateSceneDefinition();
-            sceneWriteService.WriteScene(context.ProjectRootPath, sceneDefinition);
+            sceneWriteService.WriteScene(sceneDefinition);
+            transaction.Commit();
         }
     }
 }

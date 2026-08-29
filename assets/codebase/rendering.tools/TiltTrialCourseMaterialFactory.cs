@@ -154,8 +154,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one Tilt Trial course material factory.
         /// </summary>
-        public TiltTrialCourseMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService) {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
+        public TiltTrialCourseMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService, EditorAuthoringTransaction transaction) {
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService, transaction);
         }
 
         /// <summary>

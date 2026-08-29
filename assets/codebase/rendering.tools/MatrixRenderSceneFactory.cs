@@ -77,10 +77,10 @@ namespace city.rendering.tools {
         /// Initializes the Matrix Render scene factory with the services required for authored output.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
-        public MatrixRenderSceneFactory(IEditorProjectAuthoringSession authoringSession) {
+        public MatrixRenderSceneFactory(IEditorProjectAuthoringSession authoringSession, EditorAuthoringTransaction transaction) {
             AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
             AssetAuthoringService = AuthoringSession;
-            MaterialWriteService = new GeneratedMaterialAssetWriteService(AssetAuthoringService);
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(AssetAuthoringService, transaction);
         }
 
         /// <summary>

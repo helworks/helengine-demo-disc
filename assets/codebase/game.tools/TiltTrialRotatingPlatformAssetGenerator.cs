@@ -67,11 +67,13 @@ namespace city.game.tools {
 
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
 
-        public TiltTrialRotatingPlatformAssetGenerator(IEditorProjectAuthoringSession assetAuthoringService) {
+        public TiltTrialRotatingPlatformAssetGenerator(
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
-            ModelWriteService = new SplitPlayGeneratedModelAssetWriteService(AssetAuthoringService);
-            BlueprintWriteService = new SplitPlayGeneratedBlueprintAssetWriteService(AssetAuthoringService);
-            MaterialWriteService = new CityGeneratedMaterialAssetWriteService(AssetAuthoringService);
+            ModelWriteService = new SplitPlayGeneratedModelAssetWriteService(AssetAuthoringService, transaction);
+            BlueprintWriteService = new SplitPlayGeneratedBlueprintAssetWriteService(AssetAuthoringService, transaction);
+            MaterialWriteService = new CityGeneratedMaterialAssetWriteService(AssetAuthoringService, transaction);
         }
 
         /// <summary>

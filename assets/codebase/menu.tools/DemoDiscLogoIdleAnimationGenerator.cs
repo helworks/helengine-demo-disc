@@ -10,6 +10,7 @@ namespace city.menu.tools {
         /// Host-owned capability used to author the current native animation asset.
         /// </summary>
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Project-relative path of the native demo-disc logo animation clip.
@@ -20,8 +21,11 @@ namespace city.menu.tools {
         /// Initializes one logo animation author.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used to author the current native animation asset.</param>
-        public DemoDiscLogoIdleAnimationGenerator(IEditorProjectAuthoringSession assetAuthoringService) {
+        public DemoDiscLogoIdleAnimationGenerator(
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
 
         /// <summary>
@@ -47,7 +51,7 @@ namespace city.menu.tools {
 
             animationClip.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(AnimationRelativePath);
             animationClip.FormerAuthoringAssetIds = Array.Empty<string>();
-            AssetAuthoringService.WriteAsset(AnimationRelativePath, animationClip);
+            Transaction.WriteAsset(AnimationRelativePath, animationClip);
         }
     }
 }

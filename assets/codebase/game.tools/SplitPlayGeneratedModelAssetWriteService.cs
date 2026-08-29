@@ -4,9 +4,13 @@ namespace city.game.tools {
     /// </summary>
     public sealed class SplitPlayGeneratedModelAssetWriteService {
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
 
-        public SplitPlayGeneratedModelAssetWriteService(IEditorProjectAuthoringSession assetAuthoringService) {
+        public SplitPlayGeneratedModelAssetWriteService(
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
 
         public void WriteModel(string relativePath, ModelAsset modelAsset) {
@@ -18,11 +22,7 @@ namespace city.game.tools {
 
             modelAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(relativePath);
             modelAsset.FormerAuthoringAssetIds = Array.Empty<string>();
-            // The session owns the transaction lifetime.  Calling its public
-            // write boundary keeps detached test fixtures and host sessions
-            // on the same path without constructing an editor transaction in
-            // project code.
-            AssetAuthoringService.WriteAsset(relativePath, modelAsset);
+            Transaction.WriteAsset(relativePath, modelAsset);
         }
     }
 }

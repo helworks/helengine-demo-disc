@@ -7,13 +7,17 @@ namespace city.physics.tools {
         /// Host-owned capability used by the generated physics scenes to resolve fonts and author import settings.
         /// </summary>
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Initializes one authored physics showcase generator.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by project scene factories.</param>
-        public PhysicsSceneGenerator(IEditorProjectAuthoringSession assetAuthoringService) {
+        public PhysicsSceneGenerator(
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
 
         /// <summary>
@@ -30,13 +34,13 @@ namespace city.physics.tools {
                 throw new InvalidOperationException("Physics scene generation requires the editor default font for the console instruction Blueprint.");
             }
 
-            ConsoleCameraLightInstructionsBlueprintGenerator consoleInstructionBlueprintGenerator = new ConsoleCameraLightInstructionsBlueprintGenerator(AssetAuthoringService);
+            ConsoleCameraLightInstructionsBlueprintGenerator consoleInstructionBlueprintGenerator = new ConsoleCameraLightInstructionsBlueprintGenerator(AssetAuthoringService, Transaction);
             consoleInstructionBlueprintGenerator.Generate(
                 projectRootPath,
                 new DemoSceneInstructionOverlayFactory(AssetAuthoringService),
                 editorFont);
 
-            PhysicsSceneFactory factory = new PhysicsSceneFactory(AssetAuthoringService);
+            PhysicsSceneFactory factory = new PhysicsSceneFactory(AssetAuthoringService, Transaction);
             factory.WriteScenes(projectRootPath);
         }
     }

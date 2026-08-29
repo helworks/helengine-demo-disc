@@ -9,13 +9,17 @@ namespace city.rendering.tools {
         /// Host-owned capability used to author the current native Blueprint.
         /// </summary>
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Initializes one console instruction Blueprint generator.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used to save the current Blueprint.</param>
-        public ConsoleCameraLightInstructionsBlueprintGenerator(IEditorProjectAuthoringSession assetAuthoringService) {
+        public ConsoleCameraLightInstructionsBlueprintGenerator(
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
 
         /// <summary>
@@ -41,7 +45,8 @@ namespace city.rendering.tools {
                     ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath,
                     GeneratedScenePersistenceRegistryFactory.Create(),
                     city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(
-                        ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath));
+                        ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath),
+                    Transaction);
             } finally {
                 root.Dispose();
             }

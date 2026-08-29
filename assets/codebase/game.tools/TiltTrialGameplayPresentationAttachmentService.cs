@@ -14,7 +14,8 @@ namespace city.game.tools {
         /// <summary>
         /// Host-owned capability used to load, reference, and rewrite current native assets.
         /// </summary>
-        readonly IEditorProjectAssetAuthoringService AssetAuthoringService;
+        readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Platform ids that should receive only the handheld presentation root.
@@ -26,9 +27,13 @@ namespace city.game.tools {
         /// </summary>
         /// <param name="scriptTypeResolver">Editor resolver for generated project component types.</param>
         /// <param name="assetAuthoringService">Host-owned capability for current native asset authoring.</param>
-        public TiltTrialGameplayPresentationAttachmentService(IScriptTypeResolver scriptTypeResolver, IEditorProjectAssetAuthoringService assetAuthoringService) {
+        public TiltTrialGameplayPresentationAttachmentService(
+            IScriptTypeResolver scriptTypeResolver,
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             ScriptTypeResolverValue = scriptTypeResolver;
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
 
         /// <summary>
@@ -204,10 +209,9 @@ namespace city.game.tools {
         /// <param name="blueprintPath">Project-relative Blueprint asset path.</param>
         /// <param name="blueprintAsset">Blueprint asset to serialize.</param>
         void SaveBlueprintAsset(string blueprintPath, BlueprintAsset blueprintAsset) {
-            AssetAuthoringService.WriteNativeAsset(
-                blueprintPath,
-                blueprintAsset,
-                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(blueprintPath));
+            blueprintAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(blueprintPath);
+            blueprintAsset.FormerAuthoringAssetIds = Array.Empty<string>();
+            Transaction.WriteAsset(blueprintPath, blueprintAsset);
         }
 
         /// <summary>
@@ -368,10 +372,9 @@ namespace city.game.tools {
         /// <param name="sceneAsset">Scene asset to write.</param>
         void SaveScene(string projectRootPath, string scenePath, SceneAsset sceneAsset) {
             string relativePath = Path.GetRelativePath(Path.Combine(projectRootPath, "assets"), scenePath).Replace('\\', '/');
-            AssetAuthoringService.WriteNativeAsset(
-                relativePath,
-                sceneAsset,
-                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(relativePath));
+            sceneAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(relativePath);
+            sceneAsset.FormerAuthoringAssetIds = Array.Empty<string>();
+            Transaction.WriteAsset(relativePath, sceneAsset);
         }
     }
 }

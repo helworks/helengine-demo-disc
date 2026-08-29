@@ -22,8 +22,10 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            GameSceneGenerator generator = new GameSceneGenerator(context.ScriptTypeResolver, context.Authoring);
+            using helengine.editor.EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
+            GameSceneGenerator generator = new GameSceneGenerator(context.ScriptTypeResolver, context.Authoring, transaction);
             generator.GenerateTiltTrialScene(context.ProjectRootPath);
+            transaction.Commit();
         }
     }
 }

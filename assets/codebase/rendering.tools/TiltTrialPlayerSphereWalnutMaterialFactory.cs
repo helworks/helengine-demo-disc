@@ -124,8 +124,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one walnut material factory.
         /// </summary>
-        public TiltTrialPlayerSphereWalnutMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService) {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
+        public TiltTrialPlayerSphereWalnutMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService, EditorAuthoringTransaction transaction) {
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService, transaction);
         }
 
         /// <summary>
@@ -180,6 +180,7 @@ namespace city.rendering.tools {
             GeneratedMaterialAssetDefinition definition = new GeneratedMaterialAssetDefinition();
             definition.MaterialAsset = new ShaderMaterialAsset {
                 Id = MaterialAssetId,
+                AuthoringAssetId = MaterialAuthoringAssetId,
                 DiffuseTextureAssetId = textureAssetId,
                 RenderState = new MaterialRenderState {
                     // The rolling player sphere can expose backface artifacts with photo textures;

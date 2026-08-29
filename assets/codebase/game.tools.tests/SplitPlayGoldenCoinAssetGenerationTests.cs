@@ -24,10 +24,15 @@ namespace city.tests {
 
         [Fact]
         public void Generate_writes_coin_models_material_and_blueprint_with_ds_model_override() {
+            using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(ProjectRootPath);
+            IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(ProjectRootPath);
+            using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
             SplitPlayGoldenCoinAssetGenerator generator = new SplitPlayGoldenCoinAssetGenerator(
-                new TestEditorProjectAssetAuthoringService(ProjectRootPath));
+                authoringSession,
+                transaction);
 
             generator.Generate(ProjectRootPath);
+            transaction.Commit();
 
             string commonModelPath = Path.Combine(ProjectRootPath, "assets", "models", "games", "tilt", "golden_coin.hasset");
             string dsModelPath = Path.Combine(ProjectRootPath, "assets", "models", "games", "tilt", "golden_coin_ds.hasset");
@@ -139,7 +144,9 @@ namespace city.tests {
 
             byte[] firstModelBytes = File.ReadAllBytes(commonModelPath);
             byte[] firstBlueprintBytes = File.ReadAllBytes(blueprintPath);
-            generator.Generate(ProjectRootPath);
+            using EditorAuthoringTransaction secondTransaction = authoringSession.BeginTransaction();
+            new SplitPlayGoldenCoinAssetGenerator(authoringSession, secondTransaction).Generate(ProjectRootPath);
+            secondTransaction.Commit();
             Assert.Equal(firstModelBytes, File.ReadAllBytes(commonModelPath));
             Assert.Equal(firstBlueprintBytes, File.ReadAllBytes(blueprintPath));
         }

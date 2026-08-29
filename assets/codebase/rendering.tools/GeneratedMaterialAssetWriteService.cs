@@ -4,12 +4,16 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class GeneratedMaterialAssetWriteService {
         readonly IEditorProjectAuthoringSession AuthoringSession;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Initializes one generated material write service.
         /// </summary>
-        public GeneratedMaterialAssetWriteService(IEditorProjectAuthoringSession authoringSession) {
+        public GeneratedMaterialAssetWriteService(
+            IEditorProjectAuthoringSession authoringSession,
+            EditorAuthoringTransaction transaction) {
             AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
 
         /// <summary>
@@ -40,10 +44,8 @@ namespace city.rendering.tools {
                 }
             }
 
-            AuthoringSession.WriteNativeMaterial(
-                relativePath,
-                editorDefinition,
-                city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetMaterialIdentity(relativePath));
+            editorDefinition.MaterialAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetMaterialIdentity(relativePath);
+            AuthoringSession.WriteGeneratedMaterial(relativePath, editorDefinition, Transaction);
         }
     }
 }

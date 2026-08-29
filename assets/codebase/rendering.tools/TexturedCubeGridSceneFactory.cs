@@ -312,10 +312,10 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes the textured cube-grid scene factory with the descriptors and services required for authored output.
         /// </summary>
-        public TexturedCubeGridSceneFactory(IEditorProjectAuthoringSession authoringSession) {
+        public TexturedCubeGridSceneFactory(IEditorProjectAuthoringSession authoringSession, EditorAuthoringTransaction transaction) {
             AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
             AssetAuthoringService = AuthoringSession;
-            MaterialWriteService = new GeneratedMaterialAssetWriteService(AssetAuthoringService);
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(AssetAuthoringService, transaction);
         }
 
         /// <summary>

@@ -10,8 +10,13 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Nintendo_ds_player_sphere_material_is_untextured() {
+            string projectRootPath = Path.Combine(Path.GetTempPath(), "city-marble-material-tests", Guid.NewGuid().ToString("N"));
+            using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(projectRootPath);
+            IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(projectRootPath);
+            using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
             city.rendering.tools.TiltTrialPlayerSphereMarbleMaterialFactory factory = new city.rendering.tools.TiltTrialPlayerSphereMarbleMaterialFactory(
-                new city.tests.TestEditorProjectAssetAuthoringService(Path.Combine(Path.GetTempPath(), "city-marble-material-tests", Guid.NewGuid().ToString("N"))));
+                authoringSession,
+                transaction);
             MethodInfo createDefinitionMethod = typeof(city.rendering.tools.TiltTrialPlayerSphereMarbleMaterialFactory).GetMethod(
                 "CreateDefinition",
                 BindingFlags.Instance | BindingFlags.NonPublic)!;
@@ -32,8 +37,13 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Walnut_material_definition_uses_a_repeatable_authoring_identity() {
+            string projectRootPath = Path.Combine(Path.GetTempPath(), "city-walnut-material-tests", Guid.NewGuid().ToString("N"));
+            using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(projectRootPath);
+            IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(projectRootPath);
+            using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
             city.rendering.tools.TiltTrialPlayerSphereWalnutMaterialFactory factory = new city.rendering.tools.TiltTrialPlayerSphereWalnutMaterialFactory(
-                new city.tests.TestEditorProjectAssetAuthoringService(Path.Combine(Path.GetTempPath(), "city-walnut-material-tests", Guid.NewGuid().ToString("N"))));
+                authoringSession,
+                transaction);
             MethodInfo createDefinitionMethod = typeof(city.rendering.tools.TiltTrialPlayerSphereWalnutMaterialFactory).GetMethod(
                 "CreateDefinition",
                 BindingFlags.Instance | BindingFlags.NonPublic)!;

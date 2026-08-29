@@ -94,9 +94,9 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one PBR material gallery material factory.
         /// </summary>
-        public PbrMaterialGalleryMaterialFactory(IEditorProjectAuthoringSession authoringSession) {
+        public PbrMaterialGalleryMaterialFactory(IEditorProjectAuthoringSession authoringSession, EditorAuthoringTransaction transaction) {
             AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
-            MaterialWriteService = new GeneratedMaterialAssetWriteService(AuthoringSession);
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(AuthoringSession, transaction);
         }
 
         /// <summary>

@@ -154,8 +154,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes the generated material writer required by the clipping probe material factory.
         /// </summary>
-        public TiltTrialClippingProbeMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService) {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
+        public TiltTrialClippingProbeMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService, EditorAuthoringTransaction transaction) {
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService, transaction);
         }
 
         /// <summary>

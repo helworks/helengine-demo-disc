@@ -76,8 +76,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Initializes one PBR textured showcase material factory.
         /// </summary>
-        public PbrTexturedShowcaseMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService) {
-            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService);
+        public PbrTexturedShowcaseMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService, EditorAuthoringTransaction transaction) {
+            MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService, transaction);
         }
 
         /// <summary>

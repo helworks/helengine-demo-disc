@@ -23,9 +23,9 @@ namespace city.tests {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
 
             Assert.Contains("CreateTiltTrialScene()", source, StringComparison.Ordinal);
-            Assert.Contains("sceneWriteService.WriteScene(projectRootPath, tiltTrialLevelSelectScene);", source, StringComparison.Ordinal);
+            Assert.Contains("sceneWriteService.WriteScene(tiltTrialLevelSelectScene);", source, StringComparison.Ordinal);
             Assert.Contains("CreateTiltTrialLevelScenes()", source, StringComparison.Ordinal);
-            Assert.Contains("sceneWriteService.WriteScene(projectRootPath, tiltTrialLevelScenes[index]);", source, StringComparison.Ordinal);
+            Assert.Contains("sceneWriteService.WriteScene(tiltTrialLevelScenes[index]);", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialGameplayPresentationBlueprintGenerator", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialHandheldLevelSelectSceneFactory", source, StringComparison.Ordinal);
         }

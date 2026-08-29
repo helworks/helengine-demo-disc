@@ -1,4 +1,5 @@
 using city.rendering.tools;
+using helengine.editor;
 
 namespace city.menu.tools {
     /// <summary>
@@ -24,16 +25,18 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.Authoring);
+            using EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
+            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.Authoring, transaction);
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(context.ProjectRootPath);
-            ColoredCubeGridSceneFactory factory = new ColoredCubeGridSceneFactory(context.Authoring);
+            ColoredCubeGridSceneFactory factory = new ColoredCubeGridSceneFactory(context.Authoring, transaction);
             factory.WriteMaterialAssets(context.ProjectRootPath);
             GeneratedAuthoringSceneDefinition sceneDefinition = factory.CreateSceneDefinition(
                 context.ProjectRootPath,
                 assets.GeneratedCubeModel,
                 factory.CreateRuntimeMaterials());
-            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(context.ScriptTypeResolver, context.Authoring);
-            sceneWriteService.WriteScene(context.ProjectRootPath, sceneDefinition);
+            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(context.ScriptTypeResolver, context.Authoring, transaction);
+            sceneWriteService.WriteScene(sceneDefinition);
+            transaction.Commit();
         }
     }
 }

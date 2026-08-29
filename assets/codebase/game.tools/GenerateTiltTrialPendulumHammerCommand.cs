@@ -22,8 +22,10 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            TiltTrialPendulumHammerAssetGenerator generator = new TiltTrialPendulumHammerAssetGenerator(context.Authoring);
+            using helengine.editor.EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
+            TiltTrialPendulumHammerAssetGenerator generator = new TiltTrialPendulumHammerAssetGenerator(context.Authoring, transaction);
             generator.Generate(context.ProjectRootPath);
+            transaction.Commit();
         }
     }
 }
