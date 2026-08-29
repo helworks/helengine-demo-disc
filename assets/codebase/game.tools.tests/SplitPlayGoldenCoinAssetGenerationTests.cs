@@ -142,13 +142,41 @@ namespace city.tests {
             Assert.Equal(2, idleMotionComponent.ComponentIndex);
             Assert.Contains("SplitPlayIdleMotionComponent", idleMotionComponent.ComponentTypeId, StringComparison.Ordinal);
 
-            byte[] firstModelBytes = File.ReadAllBytes(commonModelPath);
-            byte[] firstBlueprintBytes = File.ReadAllBytes(blueprintPath);
+            string[] generatedPaths = GetGeneratedPaths();
+            GeneratedAssetPublicationSnapshot firstSnapshot = GeneratedAssetPublicationSnapshot.Capture(ProjectRootPath);
+            firstSnapshot.AssertExactPaths(generatedPaths);
+            GeneratedAssetReferenceSnapshot firstReferences = GeneratedAssetReferenceSnapshot.Capture(
+                authoringSession,
+                GetGeneratedAssetKinds());
+
             using EditorAuthoringTransaction secondTransaction = authoringSession.BeginTransaction();
             new SplitPlayGoldenCoinAssetGenerator(authoringSession, secondTransaction).Generate(ProjectRootPath);
             secondTransaction.Commit();
-            Assert.Equal(firstModelBytes, File.ReadAllBytes(commonModelPath));
-            Assert.Equal(firstBlueprintBytes, File.ReadAllBytes(blueprintPath));
+            firstSnapshot.AssertUnchanged();
+            firstReferences.AssertUnchanged(authoringSession, GetGeneratedAssetKinds());
+        }
+
+        static string[] GetGeneratedPaths() {
+            return new[] {
+                SplitPlayAssetCatalog.GoldenCoinCommonModelRelativePath,
+                SplitPlayAssetCatalog.GoldenCoinDsModelRelativePath,
+                SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath,
+                SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath + ".windows.hasset",
+                SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath + ".ps2.hasset",
+                SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath + ".psp.hasset",
+                SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath + ".gamecube.hasset",
+                SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath + ".ds.hasset",
+                SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath
+            };
+        }
+
+        static IReadOnlyDictionary<string, AssetEntryKind> GetGeneratedAssetKinds() {
+            return new Dictionary<string, AssetEntryKind>(StringComparer.Ordinal) {
+                [SplitPlayAssetCatalog.GoldenCoinCommonModelRelativePath] = AssetEntryKind.Model,
+                [SplitPlayAssetCatalog.GoldenCoinDsModelRelativePath] = AssetEntryKind.Model,
+                [SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath] = AssetEntryKind.Material,
+                [SplitPlayAssetCatalog.GoldenCoinBlueprintRelativePath] = AssetEntryKind.Blueprint
+            };
         }
 
         [Fact]

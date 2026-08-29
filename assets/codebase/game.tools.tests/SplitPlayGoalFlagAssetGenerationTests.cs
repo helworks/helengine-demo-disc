@@ -104,13 +104,48 @@ namespace city.tests {
             Assert.False(dsOverride.TryGetAssetReference("Materials[1]", out _));
             Assert.Equal(2, restoredMeshComponent.Materials.Length);
 
-            byte[] firstModelBytes = File.ReadAllBytes(commonModelPath);
-            byte[] firstBlueprintBytes = File.ReadAllBytes(blueprintPath);
+            string[] generatedPaths = GetGeneratedPaths();
+            GeneratedAssetPublicationSnapshot firstSnapshot = GeneratedAssetPublicationSnapshot.Capture(ProjectRootPath);
+            firstSnapshot.AssertExactPaths(generatedPaths);
+            GeneratedAssetReferenceSnapshot firstReferences = GeneratedAssetReferenceSnapshot.Capture(
+                authoringSession,
+                GetGeneratedAssetKinds());
+
             using EditorAuthoringTransaction secondTransaction = authoringSession.BeginTransaction();
             new SplitPlayGoalFlagAssetGenerator(authoringSession, secondTransaction).Generate(ProjectRootPath);
             secondTransaction.Commit();
-            Assert.Equal(firstModelBytes, File.ReadAllBytes(commonModelPath));
-            Assert.Equal(firstBlueprintBytes, File.ReadAllBytes(blueprintPath));
+            firstSnapshot.AssertUnchanged();
+            firstReferences.AssertUnchanged(authoringSession, GetGeneratedAssetKinds());
+        }
+
+        static string[] GetGeneratedPaths() {
+            return new[] {
+                SplitPlayAssetCatalog.GoalFlagCommonModelRelativePath,
+                SplitPlayAssetCatalog.GoalFlagDsModelRelativePath,
+                SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath,
+                SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath + ".windows.hasset",
+                SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath + ".ps2.hasset",
+                SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath + ".psp.hasset",
+                SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath + ".gamecube.hasset",
+                SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath + ".ds.hasset",
+                SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath,
+                SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath + ".windows.hasset",
+                SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath + ".ps2.hasset",
+                SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath + ".psp.hasset",
+                SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath + ".gamecube.hasset",
+                SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath + ".ds.hasset",
+                SplitPlayAssetCatalog.GoalFlagBlueprintRelativePath
+            };
+        }
+
+        static IReadOnlyDictionary<string, AssetEntryKind> GetGeneratedAssetKinds() {
+            return new Dictionary<string, AssetEntryKind>(StringComparer.Ordinal) {
+                [SplitPlayAssetCatalog.GoalFlagCommonModelRelativePath] = AssetEntryKind.Model,
+                [SplitPlayAssetCatalog.GoalFlagDsModelRelativePath] = AssetEntryKind.Model,
+                [SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath] = AssetEntryKind.Material,
+                [SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath] = AssetEntryKind.Material,
+                [SplitPlayAssetCatalog.GoalFlagBlueprintRelativePath] = AssetEntryKind.Blueprint
+            };
         }
 
         static void AssertAllTriangleWindingsAgreeWithNormals(ModelAsset modelAsset) {
