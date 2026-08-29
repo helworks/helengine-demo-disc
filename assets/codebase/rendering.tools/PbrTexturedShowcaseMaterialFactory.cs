@@ -72,11 +72,13 @@ namespace city.rendering.tools {
         /// Shared generated material writer used to persist the authored showcase material settings.
         /// </summary>
         readonly GeneratedMaterialAssetWriteService MaterialWriteService;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Initializes one PBR textured showcase material factory.
         /// </summary>
         public PbrTexturedShowcaseMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService, EditorAuthoringTransaction transaction) {
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
             MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService, transaction);
         }
 
@@ -116,11 +118,12 @@ namespace city.rendering.tools {
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             string assetsRootPath = Path.Combine(fullProjectRootPath, "assets");
             string sourceTexturePath = Path.Combine(assetsRootPath, relativeTexturePath.Replace('/', Path.DirectorySeparatorChar));
-            bool settingsFileExists = File.Exists(sourceTexturePath + ".hasset");
             TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(sourceTexturePath);
-            if (!settingsFileExists) {
-                assetAuthoringService.SaveTextureImportSettings(sourceTexturePath, settings);
-            }
+            GeneratedFileTransactionWriter.WriteTextureImportSettings(
+                assetAuthoringService,
+                Transaction,
+                relativeTexturePath,
+                settings);
             string assetId = settings.Importer.AssetId;
             if (string.IsNullOrWhiteSpace(assetId)) {
                 throw new InvalidOperationException($"PBR textured showcase requires a persisted imported texture asset id for '{relativeTexturePath}'.");

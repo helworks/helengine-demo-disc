@@ -11,13 +11,15 @@ namespace city.rendering.tools {
         /// Host-owned capability used to resolve generated control icons and fonts.
         /// </summary>
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Initializes one PBR material gallery scene factory.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
-        public PbrMaterialGallerySceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
+        public PbrMaterialGallerySceneFactory(IEditorProjectAuthoringSession assetAuthoringService, EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
         /// <summary>
         /// Stable scene id used by the generated PBR material gallery asset.
@@ -63,7 +65,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction);
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);

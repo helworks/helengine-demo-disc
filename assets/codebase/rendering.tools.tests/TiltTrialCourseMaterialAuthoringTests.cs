@@ -17,9 +17,9 @@ namespace city.tests {
             string gameSceneSource = File.ReadAllText(gameSceneSourcePath);
 
             Assert.Contains("public RuntimeMaterial TiltTrialCourseMaterial { get; set; }", assetsSource, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialCourseMaterialFactory tiltTrialCourseMaterialFactory = new TiltTrialCourseMaterialFactory();", preparationSource, StringComparison.Ordinal);
-            Assert.Contains("tiltTrialCourseMaterialFactory.WriteMaterialAsset(fullProjectRootPath);", preparationSource, StringComparison.Ordinal);
-            Assert.Contains("RuntimeMaterial tiltTrialCourseMaterial = LoadRuntimeMaterial(bootstrap, projectRootPath, TiltTrialCourseMaterialFactory.MaterialRelativePath);", preparationSource, StringComparison.Ordinal);
+            Assert.Contains("TiltTrialCourseMaterialFactory tiltTrialCourseMaterialFactory = new TiltTrialCourseMaterialFactory(AuthoringSession, Transaction);", preparationSource, StringComparison.Ordinal);
+            Assert.Contains("tiltTrialCourseMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AuthoringSession);", preparationSource, StringComparison.Ordinal);
+            Assert.Contains("RuntimeMaterial tiltTrialCourseMaterial = LoadRuntimeMaterial(TiltTrialCourseMaterialFactory.MaterialRelativePath);", preparationSource, StringComparison.Ordinal);
             Assert.Contains("TiltTrialCourseMaterial = tiltTrialCourseMaterial,", preparationSource, StringComparison.Ordinal);
             Assert.Contains("readonly RuntimeMaterial TiltTrialCourseMaterial;", gameSceneSource, StringComparison.Ordinal);
             Assert.Contains("const string TiltTrialCourseMaterialRelativePath = \"materials/rendering/tilt_trial/Course.hasset\";", gameSceneSource, StringComparison.Ordinal);

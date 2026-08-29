@@ -120,11 +120,13 @@ namespace city.rendering.tools {
         /// Shared generated material writer used to persist the authored walnut material settings.
         /// </summary>
         readonly GeneratedMaterialAssetWriteService MaterialWriteService;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Initializes one walnut material factory.
         /// </summary>
         public TiltTrialPlayerSphereWalnutMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService, EditorAuthoringTransaction transaction) {
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
             MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService, transaction);
         }
 
@@ -154,11 +156,12 @@ namespace city.rendering.tools {
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             string assetsRootPath = Path.Combine(fullProjectRootPath, "assets");
             string sourceTexturePath = Path.Combine(assetsRootPath, TextureRelativePath.Replace('/', Path.DirectorySeparatorChar));
-            bool settingsFileExists = File.Exists(sourceTexturePath + ".hasset");
             TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(sourceTexturePath);
-            if (!settingsFileExists) {
-                assetAuthoringService.SaveTextureImportSettings(sourceTexturePath, settings);
-            }
+            GeneratedFileTransactionWriter.WriteTextureImportSettings(
+                assetAuthoringService,
+                Transaction,
+                TextureRelativePath,
+                settings);
             string assetId = settings.Importer.AssetId;
             if (string.IsNullOrWhiteSpace(assetId)) {
                 throw new InvalidOperationException("Tilt Trial walnut material requires a persisted imported texture asset id.");

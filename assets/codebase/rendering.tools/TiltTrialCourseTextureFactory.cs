@@ -36,36 +36,30 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <returns>Imported texture asset id backing the generated source bitmap.</returns>
-        public string WriteTextureAsset(string projectRootPath, IEditorProjectAuthoringSession assetAuthoringService) {
+        public string WriteTextureAsset(
+            string projectRootPath,
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            string fullProjectRootPath = Path.GetFullPath(projectRootPath);
-            string assetsRootPath = Path.Combine(fullProjectRootPath, "assets");
-            string fullTexturePath = Path.Combine(assetsRootPath, TextureRelativePath.Replace('/', Path.DirectorySeparatorChar));
-            string? textureDirectoryPath = Path.GetDirectoryName(fullTexturePath);
-            if (string.IsNullOrWhiteSpace(textureDirectoryPath)) {
-                throw new InvalidOperationException($"Could not resolve a texture directory for '{TextureRelativePath}'.");
-            }
-
-            Directory.CreateDirectory(textureDirectoryPath);
-
             byte[] textureBytes = BuildTextureFileBytes();
-            if (!File.Exists(fullTexturePath) || !File.ReadAllBytes(fullTexturePath).AsSpan().SequenceEqual(textureBytes)) {
-                File.WriteAllBytes(fullTexturePath, textureBytes);
-            }
-
             if (assetAuthoringService == null) {
                 throw new ArgumentNullException(nameof(assetAuthoringService));
             }
-
-            bool settingsFileExists = File.Exists(fullTexturePath + ".hasset");
-            TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(fullTexturePath);
-            if (!settingsFileExists) {
-                assetAuthoringService.SaveTextureImportSettings(fullTexturePath, settings);
+            if (transaction == null) {
+                throw new ArgumentNullException(nameof(transaction));
             }
-            string assetId = settings.Importer.AssetId;
+
+            TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(
+                Path.Combine(assetAuthoringService.ProjectRootPath, "assets", TextureRelativePath.Replace('/', Path.DirectorySeparatorChar)));
+            string assetId = GeneratedFileTransactionWriter.WriteTexture(
+                assetAuthoringService,
+                transaction,
+                TextureRelativePath,
+                textureBytes,
+                settings);
             if (string.IsNullOrWhiteSpace(assetId)) {
                 throw new InvalidOperationException("Tilt Trial lilac grid texture requires one persisted imported texture asset id.");
             }

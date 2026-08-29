@@ -27,8 +27,8 @@ namespace city.menu.tools {
 
             using EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
             RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.Authoring, transaction);
-            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(context.ProjectRootPath);
-            CubeTestSceneFactory factory = new CubeTestSceneFactory(context.Authoring);
+            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare();
+            CubeTestSceneFactory factory = new CubeTestSceneFactory(context.Authoring, transaction);
             GeneratedAuthoringSceneDefinition sceneDefinition = factory.CreateSceneDefinition(
                 context.ProjectRootPath,
                 assets.GeneratedCubeModel,

@@ -11,6 +11,7 @@ namespace city.rendering.tools {
         /// Host-owned capability used to resolve generated control icons and fonts.
         /// </summary>
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
         /// <summary>
         /// Stable scene id used by the generated depth-clip-probe asset.
         /// </summary>
@@ -20,8 +21,9 @@ namespace city.rendering.tools {
         /// Initializes one depth-clip-probe scene factory.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
-        public DepthClipProbeSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
+        public DepthClipProbeSceneFactory(IEditorProjectAuthoringSession assetAuthoringService, EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
 
         /// <summary>
@@ -43,7 +45,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction);
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);

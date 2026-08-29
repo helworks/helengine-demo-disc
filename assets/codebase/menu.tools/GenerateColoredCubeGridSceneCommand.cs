@@ -27,7 +27,7 @@ namespace city.menu.tools {
 
             using EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
             RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.Authoring, transaction);
-            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(context.ProjectRootPath);
+            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare();
             ColoredCubeGridSceneFactory factory = new ColoredCubeGridSceneFactory(context.Authoring, transaction);
             factory.WriteMaterialAssets(context.ProjectRootPath);
             GeneratedAuthoringSceneDefinition sceneDefinition = factory.CreateSceneDefinition(

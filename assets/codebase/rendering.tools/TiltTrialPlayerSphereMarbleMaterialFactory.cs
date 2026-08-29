@@ -135,11 +135,13 @@ namespace city.rendering.tools {
         /// Shared generated material writer used to persist the authored marble material settings.
         /// </summary>
         readonly GeneratedMaterialAssetWriteService MaterialWriteService;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Initializes one marble material factory.
         /// </summary>
         public TiltTrialPlayerSphereMarbleMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService, EditorAuthoringTransaction transaction) {
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
             MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService, transaction);
         }
 
@@ -192,11 +194,12 @@ namespace city.rendering.tools {
             }
 
             string sourceTexturePath = Path.Combine(assetsRootPath, relativeTexturePath.Replace('/', Path.DirectorySeparatorChar));
-            bool settingsFileExists = File.Exists(sourceTexturePath + ".hasset");
             TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(sourceTexturePath);
-            if (!settingsFileExists) {
-                assetAuthoringService.SaveTextureImportSettings(sourceTexturePath, settings);
-            }
+            GeneratedFileTransactionWriter.WriteTextureImportSettings(
+                assetAuthoringService,
+                Transaction,
+                relativeTexturePath,
+                settings);
             string assetId = settings.Importer.AssetId;
             if (string.IsNullOrWhiteSpace(assetId)) {
                 throw new InvalidOperationException($"Tilt Trial marble material requires a persisted imported texture asset id for '{relativeTexturePath}'.");

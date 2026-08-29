@@ -185,13 +185,17 @@ namespace city.rendering.tools {
         /// Host-owned asset-authoring capability used to resolve generated control icons.
         /// </summary>
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Initializes one instruction overlay factory with the host asset-authoring capability.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used to resolve generated icon assets.</param>
-        public DemoSceneInstructionOverlayFactory(IEditorProjectAuthoringSession assetAuthoringService) {
+        public DemoSceneInstructionOverlayFactory(
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
 
         /// <summary>
@@ -658,7 +662,7 @@ namespace city.rendering.tools {
             entity.LocalPosition = new float3(leftOffset, topOffset, 0.1f);
             entity.LayerMask = DesktopOverlayLayerMask;
             DesktopInstructionPlatformIconSpec commonSpec = FindRequiredCommonSpec(specs, commonPlatformId);
-            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(projectRootPath, commonSpec.SourcePlatformId, commonSpec.ControlId, AssetAuthoringService);
+            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(projectRootPath, commonSpec.SourcePlatformId, commonSpec.ControlId, AssetAuthoringService, Transaction);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = commonIcon.FitDisplaySizeWithin(commonSpec.Size),
                 SourceRect = commonIcon.SourceRect,
@@ -720,7 +724,7 @@ namespace city.rendering.tools {
             }
 
             bool hideByDefault = !hasCommonSpec;
-            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(projectRootPath, commonSpec.SourcePlatformId, commonSpec.ControlId, AssetAuthoringService);
+            ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(projectRootPath, commonSpec.SourcePlatformId, commonSpec.ControlId, AssetAuthoringService, Transaction);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = commonIcon.FitDisplaySizeWithin(commonSpec.Size),
                 SourceRect = commonIcon.SourceRect,
@@ -761,7 +765,7 @@ namespace city.rendering.tools {
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             SpriteComponent overrideComponent = (SpriteComponent)PlatformEditingService.EnsurePlatformOverrideComponent(commonComponent, saveComponent, spec.PlatformId);
-            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(projectRootPath, spec.SourcePlatformId, spec.ControlId, AssetAuthoringService);
+            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(projectRootPath, spec.SourcePlatformId, spec.ControlId, AssetAuthoringService, Transaction);
             overrideComponent.Size = resolvedIcon.FitDisplaySizeWithin(spec.Size);
             PlatformEditingService.MarkPropertyOverride(commonComponent, saveComponent, spec.PlatformId, nameof(SpriteComponent.Size));
             overrideComponent.SourceRect = resolvedIcon.SourceRect;
@@ -794,7 +798,7 @@ namespace city.rendering.tools {
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             SpriteComponent overrideComponent = (SpriteComponent)PlatformEditingService.EnsurePlatformOverrideComponent(commonComponent, saveComponent, spec.PlatformId);
-            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(projectRootPath, spec.SourcePlatformId, spec.ControlId, AssetAuthoringService);
+            ResolvedControlIcon resolvedIcon = ControlIconResolver.RequireIcon(projectRootPath, spec.SourcePlatformId, spec.ControlId, AssetAuthoringService, Transaction);
             overrideComponent.Size = resolvedIcon.FitDisplaySizeWithin(spec.Size);
             PlatformEditingService.MarkPropertyOverride(commonComponent, saveComponent, spec.PlatformId, nameof(SpriteComponent.Size));
             overrideComponent.SourceRect = resolvedIcon.SourceRect;

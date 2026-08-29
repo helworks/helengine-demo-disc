@@ -10,6 +10,7 @@ namespace city.rendering.tools {
         /// Host-owned capability used to resolve generated control icons and fonts.
         /// </summary>
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
         /// <summary>
         /// Stable scene id used by the generated directional-shadow plaza asset.
         /// </summary>
@@ -44,8 +45,9 @@ namespace city.rendering.tools {
         /// Initializes one directional-shadow plaza scene factory.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used by the shared instruction overlay.</param>
-        public DirectionalShadowPlazaSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
+        public DirectionalShadowPlazaSceneFactory(IEditorProjectAuthoringSession assetAuthoringService, EditorAuthoringTransaction transaction) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
             PlaceholderFont = new FontAsset(
                 new FontInfo("DirectionalShadowPlazaPlaceholder", 16, 4f),
                 new ManagedRuntimeTexture {
@@ -86,7 +88,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction);
             Entity cameraEntity = CreateCameraEntity();
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();

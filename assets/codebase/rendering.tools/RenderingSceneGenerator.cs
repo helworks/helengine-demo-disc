@@ -243,22 +243,22 @@ namespace city.rendering.tools {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
             AuthoringSceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver, AssetAuthoringService, Transaction);
-            DirectionalShadowPlazaFactory = new DirectionalShadowPlazaSceneFactory(AssetAuthoringService);
-            SpotlightStreetSliceFactory = new SpotlightStreetSliceSceneFactory(AssetAuthoringService);
-            CubeTestFactory = new CubeTestSceneFactory(AssetAuthoringService);
-            GroundCubeProbeFactory = new GroundCubeProbeSceneFactory(AssetAuthoringService);
-            ScaledCubeFactory = new ScaledCubeSceneFactory(AssetAuthoringService);
-            DepthClipProbeFactory = new DepthClipProbeSceneFactory(AssetAuthoringService);
+            DirectionalShadowPlazaFactory = new DirectionalShadowPlazaSceneFactory(AssetAuthoringService, Transaction);
+            SpotlightStreetSliceFactory = new SpotlightStreetSliceSceneFactory(AssetAuthoringService, Transaction);
+            CubeTestFactory = new CubeTestSceneFactory(AssetAuthoringService, Transaction);
+            GroundCubeProbeFactory = new GroundCubeProbeSceneFactory(AssetAuthoringService, Transaction);
+            ScaledCubeFactory = new ScaledCubeSceneFactory(AssetAuthoringService, Transaction);
+            DepthClipProbeFactory = new DepthClipProbeSceneFactory(AssetAuthoringService, Transaction);
             ColoredCubeGridFactory = new ColoredCubeGridSceneFactory(AssetAuthoringService, Transaction);
             TexturedCubeGridFactory = new TexturedCubeGridSceneFactory(AssetAuthoringService, Transaction);
-            AxisTestFactory = new AxisTestSceneFactory(AssetAuthoringService);
-            AxisTest2Factory = new AxisTest2SceneFactory(AssetAuthoringService);
+            AxisTestFactory = new AxisTestSceneFactory(AssetAuthoringService, Transaction);
+            AxisTest2Factory = new AxisTest2SceneFactory(AssetAuthoringService, Transaction);
             SceneMemoryProbeFactory = new SceneMemoryProbeSceneFactory(AssetAuthoringService);
             PbrMaterialGalleryMaterials = new PbrMaterialGalleryMaterialFactory(AssetAuthoringService, Transaction);
-            PbrMaterialGalleryScene = new PbrMaterialGallerySceneFactory(AssetAuthoringService);
+            PbrMaterialGalleryScene = new PbrMaterialGallerySceneFactory(AssetAuthoringService, Transaction);
             PbrTexturedShowcaseMaterials = new PbrTexturedShowcaseMaterialFactory(AssetAuthoringService, Transaction);
-            PbrTexturedShowcaseScene = new PbrTexturedShowcaseSceneFactory(AssetAuthoringService);
-            PbrShadowTheaterScene = new PbrShadowTheaterSceneFactory(AssetAuthoringService);
+            PbrTexturedShowcaseScene = new PbrTexturedShowcaseSceneFactory(AssetAuthoringService, Transaction);
+            PbrShadowTheaterScene = new PbrShadowTheaterSceneFactory(AssetAuthoringService, Transaction);
             MatrixRenderFactory = new MatrixRenderSceneFactory(AssetAuthoringService, Transaction);
         }
 
@@ -307,7 +307,7 @@ namespace city.rendering.tools {
             ConsoleCameraLightInstructionsBlueprintGenerator consoleInstructionBlueprintGenerator = new ConsoleCameraLightInstructionsBlueprintGenerator(AssetAuthoringService, Transaction);
             consoleInstructionBlueprintGenerator.Generate(
                 projectRootPath,
-                new DemoSceneInstructionOverlayFactory(AssetAuthoringService),
+                new DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction),
                 editorCore.DefaultFontAssetForEditor);
 
             GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedCubeTestSolidMaterial);

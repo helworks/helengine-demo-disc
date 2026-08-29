@@ -35,7 +35,7 @@ namespace city.menu.tools {
             ConsoleCameraLightInstructionsBlueprintGenerator generator = new ConsoleCameraLightInstructionsBlueprintGenerator(context.Authoring, transaction);
             generator.Generate(
                 context.ProjectRootPath,
-                new DemoSceneInstructionOverlayFactory(context.Authoring),
+                new DemoSceneInstructionOverlayFactory(context.Authoring, transaction),
                 context.Authoring.RendererResources.DefaultFontAsset);
             transaction.Commit();
         }

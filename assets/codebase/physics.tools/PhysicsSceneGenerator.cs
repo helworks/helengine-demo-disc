@@ -37,7 +37,7 @@ namespace city.physics.tools {
             ConsoleCameraLightInstructionsBlueprintGenerator consoleInstructionBlueprintGenerator = new ConsoleCameraLightInstructionsBlueprintGenerator(AssetAuthoringService, Transaction);
             consoleInstructionBlueprintGenerator.Generate(
                 projectRootPath,
-                new DemoSceneInstructionOverlayFactory(AssetAuthoringService),
+                new DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction),
                 editorFont);
 
             PhysicsSceneFactory factory = new PhysicsSceneFactory(AssetAuthoringService, Transaction);

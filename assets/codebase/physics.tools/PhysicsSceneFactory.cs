@@ -457,12 +457,6 @@ namespace city.physics.tools {
 
                 SceneAsset sceneAsset = CreateSceneAsset(sceneId);
                 string fullPath = GetSceneFullPath(projectRootPath, sceneId);
-                string directoryPath = Path.GetDirectoryName(fullPath);
-                if (string.IsNullOrWhiteSpace(directoryPath)) {
-                    throw new InvalidOperationException($"Could not resolve the directory path for scene '{sceneId}'.");
-                }
-
-                Directory.CreateDirectory(directoryPath);
                 sceneAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneId);
                 sceneAsset.FormerAuthoringAssetIds = Array.Empty<string>();
                 Transaction.WriteAsset(sceneId, sceneAsset);
@@ -1102,7 +1096,7 @@ namespace city.physics.tools {
                 throw new InvalidOperationException("Creating the physics showcase instruction overlay requires an active project root path.");
             }
 
-            city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory(AssetAuthoringService);
+            city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction);
             Entity overlayRootEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(CurrentProjectRootPath, ResolveRequiredEditorFont());
             if (overlayRootEntity is not EditorEntity editorOverlayRootEntity) {
                 throw new InvalidOperationException("The physics showcase instruction overlay must be authored through editor entities.");
@@ -1671,7 +1665,7 @@ namespace city.physics.tools {
                 CreateLivePhysicsShowcaseUiEntity(ResolveDemoDiscSceneLabel(normalizedSceneId))
             };
             if (includeDesktopInstructionOverlay) {
-                city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory(AssetAuthoringService);
+                city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction);
                 FontAsset instructionFont = ResolveRequiredEditorFont();
                 Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
                 city.rendering.tools.ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new city.rendering.tools.ConsoleCameraLightInstructionsSceneAttachmentService();
@@ -2009,23 +2003,21 @@ namespace city.physics.tools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            string fullPath = Path.Combine(projectRootPath, "assets", PhysicsDemoSphereTileTextureRelativePath.Replace('/', Path.DirectorySeparatorChar));
-            string directoryPath = Path.GetDirectoryName(fullPath);
-            if (string.IsNullOrWhiteSpace(directoryPath)) {
-                throw new InvalidOperationException($"Could not resolve a texture directory for '{PhysicsDemoSphereTileTextureRelativePath}'.");
-            }
-
-            Directory.CreateDirectory(directoryPath);
-            File.WriteAllBytes(fullPath, PhysicsDemoSphereTileTextureBytes);
-
-            AssetAuthoringService.SaveTextureImportSettings(fullPath, CreateSphereTileTextureImportSettings(PhysicsDemoSphereTileTextureBytes));
+            GeneratedFileTransactionWriter.WriteTexture(
+                AssetAuthoringService,
+                Transaction,
+                PhysicsDemoSphereTileTextureRelativePath,
+                PhysicsDemoSphereTileTextureBytes,
+                CreateSphereTileTextureImportSettings(PhysicsDemoSphereTileTextureBytes));
         }
 
         /// <summary>
         /// Writes the cached runtime texture asset paired with the generated sphere-stack tile texture source.
         /// </summary>
         void WriteSphereTileTextureCacheAsset() {
-            AssetAuthoringService.WriteGeneratedCacheAsset(
+            GeneratedFileTransactionWriter.WriteCache(
+                AssetAuthoringService,
+                Transaction,
                 PhysicsDemoSphereTileTextureAssetId,
                 CreateSphereTileTextureAsset());
         }

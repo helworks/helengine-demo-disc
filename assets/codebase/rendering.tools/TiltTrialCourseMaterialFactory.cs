@@ -150,11 +150,13 @@ namespace city.rendering.tools {
         /// Stable generated material writer used to persist the authored Tilt Trial course material.
         /// </summary>
         readonly GeneratedMaterialAssetWriteService MaterialWriteService;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Initializes one Tilt Trial course material factory.
         /// </summary>
         public TiltTrialCourseMaterialFactory(IEditorProjectAuthoringSession assetAuthoringService, EditorAuthoringTransaction transaction) {
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
             MaterialWriteService = new GeneratedMaterialAssetWriteService(assetAuthoringService, transaction);
         }
 
@@ -168,7 +170,7 @@ namespace city.rendering.tools {
             }
 
             TiltTrialCourseTextureFactory textureFactory = new TiltTrialCourseTextureFactory();
-            string textureAssetId = textureFactory.WriteTextureAsset(projectRootPath, assetAuthoringService);
+            string textureAssetId = textureFactory.WriteTextureAsset(projectRootPath, assetAuthoringService, Transaction);
             MaterialWriteService.WriteMaterial(MaterialRelativePath, CreateGeneratedMaterialDefinition(textureAssetId));
         }
 

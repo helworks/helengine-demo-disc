@@ -26,8 +26,8 @@ namespace city.game.tools {
 
             using helengine.editor.EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
             RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.Authoring, transaction);
-            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(context.ProjectRootPath);
-            GameSceneFactory sceneFactory = new GameSceneFactory(assets, context.ProjectRootPath, context.Authoring);
+            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare();
+            GameSceneFactory sceneFactory = new GameSceneFactory(assets, context.ProjectRootPath, context.Authoring, transaction);
             TiltTrialGameplayPresentationBlueprintGenerator generator = new TiltTrialGameplayPresentationBlueprintGenerator(context.Authoring, transaction);
             generator.Generate(sceneFactory);
             transaction.Commit();

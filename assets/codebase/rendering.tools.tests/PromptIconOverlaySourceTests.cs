@@ -18,15 +18,14 @@ namespace city.tests {
         }
 
         [Fact]
-        public void Demo_scene_instruction_overlay_source_uses_raw_control_ids_for_keyboard_and_console_rows() {
+        public void Demo_scene_instruction_overlay_source_uses_canonical_control_ids_for_camera_and_light_rows() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\DemoSceneInstructionOverlayFactory.cs");
 
-            Assert.Contains("\"wasd\"", source, StringComparison.Ordinal);
-            Assert.Contains("\"key_l\"", source, StringComparison.Ordinal);
             Assert.Contains("\"dpad\"", source, StringComparison.Ordinal);
-            Assert.Contains("\"rb\"", source, StringComparison.Ordinal);
-            Assert.Contains("\"r1\"", source, StringComparison.Ordinal);
-            Assert.Contains("\"r\"", source, StringComparison.Ordinal);
+            Assert.Contains("\"left_stick\"", source, StringComparison.Ordinal);
+            Assert.Contains("\"circle_pad\"", source, StringComparison.Ordinal);
+            Assert.Contains("\"analog\"", source, StringComparison.Ordinal);
+            Assert.Contains("\"control_stick\"", source, StringComparison.Ordinal);
         }
 
         [Fact]

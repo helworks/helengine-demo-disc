@@ -11,7 +11,8 @@ namespace city.rendering.tools {
             string projectRootPath,
             string platformId,
             string controlId,
-            IEditorProjectAssetAuthoringService assetAuthoringService) {
+            IEditorProjectAuthoringSession assetAuthoringService,
+            EditorAuthoringTransaction transaction) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
@@ -29,13 +30,16 @@ namespace city.rendering.tools {
 
             if (assetAuthoringService == null) {
                 throw new ArgumentNullException(nameof(assetAuthoringService));
+            } else if (transaction == null) {
+                throw new ArgumentNullException(nameof(transaction));
             }
 
-            bool settingsFileExists = File.Exists(fullSourcePath + ".hasset");
             TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(fullSourcePath);
-            if (!settingsFileExists) {
-                assetAuthoringService.SaveTextureImportSettings(fullSourcePath, settings);
-            }
+            GeneratedFileTransactionWriter.WriteTextureImportSettings(
+                assetAuthoringService,
+                transaction,
+                relativePath,
+                settings);
             if (settings == null || settings.Importer == null || string.IsNullOrWhiteSpace(settings.Importer.AssetId)) {
                 throw new InvalidOperationException($"Generated control icon '{relativePath}' did not produce a persisted imported texture asset id.");
             }

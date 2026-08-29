@@ -42,6 +42,11 @@ namespace city.rendering.tools {
         readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
+        /// Canonical project root supplied by the owning authoring session.
+        /// </summary>
+        string ProjectRootPath => Path.GetFullPath(AuthoringSession.ProjectRootPath);
+
+        /// <summary>
         /// Initializes one generated authored-scene writer with a project component resolver and the required host capability.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary clone loads.</param>
@@ -77,7 +82,6 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(sceneDefinition));
             }
 
-            string fullProjectRootPath = Path.GetFullPath(AuthoringSession.ProjectRootPath);
             ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create(ScriptTypeResolverValue);
             List<Entity> rootsToDispose = new List<Entity>();
 
@@ -86,16 +90,14 @@ namespace city.rendering.tools {
                 Entity[] rootsToWrite = sceneDefinition.RootEntities;
                 if (sceneDefinition.NintendoDsScene != null) {
                     Entity[] nintendoDsSceneRoots = BuildNintendoHandheldSceneRoots(
-                        fullProjectRootPath,
                         sceneDefinition);
                     AddUniqueRoots(rootsToDispose, nintendoDsSceneRoots);
-                    ExcludeRootsFromNintendoHandheldPlatforms(fullProjectRootPath, sceneDefinition.RootEntities);
-                    RestrictRootsToNintendoHandheldPlatforms(fullProjectRootPath, nintendoDsSceneRoots);
+                    ExcludeRootsFromNintendoHandheldPlatforms(sceneDefinition.RootEntities);
+                    RestrictRootsToNintendoHandheldPlatforms(nintendoDsSceneRoots);
                     rootsToWrite = CombineRootSets(sceneDefinition.RootEntities, nintendoDsSceneRoots);
                 }
 
                 SaveSceneAsset(
-                    fullProjectRootPath,
                     sceneDefinition.SceneId,
                     sceneDefinition.SceneAssetRelativePath,
                     sceneDefinition.SceneSettings,
@@ -110,15 +112,11 @@ namespace city.rendering.tools {
         /// <summary>
         /// Builds the Nintendo handheld root augmentation that should be merged into the canonical scene asset before it is saved.
         /// </summary>
-        /// <param name="fullProjectRootPath">Absolute project root path.</param>
         /// <param name="sceneDefinition">Generated scene definition being persisted.</param>
         /// <returns>Nintendo handheld-only roots that should be appended to the canonical scene.</returns>
         Entity[] BuildNintendoHandheldSceneRoots(
-            string fullProjectRootPath,
             GeneratedAuthoringSceneDefinition sceneDefinition) {
-            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
-            } else if (sceneDefinition == null) {
+            if (sceneDefinition == null) {
                 throw new ArgumentNullException(nameof(sceneDefinition));
             } else if (sceneDefinition.NintendoDsScene == null) {
                 throw new InvalidOperationException("Nintendo handheld scene roots require a Nintendo DS scene definition.");
@@ -129,7 +127,7 @@ namespace city.rendering.tools {
                 return authoredNintendoHandheldRoots;
             }
 
-            FontAsset bottomOverlayFont = ResolveRequiredBottomOverlayFont(fullProjectRootPath);
+            FontAsset bottomOverlayFont = ResolveRequiredBottomOverlayFont();
             Entity[] clonedTopScreenRoots = CloneSceneRoots(sceneDefinition.RootEntities);
             return NintendoDsRenderingSceneScaffoldFactoryValue.CreateSceneRoots(
                 clonedTopScreenRoots,
@@ -142,40 +140,31 @@ namespace city.rendering.tools {
         /// <summary>
         /// Loads the dedicated project body font used by the Nintendo DS bottom overlay through the normal authored source-font import pipeline.
         /// </summary>
-        /// <param name="fullProjectRootPath">Absolute project root path that owns the authored body font source.</param>
         /// <returns>Imported project body font asset.</returns>
-        FontAsset ResolveRequiredBottomOverlayFont(string fullProjectRootPath) {
-            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
-            }
-
+        FontAsset ResolveRequiredBottomOverlayFont() {
             SceneAssetReference fontReference = DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AuthoringSession);
             if (fontReference == null || fontReference.SourceKind != SceneAssetReferenceSourceKind.FileSystem || string.IsNullOrWhiteSpace(fontReference.RelativePath)) {
                 throw new InvalidOperationException("The demo-disc body font reference must resolve to one file-backed source font path.");
             }
 
-            string fullSourcePath = Path.Combine(fullProjectRootPath, "assets", fontReference.RelativePath.Replace('/', Path.DirectorySeparatorChar));
+            string fullSourcePath = Path.Combine(ProjectRootPath, "assets", fontReference.RelativePath.Replace('/', Path.DirectorySeparatorChar));
             return AuthoringSession.ResolveFontAsset(fullSourcePath);
         }
 
         /// <summary>
         /// Saves one generated scene asset with the supplied id, settings, and currently live generated roots.
         /// </summary>
-        /// <param name="fullProjectRootPath">Absolute project root path.</param>
         /// <param name="sceneId">Project-relative scene id to persist.</param>
         /// <param name="sceneSettings">Scene-level settings to persist.</param>
         /// <param name="generatedRoots">Currently live generated roots visible to the serializer.</param>
         void SaveSceneAsset(
-            string fullProjectRootPath,
             string sceneId,
             string sceneAssetRelativePath,
             SceneSettingsAsset sceneSettings,
             Entity[] generatedRoots,
             ComponentPersistenceRegistry persistenceRegistry,
             string authoringAssetId) {
-            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
-            } else if (string.IsNullOrWhiteSpace(sceneId)) {
+            if (string.IsNullOrWhiteSpace(sceneId)) {
                 throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
             } else if (!string.IsNullOrWhiteSpace(sceneAssetRelativePath) && Path.IsPathRooted(sceneAssetRelativePath)) {
                 throw new ArgumentException("Scene asset relative path must be project-relative when provided.", nameof(sceneAssetRelativePath));
@@ -198,7 +187,7 @@ namespace city.rendering.tools {
                     : authoringAssetId;
                 using SceneSaveService sceneSaveService = new SceneSaveService(AuthoringSession, persistenceRegistry);
                 sceneSaveService.Save(
-                    Path.Combine(fullProjectRootPath, "assets", sceneRelativePathToSave.Replace('/', Path.DirectorySeparatorChar)),
+                    Path.Combine(ProjectRootPath, "assets", sceneRelativePathToSave.Replace('/', Path.DirectorySeparatorChar)),
                     sceneSettings ?? new SceneSettingsAsset(),
                     generatedRoots,
                     stableIdentity,
@@ -211,7 +200,6 @@ namespace city.rendering.tools {
         /// <summary>
         /// Clones one generated scene root set through the editor serialization pipeline so Nintendo handheld scaffolding may mutate copies without rewriting the common authored roots.
         /// </summary>
-        /// <param name="fullProjectRootPath">Absolute project root path.</param>
         /// <param name="sourceRoots">Root entities that should be cloned.</param>
         /// <returns>Detached editor roots cloned in memory.</returns>
         EditorEntity[] CloneSceneRoots(Entity[] sourceRoots) {
@@ -226,12 +214,9 @@ namespace city.rendering.tools {
         /// <summary>
         /// Excludes the common root set from Nintendo handheld builds so only the handheld augmentation remains after platform pruning.
         /// </summary>
-        /// <param name="fullProjectRootPath">Absolute project root path.</param>
         /// <param name="roots">Common scene roots that should not survive on Nintendo handheld builds.</param>
-        void ExcludeRootsFromNintendoHandheldPlatforms(string fullProjectRootPath, Entity[] roots) {
-            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
-            } else if (roots == null) {
+        void ExcludeRootsFromNintendoHandheldPlatforms(Entity[] roots) {
+            if (roots == null) {
                 throw new ArgumentNullException(nameof(roots));
             }
 
@@ -250,7 +235,7 @@ namespace city.rendering.tools {
                 }
 
                 PlatformSceneAuthoringHelperServiceValue.ExcludeEntitySubtreeFromPlatforms(
-                    fullProjectRootPath,
+                    ProjectRootPath,
                     editorRootEntity,
                     NintendoHandheldPlatformIds);
 
@@ -283,12 +268,9 @@ namespace city.rendering.tools {
         /// <summary>
         /// Restricts the Nintendo handheld augmentation roots so they only survive on DS and 3DS builds.
         /// </summary>
-        /// <param name="fullProjectRootPath">Absolute project root path.</param>
         /// <param name="roots">Nintendo handheld augmentation roots.</param>
-        void RestrictRootsToNintendoHandheldPlatforms(string fullProjectRootPath, Entity[] roots) {
-            if (string.IsNullOrWhiteSpace(fullProjectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(fullProjectRootPath));
-            } else if (roots == null) {
+        void RestrictRootsToNintendoHandheldPlatforms(Entity[] roots) {
+            if (roots == null) {
                 throw new ArgumentNullException(nameof(roots));
             }
 
@@ -303,7 +285,7 @@ namespace city.rendering.tools {
                 }
 
                 PlatformSceneAuthoringHelperServiceValue.RestrictEntitySubtreeToPlatforms(
-                    fullProjectRootPath,
+                    ProjectRootPath,
                     editorRootEntity,
                     NintendoHandheldPlatformIds);
             }

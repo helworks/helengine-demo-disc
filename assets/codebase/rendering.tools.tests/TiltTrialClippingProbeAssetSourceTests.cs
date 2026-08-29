@@ -18,7 +18,8 @@ namespace city.tests {
             Assert.Contains("public ModelAsset CreateModelAsset()", modelSource, StringComparison.Ordinal);
             Assert.Contains("Id = ModelAssetId,", modelSource, StringComparison.Ordinal);
             Assert.Contains("IEditorProjectAuthoringSession", modelSource, StringComparison.Ordinal);
-            Assert.Contains("WriteNativeAsset", modelSource, StringComparison.Ordinal);
+            Assert.Contains("transaction.WriteAsset(ModelRelativePath, modelAsset);", modelSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("WriteNativeAsset", modelSource, StringComparison.Ordinal);
             Assert.DoesNotContain("GeneratedAssetWriteService", modelSource, StringComparison.Ordinal);
             Assert.Equal("newfloat3(-0.5f,0.5f,-0.5f),newfloat3(-0.5f,0.5f,0.5f),newfloat3(0.5f,0.5f,0.5f),newfloat3(0.5f,0.5f,-0.5f)", NormalizeSourceFragment(GetSingleArrayContents(modelSource, "Positions")));
             Assert.Equal(4, global::System.Text.RegularExpressions.Regex.Matches(GetSingleArrayContents(modelSource, "Positions"), @"new\s+float3\(").Count);

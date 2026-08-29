@@ -13,7 +13,7 @@ namespace city.tests {
             Assert.Contains("textures/rendering/pbr_textured_showcase/WoodFloor041Roughness.jpg", source, StringComparison.Ordinal);
             Assert.Contains("public const string MetalMaterialRelativePath", source, StringComparison.Ordinal);
             Assert.Contains("public const string WoodMaterialRelativePath", source, StringComparison.Ordinal);
-            Assert.Contains("public void WriteMaterialAssets(string projectRootPath)", source, StringComparison.Ordinal);
+            Assert.Contains("public void WriteMaterialAssets(string projectRootPath, IEditorProjectAuthoringSession assetAuthoringService)", source, StringComparison.Ordinal);
             Assert.Contains("metallic: \"1.0\"", source, StringComparison.Ordinal);
             Assert.Contains("metallic: \"0.0\"", source, StringComparison.Ordinal);
         }

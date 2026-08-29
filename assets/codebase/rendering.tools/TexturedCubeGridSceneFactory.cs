@@ -302,6 +302,7 @@ namespace city.rendering.tools {
         /// Service used to persist generated authored material assets plus their per-platform material settings.
         /// </summary>
         readonly GeneratedMaterialAssetWriteService MaterialWriteService;
+        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Host-owned asset-authoring capability used to write generated texture settings and resolve prompt icons.
@@ -315,6 +316,7 @@ namespace city.rendering.tools {
         public TexturedCubeGridSceneFactory(IEditorProjectAuthoringSession authoringSession, EditorAuthoringTransaction transaction) {
             AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
             AssetAuthoringService = AuthoringSession;
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
             MaterialWriteService = new GeneratedMaterialAssetWriteService(AssetAuthoringService, transaction);
         }
 
@@ -352,7 +354,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction);
             Entity[] cubeEntities = CreateCubeEntities(cubeModel, texturedMaterials);
             Entity[] rootEntities = new Entity[cubeEntities.Length + 5];
             Entity cameraEntity = CreateCameraEntity();
@@ -551,17 +553,13 @@ namespace city.rendering.tools {
         /// <param name="cubeIndex">Stable zero-based cube index.</param>
         void WriteTextureSource(string projectRootPath, int cubeIndex) {
             string relativePath = CubeTextureRelativePaths[cubeIndex];
-            string fullPath = Path.Combine(projectRootPath, "assets", relativePath.Replace('/', Path.DirectorySeparatorChar));
-            string directoryPath = Path.GetDirectoryName(fullPath);
-            if (string.IsNullOrWhiteSpace(directoryPath)) {
-                throw new InvalidOperationException($"Could not resolve a texture directory for '{relativePath}'.");
-            }
-
-            Directory.CreateDirectory(directoryPath);
             byte[] textureBytes = BuildTextureFileBytes(cubeIndex);
-            File.WriteAllBytes(fullPath, textureBytes);
-
-            AssetAuthoringService.SaveTextureImportSettings(fullPath, CreateTextureImportSettings(cubeIndex, textureBytes));
+            GeneratedFileTransactionWriter.WriteTexture(
+                AssetAuthoringService,
+                Transaction,
+                relativePath,
+                textureBytes,
+                CreateTextureImportSettings(cubeIndex, textureBytes));
             WriteTextureCacheAsset(cubeIndex);
         }
 
@@ -570,7 +568,11 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="cubeIndex">Stable zero-based cube index.</param>
         void WriteTextureCacheAsset(int cubeIndex) {
-            AssetAuthoringService.WriteGeneratedCacheAsset(CubeTextureAssetIds[cubeIndex], CreateTextureAsset(cubeIndex));
+            GeneratedFileTransactionWriter.WriteCache(
+                AssetAuthoringService,
+                Transaction,
+                CubeTextureAssetIds[cubeIndex],
+                CreateTextureAsset(cubeIndex));
         }
 
         /// <summary>

@@ -60,14 +60,9 @@ namespace city.rendering.tools {
         /// <summary>
         /// Prepares all runtime assets required by the rendering showcase scene generator.
         /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <returns>Prepared runtime asset bundle.</returns>
-        public RenderingSceneGenerationAssets Prepare(string projectRootPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            }
-
-            string fullProjectRootPath = Path.GetFullPath(projectRootPath);
+        public RenderingSceneGenerationAssets Prepare() {
+            string fullProjectRootPath = Path.GetFullPath(AuthoringSession.ProjectRootPath);
             ForwardSolidColorMaterialFactory forwardSolidColorMaterialFactory = new ForwardSolidColorMaterialFactory(AuthoringSession, Transaction);
             TiltTrialCourseMaterialFactory tiltTrialCourseMaterialFactory = new TiltTrialCourseMaterialFactory(AuthoringSession, Transaction);
             TiltTrialPlayerSphereWalnutMaterialFactory tiltTrialPlayerSphereWalnutMaterialFactory = new TiltTrialPlayerSphereWalnutMaterialFactory(AuthoringSession, Transaction);
@@ -89,37 +84,37 @@ namespace city.rendering.tools {
             RuntimeModel generatedCubeModel = AuthoringSession.GeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.CubeAssetId);
             RuntimeModel generatedPlaneModel = AuthoringSession.GeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.PlaneAssetId);
             RuntimeModel generatedSphereModel = AuthoringSession.GeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.SphereAssetId);
-            RuntimeModel generatedArrowModel = LoadImportedModelRuntime(projectRootPath, "models/rendering/axis_test/directional_light_arrow.obj");
+            RuntimeModel generatedArrowModel = LoadImportedModelRuntime("models/rendering/axis_test/directional_light_arrow.obj");
             RuntimeMaterial generatedStandardMaterial = AuthoringSession.GeneratedMaterialCache.GetRuntimeMaterial(EngineGeneratedMaterialCache.StandardAssetId);
-            RuntimeMaterial tiltTrialPlayerSphereMarbleMaterial = LoadRuntimeMaterial(projectRootPath, "materials/rendering/tilt_trial/PlayerSphereMarble.hasset");
-            RuntimeMaterial tiltTrialCourseMaterial = LoadRuntimeMaterial(projectRootPath, TiltTrialCourseMaterialFactory.MaterialRelativePath);
-            RuntimeModel tiltTrialClippingProbeModel = LoadImportedModelRuntime(projectRootPath, TiltTrialClippingProbeModelFactory.ModelRelativePath);
-            RuntimeMaterial tiltTrialClippingProbeMaterial = LoadRuntimeMaterial(projectRootPath, TiltTrialClippingProbeMaterialFactory.MaterialRelativePath);
-            RuntimeModel goldenCoinModel = LoadImportedModelRuntime(projectRootPath, "models/games/tilt/golden_coin.hasset");
-            RuntimeMaterial goldenCoinMaterial = LoadRuntimeMaterial(projectRootPath, "materials/games/tilt/GoldenCoin.hasset");
-            RuntimeModel goalFlagModel = LoadImportedModelRuntime(projectRootPath, "models/games/tilt/goal_flag.hasset");
-            RuntimeMaterial goalFlagPoleMaterial = LoadRuntimeMaterial(projectRootPath, "materials/games/tilt/GoalFlagPole.hasset");
-            RuntimeMaterial goalFlagBannerMaterial = LoadRuntimeMaterial(projectRootPath, "materials/games/tilt/GoalFlagBanner.hasset");
-            RuntimeMaterial generatedCubeTestSolidMaterial = LoadRuntimeMaterial(projectRootPath, ForwardSolidColorMaterialFactory.MaterialRelativePath);
-            RuntimeMaterial depthClipProbeMaterial = LoadRuntimeMaterial(projectRootPath, DepthClipProbeMaterialFactory.MaterialRelativePath);
-            RuntimeMaterial depthClipProbeCenterMaterial = LoadRuntimeMaterial(projectRootPath, DepthClipProbeCenterMaterialFactory.MaterialRelativePath);
+            RuntimeMaterial tiltTrialPlayerSphereMarbleMaterial = LoadRuntimeMaterial("materials/rendering/tilt_trial/PlayerSphereMarble.hasset");
+            RuntimeMaterial tiltTrialCourseMaterial = LoadRuntimeMaterial(TiltTrialCourseMaterialFactory.MaterialRelativePath);
+            RuntimeModel tiltTrialClippingProbeModel = LoadImportedModelRuntime(TiltTrialClippingProbeModelFactory.ModelRelativePath);
+            RuntimeMaterial tiltTrialClippingProbeMaterial = LoadRuntimeMaterial(TiltTrialClippingProbeMaterialFactory.MaterialRelativePath);
+            RuntimeModel goldenCoinModel = LoadImportedModelRuntime("models/games/tilt/golden_coin.hasset");
+            RuntimeMaterial goldenCoinMaterial = LoadRuntimeMaterial("materials/games/tilt/GoldenCoin.hasset");
+            RuntimeModel goalFlagModel = LoadImportedModelRuntime("models/games/tilt/goal_flag.hasset");
+            RuntimeMaterial goalFlagPoleMaterial = LoadRuntimeMaterial("materials/games/tilt/GoalFlagPole.hasset");
+            RuntimeMaterial goalFlagBannerMaterial = LoadRuntimeMaterial("materials/games/tilt/GoalFlagBanner.hasset");
+            RuntimeMaterial generatedCubeTestSolidMaterial = LoadRuntimeMaterial(ForwardSolidColorMaterialFactory.MaterialRelativePath);
+            RuntimeMaterial depthClipProbeMaterial = LoadRuntimeMaterial(DepthClipProbeMaterialFactory.MaterialRelativePath);
+            RuntimeMaterial depthClipProbeCenterMaterial = LoadRuntimeMaterial(DepthClipProbeCenterMaterialFactory.MaterialRelativePath);
             RuntimeMaterial[] axisMaterials = new[] {
-                LoadRuntimeMaterial(projectRootPath, "materials/rendering/axis_test/X.hasset"),
-                LoadRuntimeMaterial(projectRootPath, "materials/rendering/axis_test/Y.hasset"),
-                LoadRuntimeMaterial(projectRootPath, "materials/rendering/axis_test/Z.hasset"),
-                LoadRuntimeMaterial(projectRootPath, "materials/rendering/axis_test/Ground.hasset"),
-                LoadRuntimeMaterial(projectRootPath, "materials/rendering/axis_test/Marker.hasset")
+                LoadRuntimeMaterial("materials/rendering/axis_test/X.hasset"),
+                LoadRuntimeMaterial("materials/rendering/axis_test/Y.hasset"),
+                LoadRuntimeMaterial("materials/rendering/axis_test/Z.hasset"),
+                LoadRuntimeMaterial("materials/rendering/axis_test/Ground.hasset"),
+                LoadRuntimeMaterial("materials/rendering/axis_test/Marker.hasset")
             };
-            RuntimeModel lamppostModel = LoadImportedModelRuntime(projectRootPath, "models/riemers/lamppost.x");
-            RuntimeModel racerModel = LoadImportedModelRuntime(projectRootPath, "models/riemers/racer.x");
+            RuntimeModel lamppostModel = LoadImportedModelRuntime("models/riemers/lamppost.x");
+            RuntimeModel racerModel = LoadImportedModelRuntime("models/riemers/racer.x");
             RuntimeMaterial[] racerMaterials = new[] {
-                LoadRuntimeMaterial(projectRootPath, "models/riemers/racer/x3ds_mat_ruedas.hasset"),
-                LoadRuntimeMaterial(projectRootPath, "models/riemers/racer/x3ds_mat_Material__0_3.hasset"),
-                LoadRuntimeMaterial(projectRootPath, "models/riemers/racer/x3ds_mat_Material_1_2.hasset"),
-                LoadRuntimeMaterial(projectRootPath, "models/riemers/racer/x3ds_mat_Material_2_1.hasset")
+                LoadRuntimeMaterial("models/riemers/racer/x3ds_mat_ruedas.hasset"),
+                LoadRuntimeMaterial("models/riemers/racer/x3ds_mat_Material__0_3.hasset"),
+                LoadRuntimeMaterial("models/riemers/racer/x3ds_mat_Material_1_2.hasset"),
+                LoadRuntimeMaterial("models/riemers/racer/x3ds_mat_Material_2_1.hasset")
             };
-            RuntimeMaterial pbrTexturedShowcaseMetalMaterial = LoadRuntimeMaterial(projectRootPath, PbrTexturedShowcaseMaterialFactory.MetalMaterialRelativePath);
-            RuntimeMaterial pbrTexturedShowcaseWoodMaterial = LoadRuntimeMaterial(projectRootPath, PbrTexturedShowcaseMaterialFactory.WoodMaterialRelativePath);
+            RuntimeMaterial pbrTexturedShowcaseMetalMaterial = LoadRuntimeMaterial(PbrTexturedShowcaseMaterialFactory.MetalMaterialRelativePath);
+            RuntimeMaterial pbrTexturedShowcaseWoodMaterial = LoadRuntimeMaterial(PbrTexturedShowcaseMaterialFactory.WoodMaterialRelativePath);
 
             return new RenderingSceneGenerationAssets {
                 GeneratedCubeModel = generatedCubeModel,
@@ -151,45 +146,29 @@ namespace city.rendering.tools {
         /// <summary>
         /// Loads one imported model runtime asset from the project assets folder.
         /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <param name="relativeSourcePath">Project-relative model source path.</param>
         /// <returns>Runtime model rebuilt from the imported cache.</returns>
-        RuntimeModel LoadImportedModelRuntime(string projectRootPath, string relativeSourcePath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            } else if (string.IsNullOrWhiteSpace(relativeSourcePath)) {
+        RuntimeModel LoadImportedModelRuntime(string relativeSourcePath) {
+            if (string.IsNullOrWhiteSpace(relativeSourcePath)) {
                 throw new ArgumentException("Relative source path must be provided.", nameof(relativeSourcePath));
             }
 
-            string fullProjectRootPath = Path.GetFullPath(projectRootPath);
-            string assetsRootPath = Path.Combine(fullProjectRootPath, "assets");
-            string fullSourcePath = Path.GetFullPath(Path.Combine(assetsRootPath, relativeSourcePath.Replace('/', Path.DirectorySeparatorChar)));
             return AuthoringSession.LoadImportedRuntimeModel(relativeSourcePath);
         }
 
         /// <summary>
         /// Loads one authored runtime material from a project material settings document.
         /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <param name="relativeMaterialPath">Project-relative material path.</param>
         /// <returns>Runtime material rebuilt from the authored material settings.</returns>
-        RuntimeMaterial LoadRuntimeMaterial(string projectRootPath, string relativeMaterialPath) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            } else if (string.IsNullOrWhiteSpace(relativeMaterialPath)) {
+        RuntimeMaterial LoadRuntimeMaterial(string relativeMaterialPath) {
+            if (string.IsNullOrWhiteSpace(relativeMaterialPath)) {
                 throw new ArgumentException("Relative material path must be provided.", nameof(relativeMaterialPath));
             }
 
-            string fullProjectRootPath = Path.GetFullPath(projectRootPath);
-            string assetsRootPath = Path.Combine(fullProjectRootPath, "assets");
-            string platformId = ResolveMaterialPreviewPlatformId(fullProjectRootPath);
-            string fullMaterialPath = Path.GetFullPath(Path.Combine(assetsRootPath, relativeMaterialPath.Replace('/', Path.DirectorySeparatorChar)));
-            MaterialAssetSettingsService settingsService = new MaterialAssetSettingsService(fullProjectRootPath);
-            ShaderMaterialAsset materialAsset = settingsService.LoadMaterialAsset(fullMaterialPath, platformId);
-            MaterialAssetProcessorSettings platformSettings;
-            if (!settingsService.TryLoadPlatformSettings(fullMaterialPath, platformId, out platformSettings) || platformSettings == null) {
-                throw new InvalidOperationException($"Material settings for platform '{platformId}' could not be loaded from '{relativeMaterialPath}'.");
-            }
+            string platformId = ResolveMaterialPreviewPlatformId();
+            ShaderMaterialAsset materialAsset = AuthoringSession.LoadMaterialAsset(relativeMaterialPath, platformId, Transaction);
+            MaterialAssetProcessorSettings platformSettings = AuthoringSession.LoadMaterialPlatformSettings(relativeMaterialPath, platformId, Transaction);
 
             if (string.IsNullOrWhiteSpace(materialAsset.ShaderAssetId)) {
                 return BuildPreviewRuntimeMaterial(materialAsset, platformSettings);
@@ -282,9 +261,9 @@ namespace city.rendering.tools {
         /// <summary>
         /// Resolves the editor preview platform that should drive authored material loading during headless rendering-scene generation.
         /// </summary>
-        /// <param name="projectRootPath">Absolute project root path.</param>
         /// <returns>Preferred preview platform identifier, or the active/first supported platform when the preferred preview platform is unavailable.</returns>
-        string ResolveMaterialPreviewPlatformId(string projectRootPath) {
+        string ResolveMaterialPreviewPlatformId() {
+            string projectRootPath = Path.GetFullPath(AuthoringSession.ProjectRootPath);
             EditorProjectPlatformsDocument platformsDocument = new EditorProjectPlatformsService(projectRootPath).Load();
             IReadOnlyList<string> supportedPlatforms = platformsDocument.SupportedPlatforms;
             if (supportedPlatforms.Count == 0) {

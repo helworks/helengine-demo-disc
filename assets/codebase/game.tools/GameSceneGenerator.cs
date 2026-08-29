@@ -48,8 +48,8 @@ namespace city.game.tools {
             TiltTrialPlayerSphereMarbleMaterialFactory materialFactory = new TiltTrialPlayerSphereMarbleMaterialFactory(AssetAuthoringService, Transaction);
             materialFactory.WriteMaterialAsset(projectRootPath, AssetAuthoringService);
             RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(AssetAuthoringService, Transaction);
-            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(projectRootPath);
-            GameSceneFactory factory = new GameSceneFactory(assets, projectRootPath, AssetAuthoringService);
+            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare();
+            GameSceneFactory factory = new GameSceneFactory(assets, projectRootPath, AssetAuthoringService, Transaction);
             GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue, AssetAuthoringService, Transaction);
             TiltTrialGameplayPresentationBlueprintGenerator presentationBlueprintGenerator = new TiltTrialGameplayPresentationBlueprintGenerator(AssetAuthoringService, Transaction);
             presentationBlueprintGenerator.Generate(factory);
@@ -83,8 +83,8 @@ namespace city.game.tools {
             }
 
             RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(AssetAuthoringService, Transaction);
-            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(projectRootPath);
-            GameSceneFactory factory = new GameSceneFactory(assets, projectRootPath, AssetAuthoringService);
+            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare();
+            GameSceneFactory factory = new GameSceneFactory(assets, projectRootPath, AssetAuthoringService, Transaction);
             GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue, AssetAuthoringService, Transaction);
             GeneratedAuthoringSceneDefinition tiltTrialScene = factory.CreateTiltTrialScene();
             sceneWriteService.WriteScene(tiltTrialScene);

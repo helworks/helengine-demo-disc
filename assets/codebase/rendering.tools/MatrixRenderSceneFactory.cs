@@ -8,6 +8,7 @@ namespace city.rendering.tools {
         /// </summary>
         readonly IEditorProjectAuthoringSession AuthoringSession;
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly EditorAuthoringTransaction Transaction;
         /// <summary>
         /// Stable scene id used by the generated Matrix Render asset.
         /// </summary>
@@ -80,6 +81,7 @@ namespace city.rendering.tools {
         public MatrixRenderSceneFactory(IEditorProjectAuthoringSession authoringSession, EditorAuthoringTransaction transaction) {
             AuthoringSession = authoringSession ?? throw new ArgumentNullException(nameof(authoringSession));
             AssetAuthoringService = AuthoringSession;
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
             MaterialWriteService = new GeneratedMaterialAssetWriteService(AssetAuthoringService, transaction);
         }
 
@@ -97,7 +99,7 @@ namespace city.rendering.tools {
             }
 
             FontAsset instructionFont = ResolveRequiredEditorFont();
-            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService);
+            DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction);
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);

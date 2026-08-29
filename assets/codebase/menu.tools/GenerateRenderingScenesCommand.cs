@@ -27,7 +27,7 @@ namespace city.menu.tools {
 
             using EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
             RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.Authoring, transaction);
-            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare(context.ProjectRootPath);
+            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare();
             RenderingSceneGenerator generator = new RenderingSceneGenerator(context.ScriptTypeResolver, context.Authoring, transaction);
             generator.Generate(context.ProjectRootPath, assets);
             transaction.Commit();

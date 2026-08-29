@@ -15,7 +15,7 @@ namespace city.tests {
 
             Assert.Contains("public const string TextureRelativePath = \"textures/rendering/tilt_trial/CourseLilacGrid.bmp\";", textureFactorySource, StringComparison.Ordinal);
             Assert.Contains("TiltTrialCourseTextureFactory textureFactory = new TiltTrialCourseTextureFactory();", materialFactorySource, StringComparison.Ordinal);
-            Assert.Contains("string textureAssetId = textureFactory.WriteTextureAsset(projectRootPath, assetAuthoringService);", materialFactorySource, StringComparison.Ordinal);
+            Assert.Contains("string textureAssetId = textureFactory.WriteTextureAsset(projectRootPath, assetAuthoringService, Transaction);", materialFactorySource, StringComparison.Ordinal);
             Assert.Contains("DiffuseTextureAssetId = textureAssetId,", materialFactorySource, StringComparison.Ordinal);
             Assert.Contains("platformDefinition.SetFieldValue(TextureIdFieldId, textureAssetId);", materialFactorySource, StringComparison.Ordinal);
             Assert.Contains("platformDefinition.SetFieldValue(Ps2TextureRelativePathFieldId, \"cooked/imported/\" + textureAssetId);", materialFactorySource, StringComparison.Ordinal);
@@ -31,9 +31,9 @@ namespace city.tests {
 
             Assert.Contains("fileBytes[0] = (byte)'B';", textureFactorySource, StringComparison.Ordinal);
             Assert.Contains("fileBytes[1] = (byte)'M';", textureFactorySource, StringComparison.Ordinal);
-            Assert.Contains("TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(fullTexturePath);", textureFactorySource, StringComparison.Ordinal);
-            Assert.Contains("string assetId = settings.Importer.AssetId;", textureFactorySource, StringComparison.Ordinal);
-            Assert.Contains("Directory.CreateDirectory(textureDirectoryPath);", textureFactorySource, StringComparison.Ordinal);
+            Assert.Contains("TextureAssetImportSettings settings = assetAuthoringService.LoadOrCreateTextureImportSettings(", textureFactorySource, StringComparison.Ordinal);
+            Assert.Contains("string assetId = GeneratedFileTransactionWriter.WriteTexture(", textureFactorySource, StringComparison.Ordinal);
+            Assert.Contains("GeneratedFileTransactionWriter.WriteTexture(", textureFactorySource, StringComparison.Ordinal);
         }
     }
 }

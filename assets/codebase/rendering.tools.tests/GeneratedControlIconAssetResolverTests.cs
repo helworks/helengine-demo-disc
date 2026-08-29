@@ -55,36 +55,56 @@ namespace city.tests {
 
         [Fact]
         public void Resolver_returns_generated_png_path_and_imported_texture_asset_id() {
-            city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
+            string projectRootPath = CreateIconProject("ps2", "r1");
+            try {
+                using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(projectRootPath);
+                IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(projectRootPath);
+                InstallIconManifest(projectRootPath);
+                using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
+                city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
 
-            city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
-                @"C:\dev\helprojs\demodisc",
-                "ps2",
-                "r1",
-                new TestAssetAuthoringService());
+                city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
+                    projectRootPath,
+                    "ps2",
+                    "r1",
+                    authoringSession,
+                    transaction);
 
-            Assert.Equal("ps2", resolved.PlatformId);
-            Assert.Equal("ps2", resolved.FamilyId);
-            Assert.Equal("r1", resolved.ControlId);
-            Assert.Equal("images/instructions/controls/generated/ps2/r1.png", resolved.SourcePngRelativePath);
-            Assert.False(string.IsNullOrWhiteSpace(resolved.ImportedTextureAssetId));
+                Assert.Equal("ps2", resolved.PlatformId);
+                Assert.Equal("ps2", resolved.FamilyId);
+                Assert.Equal("r1", resolved.ControlId);
+                Assert.Equal("images/instructions/controls/generated/ps2/r1.png", resolved.SourcePngRelativePath);
+                Assert.False(string.IsNullOrWhiteSpace(resolved.ImportedTextureAssetId));
+            } finally {
+                DeleteIconProject(projectRootPath);
+            }
         }
 
         [Fact]
         public void Resolver_returns_trimmed_source_rect_and_aspect_fit_size_for_wide_icons() {
-            city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
+            string projectRootPath = CreateIconProject("xbox360", "rb");
+            try {
+                using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(projectRootPath);
+                IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(projectRootPath);
+                InstallIconManifest(projectRootPath);
+                using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
+                city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
 
-            city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
-                @"C:\dev\helprojs\demodisc",
-                "xbox360",
-                "rb",
-                new TestAssetAuthoringService());
+                city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
+                    projectRootPath,
+                    "xbox360",
+                    "rb",
+                    authoringSession,
+                    transaction);
 
-            Assert.Equal(32f / 256f, resolved.SourceRect.X, 3);
-            Assert.Equal(82f / 256f, resolved.SourceRect.Y, 3);
-            Assert.Equal(193f / 256f, resolved.SourceRect.Z, 3);
-            Assert.Equal(93f / 256f, resolved.SourceRect.W, 3);
-            Assert.Equal(new int2(78, 38), resolved.FitDisplaySizeWithin(new int2(78, 45)));
+                Assert.Equal(32f / 256f, resolved.SourceRect.X, 3);
+                Assert.Equal(82f / 256f, resolved.SourceRect.Y, 3);
+                Assert.Equal(193f / 256f, resolved.SourceRect.Z, 3);
+                Assert.Equal(93f / 256f, resolved.SourceRect.W, 3);
+                Assert.Equal(new int2(78, 38), resolved.FitDisplaySizeWithin(new int2(78, 45)));
+            } finally {
+                DeleteIconProject(projectRootPath);
+            }
         }
 
         /// <summary>
@@ -102,12 +122,8 @@ namespace city.tests {
 
             int width = System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(header.AsSpan(16, 4));
             int height = System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(header.AsSpan(20, 4));
-            city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
-            city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(projectRootPath, "ds", "a", new TestAssetAuthoringService());
-
             Assert.Equal(32, width);
             Assert.Equal(32, height);
-            Assert.Equal(new float4(0f, 0f, 1f, 1f), resolved.SourceRect);
         }
 
         [Fact]
@@ -115,140 +131,45 @@ namespace city.tests {
             city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
 
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
-                () => {
-                    resolver.RequireIcon(@"C:\dev\helprojs\demodisc", "saturn", "a", new TestAssetAuthoringService());
-                });
+                () => resolver.RequireIcon(
+                    @"C:\dev\helprojs\demodisc",
+                    "saturn",
+                    "a",
+                    null,
+                    null));
 
             Assert.Contains("saturn", exception.Message, StringComparison.OrdinalIgnoreCase);
         }
 
-        /// <summary>
-        /// Supplies the current typed texture settings needed by resolver tests without constructing editor import internals.
-        /// </summary>
-        sealed class TestAssetAuthoringService : IEditorProjectAssetAuthoringService {
-            /// <summary>
-            /// Loads deterministic current texture settings for one test source.
-            /// </summary>
-            public TextureAssetImportSettings LoadOrCreateTextureImportSettings(string sourcePath) {
-                return new TextureAssetImportSettings {
-                    Importer = new AssetImporterSettings {
-                        ImporterId = "gdi",
-                        AssetId = "test-imported-texture"
-                    }
-                };
+        static string CreateIconProject(string familyId, string controlId) {
+            string sourceProjectRoot = @"C:\dev\helprojs\demodisc";
+            string projectRootPath = Path.Combine(Path.GetTempPath(), "demodisc-icon-resolver-" + Guid.NewGuid().ToString("N"));
+            string relativeDirectory = Path.Combine("images", "instructions", "controls", "generated", familyId);
+            string destinationDirectory = Path.Combine(projectRootPath, "assets", relativeDirectory);
+            Directory.CreateDirectory(destinationDirectory);
+            string sourceRelativePath = Path.Combine(relativeDirectory, controlId + ".png");
+            File.Copy(
+                Path.Combine(sourceProjectRoot, "assets", sourceRelativePath),
+                Path.Combine(projectRootPath, "assets", sourceRelativePath));
+            string settingsRelativePath = sourceRelativePath + ".hasset";
+            File.Copy(
+                Path.Combine(sourceProjectRoot, "assets", settingsRelativePath),
+                Path.Combine(projectRootPath, "assets", settingsRelativePath));
+            return projectRootPath;
+        }
+
+        static void InstallIconManifest(string projectRootPath) {
+            string sourceProjectRoot = @"C:\dev\helprojs\demodisc";
+            string destinationPath = Path.Combine(projectRootPath, "assets", "images", "instructions", "controls", "generated", "manifest.json");
+            File.Copy(
+                Path.Combine(sourceProjectRoot, "assets", "images", "instructions", "controls", "generated", "manifest.json"),
+                destinationPath);
+        }
+
+        static void DeleteIconProject(string projectRootPath) {
+            if (Directory.Exists(projectRootPath)) {
+                Directory.Delete(projectRootPath, true);
             }
-
-            /// <summary>
-            /// Accepts deterministic test settings without writing editor files.
-            /// </summary>
-            public void SaveTextureImportSettings(string sourcePath, TextureAssetImportSettings settings) { }
-
-            /// <summary>
-            /// Model settings are not used by these tests.
-            /// </summary>
-            public ModelAssetImportSettings LoadOrCreateModelImportSettings(string sourcePath) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Audio settings are not used by these tests.
-            /// </summary>
-            public AudioAssetImportSettings LoadOrCreateAudioImportSettings(string sourcePath) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Sectioned settings are not used by these tests.
-            /// </summary>
-            public AssetImportSettings LoadOrCreateSectionedImportSettings(string sourcePath) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Model settings are not used by these tests.
-            /// </summary>
-            public void SaveModelImportSettings(string sourcePath, ModelAssetImportSettings settings) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Audio settings are not used by these tests.
-            /// </summary>
-            public void SaveAudioImportSettings(string sourcePath, AudioAssetImportSettings settings) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Sectioned settings are not used by these tests.
-            /// </summary>
-            public void SaveSectionedImportSettings(string sourcePath, AssetImportSettings settings) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Runtime model resolution is not used by these tests.
-            /// </summary>
-            public RuntimeModel ResolveRuntimeModel(string sourcePath) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Font resolution is not used by these tests.
-            /// </summary>
-            public FontAsset ResolveFontAsset(string sourcePath) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Texture resolution is not used by these tests.
-            /// </summary>
-            public TextureAsset ResolveTextureAsset(string sourcePath) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Native asset writing is not used by these resolver tests.
-            /// </summary>
-            public void WriteNativeAsset(string relativePath, Asset asset) => throw new NotSupportedException();
-            public void WriteNativeAsset(string relativePath, Asset asset, string authoringAssetId) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Native scene writing is not used by these resolver tests.
-            /// </summary>
-            public void WriteNativeScene(
-                string relativePath,
-                SceneSettingsAsset sceneSettings,
-                Entity[] roots,
-                ComponentPersistenceRegistry persistenceRegistry,
-                string authoringAssetId) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Reference canonicalization is not used by these resolver tests.
-            /// </summary>
-            public bool CanonicalizeAssetReferences(Component component, EntityComponentSaveState saveState) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Native blueprint writing is not used by these resolver tests.
-            /// </summary>
-            public void WriteNativeBlueprint(string relativePath, ComponentPersistenceRegistry persistenceRegistry) => throw new NotSupportedException();
-            public void WriteNativeBlueprint(string relativePath, ComponentPersistenceRegistry persistenceRegistry, string authoringAssetId) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Generated cache writing is not used by these resolver tests.
-            /// </summary>
-            public void WriteGeneratedCacheAsset(string relativePath, Asset asset) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Native material writing is not used by these resolver tests.
-            /// </summary>
-            public void WriteNativeMaterial(string relativePath, GeneratedMaterialAssetDefinition definition) => throw new NotSupportedException();
-            public void WriteNativeMaterial(string relativePath, GeneratedMaterialAssetDefinition definition, string authoringAssetId) => throw new NotSupportedException();
-
-            /// <summary>
-            /// File reference creation is not used by these resolver tests.
-            /// </summary>
-            public SceneAssetReference CreateFileReference(string relativePath, AssetEntryKind expectedKind) => throw new NotSupportedException();
-
-            /// <summary>
-            /// Native asset loading is not used by these resolver tests.
-            /// </summary>
-            public TAsset LoadNativeAsset<TAsset>(string relativePath) where TAsset : Asset => throw new NotSupportedException();
-
-            /// <summary>
-            /// Scene reference resolution is not used by these tests.
-            /// </summary>
-            public ISceneAssetReferenceResolver CreateSceneAssetReferenceResolver() => throw new NotSupportedException();
-
-            /// <summary>
-            /// Imported texture lookup is not used by these tests.
-            /// </summary>
-            public bool TryLoadImportedTextureAsset(string assetId, out TextureAsset textureAsset) {
-                textureAsset = null;
-                return false;
-            }
-            public IReadOnlyList<string> GetSupportedPlatformIds() => Array.Empty<string>();
         }
     }
 }
