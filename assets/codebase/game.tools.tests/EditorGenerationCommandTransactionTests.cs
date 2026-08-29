@@ -7,11 +7,11 @@ namespace city.tests {
     /// <summary>
     /// Exercises a production editor generation command at its public
     /// boundary, including a deterministic pre-commit staging failure after
-    /// all generated outputs have been prepared and a complete no-op rerun.
+    /// all model and material outputs have been prepared and a complete no-op rerun.
     /// </summary>
     public sealed class EditorGenerationCommandTransactionTests : IDisposable {
         const string InjectedFailureMessage =
-            "Injected deterministic generation failure after all generated model and material outputs staged.";
+            "Injected deterministic generation failure after all model and material outputs are staged.";
 
         readonly string ProjectRootPath;
 
@@ -30,7 +30,7 @@ namespace city.tests {
         }
 
         [Fact]
-        public void Production_command_failure_after_all_outputs_are_staged_leaves_changed_seeded_publication_unchanged() {
+        public void Production_command_failure_after_all_model_and_material_outputs_are_staged_leaves_changed_seeded_publication_unchanged() {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(ProjectRootPath);
             IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(ProjectRootPath);
 
