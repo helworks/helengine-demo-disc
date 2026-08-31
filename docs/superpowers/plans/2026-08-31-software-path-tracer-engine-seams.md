@@ -242,9 +242,11 @@ rtk git commit -m "Add validated runtime texture region updates"
 
   Execution note: the reviewed implementation also touches the 3D renderer frame boundaries and `VulkanContext` so texture ownership remains valid through submission/presentation, transient command/staging resources survive failed waits, descriptor sets can be recycled, and disposal is retryable. These are backend lifecycle seams for the upload contract, not tracer utilities.
 
-- [ ] **Step 4: Implement the packaged native Windows bridge.** Override the generated hook in `Win32RenderManager2D`, resolve the existing texture resource from its runtime-texture map, pin/read the generated `Array<uint8_t>`, and call `ID3D11DeviceContext::UpdateSubresource` with a `D3D11_BOX` covering only the requested rectangle and `sourceRowPitch`. Keep the existing `RuntimeTexture` and shader-resource view.
+- [x] **Step 4: Implement the packaged native Windows bridge.** Override the generated hook in `Win32RenderManager2D`, resolve the existing texture resource from its runtime-texture map, pin/read the generated `Array<uint8_t>`, and call `ID3D11DeviceContext::UpdateSubresource` with a `D3D11_BOX` covering only the requested rectangle and `sourceRowPitch`. Keep the existing `RuntimeTexture` and shader-resource view.
 
-- [ ] **Step 5: Run desktop tests.** Run:
+  Execution note: repeated runtime objects for one texture ID share a ref-counted native texture/SRV while retaining pointer-exact owners. Focused source-contract tests pass, but a current-ABI native rebuild is not claimed because existing code generation stops on baseline `CPPOWN001` before producing the required generated core.
+
+- [x] **Step 5: Run desktop tests.** Run:
 
 ```powershell
 rtk dotnet test C:\dev\helworks\helengine\engine\helengine.editor.windows.tests\helengine.editor.windows.tests.csproj --filter FullyQualifiedName~RuntimeTextureRegionUploadTests
@@ -253,7 +255,7 @@ rtk dotnet test C:\dev\helworks\helengine-windows\builder.tests\helengine.window
 
 Expected: PASS for available Direct3D 11 and Vulkan theories; an unavailable Vulkan runtime may be skipped only by the repository's existing capability guard.
 
-- [ ] **Step 6: Commit.** Commit the C# backends in `helengine`, then commit the bridge/tests separately in `helengine-windows`.
+- [x] **Step 6: Commit.** Commit the C# backends in `helengine`, then commit the bridge/tests separately in `helengine-windows`.
 
 ```powershell
 rtk git add -- engine/helengine.directx11/DirectX11Renderer2D.cs engine/helengine.vulkan/VulkanRenderer2D.cs engine/helengine.editor.windows.tests/rendering/RuntimeTextureRegionUploadTests.cs
