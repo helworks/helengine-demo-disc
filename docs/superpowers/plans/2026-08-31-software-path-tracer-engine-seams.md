@@ -40,7 +40,7 @@
 - Produces: raw `SceneAssetReference` restoration in reflected and generated managed/native player deserializers without resolving a GPU/runtime asset.
 - Consumed by: `SoftwareModelComponent.ModelReference` in the DemoDisc-core plan.
 
-- [ ] **Step 1: Write failing packaging tests.** Add a test-only component with one marked model reference and assert all of the following:
+- [x] **Step 1: Write failing packaging tests.** Add a test-only component with one marked model reference and assert all of the following:
 
 ```csharp
 sealed class CpuModelReferenceProbeComponent : Component {
@@ -76,7 +76,7 @@ rtk dotnet test C:\dev\helworks\helengine\engine\helengine.editor.tests\helengin
 
 Expected: FAIL because the attribute and rewrite path do not exist.
 
-- [ ] **Step 2: Add the marker and reflection query.** Implement the attribute as metadata only:
+- [x] **Step 2: Add the marker and reflection query.** Implement the attribute as metadata only:
 
 ```csharp
 namespace helengine {
@@ -93,7 +93,7 @@ public bool HasAttribute<TAttribute>() where TAttribute : Attribute {
 }
 ```
 
-- [ ] **Step 3: Rewrite only marked members before runtime payload serialization.** In `BuildAutomaticRuntimeComponentRecord`, call a new method before `WriteSupportedMemberValue`:
+- [x] **Step 3: Rewrite only marked members before runtime payload serialization.** In `BuildAutomaticRuntimeComponentRecord`, call a new method before `WriteSupportedMemberValue`:
 
 ```csharp
 void RewriteCpuReadableModelReferences(
@@ -118,11 +118,11 @@ void RewriteCpuReadableModelReferences(
 
 Implement generated cube/plane/sphere and filesystem-backed model branches by writing the existing `ModelAsset` serializer output beneath `cooked/cpu-models/`. Use stable asset-id/hash-derived names for filesystem inputs so two same-named source files cannot collide. Return a packaged reference pointing at the companion; do not schedule a platform model-cook work item for it.
 
-- [ ] **Step 3a: Preserve raw references in player deserializers.** Add direct `SceneAssetReferenceFactory.ReadOptionalReference` cases to the reflection runtime deserializer and generated managed/native deserializers. The raw reference must be assigned unchanged and must not call `RuntimeSceneAssetReferenceResolver` or load a renderer asset. Add null/non-null runtime round-trip tests plus managed/native generator-source tests, including native type and include coverage.
+- [x] **Step 3a: Preserve raw references in player deserializers.** Add direct `SceneAssetReferenceFactory.ReadOptionalReference` cases to the reflection runtime deserializer and generated managed/native deserializers. The raw reference must be assigned unchanged and must not call `RuntimeSceneAssetReferenceResolver` or load a renderer asset. Add null/non-null runtime round-trip tests plus managed/native generator-source tests, including native type and include coverage.
 
-- [ ] **Step 4: Add rejection, cache, and collision coverage.** Assert null marked references remain null, repeated identical references write one companion, a deleted cached companion is recreated when the same service/build root is reused, same-asset-id references with different content hashes cannot overwrite one another, malformed/unsupported generated references fail, and the ordinary `MeshComponent.Model` packaged path remains unchanged.
+- [x] **Step 4: Add rejection, cache, and collision coverage.** Assert null marked references remain null, repeated identical references write one companion, a deleted cached companion is recreated when the same service/build root is reused, same-asset-id references with different content hashes cannot overwrite one another, malformed/unsupported generated references fail, and the ordinary `MeshComponent.Model` packaged path remains unchanged.
 
-- [ ] **Step 5: Run the focused and neighboring tests.** Run:
+- [x] **Step 5: Run the focused and neighboring tests.** Run:
 
 ```powershell
 rtk dotnet test C:\dev\helworks\helengine\engine\helengine.editor.tests\helengine.editor.tests.csproj --filter "FullyQualifiedName~SceneComponentPackagingTransformServiceTests|FullyQualifiedName~RuntimeSceneAssetReferenceResolver"
@@ -130,7 +130,7 @@ rtk dotnet test C:\dev\helworks\helengine\engine\helengine.editor.tests\helengin
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```powershell
 rtk git add -- engine/helengine.core/scene/CpuReadableModelReferenceAttribute.cs engine/helengine.core/scene/runtime/AutomaticScriptComponentRuntimeDeserializer.cs engine/helengine.editor/serialization/scene/ScriptComponentReflectionMember.cs engine/helengine.editor/managers/project/SceneComponentPackagingTransformService.cs engine/helengine.editor/managers/project/ScriptComponentPlayerDeserializerGenerator.cs engine/helengine.editor.tests/managers/project/SceneComponentPackagingTransformServiceTests.cs engine/helengine.editor.tests/managers/project/ScriptComponentPlayerDeserializerGeneratorTests.cs engine/helengine.editor.tests/serialization/scene/AutomaticScriptComponentPersistenceDescriptorTests.cs
@@ -152,7 +152,7 @@ rtk git commit -m "Add selective CPU model companions"
 - Produces: protected backend hook `UpdateTextureRegionCore(...)` receiving validated arguments.
 - Consumed by: `SoftwarePathTracerComponent` after each completed tile.
 
-- [ ] **Step 1: Write failing validation/dispatch tests.** The fake renderer records one call and copied scalar arguments. Cover null/disposed/foreign textures, zero or negative dimensions, negative origin, out-of-bounds rectangles, row pitch below `width * 4`, row pitch not divisible by four, short arrays, and a valid padded-row upload.
+- [x] **Step 1: Write failing validation/dispatch tests.** The fake renderer records one call and copied scalar arguments. Cover null/disposed/foreign textures, zero or negative dimensions, negative origin, out-of-bounds rectangles, row pitch below `width * 4`, row pitch not divisible by four, short arrays, and a valid padded-row upload.
 
 ```csharp
 renderer.UpdateTextureRegion(texture, 3, 5, 8, 4, pixels, 40);
@@ -168,7 +168,7 @@ rtk dotnet test C:\dev\helworks\helengine\engine\helengine.core.tests\helengine.
 
 Expected: FAIL because the method is absent.
 
-- [ ] **Step 2: Implement common validation and the backend hook.** Add:
+- [x] **Step 2: Implement common validation and the backend hook.** Add:
 
 ```csharp
 public void UpdateTextureRegion(
@@ -199,7 +199,7 @@ protected abstract void UpdateTextureRegionCore(
 
 Backend implementations additionally reject a `RuntimeTexture` created by another backend. Update every existing test renderer with a minimal override.
 
-- [ ] **Step 3: Run core tests and code generation.** Run:
+- [x] **Step 3: Run core tests and code generation.** Run:
 
 ```powershell
 rtk dotnet test C:\dev\helworks\helengine\engine\helengine.core.tests\helengine.core.tests.csproj --filter FullyQualifiedName~RenderManager2DTextureRegionTests
@@ -208,7 +208,7 @@ rtk dotnet build C:\dev\helworks\helengine\engine\helengine.core\helengine.core.
 
 Expected: PASS/build succeeds.
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```powershell
 rtk git add -- engine/helengine.core/managers/rendering/RenderManager2D.cs engine/helengine.core.tests/assets/font/FontAssetBinarySerializerTests.cs engine/helengine.core.tests/managers/rendering/RenderManager2DTextureRegionTests.cs engine/helengine.editor.tests/testing/TestRenderManager2D.cs
@@ -221,7 +221,10 @@ rtk git commit -m "Add validated runtime texture region updates"
 
 **Files:**
 - Modify: `C:\dev\helworks\helengine\engine\helengine.directx11\DirectX11Renderer2D.cs`
+- Modify: `C:\dev\helworks\helengine\engine\helengine.directx11\DirectX11Renderer3D.cs`
 - Modify: `C:\dev\helworks\helengine\engine\helengine.vulkan\VulkanRenderer2D.cs`
+- Modify: `C:\dev\helworks\helengine\engine\helengine.vulkan\VulkanRenderer3D.cs`
+- Modify: `C:\dev\helworks\helengine\engine\helengine.vulkan\VulkanContext.cs`
 - Create: `C:\dev\helworks\helengine\engine\helengine.editor.windows.tests\rendering\RuntimeTextureRegionUploadTests.cs`
 - Modify: `C:\dev\helworks\helengine-windows\src\platform\windows\win32\win32_render_bridge.hpp`
 - Modify: `C:\dev\helworks\helengine-windows\src\platform\windows\win32\win32_render_bridge.cpp`
@@ -231,11 +234,13 @@ rtk git commit -m "Add validated runtime texture region updates"
 - Consumes: validated `UpdateTextureRegionCore` hook.
 - Produces: byte-exact desktop region upload used by the Windows reference scene and editor-hosted tests.
 
-- [ ] **Step 1: Write a failing byte-exact GPU readback test.** Create a 4x4 opaque-black `TextureAsset`, update a 2x2 region at `(1,1)` with four distinct RGBA colors and padded source rows, copy/read back the resource, and assert untouched texels stay black.
+- [x] **Step 1: Write a failing byte-exact GPU readback test.** Create a 4x4 opaque-black `TextureAsset`, update a 2x2 region at `(1,1)` with four distinct RGBA colors and padded source rows, copy/read back the resource, and assert untouched texels stay black.
 
-- [ ] **Step 2: Implement Direct3D 11.** Type-check `DirectX11TextureResource`, pin `rgba8`, create a `DataBox` using `sourceRowPitch`, and call `Device.ImmediateContext.UpdateSubresource` with a `ResourceRegion(x, y, 0, x + width, y + height, 1)`. Do not recreate the shader-resource view.
+- [x] **Step 2: Implement Direct3D 11.** Type-check `DirectX11TextureResource`, pin `rgba8`, create a `DataBox` using `sourceRowPitch`, and call `Device.ImmediateContext.UpdateSubresource` with a `ResourceRegion(x, y, 0, x + width, y + height, 1)`. Do not recreate the shader-resource view.
 
-- [ ] **Step 3: Implement Vulkan.** Type-check `VulkanTextureResource`; allocate/reuse a host-visible staging allocation sized to the validated source bytes, copy rows, transition the destination subresource from shader-read to transfer-destination, issue `CmdCopyBufferToImage` with the region offset/extent and row length derived from `sourceRowPitch / 4`, then transition back before the next draw. Fence or reuse staging memory only after completion.
+- [x] **Step 3: Implement Vulkan.** Type-check `VulkanTextureResource`; allocate/reuse a host-visible staging allocation sized to the validated source bytes, copy rows, transition the destination subresource from shader-read to transfer-destination, issue `CmdCopyBufferToImage` with the region offset/extent and row length derived from `sourceRowPitch / 4`, then transition back before the next draw. Fence or reuse staging memory only after completion.
+
+  Execution note: the reviewed implementation also touches the 3D renderer frame boundaries and `VulkanContext` so texture ownership remains valid through submission/presentation, transient command/staging resources survive failed waits, descriptor sets can be recycled, and disposal is retryable. These are backend lifecycle seams for the upload contract, not tracer utilities.
 
 - [ ] **Step 4: Implement the packaged native Windows bridge.** Override the generated hook in `Win32RenderManager2D`, resolve the existing texture resource from its runtime-texture map, pin/read the generated `Array<uint8_t>`, and call `ID3D11DeviceContext::UpdateSubresource` with a `D3D11_BOX` covering only the requested rectangle and `sourceRowPitch`. Keep the existing `RuntimeTexture` and shader-resource view.
 
