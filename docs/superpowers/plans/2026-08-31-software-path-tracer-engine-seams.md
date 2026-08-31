@@ -26,13 +26,18 @@
 
 **Files:**
 - Create: `C:\dev\helworks\helengine\engine\helengine.core\scene\CpuReadableModelReferenceAttribute.cs`
+- Modify: `C:\dev\helworks\helengine\engine\helengine.core\scene\runtime\AutomaticScriptComponentRuntimeDeserializer.cs`
 - Modify: `C:\dev\helworks\helengine\engine\helengine.editor\serialization\scene\ScriptComponentReflectionMember.cs`
 - Modify: `C:\dev\helworks\helengine\engine\helengine.editor\managers\project\SceneComponentPackagingTransformService.cs`
+- Modify: `C:\dev\helworks\helengine\engine\helengine.editor\managers\project\ScriptComponentPlayerDeserializerGenerator.cs`
 - Modify: `C:\dev\helworks\helengine\engine\helengine.editor.tests\managers\project\SceneComponentPackagingTransformServiceTests.cs`
+- Modify: `C:\dev\helworks\helengine\engine\helengine.editor.tests\managers\project\ScriptComponentPlayerDeserializerGeneratorTests.cs`
+- Modify: `C:\dev\helworks\helengine\engine\helengine.editor.tests\serialization\scene\AutomaticScriptComponentPersistenceDescriptorTests.cs`
 
 **Interfaces:**
 - Produces: `[CpuReadableModelReference]` for a public `SceneAssetReference` field/property.
 - Produces: packaged generic `ModelAsset` paths beneath `cooked/cpu-models/`.
+- Produces: raw `SceneAssetReference` restoration in reflected and generated managed/native player deserializers without resolving a GPU/runtime asset.
 - Consumed by: `SoftwareModelComponent.ModelReference` in the DemoDisc-core plan.
 
 - [ ] **Step 1: Write failing packaging tests.** Add a test-only component with one marked model reference and assert all of the following:
@@ -113,7 +118,9 @@ void RewriteCpuReadableModelReferences(
 
 Implement generated cube/plane/sphere and filesystem-backed model branches by writing the existing `ModelAsset` serializer output beneath `cooked/cpu-models/`. Use stable asset-id/hash-derived names for filesystem inputs so two same-named source files cannot collide. Return a packaged reference pointing at the companion; do not schedule a platform model-cook work item for it.
 
-- [ ] **Step 4: Add rejection and deduplication coverage.** Assert null marked references remain null, repeated identical references write one companion, malformed/unsupported generated references fail, and the ordinary `MeshComponent.Model` packaged path remains unchanged.
+- [ ] **Step 3a: Preserve raw references in player deserializers.** Add direct `SceneAssetReferenceFactory.ReadOptionalReference` cases to the reflection runtime deserializer and generated managed/native deserializers. The raw reference must be assigned unchanged and must not call `RuntimeSceneAssetReferenceResolver` or load a renderer asset. Add null/non-null runtime round-trip tests plus managed/native generator-source tests, including native type and include coverage.
+
+- [ ] **Step 4: Add rejection, cache, and collision coverage.** Assert null marked references remain null, repeated identical references write one companion, a deleted cached companion is recreated when the same service/build root is reused, same-asset-id references with different content hashes cannot overwrite one another, malformed/unsupported generated references fail, and the ordinary `MeshComponent.Model` packaged path remains unchanged.
 
 - [ ] **Step 5: Run the focused and neighboring tests.** Run:
 
@@ -126,7 +133,7 @@ Expected: PASS.
 - [ ] **Step 6: Commit.**
 
 ```powershell
-rtk git add -- engine/helengine.core/scene/CpuReadableModelReferenceAttribute.cs engine/helengine.editor/serialization/scene/ScriptComponentReflectionMember.cs engine/helengine.editor/managers/project/SceneComponentPackagingTransformService.cs engine/helengine.editor.tests/managers/project/SceneComponentPackagingTransformServiceTests.cs
+rtk git add -- engine/helengine.core/scene/CpuReadableModelReferenceAttribute.cs engine/helengine.core/scene/runtime/AutomaticScriptComponentRuntimeDeserializer.cs engine/helengine.editor/serialization/scene/ScriptComponentReflectionMember.cs engine/helengine.editor/managers/project/SceneComponentPackagingTransformService.cs engine/helengine.editor/managers/project/ScriptComponentPlayerDeserializerGenerator.cs engine/helengine.editor.tests/managers/project/SceneComponentPackagingTransformServiceTests.cs engine/helengine.editor.tests/managers/project/ScriptComponentPlayerDeserializerGeneratorTests.cs engine/helengine.editor.tests/serialization/scene/AutomaticScriptComponentPersistenceDescriptorTests.cs
 rtk git commit -m "Add selective CPU model companions"
 ```
 
