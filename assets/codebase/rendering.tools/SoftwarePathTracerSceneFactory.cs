@@ -47,6 +47,14 @@ namespace city.rendering.tools {
             Entity elapsedTextEntity = CreateHudTextEntity("SoftwarePathTracerElapsedText", "Time: 0.0s", new float3(16f, 44f, 0.1f), hudFont);
             Entity raysPerSecondTextEntity = CreateHudTextEntity("SoftwarePathTracerRaysPerSecondText", "Rays/s: 0", new float3(16f, 72f, 0.1f), hudFont);
             Entity controllerEntity = CreateControllerEntity(outputEntity, sppTextEntity, elapsedTextEntity, raysPerSecondTextEntity);
+            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerFloor", new float3(0f, -1f, 0f), new float3(2f, 0.05f, 2f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerCeiling", new float3(0f, 1f, 0f), new float3(2f, 0.05f, 2f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerBack", new float3(0f, 0f, -1f), new float3(2f, 2f, 0.05f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerLeft", new float3(-1f, 0f, 0f), new float3(0.05f, 2f, 2f), 0f, new float3(0.75f, 0.05f, 0.05f), cubeReference);
+            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerRight", new float3(1f, 0f, 0f), new float3(0.05f, 2f, 2f), 0f, new float3(0.05f, 0.75f, 0.05f), cubeReference);
+            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerShortBox", new float3(-0.35f, -0.55f, 0.15f), new float3(0.6f, 0.9f, 0.6f), 0.30f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerTallBox", new float3(0.38f, -0.25f, 0.35f), new float3(0.55f, 1.45f, 0.55f), -0.28f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+            CreateEmitterEntity(controllerEntity, cubeReference);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -57,15 +65,7 @@ namespace city.rendering.tools {
                     sppTextEntity,
                     elapsedTextEntity,
                     raysPerSecondTextEntity,
-                    controllerEntity,
-                    CreateSurfaceEntity("SoftwarePathTracerFloor", new float3(0f, -1f, 0f), new float3(2f, 0.05f, 2f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference),
-                    CreateSurfaceEntity("SoftwarePathTracerCeiling", new float3(0f, 1f, 0f), new float3(2f, 0.05f, 2f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference),
-                    CreateSurfaceEntity("SoftwarePathTracerBack", new float3(0f, 0f, -1f), new float3(2f, 2f, 0.05f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference),
-                    CreateSurfaceEntity("SoftwarePathTracerLeft", new float3(-1f, 0f, 0f), new float3(0.05f, 2f, 2f), 0f, new float3(0.75f, 0.05f, 0.05f), cubeReference),
-                    CreateSurfaceEntity("SoftwarePathTracerRight", new float3(1f, 0f, 0f), new float3(0.05f, 2f, 2f), 0f, new float3(0.05f, 0.75f, 0.05f), cubeReference),
-                    CreateSurfaceEntity("SoftwarePathTracerShortBox", new float3(-0.35f, -0.55f, 0.15f), new float3(0.6f, 0.9f, 0.6f), 0.30f, new float3(0.75f, 0.75f, 0.75f), cubeReference),
-                    CreateSurfaceEntity("SoftwarePathTracerTallBox", new float3(0.38f, -0.25f, 0.35f), new float3(0.55f, 1.45f, 0.55f), -0.28f, new float3(0.75f, 0.75f, 0.75f), cubeReference),
-                    CreateEmitterEntity(cubeReference)
+                    controllerEntity
                 }
             };
         }
@@ -134,6 +134,9 @@ namespace city.rendering.tools {
                 Size = new int2(320, 24),
                 RenderOrder2D = 1
             });
+            TextComponent textComponent = entity.Components.OfType<TextComponent>().Single();
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            saveComponent.SetAssetReference(textComponent, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringService));
             return entity;
         }
 
@@ -163,8 +166,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates one traced cube instance with exactly one software material description.
         /// </summary>
-        Entity CreateSurfaceEntity(string name, float3 position, float3 scale, float yaw, float3 diffuseColor, SceneAssetReference cubeReference, float3 emissionColor = default, float emissionStrength = 0f) {
-            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create(name);
+        Entity CreateSurfaceEntity(Entity parent, string name, float3 position, float3 scale, float yaw, float3 diffuseColor, SceneAssetReference cubeReference, float3 emissionColor = default, float emissionStrength = 0f) {
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, name);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = position;
             entity.LocalScale = scale;
@@ -187,8 +190,8 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates the single ceiling area-light cube with its fixed emissive material.
         /// </summary>
-        Entity CreateEmitterEntity(SceneAssetReference cubeReference) {
-            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("SoftwarePathTracerEmitter");
+        Entity CreateEmitterEntity(Entity parent, SceneAssetReference cubeReference) {
+            Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, "SoftwarePathTracerEmitter");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = new float3(0f, 0.93f, 0f);
             entity.LocalScale = new float3(0.55f, 0.025f, 0.45f);

@@ -3,6 +3,7 @@ using city.rendering.tools;
 using city.scene.tools;
 using helengine;
 using helengine.editor;
+using System.Reflection;
 
 namespace city.tests {
     /// <summary>
@@ -15,7 +16,7 @@ namespace city.tests {
         [Fact]
         public void Creates_the_fixed_eight_model_cornell_graph_without_mesh_components() {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
-            IEditorProjectAuthoringSession session = graph.CreateAuthoringSession(CreateProjectRoot());
+            IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
             using EditorAuthoringTransaction transaction = session.BeginTransaction();
             SceneAssetReference cubeReference = EngineSceneAssetReferenceFactory.CreateCubeModel();
             FontAsset hudFont = CreateHudFont();
@@ -30,10 +31,12 @@ namespace city.tests {
             Assert.Equal(SceneIdentity, ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(SceneId));
 
             Entity[] entities = FlattenEntities(definition.RootEntities).ToArray();
+            Entity controllerEntity = Assert.Single(entities.Where(entity => entity.Components.OfType<SoftwarePathTracerComponent>().Any()));
             Entity[] tracedEntities = entities
                 .Where(entity => entity.Components.OfType<SoftwareModelComponent>().Any())
                 .ToArray();
             Assert.Equal(8, tracedEntities.Length);
+            Assert.All(tracedEntities, entity => Assert.True(IsDescendant(controllerEntity, entity)));
 
             AssertSurface(tracedEntities, "SoftwarePathTracerFloor", new float3(0f, -1f, 0f), new float3(2f, 0.05f, 2f), 0f, new float3(0.75f, 0.75f, 0.75f));
             AssertSurface(tracedEntities, "SoftwarePathTracerCeiling", new float3(0f, 1f, 0f), new float3(2f, 0.05f, 2f), 0f, new float3(0.75f, 0.75f, 0.75f));
@@ -65,9 +68,36 @@ namespace city.tests {
         }
 
         [Fact]
+        public void Controller_root_is_consumable_by_the_recursive_software_trace_scene_scan() {
+            using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
+            IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
+            using EditorAuthoringTransaction transaction = session.BeginTransaction();
+            SceneAssetReference cubeReference = EngineSceneAssetReferenceFactory.CreateCubeModel();
+            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session, transaction);
+
+            GeneratedAuthoringSceneDefinition definition = factory.CreateSceneDefinition(
+                CreateProjectRoot(),
+                cubeReference,
+                CreateHudFont());
+            Entity controllerEntity = Assert.Single(
+                FlattenEntities(definition.RootEntities)
+                    .Where(entity => entity.Components.OfType<SoftwarePathTracerComponent>().Any()));
+            RecursiveScanModelSource source = new RecursiveScanModelSource(cubeReference);
+
+            SoftwareTraceScene scene = SoftwareTraceScene.Build(new[] { controllerEntity }, source);
+
+            Assert.Equal(8 * 12, scene.Triangles.Length);
+            Assert.Equal(1, source.LoadCount);
+            Assert.NotNull(source.LastAsset);
+            Assert.Null(source.LastAsset.Positions);
+            Assert.Null(source.LastAsset.Indices16);
+            Assert.Null(source.LastAsset.Submeshes);
+        }
+
+        [Fact]
         public void Creates_the_presentation_camera_hud_and_stably_wired_controller() {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
-            IEditorProjectAuthoringSession session = graph.CreateAuthoringSession(CreateProjectRoot());
+            IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
             using EditorAuthoringTransaction transaction = session.BeginTransaction();
             FontAsset hudFont = CreateHudFont();
             SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session, transaction);
@@ -94,6 +124,12 @@ namespace city.tests {
                 TextComponent text = Component<TextComponent>(entity);
                 Assert.Same(hudFont, text.Font);
                 Assert.NotEqual(string.Empty, text.Text);
+                EntitySaveComponent saveComponent = Component<EntitySaveComponent>(entity);
+                Assert.True(saveComponent.TryGetComponentState(text, out EntityComponentSaveState saveState));
+                Assert.True(saveState.TryGetAssetReference("Font", out SceneAssetReference fontReference));
+                Assert.NotNull(fontReference);
+                Assert.Equal(SceneAssetReferenceSourceKind.FileSystem, fontReference.SourceKind);
+                Assert.Equal("Fonts/DemoDiscBody.ttf", fontReference.RelativePath);
             });
 
             Entity controllerEntity = Assert.Single(entities.Where(entity => entity.Components.OfType<SoftwarePathTracerComponent>().Any()));
@@ -116,7 +152,7 @@ namespace city.tests {
         [Fact]
         public void Requires_the_public_factory_inputs() {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
-            IEditorProjectAuthoringSession session = graph.CreateAuthoringSession(CreateProjectRoot());
+            IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
             using EditorAuthoringTransaction transaction = session.BeginTransaction();
             SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session, transaction);
             FontAsset font = CreateHudFont();
@@ -150,6 +186,20 @@ namespace city.tests {
 
         static string EntityName(Entity entity) {
             return Assert.IsType<EditorEntity>(entity).Name;
+        }
+
+        static bool IsDescendant(Entity ancestor, Entity candidate) {
+            if (ancestor == null || candidate == null || ancestor.Children == null) {
+                return false;
+            }
+
+            foreach (Entity child in ancestor.Children) {
+                if (ReferenceEquals(child, candidate) || IsDescendant(child, candidate)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         static void AssertVector(float3 actual, float3 expected) {
@@ -194,6 +244,63 @@ namespace city.tests {
 
         static string CreateProjectRoot() {
             return Path.Combine(Path.GetTempPath(), "software-path-tracer-scene-tests", Guid.NewGuid().ToString("N"));
+        }
+
+        static IEditorProjectAuthoringSession CreateReferenceOnlyAuthoringSession(TestGeneratedAssetGraph graph) {
+            return ReferenceOnlyAuthoringSession.Create(graph.CreateAuthoringSession(CreateProjectRoot()));
+        }
+
+        sealed class RecursiveScanModelSource : ISoftwareModelAssetSource {
+            readonly SceneAssetReference reference;
+
+            public int LoadCount { get; private set; }
+            public ModelAsset LastAsset { get; private set; }
+
+            public RecursiveScanModelSource(SceneAssetReference reference) {
+                this.reference = reference ?? throw new ArgumentNullException(nameof(reference));
+            }
+
+            public ModelAsset LoadOwned(SceneAssetReference requestedReference) {
+                Assert.Equal(reference.SourceKind, requestedReference.SourceKind);
+                Assert.Equal(reference.AssetId, requestedReference.AssetId);
+                Assert.Equal(reference.RelativePath, requestedReference.RelativePath);
+                LoadCount++;
+                LastAsset = CreateCubeAsset();
+                return LastAsset;
+            }
+        }
+
+        static ModelAsset CreateCubeAsset() {
+            return new ModelAsset {
+                Positions = new[] {
+                    new float3(-1f, -1f, -1f), new float3(1f, -1f, -1f), new float3(1f, 1f, -1f), new float3(-1f, 1f, -1f),
+                    new float3(-1f, -1f, 1f), new float3(1f, -1f, 1f), new float3(1f, 1f, 1f), new float3(-1f, 1f, 1f)
+                },
+                Indices16 = new ushort[] { 0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 0, 1, 5, 0, 5, 4, 3, 7, 6, 3, 6, 2, 0, 4, 7, 0, 7, 3, 1, 2, 6, 1, 6, 5 },
+                Submeshes = new[] { new ModelSubmeshAsset { MaterialSlotName = "DefaultMaterial", IndexStart = 0, IndexCount = 36 } }
+            };
+        }
+
+        public class ReferenceOnlyAuthoringSession : DispatchProxy {
+            IEditorProjectAuthoringSession inner;
+
+            public static IEditorProjectAuthoringSession Create(IEditorProjectAuthoringSession inner) {
+                if (inner == null) {
+                    throw new ArgumentNullException(nameof(inner));
+                }
+
+                IEditorProjectAuthoringSession proxy = Create<IEditorProjectAuthoringSession, ReferenceOnlyAuthoringSession>();
+                ((ReferenceOnlyAuthoringSession)(object)proxy).inner = inner;
+                return proxy;
+            }
+
+            protected override object Invoke(MethodInfo targetMethod, object[] args) {
+                if (string.Equals(targetMethod.Name, nameof(IEditorProjectAuthoringSession.CreateFileReference), StringComparison.Ordinal)) {
+                    return global::helengine.SceneAssetReferenceFactory.CreateFileSystemFont("Fonts/DemoDiscBody.ttf");
+                }
+
+                return targetMethod.Invoke(inner, args);
+            }
         }
     }
 }
