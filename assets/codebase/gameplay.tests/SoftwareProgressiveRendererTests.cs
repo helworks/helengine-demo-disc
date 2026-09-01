@@ -10,6 +10,14 @@ namespace city.tests {
     /// </summary>
     public sealed class SoftwareProgressiveRendererTests {
         /// <summary>
+        /// Requires the stateless default allocator adapter to be absent from the production assembly.
+        /// </summary>
+        [Fact]
+        public void Default_allocator_adapter_is_removed() {
+            Assert.Null(typeof(SoftwarePathTracer).Assembly.GetType("city.rendering.DefaultSoftwareTraceBufferAllocator"));
+        }
+
+        /// <summary>
         /// Ensures every supported platform selects the exact contract resolution and memory.
         /// </summary>
         [Theory]

@@ -216,29 +216,6 @@ namespace city.rendering {
     }
 
     /// <summary>
-    /// Allocates the normal managed progressive buffers.
-    /// </summary>
-    sealed class DefaultSoftwareTraceBufferAllocator : ISoftwareTraceBufferAllocator {
-        /// <summary>
-        /// Allocates one float3 per image pixel.
-        /// </summary>
-        /// <param name="pixelCount">Number of image pixels.</param>
-        /// <returns>Zero-initialized accumulation storage.</returns>
-        public float3[] AllocateAccumulator(int pixelCount) {
-            return new float3[pixelCount];
-        }
-
-        /// <summary>
-        /// Allocates one reusable RGBA8 tile.
-        /// </summary>
-        /// <param name="byteCount">Required tile byte count.</param>
-        /// <returns>Zero-initialized tile staging storage.</returns>
-        public byte[] AllocateTileRgba8(int byteCount) {
-            return new byte[byteCount];
-        }
-    }
-
-    /// <summary>
     /// Provides deterministic stateless random samples for the software path tracer.
     /// </summary>
     public static class SoftwarePathSampler {
@@ -718,19 +695,18 @@ namespace city.rendering {
                 throw new ArgumentOutOfRangeException(nameof(resolution), "Progressive tile dimensions must be positive.");
             }
 
-            ISoftwareTraceBufferAllocator selectedAllocator = allocator;
-            if (selectedAllocator == null) {
-                selectedAllocator = new DefaultSoftwareTraceBufferAllocator();
-            }
-
             float3[] allocatedAccumulator = null;
             byte[] allocatedTile = null;
             try {
-                allocatedAccumulator = selectedAllocator.AllocateAccumulator(resolution.PixelCount);
+                allocatedAccumulator = allocator == null
+                    ? new float3[resolution.PixelCount]
+                    : allocator.AllocateAccumulator(resolution.PixelCount);
                 if (allocatedAccumulator == null || allocatedAccumulator.Length != resolution.PixelCount) {
                     throw new InvalidOperationException("The progressive accumulator allocator returned an invalid buffer.");
                 }
-                allocatedTile = selectedAllocator.AllocateTileRgba8(TileRgba8Bytes);
+                allocatedTile = allocator == null
+                    ? new byte[TileRgba8Bytes]
+                    : allocator.AllocateTileRgba8(TileRgba8Bytes);
                 if (allocatedTile == null || allocatedTile.Length != TileRgba8Bytes) {
                     throw new InvalidOperationException("The progressive tile allocator returned an invalid buffer.");
                 }
