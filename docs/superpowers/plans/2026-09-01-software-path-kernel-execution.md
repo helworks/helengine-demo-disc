@@ -79,7 +79,7 @@ geometry = cosSurface * cosLight / distanceSquared
 direct = throughput * diffuse * emission * (Area / pi) * geometry
 ```
 
-6. Launch a shadow ray only when the geometry term is positive. Offset its origin by `orientedNormal * RayEpsilon`, increment `RayCount`, and test through the BVH up to `distance - RayEpsilon`. Any hit blocks the contribution; there is no special GPU/renderer visibility path.
+6. Launch a shadow ray only when the geometry term is positive. Offset its origin by `orientedNormal * RayEpsilon`, then recompute the vector, normalized direction, and distance from that offset origin to the sampled light point. Increment `RayCount` and test through the BVH up to this recomputed `shadowDistance - RayEpsilon`. This keeps the sampled emitter outside the BVH's inclusive maximum bound; using the pre-offset direction/distance can make the emitter self-block. Any earlier hit blocks the contribution; there is no special GPU/renderer visibility path.
 7. Add visible direct light, sample a cosine direction with dimensions `2,3`, multiply throughput component-wise by diffuse color (the Lambertian BRDF/pdf cancellation), offset the next origin by the oriented normal, and continue.
 
 Use scalar component-wise color helpers local to this file if HelenEngine operators are insufficient. Do not add engine utilities.
