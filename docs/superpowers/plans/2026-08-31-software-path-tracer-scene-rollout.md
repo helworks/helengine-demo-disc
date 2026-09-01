@@ -53,6 +53,8 @@ Expected instance table:
 
 Use these as v0 constants unless the 16x16 reference test shows the camera cannot see the full enclosure; any adjustment must update the test and remain authored/fixed.
 
+Use the accepted reference basis and material values exactly: trace camera origin `(0,0,3)`, forward `(0,0,-1)`, right `+X`, up `+Y`, vertical FOV `55`, exposure `1`; neutral diffuse `(0.75,0.75,0.75)`, red diffuse `(0.75,0.05,0.05)`, green diffuse `(0.05,0.75,0.05)`, black emitter diffuse, white emitter color, and emitter strength `14`. The authored two-box showcase extends the core reference enclosure but must not change its handedness or swap the red/green walls.
+
 - [ ] **Step 2: Implement the factory.** Public contract:
 
 ```csharp
