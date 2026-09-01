@@ -9,7 +9,7 @@
 ## Task 1: Verify the actual builder and profile before building
 
 - [ ] Assert `C:\dev\helworks\helengine\user_settings\platforms.json` resolves Windows `builderAssemblyPath` to `C:\dev\helworks\helengine-windows\builder\bin\Debug\net9.0\helengine.windows.builder.dll` and `playerSourceRootPath` to `C:\dev\helworks\helengine-windows`.
-- [ ] Build the Windows builder project if its DLL is missing or older than its source; do not substitute another repository.
+- [ ] Build the Windows builder project if its DLL is missing or older than its source, passing `-p:HelEngineRoot=C:\dev\helprojs\.worktrees\helengine-software-path-tracer-engine-seams` so the existing builder compiles against the accepted engine seams; do not substitute another repository.
 - [ ] Parse DemoDisc `user_settings/build_config.json` and require the Windows block's `selectedGraphicsProfileId` to be `directx11` and selected build profile to be `release`.
 - [ ] Ensure `HELENGINE_RENDER_BACKEND` and `HELENGINE_ENABLE_EXPERIMENTAL_VULKAN` are not set to the explicit Vulkan opt-in pair for the build process. Preserve the gated Vulkan code; simply do not select it.
 - [ ] Verify the accepted generated `software_path_tracer.helen` and regenerated DemoDisc main-menu asset exist before packaging.
@@ -19,16 +19,19 @@
 - [ ] Use the existing engine wrapper and Windows builder with the isolated worktree project:
 
 ```powershell
-rtk dotnet run --project C:\dev\helworks\helengine\tools\build-waiter\helengine.buildwaiter.csproj -- \
+$env:HELENGINE_ENGINE_USER_SETTINGS_ROOT = "C:\dev\helworks\helengine\user_settings"
+rtk dotnet run --project C:\dev\helprojs\.worktrees\helengine-software-path-tracer-engine-seams\tools\build-waiter\helengine.buildwaiter.csproj -- \
   --output C:\dev\helprojs\demodisc\.worktrees\software-path-tracer-core\windows-build \
   --require helengine_windows.exe \
-  -- powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helworks\helengine\scripts\build-platform.ps1 \
+  -- powershell -NoProfile -ExecutionPolicy Bypass -File C:\dev\helprojs\.worktrees\helengine-software-path-tracer-engine-seams\scripts\build-platform.ps1 \
   -Project C:\dev\helprojs\demodisc\.worktrees\software-path-tracer-core\project.heproj \
   -Platform windows \
   -Configuration Release \
   -BuildProfile release \
   -Output C:\dev\helprojs\demodisc\.worktrees\software-path-tracer-core\windows-build
 ```
+
+The wrapper and editor must come from the accepted engine-seams worktree so `HELENGINE_SOURCE_ROOT` points native code generation at the CPU-readable model, runtime deserializer, and texture-region upload changes. The process-scoped `HELENGINE_ENGINE_USER_SETTINGS_ROOT` override deliberately keeps platform installation discovery on the shared main checkout, where the existing relative paths resolve to `C:\dev\helworks\helengine-windows` and the installed codegen tool. Do not launch the wrapper from engine `main`, and do not rewrite either platform manifest merely to accommodate the worktree path.
 
 - [ ] Require wrapper exit code `0`, a fresh nonempty `windows-build\helengine_windows.exe`, and no `codegen.exe` application-error dialog. If codegen fails, capture the console/build-state evidence and diagnose the first failing stage instead of rerunning blindly.
 
@@ -56,4 +59,3 @@ rtk dotnet run --project C:\dev\helworks\helengine\tools\build-waiter\helengine.
 - [ ] Run the full focused software tracer tests plus the rendering/menu/game integration tests.
 - [ ] Record: artifact path/size/timestamp, build exit code, selected `directx11` profile evidence, first-pass time, initialization peak bytes, steady-state bytes, post-Return tracer-owned bytes (zero), and smoke outcome.
 - [ ] Commit only source/test fixes that were driven by a reproducible failure. Do not commit `windows-build` artifacts.
-
