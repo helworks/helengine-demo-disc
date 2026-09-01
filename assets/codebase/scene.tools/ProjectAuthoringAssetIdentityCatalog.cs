@@ -24,6 +24,7 @@ namespace city.scene.tools {
                 ["scenes/rendering/pbr_textured_showcase.helen"] = "1000000000000000000000000000001c",
                 ["scenes/rendering/pbr_shadow_theater.helen"] = "1000000000000000000000000000001d",
                 ["scenes/rendering/test_scene_matrix_render.helen"] = "1000000000000000000000000000001e",
+                ["scenes/rendering/software_path_tracer.helen"] = "1000000000000000000000000000001f",
                 ["scenes/physics/test_scene_character_slope.helen"] = "10000000000000000000000000000020",
                 ["scenes/physics/test_scene_character_steps.helen"] = "10000000000000000000000000000021",
                 ["scenes/physics/test_scene_character_moving_platform.helen"] = "10000000000000000000000000000022",
