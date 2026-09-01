@@ -36,4 +36,3 @@
 
 - [ ] Stage only the two planned files and commit as `Separate progressive allocation ownership paths`.
 - [ ] Leave unrelated worktree churn and build artifacts untouched.
-

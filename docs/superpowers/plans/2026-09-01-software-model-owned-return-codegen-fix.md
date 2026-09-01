@@ -37,4 +37,3 @@
 - [ ] Stage only the plan-approved production and test files.
 - [ ] Commit as `Declare software model load ownership`.
 - [ ] Leave the local Windows platform manifest, package output, codegen cache, and unrelated importer churn uncommitted and untouched.
-

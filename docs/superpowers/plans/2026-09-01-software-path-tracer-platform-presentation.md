@@ -73,4 +73,3 @@ rtk git diff --check
 
 - [ ] Inspect the diff for DemoDisc-only ownership, one output sprite, persisted font/reference overrides, and no unrelated scaffold changes.
 - [ ] Commit as `Add software path tracer presentation layouts`.
-

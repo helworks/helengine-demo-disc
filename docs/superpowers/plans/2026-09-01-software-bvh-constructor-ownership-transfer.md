@@ -35,4 +35,3 @@
 
 - [ ] Stage only the two planned files and commit as `Transfer BVH array ownership`.
 - [ ] Leave unrelated worktree churn and build artifacts untouched.
-

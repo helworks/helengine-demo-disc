@@ -36,4 +36,3 @@
 
 - [ ] Stage only the two plan-approved files and commit as `Declare BVH build buffer borrowing`.
 - [ ] Leave importer churn, local manifests, cache, and package output untouched.
-

@@ -58,4 +58,3 @@ rtk git diff --check
 
 - [ ] Inspect the JSON diff to ensure only the two recognition arrays, the new node, and Back order changed.
 - [ ] Commit as `Expose software path tracer in DemoDisc`.
-

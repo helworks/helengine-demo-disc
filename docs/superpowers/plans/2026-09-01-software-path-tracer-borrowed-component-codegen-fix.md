@@ -37,4 +37,3 @@
 - [ ] Stage only the two plan-approved files.
 - [ ] Commit as `Declare tracer component lookup borrowing` once the focused contract and original boundary are green.
 - [ ] Leave importer churn, local Windows manifest, build output, and cache uncommitted and untouched.
-

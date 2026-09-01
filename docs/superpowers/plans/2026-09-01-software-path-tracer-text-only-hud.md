@@ -131,4 +131,3 @@ Require exit code 0, a fresh nonempty `windows-build/helengine_windows.exe`, Dir
 - [ ] **Step 8: Launch and visually verify the corrected scene**
 
 Close only the prior `helengine_windows` process if it is still running, launch the rebuilt executable visibly, navigate `Rendering -> Software Path Tracer`, and verify the progressive Cornell render is unobstructed except for four tiny left-aligned text rows at the upper-left. Verify no desktop rectangle is visible, diagnostics update, progressive rendering continues, and Return still works. Leave the corrected DemoDisc window open for Helena.
-

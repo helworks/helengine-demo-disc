@@ -34,4 +34,3 @@
 ## Task 4: Commit narrowly
 
 - [ ] Commit only the two planned files as `Separate software trace group ownership paths`.
-

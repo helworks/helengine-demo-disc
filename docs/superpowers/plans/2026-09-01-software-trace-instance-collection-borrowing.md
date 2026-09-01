@@ -32,4 +32,3 @@
 ## Task 4: Commit narrowly
 
 - [ ] Commit only the two planned files as `Declare trace instance collection borrowing`.
-
