@@ -24,7 +24,8 @@
         "tilt_trial_level_05",
         "pbr_material_gallery",
         "pbr_textured_showcase",
-        "pbr_shadow_theater"
+        "pbr_shadow_theater",
+        "software_path_tracer"
       ],
       "sceneOrders": [
         {
@@ -114,13 +115,22 @@
         {
           "sceneId": "pbr_shadow_theater",
           "orderNumber": 22
+        },
+        {
+          "sceneId": "software_path_tracer",
+          "orderNumber": 23
         }
       ],
       "outputDirectoryPath": "C:\\dev\\helprojs\\output\\windows",
       "debugBuild": false,
       "selectedEnvironmentId": "release",
       "selectedBuildProfileId": "release",
-      "editorPrebuildCommandIdsByBuildProfileId": {},
+      "editorPrebuildCommandIdsByBuildProfileId": {
+        "release": [
+          "menu.generate-rendering-scenes",
+          "menu.regenerate-demo-disc-main-menu"
+        ]
+      },
       "selectedGraphicsProfileId": "directx11",
       "selectedBuildOptionValues": {
         "texture-scale-percent": "100",
@@ -166,7 +176,8 @@
         "tilt_trial_level_05",
         "pbr_material_gallery",
         "pbr_textured_showcase",
-        "pbr_shadow_theater"
+        "pbr_shadow_theater",
+        "software_path_tracer"
       ],
       "sceneOrders": [
         {
@@ -256,6 +267,10 @@
         {
           "sceneId": "pbr_shadow_theater",
           "orderNumber": 22
+        },
+        {
+          "sceneId": "software_path_tracer",
+          "orderNumber": 23
         }
       ],
       "outputDirectoryPath": "C:\\dev\\helprojs\\output\\ps2-city-demo-disc",
@@ -322,7 +337,8 @@
         "tilt_trial_level_05",
         "pbr_material_gallery",
         "pbr_textured_showcase",
-        "pbr_shadow_theater"
+        "pbr_shadow_theater",
+        "software_path_tracer"
       ],
       "sceneOrders": [
         {
@@ -412,6 +428,10 @@
         {
           "sceneId": "pbr_shadow_theater",
           "orderNumber": 22
+        },
+        {
+          "sceneId": "software_path_tracer",
+          "orderNumber": 23
         }
       ],
       "outputDirectoryPath": "C:\\dev\\helprojs\\output\\psp-platform-info-startup",
@@ -472,7 +492,8 @@
         "tilt_trial_level_05",
         "pbr_material_gallery",
         "pbr_textured_showcase",
-        "pbr_shadow_theater"
+        "pbr_shadow_theater",
+        "software_path_tracer"
       ],
       "sceneOrders": [
         {
@@ -562,13 +583,22 @@
         {
           "sceneId": "pbr_shadow_theater",
           "orderNumber": 22
+        },
+        {
+          "sceneId": "software_path_tracer",
+          "orderNumber": 23
         }
       ],
       "outputDirectoryPath": "C:\\dev\\helprojs\\output\\gamecube",
       "debugBuild": true,
       "selectedEnvironmentId": "release",
       "selectedBuildProfileId": "gamecube-default",
-      "editorPrebuildCommandIdsByBuildProfileId": {},
+      "editorPrebuildCommandIdsByBuildProfileId": {
+        "gamecube-default": [
+          "menu.generate-rendering-scenes",
+          "menu.regenerate-demo-disc-main-menu"
+        ]
+      },
       "selectedGraphicsProfileId": "gx",
       "selectedBuildOptionValues": {
         "texture-scale-percent": "100",
@@ -613,7 +643,8 @@
         "tilt_trial_level_05",
         "pbr_material_gallery",
         "pbr_textured_showcase",
-        "pbr_shadow_theater"
+        "pbr_shadow_theater",
+        "software_path_tracer"
       ],
       "sceneOrders": [
         {
@@ -703,13 +734,22 @@
         {
           "sceneId": "pbr_shadow_theater",
           "orderNumber": 22
+        },
+        {
+          "sceneId": "software_path_tracer",
+          "orderNumber": 23
         }
       ],
       "outputDirectoryPath": "C:\\dev\\helprojs\\output\\wii",
       "debugBuild": true,
       "selectedEnvironmentId": "release",
       "selectedBuildProfileId": "wii-default",
-      "editorPrebuildCommandIdsByBuildProfileId": {},
+      "editorPrebuildCommandIdsByBuildProfileId": {
+        "wii-default": [
+          "menu.generate-rendering-scenes",
+          "menu.regenerate-demo-disc-main-menu"
+        ]
+      },
       "selectedGraphicsProfileId": "",
       "selectedBuildOptionValues": {
         "texture-scale-percent": "100",
@@ -752,7 +792,8 @@
         "tilt_trial_level_05",
         "pbr_material_gallery",
         "pbr_textured_showcase",
-        "pbr_shadow_theater"
+        "pbr_shadow_theater",
+        "software_path_tracer"
       ],
       "sceneOrders": [
         {
@@ -834,13 +875,22 @@
         {
           "sceneId": "pbr_shadow_theater",
           "orderNumber": 20
+        },
+        {
+          "sceneId": "software_path_tracer",
+          "orderNumber": 21
         }
       ],
       "outputDirectoryPath": "C:\\dev\\helprojs\\output\\ds",
       "debugBuild": true,
       "selectedEnvironmentId": "release",
       "selectedBuildProfileId": "debug",
-      "editorPrebuildCommandIdsByBuildProfileId": {},
+      "editorPrebuildCommandIdsByBuildProfileId": {
+        "debug": [
+          "menu.generate-rendering-scenes",
+          "menu.regenerate-demo-disc-main-menu"
+        ]
+      },
       "selectedGraphicsProfileId": "ds-main-2d",
       "selectedBuildOptionValues": {
         "startup-top-screen-color": "#FF0000",
@@ -881,7 +931,8 @@
         "tilt_trial_level_05",
         "pbr_material_gallery",
         "pbr_textured_showcase",
-        "pbr_shadow_theater"
+        "pbr_shadow_theater",
+        "software_path_tracer"
       ],
       "sceneOrders": [
         {
@@ -963,13 +1014,22 @@
         {
           "sceneId": "pbr_shadow_theater",
           "orderNumber": 20
+        },
+        {
+          "sceneId": "software_path_tracer",
+          "orderNumber": 21
         }
       ],
       "outputDirectoryPath": "C:\\dev\\helprojs\\output\\3ds",
       "debugBuild": true,
       "selectedEnvironmentId": "release",
       "selectedBuildProfileId": "3ds-default",
-      "editorPrebuildCommandIdsByBuildProfileId": {},
+      "editorPrebuildCommandIdsByBuildProfileId": {
+        "3ds-default": [
+          "menu.generate-rendering-scenes",
+          "menu.regenerate-demo-disc-main-menu"
+        ]
+      },
       "selectedGraphicsProfileId": "3ds-bootstrap",
       "selectedBuildOptionValues": {
         "startup-top-screen-color": "#FF0000",
@@ -1009,7 +1069,8 @@
         "tilt_trial_level_05",
         "pbr_material_gallery",
         "pbr_textured_showcase",
-        "pbr_shadow_theater"
+        "pbr_shadow_theater",
+        "software_path_tracer"
       ],
       "sceneOrders": [
         {
@@ -1099,13 +1160,22 @@
         {
           "sceneId": "pbr_shadow_theater",
           "orderNumber": 22
+        },
+        {
+          "sceneId": "software_path_tracer",
+          "orderNumber": 23
         }
       ],
       "outputDirectoryPath": "C:\\tmp\\city-psvita-main-menu-cli",
       "debugBuild": true,
       "selectedEnvironmentId": "release",
       "selectedBuildProfileId": "debug",
-      "editorPrebuildCommandIdsByBuildProfileId": {},
+      "editorPrebuildCommandIdsByBuildProfileId": {
+        "debug": [
+          "menu.generate-rendering-scenes",
+          "menu.regenerate-demo-disc-main-menu"
+        ]
+      },
       "selectedGraphicsProfileId": "psvita-forward",
       "selectedBuildOptionValues": {
         "texture-scale-percent": "100",
@@ -1153,7 +1223,8 @@
         "tilt_trial_level_05",
         "pbr_material_gallery",
         "pbr_textured_showcase",
-        "pbr_shadow_theater"
+        "pbr_shadow_theater",
+        "software_path_tracer"
       ],
       "sceneOrders": [
         {
@@ -1243,13 +1314,22 @@
         {
           "sceneId": "pbr_shadow_theater",
           "orderNumber": 22
+        },
+        {
+          "sceneId": "software_path_tracer",
+          "orderNumber": 23
         }
       ],
       "outputDirectoryPath": "C:\\dev\\helprojs\\output\\switch",
       "debugBuild": true,
       "selectedEnvironmentId": "release",
       "selectedBuildProfileId": "debug",
-      "editorPrebuildCommandIdsByBuildProfileId": {},
+      "editorPrebuildCommandIdsByBuildProfileId": {
+        "debug": [
+          "menu.generate-rendering-scenes",
+          "menu.regenerate-demo-disc-main-menu"
+        ]
+      },
       "selectedGraphicsProfileId": "switch-native",
       "selectedBuildOptionValues": {
         "startup-clear-color": "#FFFF00"
@@ -1293,7 +1373,8 @@
         "tilt_trial_level_05",
         "pbr_material_gallery",
         "pbr_textured_showcase",
-        "pbr_shadow_theater"
+        "pbr_shadow_theater",
+        "software_path_tracer"
       ],
       "sceneOrders": [
         {
@@ -1383,13 +1464,22 @@
         {
           "sceneId": "pbr_shadow_theater",
           "orderNumber": 22
+        },
+        {
+          "sceneId": "software_path_tracer",
+          "orderNumber": 23
         }
       ],
       "outputDirectoryPath": "C:\\dev\\helprojs\\output\\wiiu",
       "debugBuild": true,
       "selectedEnvironmentId": "release",
       "selectedBuildProfileId": "wiiu-default",
-      "editorPrebuildCommandIdsByBuildProfileId": {},
+      "editorPrebuildCommandIdsByBuildProfileId": {
+        "wiiu-default": [
+          "menu.generate-rendering-scenes",
+          "menu.regenerate-demo-disc-main-menu"
+        ]
+      },
       "selectedGraphicsProfileId": "wiiu-default",
       "selectedBuildOptionValues": {
         "texture-scale-percent": "100",

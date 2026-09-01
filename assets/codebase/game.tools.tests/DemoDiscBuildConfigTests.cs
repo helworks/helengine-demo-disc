@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Runtime.CompilerServices;
 
 namespace city.tests {
     /// <summary>
@@ -30,7 +31,8 @@ namespace city.tests {
             "tilt_trial_level_05",
             "pbr_material_gallery",
             "pbr_textured_showcase",
-            "pbr_shadow_theater"
+            "pbr_shadow_theater",
+            "software_path_tracer"
         ];
 
         /// <summary>
@@ -38,7 +40,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Non_handheld_platforms_share_the_main_menu_scene_package() {
-            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
+            string json = DemoDiscBuildConfigTestPaths.ReadBuildConfig();
             using JsonDocument document = JsonDocument.Parse(json);
 
             JsonElement.ArrayEnumerator platforms = document.RootElement.GetProperty("platforms").EnumerateArray();
@@ -69,7 +71,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Psp_debug_and_release_profiles_regenerate_the_demo_disc_main_menu() {
-            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
+            string json = DemoDiscBuildConfigTestPaths.ReadBuildConfig();
             using JsonDocument document = JsonDocument.Parse(json);
             JsonElement pspPlatform = document.RootElement.GetProperty("platforms").EnumerateArray()
                 .Single(platform => string.Equals(platform.GetProperty("platformId").GetString(), "psp", StringComparison.Ordinal));
@@ -84,7 +86,7 @@ namespace city.tests {
 
         [Fact]
         public void Windows_platform_packages_the_persistent_loading_screen_scene() {
-            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
+            string json = DemoDiscBuildConfigTestPaths.ReadBuildConfig();
             using JsonDocument document = JsonDocument.Parse(json);
             JsonElement windowsPlatform = document.RootElement.GetProperty("platforms").EnumerateArray()
                 .Single(platform => string.Equals(platform.GetProperty("platformId").GetString(), "windows", StringComparison.OrdinalIgnoreCase));
@@ -108,7 +110,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Wii_u_platform_packages_the_persistent_loading_screen_scene() {
-            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
+            string json = DemoDiscBuildConfigTestPaths.ReadBuildConfig();
             using JsonDocument document = JsonDocument.Parse(json);
             JsonElement wiiUPlatform = document.RootElement.GetProperty("platforms").EnumerateArray()
                 .Single(platform => string.Equals(platform.GetProperty("platformId").GetString(), "wiiu", StringComparison.OrdinalIgnoreCase));
@@ -132,7 +134,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Wii_platform_packages_the_persistent_loading_screen_scene() {
-            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
+            string json = DemoDiscBuildConfigTestPaths.ReadBuildConfig();
             using JsonDocument document = JsonDocument.Parse(json);
             JsonElement wiiPlatform = document.RootElement.GetProperty("platforms").EnumerateArray()
                 .Single(platform => string.Equals(platform.GetProperty("platformId").GetString(), "wii", StringComparison.OrdinalIgnoreCase));
@@ -156,7 +158,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Nintendo_ds_shares_the_common_demo_scene_package() {
-            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
+            string json = DemoDiscBuildConfigTestPaths.ReadBuildConfig();
             using JsonDocument document = JsonDocument.Parse(json);
 
             JsonElement dsPlatform = document.RootElement.GetProperty("platforms").EnumerateArray()
@@ -185,7 +187,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Handheld_platforms_do_not_package_the_standard_splash_scene() {
-            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
+            string json = DemoDiscBuildConfigTestPaths.ReadBuildConfig();
             using JsonDocument document = JsonDocument.Parse(json);
 
             foreach (JsonElement platform in document.RootElement.GetProperty("platforms").EnumerateArray()) {
@@ -201,6 +203,26 @@ namespace city.tests {
                     .ToArray();
                 Assert.DoesNotContain("HelenOfCodeSplash", selectedSceneIds);
             }
+        }
+    }
+
+    internal static class DemoDiscBuildConfigTestPaths {
+        public static string ReadBuildConfig([CallerFilePath] string sourceFilePath = "") {
+            return File.ReadAllText(Path.Combine(FindCheckoutRoot(sourceFilePath), "user_settings", "build_config.json"));
+        }
+
+        public static string FindCheckoutRoot([CallerFilePath] string sourceFilePath = "") {
+            DirectoryInfo directory = new DirectoryInfo(Path.GetDirectoryName(sourceFilePath));
+            while (directory != null) {
+                if (File.Exists(Path.Combine(directory.FullName, "project.heproj"))
+                    && File.Exists(Path.Combine(directory.FullName, "user_settings", "build_config.json"))) {
+                    return directory.FullName;
+                }
+
+                directory = directory.Parent;
+            }
+
+            throw new DirectoryNotFoundException("Could not locate the Demo Disc checkout root.");
         }
     }
 }
