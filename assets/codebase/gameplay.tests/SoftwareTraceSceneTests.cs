@@ -302,7 +302,8 @@ namespace city.tests {
             source.Register(anchorReference, CreateGeneratedCubeAsset);
             source.Register(emitterReference, CreateMixedMaterialCubeAsset);
             fixture.AddModel(anchorReference, new SoftwareMaterial());
-            fixture.AddModel(emitterReference, new SoftwareMaterial(), EmitterMaterial());
+            fixture.AddModel(emitterReference, EmitterMaterial(), new SoftwareMaterial());
+            fixture.Entities[1].LocalPosition = new float3(0f, 1f, 0f);
 
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
 
@@ -515,10 +516,10 @@ namespace city.tests {
         }
 
         static ModelAsset CreateMixedMaterialCubeAsset() {
-            ModelAsset cube = CreateCubeAsset();
+            ModelAsset cube = CreateGeneratedCubeAsset();
             cube.Submeshes = new[] {
-                new ModelSubmeshAsset { MaterialSlotName = "diffuse-inward-face", IndexStart = 0, IndexCount = 6 },
-                new ModelSubmeshAsset { MaterialSlotName = "emissive-other-faces", IndexStart = 6, IndexCount = cube.Indices16.Length - 6 }
+                new ModelSubmeshAsset { MaterialSlotName = "emissive-other-faces", IndexStart = 0, IndexCount = 30 },
+                new ModelSubmeshAsset { MaterialSlotName = "diffuse-bottom-face", IndexStart = 30, IndexCount = 6 }
             };
             return cube;
         }
