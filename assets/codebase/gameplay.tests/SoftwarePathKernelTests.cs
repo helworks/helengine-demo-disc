@@ -91,6 +91,25 @@ namespace city.tests {
             SoftwareRay firstRay = DiffuseCameraRay();
             SoftwareRay secondRay = DiffuseCameraRay();
 
+            SoftwareRay probeRay = DiffuseCameraRay();
+            Assert.True(largeEmitter.Bvh.Intersect(largeEmitter.Triangles, ref probeRay, SoftwarePathTracer.RayEpsilon, float.PositiveInfinity, largeEmitter.Stack, out SoftwareHit diffuseHit, out int diffuseTriangleIndex));
+            SoftwareTriangle diffuseTriangle = largeEmitter.Triangles[diffuseTriangleIndex];
+            float3 orientedNormal = float3.Dot(diffuseTriangle.GeometricNormal, probeRay.Direction) > 0f
+                ? new float3(-diffuseTriangle.GeometricNormal.X, -diffuseTriangle.GeometricNormal.Y, -diffuseTriangle.GeometricNormal.Z)
+                : diffuseTriangle.GeometricNormal;
+            float firstBounceSample = SoftwarePathSampler.Sample01(2, 3, 0, 0, 2);
+            float secondBounceSample = SoftwarePathSampler.Sample01(2, 3, 0, 0, 3);
+            float3 bounceDirection = SoftwarePathSampler.SampleCosineHemisphere(orientedNormal, firstBounceSample, secondBounceSample);
+            SoftwareRay bounceProbe = new SoftwareRay(
+                new float3(
+                    diffuseHit.Position.X + (orientedNormal.X * SoftwarePathTracer.RayEpsilon),
+                    diffuseHit.Position.Y + (orientedNormal.Y * SoftwarePathTracer.RayEpsilon),
+                    diffuseHit.Position.Z + (orientedNormal.Z * SoftwarePathTracer.RayEpsilon)),
+                bounceDirection);
+            Assert.True(largeEmitter.Bvh.Intersect(largeEmitter.Triangles, ref bounceProbe, SoftwarePathTracer.RayEpsilon, float.PositiveInfinity, largeEmitter.Stack, out _, out int bouncedTriangleIndex));
+            Assert.True(bouncedTriangleIndex == largeEmitter.LightFirstTriangleIndex || bouncedTriangleIndex == largeEmitter.LightSecondTriangleIndex);
+            Assert.True(largeEmitter.Materials[largeEmitter.Triangles[bouncedTriangleIndex].MaterialIndex].Emission.X > 0f);
+
             float3 first = largeEmitter.Tracer.TraceSample(ref firstRay, 2, 3, 0);
             float3 second = escapingEmitter.Tracer.TraceSample(ref secondRay, 2, 3, 0);
 
@@ -112,7 +131,7 @@ namespace city.tests {
             float3 result = fixture.Tracer.TraceSample(ref ray, 5, 7, 0);
 
             Assert.True(IsFinite(result));
-            Assert.InRange(fixture.Tracer.RayCount, 1L, 9L);
+            Assert.Equal(4L, fixture.Tracer.RayCount);
         }
 
         /// <summary>
@@ -197,6 +216,16 @@ namespace city.tests {
             public readonly int[] Stack;
             /// <summary>Emission used by the fixture light.</summary>
             public readonly float3 LightEmission;
+            /// <summary>Exact triangle array borrowed by the tracer and BVH.</summary>
+            public readonly SoftwareTriangle[] Triangles;
+            /// <summary>Exact compact material array borrowed by the tracer.</summary>
+            public readonly SoftwareMaterialData[] Materials;
+            /// <summary>Real BVH built over the fixture triangle array.</summary>
+            public readonly SoftwareBvh Bvh;
+            /// <summary>First triangle selected as the explicit fixture emitter.</summary>
+            public readonly int LightFirstTriangleIndex;
+            /// <summary>Second triangle selected as the explicit fixture emitter.</summary>
+            public readonly int LightSecondTriangleIndex;
 
             /// <summary>
             /// Initializes one trace fixture.
@@ -204,10 +233,20 @@ namespace city.tests {
             /// <param name="tracer">Tracer under test.</param>
             /// <param name="stack">Traversal scratch.</param>
             /// <param name="lightEmission">Fixture emission.</param>
-            public TraceFixture(SoftwarePathTracer tracer, int[] stack, float3 lightEmission) {
+            /// <param name="triangles">Exact fixture triangle array.</param>
+            /// <param name="materials">Exact fixture material array.</param>
+            /// <param name="bvh">Real fixture BVH.</param>
+            /// <param name="lightFirstTriangleIndex">First fixture emitter triangle.</param>
+            /// <param name="lightSecondTriangleIndex">Second fixture emitter triangle.</param>
+            public TraceFixture(SoftwarePathTracer tracer, int[] stack, float3 lightEmission, SoftwareTriangle[] triangles, SoftwareMaterialData[] materials, SoftwareBvh bvh, int lightFirstTriangleIndex, int lightSecondTriangleIndex) {
                 Tracer = tracer;
                 Stack = stack;
                 LightEmission = lightEmission;
+                Triangles = triangles;
+                Materials = materials;
+                Bvh = bvh;
+                LightFirstTriangleIndex = lightFirstTriangleIndex;
+                LightSecondTriangleIndex = lightSecondTriangleIndex;
             }
         }
 
@@ -281,7 +320,32 @@ namespace city.tests {
         /// </summary>
         /// <returns>A real BVH-backed tracer fixture.</returns>
         static TraceFixture CreateClosedDiffuseFixture() {
-            return CreateDiffuseAndLight(float3.One, false);
+            SoftwareTriangle[] triangles = new SoftwareTriangle[12];
+            triangles[0] = MakeTriangle(new float3(-1f, -1f, -1f), new float3(2f, 0f, 0f), new float3(0f, 2f, 0f), 0);
+            triangles[1] = MakeTriangle(new float3(1f, 1f, -1f), new float3(-2f, 0f, 0f), new float3(0f, -2f, 0f), 0);
+            triangles[2] = MakeTriangle(new float3(-1f, -1f, 1f), new float3(0f, 2f, 0f), new float3(2f, 0f, 0f), 0);
+            triangles[3] = MakeTriangle(new float3(1f, 1f, 1f), new float3(0f, -2f, 0f), new float3(-2f, 0f, 0f), 0);
+            triangles[4] = MakeTriangle(new float3(-1f, -1f, -1f), new float3(0f, 0f, 2f), new float3(0f, 2f, 0f), 0);
+            triangles[5] = MakeTriangle(new float3(-1f, 1f, 1f), new float3(0f, 0f, -2f), new float3(0f, -2f, 0f), 0);
+            triangles[6] = MakeTriangle(new float3(1f, -1f, -1f), new float3(0f, 2f, 0f), new float3(0f, 0f, 2f), 0);
+            triangles[7] = MakeTriangle(new float3(1f, 1f, 1f), new float3(0f, -2f, 0f), new float3(0f, 0f, -2f), 0);
+            triangles[8] = MakeTriangle(new float3(-1f, -1f, -1f), new float3(2f, 0f, 0f), new float3(0f, 0f, 2f), 0);
+            triangles[9] = MakeTriangle(new float3(1f, -1f, 1f), new float3(-2f, 0f, 0f), new float3(0f, 0f, -2f), 0);
+            triangles[10] = MakeTriangle(new float3(-1f, 1f, -1f), new float3(0f, 0f, 2f), new float3(2f, 0f, 0f), 0);
+            triangles[11] = MakeTriangle(new float3(1f, 1f, 1f), new float3(0f, 0f, -2f), new float3(-2f, 0f, 0f), 0);
+            SoftwareMaterialData[] materials = {
+                new SoftwareMaterialData(float3.One, float3.Zero)
+            };
+            SoftwareAreaLight light = new SoftwareAreaLight(
+                new float3(-10f, -10f, 10f),
+                new float3(20f, 0f, 0f),
+                new float3(0f, 20f, 0f),
+                new float3(0f, 0f, 1f),
+                400f,
+                float3.Zero,
+                0,
+                1);
+            return BuildFixture(triangles, materials, light);
         }
 
         /// <summary>
@@ -295,7 +359,7 @@ namespace city.tests {
             SoftwareBvh bvh = SoftwareBvh.Build(triangles);
             int[] stack = new int[SoftwareBvh.TraversalStackCapacity];
             SoftwarePathTracer tracer = new SoftwarePathTracer(triangles, materials, light, bvh, stack);
-            return new TraceFixture(tracer, stack, light.Emission);
+            return new TraceFixture(tracer, stack, light.Emission, triangles, materials, bvh, light.FirstTriangleIndex, light.SecondTriangleIndex);
         }
 
         /// <summary>

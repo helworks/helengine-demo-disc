@@ -379,6 +379,9 @@ namespace city.rendering {
 
                     if (geometry > 0f && distance > RayEpsilon) {
                         float3 shadowOrigin = Add(hit.Position, Scale(orientedNormal, RayEpsilon));
+                        if (!IsFinite(shadowOrigin)) {
+                            return DiscardSample();
+                        }
                         float3 shadowToLight = Subtract(lightPoint, shadowOrigin);
                         float shadowDistanceSquared = LengthSquared(shadowToLight);
                         if (!float.IsFinite(shadowDistanceSquared) || shadowDistanceSquared <= 0f) {
