@@ -173,7 +173,7 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Creates the desktop statistics panel and pointer-only Return action beneath the top viewport.
+        /// Creates the text-only desktop diagnostics and pointer-only Return action beneath the top viewport.
         /// </summary>
         (Entity SppText, Entity ElapsedText, Entity RaysPerSecondText) CreateDesktopHud(Entity parent, FontAsset hudFont) {
             Entity root = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, "SoftwarePathTracerDesktopHudRoot");
@@ -185,36 +185,54 @@ namespace city.rendering.tools {
             rootSave.GetOrCreateExistencePlatformOverride("ds").Exists = false;
             rootSave.GetOrCreateExistencePlatformOverride("3ds").Exists = false;
 
-            Entity panel = CreateRoundedPanelEntity(
+            Entity sppText = CreateHudTextEntity(
                 root,
-                "SoftwarePathTracerDesktopHudPanel",
-                new float3(8f, 8f, 0f),
-                new int2(304, 136),
-                6f,
-                2f,
-                new byte4(18, 27, 43, 220),
-                new byte4(96, 128, 168, 255),
-                1);
-            Entity sppText = CreateHudTextEntity(panel, "SoftwarePathTracerSppText", "SPP: 0", new float3(8f, 8f, 0.1f), hudFont);
-            Entity elapsedText = CreateHudTextEntity(panel, "SoftwarePathTracerElapsedText", "Time: 0.0s", new float3(8f, 36f, 0.1f), hudFont);
-            Entity raysPerSecondText = CreateHudTextEntity(panel, "SoftwarePathTracerRaysPerSecondText", "Rays/s: 0", new float3(8f, 64f, 0.1f), hudFont);
-            Entity returnButton = CreateRoundedPanelEntity(
-                panel,
-                "SoftwarePathTracerDesktopReturnButton",
-                new float3(8f, 98f, 0.1f),
-                new int2(144, 28),
-                5f,
-                1f,
-                new byte4(40, 58, 87, 255),
-                new byte4(122, 147, 182, 255),
-                2);
-            returnButton.AddComponent(new InteractableComponent { Size = new int2(144, 28) });
-            returnButton.AddComponent(new DemoDiscReturnToMenuComponent {
+                "SoftwarePathTracerSppText",
+                "SPP: 0",
+                new float3(4f, 4f, 0.1f),
+                hudFont,
+                new int2(128, 12),
+                0.35f,
+                TextAlignment.Left);
+            Entity elapsedText = CreateHudTextEntity(
+                root,
+                "SoftwarePathTracerElapsedText",
+                "Time: 0.0s",
+                new float3(4f, 16f, 0.1f),
+                hudFont,
+                new int2(128, 12),
+                0.35f,
+                TextAlignment.Left);
+            Entity raysPerSecondText = CreateHudTextEntity(
+                root,
+                "SoftwarePathTracerRaysPerSecondText",
+                "Rays/s: 0",
+                new float3(4f, 28f, 0.1f),
+                hudFont,
+                new int2(128, 12),
+                0.35f,
+                TextAlignment.Left);
+            Entity returnTarget = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(root, "SoftwarePathTracerDesktopReturnTarget");
+            returnTarget.LayerMask = EditorLayerMasks.SceneObjects;
+            returnTarget.LocalPosition = new float3(4f, 40f, 0.1f);
+            returnTarget.LocalScale = float3.One;
+            returnTarget.LocalOrientation = float4.Identity;
+            returnTarget.AddComponent(new InteractableComponent { Size = new int2(64, 12) });
+            returnTarget.AddComponent(new DemoDiscReturnToMenuComponent {
                 AllowKeyboardReturn = false,
                 AllowGamepadReturn = false,
                 AllowPointerReturn = true
             });
-            CreateHudTextEntity(returnButton, "SoftwarePathTracerDesktopReturnLabel", "RETURN", new float3(8f, 2f, 0.1f), hudFont, 3);
+            CreateHudTextEntity(
+                returnTarget,
+                "SoftwarePathTracerDesktopReturnLabel",
+                "RETURN",
+                new float3(0f, 0f, 0.1f),
+                hudFont,
+                new int2(64, 12),
+                0.35f,
+                TextAlignment.Left,
+                3);
             return (sppText, elapsedText, raysPerSecondText);
         }
 
@@ -272,6 +290,13 @@ namespace city.rendering.tools {
         /// Creates one diagnostic text row under either a desktop root or a handheld presentation subtree.
         /// </summary>
         Entity CreateHudTextEntity(Entity parent, string name, string text, float3 position, FontAsset font, byte renderOrder2D = 1) {
+            return CreateHudTextEntity(parent, name, text, position, font, new int2(320, 24), 1f, TextAlignment.Left, renderOrder2D);
+        }
+
+        /// <summary>
+        /// Creates one diagnostic text row with explicit layout and visual settings.
+        /// </summary>
+        Entity CreateHudTextEntity(Entity parent, string name, string text, float3 position, FontAsset font, int2 size, float fontScale, TextAlignment alignment, byte renderOrder2D = 1) {
             Entity entity = parent == null
                 ? AssetAuthoringService.OwningCore.EntityFactory.Create(name)
                 : AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, name);
@@ -282,9 +307,10 @@ namespace city.rendering.tools {
             entity.AddComponent(new TextComponent {
                 Text = text,
                 Font = font,
-                FontScale = 1f,
+                FontScale = fontScale,
+                Alignment = alignment,
                 Color = new byte4(255, 255, 255, 255),
-                Size = new int2(320, 24),
+                Size = size,
                 RenderOrder2D = renderOrder2D
             });
             TextComponent textComponent = entity.Components.OfType<TextComponent>().Single();

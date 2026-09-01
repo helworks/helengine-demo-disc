@@ -159,6 +159,48 @@ namespace city.tests {
         }
 
         [Fact]
+        public void Creates_a_text_only_desktop_hud_with_compact_rows_and_invisible_return_target() {
+            using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
+            IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
+            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session);
+
+            Entity[] entities = FlattenEntities(factory.CreateSceneDefinition(
+                CreateProjectRoot(),
+                EngineSceneAssetReferenceFactory.CreateCubeModel(),
+                CreateHudFont()).RootEntities).ToArray();
+            Entity desktopRoot = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerDesktopHudRoot");
+            Entity[] desktopTree = FlattenEntities(new[] { desktopRoot }).ToArray();
+            Assert.Empty(desktopTree.SelectMany(entity => entity.Components.OfType<RoundedRectComponent>()));
+
+            var expectedRows = new[] {
+                (Name: "SoftwarePathTracerSppText", Position: new float3(4f, 4f, 0.1f)),
+                (Name: "SoftwarePathTracerElapsedText", Position: new float3(4f, 16f, 0.1f)),
+                (Name: "SoftwarePathTracerRaysPerSecondText", Position: new float3(4f, 28f, 0.1f))
+            };
+            foreach (var expected in expectedRows) {
+                Entity row = desktopTree.Single(entity => EntityName(entity) == expected.Name);
+                Assert.Contains(row, desktopRoot.Children);
+                TextComponent text = Component<TextComponent>(row);
+                AssertVector(row.LocalPosition, expected.Position);
+                Assert.Equal(0.35f, text.FontScale);
+                Assert.Equal(TextAlignment.Left, text.Alignment);
+                Assert.Equal(new int2(128, 12), text.Size);
+            }
+
+            Entity returnTarget = desktopTree.Single(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnTarget");
+            Assert.Contains(returnTarget, desktopRoot.Children);
+            Assert.Equal(new float3(4f, 40f, 0.1f), returnTarget.LocalPosition);
+            Assert.Equal(new int2(64, 12), Component<InteractableComponent>(returnTarget).Size);
+            Assert.Single(returnTarget.Components.OfType<DemoDiscReturnToMenuComponent>());
+            Entity returnLabel = desktopTree.Single(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnLabel");
+            Assert.Contains(returnLabel, returnTarget.Children);
+            TextComponent returnText = Component<TextComponent>(returnLabel);
+            Assert.Equal(0.35f, returnText.FontScale);
+            Assert.Equal(TextAlignment.Left, returnText.Alignment);
+            Assert.Equal(new int2(64, 12), returnText.Size);
+        }
+
+        [Fact]
         public void Creates_one_reference_canvas_output_viewport_with_ds_and_3ds_presentation_overrides() {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
             IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
@@ -279,11 +321,11 @@ namespace city.tests {
             Entity handheldRoot = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerHandheldHudRoot"));
             Assert.True(IsDescendant(bottomViewportEntity, handheldRoot));
             Assert.True(IsDescendant(topCamera, desktopRoot));
-            Entity desktopPanel = Assert.Single(desktopRoot.Children.Where(entity => entity.Components.OfType<RoundedRectComponent>().Any()));
-            Assert.Equal(new byte4(18, 27, 43, 220), Component<RoundedRectComponent>(desktopPanel).FillColor);
-            Entity desktopReturn = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnButton"));
+            Assert.Empty(FlattenEntities(new[] { desktopRoot }).SelectMany(entity => entity.Components.OfType<RoundedRectComponent>()));
+            Entity desktopReturn = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnTarget"));
+            Assert.Contains(desktopReturn, desktopRoot.Children);
             InteractableComponent desktopInteractable = Component<InteractableComponent>(desktopReturn);
-            Assert.Equal(new int2(144, 28), desktopInteractable.Size);
+            Assert.Equal(new int2(64, 12), desktopInteractable.Size);
             DemoDiscReturnToMenuComponent desktopReturnComponent = Component<DemoDiscReturnToMenuComponent>(desktopReturn);
             Assert.False(desktopReturnComponent.AllowKeyboardReturn);
             Assert.False(desktopReturnComponent.AllowGamepadReturn);
@@ -321,11 +363,14 @@ namespace city.tests {
             SoftwarePathTracerComponent controller = Component<SoftwarePathTracerComponent>(controllerEntity);
             Entity presentationViewport = Assert.Single(topCamera.Children.Where(entity => EntityName(entity) == "SoftwarePathTracerPresentationViewport"));
             Entity desktopRoot = Assert.Single(presentationViewport.Children.Where(entity => EntityName(entity) == "SoftwarePathTracerDesktopHudRoot"));
-            Entity desktopPanel = Assert.Single(desktopRoot.Children.Where(entity => EntityName(entity) == "SoftwarePathTracerDesktopHudPanel"));
             Assert.Contains(outputEntity, presentationViewport.Children);
-            Assert.Contains(sppEntity, desktopPanel.Children);
-            Assert.Contains(elapsedEntity, desktopPanel.Children);
-            Assert.Contains(raysPerSecondEntity, desktopPanel.Children);
+            Assert.Contains(sppEntity, desktopRoot.Children);
+            Assert.Contains(elapsedEntity, desktopRoot.Children);
+            Assert.Contains(raysPerSecondEntity, desktopRoot.Children);
+            Assert.Empty(FlattenEntities(new[] { desktopRoot }).SelectMany(entity => entity.Components.OfType<RoundedRectComponent>()));
+            Entity desktopReturnTarget = Assert.Single(desktopRoot.Children.Where(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnTarget"));
+            Assert.Equal(new int2(64, 12), Component<InteractableComponent>(desktopReturnTarget).Size);
+            Assert.Single(desktopReturnTarget.Components.OfType<DemoDiscReturnToMenuComponent>());
 
             MaterializeRuntimeIds(roots);
             topCamera.InitializeHierarchy();
@@ -347,7 +392,7 @@ namespace city.tests {
         }
 
         [Fact]
-        public void Return_labels_render_above_their_button_backgrounds() {
+        public void Return_labels_keep_handheld_background_order_and_desktop_target_text_style() {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
             IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
             SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session);
@@ -356,11 +401,15 @@ namespace city.tests {
                 EngineSceneAssetReferenceFactory.CreateCubeModel(),
                 CreateHudFont()).RootEntities).ToArray();
 
-            Entity desktopButton = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnButton");
+            Entity desktopTarget = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnTarget");
             Entity desktopLabel = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnLabel");
             Entity handheldButton = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerHandheldReturnButton");
             Entity handheldLabel = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerHandheldReturnLabel");
-            Assert.True(Component<TextComponent>(desktopLabel).RenderOrder2D > Component<RoundedRectComponent>(desktopButton).RenderOrder2D);
+            Assert.Contains(desktopLabel, desktopTarget.Children);
+            Assert.Equal(0.35f, Component<TextComponent>(desktopLabel).FontScale);
+            Assert.Equal(TextAlignment.Left, Component<TextComponent>(desktopLabel).Alignment);
+            Assert.Equal(new int2(64, 12), Component<TextComponent>(desktopLabel).Size);
+            Assert.Empty(FlattenEntities(new[] { desktopTarget }).SelectMany(entity => entity.Components.OfType<RoundedRectComponent>()));
             Assert.True(Component<TextComponent>(handheldLabel).RenderOrder2D > Component<RoundedRectComponent>(handheldButton).RenderOrder2D);
         }
 
