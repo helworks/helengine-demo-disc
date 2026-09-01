@@ -8,7 +8,6 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class SoftwarePathTracerSceneFactory {
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
-        readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
         /// Stable generated scene path and identity key.
@@ -19,10 +18,8 @@ namespace city.rendering.tools {
         /// Initializes the scene factory with the active editor authoring capabilities.
         /// </summary>
         /// <param name="assetAuthoringService">Authoring session used to create live entities.</param>
-        /// <param name="transaction">Transaction that owns the authored graph.</param>
-        public SoftwarePathTracerSceneFactory(IEditorProjectAuthoringSession assetAuthoringService, EditorAuthoringTransaction transaction) {
+        public SoftwarePathTracerSceneFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
-            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
 
         /// <summary>

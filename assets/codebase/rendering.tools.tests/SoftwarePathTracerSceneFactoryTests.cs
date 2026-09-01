@@ -17,10 +17,9 @@ namespace city.tests {
         public void Creates_the_fixed_eight_model_cornell_graph_without_mesh_components() {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
             IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
-            using EditorAuthoringTransaction transaction = session.BeginTransaction();
             SceneAssetReference cubeReference = EngineSceneAssetReferenceFactory.CreateCubeModel();
             FontAsset hudFont = CreateHudFont();
-            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session, transaction);
+            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session);
 
             GeneratedAuthoringSceneDefinition definition = factory.CreateSceneDefinition(
                 CreateProjectRoot(),
@@ -71,9 +70,8 @@ namespace city.tests {
         public void Controller_root_is_consumable_by_the_recursive_software_trace_scene_scan() {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
             IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
-            using EditorAuthoringTransaction transaction = session.BeginTransaction();
             SceneAssetReference cubeReference = EngineSceneAssetReferenceFactory.CreateCubeModel();
-            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session, transaction);
+            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session);
 
             GeneratedAuthoringSceneDefinition definition = factory.CreateSceneDefinition(
                 CreateProjectRoot(),
@@ -98,9 +96,8 @@ namespace city.tests {
         public void Creates_the_presentation_camera_hud_and_stably_wired_controller() {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
             IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
-            using EditorAuthoringTransaction transaction = session.BeginTransaction();
             FontAsset hudFont = CreateHudFont();
-            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session, transaction);
+            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session);
 
             GeneratedAuthoringSceneDefinition definition = factory.CreateSceneDefinition(
                 CreateProjectRoot(),
@@ -140,10 +137,17 @@ namespace city.tests {
             AssertVector(controller.TraceCameraUp, new float3(0f, 1f, 0f));
             Assert.Equal(55f, controller.VerticalFieldOfViewDegrees);
             Assert.Equal(1f, controller.Exposure);
-            Assert.Equal(SaveId(outputEntity), controller.OutputSpriteEntityReference.EntityId);
-            Assert.Equal(SaveId(hudEntities.Single(entity => EntityName(entity) == "SoftwarePathTracerSppText")), controller.SppTextEntityReference.EntityId);
-            Assert.Equal(SaveId(hudEntities.Single(entity => EntityName(entity) == "SoftwarePathTracerElapsedText")), controller.ElapsedTextEntityReference.EntityId);
-            Assert.Equal(SaveId(hudEntities.Single(entity => EntityName(entity) == "SoftwarePathTracerRaysPerSecondText")), controller.RaysPerSecondTextEntityReference.EntityId);
+            uint outputId = SaveId(outputEntity);
+            uint sppId = SaveId(hudEntities.Single(entity => EntityName(entity) == "SoftwarePathTracerSppText"));
+            uint elapsedId = SaveId(hudEntities.Single(entity => EntityName(entity) == "SoftwarePathTracerElapsedText"));
+            uint raysPerSecondId = SaveId(hudEntities.Single(entity => EntityName(entity) == "SoftwarePathTracerRaysPerSecondText"));
+            uint[] targetIds = new[] { outputId, sppId, elapsedId, raysPerSecondId };
+            Assert.All(targetIds, id => Assert.NotEqual(0u, id));
+            Assert.Equal(targetIds.Length, targetIds.Distinct().Count());
+            Assert.Equal(outputId, controller.OutputSpriteEntityReference.EntityId);
+            Assert.Equal(sppId, controller.SppTextEntityReference.EntityId);
+            Assert.Equal(elapsedId, controller.ElapsedTextEntityReference.EntityId);
+            Assert.Equal(raysPerSecondId, controller.RaysPerSecondTextEntityReference.EntityId);
 
             Assert.DoesNotContain(entities, entity => entity.Components.OfType<DirectionalLightComponent>().Any());
             Assert.DoesNotContain(entities, entity => entity.Components.OfType<SpotLightComponent>().Any());
@@ -153,8 +157,7 @@ namespace city.tests {
         public void Requires_the_public_factory_inputs() {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
             IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
-            using EditorAuthoringTransaction transaction = session.BeginTransaction();
-            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session, transaction);
+            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session);
             FontAsset font = CreateHudFont();
             SceneAssetReference cube = EngineSceneAssetReferenceFactory.CreateCubeModel();
 

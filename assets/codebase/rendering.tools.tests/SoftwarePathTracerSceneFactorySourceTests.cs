@@ -9,6 +9,7 @@ namespace city.tests {
 
             Assert.Contains("public const string SceneId = \"scenes/rendering/software_path_tracer.helen\";", source, StringComparison.Ordinal);
             Assert.Contains("CreateSceneDefinition(string projectRootPath, SceneAssetReference cubeReference, FontAsset hudFont)", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("EditorAuthoringTransaction", source, StringComparison.Ordinal);
             Assert.Contains("new float3(0f, 0f, 3f)", source, StringComparison.Ordinal);
             Assert.Contains("new float3(0f, 0f, -1f)", source, StringComparison.Ordinal);
             Assert.Contains("new float3(1f, 0f, 0f)", source, StringComparison.Ordinal);
