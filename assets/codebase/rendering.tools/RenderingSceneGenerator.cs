@@ -17,6 +17,11 @@ namespace city.rendering.tools {
         public const string CubeTestSceneId = "scenes/rendering/cube_test.helen";
 
         /// <summary>
+        /// Stable scene id used by the software path tracer showcase.
+        /// </summary>
+        public const string SoftwarePathTracerSceneId = "scenes/rendering/software_path_tracer.helen";
+
+        /// <summary>
         /// Stable Nintendo DS companion-scene id used by the cube-test showcase.
         /// </summary>
         public const string CubeTestNintendoDsSceneId = "scenes/rendering/ds/cube_test_ds.helen";
@@ -232,6 +237,11 @@ namespace city.rendering.tools {
         readonly MatrixRenderSceneFactory MatrixRenderFactory;
 
         /// <summary>
+        /// Factory used to author the shared software path tracer scene.
+        /// </summary>
+        readonly SoftwarePathTracerSceneFactory SoftwarePathTracerFactory;
+
+        /// <summary>
         /// Initializes one city rendering scene generator.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
@@ -260,6 +270,7 @@ namespace city.rendering.tools {
             PbrTexturedShowcaseScene = new PbrTexturedShowcaseSceneFactory(AssetAuthoringService, Transaction);
             PbrShadowTheaterScene = new PbrShadowTheaterSceneFactory(AssetAuthoringService, Transaction);
             MatrixRenderFactory = new MatrixRenderSceneFactory(AssetAuthoringService, Transaction);
+            SoftwarePathTracerFactory = new SoftwarePathTracerSceneFactory(AssetAuthoringService);
         }
 
         /// <summary>
@@ -328,6 +339,10 @@ namespace city.rendering.tools {
             GeneratedAuthoringSceneDefinition pbrShadowTheaterSceneDefinition = PbrShadowTheaterScene.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial, pbrGalleryMaterials);
             MatrixRenderFactory.WriteMaterialAssets(projectRootPath);
             GeneratedAuthoringSceneDefinition matrixRenderSceneDefinition = MatrixRenderFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel);
+            GeneratedAuthoringSceneDefinition softwarePathTracerSceneDefinition = SoftwarePathTracerFactory.CreateSceneDefinition(
+                projectRootPath,
+                EngineSceneAssetReferenceFactory.CreateCubeModel(),
+                editorCore.DefaultFontAssetForEditor);
             ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
             TexturedCubeGridFactory.WriteAssets(projectRootPath);
             coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
@@ -347,6 +362,7 @@ namespace city.rendering.tools {
             AuthoringSceneWriteService.WriteScene(pbrTexturedShowcaseSceneDefinition);
             AuthoringSceneWriteService.WriteScene(pbrShadowTheaterSceneDefinition);
             AuthoringSceneWriteService.WriteScene(matrixRenderSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(softwarePathTracerSceneDefinition);
         }
 
     }
