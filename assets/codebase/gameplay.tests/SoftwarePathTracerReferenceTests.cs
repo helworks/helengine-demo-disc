@@ -35,6 +35,10 @@ namespace city.tests {
                 Assert.NotSame(first.Tracer, second.Tracer);
                 first.Tracer.InitializeProgressive(new SoftwareTraceResolution(Width, Height), Camera, Exposure);
                 second.Tracer.InitializeProgressive(new SoftwareTraceResolution(Width, Height), Camera, Exposure);
+                Assert.NotSame(first.Bvh.Nodes, second.Bvh.Nodes);
+                Assert.NotSame(first.Bvh.TriangleOrder, second.Bvh.TriangleOrder);
+                Assert.NotSame(first.Tracer.Accumulation, second.Tracer.Accumulation);
+                Assert.NotSame(first.Tracer.TileRgba8, second.Tracer.TileRgba8);
                 Assert.Equal(Width * Height, first.Tracer.Accumulation.Length);
                 Assert.Equal(Width * Height, second.Tracer.Accumulation.Length);
                 Assert.Equal(SoftwarePathTracer.TileRgba8Bytes, first.Tracer.TileRgba8.Length);
