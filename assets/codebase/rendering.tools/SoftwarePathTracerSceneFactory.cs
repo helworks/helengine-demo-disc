@@ -42,7 +42,7 @@ namespace city.rendering.tools {
 
             Entity cameraEntity = CreatePresentationCameraEntity(out Entity presentationViewportEntity);
             Entity outputEntity = CreateOutputSpriteEntity(presentationViewportEntity);
-            (Entity desktopHudRoot, Entity sppTextEntity, Entity elapsedTextEntity, Entity raysPerSecondTextEntity) = CreateDesktopHud(
+            (Entity sppTextEntity, Entity elapsedTextEntity, Entity raysPerSecondTextEntity) = CreateDesktopHud(
                 presentationViewportEntity,
                 hudFont);
             Entity bottomCameraEntity = CreateBottomScreenCameraEntity(out Entity bottomViewportEntity);
@@ -175,7 +175,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates the desktop statistics panel and pointer-only Return action beneath the top viewport.
         /// </summary>
-        (Entity Root, Entity SppText, Entity ElapsedText, Entity RaysPerSecondText) CreateDesktopHud(Entity parent, FontAsset hudFont) {
+        (Entity SppText, Entity ElapsedText, Entity RaysPerSecondText) CreateDesktopHud(Entity parent, FontAsset hudFont) {
             Entity root = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, "SoftwarePathTracerDesktopHudRoot");
             root.LayerMask = EditorLayerMasks.SceneObjects;
             root.LocalPosition = float3.Zero;
@@ -214,8 +214,8 @@ namespace city.rendering.tools {
                 AllowGamepadReturn = false,
                 AllowPointerReturn = true
             });
-            CreateHudTextEntity(returnButton, "SoftwarePathTracerDesktopReturnLabel", "RETURN", new float3(8f, 2f, 0.1f), hudFont);
-            return (root, sppText, elapsedText, raysPerSecondText);
+            CreateHudTextEntity(returnButton, "SoftwarePathTracerDesktopReturnLabel", "RETURN", new float3(8f, 2f, 0.1f), hudFont, 3);
+            return (sppText, elapsedText, raysPerSecondText);
         }
 
         /// <summary>
@@ -271,7 +271,7 @@ namespace city.rendering.tools {
         /// <summary>
         /// Creates one diagnostic text row under either a desktop root or a handheld presentation subtree.
         /// </summary>
-        Entity CreateHudTextEntity(Entity parent, string name, string text, float3 position, FontAsset font) {
+        Entity CreateHudTextEntity(Entity parent, string name, string text, float3 position, FontAsset font, byte renderOrder2D = 1) {
             Entity entity = parent == null
                 ? AssetAuthoringService.OwningCore.EntityFactory.Create(name)
                 : AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, name);
@@ -285,7 +285,7 @@ namespace city.rendering.tools {
                 FontScale = 1f,
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(320, 24),
-                RenderOrder2D = 1
+                RenderOrder2D = renderOrder2D
             });
             TextComponent textComponent = entity.Components.OfType<TextComponent>().Single();
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
@@ -358,7 +358,7 @@ namespace city.rendering.tools {
                 2);
             button.AddComponent(new InteractableComponent { Size = new int2(224, 32) });
             button.AddComponent(new NintendoDsReturnOverlayComponent());
-            CreateHudTextEntity(button, "SoftwarePathTracerHandheldReturnLabel", "RETURN", new float3(80f, 6f, 0.1f), hudFont);
+            CreateHudTextEntity(button, "SoftwarePathTracerHandheldReturnLabel", "RETURN", new float3(80f, 6f, 0.1f), hudFont, 3);
             return button;
         }
 

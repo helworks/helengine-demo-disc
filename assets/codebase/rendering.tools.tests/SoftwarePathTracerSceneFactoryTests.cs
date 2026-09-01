@@ -300,6 +300,68 @@ namespace city.tests {
         }
 
         [Fact]
+        public void Materialized_nested_presentation_resolves_global_tracer_references_before_model_load() {
+            using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
+            IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
+            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session);
+            Entity[] roots = factory.CreateSceneDefinition(
+                CreateProjectRoot(),
+                global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel("missing/software_path_tracer.hasset"),
+                CreateHudFont()).RootEntities;
+            Entity topCamera = Assert.Single(roots.Where(entity => EntityName(entity) == "SoftwarePathTracerCamera"));
+            Entity bottomCamera = Assert.Single(roots.Where(entity => EntityName(entity) == "SoftwarePathTracerBottomScreenCamera"));
+            Entity controllerEntity = Assert.Single(roots.Where(entity => EntityName(entity) == "SoftwarePathTracerController"));
+            Entity outputEntity = FlattenEntities(roots).Single(entity => EntityName(entity) == "SoftwarePathTracerOutput");
+            Entity sppEntity = FlattenEntities(roots).Single(entity => EntityName(entity) == "SoftwarePathTracerSppText");
+            Entity elapsedEntity = FlattenEntities(roots).Single(entity => EntityName(entity) == "SoftwarePathTracerElapsedText");
+            Entity raysPerSecondEntity = FlattenEntities(roots).Single(entity => EntityName(entity) == "SoftwarePathTracerRaysPerSecondText");
+            SoftwarePathTracerComponent controller = Component<SoftwarePathTracerComponent>(controllerEntity);
+            Entity presentationViewport = Assert.Single(topCamera.Children.Where(entity => EntityName(entity) == "SoftwarePathTracerPresentationViewport"));
+            Entity desktopRoot = Assert.Single(presentationViewport.Children.Where(entity => EntityName(entity) == "SoftwarePathTracerDesktopHudRoot"));
+            Entity desktopPanel = Assert.Single(desktopRoot.Children.Where(entity => EntityName(entity) == "SoftwarePathTracerDesktopHudPanel"));
+            Assert.Contains(outputEntity, presentationViewport.Children);
+            Assert.Contains(sppEntity, desktopPanel.Children);
+            Assert.Contains(elapsedEntity, desktopPanel.Children);
+            Assert.Contains(raysPerSecondEntity, desktopPanel.Children);
+
+            MaterializeRuntimeIds(roots);
+            topCamera.InitializeHierarchy();
+            bottomCamera.InitializeHierarchy();
+            controllerEntity.InitializeHierarchy();
+
+            Assert.Equal(SoftwarePathTraceSessionState.Failed, controller.SessionState);
+            Assert.Same(Component<SpriteComponent>(outputEntity), PrivateField<SpriteComponent>(controller, "outputSprite"));
+            Assert.Same(Component<TextComponent>(sppEntity), PrivateField<TextComponent>(controller, "sppText"));
+            Assert.Same(Component<TextComponent>(elapsedEntity), PrivateField<TextComponent>(controller, "elapsedText"));
+            Assert.Same(Component<TextComponent>(raysPerSecondEntity), PrivateField<TextComponent>(controller, "raysPerSecondText"));
+
+            ComponentPlatformEditingService platformEditingService = new ComponentPlatformEditingService();
+            EntitySaveComponent controllerSave = Component<EntitySaveComponent>(controllerEntity);
+            SoftwarePathTracerComponent effectiveHandheld = Assert.IsType<SoftwarePathTracerComponent>(platformEditingService.ResolveEditableComponent(controller, controllerSave, "ds"));
+            Assert.Equal(SaveId(FlattenEntities(roots).Single(entity => EntityName(entity) == "SoftwarePathTracerHandheldSppText")), effectiveHandheld.SppTextEntityReference.EntityId);
+            Assert.Equal(SaveId(FlattenEntities(roots).Single(entity => EntityName(entity) == "SoftwarePathTracerHandheldElapsedText")), effectiveHandheld.ElapsedTextEntityReference.EntityId);
+            Assert.Equal(SaveId(FlattenEntities(roots).Single(entity => EntityName(entity) == "SoftwarePathTracerHandheldRaysPerSecondText")), effectiveHandheld.RaysPerSecondTextEntityReference.EntityId);
+        }
+
+        [Fact]
+        public void Return_labels_render_above_their_button_backgrounds() {
+            using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
+            IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
+            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session);
+            Entity[] entities = FlattenEntities(factory.CreateSceneDefinition(
+                CreateProjectRoot(),
+                EngineSceneAssetReferenceFactory.CreateCubeModel(),
+                CreateHudFont()).RootEntities).ToArray();
+
+            Entity desktopButton = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnButton");
+            Entity desktopLabel = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnLabel");
+            Entity handheldButton = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerHandheldReturnButton");
+            Entity handheldLabel = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerHandheldReturnLabel");
+            Assert.True(Component<TextComponent>(desktopLabel).RenderOrder2D > Component<RoundedRectComponent>(desktopButton).RenderOrder2D);
+            Assert.True(Component<TextComponent>(handheldLabel).RenderOrder2D > Component<RoundedRectComponent>(handheldButton).RenderOrder2D);
+        }
+
+        [Fact]
         public void Requires_the_public_factory_inputs() {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
             IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
@@ -331,6 +393,20 @@ namespace city.tests {
 
         static uint SaveId(Entity entity) {
             return Component<EntitySaveComponent>(entity).EntityId;
+        }
+
+        static void MaterializeRuntimeIds(IEnumerable<Entity> roots) {
+            foreach (Entity entity in FlattenEntities(roots)) {
+                if (!entity.Components.OfType<SceneEntityRuntimeIdComponent>().Any()) {
+                    entity.AddComponent(new SceneEntityRuntimeIdComponent { SceneEntityId = SaveId(entity) });
+                }
+            }
+        }
+
+        static T PrivateField<T>(object instance, string fieldName) where T : class {
+            FieldInfo field = instance.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field);
+            return Assert.IsType<T>(field.GetValue(instance));
         }
 
         static bool ResolveExistence(EntitySaveComponent saveComponent, string platformId) {
