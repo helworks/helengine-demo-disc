@@ -50,7 +50,7 @@ namespace city.tests {
         }
 
         /// <summary>
-        /// Ensures only the positive portion of the caller-supplied distance range is accepted.
+        /// Ensures only the positive portion of the caller-supplied ray-parameter range is accepted.
         /// </summary>
         [Fact]
         public void Triangle_hit_respects_positive_nearest_and_range_distances() {
@@ -64,6 +64,21 @@ namespace city.tests {
             Assert.False(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 2.001f, 10f, out _));
             Assert.False(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 1.999f, out _));
             Assert.False(city.rendering.SoftwareBvh.IntersectTriangle(ref awayRay, ref triangle, 0f, 10f, out _));
+        }
+
+        /// <summary>
+        /// Ensures an unnormalized direction returns the ray parameter and evaluates the hit position with that parameter.
+        /// </summary>
+        [Fact]
+        public void Triangle_hit_reports_ray_parameter_for_unnormalized_direction() {
+            SoftwareTriangle triangle = CreateTriangle();
+            SoftwareRay ray = new SoftwareRay(new float3(0.25f, 0.25f, 1f), new float3(0f, 0f, -2f));
+
+            Assert.True(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 10f, out SoftwareHit hit));
+            Assert.Equal(0.5f, hit.Distance, precision: 5);
+            Assert.Equal(0.25f, hit.Position.X, precision: 5);
+            Assert.Equal(0.25f, hit.Position.Y, precision: 5);
+            Assert.Equal(0f, hit.Position.Z, precision: 5);
         }
 
         /// <summary>
@@ -119,9 +134,9 @@ namespace city.tests {
         [Fact]
         public void Triangle_intersection_uses_finite_parallel_epsilon() {
             SoftwareTriangle triangle = CreateTriangle();
-            SoftwareRay ray = new SoftwareRay(new float3(0.25f, 0.25f, 1f), new float3(1f, 0f, 0.00000001f));
+            SoftwareRay ray = new SoftwareRay(new float3(0.25f, 0.25f, 1f), new float3(0f, 0f, -0.00000001f));
 
-            Assert.False(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 1000000f, out _));
+            Assert.False(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 200000000f, out _));
         }
 
         /// <summary>

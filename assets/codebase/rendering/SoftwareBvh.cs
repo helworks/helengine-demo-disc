@@ -12,7 +12,7 @@ namespace city.rendering {
         public float3 Origin { get; }
 
         /// <summary>
-        /// Gets the world-space ray direction, which is not normalized by this type.
+        /// Gets the world-space ray direction as supplied; intersection routines return the ray parameter t and do not normalize it.
         /// </summary>
         public float3 Direction { get; }
 
@@ -32,7 +32,7 @@ namespace city.rendering {
     /// </summary>
     public readonly struct SoftwareHit {
         /// <summary>
-        /// Gets the ray distance at the intersection.
+        /// Gets the ray parameter t at the intersection. This equals world-space distance only when the direction is unit length.
         /// </summary>
         public float Distance { get; }
 
@@ -57,29 +57,9 @@ namespace city.rendering {
         public float3 GeometricNormal { get; }
 
         /// <summary>
-        /// Gets the first barycentric coordinate using the descriptive property name.
-        /// </summary>
-        public float BarycentricU => U;
-
-        /// <summary>
-        /// Gets the second barycentric coordinate using the descriptive property name.
-        /// </summary>
-        public float BarycentricV => V;
-
-        /// <summary>
-        /// Gets the geometric normal using the short property name used by shading callers.
-        /// </summary>
-        public float3 Normal => GeometricNormal;
-
-        /// <summary>
-        /// Gets all three barycentric coordinates in P0, P1, P2 order.
-        /// </summary>
-        public float3 Barycentric => new float3(1f - U - V, U, V);
-
-        /// <summary>
         /// Initializes one scalar software hit.
         /// </summary>
-        /// <param name="distance">Ray distance at the hit.</param>
+        /// <param name="distance">Ray parameter t at the hit; this is world-space distance only for a unit direction.</param>
         /// <param name="u">Barycentric coordinate for Edge1.</param>
         /// <param name="v">Barycentric coordinate for Edge2.</param>
         /// <param name="position">World-space position at the hit.</param>
@@ -106,26 +86,6 @@ namespace city.rendering {
         /// Gets the maximum corner of the bounds.
         /// </summary>
         public float3 Max { get; }
-
-        /// <summary>
-        /// Gets the minimum corner using the descriptive property name.
-        /// </summary>
-        public float3 Minimum => Min;
-
-        /// <summary>
-        /// Gets the maximum corner using the descriptive property name.
-        /// </summary>
-        public float3 Maximum => Max;
-
-        /// <summary>
-        /// Gets the minimum corner using the trace-scene bounds naming convention.
-        /// </summary>
-        public float3 BoundsMin => Min;
-
-        /// <summary>
-        /// Gets the maximum corner using the trace-scene bounds naming convention.
-        /// </summary>
-        public float3 BoundsMax => Max;
 
         /// <summary>
         /// Initializes one axis-aligned software bounds.
@@ -158,14 +118,14 @@ namespace city.rendering {
         const float BoundsEpsilon = 0.000001f;
 
         /// <summary>
-        /// Intersects a scalar ray with a world-space triangle using Moller-Trumbore arithmetic.
+        /// Intersects a scalar ray with a world-space triangle using Moller-Trumbore arithmetic and returns its ray parameter.
         /// </summary>
         /// <param name="ray">Ray whose direction is used as supplied; it is not normalized.</param>
         /// <param name="triangle">Triangle to test.</param>
-        /// <param name="minimumDistance">Inclusive lower distance bound.</param>
-        /// <param name="maximumDistance">Inclusive upper distance bound.</param>
+        /// <param name="minimumDistance">Inclusive lower ray-parameter bound; this is world-space distance only for a unit direction.</param>
+        /// <param name="maximumDistance">Inclusive upper ray-parameter bound; this is world-space distance only for a unit direction.</param>
         /// <param name="hit">Intersection details when the method returns true; default otherwise.</param>
-        /// <returns>True when the ray intersects the triangle inside the supplied forward distance range.</returns>
+        /// <returns>True when the ray intersects the triangle inside the supplied forward ray-parameter range.</returns>
         public static bool IntersectTriangle(ref SoftwareRay ray, ref SoftwareTriangle triangle, float minimumDistance, float maximumDistance, out SoftwareHit hit) {
             hit = default;
             if (float.IsNaN(minimumDistance) || float.IsNaN(maximumDistance) || minimumDistance > maximumDistance || maximumDistance < 0f) {
@@ -206,8 +166,8 @@ namespace city.rendering {
         /// </summary>
         /// <param name="ray">Ray whose direction is used as supplied; it is not normalized.</param>
         /// <param name="bounds">Axis-aligned bounds to test.</param>
-        /// <param name="maximumDistance">Inclusive upper distance bound.</param>
-        /// <returns>True when the forward ray enters the bounds before the supplied distance.</returns>
+        /// <param name="maximumDistance">Inclusive upper ray-parameter bound; this is world-space distance only for a unit direction.</param>
+        /// <returns>True when the forward ray enters the bounds before the supplied ray parameter.</returns>
         public static bool IntersectBounds(ref SoftwareRay ray, ref SoftwareBounds bounds, float maximumDistance) {
             if (float.IsNaN(maximumDistance) || maximumDistance < 0f || bounds.Min.X > bounds.Max.X || bounds.Min.Y > bounds.Max.Y || bounds.Min.Z > bounds.Max.Z) {
                 return false;
@@ -231,8 +191,8 @@ namespace city.rendering {
         /// <param name="direction">Ray direction component.</param>
         /// <param name="minimum">Slab minimum.</param>
         /// <param name="maximum">Slab maximum.</param>
-        /// <param name="nearDistance">Current near interval, updated on success.</param>
-        /// <param name="farDistance">Current far interval, updated on success.</param>
+        /// <param name="nearDistance">Current near ray-parameter interval, updated on success.</param>
+        /// <param name="farDistance">Current far ray-parameter interval, updated on success.</param>
         /// <returns>True when this slab overlaps the current interval.</returns>
         static bool IntersectSlab(float origin, float direction, float minimum, float maximum, ref float nearDistance, ref float farDistance) {
             if (direction == 0f) {
