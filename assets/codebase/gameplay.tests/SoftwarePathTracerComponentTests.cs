@@ -375,9 +375,9 @@ namespace city.tests {
         public void Initialize_disposal_during_model_loading_cleans_late_scene() {
             using TestFixture fixture = CreateFixture(new SoftwareTraceResolution(8, 8));
             using SoftwarePathTraceSession session = new SoftwarePathTraceSession(fixture.RenderManager);
-            fixture.Source.OnLoadOwned = session.Dispose;
+            ISoftwareModelAssetSource source = new CallbackSoftwareModelAssetSource(fixture.Source, session.Dispose);
 
-            Assert.Throws<ObjectDisposedException>(() => session.Initialize(fixture.Roots, fixture.Source, new SoftwareTraceResolution(8, 8), Camera, 1f));
+            Assert.Throws<ObjectDisposedException>(() => session.Initialize(fixture.Roots, source, new SoftwareTraceResolution(8, 8), Camera, 1f));
 
             AssertPartialInitializationDisposed(session, fixture.RenderManager, fixture.Source);
         }
@@ -440,6 +440,22 @@ namespace city.tests {
             Assert.Equal(source.LoadCount, source.DisposedCount);
             Assert.Single(renderManager.ReleaseAttempts);
             Assert.Single(renderManager.ReleaseCalls);
+        }
+
+        sealed class CallbackSoftwareModelAssetSource : ISoftwareModelAssetSource {
+            readonly ISoftwareModelAssetSource inner;
+            readonly Action callback;
+
+            public CallbackSoftwareModelAssetSource(ISoftwareModelAssetSource inner, Action callback) {
+                this.inner = inner;
+                this.callback = callback;
+            }
+
+            public ModelAsset LoadOwned(SceneAssetReference reference) {
+                ModelAsset asset = inner.LoadOwned(reference);
+                callback();
+                return asset;
+            }
         }
 
         /// <summary>Ensures a warmed tile/upload call performs no managed allocation when recording is disabled.</summary>

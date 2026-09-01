@@ -44,9 +44,6 @@ namespace city.tests {
         /// </summary>
         public bool LoadObservedAllPreviousAssetsDisposed { get; private set; } = true;
 
-        /// <summary>Optional callback invoked after one owned asset is tracked and before it is returned.</summary>
-        public Action OnLoadOwned { get; set; }
-
         /// <summary>
         /// Registers one stable reference identity and an asset factory.
         /// </summary>
@@ -90,7 +87,6 @@ namespace city.tests {
             loadedAssets.Add(asset);
             loadedRelativePaths.Add(reference.RelativePath);
             LoadCount++;
-            OnLoadOwned?.Invoke();
             return asset;
         }
 
