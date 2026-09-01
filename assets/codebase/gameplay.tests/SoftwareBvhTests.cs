@@ -364,6 +364,60 @@ namespace city.tests {
         }
 
         /// <summary>
+        /// Ensures a same-length replacement triangle array is rejected before traversal scratch is touched.
+        /// </summary>
+        [Fact]
+        public void Traversal_rejects_same_length_replacement_array_before_traversal() {
+            SoftwareTriangle[] triangles = CreateLineTriangles(5);
+            SoftwareTriangle[] replacement = (SoftwareTriangle[])triangles.Clone();
+            SoftwareTriangle originalBefore = triangles[0];
+            SoftwareTriangle replacementBefore = replacement[0];
+            SoftwareRay ray = new SoftwareRay(new float3(0.25f, 0.25f, 1f), new float3(0f, 0f, -1f));
+            int[] stack = CreateSentinelStack();
+
+            using SoftwareBvh bvh = SoftwareBvh.Build(triangles);
+            Assert.NotSame(triangles, replacement);
+            Assert.Throws<ArgumentException>(() => bvh.Intersect(replacement, ref ray, 0f, 10f, stack, out _, out _));
+            AssertTriangleEqual(originalBefore, triangles[0]);
+            AssertTriangleEqual(replacementBefore, replacement[0]);
+            AssertSentinelStack(stack);
+        }
+
+        /// <summary>
+        /// Ensures a shorter replacement triangle array is rejected even when the ray would miss before indexing it.
+        /// </summary>
+        [Fact]
+        public void Traversal_rejects_shorter_replacement_array_before_traversal() {
+            SoftwareTriangle[] triangles = CreateLineTriangles(5);
+            SoftwareTriangle[] replacement = new SoftwareTriangle[4];
+            Array.Copy(triangles, replacement, replacement.Length);
+            SoftwareTriangle originalBefore = triangles[0];
+            SoftwareTriangle replacementBefore = replacement[0];
+            SoftwareRay ray = new SoftwareRay(new float3(100f, 100f, 100f), new float3(0f, 0f, 1f));
+            int[] stack = CreateSentinelStack();
+
+            using SoftwareBvh bvh = SoftwareBvh.Build(triangles);
+            Assert.Throws<ArgumentException>(() => bvh.Intersect(replacement, ref ray, 0f, 10f, stack, out _, out _));
+            AssertTriangleEqual(originalBefore, triangles[0]);
+            AssertTriangleEqual(replacementBefore, replacement[0]);
+            AssertSentinelStack(stack);
+        }
+
+        /// <summary>
+        /// Ensures disposal clears the retained original triangle reference after releasing owned arrays.
+        /// </summary>
+        [Fact]
+        public void Dispose_clears_retained_original_triangle_reference() {
+            SoftwareTriangle[] triangles = CreateLineTriangles(5);
+            using SoftwareBvh bvh = SoftwareBvh.Build(triangles);
+            FieldInfo sourceField = FindTriangleSourceField();
+
+            Assert.Same(triangles, sourceField.GetValue(bvh));
+            bvh.Dispose();
+            Assert.Null(sourceField.GetValue(bvh));
+        }
+
+        /// <summary>
         /// Ensures disposal releases only BVH-owned arrays, is idempotent, and blocks later traversal.
         /// </summary>
         [Fact]
@@ -505,6 +559,58 @@ namespace city.tests {
                 centroid,
                 boundsMin,
                 boundsMax);
+        }
+
+        /// <summary>
+        /// Creates a caller stack filled with a value that reveals pre-traversal writes.
+        /// </summary>
+        /// <returns>A fixed-capacity sentinel stack.</returns>
+        static int[] CreateSentinelStack() {
+            int[] stack = new int[SoftwareBvh.TraversalStackCapacity];
+            for (int i = 0; i < stack.Length; i++) {
+                stack[i] = 0x13579BDF;
+            }
+            return stack;
+        }
+
+        /// <summary>
+        /// Asserts that a caller stack retains every sentinel entry.
+        /// </summary>
+        /// <param name="stack">Caller stack to inspect.</param>
+        static void AssertSentinelStack(int[] stack) {
+            for (int i = 0; i < stack.Length; i++) {
+                Assert.Equal(0x13579BDF, stack[i]);
+            }
+        }
+
+        /// <summary>
+        /// Locates the private retained source triangle reference without relying on its field name.
+        /// </summary>
+        /// <returns>The single private SoftwareTriangle array field.</returns>
+        static FieldInfo FindTriangleSourceField() {
+            FieldInfo[] fields = typeof(SoftwareBvh).GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+            for (int i = 0; i < fields.Length; i++) {
+                if (fields[i].FieldType == typeof(SoftwareTriangle[])) {
+                    return fields[i];
+                }
+            }
+            throw new InvalidOperationException("SoftwareBvh must retain its exact source triangle array.");
+        }
+
+        /// <summary>
+        /// Compares every compact triangle field to prove caller content was not changed.
+        /// </summary>
+        /// <param name="expected">Triangle captured before traversal.</param>
+        /// <param name="actual">Triangle captured after rejected traversal.</param>
+        static void AssertTriangleEqual(SoftwareTriangle expected, SoftwareTriangle actual) {
+            Assert.Equal(expected.P0, actual.P0);
+            Assert.Equal(expected.Edge1, actual.Edge1);
+            Assert.Equal(expected.Edge2, actual.Edge2);
+            Assert.Equal(expected.GeometricNormal, actual.GeometricNormal);
+            Assert.Equal(expected.MaterialIndex, actual.MaterialIndex);
+            Assert.Equal(expected.Centroid, actual.Centroid);
+            Assert.Equal(expected.BoundsMin, actual.BoundsMin);
+            Assert.Equal(expected.BoundsMax, actual.BoundsMax);
         }
 
         /// <summary>

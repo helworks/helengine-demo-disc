@@ -162,6 +162,11 @@ namespace city.rendering {
         int[] triangleOrder;
 
         /// <summary>
+        /// Exact source triangle array borrowed from the caller; its contents must remain immutable for the BVH lifetime.
+        /// </summary>
+        SoftwareTriangle[] sourceTriangles;
+
+        /// <summary>
         /// Maximum root-relative depth recorded during construction.
         /// </summary>
         readonly int maximumDepth;
@@ -213,16 +218,18 @@ namespace city.rendering {
         /// <param name="nodes">Flat node array owned by the BVH.</param>
         /// <param name="triangleOrder">Triangle-order array owned by the BVH.</param>
         /// <param name="maximumDepth">Maximum root-relative build depth.</param>
-        SoftwareBvh(SoftwareBvhNode[] nodes, int[] triangleOrder, int maximumDepth) {
+        /// <param name="sourceTriangles">Exact source triangle array retained by reference for traversal identity validation.</param>
+        SoftwareBvh(SoftwareBvhNode[] nodes, int[] triangleOrder, int maximumDepth, SoftwareTriangle[] sourceTriangles) {
             this.nodes = nodes;
             this.triangleOrder = triangleOrder;
             this.maximumDepth = maximumDepth;
+            this.sourceTriangles = sourceTriangles;
         }
 
         /// <summary>
         /// Builds one deterministic median-split BVH over finite compact triangle bounds.
         /// </summary>
-        /// <param name="triangles">Validated triangles to index; the caller retains ownership.</param>
+        /// <param name="triangles">Validated triangles to index; the caller retains ownership and must keep this exact array instance and its contents immutable for the BVH lifetime.</param>
         /// <returns>A compact deterministic BVH owning only its nodes and order array.</returns>
         public static SoftwareBvh Build(SoftwareTriangle[] triangles) {
             if (triangles == null) {
@@ -246,7 +253,7 @@ namespace city.rendering {
                 throw new InvalidOperationException("The deterministic BVH node prepass did not match its build.");
             }
             ValidateMaximumDepth(maximumDepth);
-            return new SoftwareBvh(nodes, order, maximumDepth);
+            return new SoftwareBvh(nodes, order, maximumDepth, triangles);
         }
 
         /// <summary>
@@ -260,6 +267,7 @@ namespace city.rendering {
             disposed = true;
             nodes = Array.Empty<SoftwareBvhNode>();
             triangleOrder = Array.Empty<int>();
+            sourceTriangles = null;
         }
 
         /// <summary>
@@ -362,15 +370,48 @@ namespace city.rendering {
         /// <param name="count">Number of order slots.</param>
         /// <param name="axis">Centroid axis used as the primary key.</param>
         static void SortTriangleOrder(SoftwareTriangle[] triangles, int[] order, int start, int count, int axis) {
-            for (int i = start + 1; i < start + count; i++) {
-                int candidate = order[i];
-                int j = i - 1;
-                while (j >= start && CompareTriangleOrder(triangles, order[j], candidate, axis) > 0) {
-                    order[j + 1] = order[j];
-                    j--;
-                }
-                order[j + 1] = candidate;
+            for (int root = (count / 2) - 1; root >= 0; root--) {
+                SiftDownTriangleOrder(triangles, order, start, count, root, axis);
             }
+            for (int last = count - 1; last > 0; last--) {
+                SwapTriangleOrder(order, start, start + last);
+                SiftDownTriangleOrder(triangles, order, start, last, 0, axis);
+            }
+        }
+
+        /// <summary>
+        /// Restores the max-heap property below one relative order slot.
+        /// </summary>
+        /// <param name="triangles">Source triangles.</param>
+        /// <param name="order">Mutable original-index order.</param>
+        /// <param name="start">First absolute order slot.</param>
+        /// <param name="length">Heap length from the first slot.</param>
+        /// <param name="root">Relative root slot to sift down.</param>
+        /// <param name="axis">Centroid axis used as the primary key.</param>
+        static void SiftDownTriangleOrder(SoftwareTriangle[] triangles, int[] order, int start, int length, int root, int axis) {
+            while (root < length / 2) {
+                int child = (root * 2) + 1;
+                if (child + 1 < length && CompareTriangleOrder(triangles, order[start + child], order[start + child + 1], axis) < 0) {
+                    child++;
+                }
+                if (CompareTriangleOrder(triangles, order[start + root], order[start + child], axis) >= 0) {
+                    return;
+                }
+                SwapTriangleOrder(order, start + root, start + child);
+                root = child;
+            }
+        }
+
+        /// <summary>
+        /// Swaps two absolute triangle-order slots without allocating.
+        /// </summary>
+        /// <param name="order">Mutable original-index order.</param>
+        /// <param name="left">First absolute slot.</param>
+        /// <param name="right">Second absolute slot.</param>
+        static void SwapTriangleOrder(int[] order, int left, int right) {
+            int temporary = order[left];
+            order[left] = order[right];
+            order[right] = temporary;
         }
 
         /// <summary>
@@ -442,7 +483,7 @@ namespace city.rendering {
         /// <summary>
         /// Traverses the compact nodes with caller-owned fixed-capacity scratch and returns the nearest hit.
         /// </summary>
-        /// <param name="triangles">Triangles referenced by this BVH; the caller retains ownership.</param>
+        /// <param name="triangles">The exact triangle array instance supplied to Build; the caller retains ownership and must keep its contents immutable for the BVH lifetime.</param>
         /// <param name="ray">Ray to trace; its direction is used as supplied.</param>
         /// <param name="minimumDistance">Inclusive lower ray-parameter bound.</param>
         /// <param name="maximumDistance">Inclusive upper ray-parameter bound.</param>
@@ -458,6 +499,9 @@ namespace city.rendering {
             }
             if (triangles == null) {
                 throw new ArgumentNullException(nameof(triangles));
+            }
+            if (!ReferenceEquals(triangles, sourceTriangles)) {
+                throw new ArgumentException("The supplied triangles must be the exact immutable array used to build this BVH.", nameof(triangles));
             }
             if (traversalStack == null) {
                 throw new ArgumentNullException(nameof(traversalStack));
