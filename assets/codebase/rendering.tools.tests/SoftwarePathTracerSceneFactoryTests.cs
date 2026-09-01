@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using city.rendering;
 using city.menu;
 using city.rendering.tools;
@@ -83,7 +84,9 @@ namespace city.tests {
                     .Where(entity => entity.Components.OfType<SoftwarePathTracerComponent>().Any()));
             RecursiveScanModelSource source = new RecursiveScanModelSource(cubeReference);
 
-            SoftwareTraceScene scene = SoftwareTraceScene.Build(new[] { controllerEntity }, source);
+            List<Entity> sceneRoots = new List<Entity>();
+            sceneRoots.Add(controllerEntity);
+            SoftwareTraceScene scene = SoftwareTraceScene.Build(sceneRoots, source);
 
             Assert.Equal(8 * 12, scene.Triangles.Length);
             Assert.Equal(1, source.LoadCount);

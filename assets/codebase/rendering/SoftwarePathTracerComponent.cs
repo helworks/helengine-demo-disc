@@ -39,7 +39,10 @@ namespace city.rendering {
         /// </summary>
         /// <param name="renderManager2D">Exact renderer instance that owns the presentation texture.</param>
         public SoftwarePathTraceSession(RenderManager2D renderManager2D) {
-            this.renderManager2D = renderManager2D ?? throw new ArgumentNullException(nameof(renderManager2D));
+            if (renderManager2D == null) {
+                throw new ArgumentNullException(nameof(renderManager2D));
+            }
+            this.renderManager2D = renderManager2D;
             state = SoftwarePathTraceSessionState.Uninitialized;
         }
 
@@ -77,7 +80,7 @@ namespace city.rendering {
         /// <param name="exposure">Positive tone-mapping exposure.</param>
         /// <param name="allocator">Optional progressive allocation seam.</param>
         public void Initialize(
-            IReadOnlyList<Entity> sceneRoots,
+            List<Entity> sceneRoots,
             ISoftwareModelAssetSource modelSource,
             SoftwareTraceResolution resolution,
             SoftwareTraceCamera camera,
@@ -130,7 +133,7 @@ namespace city.rendering {
                 ObservePeak(steadyStateOwnedBytes);
                 state = SoftwarePathTraceSessionState.Tracing;
             }
-            catch (Exception exception) {
+            catch {
                 if (state == SoftwarePathTraceSessionState.Disposed) {
                     // A synchronous seam may dispose the session before the current stage returns
                     // its newly-created resource. Run one final rollback pass after that resource
@@ -139,10 +142,10 @@ namespace city.rendering {
                     throw;
                 }
 
-                failureMessage = CreateFailureMessage(exception);
+                failureMessage = "Software path tracing failed.";
                 CleanupOwnedResources();
                 state = SoftwarePathTraceSessionState.Failed;
-                throw new InvalidOperationException(failureMessage, exception);
+                throw new InvalidOperationException(failureMessage);
             }
         }
 
@@ -167,11 +170,11 @@ namespace city.rendering {
                     tracer.TileRowPitch);
                 return tile;
             }
-            catch (Exception exception) {
-                failureMessage = CreateFailureMessage(exception);
+            catch {
+                failureMessage = "Software path tracing failed.";
                 CleanupOwnedResources();
                 state = SoftwarePathTraceSessionState.Failed;
-                throw new InvalidOperationException(failureMessage, exception);
+                throw new InvalidOperationException(failureMessage);
             }
         }
 
@@ -191,7 +194,7 @@ namespace city.rendering {
         /// Validates all non-engine initialization inputs before taking ownership of resources.
         /// </summary>
         static void ValidateInitializationArguments(
-            IReadOnlyList<Entity> sceneRoots,
+            List<Entity> sceneRoots,
             ISoftwareModelAssetSource modelSource,
             SoftwareTraceResolution resolution,
             SoftwareTraceCamera camera,
@@ -293,18 +296,11 @@ namespace city.rendering {
         /// <summary>Rejects callbacks that dispose the session while staged initialization is still running.</summary>
         void ThrowIfDisposedDuringInitialization() {
             if (state == SoftwarePathTraceSessionState.Disposed) {
-                throw new ObjectDisposedException(nameof(SoftwarePathTraceSession));
+                throw new InvalidOperationException("The software path trace session has been disposed.");
             }
         }
 
-        /// <summary>Builds one stable non-empty diagnostic message from a stage failure.</summary>
-        static string CreateFailureMessage(Exception exception) {
-            string detail = exception == null ? string.Empty : exception.Message;
-            return string.IsNullOrWhiteSpace(detail)
-                ? "Software path tracing failed."
-                : "Software path tracing failed: " + detail;
         }
-    }
 
     /// <summary>
     /// Drives one authored DemoDisc software path tracing presentation.
@@ -362,7 +358,14 @@ namespace city.rendering {
                 : (session == null ? SoftwarePathTraceSessionState.Uninitialized : session.State));
 
         /// <summary>Completed progressive samples per pixel.</summary>
-        public int CompletedSpp => session?.Tracer?.CompletedPasses ?? 0;
+        public int CompletedSpp {
+            get {
+                if (session == null || session.Tracer == null) {
+                    return 0;
+                }
+                return session.Tracer.CompletedPasses;
+            }
+        }
 
         /// <summary>Elapsed trace seconds measured from Core.TotalElapsedSeconds.</summary>
         public double ElapsedTraceSeconds {
@@ -375,7 +378,14 @@ namespace city.rendering {
         }
 
         /// <summary>Total primary, bounce, and shadow rays launched.</summary>
-        public long TotalRays => session?.Tracer?.RayCount ?? 0L;
+        public long TotalRays {
+            get {
+                if (session == null || session.Tracer == null) {
+                    return 0L;
+                }
+                return session.Tracer.RayCount;
+            }
+        }
 
         /// <summary>Total rays divided by finite positive elapsed trace seconds.</summary>
         public double RaysPerSecond => ElapsedTraceSeconds > 0d && double.IsFinite(ElapsedTraceSeconds)
@@ -383,13 +393,34 @@ namespace city.rendering {
             : 0d;
 
         /// <summary>Samples discarded because a non-finite intermediate value was observed.</summary>
-        public long NonFiniteSampleCount => session?.Tracer?.NonFiniteSampleCount ?? 0L;
+        public long NonFiniteSampleCount {
+            get {
+                if (session == null || session.Tracer == null) {
+                    return 0L;
+                }
+                return session.Tracer.NonFiniteSampleCount;
+            }
+        }
 
         /// <summary>Explicit initialization peak bytes, excluding runtime/backend allocator overhead.</summary>
-        public long InitializationPeakOwnedBytes => session?.InitializationPeakOwnedBytes ?? 0L;
+        public long InitializationPeakOwnedBytes {
+            get {
+                if (session == null) {
+                    return 0L;
+                }
+                return session.InitializationPeakOwnedBytes;
+            }
+        }
 
         /// <summary>Explicit steady-state bytes, excluding runtime/backend allocator overhead.</summary>
-        public long SteadyStateOwnedBytes => session?.SteadyStateOwnedBytes ?? 0L;
+        public long SteadyStateOwnedBytes {
+            get {
+                if (session == null) {
+                    return 0L;
+                }
+                return session.SteadyStateOwnedBytes;
+            }
+        }
 
         /// <summary>Whether Return has been consumed by this component lifetime.</summary>
         public bool ReturnRequested => returnRequested;
@@ -444,8 +475,10 @@ namespace city.rendering {
                     TraceCameraRight,
                     TraceCameraUp,
                     VerticalFieldOfViewDegrees);
+                List<Entity> sceneRoots = new List<Entity>();
+                sceneRoots.Add(Parent);
                 session.Initialize(
-                    new[] { Parent },
+                    sceneRoots,
                     new ContentSoftwareModelAssetSource(OwnerCore.ContentManager),
                     resolution,
                     camera,
@@ -456,10 +489,13 @@ namespace city.rendering {
                 lastHudSpp = -1;
                 RefreshHud(true);
             }
-            catch (Exception exception) {
-                componentFailureMessage = string.IsNullOrWhiteSpace(session?.FailureMessage)
-                    ? CreateComponentFailureMessage(exception)
-                    : session.FailureMessage;
+            catch {
+                if (session == null || string.IsNullOrWhiteSpace(session.FailureMessage)) {
+                    componentFailureMessage = CreateComponentFailureMessage();
+                }
+                else {
+                    componentFailureMessage = session.FailureMessage;
+                }
                 if (outputSprite != null) {
                     outputSprite.Texture = null;
                 }
@@ -491,8 +527,13 @@ namespace city.rendering {
             try {
                 session.RenderAndUploadNextTile();
             }
-            catch (Exception exception) {
-                componentFailureMessage = session.FailureMessage ?? CreateComponentFailureMessage(exception);
+            catch {
+                if (session == null || string.IsNullOrWhiteSpace(session.FailureMessage)) {
+                    componentFailureMessage = CreateComponentFailureMessage();
+                }
+                else {
+                    componentFailureMessage = session.FailureMessage;
+                }
                 if (outputSprite != null) {
                     outputSprite.Texture = null;
                 }
@@ -663,7 +704,14 @@ namespace city.rendering {
                 return;
             }
             if (currentState == SoftwarePathTraceSessionState.Failed) {
-                sppText.Text = "Trace error: " + (session?.FailureMessage ?? componentFailureMessage ?? "Software path tracing failed.");
+                string failure = componentFailureMessage;
+                if (session != null && !string.IsNullOrWhiteSpace(session.FailureMessage)) {
+                    failure = session.FailureMessage;
+                }
+                if (string.IsNullOrWhiteSpace(failure)) {
+                    failure = CreateComponentFailureMessage();
+                }
+                sppText.Text = "Trace error: " + failure;
             }
             else {
                 sppText.Text = FormatSpp(spp);
@@ -702,11 +750,8 @@ namespace city.rendering {
         }
 
         /// <summary>Builds one stable component-side initialization error.</summary>
-        static string CreateComponentFailureMessage(Exception exception) {
-            string detail = exception == null ? string.Empty : exception.Message;
-            return string.IsNullOrWhiteSpace(detail)
-                ? "Software path tracing failed."
-                : "Software path tracing failed: " + detail;
+        static string CreateComponentFailureMessage() {
+            return "Software path tracing failed.";
         }
     }
 }

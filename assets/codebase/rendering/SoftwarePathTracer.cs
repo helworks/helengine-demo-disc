@@ -66,7 +66,7 @@ namespace city.rendering {
                 return new SoftwareTraceResolution(320, 240);
             }
 
-            throw new ArgumentOutOfRangeException(nameof(platformId), platformId, "The platform is not supported by the software path tracer.");
+            throw new ArgumentOutOfRangeException(nameof(platformId), "The platform is not supported by the software path tracer.");
         }
     }
 
@@ -344,7 +344,7 @@ namespace city.rendering {
         /// <param name="name">Argument name for the exception.</param>
         static void ValidateUnitSample(float value, string name) {
             if (!float.IsFinite(value) || value < 0f || value >= 1f) {
-                throw new ArgumentOutOfRangeException(name, value, "Sampler inputs must be finite and in the half-open unit interval.");
+                throw new ArgumentOutOfRangeException(name, "Sampler inputs must be finite and in the half-open unit interval.");
             }
         }
 
@@ -724,9 +724,9 @@ namespace city.rendering {
                 this.tileRgba8 = allocatedTile;
                 this.progressiveInitialized = true;
             }
-            catch (Exception exception) {
+            catch {
                 ResetProgressiveState();
-                throw new InvalidOperationException(ProgressiveAllocationFailureMessage, exception);
+                throw new InvalidOperationException(ProgressiveAllocationFailureMessage);
             }
         }
 
@@ -1155,7 +1155,7 @@ namespace city.rendering {
 
             float srgb = mapped <= 0.0031308f
                 ? 12.92f * mapped
-                : (1.055f * (float)Math.Pow(mapped, 1f / 2.4f)) - 0.055f;
+                : (1.055f * ApproximatePowerFiveTwelfths(mapped)) - 0.055f;
             if (!float.IsFinite(srgb) || srgb <= 0f) {
                 return 0;
             }
@@ -1171,6 +1171,20 @@ namespace city.rendering {
                 return 255;
             }
             return (byte)quantized;
+        }
+
+        /// <summary>
+        /// Computes x^(5/12) for one positive scalar using fixed Newton iterations and square roots.
+        /// </summary>
+        /// <param name="value">Positive scalar in the tone-mapping range.</param>
+        /// <returns>A deterministic approximation of the sRGB transfer exponent.</returns>
+        static float ApproximatePowerFiveTwelfths(float value) {
+            float quarterRoot = (float)Math.Sqrt((float)Math.Sqrt(value));
+            float cubeRoot = quarterRoot;
+            for (int iteration = 0; iteration < 6; iteration++) {
+                cubeRoot = ((2f * cubeRoot) + (quarterRoot / (cubeRoot * cubeRoot))) / 3f;
+            }
+            return cubeRoot * cubeRoot * cubeRoot * cubeRoot * cubeRoot;
         }
 
         /// <summary>

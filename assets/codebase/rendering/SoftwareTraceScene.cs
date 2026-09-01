@@ -277,7 +277,7 @@ namespace city.rendering {
         /// </summary>
         /// <param name="entities">Entities whose attached software model components are consumed.</param>
         /// <param name="source">Source that returns owned raw model assets.</param>
-        public SoftwareTraceScene(IReadOnlyList<Entity> entities, ISoftwareModelAssetSource source) {
+        public SoftwareTraceScene(List<Entity> entities, ISoftwareModelAssetSource source) {
             if (entities == null) {
                 throw new ArgumentNullException(nameof(entities));
             }
@@ -351,7 +351,7 @@ namespace city.rendering {
         /// <param name="entities">Entities whose attached software model components are consumed.</param>
         /// <param name="source">Source that returns owned raw model assets.</param>
         /// <returns>A compact software trace scene.</returns>
-        public static SoftwareTraceScene Build(IReadOnlyList<Entity> entities, ISoftwareModelAssetSource source) {
+        public static SoftwareTraceScene Build(List<Entity> entities, ISoftwareModelAssetSource source) {
             return new SoftwareTraceScene(entities, source);
         }
 
@@ -361,7 +361,7 @@ namespace city.rendering {
         /// <param name="entities">Entities whose attached software model components are consumed.</param>
         /// <param name="source">Source that returns owned raw model assets.</param>
         /// <returns>A compact software trace scene.</returns>
-        public static SoftwareTraceScene Create(IReadOnlyList<Entity> entities, ISoftwareModelAssetSource source) {
+        public static SoftwareTraceScene Create(List<Entity> entities, ISoftwareModelAssetSource source) {
             return new SoftwareTraceScene(entities, source);
         }
 
@@ -662,8 +662,14 @@ namespace city.rendering {
                 return false;
             }
 
-            float3[] firstPoints = { first.P0, first.P0 + first.Edge1, first.P0 + first.Edge2 };
-            float3[] secondPoints = { second.P0, second.P0 + second.Edge1, second.P0 + second.Edge2 };
+            float3[] firstPoints = new float3[3];
+            firstPoints[0] = first.P0;
+            firstPoints[1] = first.P0 + first.Edge1;
+            firstPoints[2] = first.P0 + first.Edge2;
+            float3[] secondPoints = new float3[3];
+            secondPoints[0] = second.P0;
+            secondPoints[1] = second.P0 + second.Edge1;
+            secondPoints[2] = second.P0 + second.Edge2;
             float3[] points = new float3[4];
             int pointCount = 0;
             int sharedCount = 0;
@@ -837,7 +843,7 @@ namespace city.rendering {
             /// <summary>
             /// Entity owning the component.
             /// </summary>
-            public readonly Entity Entity;
+            public readonly Entity OwnerEntity;
             /// <summary>
             /// Attached authored software model component.
             /// </summary>
@@ -853,7 +859,7 @@ namespace city.rendering {
             /// <param name="entity">Owning entity.</param>
             /// <param name="component">Attached software component.</param>
             public ModelInstance(Entity entity, SoftwareModelComponent component) {
-                Entity = entity;
+                OwnerEntity = entity;
                 Component = component;
                 WorldTransform = entity.WorldTransformMatrix;
             }

@@ -497,7 +497,7 @@ namespace city.tests {
             Assert.NotSame(ownedNodes, bvh.Nodes);
             Assert.NotSame(ownedOrder, bvh.TriangleOrder);
             SoftwareRay ray = new SoftwareRay(new float3(0f, 0f, 1f), new float3(0f, 0f, -1f));
-            Assert.Throws<ObjectDisposedException>(() => bvh.Intersect(triangles, ref ray, 0f, 10f, stack, out _, out _));
+            Assert.Throws<InvalidOperationException>(() => bvh.Intersect(triangles, ref ray, 0f, 10f, stack, out _, out _));
         }
 
         /// <summary>

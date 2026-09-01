@@ -476,7 +476,7 @@ namespace city.rendering {
         /// <param name="depth">Root-relative maximum depth to validate.</param>
         static void ValidateMaximumDepth(int depth) {
             if (depth < 0 || depth >= TraversalStackCapacity) {
-                throw new ArgumentOutOfRangeException(nameof(depth), depth, "The software BVH exceeds the fixed traversal stack capacity.");
+                throw new ArgumentOutOfRangeException(nameof(depth), "The software BVH exceeds the fixed traversal stack capacity.");
             }
         }
 
@@ -495,7 +495,7 @@ namespace city.rendering {
             hit = default;
             triangleIndex = -1;
             if (disposed) {
-                throw new ObjectDisposedException(nameof(SoftwareBvh));
+                throw new InvalidOperationException("The software BVH has been disposed.");
             }
             if (triangles == null) {
                 throw new ArgumentNullException(nameof(triangles));
