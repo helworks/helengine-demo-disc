@@ -10,6 +10,7 @@
 
 - [ ] Assert `C:\dev\helworks\helengine\user_settings\platforms.json` resolves Windows `builderAssemblyPath` to `C:\dev\helworks\helengine-windows\builder\bin\Debug\net9.0\helengine.windows.builder.dll` and `playerSourceRootPath` to `C:\dev\helworks\helengine-windows`.
 - [ ] Build the Windows builder project if its DLL is missing or older than its source, passing `-p:HelEngineRoot=C:\dev\helprojs\.worktrees\helengine-software-path-tracer-engine-seams` so the existing builder compiles against the accepted engine seams; do not substitute another repository.
+- [ ] Compare DemoDisc `requiredEngineVersion` with the shared platform entry before building. When they differ, do not mutate the shared installation registry or weaken exact-version filtering. Create an uncommitted, Windows-only build manifest at `user_settings/windows-dx11-build-platforms/platforms.json` whose entry uses DemoDisc's existing required version and absolute paths to the verified Windows builder, player source, generated-core output, and codegen tool. This is isolated build input, not a project asset.
 - [ ] Parse DemoDisc `user_settings/build_config.json` and require the Windows block's `selectedGraphicsProfileId` to be `directx11` and selected build profile to be `release`.
 - [ ] Ensure `HELENGINE_RENDER_BACKEND` and `HELENGINE_ENABLE_EXPERIMENTAL_VULKAN` are not set to the explicit Vulkan opt-in pair for the build process. Preserve the gated Vulkan code; simply do not select it.
 - [ ] Verify the accepted generated `software_path_tracer.helen` and regenerated DemoDisc main-menu asset exist before packaging.
@@ -19,7 +20,7 @@
 - [ ] Use the existing engine wrapper and Windows builder with the isolated worktree project:
 
 ```powershell
-$env:HELENGINE_ENGINE_USER_SETTINGS_ROOT = "C:\dev\helworks\helengine\user_settings"
+$env:HELENGINE_ENGINE_USER_SETTINGS_ROOT = "C:\dev\helprojs\demodisc\.worktrees\software-path-tracer-core\user_settings\windows-dx11-build-platforms"
 rtk dotnet run --project C:\dev\helprojs\.worktrees\helengine-software-path-tracer-engine-seams\tools\build-waiter\helengine.buildwaiter.csproj -- \
   --output C:\dev\helprojs\demodisc\.worktrees\software-path-tracer-core\windows-build \
   --require helengine_windows.exe \
@@ -31,7 +32,7 @@ rtk dotnet run --project C:\dev\helprojs\.worktrees\helengine-software-path-trac
   -Output C:\dev\helprojs\demodisc\.worktrees\software-path-tracer-core\windows-build
 ```
 
-The wrapper and editor must come from the accepted engine-seams worktree so `HELENGINE_SOURCE_ROOT` points native code generation at the CPU-readable model, runtime deserializer, and texture-region upload changes. The process-scoped `HELENGINE_ENGINE_USER_SETTINGS_ROOT` override deliberately keeps platform installation discovery on the shared main checkout, where the existing relative paths resolve to `C:\dev\helworks\helengine-windows` and the installed codegen tool. Do not launch the wrapper from engine `main`, and do not rewrite either platform manifest merely to accommodate the worktree path.
+The wrapper and editor must come from the accepted engine-seams worktree so `HELENGINE_SOURCE_ROOT` points native code generation at the CPU-readable model, runtime deserializer, and texture-region upload changes. The process-scoped `HELENGINE_ENGINE_USER_SETTINGS_ROOT` override points platform discovery at the isolated Windows-only manifest, whose absolute payload paths still select `C:\dev\helworks\helengine-windows` and the installed codegen tool. This preserves the shared installation registry and the project's existing engine pin while binding all executable build inputs to the accepted source worktree. Do not launch the wrapper from engine `main`, weaken version matching, or rewrite the shared platform manifest.
 
 - [ ] Require wrapper exit code `0`, a fresh nonempty `windows-build\helengine_windows.exe`, and no `codegen.exe` application-error dialog. If codegen fails, capture the console/build-state evidence and diagnose the first failing stage instead of rerunning blindly.
 
@@ -43,6 +44,7 @@ The wrapper and editor must come from the accepted engine-seams worktree so `HEL
 - [ ] Confirm the software scene did not duplicate an ordinary GPU/runtime model payload for each of the eight instances.
 - [ ] Confirm no tracer-specific writable cache/checkpoint/image directory is created in the package.
 - [ ] Retain the build terminal state/log paths and artifact timestamp as completion evidence.
+- [ ] Do not commit `user_settings/windows-dx11-build-platforms`; retain it only as local build evidence alongside the uncommitted Windows output.
 
 ## Task 4: Launch and smoke the DX11 artifact
 
