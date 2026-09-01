@@ -7,6 +7,35 @@ namespace city.tests {
     /// </summary>
     public sealed class SoftwareTraceSceneTests {
         /// <summary>
+        /// Requires recursive instance collection to borrow its destination list without retaining it.
+        /// </summary>
+        [Fact]
+        public void Collect_instances_destination_declares_native_no_escape() {
+            System.Reflection.MethodInfo method = typeof(SoftwareTraceScene).GetMethod(
+                "CollectInstances",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+
+            Assert.NotNull(method);
+            Assert.Equal("CollectInstances", method.Name);
+            Assert.True(method.IsStatic);
+            Assert.False(method.IsGenericMethod);
+            Assert.Equal(typeof(void), method.ReturnType);
+            Assert.Equal(2, method.GetParameters().Length);
+
+            System.Reflection.ParameterInfo[] parameters = method.GetParameters();
+            System.Reflection.ParameterInfo instances = null;
+            for (int index = 0; index < parameters.Length; index++) {
+                if (string.Equals(parameters[index].Name, "instances", System.StringComparison.Ordinal)) {
+                    instances = parameters[index];
+                    break;
+                }
+            }
+
+            Assert.NotNull(instances);
+            Assert.NotEmpty(instances.GetCustomAttributes(typeof(NativeNoEscapeAttribute), false));
+        }
+
+        /// <summary>
         /// Ensures equal references share one owned raw load while every entity still produces triangles.
         /// </summary>
         [Fact]

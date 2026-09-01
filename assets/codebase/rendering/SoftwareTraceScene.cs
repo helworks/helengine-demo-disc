@@ -370,7 +370,7 @@ namespace city.rendering {
         /// </summary>
         /// <param name="entity">Entity to inspect.</param>
         /// <param name="instances">Destination instance list.</param>
-        static void CollectInstances(Entity entity, List<ModelInstance> instances) {
+        static void CollectInstances(Entity entity, [NativeNoEscape] List<ModelInstance> instances) {
             if (entity == null) {
                 throw new InvalidOperationException("Software trace scene entity entries cannot be null.");
             }
