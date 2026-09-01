@@ -27,6 +27,22 @@ namespace city.tests {
         }
 
         /// <summary>
+        /// Requires the private generic component lookup to declare that it returns an entity-owned component borrow.
+        /// </summary>
+        [Fact]
+        public void Find_required_component_return_declares_native_borrowing() {
+            System.Reflection.MethodInfo method = typeof(SoftwarePathTracerComponent).GetMethod(
+                "FindRequiredComponent",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+            Assert.NotNull(method);
+            Assert.Equal("FindRequiredComponent", method.Name);
+            Assert.True(method.IsGenericMethodDefinition);
+            Assert.Equal(1, method.GetGenericArguments().Length);
+            Assert.NotEmpty(method.GetCustomAttributes(typeof(NativeBorrowedReturnAttribute), false));
+        }
+
+        /// <summary>
         /// Ensures the presentation texture is built at the exact requested dimensions and is opaque.
         /// </summary>
         [Fact]

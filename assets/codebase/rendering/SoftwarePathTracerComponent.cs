@@ -592,6 +592,7 @@ namespace city.rendering {
         }
 
         /// <summary>Resolves exactly one entity/component matching a stable runtime scene id.</summary>
+        [NativeBorrowedReturn]
         T FindRequiredComponent<T>(SceneEntityReference entityReference, string description, out Entity resolvedEntity) where T : Component {
             resolvedEntity = null;
             int matches = 0;
