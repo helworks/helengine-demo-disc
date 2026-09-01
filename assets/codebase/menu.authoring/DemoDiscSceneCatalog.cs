@@ -19,6 +19,7 @@ namespace city.menu {
                 new MenuItemDefinition("scene-pbr-material-gallery", "PBR Material Gallery", true, new MenuActionDefinition(MenuActionKind.LoadScene, "pbr_material_gallery")),
                 new MenuItemDefinition("scene-pbr-textured-showcase", "PBR Textured Showcase", true, new MenuActionDefinition(MenuActionKind.LoadScene, "pbr_textured_showcase")),
                 new MenuItemDefinition("scene-pbr-shadow-theater", "PBR Shadow Theater", true, new MenuActionDefinition(MenuActionKind.LoadScene, "pbr_shadow_theater")),
+                new MenuItemDefinition("scene-software-path-tracer", "Software Path Tracer", true, new MenuActionDefinition(MenuActionKind.LoadScene, "software_path_tracer")),
                 new MenuItemDefinition("scene-back", "Back", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))
             };
         }

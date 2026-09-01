@@ -311,7 +311,8 @@
                 "Directional Shadow Plaza",
                 "PBR Material Gallery",
                 "PBR Textured Showcase",
-                "PBR Shadow Theater"
+                "PBR Shadow Theater",
+                "Software Path Tracer"
               ],
               "minimumMatches": 2
             }
@@ -860,13 +861,67 @@
           ]
         },
         {
+          "id": "node-demodisc-rendering-software-path-tracer",
+          "type": "menu_item",
+          "name": "Software Path Tracer",
+          "description": "Launches the Software Path Tracer rendering showcase.",
+          "text": "Software Path Tracer",
+          "parentNodeId": null,
+          "order": 10,
+          "isOptional": false,
+          "interactions": [
+            {
+              "id": "node-demodisc-rendering-software-path-tracer-previous",
+              "kind": "move_previous",
+              "isDefault": false
+            },
+            {
+              "id": "node-demodisc-rendering-software-path-tracer-next",
+              "kind": "move_next",
+              "isDefault": false
+            },
+            {
+              "id": "node-demodisc-rendering-software-path-tracer-activate-surface-demodisc-showcase-scene",
+              "kind": "activate",
+              "isDefault": true,
+              "targetSurfaceId": "surface-demodisc-showcase-scene"
+            }
+          ],
+          "states": [
+            {
+              "name": "selected",
+              "recognition": {
+                "clues": [
+                  {
+                    "id": "node-demodisc-rendering-software-path-tracer-selected",
+                    "type": "highlighted_text",
+                    "weight": 1,
+                    "params": {
+                      "candidates": [
+                        "Software Path Tracer"
+                      ],
+                      "highlightColorHex": "#C993FF",
+                      "hueTolerance": 24,
+                      "minSaturation": 0.2,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
+                      "arrowOffsetX": -60,
+                      "arrowWidth": 40
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
           "id": "node-demodisc-rendering-back",
           "type": "menu_item",
           "name": "Back",
           "description": "Returns to the Demo Disc main menu.",
           "text": "Back",
           "parentNodeId": null,
-          "order": 10,
+          "order": 11,
           "isOptional": false,
           "interactions": [
             {
@@ -1308,6 +1363,7 @@
                 "PBR Material Gallery",
                 "PBR Textured Showcase",
                 "PBR Shadow Theater",
+                "Software Path Tracer",
                 "Stacked Boxes",
                 "Sphere Stack",
                 "Mixed Stack",
