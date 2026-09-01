@@ -1,3 +1,4 @@
+using city.testing;
 using helengine;
 using helengine.editor;
 
@@ -6,7 +7,7 @@ namespace city.tests {
     /// Verifies the committed console camera/light Blueprint has the requested serialized shape.
     /// </summary>
     public sealed class ConsoleCameraLightInstructionsBlueprintAssetGenerationTests {
-        const string BlueprintPath = @"C:\dev\helprojs\demodisc\assets\blueprints\ui\ConsoleCameraLightInstructions.hblueprint";
+        static readonly string BlueprintPath = DemoDiscTestProject.GetPath("assets", "blueprints", "ui", "ConsoleCameraLightInstructions.hblueprint");
 
         [Fact]
         public void Committed_console_blueprint_contains_only_the_camera_light_panel() {
@@ -34,22 +35,23 @@ namespace city.tests {
 
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/ps2/dpad.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/ps2/left_stick.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/ps2/r1.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/ps2/circle.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/gamecube/dpad.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/gamecube/control_stick.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/gamecube/r.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/gamecube/y.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/wii/dpad.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/wii/stick.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/wii/b.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/wii/2.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/switch/dpad.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/switch/left_stick.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/switch/r.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/switch/x.png");
         }
 
         [Theory]
-        [InlineData(@"C:\dev\helprojs\demodisc\assets\scenes\rendering\cube_test.helen")]
-        [InlineData(@"C:\dev\helprojs\demodisc\assets\scenes\physics\test_scene_dynamic_stack_boxes.helen")]
-        public void Generated_rendering_and_physics_scenes_attach_one_console_blueprint_root(string scenePath) {
+        [InlineData("assets/scenes/rendering/cube_test.helen")]
+        [InlineData("assets/scenes/physics/test_scene_dynamic_stack_boxes.helen")]
+        public void Generated_rendering_and_physics_scenes_attach_one_console_blueprint_root(string sceneRelativePath) {
+            string scenePath = DemoDiscTestProject.GetPath(sceneRelativePath);
             Assert.True(File.Exists(scenePath), $"Expected generated scene at '{scenePath}'.");
 
             using FileStream stream = File.OpenRead(scenePath);

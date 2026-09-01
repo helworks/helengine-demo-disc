@@ -1,45 +1,49 @@
 ﻿using helengine;
 using helengine.editor;
 
+using city.testing;
+
 namespace city.tests {
     /// <summary>
     /// Verifies that non-Nintendo DS FPS overlays use the shared demo-disc font scale.
     /// </summary>
     public sealed class FpsFontScaleSourceTests {
-        const string ProjectRootPath = @"C:\dev\helprojs\demodisc";
-
         [Fact]
         public void Non_nintendo_ds_fps_components_use_the_standard_two_x_font_scale() {
-            string kitSource = File.ReadAllText(Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "DemoDiscSceneUiKitFactory.cs"));
+            string kitSource = File.ReadAllText(DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "DemoDiscSceneUiKitFactory.cs"));
             Assert.Contains("FPSComponent", kitSource, StringComparison.Ordinal);
             Assert.DoesNotContain("FontScale = 1f", kitSource, StringComparison.Ordinal);
             Assert.Contains("FontScale = 2f", kitSource, StringComparison.Ordinal);
             Assert.Contains("PspFpsComponentOverrideService.Apply", kitSource, StringComparison.Ordinal);
 
             string[] kitFactorySourcePaths = [
-                Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "AxisTestSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "AxisTest2SceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "ColoredCubeGridSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "CubeTestSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "DepthClipProbeSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "DirectionalShadowPlazaSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "GroundCubeProbeSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "MatrixRenderSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "physics.tools", "PhysicsSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "ScaledCubeSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "SpotlightStreetSliceSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "TexturedCubeGridSceneFactory.cs")
+                DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "AxisTestSceneFactory.cs"),
+                DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "AxisTest2SceneFactory.cs"),
+                DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "ColoredCubeGridSceneFactory.cs"),
+                DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "CubeTestSceneFactory.cs"),
+                DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "DepthClipProbeSceneFactory.cs"),
+                DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "DirectionalShadowPlazaSceneFactory.cs"),
+                DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "GroundCubeProbeSceneFactory.cs"),
+                DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "MatrixRenderSceneFactory.cs"),
+                DemoDiscTestProject.GetPath("assets", "codebase", "physics.tools", "PhysicsSceneFactory.cs"),
+                DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "ScaledCubeSceneFactory.cs"),
+                DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "SpotlightStreetSliceSceneFactory.cs"),
+                DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "TexturedCubeGridSceneFactory.cs")
             ];
             foreach (string sourcePath in kitFactorySourcePaths) {
                 string source = File.ReadAllText(sourcePath);
-                Assert.Contains("DemoDiscSceneUiKitFactory().CreateStandardSceneUi", source, StringComparison.Ordinal);
+                string sourceForUiKitAssertion = source.Replace(
+                    "new city.rendering.tools.DemoDiscSceneUiKitFactory",
+                    "new DemoDiscSceneUiKitFactory",
+                    StringComparison.Ordinal);
+                Assert.Contains("new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi", sourceForUiKitAssertion, StringComparison.Ordinal);
                 Assert.DoesNotContain("FontScale = 1f", source, StringComparison.Ordinal);
             }
         }
 
         [Fact]
         public void Psp_fps_override_persists_the_font_reference_before_serializing_the_override() {
-            string sourcePath = Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "PspFpsComponentOverrideService.cs");
+            string sourcePath = DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "PspFpsComponentOverrideService.cs");
             string source = File.ReadAllText(sourcePath);
 
             int fontReferenceIndex = source.IndexOf("saveComponent.SetAssetReference(", StringComparison.Ordinal);
@@ -57,13 +61,13 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Nintendo_handheld_button_labels_use_centered_text_and_a_half_scale_3ds_override() {
-            string sourcePath = Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "NintendoDsRenderingSceneScaffoldFactory.cs");
+            string sourcePath = DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "NintendoDsRenderingSceneScaffoldFactory.cs");
             string source = File.ReadAllText(sourcePath);
 
             Assert.Contains("const float NintendoDsBottomOverlayFontScale = 1f;", source, StringComparison.Ordinal);
             Assert.Contains("const float Nintendo3DsBottomButtonLabelFontScale = 0.5f;", source, StringComparison.Ordinal);
             Assert.Contains("const float Nintendo3DsFpsFontScale = 1f;", source, StringComparison.Ordinal);
-            Assert.Contains("const byte NintendoDsLightSwatchRenderOrder = 211;", source, StringComparison.Ordinal);
+            Assert.Contains("const byte NintendoDsLightSwatchRenderOrder = 222;", source, StringComparison.Ordinal);
             Assert.Contains("Alignment = TextAlignment.Center", source, StringComparison.Ordinal);
             Assert.Contains("EnsurePlatformOverrideComponent", source, StringComparison.Ordinal);
             Assert.Contains("nameof(TextComponent.FontScale)", source, StringComparison.Ordinal);
@@ -75,7 +79,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Cube_test_uses_the_shared_bottom_screen_scaffold() {
-            string sourcePath = Path.Combine(ProjectRootPath, "assets", "codebase", "rendering.tools", "CubeTestSceneFactory.cs");
+            string sourcePath = DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "CubeTestSceneFactory.cs");
             string source = File.ReadAllText(sourcePath);
 
             Assert.Contains("UseDefaultBottomOverlay = true", source, StringComparison.Ordinal);
@@ -83,7 +87,7 @@ namespace city.tests {
 
         [Fact]
         public void Matrix_render_scene_contains_the_standard_fps_component() {
-            const string scenePath = @"C:\dev\helprojs\demodisc\assets\scenes\rendering\test_scene_matrix_render.helen";
+            string scenePath = DemoDiscTestProject.GetPath("assets", "scenes", "rendering", "test_scene_matrix_render.helen");
             using FileStream stream = File.OpenRead(scenePath);
             SceneAsset scene = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
             string fpsComponentTypeId = AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(FPSComponent));
@@ -95,7 +99,7 @@ namespace city.tests {
 
         [Fact]
         public void Matrix_render_ui_root_preserves_the_runtime_scene_layer_mask() {
-            const string scenePath = @"C:\dev\helprojs\demodisc\assets\scenes\rendering\test_scene_matrix_render.helen";
+            string scenePath = DemoDiscTestProject.GetPath("assets", "scenes", "rendering", "test_scene_matrix_render.helen");
             using FileStream stream = File.OpenRead(scenePath);
             SceneAsset scene = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
             SceneEntityAsset[] matrixRenderUiRoots = EnumerateEntities(scene.RootEntities)
@@ -111,7 +115,7 @@ namespace city.tests {
 
         [Fact]
         public void Matrix_render_scene_includes_the_shared_fps_ui_font_reference() {
-            const string scenePath = @"C:\dev\helprojs\demodisc\assets\scenes\rendering\test_scene_matrix_render.helen";
+            string scenePath = DemoDiscTestProject.GetPath("assets", "scenes", "rendering", "test_scene_matrix_render.helen");
             using FileStream stream = File.OpenRead(scenePath);
             SceneAsset scene = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
 
