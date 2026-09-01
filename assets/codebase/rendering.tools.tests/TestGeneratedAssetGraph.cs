@@ -102,6 +102,15 @@ namespace city.tests {
             return new RenderingTestRuntimeTexture { Width = data.Width, Height = data.Height };
         }
 
+        protected override void UpdateTextureRegionCore(
+            RuntimeTexture texture,
+            int x,
+            int y,
+            int width,
+            int height,
+            [NativeNoEscape] byte[] rgba8,
+            int sourceRowPitch) { }
+
         public override void DrawSprite(ISpriteDrawable2D sprite) { }
         public override void DrawText(ITextDrawable2D text) { }
         public override void DrawRoundedRect(IRoundedRectDrawable2D shape) { }
