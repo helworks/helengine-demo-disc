@@ -6,7 +6,7 @@ namespace city.tests {
         /// <summary>
         /// Absolute path to the authored runtime source root.
         /// </summary>
-        const string RuntimeSourceRootPath = @"C:\dev\helprojs\demodisc\assets\codebase";
+        static readonly string RuntimeSourceRootPath = global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase");
 
         /// <summary>
         /// Runtime source directories that may be compiled into console and handheld game cores.
@@ -36,6 +36,16 @@ namespace city.tests {
             }
         }
 
+        [Fact]
+        public void RemoveDesktopOnlySource_keeps_the_non_desktop_branch_of_an_inverse_guard() {
+            string source = "#if !DESKTOP_PLATFORM\nreturn false;\n#else\nreturn Keys.Enter;\n#endif";
+
+            string nonDesktopSource = RemoveDesktopOnlySource(source);
+
+            Assert.Contains("return false;", nonDesktopSource, StringComparison.Ordinal);
+            Assert.DoesNotContain("Keys.", nonDesktopSource, StringComparison.Ordinal);
+        }
+
         /// <summary>
         /// Removes source lines compiled exclusively when the desktop platform symbol is defined.
         /// </summary>
@@ -48,24 +58,47 @@ namespace city.tests {
 
             StringReader reader = new StringReader(source);
             StringWriter writer = new StringWriter();
-            int desktopConditionalDepth = 0;
+            Stack<(bool IsDesktopConditional, bool IncludeBranch)> conditionalStack = new Stack<(bool, bool)>();
             string line;
             while ((line = reader.ReadLine()) != null) {
                 string trimmedLine = line.Trim();
-                if (string.Equals(trimmedLine, "#if DESKTOP_PLATFORM", StringComparison.Ordinal)) {
-                    desktopConditionalDepth++;
+                if (trimmedLine.StartsWith("#if ", StringComparison.Ordinal)) {
+                    bool isDesktopConditional = string.Equals(trimmedLine, "#if DESKTOP_PLATFORM", StringComparison.Ordinal);
+                    bool isInverseDesktopConditional = string.Equals(trimmedLine, "#if !DESKTOP_PLATFORM", StringComparison.Ordinal);
+                    conditionalStack.Push((
+                        isDesktopConditional || isInverseDesktopConditional,
+                        isInverseDesktopConditional || (!isDesktopConditional && !isInverseDesktopConditional)));
                     continue;
                 }
-                if (string.Equals(trimmedLine, "#endif", StringComparison.Ordinal) && desktopConditionalDepth > 0) {
-                    desktopConditionalDepth--;
+                if (string.Equals(trimmedLine, "#else", StringComparison.Ordinal)) {
+                    if (conditionalStack.Count == 0) {
+                        throw new InvalidOperationException("Desktop platform source guard has an unmatched #else.");
+                    }
+                    (bool isDesktopConditional, bool includeBranch) = conditionalStack.Pop();
+                    conditionalStack.Push((isDesktopConditional, isDesktopConditional ? !includeBranch : true));
                     continue;
                 }
-                if (desktopConditionalDepth == 0) {
+                if (string.Equals(trimmedLine, "#endif", StringComparison.Ordinal)) {
+                    if (conditionalStack.Count == 0) {
+                        throw new InvalidOperationException("Desktop platform source guard has an unmatched #endif.");
+                    }
+                    conditionalStack.Pop();
+                    continue;
+                }
+
+                bool includeLine = true;
+                foreach ((bool IsDesktopConditional, bool IncludeBranch) frame in conditionalStack) {
+                    if (!frame.IncludeBranch) {
+                        includeLine = false;
+                        break;
+                    }
+                }
+                if (includeLine) {
                     writer.WriteLine(line);
                 }
             }
 
-            if (desktopConditionalDepth != 0) {
+            if (conditionalStack.Count != 0) {
                 throw new InvalidOperationException("Desktop platform source guard is not balanced.");
             }
 
