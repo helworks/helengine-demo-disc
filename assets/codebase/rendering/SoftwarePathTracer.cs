@@ -3,6 +3,242 @@ using helengine;
 
 namespace city.rendering {
     /// <summary>
+    /// Describes one validated CPU-trace image resolution and its accumulator footprint.
+    /// </summary>
+    public readonly struct SoftwareTraceResolution {
+        /// <summary>Bytes owned by one accumulated float3 pixel.</summary>
+        public const int AccumulatorBytesPerPixel = 12;
+
+        /// <summary>Image width in pixels.</summary>
+        public int Width { get; }
+
+        /// <summary>Image height in pixels.</summary>
+        public int Height { get; }
+
+        /// <summary>Total number of image pixels.</summary>
+        public int PixelCount { get; }
+
+        /// <summary>Exact byte count of the float3 accumulation array.</summary>
+        public long AccumulatorBytes { get; }
+
+        /// <summary>
+        /// Initializes one positive checked image resolution.
+        /// </summary>
+        /// <param name="width">Positive image width.</param>
+        /// <param name="height">Positive image height.</param>
+        public SoftwareTraceResolution(int width, int height) {
+            if (width <= 0) {
+                throw new ArgumentOutOfRangeException(nameof(width), "Trace dimensions must be positive.");
+            }
+            if (height <= 0) {
+                throw new ArgumentOutOfRangeException(nameof(height), "Trace dimensions must be positive.");
+            }
+
+            int pixelCount;
+            try {
+                pixelCount = checked(width * height);
+            }
+            catch (OverflowException) {
+                throw new ArgumentOutOfRangeException(nameof(width), "Trace dimensions exceed the supported pixel count.");
+            }
+
+            Width = width;
+            Height = height;
+            PixelCount = pixelCount;
+            AccumulatorBytes = checked((long)pixelCount * AccumulatorBytesPerPixel);
+        }
+
+        /// <summary>
+        /// Resolves the fixed showcase resolution for one exact platform identifier.
+        /// </summary>
+        /// <param name="platformId">Ordinal platform identifier.</param>
+        /// <returns>256x192 for the exact ds identifier, otherwise 320x240 for a supported platform.</returns>
+        public static SoftwareTraceResolution ForPlatform(string platformId) {
+            if (platformId == null) {
+                throw new ArgumentNullException(nameof(platformId));
+            }
+
+            if (string.Equals(platformId, "ds", StringComparison.Ordinal)) {
+                return new SoftwareTraceResolution(256, 192);
+            }
+
+            if (string.Equals(platformId, "3ds", StringComparison.Ordinal) || string.Equals(platformId, "gamecube", StringComparison.Ordinal) || string.Equals(platformId, "ps2", StringComparison.Ordinal) || string.Equals(platformId, "psp", StringComparison.Ordinal) || string.Equals(platformId, "psvita", StringComparison.Ordinal) || string.Equals(platformId, "switch", StringComparison.Ordinal) || string.Equals(platformId, "wii", StringComparison.Ordinal) || string.Equals(platformId, "wiiu", StringComparison.Ordinal) || string.Equals(platformId, "windows", StringComparison.Ordinal)) {
+                return new SoftwareTraceResolution(320, 240);
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(platformId), platformId, "The platform is not supported by the software path tracer.");
+        }
+    }
+
+    /// <summary>
+    /// Stores one validated world-space camera basis for progressive tracing.
+    /// </summary>
+    public readonly struct SoftwareTraceCamera {
+        /// <summary>Tolerance for unit-length and orthogonality checks.</summary>
+        public const float BasisTolerance = 0.002f;
+
+        /// <summary>Camera world-space origin.</summary>
+        public float3 Origin { get; }
+
+        /// <summary>Unit direction into the image.</summary>
+        public float3 Forward { get; }
+
+        /// <summary>Unit image-space right direction.</summary>
+        public float3 Right { get; }
+
+        /// <summary>Unit image-space up direction.</summary>
+        public float3 Up { get; }
+
+        /// <summary>Vertical field of view in degrees.</summary>
+        public float VerticalFieldOfViewDegrees { get; }
+
+        /// <summary>
+        /// Initializes and validates one right/up/forward camera basis.
+        /// </summary>
+        /// <param name="origin">Finite camera origin.</param>
+        /// <param name="forward">Unit direction into the image.</param>
+        /// <param name="right">Unit image-space right direction.</param>
+        /// <param name="up">Unit image-space up direction.</param>
+        /// <param name="verticalFieldOfViewDegrees">FOV strictly between zero and 179 degrees.</param>
+        public SoftwareTraceCamera(float3 origin, float3 forward, float3 right, float3 up, float verticalFieldOfViewDegrees) {
+            Validate(origin, forward, right, up, verticalFieldOfViewDegrees);
+            Origin = origin;
+            Forward = forward;
+            Right = right;
+            Up = up;
+            VerticalFieldOfViewDegrees = verticalFieldOfViewDegrees;
+        }
+
+        /// <summary>
+        /// Validates camera finiteness, basis lengths, handedness, and field of view.
+        /// </summary>
+        /// <param name="origin">Camera origin.</param>
+        /// <param name="forward">Forward basis.</param>
+        /// <param name="right">Right basis.</param>
+        /// <param name="up">Up basis.</param>
+        /// <param name="verticalFieldOfViewDegrees">Vertical FOV.</param>
+        static void Validate(float3 origin, float3 forward, float3 right, float3 up, float verticalFieldOfViewDegrees) {
+            if (!IsFinite(origin) || !IsFinite(forward) || !IsFinite(right) || !IsFinite(up)) {
+                throw new ArgumentOutOfRangeException(nameof(origin), "Camera values must be finite.");
+            }
+            if (!float.IsFinite(verticalFieldOfViewDegrees) || verticalFieldOfViewDegrees <= 0f || verticalFieldOfViewDegrees >= 179f) {
+                throw new ArgumentOutOfRangeException(nameof(verticalFieldOfViewDegrees), "Camera FOV must be finite and lie strictly between zero and 179 degrees.");
+            }
+
+            ValidateUnit(forward, nameof(forward));
+            ValidateUnit(right, nameof(right));
+            ValidateUnit(up, nameof(up));
+            if (Math.Abs(float3.Dot(forward, right)) > BasisTolerance || Math.Abs(float3.Dot(forward, up)) > BasisTolerance || Math.Abs(float3.Dot(right, up)) > BasisTolerance) {
+                throw new ArgumentOutOfRangeException(nameof(up), "Camera basis vectors must be mutually orthogonal.");
+            }
+
+            float handedness = float3.Dot(float3.Cross(right, up), forward);
+            if (!float.IsFinite(handedness) || handedness >= -1f + (BasisTolerance * 2f)) {
+                throw new ArgumentOutOfRangeException(nameof(up), "Camera basis must use the forward/right/up handedness convention.");
+            }
+        }
+
+        /// <summary>
+        /// Validates one finite unit basis vector.
+        /// </summary>
+        /// <param name="value">Basis vector.</param>
+        /// <param name="name">Argument name.</param>
+        static void ValidateUnit(float3 value, string name) {
+            float lengthSquared = (value.X * value.X) + (value.Y * value.Y) + (value.Z * value.Z);
+            if (!float.IsFinite(lengthSquared) || lengthSquared <= 0f || Math.Abs(lengthSquared - 1f) > BasisTolerance) {
+                throw new ArgumentOutOfRangeException(name, "Camera basis vectors must be finite unit vectors.");
+            }
+        }
+
+        /// <summary>
+        /// Tests every vector component for finiteness.
+        /// </summary>
+        /// <param name="value">Vector to inspect.</param>
+        /// <returns>True when every component is finite.</returns>
+        static bool IsFinite(float3 value) {
+            return float.IsFinite(value.X) && float.IsFinite(value.Y) && float.IsFinite(value.Z);
+        }
+    }
+
+    /// <summary>
+    /// Describes one edge-clipped progressive tile.
+    /// </summary>
+    public readonly struct SoftwareTraceTile {
+        /// <summary>Global pixel x coordinate.</summary>
+        public int X { get; }
+
+        /// <summary>Global pixel y coordinate.</summary>
+        public int Y { get; }
+
+        /// <summary>Clipped tile width.</summary>
+        public int Width { get; }
+
+        /// <summary>Clipped tile height.</summary>
+        public int Height { get; }
+
+        /// <summary>Unpermuted tile index within the image grid.</summary>
+        public int TileIndex { get; }
+
+        /// <summary>
+        /// Initializes one progressive tile descriptor.
+        /// </summary>
+        /// <param name="x">Global x coordinate.</param>
+        /// <param name="y">Global y coordinate.</param>
+        /// <param name="width">Clipped width.</param>
+        /// <param name="height">Clipped height.</param>
+        /// <param name="tileIndex">Unpermuted tile index.</param>
+        public SoftwareTraceTile(int x, int y, int width, int height, int tileIndex) {
+            X = x;
+            Y = y;
+            Width = width;
+            Height = height;
+            TileIndex = tileIndex;
+        }
+    }
+
+    /// <summary>
+    /// Provides the narrow allocation seam used to test progressive rollback.
+    /// </summary>
+    public interface ISoftwareTraceBufferAllocator {
+        /// <summary>
+        /// Allocates the one float3-per-pixel accumulation buffer.
+        /// </summary>
+        /// <param name="pixelCount">Number of pixels to allocate.</param>
+        /// <returns>A buffer with exactly pixelCount elements.</returns>
+        float3[] AllocateAccumulator(int pixelCount);
+
+        /// <summary>
+        /// Allocates the reusable RGBA8 tile staging buffer.
+        /// </summary>
+        /// <param name="byteCount">Number of bytes to allocate.</param>
+        /// <returns>A buffer with exactly byteCount elements.</returns>
+        byte[] AllocateTileRgba8(int byteCount);
+    }
+
+    /// <summary>
+    /// Allocates the normal managed progressive buffers.
+    /// </summary>
+    sealed class DefaultSoftwareTraceBufferAllocator : ISoftwareTraceBufferAllocator {
+        /// <summary>
+        /// Allocates one float3 per image pixel.
+        /// </summary>
+        /// <param name="pixelCount">Number of image pixels.</param>
+        /// <returns>Zero-initialized accumulation storage.</returns>
+        public float3[] AllocateAccumulator(int pixelCount) {
+            return new float3[pixelCount];
+        }
+
+        /// <summary>
+        /// Allocates one reusable RGBA8 tile.
+        /// </summary>
+        /// <param name="byteCount">Required tile byte count.</param>
+        /// <returns>Zero-initialized tile staging storage.</returns>
+        public byte[] AllocateTileRgba8(int byteCount) {
+            return new byte[byteCount];
+        }
+    }
+
+    /// <summary>
     /// Provides deterministic stateless random samples for the software path tracer.
     /// </summary>
     public static class SoftwarePathSampler {
@@ -218,7 +454,9 @@ namespace city.rendering {
     }
 
     /// <summary>
-    /// Traces one finite scalar CPU path through compact DemoDisc geometry.
+    /// Traces one finite scalar CPU path through compact DemoDisc geometry and one progressive worker.
+    /// The progressive traversal and tile scratch are currently worker-owned; future multithreading
+    /// requires worker-local scratch plus synchronized or partitioned accumulator ownership.
     /// </summary>
     public sealed class SoftwarePathTracer {
         /// <summary>
@@ -230,6 +468,16 @@ namespace city.rendering {
         /// Shared world-space origin offset used for all secondary and shadow rays.
         /// </summary>
         public const float RayEpsilon = 0.0001f;
+
+        /// <summary>
+        /// Width and height of the reusable progressive tile in pixels.
+        /// </summary>
+        public const int TileSize = 8;
+
+        /// <summary>
+        /// Exact byte capacity of one reusable RGBA8 tile staging buffer.
+        /// </summary>
+        public const int TileRgba8Bytes = TileSize * TileSize * 4;
 
         /// <summary>
         /// Single precision pi constant used by the Lambertian estimator.
@@ -277,6 +525,81 @@ namespace city.rendering {
         long nonFiniteSampleCount;
 
         /// <summary>
+        /// Progressive accumulator owned by this tracer; scene and BVH arrays remain borrowed.
+        /// </summary>
+        float3[] accumulation = Array.Empty<float3>();
+
+        /// <summary>
+        /// Reusable RGBA8 tile staging buffer owned by this tracer.
+        /// </summary>
+        byte[] tileRgba8 = Array.Empty<byte>();
+
+        /// <summary>
+        /// Fixed image resolution selected during progressive initialization.
+        /// </summary>
+        SoftwareTraceResolution resolution;
+
+        /// <summary>
+        /// Validated camera retained for jittered primary-ray generation.
+        /// </summary>
+        SoftwareTraceCamera camera;
+
+        /// <summary>
+        /// Positive exposure retained for CPU tone mapping.
+        /// </summary>
+        float exposure;
+
+        /// <summary>
+        /// Number of fully completed image passes.
+        /// </summary>
+        int completedPasses;
+
+        /// <summary>
+        /// Number of tiles already rendered in the current pass.
+        /// </summary>
+        int nextTilePosition;
+
+        /// <summary>
+        /// Number of horizontal tiles in the progressive image grid.
+        /// </summary>
+        int tilesX;
+
+        /// <summary>
+        /// Number of vertical tiles in the progressive image grid.
+        /// </summary>
+        int tilesY;
+
+        /// <summary>
+        /// Total number of progressive tiles in one pass.
+        /// </summary>
+        int tileCount;
+
+        /// <summary>
+        /// Coprime permutation step used for tile scheduling.
+        /// </summary>
+        int permutationStep;
+
+        /// <summary>
+        /// Indicates that both progressive buffers and scheduling state are active.
+        /// </summary>
+        bool progressiveInitialized;
+
+        /// <summary>
+        /// Stable error used when progressive buffers cannot be allocated or validated.
+        /// </summary>
+        const string ProgressiveAllocationFailureMessage = "Software progressive buffers could not be allocated.";
+
+        /// <summary>
+        /// Stable error used when progressive work is requested before initialization or after disposal.
+        /// </summary>
+        const string ProgressiveUnavailableMessage = "Software progressive tracing is not initialized.";
+
+        /// <summary>
+        /// Stable error used when a progressive pass identity would overflow.
+        /// </summary>
+        const string ProgressivePassOverflowMessage = "Software progressive pass count cannot be incremented further.";
+
+        /// <summary>
         /// Gets the number of BVH rays launched by this tracer.
         /// </summary>
         public long RayCount {
@@ -288,6 +611,62 @@ namespace city.rendering {
         /// </summary>
         public long NonFiniteSampleCount {
             get { return nonFiniteSampleCount; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether progressive buffers and scheduling are initialized.
+        /// </summary>
+        public bool IsProgressiveInitialized {
+            get { return progressiveInitialized; }
+        }
+
+        /// <summary>
+        /// Gets the validated progressive image resolution.
+        /// </summary>
+        public SoftwareTraceResolution Resolution {
+            get { return resolution; }
+        }
+
+        /// <summary>
+        /// Gets the number of image passes completed before the current pass.
+        /// </summary>
+        public int CompletedPasses {
+            get { return completedPasses; }
+        }
+
+        /// <summary>
+        /// Gets the fixed byte pitch of the reusable RGBA8 tile staging buffer.
+        /// </summary>
+        public int TileRowPitch {
+            get { return TileSize * 4; }
+        }
+
+        /// <summary>
+        /// Gets the progressive accumulator owned by this tracer. Callers may reference it for
+        /// verification, but must not replace or mutate the array.
+        /// </summary>
+        public float3[] Accumulation {
+            get { return accumulation; }
+        }
+
+        /// <summary>
+        /// Gets the reusable RGBA8 tile staging buffer owned by this tracer. Callers may reference
+        /// it for upload, but must not replace or mutate the array.
+        /// </summary>
+        public byte[] TileRgba8 {
+            get { return tileRgba8; }
+        }
+
+        /// <summary>
+        /// Gets the exact persistent byte count of the progressive buffers.
+        /// </summary>
+        public long ProgressiveOwnedBytes {
+            get {
+                if (!progressiveInitialized) {
+                    return 0L;
+                }
+                return resolution.AccumulatorBytes + TileRgba8Bytes;
+            }
         }
 
         /// <summary>
@@ -305,6 +684,188 @@ namespace city.rendering {
             this.areaLight = areaLight;
             this.bvh = bvh;
             this.traversalStack = traversalStack;
+        }
+
+        /// <summary>
+        /// Allocates progressive accumulation and tile buffers after scene and BVH construction.
+        /// </summary>
+        /// <param name="resolution">Positive checked output resolution.</param>
+        /// <param name="camera">Finite orthonormal camera basis.</param>
+        /// <param name="exposure">Positive finite CPU tone-mapping exposure.</param>
+        /// <param name="allocator">Optional deterministic buffer allocator used by failure tests.</param>
+        public void InitializeProgressive(SoftwareTraceResolution resolution, SoftwareTraceCamera camera, float exposure, ISoftwareTraceBufferAllocator allocator = null) {
+            if (progressiveInitialized) {
+                throw new InvalidOperationException("Software progressive tracing is already initialized.");
+            }
+            ValidateProgressiveCamera(camera);
+            if (!float.IsFinite(exposure) || exposure <= 0f) {
+                throw new ArgumentOutOfRangeException(nameof(exposure), "Progressive exposure must be finite and positive.");
+            }
+
+            int localTilesX;
+            int localTilesY;
+            int localTileCount;
+            try {
+                localTilesX = checked((resolution.Width / TileSize) + (resolution.Width % TileSize == 0 ? 0 : 1));
+                localTilesY = checked((resolution.Height / TileSize) + (resolution.Height % TileSize == 0 ? 0 : 1));
+                localTileCount = checked(localTilesX * localTilesY);
+            }
+            catch (OverflowException) {
+                throw new ArgumentOutOfRangeException(nameof(resolution), "Progressive tile dimensions exceed the supported count.");
+            }
+
+            if (localTilesX <= 0 || localTilesY <= 0 || localTileCount <= 0) {
+                throw new ArgumentOutOfRangeException(nameof(resolution), "Progressive tile dimensions must be positive.");
+            }
+
+            ISoftwareTraceBufferAllocator selectedAllocator = allocator;
+            if (selectedAllocator == null) {
+                selectedAllocator = new DefaultSoftwareTraceBufferAllocator();
+            }
+
+            float3[] allocatedAccumulator = null;
+            byte[] allocatedTile = null;
+            try {
+                allocatedAccumulator = selectedAllocator.AllocateAccumulator(resolution.PixelCount);
+                if (allocatedAccumulator == null || allocatedAccumulator.Length != resolution.PixelCount) {
+                    throw new InvalidOperationException("The progressive accumulator allocator returned an invalid buffer.");
+                }
+                allocatedTile = selectedAllocator.AllocateTileRgba8(TileRgba8Bytes);
+                if (allocatedTile == null || allocatedTile.Length != TileRgba8Bytes) {
+                    throw new InvalidOperationException("The progressive tile allocator returned an invalid buffer.");
+                }
+
+                this.resolution = resolution;
+                this.camera = camera;
+                this.exposure = exposure;
+                this.tilesX = localTilesX;
+                this.tilesY = localTilesY;
+                this.tileCount = localTileCount;
+                this.permutationStep = ChoosePermutationStep(localTileCount);
+                this.nextTilePosition = 0;
+                this.completedPasses = 0;
+                this.accumulation = allocatedAccumulator;
+                this.tileRgba8 = allocatedTile;
+                this.progressiveInitialized = true;
+            }
+            catch (Exception exception) {
+                ResetProgressiveState();
+                throw new InvalidOperationException(ProgressiveAllocationFailureMessage, exception);
+            }
+        }
+
+        /// <summary>
+        /// Renders one deterministic edge-clipped tile, updates its accumulation, and tone-maps it.
+        /// </summary>
+        /// <returns>The tile rectangle whose bytes are currently in TileRgba8.</returns>
+        public SoftwareTraceTile RenderNextTile() {
+            if (!progressiveInitialized) {
+                throw new InvalidOperationException(ProgressiveUnavailableMessage);
+            }
+            if (completedPasses == int.MaxValue) {
+                throw new InvalidOperationException(ProgressivePassOverflowMessage);
+            }
+
+            int tileIndex = MapTileIndex(nextTilePosition, completedPasses, permutationStep, tileCount);
+            int tileX = tileIndex % tilesX;
+            int tileY = tileIndex / tilesX;
+            int originX = tileX * TileSize;
+            int originY = tileY * TileSize;
+            int tileWidth = Math.Min(TileSize, resolution.Width - originX);
+            int tileHeight = Math.Min(TileSize, resolution.Height - originY);
+            float divisor = completedPasses + 1f;
+
+            for (int localY = 0; localY < tileHeight; localY++) {
+                int globalY = originY + localY;
+                for (int localX = 0; localX < tileWidth; localX++) {
+                    int globalX = originX + localX;
+                    int pixelIndex = (globalY * resolution.Width) + globalX;
+                    SoftwareRay primaryRay = CreateCameraRayInternal(globalX, globalY, completedPasses);
+                    float3 sample = TraceSample(ref primaryRay, globalX, globalY, completedPasses);
+                    float3 previous = accumulation[pixelIndex];
+                    float3 updated = AddColor(previous, sample);
+                    if (IsFinite(updated)) {
+                        accumulation[pixelIndex] = updated;
+                    }
+                    else {
+                        updated = previous;
+                    }
+
+                    float3 average = Scale(updated, 1f / divisor);
+                    int destination = (localY * TileRowPitch) + (localX * 4);
+                    WriteToneMappedPixel(average, destination);
+                }
+            }
+
+            nextTilePosition++;
+            if (nextTilePosition >= tileCount) {
+                nextTilePosition = 0;
+                completedPasses++;
+            }
+
+            return new SoftwareTraceTile(originX, originY, tileWidth, tileHeight, tileIndex);
+        }
+
+        /// <summary>
+        /// Releases only progressive-owned arrays and state; borrowed scene state remains valid.
+        /// </summary>
+        public void DisposeProgressive() {
+            ResetProgressiveState();
+        }
+
+        /// <summary>
+        /// Generates a camera ray for the current completed pass and validates the pixel identity.
+        /// </summary>
+        /// <param name="pixelX">Non-negative pixel x coordinate.</param>
+        /// <param name="pixelY">Non-negative pixel y coordinate.</param>
+        /// <returns>A finite normalized jittered primary ray.</returns>
+        public SoftwareRay CreateCameraRay(int pixelX, int pixelY) {
+            if (!progressiveInitialized) {
+                throw new InvalidOperationException(ProgressiveUnavailableMessage);
+            }
+            return CreateCameraRay(pixelX, pixelY, completedPasses);
+        }
+
+        /// <summary>
+        /// Generates a deterministic camera ray for an explicit non-negative pass identity.
+        /// </summary>
+        /// <param name="pixelX">Non-negative pixel x coordinate.</param>
+        /// <param name="pixelY">Non-negative pixel y coordinate.</param>
+        /// <param name="pass">Non-negative completed-pass identity.</param>
+        /// <returns>A finite normalized jittered primary ray.</returns>
+        public SoftwareRay CreateCameraRay(int pixelX, int pixelY, int pass) {
+            if (!progressiveInitialized) {
+                throw new InvalidOperationException(ProgressiveUnavailableMessage);
+            }
+            if (pixelX < 0 || pixelX >= resolution.Width) {
+                throw new ArgumentOutOfRangeException(nameof(pixelX));
+            }
+            if (pixelY < 0 || pixelY >= resolution.Height) {
+                throw new ArgumentOutOfRangeException(nameof(pixelY));
+            }
+            if (pass < 0) {
+                throw new ArgumentOutOfRangeException(nameof(pass));
+            }
+            return CreateCameraRayInternal(pixelX, pixelY, pass);
+        }
+
+        /// <summary>
+        /// Generates one normalized jittered primary ray without public-boundary checks.
+        /// </summary>
+        /// <param name="pixelX">Pixel x coordinate.</param>
+        /// <param name="pixelY">Pixel y coordinate.</param>
+        /// <param name="pass">Completed-pass identity.</param>
+        /// <returns>The normalized world-space camera ray.</returns>
+        SoftwareRay CreateCameraRayInternal(int pixelX, int pixelY, int pass) {
+            float jitterX = SoftwarePathSampler.Sample01(pixelX, pixelY, pass, -1, 0);
+            float jitterY = SoftwarePathSampler.Sample01(pixelX, pixelY, pass, -1, 1);
+            float normalizedX = (((pixelX + jitterX) / resolution.Width) * 2f) - 1f;
+            float normalizedY = 1f - (((pixelY + jitterY) / resolution.Height) * 2f);
+            float aspect = (float)resolution.Width / resolution.Height;
+            float tangent = (float)Math.Tan((camera.VerticalFieldOfViewDegrees * (Pi / 180f)) * 0.5f);
+            float3 direction = Add(camera.Forward, Add(Scale(camera.Right, normalizedX * aspect * tangent), Scale(camera.Up, normalizedY * tangent)));
+            direction = float3.Normalize(direction);
+            return new SoftwareRay(camera.Origin, direction);
         }
 
         /// <summary>
@@ -436,6 +997,204 @@ namespace city.rendering {
             }
 
             return IsFinite(radiance) ? radiance : DiscardSample();
+        }
+
+        /// <summary>
+        /// Releases progressive buffers and resets all progressive scheduling state.
+        /// </summary>
+        void ResetProgressiveState() {
+            progressiveInitialized = false;
+            accumulation = Array.Empty<float3>();
+            tileRgba8 = Array.Empty<byte>();
+            resolution = default;
+            camera = default;
+            exposure = 0f;
+            completedPasses = 0;
+            nextTilePosition = 0;
+            tilesX = 0;
+            tilesY = 0;
+            tileCount = 0;
+            permutationStep = 0;
+        }
+
+        /// <summary>
+        /// Validates camera values again at the progressive initialization boundary.
+        /// </summary>
+        /// <param name="value">Camera to validate.</param>
+        static void ValidateProgressiveCamera(SoftwareTraceCamera value) {
+            if (!IsFinite(value.Origin) || !IsFinite(value.Forward) || !IsFinite(value.Right) || !IsFinite(value.Up)) {
+                throw new ArgumentOutOfRangeException(nameof(value), "Camera values must be finite.");
+            }
+            if (!float.IsFinite(value.VerticalFieldOfViewDegrees) || value.VerticalFieldOfViewDegrees <= 0f || value.VerticalFieldOfViewDegrees >= 179f) {
+                throw new ArgumentOutOfRangeException(nameof(value), "Camera FOV must be finite and lie strictly between zero and 179 degrees.");
+            }
+
+            ValidateUnitCameraVector(value.Forward, nameof(value));
+            ValidateUnitCameraVector(value.Right, nameof(value));
+            ValidateUnitCameraVector(value.Up, nameof(value));
+            if (Math.Abs(float3.Dot(value.Forward, value.Right)) > SoftwareTraceCamera.BasisTolerance || Math.Abs(float3.Dot(value.Forward, value.Up)) > SoftwareTraceCamera.BasisTolerance || Math.Abs(float3.Dot(value.Right, value.Up)) > SoftwareTraceCamera.BasisTolerance) {
+                throw new ArgumentOutOfRangeException(nameof(value), "Camera basis vectors must be mutually orthogonal.");
+            }
+            float handedness = float3.Dot(float3.Cross(value.Right, value.Up), value.Forward);
+            if (!float.IsFinite(handedness) || handedness >= -1f + (SoftwareTraceCamera.BasisTolerance * 2f)) {
+                throw new ArgumentOutOfRangeException(nameof(value), "Camera basis must use the forward/right/up handedness convention.");
+            }
+        }
+
+        /// <summary>
+        /// Validates one camera basis vector at the progressive boundary.
+        /// </summary>
+        /// <param name="value">Basis vector.</param>
+        /// <param name="name">Argument name.</param>
+        static void ValidateUnitCameraVector(float3 value, string name) {
+            float lengthSquared = LengthSquared(value);
+            if (!float.IsFinite(lengthSquared) || lengthSquared <= 0f || Math.Abs(lengthSquared - 1f) > SoftwareTraceCamera.BasisTolerance) {
+                throw new ArgumentOutOfRangeException(name, "Camera basis vectors must be finite unit vectors.");
+            }
+        }
+
+        /// <summary>
+        /// Maps one sequence position to a deterministic coprime-permuted tile index.
+        /// </summary>
+        /// <param name="position">Position within the current pass.</param>
+        /// <param name="pass">Completed-pass identity.</param>
+        /// <param name="step">Coprime permutation step.</param>
+        /// <param name="count">Number of tiles in the image.</param>
+        /// <returns>The unpermuted tile index.</returns>
+        static int MapTileIndex(int position, int pass, int step, int count) {
+            int offset = GetPassOffset(pass, count);
+            return (int)((((long)position * step) + offset) % count);
+        }
+
+        /// <summary>
+        /// Computes a deterministic non-zero offset for every pass after the first.
+        /// </summary>
+        /// <param name="pass">Completed-pass identity.</param>
+        /// <param name="count">Number of tiles in the image.</param>
+        /// <returns>A valid tile offset.</returns>
+        static int GetPassOffset(int pass, int count) {
+            if (pass <= 0 || count <= 1) {
+                return 0;
+            }
+
+            long offset = (((long)pass * 2654435761L) + 1013904223L) % count;
+            if (offset == 0L) {
+                offset = 1L;
+            }
+            return (int)offset;
+        }
+
+        /// <summary>
+        /// Chooses the near-golden-ratio coprime step for a tile permutation.
+        /// </summary>
+        /// <param name="count">Number of tiles in the image.</param>
+        /// <returns>A non-zero step relatively prime to count.</returns>
+        static int ChoosePermutationStep(int count) {
+            if (count <= 1) {
+                return 1;
+            }
+
+            long candidateValue = (long)Math.Floor(count * 0.6180339887498948482d);
+            if (candidateValue <= 0L) {
+                candidateValue = 1L;
+            }
+            candidateValue %= count;
+            if (candidateValue == 0L) {
+                candidateValue = 1L;
+            }
+
+            int candidate = (int)candidateValue;
+            while (GreatestCommonDivisor(candidate, count) != 1) {
+                candidate++;
+                if (candidate >= count) {
+                    candidate = 1;
+                }
+            }
+            return candidate;
+        }
+
+        /// <summary>
+        /// Computes the greatest common divisor without allocating.
+        /// </summary>
+        /// <param name="first">First positive integer.</param>
+        /// <param name="second">Second positive integer.</param>
+        /// <returns>The greatest common divisor.</returns>
+        static int GreatestCommonDivisor(int first, int second) {
+            while (second != 0) {
+                int remainder = first % second;
+                first = second;
+                second = remainder;
+            }
+            return first;
+        }
+
+        /// <summary>
+        /// Writes one tone-mapped average color into the reusable tile staging buffer.
+        /// </summary>
+        /// <param name="average">Linear average radiance.</param>
+        /// <param name="destination">RGBA byte offset in TileRgba8.</param>
+        void WriteToneMappedPixel(float3 average, int destination) {
+            tileRgba8[destination] = ToneMapChannel(average.X);
+            tileRgba8[destination + 1] = ToneMapChannel(average.Y);
+            tileRgba8[destination + 2] = ToneMapChannel(average.Z);
+            tileRgba8[destination + 3] = 255;
+        }
+
+        /// <summary>
+        /// Applies exposure, ACES fitted tone mapping, sRGB conversion, and nearest-byte quantization.
+        /// </summary>
+        /// <param name="value">One linear average radiance channel.</param>
+        /// <returns>The finite clamped sRGB channel as an RGBA8 byte.</returns>
+        byte ToneMapChannel(float value) {
+            if (float.IsNaN(value) || value <= 0f) {
+                return 0;
+            }
+            if (float.IsPositiveInfinity(value)) {
+                return 255;
+            }
+
+            float exposed = value * exposure;
+            if (float.IsNaN(exposed) || exposed <= 0f) {
+                return 0;
+            }
+            if (float.IsPositiveInfinity(exposed)) {
+                return 255;
+            }
+
+            float numerator = exposed * ((2.51f * exposed) + 0.03f);
+            float denominator = (exposed * ((2.43f * exposed) + 0.59f)) + 0.14f;
+            if (float.IsPositiveInfinity(numerator) || float.IsPositiveInfinity(denominator)) {
+                return 255;
+            }
+            if (!float.IsFinite(numerator) || !float.IsFinite(denominator) || denominator <= 0f) {
+                return 0;
+            }
+            float mapped = numerator / denominator;
+            if (float.IsNaN(mapped) || mapped <= 0f) {
+                return 0;
+            }
+            if (float.IsPositiveInfinity(mapped) || mapped >= 1f) {
+                mapped = 1f;
+            }
+
+            float srgb = mapped <= 0.0031308f
+                ? 12.92f * mapped
+                : (1.055f * (float)Math.Pow(mapped, 1f / 2.4f)) - 0.055f;
+            if (!float.IsFinite(srgb) || srgb <= 0f) {
+                return 0;
+            }
+            if (srgb >= 1f) {
+                return 255;
+            }
+
+            int quantized = (int)((srgb * 255f) + 0.5f);
+            if (quantized <= 0) {
+                return 0;
+            }
+            if (quantized >= 255) {
+                return 255;
+            }
+            return (byte)quantized;
         }
 
         /// <summary>
