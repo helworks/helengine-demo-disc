@@ -22,11 +22,16 @@ namespace city.menu.tools {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            using helengine.editor.EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
-            new DemoDiscLogoIdleAnimationGenerator(context.Authoring, transaction).Generate();
-            DemoDiscSceneGenerator generator = new DemoDiscSceneGenerator(context.ScriptTypeResolver, context.Authoring, transaction);
-            generator.Generate(context.ProjectRootPath);
-            transaction.Commit();
+            using (helengine.editor.EditorAuthoringTransaction animationTransaction = context.Authoring.BeginTransaction()) {
+                new DemoDiscLogoIdleAnimationGenerator(context.Authoring, animationTransaction).Generate();
+                animationTransaction.Commit();
+            }
+
+            using (helengine.editor.EditorAuthoringTransaction sceneTransaction = context.Authoring.BeginTransaction()) {
+                DemoDiscSceneGenerator generator = new DemoDiscSceneGenerator(context.ScriptTypeResolver, context.Authoring, sceneTransaction);
+                generator.Generate(context.ProjectRootPath);
+                sceneTransaction.Commit();
+            }
         }
     }
 }
