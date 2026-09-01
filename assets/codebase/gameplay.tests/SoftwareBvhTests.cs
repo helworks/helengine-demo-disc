@@ -44,6 +44,30 @@ namespace city.tests {
         }
 
         /// <summary>
+        /// Requires the private constructor to take ownership of the arrays retained by the BVH lifetime.
+        /// </summary>
+        [Fact]
+        public void Constructor_array_parameters_take_native_ownership() {
+            ConstructorInfo constructor = typeof(SoftwareBvh).GetConstructor(
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                null,
+                new[] { typeof(SoftwareBvhNode[]), typeof(int[]), typeof(int), typeof(SoftwareTriangle[]) },
+                null);
+
+            Assert.NotNull(constructor);
+            Assert.Equal(4, constructor.GetParameters().Length);
+
+            ParameterInfo[] parameters = constructor.GetParameters();
+            ParameterInfo nodes = FindParameter(parameters, "nodes");
+            ParameterInfo triangleOrder = FindParameter(parameters, "triangleOrder");
+
+            Assert.Equal(typeof(SoftwareBvhNode[]), nodes.ParameterType);
+            Assert.Equal(typeof(int[]), triangleOrder.ParameterType);
+            Assert.NotEmpty(nodes.GetCustomAttributes(typeof(NativeTakesOwnershipAttribute), false));
+            Assert.NotEmpty(triangleOrder.GetCustomAttributes(typeof(NativeTakesOwnershipAttribute), false));
+        }
+
+        /// <summary>
         /// Ensures null triangle input is rejected before a root is created.
         /// </summary>
         [Fact]

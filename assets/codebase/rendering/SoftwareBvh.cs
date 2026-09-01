@@ -219,7 +219,7 @@ namespace city.rendering {
         /// <param name="triangleOrder">Triangle-order array owned by the BVH.</param>
         /// <param name="maximumDepth">Maximum root-relative build depth.</param>
         /// <param name="sourceTriangles">Exact source triangle array retained by reference for traversal identity validation.</param>
-        SoftwareBvh(SoftwareBvhNode[] nodes, int[] triangleOrder, int maximumDepth, SoftwareTriangle[] sourceTriangles) {
+        SoftwareBvh([NativeTakesOwnership] SoftwareBvhNode[] nodes, [NativeTakesOwnership] int[] triangleOrder, int maximumDepth, SoftwareTriangle[] sourceTriangles) {
             this.nodes = nodes;
             this.triangleOrder = triangleOrder;
             this.maximumDepth = maximumDepth;
