@@ -8,7 +8,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Targeted_tilt_trial_generation_writes_standard_and_handheld_selectors() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneGenerator.cs"));
             int methodStart = source.IndexOf("public void GenerateTiltTrialScene(string projectRootPath)", StringComparison.Ordinal);
 
             Assert.True(methodStart >= 0);
@@ -20,7 +20,7 @@ namespace city.tests {
 
         [Fact]
         public void Game_scene_generator_writes_selectors_gameplay_levels_and_presentation_blueprints() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneGenerator.cs"));
 
             Assert.Contains("CreateTiltTrialScene()", source, StringComparison.Ordinal);
             Assert.Contains("sceneWriteService.WriteScene(tiltTrialLevelSelectScene);", source, StringComparison.Ordinal);
@@ -32,7 +32,7 @@ namespace city.tests {
 
         [Fact]
         public void Game_scene_factory_authors_level_settings_and_session_components() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("const string TiltTrialLevelSelectSceneAssetRelativePath = \"scenes/games/tilt/tilt_trial.helen\";", source, StringComparison.Ordinal);
             Assert.Contains("const string TiltTrialGameplaySceneAssetDirectoryRelativePath = \"scenes/games/tilt\";", source, StringComparison.Ordinal);
@@ -51,7 +51,7 @@ namespace city.tests {
             Assert.Contains("TiltTrialStartPromptPrefixText", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialStartPromptIcon", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialStartPromptSuffixText", source, StringComparison.Ordinal);
-            Assert.Contains("RequireIcon(ProjectRootPath, \"windows\", \"enter\", AssetAuthoringService)", source, StringComparison.Ordinal);
+            Assert.Contains("RequireIcon(ProjectRootPath, \"windows\", \"enter\", AssetAuthoringService, Transaction)", source, StringComparison.Ordinal);
             Assert.Contains("CreateTiltTrialStartPromptPlatformOverride", source, StringComparison.Ordinal);
             Assert.Contains("\"ps2\", \"ps2\", \"cross\"", source, StringComparison.Ordinal);
             Assert.DoesNotContain("Press \\\"X\\\" to start", source, StringComparison.Ordinal);
@@ -78,7 +78,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Game_scene_factory_promotes_ds_start_icon_to_foreground_obj_priority() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("const byte NintendoDsStartPromptIconRenderOrder = 220;", source, StringComparison.Ordinal);
             Assert.Contains("string.Equals(platformId, NintendoDsPlatformId, StringComparison.Ordinal)", source, StringComparison.Ordinal);
@@ -91,8 +91,8 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Game_scene_factory_authors_tall_box_trigger_for_collectible_coins() {
-            string factorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
-            string coinGeneratorSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\SplitPlayGoldenCoinAssetGenerator.cs");
+            string factorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
+            string coinGeneratorSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "SplitPlayGoldenCoinAssetGenerator.cs"));
 
             Assert.Contains("Size = new float3(3f, 6f, 3f)", coinGeneratorSource, StringComparison.Ordinal);
             Assert.Contains("triggerCollider.IsTrigger = true;", coinGeneratorSource, StringComparison.Ordinal);
@@ -105,7 +105,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Tilt_trial_front_door_generates_title_options_and_level_select_panels() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("CreateTiltPlayShellUiEntity()", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltPlayTitlePanel\"", source, StringComparison.Ordinal);
@@ -124,7 +124,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Tilt_trial_front_door_title_panel_has_its_required_presentation_role() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("titlePanel.AddComponent(new city.game.TiltTrialPresentationRoleComponent {", source, StringComparison.Ordinal);
             Assert.Contains("Role = \"TiltPlayTitlePanel\"", source, StringComparison.Ordinal);
@@ -135,7 +135,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Tilt_trial_front_door_sprite_factory_assigns_the_sprite_role() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("spriteEntity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {", source, StringComparison.Ordinal);
             Assert.Contains("Role = name", source, StringComparison.Ordinal);
@@ -146,8 +146,8 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Tilt_trial_front_door_generates_the_arena_title_treatment() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
-            string menuSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltPlayMenuComponent.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
+            string menuSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltPlayMenuComponent.cs"));
 
             Assert.Contains("CreateTiltPlayViewportBackgroundEntity()", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltPlayPlayButton\"", source, StringComparison.Ordinal);
@@ -163,7 +163,7 @@ namespace city.tests {
 
         [Fact]
         public void Tilt_play_title_background_uses_a_screen_viewport_outside_the_fitted_shell() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("CreateTiltPlayViewportBackgroundEntity()", source, StringComparison.Ordinal);
             Assert.Contains("CreateTiltPlayShellUiEntity()", source, StringComparison.Ordinal);
@@ -179,8 +179,8 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Tilt_trial_front_door_uses_authored_png_sprites_for_title_chrome() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
-            string menuSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltPlayMenuComponent.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
+            string menuSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltPlayMenuComponent.cs"));
 
             Assert.Contains("images/ui/tilt_trial/title/background.png", source, StringComparison.Ordinal);
             Assert.Contains("images/ui/tilt_trial/title/button_primary.png", source, StringComparison.Ordinal);
@@ -190,7 +190,7 @@ namespace city.tests {
             Assert.Contains("images/ui/tilt_trial/title/button_secondary_demo_disc.png", source, StringComparison.Ordinal);
             Assert.Contains("images/ui/tilt_trial/title/button_secondary_demo_disc_selected.png", source, StringComparison.Ordinal);
             Assert.Contains("new SpriteComponent", source, StringComparison.Ordinal);
-            Assert.Contains("CreateFileSystemTexture", source, StringComparison.Ordinal);
+            Assert.Contains("AssetAuthoringService.CreateFileReference(textureRelativePath, AssetEntryKind.Image)", source, StringComparison.Ordinal);
             Assert.Contains("Entity PlayButtonSelectedOverlay", menuSource, StringComparison.Ordinal);
             Assert.Contains("ApplyTitleActionSelection", menuSource, StringComparison.Ordinal);
         }
@@ -200,10 +200,10 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Level_01_render_test_scene_uses_one_cube_light_camera_and_fps_only() {
-            string catalogSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneCatalog.cs");
-            string generatorSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneGenerator.cs");
-            string preparationSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\rendering.tools\RenderingSceneAssetPreparationService.cs");
-            string factorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string catalogSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneCatalog.cs"));
+            string generatorSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneGenerator.cs"));
+            string preparationSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "RenderingSceneAssetPreparationService.cs"));
+            string factorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("TiltTrialLevel01RenderTestSceneId", catalogSource, StringComparison.Ordinal);
             Assert.Contains("CreateTiltTrialLevel01RenderTestScene", generatorSource, StringComparison.Ordinal);
@@ -215,8 +215,8 @@ namespace city.tests {
             Assert.Contains("TiltTrialClippingProbeMaterial = tiltTrialClippingProbeMaterial", preparationSource, StringComparison.Ordinal);
             Assert.Contains("Model = TiltTrialClippingProbeModel", factorySource, StringComparison.Ordinal);
             Assert.Contains("Materials = new[] { TiltTrialClippingProbeMaterial }", factorySource, StringComparison.Ordinal);
-            Assert.Contains("CreateFileSystemModel(TiltTrialClippingProbeModelFactory.ModelRelativePath)", factorySource, StringComparison.Ordinal);
-            Assert.Contains("CreateFileSystemMaterial(TiltTrialClippingProbeMaterialFactory.MaterialRelativePath)", factorySource, StringComparison.Ordinal);
+            Assert.Contains("AssetAuthoringService.CreateFileReference(TiltTrialClippingProbeModelFactory.ModelRelativePath, AssetEntryKind.Model)", factorySource, StringComparison.Ordinal);
+            Assert.Contains("AssetAuthoringService.CreateFileReference(TiltTrialClippingProbeMaterialFactory.MaterialRelativePath, AssetEntryKind.Material)", factorySource, StringComparison.Ordinal);
             Assert.DoesNotContain("CreateLevel01RenderOnlyCourseBoxEntity(\"ClipProbeCube\", float3.Zero, new float3(5f, 1f, 5f), float4.Identity, true)", factorySource, StringComparison.Ordinal);
             Assert.Contains("entity.LocalPosition = new float3(6f, 4f, 8f)", factorySource, StringComparison.Ordinal);
             Assert.Contains("float4.CreateFromYawPitchRoll(0.6435011f, -0.3805064f, 0f, out orientation)", factorySource, StringComparison.Ordinal);
@@ -229,7 +229,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Level_01_render_test_scene_excludes_unrelated_visual_roots() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.DoesNotContain("entity.AddChild(CreateLevel01RenderOnlyPlayerSphereEntity())", source, StringComparison.Ordinal);
             Assert.DoesNotContain("entity.AddChild(CreateLevel01RenderOnlyCoinEntity(", source, StringComparison.Ordinal);
@@ -241,7 +241,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Gameplay_session_refreshes_target_times_from_current_level() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialSessionComponent.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialSessionComponent.cs"));
 
             Assert.Contains("TargetTimesTextComponent", source, StringComparison.Ordinal);
             Assert.Contains("TryFindNamedEntity(Parent, \"TiltTrialTargetTimesText\")", source, StringComparison.Ordinal);

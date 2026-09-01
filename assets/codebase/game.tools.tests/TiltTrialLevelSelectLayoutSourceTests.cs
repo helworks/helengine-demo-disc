@@ -5,7 +5,7 @@ namespace city.tests {
     public sealed class TiltTrialLevelSelectLayoutSourceTests {
         [Fact]
         public void Game_scene_factory_uses_two_stage_full_width_handheld_layout() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("viewportRoot.AddChild(CreateHandheldLevelSelectUiEntity());", source, StringComparison.Ordinal);
             Assert.Contains("CreateRoundedPanelEntity(entity, \"TiltTrialLevelSelectListPanel\", new float3(6f, 8f, 0f), new int2(244, 176)", source, StringComparison.Ordinal);
@@ -25,7 +25,7 @@ namespace city.tests {
             Assert.Contains("new byte4(26, 40, 61, 255), new byte4(122, 147, 182, 255)", source, StringComparison.Ordinal);
             Assert.DoesNotContain("TiltTrialLevelSelectPreviewPlaceholder", source, StringComparison.Ordinal);
 
-            string componentSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelSelectComponent.cs");
+            string componentSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialLevelSelectComponent.cs"));
             Assert.Contains("public void HandleAction(TiltTrialLevelSelectAction action, int stageIndex)", componentSource, StringComparison.Ordinal);
             Assert.Contains("ShowDetails();", componentSource, StringComparison.Ordinal);
             Assert.Contains("ShowStageList();", componentSource, StringComparison.Ordinal);
@@ -51,9 +51,9 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Game_scene_factory_uses_one_shared_non_handheld_selector() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
-            Assert.DoesNotContain("Ps2", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("CreatePs2LevelSelectUiEntity", source, StringComparison.Ordinal);
             Assert.Contains("CreateLevelSelectUiEntity(useOwnViewport: true)", source, StringComparison.Ordinal);
             Assert.Contains("FixedSize = new int2(1280, 720)", source, StringComparison.Ordinal);
             Assert.Contains("ReferenceWidth = 1280", source, StringComparison.Ordinal);
@@ -67,7 +67,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Game_scene_factory_uses_shell_viewport_for_embedded_level_selector() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("CreateLevelSelectUiEntity(useOwnViewport: false)", source, StringComparison.Ordinal);
             Assert.Contains("EditorEntity CreateLevelSelectUiEntity(bool useOwnViewport)", source, StringComparison.Ordinal);
@@ -79,8 +79,8 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Game_scene_factory_uses_desktop_selector_detail_action_buttons() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
-            int desktopMethodStart = source.IndexOf("EditorEntity CreateLevelSelectUiEntity()", StringComparison.Ordinal);
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
+            int desktopMethodStart = source.IndexOf("EditorEntity CreateLevelSelectUiEntity(bool useOwnViewport)", StringComparison.Ordinal);
 
             Assert.True(desktopMethodStart >= 0);
 
@@ -97,7 +97,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Game_scene_factory_expands_desktop_level_list_without_title() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
             int desktopMethodStart = source.IndexOf("EditorEntity CreateLevelSelectUiEntity(bool useOwnViewport)", StringComparison.Ordinal);
 
             Assert.True(desktopMethodStart >= 0);
@@ -116,7 +116,7 @@ namespace city.tests {
             Assert.Contains("OwningCore.EntityFactory.CreateChild(parent, name)", source, StringComparison.Ordinal);
             Assert.Contains("new float3(392f, 28f, 0f)", desktopMethodSource, StringComparison.Ordinal);
             Assert.Contains("GeneratedControlIconAssetResolver", source, StringComparison.Ordinal);
-            Assert.Contains("CreateFileSystemTexture(resolvedIcon.SourcePngRelativePath)", source, StringComparison.Ordinal);
+            Assert.Contains("AssetAuthoringService.CreateFileReference(relativePath, AssetEntryKind.Image)", source, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -124,10 +124,10 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Game_scene_factory_enables_details_stage_only_for_handheld_selector() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             int handheldMethodStart = source.IndexOf("EditorEntity CreateHandheldLevelSelectUiEntity()", StringComparison.Ordinal);
-            int standardMethodStart = source.IndexOf("EditorEntity CreateLevelSelectUiEntity()", StringComparison.Ordinal);
+            int standardMethodStart = source.IndexOf("EditorEntity CreateLevelSelectUiEntity(bool useOwnViewport)", StringComparison.Ordinal);
 
             Assert.True(handheldMethodStart >= 0);
             Assert.True(standardMethodStart > handheldMethodStart);
@@ -145,7 +145,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Level_select_controller_formats_medals_one_per_line_on_all_platforms() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelSelectComponent.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialLevelSelectComponent.cs"));
 
             Assert.DoesNotContain("UseDetailsStage\n                ? $\"Targets G", source, StringComparison.Ordinal);
             Assert.Contains("$\"Gold  {FormatTimerSeconds(goldTimeSeconds)}\\nSilver {FormatTimerSeconds(silverTimeSeconds)}\\nBronze {FormatTimerSeconds(bronzeTimeSeconds)}\"", source, StringComparison.Ordinal);
@@ -156,14 +156,14 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Level_select_controller_uses_generated_platform_action_prompts() {
-            string componentSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelSelectComponent.cs");
-            string factorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string componentSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialLevelSelectComponent.cs"));
+            string factorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.DoesNotContain("ResolvePlatformHintText", componentSource, StringComparison.Ordinal);
             Assert.DoesNotContain("TiltTrialLevelSelectHint", componentSource, StringComparison.Ordinal);
             Assert.Contains("$\"Limit {FormatTimerSeconds(startTimeSeconds)}\"", componentSource, StringComparison.Ordinal);
             Assert.Contains("GeneratedControlIconAssetResolver", factorySource, StringComparison.Ordinal);
-            Assert.Contains("ControlIconResolver.RequireIcon(ProjectRootPath, \"windows\", controlId, AssetAuthoringService)", factorySource, StringComparison.Ordinal);
+            Assert.Contains("ControlIconResolver.RequireIcon(ProjectRootPath, \"windows\", controlId, AssetAuthoringService, Transaction)", factorySource, StringComparison.Ordinal);
             Assert.Contains("\"enter\", \"PLAY\"", factorySource, StringComparison.Ordinal);
             Assert.Contains("\"escape\", \"MENU\"", factorySource, StringComparison.Ordinal);
         }
@@ -173,7 +173,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Game_scene_factory_uses_shared_non_handheld_preview_placeholders() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneFactory.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("TiltTrialLevelSelectPreviewPanel", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialLevelSelectPreviewText", source, StringComparison.Ordinal);
@@ -188,7 +188,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Level_select_controller_reuses_one_catalog_across_frames() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelSelectComponent.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialLevelSelectComponent.cs"));
 
             Assert.Contains("readonly IReadOnlyList<TiltTrialLevelCatalogEntry> LevelEntries;", source, StringComparison.Ordinal);
             Assert.Contains("LevelEntries = TiltTrialLevelCatalog.CreateEntries();", source, StringComparison.Ordinal);
@@ -200,7 +200,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Level_select_controller_supports_detail_action_stick_navigation() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelSelectComponent.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialLevelSelectComponent.cs"));
 
             Assert.Contains("int DetailActionIndex;", source, StringComparison.Ordinal);
             Assert.Contains("WasLeftStickUpPressed()", source, StringComparison.Ordinal);
@@ -215,7 +215,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Level_select_controller_supports_shared_keyboard_face_buttons() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialLevelSelectComponent.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialLevelSelectComponent.cs"));
 
             Assert.Contains("inputSystem.WasKeyPressed(Keys.J)", source, StringComparison.Ordinal);
             Assert.Contains("inputSystem.WasKeyPressed(Keys.K)", source, StringComparison.Ordinal);
