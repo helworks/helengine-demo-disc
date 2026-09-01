@@ -44,7 +44,7 @@ Expected instance table:
 | --- | --- | --- | ---: | --- | --- |
 | Floor | `(0,-1,0)` | `(2,0.05,2)` | 0 | white | none |
 | Ceiling | `(0,1,0)` | `(2,0.05,2)` | 0 | white | none |
-| Back | `(0,0,1)` | `(2,2,0.05)` | 0 | white | none |
+| Back | `(0,0,-1)` | `(2,2,0.05)` | 0 | white | none |
 | Left | `(-1,0,0)` | `(0.05,2,2)` | 0 | red | none |
 | Right | `(1,0,0)` | `(0.05,2,2)` | 0 | green | none |
 | Short box | `(-0.35,-0.55,0.15)` | `(0.6,0.9,0.6)` | `+0.30` rad | white | none |
@@ -66,7 +66,7 @@ public sealed class SoftwarePathTracerSceneFactory {
 }
 ```
 
-Create `SoftwareModelComponent` instances with `Materials = [material]` because the generated cube has one submesh. Put ray-camera position/target/FOV, exposure, max bounces, and tile size on the controller. The ordinary `CameraComponent` renders only the output sprite/HUD and sees no `MeshComponent` geometry.
+Create `SoftwareModelComponent` instances with `Materials = [material]` because the generated cube has one submesh. Put the accepted ray-camera origin/basis/FOV and exposure on the controller. The accepted kernel keeps its fixed four-bounce limit and 8x8 tile size internally; do not invent new authored controls. The ordinary `CameraComponent` renders only the output sprite/HUD and sees no `MeshComponent` geometry.
 
 - [ ] **Step 3: Add stable identity.** Add:
 
@@ -79,7 +79,7 @@ Do not reuse or renumber existing identities.
 - [ ] **Step 4: Run tests.**
 
 ```powershell
-rtk dotnet test user_settings/generated_code/projects/rendering.tools.tests/rendering.tools.tests.csproj --filter "FullyQualifiedName~SoftwarePathTracerSceneFactory|FullyQualifiedName~Cornell"
+rtk dotnet test user_settings/generated_code/editor-command/EditorFull/projects/rendering.tools.tests/rendering.tools.tests.csproj --no-restore --filter "FullyQualifiedName~SoftwarePathTracerSceneFactory|FullyQualifiedName~Cornell"
 ```
 
 Expected: PASS.
@@ -190,7 +190,7 @@ new MenuItemDefinition(
 
 ```powershell
 Get-Content helenui/demodisc.json -Raw | ConvertFrom-Json | Out-Null
-rtk dotnet test user_settings/generated_code/projects/menu.tools.tests/menu.tools.tests.csproj --filter "FullyQualifiedName~DemoDiscSceneCatalog|FullyQualifiedName~SoftwarePathTracer"
+rtk dotnet test user_settings/generated_code/editor-command/EditorFull/projects/menu.tools.tests/menu.tools.tests.csproj --no-restore --filter "FullyQualifiedName~DemoDiscSceneCatalog|FullyQualifiedName~SoftwarePathTracer"
 ```
 
 Expected: JSON parses and tests pass.
@@ -229,7 +229,7 @@ rtk git commit -m "Expose software path tracer in DemoDisc"
 - [ ] **Step 5: Run tests.**
 
 ```powershell
-rtk dotnet test user_settings/generated_code/projects/game.tools.tests/game.tools.tests.csproj --filter "FullyQualifiedName~DemoDiscBuildConfigTests|FullyQualifiedName~SoftwarePathTracerProjectIntegrationTests"
+rtk dotnet test user_settings/generated_code/editor-command/EditorFull/projects/game.tools.tests/game.tools.tests.csproj --no-restore --filter "FullyQualifiedName~DemoDiscBuildConfigTests|FullyQualifiedName~SoftwarePathTracerProjectIntegrationTests"
 ```
 
 Expected: PASS.
