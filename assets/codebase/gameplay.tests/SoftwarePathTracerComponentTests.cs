@@ -22,7 +22,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Session_surface_exposes_progressive_lifecycle() {
-            Assert.Equal(typeof(IDisposable), typeof(SoftwarePathTraceSession).GetInterfaces()[0]);
+            Assert.Contains(typeof(IDisposable), typeof(SoftwarePathTraceSession).GetInterfaces());
             Assert.Equal(SoftwarePathTraceSessionState.Uninitialized, new SoftwarePathTraceSessionState());
         }
 
@@ -195,6 +195,34 @@ namespace city.tests {
             Assert.Null(session.PresentationTexture);
             Assert.Null(session.Scene);
             Assert.Equal(0L, session.InitializationPeakOwnedBytes);
+        }
+
+        /// <summary>Ensures a malformed owned model is disposed after validation rejects its invariant.</summary>
+        [Fact]
+        public void Initialize_malformed_owned_model_rolls_back_and_disposes_corrupted_asset() {
+            using TestFixture fixture = CreateFixture(new SoftwareTraceResolution(8, 8));
+            using SoftwarePathTraceSession session = new SoftwarePathTraceSession(fixture.RenderManager);
+            MalformedOwnedModelAssetSource source = new MalformedOwnedModelAssetSource(fixture.Source);
+
+            Assert.Throws<InvalidOperationException>(() => session.Initialize(fixture.Roots, source, new SoftwareTraceResolution(8, 8), Camera, 1f));
+
+            Assert.Equal(SoftwarePathTraceSessionState.Failed, session.State);
+            Assert.NotNull(source.CorruptedAsset);
+            Assert.Null(source.CorruptedAsset.Positions);
+            Assert.Null(source.CorruptedAsset.Normals);
+            Assert.Null(source.CorruptedAsset.TexCoords);
+            Assert.Null(source.CorruptedAsset.Indices16);
+            Assert.Null(source.CorruptedAsset.Indices32);
+            Assert.Null(source.CorruptedAsset.Submeshes);
+            Assert.Equal(1, fixture.Source.LoadCount);
+            Assert.Equal(1, fixture.Source.DisposedCount);
+            Assert.Single(fixture.RenderManager.ReleaseCalls);
+            Assert.Null(session.PresentationTexture);
+            Assert.Null(session.Scene);
+            Assert.Null(session.Bvh);
+            Assert.Null(session.Tracer);
+            Assert.Equal(0L, session.InitializationPeakOwnedBytes);
+            Assert.Equal(0L, session.SteadyStateOwnedBytes);
         }
 
         /// <summary>Ensures accumulator allocation failures release all earlier stages.</summary>
@@ -458,6 +486,25 @@ namespace city.tests {
             }
         }
 
+        sealed class MalformedOwnedModelAssetSource : ISoftwareModelAssetSource {
+            readonly ISoftwareModelAssetSource inner;
+
+            public ModelAsset CorruptedAsset { get; private set; }
+
+            public MalformedOwnedModelAssetSource(ISoftwareModelAssetSource inner) {
+                this.inner = inner;
+            }
+
+            public ModelAsset LoadOwned(SceneAssetReference reference) {
+                ModelAsset asset = inner.LoadOwned(reference);
+                if (CorruptedAsset == null) {
+                    CorruptedAsset = asset;
+                    asset.Submeshes = null;
+                }
+                return asset;
+            }
+        }
+
         /// <summary>Ensures a warmed tile/upload call performs no managed allocation when recording is disabled.</summary>
         [Fact]
         public void Render_and_upload_next_tile_hot_path_does_not_allocate_with_preallocated_recording() {
@@ -572,6 +619,8 @@ namespace city.tests {
         public void Hud_refresh_is_due_at_relative_quarter_second() {
             Assert.False(SoftwarePathTracerComponent.ShouldRefreshHud(0.24d, 0, SoftwarePathTraceSessionState.Tracing, 0d, 0, SoftwarePathTraceSessionState.Tracing));
             Assert.True(SoftwarePathTracerComponent.ShouldRefreshHud(0.25d, 0, SoftwarePathTraceSessionState.Tracing, 0d, 0, SoftwarePathTraceSessionState.Tracing));
+            Assert.True(SoftwarePathTracerComponent.ShouldRefreshHud(0.24d, 1, SoftwarePathTraceSessionState.Tracing, 0d, 0, SoftwarePathTraceSessionState.Tracing));
+            Assert.True(SoftwarePathTracerComponent.ShouldRefreshHud(0.24d, 0, SoftwarePathTraceSessionState.Failed, 0d, 0, SoftwarePathTraceSessionState.Tracing));
         }
 
         /// <summary>
@@ -681,6 +730,42 @@ namespace city.tests {
             Assert.Equal(0L, fixture.Component.SteadyStateOwnedBytes);
             Assert.Single(fixture.RenderManager.ReleaseCalls);
             Assert.Equal(uploadsAfterDispose, fixture.RenderManager.Uploads.Count);
+        }
+
+        /// <summary>Ensures ComponentRemoved clears all UI references, is idempotent, and never transitions scenes.</summary>
+        [Fact]
+        public void ComponentRemoved_clears_ui_references_idempotently_without_transition_or_upload() {
+            using ComponentFixture fixture = new ComponentFixture("windows");
+            fixture.Root.AddComponent(fixture.Component);
+            fixture.Root.InitializeHierarchy();
+            int uploadsBeforeRemoval = fixture.RenderManager.Uploads.Count;
+
+            AssertPrivateUiReferences(fixture.Component, true);
+            fixture.Component.ComponentRemoved(fixture.Root);
+            fixture.Component.ComponentRemoved(fixture.Root);
+            fixture.Component.Update();
+
+            AssertPrivateUiReferences(fixture.Component, false);
+            Assert.Null(fixture.OutputSprite.Texture);
+            Assert.Equal(SoftwarePathTraceSessionState.Uninitialized, fixture.Component.SessionState);
+            Assert.Equal(uploadsBeforeRemoval, fixture.RenderManager.Uploads.Count);
+            Assert.Single(fixture.RenderManager.ReleaseCalls);
+            Assert.False(fixture.Core.SceneManager.IsSceneTransitionActive);
+        }
+
+        static void AssertPrivateUiReferences(SoftwarePathTracerComponent component, bool expectedLive) {
+            const System.Reflection.BindingFlags Flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            Type componentType = typeof(SoftwarePathTracerComponent);
+            string[] fieldNames = { "outputSprite", "sppText", "elapsedText", "raysPerSecondText" };
+            for (int index = 0; index < fieldNames.Length; index++) {
+                object value = componentType.GetField(fieldNames[index], Flags).GetValue(component);
+                if (expectedLive) {
+                    Assert.NotNull(value);
+                }
+                else {
+                    Assert.Null(value);
+                }
+            }
         }
 
         /// <summary>Ensures each serialized reference target rejects zero, missing, duplicate, and wrong component identities.</summary>

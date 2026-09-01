@@ -340,7 +340,6 @@ namespace city.rendering {
         /// <summary>Authored positive CPU tone-mapping exposure.</summary>
         public float Exposure { get; set; }
 
-        Entity outputSpriteEntity;
         SpriteComponent outputSprite;
         TextComponent sppText;
         TextComponent elapsedText;
@@ -414,7 +413,6 @@ namespace city.rendering {
             componentDisposed = false;
             componentFailureMessage = null;
             session = null;
-            outputSpriteEntity = null;
             outputSprite = null;
             sppText = null;
             elapsedText = null;
@@ -434,7 +432,7 @@ namespace city.rendering {
             lifecycleInitialized = true;
             try {
                 ValidateComponentSettings();
-                outputSprite = FindRequiredComponent<SpriteComponent>(OutputSpriteEntityReference, "output sprite", out outputSpriteEntity);
+                outputSprite = FindRequiredComponent<SpriteComponent>(OutputSpriteEntityReference, "output sprite", out _);
                 sppText = FindRequiredComponent<TextComponent>(SppTextEntityReference, "SPP text", out _);
                 elapsedText = FindRequiredComponent<TextComponent>(ElapsedTextEntityReference, "elapsed text", out _);
                 raysPerSecondText = FindRequiredComponent<TextComponent>(RaysPerSecondTextEntityReference, "rays-per-second text", out _);
@@ -685,6 +683,10 @@ namespace city.rendering {
                 session.Dispose();
                 session = null;
             }
+            outputSprite = null;
+            sppText = null;
+            elapsedText = null;
+            raysPerSecondText = null;
         }
 
         /// <summary>Consumes Return once, clears the output, and resolves the DemoDisc main menu transition once.</summary>
