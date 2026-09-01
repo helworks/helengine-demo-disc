@@ -479,8 +479,8 @@ namespace city.rendering {
 
             for (int instanceIndex = 0; instanceIndex < group.Instances.Count; instanceIndex++) {
                 SoftwareMaterial[] instanceMaterials = group.Instances[instanceIndex].Component.Materials;
-                if (instanceMaterials == null || instanceMaterials.Length < asset.Submeshes.Length) {
-                    throw new InvalidOperationException("SoftwareModelComponent.Materials must provide at least one material for every ModelAsset submesh.");
+                if (instanceMaterials == null || instanceMaterials.Length != asset.Submeshes.Length) {
+                    throw new InvalidOperationException("SoftwareModelComponent.Materials must provide exactly one material for every ModelAsset submesh.");
                 }
                 for (int materialIndex = 0; materialIndex < instanceMaterials.Length; materialIndex++) {
                     if (instanceMaterials[materialIndex] == null) {
@@ -578,6 +578,12 @@ namespace city.rendering {
                         continue;
                     }
 
+                    SoftwareMaterialData firstCandidateMaterial = materials[triangles[first].MaterialIndex];
+                    SoftwareMaterialData secondCandidateMaterial = materials[triangles[second].MaterialIndex];
+                    if (!IsUsableEmission(firstCandidateMaterial.Emission) || !IsUsableEmission(secondCandidateMaterial.Emission) || !NearlyEqual(firstCandidateMaterial.Emission, secondCandidateMaterial.Emission)) {
+                        continue;
+                    }
+
                     float3 faceCenter = (triangles[first].Centroid + triangles[second].Centroid) * 0.5f;
                     candidate.IsInward = hasSceneInterior && float3.Dot(candidate.Normal, sceneInteriorCenter - faceCenter) > GeometryTolerance;
                     if (!largestCandidate.IsValid || candidate.Area > largestCandidate.Area + GeometryTolerance) {
@@ -623,6 +629,15 @@ namespace city.rendering {
                 }
             }
             return new SoftwareAreaLight(best.Corner, best.Edge1, best.Edge2, lightNormal, best.Area, firstMaterial.Emission, best.FirstTriangle, best.SecondTriangle);
+        }
+
+        /// <summary>
+        /// Determines whether one compact emission value is finite and physically usable.
+        /// </summary>
+        /// <param name="emission">Pre-multiplied emission to validate.</param>
+        /// <returns>True when emission is non-negative and greater than the geometric tolerance.</returns>
+        static bool IsUsableEmission(float3 emission) {
+            return float.IsFinite(emission.X) && float.IsFinite(emission.Y) && float.IsFinite(emission.Z) && emission.X >= 0f && emission.Y >= 0f && emission.Z >= 0f && emission.LengthSquared() > GeometryTolerance * GeometryTolerance;
         }
 
         /// <summary>

@@ -115,6 +115,24 @@ namespace city.tests {
         }
 
         /// <summary>
+        /// Ensures unreferenced component materials cannot be treated as emissive geometry.
+        /// </summary>
+        [Fact]
+        public void Unreferenced_component_materials_are_rejected() {
+            using SceneFixture fixture = new SceneFixture();
+            SceneAssetReference reference = SceneAssetReferenceFactory.CreateFileSystemModel("models/unreferenced-material.hasset");
+            FakeSoftwareModelAssetSource source = new FakeSoftwareModelAssetSource();
+            source.Register(reference, CreateTriangleAsset16);
+            fixture.AddModel(reference, new SoftwareMaterial(), EmitterMaterial());
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+
+            Assert.Contains("exactly", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("submesh", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(1, source.DisposedCount);
+        }
+
+        /// <summary>
         /// Ensures stable reference identity includes source kind, provider, asset id, and path.
         /// </summary>
         [Fact]
@@ -270,6 +288,26 @@ namespace city.tests {
             Assert.InRange(Math.Abs(scene.AreaLight.Area - (0.55f * 0.45f)), 0f, 0.0001f);
             AssertVector(new float3(0.6f, 1.2f, 1.8f), scene.AreaLight.Emission);
             Assert.True(scene.AreaLight.InwardNormal.Y < -0.99f);
+        }
+
+        /// <summary>
+        /// Ensures a diffuse inward face cannot be selected when another emitter submesh emits.
+        /// </summary>
+        [Fact]
+        public void Mixed_submesh_cube_rejects_diffuse_inward_area_face() {
+            using SceneFixture fixture = new SceneFixture();
+            SceneAssetReference anchorReference = SceneAssetReferenceFactory.CreateFileSystemModel("models/mixed-anchor.hasset");
+            SceneAssetReference emitterReference = SceneAssetReferenceFactory.CreateFileSystemModel("models/mixed-emitter.hasset");
+            FakeSoftwareModelAssetSource source = new FakeSoftwareModelAssetSource();
+            source.Register(anchorReference, CreateGeneratedCubeAsset);
+            source.Register(emitterReference, CreateMixedMaterialCubeAsset);
+            fixture.AddModel(anchorReference, new SoftwareMaterial());
+            fixture.AddModel(emitterReference, new SoftwareMaterial(), EmitterMaterial());
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+
+            Assert.Contains("emissive", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(2, source.DisposedCount);
         }
 
         /// <summary>
@@ -473,6 +511,15 @@ namespace city.tests {
         static ModelAsset CreateGeneratedCubeAsset() {
             ModelAsset cube = ModelUtils.GenerateCubeMesh(float3.Zero, float3.One);
             cube.Submeshes = new[] { new ModelSubmeshAsset { MaterialSlotName = "DefaultMaterial", IndexStart = 0, IndexCount = cube.Indices16.Length } };
+            return cube;
+        }
+
+        static ModelAsset CreateMixedMaterialCubeAsset() {
+            ModelAsset cube = CreateCubeAsset();
+            cube.Submeshes = new[] {
+                new ModelSubmeshAsset { MaterialSlotName = "diffuse-inward-face", IndexStart = 0, IndexCount = 6 },
+                new ModelSubmeshAsset { MaterialSlotName = "emissive-other-faces", IndexStart = 6, IndexCount = cube.Indices16.Length - 6 }
+            };
             return cube;
         }
 
