@@ -18,6 +18,9 @@ namespace city.tests {
         /// <summary>Runtime textures released through this exact creator instance.</summary>
         public List<RuntimeTexture> ReleaseCalls { get; } = new List<RuntimeTexture>();
 
+        /// <summary>All release attempts, including attempts configured to fail.</summary>
+        public List<RuntimeTexture> ReleaseAttempts { get; } = new List<RuntimeTexture>();
+
         /// <summary>Raw asset presented to the creator, including a failed build attempt.</summary>
         public TextureAsset LastAttemptedBuildAsset { get; private set; }
 
@@ -29,6 +32,12 @@ namespace city.tests {
 
         /// <summary>Injects a region-update failure.</summary>
         public bool ThrowOnUpdate { get; set; }
+
+        /// <summary>Injects an independent runtime-texture release failure.</summary>
+        public bool ThrowOnRelease { get; set; }
+
+        /// <summary>Optional callback invoked from the texture creator before it returns its runtime texture.</summary>
+        public Action OnBuildTextureFromRaw { get; set; }
 
         /// <summary>Optional width used by the next fake runtime texture.</summary>
         public int BuildWidthOverride { get; set; }
@@ -45,6 +54,7 @@ namespace city.tests {
         /// <summary>Creates a fake runtime texture with the raw dimensions.</summary>
         public override RuntimeTexture BuildTextureFromRaw(TextureAsset data) {
             LastAttemptedBuildAsset = data;
+            OnBuildTextureFromRaw?.Invoke();
             if (ThrowOnBuild) {
                 throw new InvalidOperationException("Injected texture build failure.");
             }
@@ -70,13 +80,20 @@ namespace city.tests {
             if (!RecordUploads) {
                 return;
             }
-            byte[] copy = new byte[checked(sourceRowPitch * (height - 1) + (width * 4))];
-            Array.Copy(rgba8, copy, copy.Length);
-            Uploads.Add(new Upload(texture, x, y, width, height, rgba8, sourceRowPitch, copy));
+            int copiedRowPitch = checked(width * 4);
+            byte[] copy = new byte[checked(copiedRowPitch * height)];
+            for (int row = 0; row < height; row++) {
+                Array.Copy(rgba8, row * sourceRowPitch, copy, row * copiedRowPitch, copiedRowPitch);
+            }
+            Uploads.Add(new Upload(texture, x, y, width, height, rgba8, sourceRowPitch, copiedRowPitch, copy));
         }
 
         /// <summary>Releases one texture through the manager that created it.</summary>
         public override void ReleaseTexture(RuntimeTexture texture) {
+            ReleaseAttempts.Add(texture);
+            if (ThrowOnRelease) {
+                throw new InvalidOperationException("Injected texture release failure.");
+            }
             if (!ownedTextures.Remove(texture)) {
                 throw new InvalidOperationException("Texture was not owned by this fake renderer or was already released.");
             }
@@ -97,9 +114,10 @@ namespace city.tests {
             public readonly int Height;
             public readonly byte[] Source;
             public readonly int SourceRowPitch;
+            public readonly int CopiedRowPitch;
             public readonly byte[] CopiedBytes;
 
-            public Upload(RuntimeTexture texture, int x, int y, int width, int height, byte[] source, int sourceRowPitch, byte[] copiedBytes) {
+            public Upload(RuntimeTexture texture, int x, int y, int width, int height, byte[] source, int sourceRowPitch, int copiedRowPitch, byte[] copiedBytes) {
                 Texture = texture;
                 X = x;
                 Y = y;
@@ -107,6 +125,7 @@ namespace city.tests {
                 Height = height;
                 Source = source;
                 SourceRowPitch = sourceRowPitch;
+                CopiedRowPitch = copiedRowPitch;
                 CopiedBytes = copiedBytes;
             }
         }

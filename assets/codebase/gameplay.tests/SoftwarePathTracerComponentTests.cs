@@ -292,7 +292,18 @@ namespace city.tests {
             byte[] tileBuffer = session.Tracer.TileRgba8;
 
             for (int i = 0; i < 4; i++) {
+                Array.Fill(tileBuffer, (byte)0xA5);
                 session.RenderAndUploadNextTile();
+                SoftwarePathTracerTestRenderManager2D.Upload upload = fixture.RenderManager.Uploads[i];
+                Assert.Equal(upload.Width * upload.Height * 4, upload.CopiedBytes.Length);
+                Assert.Equal(upload.Width * 4, upload.CopiedRowPitch);
+                for (int row = 0; row < upload.Height; row++) {
+                    int sourceOffset = row * upload.SourceRowPitch;
+                    int copiedOffset = row * upload.CopiedRowPitch;
+                    for (int byteIndex = 0; byteIndex < upload.Width * 4; byteIndex++) {
+                        Assert.Equal(upload.Source[sourceOffset + byteIndex], upload.CopiedBytes[copiedOffset + byteIndex]);
+                    }
+                }
             }
 
             Assert.Equal(4, fixture.RenderManager.Uploads.Count);
@@ -302,6 +313,133 @@ namespace city.tests {
                 Assert.Same(tileBuffer, upload.Source);
                 Assert.Equal(32, upload.SourceRowPitch);
             });
+        }
+
+        /// <summary>Ensures a creator release failure is attempted once and repeated cleanup remains harmless.</summary>
+        [Fact]
+        public void Dispose_release_failure_is_stable_and_idempotent() {
+            using TestFixture fixture = CreateFixture(new SoftwareTraceResolution(8, 8));
+            using SoftwarePathTraceSession session = new SoftwarePathTraceSession(fixture.RenderManager);
+            session.Initialize(fixture.Roots, fixture.Source, new SoftwareTraceResolution(8, 8), Camera, 1f);
+            fixture.RenderManager.ThrowOnRelease = true;
+
+            session.Dispose();
+            session.Dispose();
+
+            Assert.Equal(SoftwarePathTraceSessionState.Disposed, session.State);
+            Assert.Single(fixture.RenderManager.ReleaseAttempts);
+            Assert.Empty(fixture.RenderManager.ReleaseCalls);
+            Assert.Null(session.PresentationTexture);
+            Assert.Null(session.Scene);
+            Assert.Null(session.Bvh);
+            Assert.Null(session.Tracer);
+            Assert.Equal(0L, session.InitializationPeakOwnedBytes);
+            Assert.Equal(0L, session.SteadyStateOwnedBytes);
+        }
+
+        /// <summary>Ensures a release failure during upload rollback is not retried by later session disposal.</summary>
+        [Fact]
+        public void Upload_failure_with_release_failure_remains_idempotent() {
+            using TestFixture fixture = CreateFixture(new SoftwareTraceResolution(8, 8));
+            using SoftwarePathTraceSession session = new SoftwarePathTraceSession(fixture.RenderManager);
+            session.Initialize(fixture.Roots, fixture.Source, new SoftwareTraceResolution(8, 8), Camera, 1f);
+            fixture.RenderManager.ThrowOnUpdate = true;
+            fixture.RenderManager.ThrowOnRelease = true;
+
+            Assert.Throws<InvalidOperationException>(() => session.RenderAndUploadNextTile());
+            session.Dispose();
+            session.Dispose();
+
+            Assert.Equal(SoftwarePathTraceSessionState.Disposed, session.State);
+            Assert.Single(fixture.RenderManager.ReleaseAttempts);
+            Assert.Empty(fixture.RenderManager.ReleaseCalls);
+            Assert.Null(session.PresentationTexture);
+            Assert.Equal(0L, session.InitializationPeakOwnedBytes);
+            Assert.Equal(0L, session.SteadyStateOwnedBytes);
+        }
+
+        /// <summary>Ensures disposal from the texture creator callback wins and cleans up the late texture result.</summary>
+        [Fact]
+        public void Initialize_disposal_during_presentation_creation_cleans_late_texture() {
+            using TestFixture fixture = CreateFixture(new SoftwareTraceResolution(8, 8));
+            using SoftwarePathTraceSession session = new SoftwarePathTraceSession(fixture.RenderManager);
+            fixture.RenderManager.OnBuildTextureFromRaw = session.Dispose;
+
+            Assert.Throws<ObjectDisposedException>(() => session.Initialize(fixture.Roots, fixture.Source, new SoftwareTraceResolution(8, 8), Camera, 1f));
+
+            AssertPartialInitializationDisposed(session, fixture.RenderManager, fixture.Source);
+        }
+
+        /// <summary>Ensures disposal from model loading cleans up the scene assigned after the callback returns.</summary>
+        [Fact]
+        public void Initialize_disposal_during_model_loading_cleans_late_scene() {
+            using TestFixture fixture = CreateFixture(new SoftwareTraceResolution(8, 8));
+            using SoftwarePathTraceSession session = new SoftwarePathTraceSession(fixture.RenderManager);
+            fixture.Source.OnLoadOwned = session.Dispose;
+
+            Assert.Throws<ObjectDisposedException>(() => session.Initialize(fixture.Roots, fixture.Source, new SoftwareTraceResolution(8, 8), Camera, 1f));
+
+            AssertPartialInitializationDisposed(session, fixture.RenderManager, fixture.Source);
+        }
+
+        /// <summary>Ensures disposal from accumulator allocation clears the tracer and BVH once late allocation completes.</summary>
+        [Fact]
+        public void Initialize_disposal_during_accumulator_allocation_cleans_late_progressive_state() {
+            using TestFixture fixture = CreateFixture(new SoftwareTraceResolution(8, 8));
+            using SoftwarePathTraceSession session = new SoftwarePathTraceSession(fixture.RenderManager);
+            SoftwarePathTracer observedTracer = null;
+            SoftwareBvh observedBvh = null;
+            fixture.Allocator.OnAllocateAccumulator = () => {
+                observedTracer = session.Tracer;
+                observedBvh = session.Bvh;
+                session.Dispose();
+            };
+
+            Assert.Throws<ObjectDisposedException>(() => session.Initialize(fixture.Roots, fixture.Source, new SoftwareTraceResolution(8, 8), Camera, 1f, fixture.Allocator));
+
+            AssertPartialInitializationDisposed(session, fixture.RenderManager, fixture.Source);
+            Assert.NotNull(observedTracer);
+            Assert.NotNull(observedBvh);
+            Assert.Empty(observedTracer.Accumulation);
+            Assert.Empty(observedTracer.TileRgba8);
+            Assert.Empty(observedBvh.Nodes);
+            Assert.Empty(observedBvh.TriangleOrder);
+        }
+
+        /// <summary>Ensures disposal from tile allocation clears all progressive arrays after both allocator callbacks.</summary>
+        [Fact]
+        public void Initialize_disposal_during_tile_allocation_cleans_progressive_arrays() {
+            using TestFixture fixture = CreateFixture(new SoftwareTraceResolution(8, 8));
+            using SoftwarePathTraceSession session = new SoftwarePathTraceSession(fixture.RenderManager);
+            SoftwarePathTracer observedTracer = null;
+            fixture.Allocator.OnAllocateTile = () => {
+                observedTracer = session.Tracer;
+                session.Dispose();
+            };
+
+            Assert.Throws<ObjectDisposedException>(() => session.Initialize(fixture.Roots, fixture.Source, new SoftwareTraceResolution(8, 8), Camera, 1f, fixture.Allocator));
+
+            AssertPartialInitializationDisposed(session, fixture.RenderManager, fixture.Source);
+            Assert.NotNull(observedTracer);
+            Assert.Empty(observedTracer.Accumulation);
+            Assert.Empty(observedTracer.TileRgba8);
+        }
+
+        static void AssertPartialInitializationDisposed(
+            SoftwarePathTraceSession session,
+            SoftwarePathTracerTestRenderManager2D renderManager,
+            FakeSoftwareModelAssetSource source) {
+            Assert.Equal(SoftwarePathTraceSessionState.Disposed, session.State);
+            Assert.Null(session.PresentationTexture);
+            Assert.Null(session.Scene);
+            Assert.Null(session.Bvh);
+            Assert.Null(session.Tracer);
+            Assert.Equal(0L, session.InitializationPeakOwnedBytes);
+            Assert.Equal(0L, session.SteadyStateOwnedBytes);
+            Assert.Single(renderManager.BuildCalls);
+            Assert.Equal(source.LoadCount, source.DisposedCount);
+            Assert.Single(renderManager.ReleaseAttempts);
+            Assert.Single(renderManager.ReleaseCalls);
         }
 
         /// <summary>Ensures a warmed tile/upload call performs no managed allocation when recording is disabled.</summary>
@@ -747,20 +885,26 @@ namespace city.tests {
             public bool ObservedAllModelsDisposed;
             public bool ThrowOnAccumulator;
             public bool ThrowOnTile;
+            public Action OnAllocateAccumulator { get; set; }
+            public Action OnAllocateTile { get; set; }
 
             public float3[] AllocateAccumulator(int pixelCount) {
                 ObservedAllModelsDisposed = RequireModelsDisposed == null || RequireModelsDisposed.DisposedCount > 0;
                 if (ThrowOnAccumulator) {
                     throw new InvalidOperationException("Injected accumulator allocation failure.");
                 }
-                return new float3[pixelCount];
+                float3[] allocation = new float3[pixelCount];
+                OnAllocateAccumulator?.Invoke();
+                return allocation;
             }
 
             public byte[] AllocateTileRgba8(int byteCount) {
                 if (ThrowOnTile) {
                     throw new InvalidOperationException("Injected tile-buffer allocation failure.");
                 }
-                return new byte[byteCount];
+                byte[] allocation = new byte[byteCount];
+                OnAllocateTile?.Invoke();
+                return allocation;
             }
         }
     }

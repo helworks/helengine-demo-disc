@@ -113,7 +113,13 @@ namespace city.rendering {
 
                 tracer = new SoftwarePathTracer(scene.Triangles, scene.Materials, scene.AreaLight, bvh, traversalStack);
                 state = SoftwarePathTraceSessionState.AllocatingProgressiveBuffers;
-                tracer.InitializeProgressive(resolution, camera, exposure, allocator);
+                SoftwarePathTracer initializingTracer = tracer;
+                initializingTracer.InitializeProgressive(resolution, camera, exposure, allocator);
+                if (state == SoftwarePathTraceSessionState.Disposed) {
+                    // Dispose may clear the session field while an allocator callback is in flight;
+                    // reset the local tracer once its late buffers become reachable.
+                    initializingTracer.DisposeProgressive();
+                }
                 ThrowIfDisposedDuringInitialization();
 
                 steadyStateOwnedBytes = checked(displayBytes
@@ -126,6 +132,10 @@ namespace city.rendering {
             }
             catch (Exception exception) {
                 if (state == SoftwarePathTraceSessionState.Disposed) {
+                    // A synchronous seam may dispose the session before the current stage returns
+                    // its newly-created resource. Run one final rollback pass after that resource
+                    // becomes reachable, while preserving Disposed and the original exception.
+                    CleanupOwnedResources();
                     throw;
                 }
 
