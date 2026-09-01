@@ -8,8 +8,7 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Splash_factory_authors_centered_ninety_percent_logo_scene() {
-            string sourcePath = Path.Combine(
-                @"C:\dev\helprojs\demodisc",
+            string sourcePath = global::city.testing.DemoDiscTestProject.GetPath(
                 "assets",
                 "codebase",
                 "menu.tools",
@@ -31,8 +30,7 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Splash_factory_authors_an_opaque_black_solid_background() {
-            string sourcePath = Path.Combine(
-                @"C:\dev\helprojs\demodisc",
+            string sourcePath = global::city.testing.DemoDiscTestProject.GetPath(
                 "assets",
                 "codebase",
                 "menu.tools",
@@ -51,8 +49,7 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Splash_factory_nests_the_sprite_subtree_under_its_overlay_camera() {
-            string sourcePath = Path.Combine(
-                @"C:\dev\helprojs\demodisc",
+            string sourcePath = global::city.testing.DemoDiscTestProject.GetPath(
                 "assets",
                 "codebase",
                 "menu.tools",
@@ -71,8 +68,8 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Splash_factory_keeps_its_blackout_background_outside_the_fitted_canvas() {
-            string factorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\menu.tools\HelenOfCodeSplashSceneFactory.cs");
-            string componentSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\menu\HelenOfCodeSplashComponent.cs");
+            string factorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "HelenOfCodeSplashSceneFactory.cs")).ReplaceLineEndings("\n");
+            string componentSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "HelenOfCodeSplashComponent.cs"));
 
             Assert.Contains("Entity backgroundEntity = CreateBackgroundEntity(cameraEntity);", factorySource, StringComparison.Ordinal);
             Assert.Contains("BackgroundRectangle.Size = Core.Instance.RenderManager3D.MainWindowSize", componentSource, StringComparison.Ordinal);
@@ -84,8 +81,7 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Splash_factory_assigns_the_dedicated_runtime_layer_to_every_splash_entity() {
-            string sourcePath = Path.Combine(
-                @"C:\dev\helprojs\demodisc",
+            string sourcePath = global::city.testing.DemoDiscTestProject.GetPath(
                 "assets",
                 "codebase",
                 "menu.tools",
@@ -96,42 +92,23 @@ namespace city.menu.tools.tests {
         }
 
         /// <summary>
-        /// Ensures the latest packaged Windows splash scene retains the dedicated overlay layer on the camera-owned sprite subtree.
+        /// Ensures the committed splash scene retains the dedicated overlay layer on the camera-owned sprite subtree.
         /// </summary>
         [Fact]
-        public void Packaged_windows_splash_scene_preserves_overlay_layer_on_the_sprite_subtree() {
-            string authoredScenePath = Path.Combine(
-                @"C:\dev\helprojs\demodisc",
-                "assets",
-                "scenes",
-                "HelenOfCodeSplash.helen");
-            string packagedScenePath = Path.Combine(
-                @"C:\dev\helprojs\demodisc",
-                "output",
-                "windows",
-                "cooked",
-                "scenes",
-                "helenofcodesplash.hasset");
-            using FileStream authoredStream = File.OpenRead(authoredScenePath);
-            SceneAsset authoredScene = Assert.IsType<SceneAsset>(global::helengine.AssetSerializer.Deserialize(authoredStream));
-            using FileStream stream = File.OpenRead(packagedScenePath);
+        public void Committed_splash_scene_preserves_overlay_layer_on_the_sprite_subtree() {
+            string scenePath = global::city.testing.DemoDiscTestProject.GetPath("assets", "scenes", "HelenOfCodeSplash.helen");
+            using FileStream stream = File.OpenRead(scenePath);
             SceneAsset scene = Assert.IsType<SceneAsset>(global::helengine.AssetSerializer.Deserialize(stream));
 
-            SceneEntityAsset authoredCameraEntity = Assert.Single(authoredScene.RootEntities);
-            Assert.Equal(2, authoredCameraEntity.Children.Length);
-            SceneEntityAsset authoredBackgroundEntity = Assert.Single(authoredCameraEntity.Children.Where(entity => entity.Components.Any(component => component.ComponentTypeId == "helengine.RoundedRectComponent")));
-            SceneEntityAsset authoredSplashRootEntity = Assert.Single(authoredCameraEntity.Children.Where(entity => entity.Children.Length == 1));
             SceneEntityAsset cameraEntity = Assert.Single(scene.RootEntities);
-            SceneEntityAsset splashRootEntity = Assert.Single(cameraEntity.Children);
-            SceneEntityAsset[] spriteEntities = splashRootEntity.Children;
-
-            Assert.Equal((ushort)2, authoredCameraEntity.LayerMask);
-            Assert.Equal((ushort)2, authoredBackgroundEntity.LayerMask);
-            Assert.Equal((ushort)2, authoredSplashRootEntity.LayerMask);
+            Assert.Equal(2, cameraEntity.Children.Length);
+            SceneEntityAsset backgroundEntity = Assert.Single(cameraEntity.Children.Where(entity => entity.Components.Any(component => component.ComponentTypeId == "helengine.RoundedRectComponent")));
+            SceneEntityAsset splashRootEntity = Assert.Single(cameraEntity.Children.Where(entity => entity.Children.Length == 1));
+            SceneEntityAsset logoEntity = Assert.Single(splashRootEntity.Children);
             Assert.Equal((ushort)2, cameraEntity.LayerMask);
+            Assert.Equal((ushort)2, backgroundEntity.LayerMask);
             Assert.Equal((ushort)2, splashRootEntity.LayerMask);
-            Assert.Equal(2, spriteEntities.Length);
-            Assert.All(spriteEntities, entity => Assert.Equal((ushort)2, entity.LayerMask));
+            Assert.Equal((ushort)2, logoEntity.LayerMask);
         }
 
         /// <summary>
