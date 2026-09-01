@@ -6,7 +6,7 @@ namespace city.tests {
     /// Verifies the generated demo-disc menu scenes remain silent until music is intentionally reintroduced.
     /// </summary>
     public sealed class DemoDiscMainMenuAudioSourceTests {
-        const string ProjectRootPath = @"C:\dev\helprojs\demodisc";
+        static string ProjectRootPath => global::city.testing.DemoDiscTestProject.RootPath;
         /// <summary>
         /// Ensures the persisted standard and handheld menu scenes contain no serialized audio source component or menu music reference.
         /// </summary>
@@ -27,9 +27,9 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Menu_scene_factories_do_not_author_music() {
-            string standardFactorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\menu.tools\DemoDiscStandardMainMenuSceneFactory.cs");
-            string handheldFactorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\menu.tools\DemoDiscHandheldMainMenuSceneFactory.cs");
-            string themeSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\menu\DemoDiscMenuTheme.cs");
+            string standardFactorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
+            string handheldFactorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscHandheldMainMenuSceneFactory.cs"));
+            string themeSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.authoring", "DemoDiscMenuTheme.cs"));
 
             Assert.DoesNotContain("AudioSourceComponent", standardFactorySource, StringComparison.Ordinal);
             Assert.DoesNotContain("AudioSourceComponent", handheldFactorySource, StringComparison.Ordinal);

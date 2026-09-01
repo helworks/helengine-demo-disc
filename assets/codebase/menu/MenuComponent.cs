@@ -725,10 +725,6 @@ namespace city.menu {
                 }
             }
 
-            if (rootEntity.Children.Count == 1) {
-                return rootEntity.Children[0];
-            }
-
             return null;
         }
 

@@ -8,9 +8,9 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Loading_screen_scales_its_runtime_fill_width_from_the_reference_canvas() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\menu\SceneLoadingScreenComponent.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "SceneLoadingScreenComponent.cs"));
 
-            Assert.Contains("ReferenceCanvasFitComponent.CalculateScale()", source, StringComparison.Ordinal);
+            Assert.Contains("referenceCanvasFitComponent.CalculateScale()", source, StringComparison.Ordinal);
             Assert.Contains("ProgressTrackWidth * clampedProgress * canvasScale.X", source, StringComparison.Ordinal);
         }
 
@@ -19,8 +19,8 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Loading_screen_background_uses_the_camera_hierarchy_and_live_viewport_size() {
-            string factorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\menu.tools\SceneLoadingScreenFactory.cs");
-            string componentSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\menu\SceneLoadingScreenComponent.cs");
+            string factorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "SceneLoadingScreenFactory.cs"));
+            string componentSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "SceneLoadingScreenComponent.cs"));
 
             Assert.Contains("Entity background = CreateRectangle(camera, \"LoadingBackground\"", factorySource, StringComparison.Ordinal);
             Assert.Contains("Background.Size = Core.Instance.RenderManager3D.MainWindowSize", componentSource, StringComparison.Ordinal);
