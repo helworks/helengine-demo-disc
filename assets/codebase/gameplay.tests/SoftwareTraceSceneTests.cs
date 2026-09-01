@@ -454,6 +454,29 @@ namespace city.tests {
             Assert.Equal(72, city.rendering.SoftwareAreaLight.OwnedBytes);
         }
 
+        /// <summary>
+        /// Ensures the owned raw-model transfer is declared on both the source contract and its content implementation.
+        /// </summary>
+        [Fact]
+        public void Load_owned_return_declares_native_ownership() {
+            System.Reflection.MethodInfo interfaceMethod = typeof(ISoftwareModelAssetSource).GetMethod(
+                nameof(ISoftwareModelAssetSource.LoadOwned));
+            System.Reflection.MethodInfo implementationMethod = typeof(ContentSoftwareModelAssetSource).GetMethod(
+                nameof(ContentSoftwareModelAssetSource.LoadOwned));
+
+            AssertOwnedReturn(interfaceMethod);
+            AssertOwnedReturn(implementationMethod);
+        }
+
+        /// <summary>
+        /// Verifies that one reflected method carries the native owned-return contract.
+        /// </summary>
+        /// <param name="method">Method whose returned model asset becomes the caller's responsibility.</param>
+        static void AssertOwnedReturn(System.Reflection.MethodInfo method) {
+            Assert.NotNull(method);
+            Assert.NotEmpty(method.GetCustomAttributes(typeof(NativeOwnedReturnAttribute), false));
+        }
+
         static ModelAsset CreateCubeAsset() {
             return new ModelAsset {
                 Positions = new[] {

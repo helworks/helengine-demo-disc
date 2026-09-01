@@ -10,6 +10,7 @@ namespace city.rendering {
         /// </summary>
         /// <param name="reference">Stable scene asset reference.</param>
         /// <returns>An owned raw model asset that the caller must dispose.</returns>
+        [NativeOwnedReturn]
         ModelAsset LoadOwned(SceneAssetReference reference);
     }
 
@@ -35,6 +36,7 @@ namespace city.rendering {
         /// </summary>
         /// <param name="reference">File-backed or generated scene asset reference.</param>
         /// <returns>An owned raw model asset.</returns>
+        [NativeOwnedReturn]
         public ModelAsset LoadOwned(SceneAssetReference reference) {
             if (reference == null) {
                 throw new ArgumentNullException(nameof(reference));
