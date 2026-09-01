@@ -297,7 +297,7 @@ namespace city.rendering {
         /// <param name="depth">Root-relative depth of this node.</param>
         /// <param name="nextNodeIndex">Next unreserved node slot.</param>
         /// <param name="maximumDepth">Maximum depth updated in place.</param>
-        static void BuildNode(SoftwareTriangle[] triangles, int[] order, SoftwareBvhNode[] nodes, int nodeIndex, int start, int count, int depth, ref int nextNodeIndex, ref int maximumDepth) {
+        static void BuildNode(SoftwareTriangle[] triangles, [NativeNoEscape] int[] order, [NativeNoEscape] SoftwareBvhNode[] nodes, int nodeIndex, int start, int count, int depth, ref int nextNodeIndex, ref int maximumDepth) {
             if (depth > maximumDepth) {
                 maximumDepth = depth;
             }

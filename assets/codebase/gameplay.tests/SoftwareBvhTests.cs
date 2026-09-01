@@ -9,6 +9,41 @@ namespace city.tests {
     /// </summary>
     public sealed class SoftwareBvhTests {
         /// <summary>
+        /// Requires the private static builder to borrow its temporary order and node arrays without escaping them.
+        /// </summary>
+        [Fact]
+        public void Build_node_build_buffers_declare_native_no_escape() {
+            MethodInfo method = typeof(SoftwareBvh).GetMethod(
+                "BuildNode",
+                BindingFlags.Static | BindingFlags.NonPublic);
+
+            Assert.NotNull(method);
+            Assert.Equal("BuildNode", method.Name);
+            Assert.True(method.IsStatic);
+            Assert.False(method.IsGenericMethod);
+            Assert.Equal(typeof(void), method.ReturnType);
+            Assert.Equal(9, method.GetParameters().Length);
+
+            ParameterInfo[] parameters = method.GetParameters();
+            ParameterInfo order = FindParameter(parameters, "order");
+            ParameterInfo nodes = FindParameter(parameters, "nodes");
+
+            Assert.Equal(typeof(int[]), order.ParameterType);
+            Assert.Equal(typeof(SoftwareBvhNode[]), nodes.ParameterType);
+            Assert.NotEmpty(order.GetCustomAttributes(typeof(NativeNoEscapeAttribute), false));
+            Assert.NotEmpty(nodes.GetCustomAttributes(typeof(NativeNoEscapeAttribute), false));
+        }
+
+        static ParameterInfo FindParameter(ParameterInfo[] parameters, string name) {
+            for (int index = 0; index < parameters.Length; index++) {
+                if (string.Equals(parameters[index].Name, name, StringComparison.Ordinal)) {
+                    return parameters[index];
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Ensures null triangle input is rejected before a root is created.
         /// </summary>
         [Fact]
