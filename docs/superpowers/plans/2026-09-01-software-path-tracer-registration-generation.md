@@ -44,8 +44,10 @@ SoftwarePathTracerFactory.CreateSceneDefinition(
 - [ ] Run the editor command against the isolated worktree project:
 
 ```powershell
-rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc\.worktrees\software-path-tracer-core\project.heproj --editor-command menu.generate-rendering-scenes
+rtk dotnet run --project C:\dev\helprojs\.worktrees\helengine-software-path-tracer-engine-seams\helengine.ui\helengine.editor.app\helengine.editor.app.csproj -- --project C:\dev\helprojs\demodisc\.worktrees\software-path-tracer-core\project.heproj --editor-command menu.generate-rendering-scenes
 ```
+
+The editor must run from the accepted engine-seams worktree until that branch is integrated into engine `main`. The generated editor-command projects reference the launched editor's `helengine.core.dll`; launching the current main checkout would omit `CpuReadableModelReferenceAttribute` and fail DemoDisc gameplay compilation before the command handler runs.
 
 - [ ] Require exit code `0` and `assets/scenes/rendering/software_path_tracer.helen` to exist.
 - [ ] Inspect `git status` immediately. Existing generated scenes may be rewritten by the command; do not stage unrelated churn. If existing tracked scenes change semantically, diagnose before proceeding rather than silently discarding user changes.
@@ -64,4 +66,3 @@ rtk dotnet run --project C:\dev\helworks\helengine\helengine.ui\helengine.editor
 
 - [ ] Stage only the generator, new test and sidecar, and `assets/scenes/rendering/software_path_tracer.helen`.
 - [ ] Commit as `Generate software path tracer scene`.
-
