@@ -57,7 +57,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void TiltPlayMenuComponent_uses_codegen_supported_argument_out_of_range_exceptions() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltPlayMenuComponent.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltPlayMenuComponent.cs"));
 
             Assert.DoesNotContain("nameof(action), action,", source, StringComparison.Ordinal);
             Assert.DoesNotContain("nameof(currentState), currentState,", source, StringComparison.Ordinal);
@@ -68,11 +68,13 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void TiltPlayMenuComponent_applies_title_action_selection_presentation() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltPlayMenuComponent.cs");
+            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltPlayMenuComponent.cs"));
 
             Assert.Contains("ApplyTitleActionSelection();", source, StringComparison.Ordinal);
             Assert.Contains("TiltPlayPlayButton", source, StringComparison.Ordinal);
-            Assert.Contains("new byte4(102, 56, 160, 255)", source, StringComparison.Ordinal);
+            Assert.Contains("PlayButtonSelectedOverlay.Enabled = isTitleVisible && SelectedTitleActionIndex == 0;", source, StringComparison.Ordinal);
+            Assert.Contains("OptionsButtonSelectedOverlay.Enabled = isTitleVisible && SelectedTitleActionIndex == 1;", source, StringComparison.Ordinal);
+            Assert.Contains("DemoDiscButtonSelectedOverlay.Enabled = isTitleVisible && SelectedTitleActionIndex == 2;", source, StringComparison.Ordinal);
         }
     }
 }
