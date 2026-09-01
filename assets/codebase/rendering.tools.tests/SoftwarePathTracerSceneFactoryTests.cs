@@ -1,4 +1,5 @@
 using city.rendering;
+using city.menu;
 using city.rendering.tools;
 using city.scene.tools;
 using helengine;
@@ -105,7 +106,7 @@ namespace city.tests {
                 hudFont);
             Entity[] entities = FlattenEntities(definition.RootEntities).ToArray();
 
-            Entity cameraEntity = Assert.Single(entities.Where(entity => entity.Components.OfType<CameraComponent>().Any()));
+            Entity cameraEntity = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerCamera"));
             CameraComponent camera = Component<CameraComponent>(cameraEntity);
             Assert.Equal(EditorLayerMasks.SceneObjects, camera.LayerMask);
             Assert.Equal(new float4(0f, 0f, 1f, 1f), camera.Viewport);
@@ -115,7 +116,8 @@ namespace city.tests {
             Assert.Single(outputEntity.Components.OfType<SpriteComponent>());
             Assert.Equal(EditorLayerMasks.SceneObjects, outputEntity.LayerMask);
 
-            Entity[] hudEntities = entities.Where(entity => entity.Components.OfType<TextComponent>().Any()).ToArray();
+            Entity[] hudEntities = entities.Where(entity => entity.Components.OfType<TextComponent>().Any()
+                && new[] { "SoftwarePathTracerSppText", "SoftwarePathTracerElapsedText", "SoftwarePathTracerRaysPerSecondText" }.Contains(EntityName(entity))).ToArray();
             Assert.Equal(3, hudEntities.Length);
             Assert.All(hudEntities, entity => {
                 TextComponent text = Component<TextComponent>(entity);
@@ -154,6 +156,150 @@ namespace city.tests {
         }
 
         [Fact]
+        public void Creates_one_reference_canvas_output_viewport_with_ds_and_3ds_presentation_overrides() {
+            using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
+            IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
+            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session);
+
+            GeneratedAuthoringSceneDefinition definition = factory.CreateSceneDefinition(
+                CreateProjectRoot(),
+                EngineSceneAssetReferenceFactory.CreateCubeModel(),
+                CreateHudFont());
+            Entity[] entities = FlattenEntities(definition.RootEntities).ToArray();
+            Entity cameraEntity = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerCamera"));
+            Entity outputEntity = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerOutput"));
+            SpriteComponent outputSprite = Component<SpriteComponent>(outputEntity);
+            EntitySaveComponent outputSave = Component<EntitySaveComponent>(outputEntity);
+            Entity presentationViewportEntity = Assert.Single(cameraEntity.Children.Where(entity => entity.Components.OfType<ViewportComponent>().Any()));
+            ViewportComponent presentationViewport = Component<ViewportComponent>(presentationViewportEntity);
+
+            Assert.Equal(ViewportComponent.AncestorCameraBindingMode, presentationViewport.BindingMode);
+            Assert.Equal(ViewportComponent.ReferenceCanvasScalingMode, presentationViewport.ScalingMode);
+            Assert.Equal(new int2(320, 240), presentationViewport.FixedSize);
+            Assert.Equal(320, presentationViewport.ReferenceWidth);
+            Assert.Equal(240, presentationViewport.ReferenceHeight);
+            Assert.Contains(outputEntity, presentationViewportEntity.Children);
+            Assert.Equal(new int2(320, 240), outputSprite.Size);
+            Assert.Null(outputSprite.Texture);
+            Assert.Equal(1, entities.Count(entity => entity.Components.OfType<SpriteComponent>().Any()));
+
+            ComponentPlatformEditingService platformEditingService = new ComponentPlatformEditingService();
+            SpriteComponent dsSprite = Assert.IsType<SpriteComponent>(platformEditingService.ResolveEditableComponent(outputSprite, outputSave, "ds"));
+            Assert.Equal(new int2(256, 192), dsSprite.Size);
+            ViewportComponent dsViewport = Assert.IsType<ViewportComponent>(platformEditingService.ResolveEditableComponent(presentationViewport, Component<EntitySaveComponent>(presentationViewportEntity), "ds"));
+            Assert.Equal(new int2(256, 192), dsViewport.FixedSize);
+            Assert.Equal(256, dsViewport.ReferenceWidth);
+            Assert.Equal(192, dsViewport.ReferenceHeight);
+
+            ViewportComponent threeDsViewport = Assert.IsType<ViewportComponent>(platformEditingService.ResolveEditableComponent(presentationViewport, Component<EntitySaveComponent>(presentationViewportEntity), "3ds"));
+            Assert.Equal(new int2(400, 240), threeDsViewport.FixedSize);
+            Assert.Equal(400, threeDsViewport.ReferenceWidth);
+            Assert.Equal(240, threeDsViewport.ReferenceHeight);
+            Assert.True(outputSave.TryGetTransformPlatformOverride("3ds", out SceneEntityPlatformTransformOverrideAsset outputTransform));
+            Assert.True(outputTransform.HasLocalPositionOverride);
+            AssertVector(outputTransform.LocalPosition, new float3(40f, 0f, 0f));
+        }
+
+        [Fact]
+        public void Persists_ds_and_3ds_controller_hud_reference_overrides_without_duplicating_the_output_sprite() {
+            using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
+            IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
+            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session);
+
+            GeneratedAuthoringSceneDefinition definition = factory.CreateSceneDefinition(
+                CreateProjectRoot(),
+                EngineSceneAssetReferenceFactory.CreateCubeModel(),
+                CreateHudFont());
+            Entity[] entities = FlattenEntities(definition.RootEntities).ToArray();
+            Entity controllerEntity = Assert.Single(entities.Where(entity => entity.Components.OfType<SoftwarePathTracerComponent>().Any()));
+            SoftwarePathTracerComponent commonController = Component<SoftwarePathTracerComponent>(controllerEntity);
+            EntitySaveComponent controllerSave = Component<EntitySaveComponent>(controllerEntity);
+            ComponentPlatformEditingService platformEditingService = new ComponentPlatformEditingService();
+            Entity[] commonHudEntities = new[] {
+                entities.Single(entity => EntityName(entity) == "SoftwarePathTracerSppText"),
+                entities.Single(entity => EntityName(entity) == "SoftwarePathTracerElapsedText"),
+                entities.Single(entity => EntityName(entity) == "SoftwarePathTracerRaysPerSecondText")
+            };
+            Entity[] handheldHudEntities = new[] {
+                entities.Single(entity => EntityName(entity) == "SoftwarePathTracerHandheldSppText"),
+                entities.Single(entity => EntityName(entity) == "SoftwarePathTracerHandheldElapsedText"),
+                entities.Single(entity => EntityName(entity) == "SoftwarePathTracerHandheldRaysPerSecondText")
+            };
+            uint[] commonHudIds = commonHudEntities.Select(SaveId).ToArray();
+            uint[] handheldHudIds = handheldHudEntities.Select(SaveId).ToArray();
+            Assert.All(commonHudIds.Concat(handheldHudIds), id => Assert.NotEqual(0u, id));
+            Assert.Equal(3, commonHudIds.Distinct().Count());
+            Assert.Equal(3, handheldHudIds.Distinct().Count());
+            Assert.Empty(commonHudIds.Intersect(handheldHudIds));
+
+            foreach (string platformId in new[] { "ds", "3ds" }) {
+                SoftwarePathTracerComponent effectiveController = Assert.IsType<SoftwarePathTracerComponent>(platformEditingService.ResolveEditableComponent(commonController, controllerSave, platformId));
+                Assert.Equal(handheldHudIds[0], effectiveController.SppTextEntityReference.EntityId);
+                Assert.Equal(handheldHudIds[1], effectiveController.ElapsedTextEntityReference.EntityId);
+                Assert.Equal(handheldHudIds[2], effectiveController.RaysPerSecondTextEntityReference.EntityId);
+                Assert.DoesNotContain(effectiveController.SppTextEntityReference.EntityId, commonHudIds);
+                Assert.DoesNotContain(effectiveController.ElapsedTextEntityReference.EntityId, commonHudIds);
+                Assert.DoesNotContain(effectiveController.RaysPerSecondTextEntityReference.EntityId, commonHudIds);
+            }
+
+            Assert.Equal(1, entities.Count(entity => entity.Components.OfType<SpriteComponent>().Any()));
+        }
+
+        [Fact]
+        public void Creates_mutually_exclusive_desktop_and_handheld_hud_trees_with_platform_return_owners() {
+            using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
+            IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
+            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session);
+
+            GeneratedAuthoringSceneDefinition definition = factory.CreateSceneDefinition(
+                CreateProjectRoot(),
+                EngineSceneAssetReferenceFactory.CreateCubeModel(),
+                CreateHudFont());
+            Entity[] entities = FlattenEntities(definition.RootEntities).ToArray();
+            Assert.Equal(2, entities.Count(entity => entity.Components.OfType<CameraComponent>().Any()));
+            Entity topCamera = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerCamera"));
+            CameraComponent topCameraComponent = Component<CameraComponent>(topCamera);
+            Assert.Equal(0, topCameraComponent.CameraDrawOrder);
+            Entity bottomCamera = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerBottomScreenCamera"));
+            CameraComponent bottomCameraComponent = Component<CameraComponent>(bottomCamera);
+            Assert.Equal(1, bottomCameraComponent.CameraDrawOrder);
+            Assert.Equal(new float4(0f, 1f, 1f, 1f), bottomCameraComponent.Viewport);
+            Entity bottomViewportEntity = Assert.Single(bottomCamera.Children.Where(entity => entity.Components.OfType<ViewportComponent>().Any()));
+            ViewportComponent bottomViewport = Component<ViewportComponent>(bottomViewportEntity);
+            Assert.Equal(ViewportComponent.AncestorCameraBindingMode, bottomViewport.BindingMode);
+            Assert.Equal(ViewportComponent.ReferenceCanvasScalingMode, bottomViewport.ScalingMode);
+            Assert.Equal(new int2(256, 192), bottomViewport.FixedSize);
+            Assert.Equal(256, bottomViewport.ReferenceWidth);
+            Assert.Equal(192, bottomViewport.ReferenceHeight);
+
+            Entity desktopRoot = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerDesktopHudRoot"));
+            Entity handheldRoot = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerHandheldHudRoot"));
+            Assert.True(IsDescendant(bottomViewportEntity, handheldRoot));
+            Assert.True(IsDescendant(topCamera, desktopRoot));
+            Entity desktopPanel = Assert.Single(desktopRoot.Children.Where(entity => entity.Components.OfType<RoundedRectComponent>().Any()));
+            Assert.Equal(new byte4(18, 27, 43, 220), Component<RoundedRectComponent>(desktopPanel).FillColor);
+            Entity desktopReturn = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnButton"));
+            InteractableComponent desktopInteractable = Component<InteractableComponent>(desktopReturn);
+            Assert.Equal(new int2(144, 28), desktopInteractable.Size);
+            DemoDiscReturnToMenuComponent desktopReturnComponent = Component<DemoDiscReturnToMenuComponent>(desktopReturn);
+            Assert.False(desktopReturnComponent.AllowKeyboardReturn);
+            Assert.False(desktopReturnComponent.AllowGamepadReturn);
+            Assert.True(desktopReturnComponent.AllowPointerReturn);
+            Entity handheldReturn = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerHandheldReturnButton"));
+            Assert.Single(handheldReturn.Components.OfType<InteractableComponent>());
+            Assert.Single(handheldReturn.Components.OfType<NintendoDsReturnOverlayComponent>());
+
+            string[] supportedPlatforms = new[] { "windows", "gamecube", "ps2", "psp", "psvita", "wii", "wiiu", "switch", "ds", "3ds" };
+            EntitySaveComponent desktopSave = Component<EntitySaveComponent>(desktopRoot);
+            EntitySaveComponent bottomCameraSave = Component<EntitySaveComponent>(bottomCamera);
+            foreach (string platformId in supportedPlatforms) {
+                bool isHandheld = platformId == "ds" || platformId == "3ds";
+                Assert.Equal(!isHandheld, ResolveExistence(desktopSave, platformId));
+                Assert.Equal(isHandheld, ResolveExistence(bottomCameraSave, platformId));
+            }
+        }
+
+        [Fact]
         public void Requires_the_public_factory_inputs() {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
             IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
@@ -185,6 +331,12 @@ namespace city.tests {
 
         static uint SaveId(Entity entity) {
             return Component<EntitySaveComponent>(entity).EntityId;
+        }
+
+        static bool ResolveExistence(EntitySaveComponent saveComponent, string platformId) {
+            return saveComponent.TryGetExistencePlatformOverride(platformId, out SceneEntityPlatformExistenceOverrideAsset overrideState)
+                ? overrideState.Exists
+                : true;
         }
 
         static string EntityName(Entity entity) {

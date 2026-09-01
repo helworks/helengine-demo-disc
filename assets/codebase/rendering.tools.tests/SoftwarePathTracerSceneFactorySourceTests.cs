@@ -19,8 +19,9 @@ namespace city.tests {
             Assert.Contains("EmissionStrength = 14f", source, StringComparison.Ordinal);
             Assert.Contains("new SoftwareModelComponent", source, StringComparison.Ordinal);
             Assert.DoesNotContain("MeshComponent", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("PlatformEditingService", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("ApplyPlatform", source, StringComparison.Ordinal);
+            Assert.Contains("ComponentPlatformEditingService", source, StringComparison.Ordinal);
+            Assert.Contains("EnsurePlatformOverrideComponent", source, StringComparison.Ordinal);
+            Assert.Contains("PersistPlatformOverride", source, StringComparison.Ordinal);
         }
 
         [Fact]
