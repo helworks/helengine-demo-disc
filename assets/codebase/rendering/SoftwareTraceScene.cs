@@ -405,19 +405,21 @@ namespace city.rendering {
             for (int instanceIndex = 0; instanceIndex < instances.Count; instanceIndex++) {
                 ModelInstance instance = instances[instanceIndex];
                 SceneAssetReference reference = instance.Component.ModelReference;
-                ModelGroup matchingGroup = null;
+                int matchingGroupIndex = -1;
                 for (int groupIndex = 0; groupIndex < groups.Count; groupIndex++) {
                     if (groups[groupIndex].Matches(reference)) {
-                        matchingGroup = groups[groupIndex];
+                        matchingGroupIndex = groupIndex;
                         break;
                     }
                 }
 
-                if (matchingGroup == null) {
-                    matchingGroup = new ModelGroup(reference);
-                    groups.Add(matchingGroup);
+                if (matchingGroupIndex < 0) {
+                    ModelGroup newGroup = new ModelGroup(reference);
+                    newGroup.Instances.Add(instance);
+                    groups.Add(newGroup);
+                } else {
+                    groups[matchingGroupIndex].Instances.Add(instance);
                 }
-                matchingGroup.Instances.Add(instance);
             }
             return groups;
         }

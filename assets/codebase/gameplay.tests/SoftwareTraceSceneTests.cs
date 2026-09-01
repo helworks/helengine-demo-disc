@@ -7,6 +7,19 @@ namespace city.tests {
     /// </summary>
     public sealed class SoftwareTraceSceneTests {
         /// <summary>
+        /// Requires stable grouping to keep borrowed and newly allocated group paths separate.
+        /// </summary>
+        [Fact]
+        public void Stable_group_selection_uses_index_without_mixed_group_reference() {
+            string source = System.IO.File.ReadAllText(
+                @"C:\dev\helprojs\demodisc\.worktrees\software-path-tracer-core\assets\codebase\rendering\SoftwareTraceScene.cs");
+
+            Assert.Contains("int matchingGroupIndex = -1;", source, StringComparison.Ordinal);
+            Assert.Contains("groups[matchingGroupIndex].Instances.Add(instance);", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("ModelGroup matchingGroup", source, StringComparison.Ordinal);
+        }
+
+        /// <summary>
         /// Requires recursive instance collection to borrow its destination list without retaining it.
         /// </summary>
         [Fact]
