@@ -141,6 +141,10 @@ namespace city.tests {
             Assert.True(float.IsFinite(hit.Position.Z));
         }
 
+        /// <summary>
+        /// Creates the unit right triangle shared by scalar intersection tests.
+        /// </summary>
+        /// <returns>A unit right triangle on the XY plane.</returns>
         static SoftwareTriangle CreateTriangle() {
             return new SoftwareTriangle(
                 new float3(0f, 0f, 0f),
