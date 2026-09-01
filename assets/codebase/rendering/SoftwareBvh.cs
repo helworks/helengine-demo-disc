@@ -147,7 +147,7 @@ namespace city.rendering {
         public const int LeafTriangleCapacity = 4;
 
         /// <summary>
-        /// Maximum number of caller-supplied traversal stack entries used by one ray.
+        /// Maximum number of caller-supplied traversal stack entries used by one ray. In v0, the single worker reuses one caller-owned traversal stack; before any future multithreading, this scratch must become worker-local.
         /// </summary>
         public const int TraversalStackCapacity = 64;
 
@@ -446,7 +446,7 @@ namespace city.rendering {
         /// <param name="ray">Ray to trace; its direction is used as supplied.</param>
         /// <param name="minimumDistance">Inclusive lower ray-parameter bound.</param>
         /// <param name="maximumDistance">Inclusive upper ray-parameter bound.</param>
-        /// <param name="traversalStack">Caller-owned scratch array with at least TraversalStackCapacity entries.</param>
+        /// <param name="traversalStack">Caller-owned scratch array with at least TraversalStackCapacity entries. The v0 single worker reuses one such stack; this scratch must become worker-local before any future multithreading.</param>
         /// <param name="hit">Nearest intersection details, or default when there is no hit.</param>
         /// <param name="triangleIndex">Nearest original triangle index, or -1 when there is no hit.</param>
         /// <returns>True when one indexed triangle intersects the ray in the supplied range.</returns>
