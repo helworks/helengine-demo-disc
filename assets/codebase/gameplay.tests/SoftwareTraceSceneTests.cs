@@ -183,10 +183,11 @@ namespace city.tests {
             SceneAssetReference first = SceneAssetReferenceFactory.CreateFileSystemModel("models/first.hasset");
             SceneAssetReference second = SceneAssetReferenceFactory.CreateFileSystemModel("models/second.hasset");
             FakeSoftwareModelAssetSource source = new FakeSoftwareModelAssetSource();
-            source.Register(first, CreateTriangleAsset16);
-            source.Register(second, CreateInwardFaceCubeAsset);
+            source.Register(first, CreateGeneratedCubeAsset);
+            source.Register(second, CreateGeneratedCubeAsset);
             fixture.AddModel(first, new SoftwareMaterial());
             fixture.AddModel(second, EmitterMaterial());
+            fixture.Entities[1].LocalPosition = new float3(0f, 1f, 0f);
 
             city.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
 
@@ -241,17 +242,34 @@ namespace city.tests {
             SceneAssetReference boxReference = SceneAssetReferenceFactory.CreateFileSystemModel("models/box.hasset");
             SceneAssetReference emitterReference = SceneAssetReferenceFactory.CreateFileSystemModel("models/emitter-cube.hasset");
             FakeSoftwareModelAssetSource source = new FakeSoftwareModelAssetSource();
-            source.Register(boxReference, CreateTriangleAsset16);
-            source.Register(emitterReference, CreateInwardFaceCubeAsset);
+            source.Register(boxReference, CreateGeneratedCubeAsset);
+            source.Register(emitterReference, CreateGeneratedCubeAsset);
             fixture.AddModel(boxReference, new SoftwareMaterial());
             fixture.AddModel(emitterReference, new SoftwareMaterial { EmissionColor = new float3(0.2f, 0.4f, 0.6f), EmissionStrength = 3f });
+            Entity emitterEntity = fixture.Entities[1];
+            emitterEntity.LocalPosition = new float3(0f, 1f, 0f);
+            emitterEntity.LocalScale = new float3(0.55f, 0.025f, 0.45f);
 
             city.rendering.SoftwareTraceScene scene = city.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
 
-            Assert.True(scene.AreaLight.Area > 0f);
+            Assert.Equal(24, scene.Triangles.Length);
+            Assert.InRange(scene.AreaLight.FirstTriangleIndex, 12, 23);
+            Assert.InRange(scene.AreaLight.SecondTriangleIndex, 12, 23);
+            int selectedEmitterTriangles = 0;
+            int unselectedEmitterTriangles = 0;
+            for (int triangleIndex = 12; triangleIndex < 24; triangleIndex++) {
+                if (triangleIndex == scene.AreaLight.FirstTriangleIndex || triangleIndex == scene.AreaLight.SecondTriangleIndex) {
+                    selectedEmitterTriangles++;
+                } else {
+                    Assert.True(scene.Triangles[triangleIndex].Edge1.Length() > 0f);
+                    unselectedEmitterTriangles++;
+                }
+            }
+            Assert.Equal(2, selectedEmitterTriangles);
+            Assert.Equal(10, unselectedEmitterTriangles);
+            Assert.InRange(Math.Abs(scene.AreaLight.Area - (0.55f * 0.45f)), 0f, 0.0001f);
             AssertVector(new float3(0.6f, 1.2f, 1.8f), scene.AreaLight.Emission);
-            Assert.NotEqual(scene.AreaLight.FirstTriangleIndex, scene.AreaLight.SecondTriangleIndex);
-            Assert.True(scene.AreaLight.InwardNormal.Length() > 0.99f);
+            Assert.True(scene.AreaLight.InwardNormal.Y < -0.99f);
         }
 
         /// <summary>
@@ -277,13 +295,124 @@ namespace city.tests {
             using SceneFixture fixture = new SceneFixture();
             SceneAssetReference reference = SceneAssetReferenceFactory.CreateFileSystemModel("models/triangle16.hasset");
             FakeSoftwareModelAssetSource source = new FakeSoftwareModelAssetSource();
-            source.Register(reference, CreateInwardFaceCubeAsset);
+            source.Register(reference, CreateGeneratedCubeAsset);
+            fixture.AddModel(reference, new SoftwareMaterial());
             fixture.AddModel(reference, new SoftwareMaterial { EmissionColor = float3.One, EmissionStrength = 1f });
+            fixture.Entities[1].LocalPosition = new float3(0f, 1f, 0f);
 
             city.rendering.SoftwareTraceScene scene = city.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
 
             Assert.Equal(scene.SteadyStateOwnedBytes, scene.Triangles.Length * city.rendering.SoftwareTraceScene.SoftwareTriangleBytes + scene.Materials.Length * city.rendering.SoftwareTraceScene.SoftwareMaterialDataBytes + city.rendering.SoftwareTraceScene.SoftwareAreaLightBytes);
             Assert.True(scene.InitializationPeakOwnedBytes >= scene.SteadyStateOwnedBytes);
+        }
+
+        /// <summary>
+        /// Ensures a null submesh element is rejected and its owned raw asset is disposed.
+        /// </summary>
+        [Fact]
+        public void Null_submesh_element_is_rejected_and_disposed() {
+            using SceneFixture fixture = new SceneFixture();
+            SceneAssetReference reference = SceneAssetReferenceFactory.CreateFileSystemModel("models/null-submesh.hasset");
+            FakeSoftwareModelAssetSource source = new FakeSoftwareModelAssetSource();
+            source.Register(reference, () => {
+                ModelAsset asset = CreateTriangleAsset16();
+                asset.Submeshes = new ModelSubmeshAsset[] { null };
+                return asset;
+            });
+            fixture.AddModel(reference, new SoftwareMaterial());
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+
+            Assert.Contains("Submeshes[0]", exception.Message, StringComparison.Ordinal);
+            Assert.Equal(1, source.DisposedCount);
+        }
+
+        /// <summary>
+        /// Ensures overlapping submesh ranges are rejected before flattening.
+        /// </summary>
+        [Fact]
+        public void Overlapping_submesh_ranges_are_rejected_and_disposed() {
+            using SceneFixture fixture = new SceneFixture();
+            SceneAssetReference reference = SceneAssetReferenceFactory.CreateFileSystemModel("models/overlap.hasset");
+            FakeSoftwareModelAssetSource source = new FakeSoftwareModelAssetSource();
+            source.Register(reference, () => CreateRangeContractAsset(new[] {
+                new ModelSubmeshAsset { IndexStart = 0, IndexCount = 6 },
+                new ModelSubmeshAsset { IndexStart = 3, IndexCount = 6 }
+            }));
+            fixture.AddModel(reference, new SoftwareMaterial(), new SoftwareMaterial());
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+
+            Assert.Contains("overlap", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(1, source.DisposedCount);
+        }
+
+        /// <summary>
+        /// Ensures uncovered index ranges are rejected before flattening.
+        /// </summary>
+        [Fact]
+        public void Uncovered_submesh_range_is_rejected_and_disposed() {
+            using SceneFixture fixture = new SceneFixture();
+            SceneAssetReference reference = SceneAssetReferenceFactory.CreateFileSystemModel("models/uncovered.hasset");
+            FakeSoftwareModelAssetSource source = new FakeSoftwareModelAssetSource();
+            source.Register(reference, () => CreateRangeContractAsset(new[] {
+                new ModelSubmeshAsset { IndexStart = 0, IndexCount = 3 }
+            }));
+            fixture.AddModel(reference, new SoftwareMaterial());
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+
+            Assert.Contains("do not cover", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(1, source.DisposedCount);
+        }
+
+        /// <summary>
+        /// Ensures an empty positions array is rejected and disposed.
+        /// </summary>
+        [Fact]
+        public void Empty_positions_are_rejected_and_disposed() {
+            using SceneFixture fixture = new SceneFixture();
+            SceneAssetReference reference = SceneAssetReferenceFactory.CreateFileSystemModel("models/empty-positions.hasset");
+            FakeSoftwareModelAssetSource source = new FakeSoftwareModelAssetSource();
+            source.Register(reference, () => {
+                ModelAsset asset = CreateTriangleAsset16();
+                asset.Positions = Array.Empty<float3>();
+                return asset;
+            });
+            fixture.AddModel(reference, new SoftwareMaterial());
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+
+            Assert.Contains("Positions", exception.Message, StringComparison.Ordinal);
+            Assert.Equal(1, source.DisposedCount);
+        }
+
+        /// <summary>
+        /// Ensures a valid raw triangle that degenerates under its world transform is disposed after flatten failure.
+        /// </summary>
+        [Fact]
+        public void Post_validation_flatten_failure_disposes_owned_asset() {
+            using SceneFixture fixture = new SceneFixture();
+            SceneAssetReference reference = SceneAssetReferenceFactory.CreateFileSystemModel("models/degenerate-transform.hasset");
+            FakeSoftwareModelAssetSource source = new FakeSoftwareModelAssetSource();
+            source.Register(reference, CreateTriangleAsset16);
+            Entity entity = fixture.AddModel(reference, new SoftwareMaterial());
+            entity.LocalScale = new float3(1f, 0f, 1f);
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+
+            Assert.Contains("degenerate", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(1, source.DisposedCount);
+        }
+
+        /// <summary>
+        /// Ensures compact owned-byte constants are independently exact.
+        /// </summary>
+        [Fact]
+        public void Compact_owned_byte_constants_are_exact() {
+            Assert.Equal(88, city.rendering.SoftwareTriangle.OwnedBytes);
+            Assert.Equal(24, city.rendering.SoftwareMaterialData.OwnedBytes);
+            Assert.Equal(72, city.rendering.SoftwareAreaLight.OwnedBytes);
         }
 
         static ModelAsset CreateCubeAsset() {
@@ -341,12 +470,21 @@ namespace city.tests {
             };
         }
 
-        static ModelAsset CreateInwardFaceCubeAsset() {
-            ModelAsset cube = CreateCubeAsset();
-            cube.Indices16 = new ushort[] { 0, 1, 2, 0, 2, 3 };
-            cube.Positions = new[] { new float3(-1f, -1f, 0f), new float3(1f, -1f, 0f), new float3(1f, 1f, 0f), new float3(-1f, 1f, 0f) };
-            cube.Submeshes = new[] { new ModelSubmeshAsset { IndexStart = 0, IndexCount = 6 } };
+        static ModelAsset CreateGeneratedCubeAsset() {
+            ModelAsset cube = ModelUtils.GenerateCubeMesh(float3.Zero, float3.One);
+            cube.Submeshes = new[] { new ModelSubmeshAsset { MaterialSlotName = "DefaultMaterial", IndexStart = 0, IndexCount = cube.Indices16.Length } };
             return cube;
+        }
+
+        static ModelAsset CreateRangeContractAsset(ModelSubmeshAsset[] submeshes) {
+            return new ModelAsset {
+                Positions = new[] {
+                    new float3(0f, 0f, 0f), new float3(1f, 0f, 0f), new float3(1f, 1f, 0f),
+                    new float3(0f, 1f, 0f), new float3(-1f, 1f, 0f), new float3(-1f, 0f, 0f)
+                },
+                Indices16 = new ushort[] { 0, 1, 2, 0, 2, 3, 0, 3, 4 },
+                Submeshes = submeshes
+            };
         }
 
         static ModelAsset CreateInvalidAsset(int failureKind) {

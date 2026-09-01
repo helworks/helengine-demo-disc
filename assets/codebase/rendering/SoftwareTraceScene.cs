@@ -549,55 +549,80 @@ namespace city.rendering {
         /// <param name="emitter">Flattened emitter triangle range.</param>
         /// <returns>One compact rectangular area light.</returns>
         static SoftwareAreaLight DeriveAreaLight(SoftwareTriangle[] triangles, SoftwareMaterialData[] materials, EmitterInstance emitter) {
-            Candidate bestAny = default(Candidate);
-            int bestAnyCount = 0;
-            Candidate bestInward = default(Candidate);
-            int bestInwardCount = 0;
-            float3 modelMin = new float3(float.PositiveInfinity);
-            float3 modelMax = new float3(float.NegativeInfinity);
-            for (int index = emitter.TriangleOffset; index < emitter.TriangleOffset + emitter.TriangleCount; index++) {
-                modelMin = float3.Min(modelMin, triangles[index].BoundsMin);
-                modelMax = float3.Max(modelMax, triangles[index].BoundsMax);
+            int emitterEnd = emitter.TriangleOffset + emitter.TriangleCount;
+            bool hasSceneInterior = false;
+            float3 sceneMin = new float3(float.PositiveInfinity);
+            float3 sceneMax = new float3(float.NegativeInfinity);
+            for (int index = 0; index < triangles.Length; index++) {
+                if (index >= emitter.TriangleOffset && index < emitterEnd) {
+                    continue;
+                }
+                sceneMin = float3.Min(sceneMin, triangles[index].BoundsMin);
+                sceneMax = float3.Max(sceneMax, triangles[index].BoundsMax);
+                hasSceneInterior = true;
             }
-            float3 modelCenter = (modelMin + modelMax) * 0.5f;
-            for (int first = emitter.TriangleOffset; first < emitter.TriangleOffset + emitter.TriangleCount; first++) {
-                for (int second = first + 1; second < emitter.TriangleOffset + emitter.TriangleCount; second++) {
+
+            bool closedEmitter = emitter.TriangleCount > 2;
+            if (closedEmitter && !hasSceneInterior) {
+                throw new InvalidOperationException("Closed emissive geometry requires non-emitter scene triangles to define the scene interior.");
+            }
+
+            float3 sceneInteriorCenter = (sceneMin + sceneMax) * 0.5f;
+            Candidate largestCandidate = default(Candidate);
+            Candidate largestInwardCandidate = default(Candidate);
+            int largestCandidateCount = 0;
+            int largestInwardCandidateCount = 0;
+            for (int first = emitter.TriangleOffset; first < emitterEnd; first++) {
+                for (int second = first + 1; second < emitterEnd; second++) {
                     if (!TryCreateCandidate(triangles[first], triangles[second], first, second, out Candidate candidate)) {
                         continue;
                     }
-                    float3 toCenter = modelCenter - candidate.Corner;
-                    bool inward = float3.Dot(candidate.Normal, toCenter) > GeometryTolerance;
-                    if (inward) {
-                        candidate.IsInward = true;
-                    }
-                    if (!bestAny.IsValid || candidate.Area > bestAny.Area + GeometryTolerance) {
-                        bestAny = candidate;
-                        bestAnyCount = 1;
-                    } else if (Math.Abs(bestAny.Area - candidate.Area) <= GeometryTolerance) {
-                        bestAnyCount++;
-                    }
-                    if (candidate.IsInward) {
-                        if (!bestInward.IsValid || candidate.Area > bestInward.Area + GeometryTolerance) {
-                            bestInward = candidate;
-                            bestInwardCount = 1;
-                        } else if (Math.Abs(bestInward.Area - candidate.Area) <= GeometryTolerance) {
-                            bestInwardCount++;
+
+                    float3 faceCenter = (triangles[first].Centroid + triangles[second].Centroid) * 0.5f;
+                    candidate.IsInward = hasSceneInterior && float3.Dot(candidate.Normal, sceneInteriorCenter - faceCenter) > GeometryTolerance;
+                    if (!largestCandidate.IsValid || candidate.Area > largestCandidate.Area + GeometryTolerance) {
+                        largestCandidate = candidate;
+                        largestCandidateCount = 1;
+                        largestInwardCandidate = candidate.IsInward ? candidate : default(Candidate);
+                        largestInwardCandidateCount = candidate.IsInward ? 1 : 0;
+                    } else if (Math.Abs(largestCandidate.Area - candidate.Area) <= GeometryTolerance) {
+                        largestCandidateCount++;
+                        if (candidate.IsInward) {
+                            if (!largestInwardCandidate.IsValid) {
+                                largestInwardCandidate = candidate;
+                            }
+                            largestInwardCandidateCount++;
                         }
                     }
                 }
             }
 
-            Candidate best = bestInward.IsValid ? bestInward : bestAny;
-            int candidateCount = bestInward.IsValid ? bestInwardCount : bestAnyCount;
-            if (!best.IsValid || candidateCount != 1) {
-                throw new InvalidOperationException("Emissive geometry must contain exactly one unambiguous rectangular inward-facing triangle pair.");
+            Candidate best;
+            if (closedEmitter) {
+                if (!largestCandidate.IsValid || largestInwardCandidateCount != 1) {
+                    throw new InvalidOperationException("Closed emissive geometry must contain exactly one largest rectangular face oriented toward the non-emitter scene interior.");
+                }
+                best = largestInwardCandidate;
+            } else {
+                if (!largestCandidate.IsValid || largestCandidateCount != 1) {
+                    throw new InvalidOperationException("Emissive geometry must contain exactly one unambiguous rectangular triangle pair.");
+                }
+                best = largestCandidate;
             }
             SoftwareMaterialData firstMaterial = materials[triangles[best.FirstTriangle].MaterialIndex];
             SoftwareMaterialData secondMaterial = materials[triangles[best.SecondTriangle].MaterialIndex];
             if (!NearlyEqual(firstMaterial.Emission, secondMaterial.Emission)) {
                 throw new InvalidOperationException("Selected emissive rectangle triangles must share one emission value.");
             }
-            return new SoftwareAreaLight(best.Corner, best.Edge1, best.Edge2, best.Normal, best.Area, firstMaterial.Emission, best.FirstTriangle, best.SecondTriangle);
+
+            float3 lightNormal = best.Normal;
+            if (!closedEmitter && hasSceneInterior) {
+                float3 faceCenter = (triangles[best.FirstTriangle].Centroid + triangles[best.SecondTriangle].Centroid) * 0.5f;
+                if (float3.Dot(lightNormal, sceneInteriorCenter - faceCenter) < -GeometryTolerance) {
+                    lightNormal = new float3(-lightNormal.X, -lightNormal.Y, -lightNormal.Z);
+                }
+            }
+            return new SoftwareAreaLight(best.Corner, best.Edge1, best.Edge2, lightNormal, best.Area, firstMaterial.Emission, best.FirstTriangle, best.SecondTriangle);
         }
 
         /// <summary>
