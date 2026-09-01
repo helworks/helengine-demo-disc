@@ -14,7 +14,7 @@
 
 ## Task 1: Make configuration tests worktree-correct and red
 
-- [ ] Replace hard-coded `C:\dev\helprojs\demodisc` reads in the touched build-config tests with one checkout-root resolver that walks upward from the test assembly until it finds both `project.heproj` and `user_settings/build_config.json`.
+- [ ] Replace hard-coded `C:\dev\helprojs\demodisc` reads in the touched build-config tests with one `[CallerFilePath]` checkout-root resolver that walks upward from the test source file until it finds both `project.heproj` and `user_settings/build_config.json`. Do not resolve from the generated test assembly, whose output can live under a temporary build root outside the checkout.
 - [ ] Extend the expected common scene package with `software_path_tracer` immediately after `pbr_shadow_theater`.
 - [ ] Add focused integration tests requiring `project.heproj.supportedPlatforms` to match `settings/platforms.json.supportedPlatforms` as an ordinal set of exactly these ten IDs: `windows`, `ps2`, `psp`, `psvita`, `ds`, `3ds`, `gamecube`, `wii`, `switch`, `wiiu`.
 - [ ] Assert `gamecube` appears exactly once and `gc` never appears.
@@ -64,4 +64,3 @@ rtk git diff --check
 
 - [ ] Inspect all ten platform blocks, especially DS/3DS order numbers and PS2 special profiles.
 - [ ] Commit as `Package software path tracer on every target`.
-
