@@ -11,11 +11,12 @@
 
 ## Steps
 
-1. Temporarily narrow only the GameCube `selectedSceneIds` entry to `software_path_tracer`.
-2. Build into the dedicated `gamecube-path-tracer-build` output directory.
-3. Restore `user_settings/build_config.json` exactly and confirm it has no diff.
-4. Verify the generated GameCube runtime manifest embeds `software_path_tracer` as its startup scene and the packaged disc contains the cooked scene.
-5. Stop only the previous Dolphin validation process, launch the direct-start `game.gcm`, and verify that Dolphin remains responsive while emulation time advances.
+1. Build into the dedicated `gamecube-path-tracer-build` output directory so the complete DemoDisc scene catalog is cooked and packaged.
+2. Stage a validation-only copy of the generated GameCube runtime manifest, change only its embedded startup id to `software_path_tracer`, and copy it into the generated build cache.
+3. Incrementally rebuild the packaged-mode native DOL, copy it into the dedicated extracted-disc layout, and repackage that layout as `game.gcm`.
+4. Restore the original generated-cache manifest and confirm `user_settings/build_config.json` has no diff.
+5. Verify the direct-start DOL contains `software_path_tracer` as its startup scene and the packaged disc contains the cooked scene.
+6. Stop only the previous Dolphin validation process, launch the direct-start `game.gcm`, and verify that Dolphin remains responsive while emulation time advances.
 
 ## Acceptance
 
