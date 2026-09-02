@@ -131,8 +131,8 @@ namespace city.game {
         /// </summary>
         /// <param name="inputSystem">Input system supplying the current frame state.</param>
         void UpdateLook(InputSystem inputSystem) {
-            inputSystem.RequestPointerWrapEnabled();
 #if DESKTOP_PLATFORM
+            inputSystem.RequestPointerWrapEnabled();
             CurrentYawDegrees += inputSystem.GetMouseDeltaX() * LookSensitivityDegrees;
             CurrentPitchDegrees = ClampPitchDegrees(CurrentPitchDegrees - (inputSystem.GetMouseDeltaY() * LookSensitivityDegrees));
 #endif

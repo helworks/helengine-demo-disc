@@ -16,7 +16,7 @@ namespace city.tests {
         /// <summary>
         /// Input member names available exclusively to desktop game cores.
         /// </summary>
-        static readonly string[] DesktopOnlyInputReferenceFragments = ["Keys.", "GetMouse", "WasMouse", "IsMouse"];
+        static readonly string[] DesktopOnlyInputReferenceFragments = ["Keys.", "GetMouse", "WasMouse", "IsMouse", "RequestPointerWrapEnabled", "SetPointerWrapEnabled"];
 
         /// <summary>
         /// Ensures keyboard fallback input is emitted only when desktop compilation is active.

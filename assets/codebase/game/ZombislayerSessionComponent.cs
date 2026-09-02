@@ -83,7 +83,9 @@ namespace city.game {
             ResolvePauseOverlayEntityWhenNeeded();
             UpdateSessionState();
             RefreshOverlayPresentation();
+#if DESKTOP_PLATFORM
             Core.Instance.Input.SetPointerWrapEnabled(SessionStateMachine.CurrentState == ZombislayerSessionState.Playing);
+#endif
         }
 
         /// <summary>
