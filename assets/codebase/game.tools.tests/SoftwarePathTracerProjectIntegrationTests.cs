@@ -63,9 +63,9 @@ namespace city.tests {
 
             Assert.Equal(requiredEngineVersion, gameCube.GetProperty("engineVersion").GetString());
             Assert.Equal(
-                @"C:\dev\helworks\helengine-gc\builder\bin\Debug\net9.0\helengine.gamecube.builder.dll",
+                @"C:\dev\helprojs\.worktrees\helengine-gc-path-tracer-repair\builder\bin\Debug\net9.0\helengine.gamecube.builder.dll",
                 gameCube.GetProperty("builderAssemblyPath").GetString());
-            Assert.Equal(@"C:\dev\helworks\helengine-gc", gameCube.GetProperty("playerSourceRootPath").GetString());
+            Assert.Equal(@"C:\dev\helprojs\.worktrees\helengine-gc-path-tracer-repair", gameCube.GetProperty("playerSourceRootPath").GetString());
             Assert.Equal(
                 @"C:\dev\helworks\helengine\tmp\helengine-core-cpp-regenerated",
                 gameCube.GetProperty("generatedCoreCppRootPath").GetString());

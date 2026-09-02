@@ -4,8 +4,8 @@
       "engineVersion": "1.0.0+fb94b93fbfd8c1e895c910a57903970c0e303900",
       "platformId": "gamecube",
       "displayName": "Nintendo GameCube",
-      "builderAssemblyPath": "C:\\dev\\helworks\\helengine-gc\\builder\\bin\\Debug\\net9.0\\helengine.gamecube.builder.dll",
-      "playerSourceRootPath": "C:\\dev\\helworks\\helengine-gc",
+      "builderAssemblyPath": "C:\\dev\\helprojs\\.worktrees\\helengine-gc-path-tracer-repair\\builder\\bin\\Debug\\net9.0\\helengine.gamecube.builder.dll",
+      "playerSourceRootPath": "C:\\dev\\helprojs\\.worktrees\\helengine-gc-path-tracer-repair",
       "generatedCoreCppRootPath": "C:\\dev\\helworks\\helengine\\tmp\\helengine-core-cpp-regenerated",
       "codegenToolPath": "C:\\dev\\helworks\\csharpcodegen\\codegen\\bin\\Release\\net9.0\\codegen.exe"
     }
