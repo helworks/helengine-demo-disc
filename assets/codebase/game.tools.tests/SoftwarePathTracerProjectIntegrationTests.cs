@@ -50,6 +50,31 @@ namespace city.tests {
         }
 
         /// <summary>
+        /// Ensures the isolated GameCube build catalog selects exactly one version-matched installed builder and its native payload roots.
+        /// </summary>
+        [Fact]
+        public void GameCube_build_catalog_contains_one_version_matched_installed_descriptor() {
+            using JsonDocument project = LoadJson("project.heproj");
+            using JsonDocument catalog = LoadJson(Path.Combine("user_settings", "gamecube-build-platforms", "platforms.json"));
+
+            string requiredEngineVersion = project.RootElement.GetProperty("requiredEngineVersion").GetString() ?? string.Empty;
+            JsonElement[] platforms = catalog.RootElement.GetProperty("platforms").EnumerateArray().ToArray();
+            JsonElement gameCube = Assert.Single(platforms, platform => platform.GetProperty("platformId").GetString() == "gamecube");
+
+            Assert.Equal(requiredEngineVersion, gameCube.GetProperty("engineVersion").GetString());
+            Assert.Equal(
+                @"C:\dev\helworks\helengine-gc\builder\bin\Debug\net9.0\helengine.gamecube.builder.dll",
+                gameCube.GetProperty("builderAssemblyPath").GetString());
+            Assert.Equal(@"C:\dev\helworks\helengine-gc", gameCube.GetProperty("playerSourceRootPath").GetString());
+            Assert.Equal(
+                @"C:\dev\helworks\helengine\tmp\helengine-core-cpp-regenerated",
+                gameCube.GetProperty("generatedCoreCppRootPath").GetString());
+            Assert.Equal(
+                @"C:\dev\helworks\csharpcodegen\codegen\bin\Release\net9.0\codegen.exe",
+                gameCube.GetProperty("codegenToolPath").GetString());
+        }
+
+        /// <summary>
         /// Ensures the shared software path tracer scene follows PBR Shadow Theater in every target package.
         /// </summary>
         [Fact]
