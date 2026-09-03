@@ -41,11 +41,14 @@ namespace city.tests {
         }
 
         /// <summary>
-        /// Ensures platform identifiers use ordinal case-sensitive matching.
+        /// Ensures platform identifiers use ordinal case-insensitive matching.
         /// </summary>
         [Fact]
-        public void Platform_resolution_is_ordinal_case_sensitive() {
-            Assert.Throws<ArgumentOutOfRangeException>(() => SoftwareTraceResolution.ForPlatform("DS"));
+        public void Platform_resolution_is_ordinal_case_insensitive() {
+            SoftwareTraceResolution resolution = SoftwareTraceResolution.ForPlatform("DS");
+
+            Assert.Equal(256, resolution.Width);
+            Assert.Equal(192, resolution.Height);
         }
 
         /// <summary>

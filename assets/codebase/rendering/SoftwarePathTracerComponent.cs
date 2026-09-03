@@ -79,13 +79,15 @@ namespace city.rendering {
         /// <param name="camera">Validated authored camera basis.</param>
         /// <param name="exposure">Positive tone-mapping exposure.</param>
         /// <param name="allocator">Optional progressive allocation seam.</param>
+        /// <param name="platformName">Optional runtime platform identity used to select the presentation texture format.</param>
         public void Initialize(
             List<Entity> sceneRoots,
             ISoftwareModelAssetSource modelSource,
             SoftwareTraceResolution resolution,
             SoftwareTraceCamera camera,
             float exposure,
-            ISoftwareTraceBufferAllocator allocator = null) {
+            ISoftwareTraceBufferAllocator allocator = null,
+            string platformName = null) {
             if (state != SoftwarePathTraceSessionState.Uninitialized) {
                 throw new InvalidOperationException("Software path trace session initialization is permitted only once.");
             }
@@ -93,9 +95,10 @@ namespace city.rendering {
             long displayBytes = 0L;
             try {
                 ValidateInitializationArguments(sceneRoots, modelSource, resolution, camera, exposure);
-                displayBytes = checked((long)resolution.Width * resolution.Height * 4L);
+                int presentationBytesPerPixel = IsDsPlatform(platformName) ? 2 : 4;
+                displayBytes = checked((long)resolution.Width * resolution.Height * presentationBytesPerPixel);
                 state = SoftwarePathTraceSessionState.CreatingPresentation;
-                CreatePresentationTexture(resolution);
+                CreatePresentationTexture(resolution, platformName);
                 ObservePeak(checked(displayBytes + displayBytes));
                 ThrowIfDisposedDuringInitialization();
 
@@ -226,19 +229,27 @@ namespace city.rendering {
         }
 
         /// <summary>
-        /// Creates the blank opaque RGBA8 presentation texture and immediately disposes its CPU asset.
+        /// Creates the blank opaque presentation texture and immediately disposes its CPU asset.
         /// </summary>
-        void CreatePresentationTexture(SoftwareTraceResolution resolution) {
-            int byteCount = checked(resolution.Width * resolution.Height * 4);
+        void CreatePresentationTexture(SoftwareTraceResolution resolution, string platformName) {
+            bool useRgba4444 = IsDsPlatform(platformName);
+            int bytesPerPixel = useRgba4444 ? 2 : 4;
+            int byteCount = checked(resolution.Width * resolution.Height * bytesPerPixel);
             TextureAsset rawTexture = new TextureAsset {
                 Width = (ushort)resolution.Width,
                 Height = (ushort)resolution.Height,
-                ColorFormat = TextureAssetColorFormat.Rgba32,
-                AlphaPrecision = TextureAssetAlphaPrecision.A8,
+                ColorFormat = useRgba4444 ? TextureAssetColorFormat.Rgba4444 : TextureAssetColorFormat.Rgba32,
+                AlphaPrecision = useRgba4444 ? TextureAssetAlphaPrecision.A4 : TextureAssetAlphaPrecision.A8,
                 Colors = new byte[byteCount]
             };
-            for (int pixel = 3; pixel < rawTexture.Colors.Length; pixel += 4) {
-                rawTexture.Colors[pixel] = byte.MaxValue;
+            if (useRgba4444) {
+                for (int pixel = 1; pixel < rawTexture.Colors.Length; pixel += 2) {
+                    rawTexture.Colors[pixel] = 0xF0;
+                }
+            } else {
+                for (int pixel = 3; pixel < rawTexture.Colors.Length; pixel += 4) {
+                    rawTexture.Colors[pixel] = byte.MaxValue;
+                }
             }
 
             try {
@@ -253,6 +264,11 @@ namespace city.rendering {
             finally {
                 rawTexture.Dispose();
             }
+        }
+
+        /// <summary>Returns whether one platform uses the Nintendo DS native presentation format.</summary>
+        static bool IsDsPlatform(string platformName) {
+            return string.Equals(platformName, "ds", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -482,7 +498,9 @@ namespace city.rendering {
                     new ContentSoftwareModelAssetSource(OwnerCore.ContentManager),
                     resolution,
                     camera,
-                    Exposure);
+                    Exposure,
+                    null,
+                    OwnerCore.PlatformInfo.Name);
                 outputSprite.Texture = session.PresentationTexture;
                 traceStartSeconds = OwnerCore.TotalElapsedSeconds;
                 lastHudRefreshSeconds = 0d;
@@ -614,8 +632,8 @@ namespace city.rendering {
 
         /// <summary>Returns whether the desktop controller return path should be polled.</summary>
         public static bool ShouldPollControllerReturn(string platformName) {
-            return !string.Equals(platformName, "ds", StringComparison.Ordinal)
-                && !string.Equals(platformName, "3ds", StringComparison.Ordinal);
+            return !string.Equals(platformName, "ds", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(platformName, "3ds", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>Validates references and authored camera/exposure values before engine access.</summary>

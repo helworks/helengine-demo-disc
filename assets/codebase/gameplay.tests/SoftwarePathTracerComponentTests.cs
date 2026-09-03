@@ -338,19 +338,35 @@ namespace city.tests {
 
         /// <summary>Ensures platform presets use the exact documented output dimensions and byte diagnostics.</summary>
         [Theory]
-        [InlineData("ds", 256, 192)]
-        [InlineData("windows", 320, 240)]
-        public void Initialize_platform_resolution_reports_exact_texture_and_memory(string platformName, int expectedWidth, int expectedHeight) {
+        [InlineData("ds", 256, 192, TextureAssetColorFormat.Rgba4444, TextureAssetAlphaPrecision.A4, 2)]
+        [InlineData("DS", 256, 192, TextureAssetColorFormat.Rgba4444, TextureAssetAlphaPrecision.A4, 2)]
+        [InlineData("windows", 320, 240, TextureAssetColorFormat.Rgba32, TextureAssetAlphaPrecision.A8, 4)]
+        public void Initialize_platform_resolution_reports_exact_texture_and_memory(string platformName, int expectedWidth, int expectedHeight, TextureAssetColorFormat expectedColorFormat, TextureAssetAlphaPrecision expectedAlphaPrecision, int expectedBytesPerPixel) {
             using TestFixture fixture = CreateFixture(new SoftwareTraceResolution(expectedWidth, expectedHeight));
             SoftwareTraceResolution resolution = SoftwareTraceResolution.ForPlatform(platformName);
             using SoftwarePathTraceSession session = new SoftwarePathTraceSession(fixture.RenderManager);
 
-            session.Initialize(fixture.Roots, fixture.Source, resolution, Camera, 1f, fixture.Allocator);
+            session.Initialize(fixture.Roots, fixture.Source, resolution, Camera, 1f, fixture.Allocator, platformName);
 
             Assert.Single(fixture.RenderManager.BuildCalls);
             Assert.Equal(expectedWidth, fixture.RenderManager.BuildCalls[0].Width);
             Assert.Equal(expectedHeight, fixture.RenderManager.BuildCalls[0].Height);
-            long displayBytes = (long)expectedWidth * expectedHeight * 4L;
+            Assert.Equal(expectedColorFormat, fixture.RenderManager.LastBuiltColorFormat);
+            Assert.Equal(expectedAlphaPrecision, fixture.RenderManager.LastBuiltAlphaPrecision);
+            Assert.Equal(expectedWidth * expectedHeight * expectedBytesPerPixel, fixture.RenderManager.LastBuiltColors.Length);
+            if (expectedColorFormat == TextureAssetColorFormat.Rgba4444) {
+                for (int pixelIndex = 0; pixelIndex < expectedWidth * expectedHeight; pixelIndex++) {
+                    int payloadIndex = pixelIndex * 2;
+                    Assert.Equal(0, fixture.RenderManager.LastBuiltColors[payloadIndex]);
+                    Assert.Equal(0xF0, fixture.RenderManager.LastBuiltColors[payloadIndex + 1]);
+                }
+            } else {
+                Assert.Equal(0, fixture.RenderManager.LastBuiltColors[0]);
+                Assert.Equal(0, fixture.RenderManager.LastBuiltColors[1]);
+                Assert.Equal(0, fixture.RenderManager.LastBuiltColors[2]);
+                Assert.Equal(byte.MaxValue, fixture.RenderManager.LastBuiltColors[3]);
+            }
+            long displayBytes = (long)expectedWidth * expectedHeight * expectedBytesPerPixel;
             long sceneBytes = session.Scene.SteadyStateOwnedBytes;
             long bvhBytes = ((long)session.Bvh.Nodes.Length * 32L) + ((long)session.Bvh.TriangleOrder.Length * 4L);
             long stackBytes = (long)SoftwareBvh.TraversalStackCapacity * 4L;
@@ -705,6 +721,7 @@ namespace city.tests {
         /// </summary>
         [Theory]
         [InlineData("ds", false)]
+        [InlineData("DS", false)]
         [InlineData("3ds", false)]
         [InlineData("windows", true)]
         public void Return_policy_identifies_handheld_polling(string platform, bool expected) {
@@ -725,6 +742,28 @@ namespace city.tests {
             Assert.True(ReferenceEquals(fixture.RenderManager.LastBuiltTexture, fixture.OutputSprite.Texture), fixture.SppText.Text);
         }
 
+        /// <summary>Ensures the DS runtime platform casing initializes the tracer instead of entering the generic error state.</summary>
+        [Fact]
+        public void ComponentInitialized_accepts_uppercase_ds_platform_name() {
+            using ComponentFixture fixture = new ComponentFixture("DS");
+            fixture.Root.AddComponent(fixture.Component);
+
+            fixture.Root.InitializeHierarchy();
+
+            Assert.Single(fixture.RenderManager.BuildCalls);
+            Assert.Equal(256, fixture.RenderManager.BuildCalls[0].Width);
+            Assert.Equal(192, fixture.RenderManager.BuildCalls[0].Height);
+            Assert.Equal(TextureAssetColorFormat.Rgba4444, fixture.RenderManager.LastBuiltColorFormat);
+            Assert.Equal(256 * 192 * 2, fixture.RenderManager.LastBuiltColors.Length);
+            for (int pixelIndex = 0; pixelIndex < 256 * 192; pixelIndex++) {
+                int payloadIndex = pixelIndex * 2;
+                Assert.Equal(0, fixture.RenderManager.LastBuiltColors[payloadIndex]);
+                Assert.Equal(0xF0, fixture.RenderManager.LastBuiltColors[payloadIndex + 1]);
+            }
+            Assert.Equal(SoftwarePathTraceSessionState.Tracing, fixture.Component.SessionState);
+            Assert.NotNull(fixture.OutputSprite.Texture);
+        }
+
         /// <summary>Ensures initialized references receive the exact session texture and one update uploads one tile.</summary>
         [Fact]
         public void ComponentInitialized_assigns_sprite_and_Update_uploads_once() {
@@ -735,6 +774,12 @@ namespace city.tests {
 
             Assert.True(texture != null, fixture.SppText.Text);
             Assert.Equal(SoftwarePathTraceSessionState.Tracing, fixture.Component.SessionState);
+            Assert.Equal(TextureAssetColorFormat.Rgba32, fixture.RenderManager.LastBuiltColorFormat);
+            Assert.Equal(320 * 240 * 4, fixture.RenderManager.LastBuiltColors.Length);
+            Assert.Equal(0, fixture.RenderManager.LastBuiltColors[0]);
+            Assert.Equal(0, fixture.RenderManager.LastBuiltColors[1]);
+            Assert.Equal(0, fixture.RenderManager.LastBuiltColors[2]);
+            Assert.Equal(byte.MaxValue, fixture.RenderManager.LastBuiltColors[3]);
             int uploadsBefore = fixture.RenderManager.Uploads.Count;
             fixture.Component.Update();
 

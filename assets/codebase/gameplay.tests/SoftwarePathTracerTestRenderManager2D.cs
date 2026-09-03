@@ -24,6 +24,15 @@ namespace city.tests {
         /// <summary>Raw asset presented to the creator, including a failed build attempt.</summary>
         public TextureAsset LastAttemptedBuildAsset { get; private set; }
 
+        /// <summary>Color format captured from the raw asset before the session disposes it.</summary>
+        public TextureAssetColorFormat LastBuiltColorFormat { get; private set; }
+
+        /// <summary>Alpha precision captured from the raw asset before the session disposes it.</summary>
+        public TextureAssetAlphaPrecision LastBuiltAlphaPrecision { get; private set; }
+
+        /// <summary>Color payload captured from the raw asset before the session disposes it.</summary>
+        public byte[] LastBuiltColors { get; private set; }
+
         /// <summary>Disables test-only upload recording after the hot path is warmed.</summary>
         public bool RecordUploads { get; set; } = true;
 
@@ -54,6 +63,9 @@ namespace city.tests {
         /// <summary>Creates a fake runtime texture with the raw dimensions.</summary>
         public override RuntimeTexture BuildTextureFromRaw(TextureAsset data) {
             LastAttemptedBuildAsset = data;
+            LastBuiltColorFormat = data.ColorFormat;
+            LastBuiltAlphaPrecision = data.AlphaPrecision;
+            LastBuiltColors = data.Colors == null ? null : (byte[])data.Colors.Clone();
             OnBuildTextureFromRaw?.Invoke();
             if (ThrowOnBuild) {
                 throw new InvalidOperationException("Injected texture build failure.");

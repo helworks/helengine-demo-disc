@@ -49,20 +49,20 @@ namespace city.rendering {
         }
 
         /// <summary>
-        /// Resolves the fixed showcase resolution for one exact platform identifier.
+        /// Resolves the fixed showcase resolution for one supported platform identifier.
         /// </summary>
-        /// <param name="platformId">Ordinal platform identifier.</param>
-        /// <returns>256x192 for the exact ds identifier, otherwise 320x240 for a supported platform.</returns>
+        /// <param name="platformId">Ordinal platform identifier; matching is case-insensitive.</param>
+        /// <returns>256x192 for the case-insensitive ds identifier, otherwise 320x240 for a supported platform.</returns>
         public static SoftwareTraceResolution ForPlatform(string platformId) {
             if (platformId == null) {
                 throw new ArgumentNullException(nameof(platformId));
             }
 
-            if (string.Equals(platformId, "ds", StringComparison.Ordinal)) {
+            if (string.Equals(platformId, "ds", StringComparison.OrdinalIgnoreCase)) {
                 return new SoftwareTraceResolution(256, 192);
             }
 
-            if (string.Equals(platformId, "3ds", StringComparison.Ordinal) || string.Equals(platformId, "gamecube", StringComparison.Ordinal) || string.Equals(platformId, "ps2", StringComparison.Ordinal) || string.Equals(platformId, "psp", StringComparison.Ordinal) || string.Equals(platformId, "psvita", StringComparison.Ordinal) || string.Equals(platformId, "switch", StringComparison.Ordinal) || string.Equals(platformId, "wii", StringComparison.Ordinal) || string.Equals(platformId, "wiiu", StringComparison.Ordinal) || string.Equals(platformId, "windows", StringComparison.Ordinal)) {
+            if (string.Equals(platformId, "3ds", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "gamecube", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "ps2", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "psp", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "psvita", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "switch", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "wii", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "wiiu", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "windows", StringComparison.OrdinalIgnoreCase)) {
                 return new SoftwareTraceResolution(320, 240);
             }
 
