@@ -164,6 +164,7 @@ function Enter-VerifiedPackagePublicationLock {
     $LockFilePath = Assert-SafeWorkspaceOwnedPath `
         -TargetPath ($SafeDestinationRootPath + ".publication.lock") `
         -WorkspaceOwnedRootPath $DestinationParentRootPath
+    $null = [System.IO.Directory]::CreateDirectory([System.IO.Path]::GetDirectoryName($LockFilePath))
     try {
         $LockStream = [System.IO.File]::Open(
             $LockFilePath,

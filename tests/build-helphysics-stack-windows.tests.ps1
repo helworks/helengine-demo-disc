@@ -378,3 +378,9 @@ $ErrorRejected = $false
 try { Assert-ConversionReports -SearchRootPath $ReportTestRoot } catch { $ErrorRejected = $true }
 if (-not $ErrorRejected) { throw 'An error in any conversion report must fail verification.' }
 Write-Host 'Multiple conversion report regression tests passed.'
+
+$MissingParent = Join-Path $FunctionalTestRootPath 'new-output-parent'
+$NewParentLock = Enter-VerifiedPackagePublicationLock -DestinationRootPath (Join-Path $MissingParent 'package') -DestinationParentRootPath $MissingParent
+Exit-VerifiedPackagePublicationLock -PublicationLock $NewParentLock
+if (-not (Test-Path -LiteralPath $MissingParent -PathType Container)) { throw 'Publication must create its dedicated output parent.' }
+Write-Host 'Missing publication parent regression test passed.'
