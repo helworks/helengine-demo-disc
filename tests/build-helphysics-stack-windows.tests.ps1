@@ -357,3 +357,24 @@ if (-not (Test-Path -LiteralPath $CompletionDestinationRootPath -PathType Contai
 }
 
 Write-Host "Guarded HelPhysics Windows build script contract passed."
+
+# Every generated module and its packaged copy must be checked.
+. (Get-BuildScriptFunctionDefinition -SourcePath $BuildScriptPath -FunctionName 'Assert-ConversionReport')
+. (Get-BuildScriptFunctionDefinition -SourcePath $BuildScriptPath -FunctionName 'Assert-ConversionReports')
+$ReportTestRoot = Join-Path $FunctionalTestRootPath 'conversion-reports'
+$null = New-Item -ItemType Directory -Path $ReportTestRoot
+$EmptyRejected = $false
+try { Assert-ConversionReports -SearchRootPath $ReportTestRoot } catch { $EmptyRejected = $true }
+if (-not $EmptyRejected) { throw 'Missing conversion reports must fail verification.' }
+foreach ($Module in @('generated-core', 'code/gameplay', 'package/code/gameplay')) {
+    $ModuleRoot = Join-Path $ReportTestRoot $Module
+    $null = New-Item -ItemType Directory -Force -Path $ModuleRoot
+    Set-Content -LiteralPath (Join-Path $ModuleRoot 'cpp-conversion-report.json') -Value '{"hasErrors":false,"errorCount":0,"diagnostics":[]}'
+}
+$VerifiedReports = @(Assert-ConversionReports -SearchRootPath $ReportTestRoot)
+if ($VerifiedReports.Count -ne 3) { throw 'All three conversion reports must be verified.' }
+Set-Content -LiteralPath (Join-Path $ReportTestRoot 'package/code/gameplay/cpp-conversion-report.json') -Value '{"hasErrors":true,"errorCount":1,"diagnostics":[{"severity":"Error"}]}'
+$ErrorRejected = $false
+try { Assert-ConversionReports -SearchRootPath $ReportTestRoot } catch { $ErrorRejected = $true }
+if (-not $ErrorRejected) { throw 'An error in any conversion report must fail verification.' }
+Write-Host 'Multiple conversion report regression tests passed.'

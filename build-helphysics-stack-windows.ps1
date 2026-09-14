@@ -388,6 +388,23 @@ function Assert-ConversionReport {
     }
 }
 
+# Validate every generated module report, including packaged copies.
+function Assert-ConversionReports {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$SearchRootPath
+    )
+
+    $Reports = @(Get-ChildItem -LiteralPath $SearchRootPath -Recurse -File -Filter 'cpp-conversion-report.json')
+    if ($Reports.Count -eq 0) {
+        throw "No C++ conversion reports found beneath '$SearchRootPath'."
+    }
+    foreach ($Report in $Reports) {
+        Assert-ConversionReport -ReportPath $Report.FullName
+    }
+    return $Reports.FullName
+}
+
 function Assert-BackendManifest {
     param(
         [Parameter(Mandatory = $true)]
@@ -466,7 +483,7 @@ $BuildRootPath = $null
 $ExecutablePath = $null
 $BackendManifestPath = $null
 $WindowsBuildManifestPath = $null
-$ConversionReportPath = $null
+$ConversionReportPaths = @()
 try {
     Assert-IsolatedWorktree -RepositoryRootPath $DemoWorktreeRootPath -BaselineCommit $DemoBaselineCommit
     Assert-IsolatedWorktree -RepositoryRootPath $EngineWorktreeRootPath -BaselineCommit $EngineBaselineCommit
@@ -538,8 +555,7 @@ try {
             -WorkspaceRoot $WorkspaceRootPath
     }
 
-    $ConversionReportPath = Get-OnlyFile -SearchRootPath $WorkspaceRootPath -FileName "cpp-conversion-report.json"
-    Assert-ConversionReport -ReportPath $ConversionReportPath
+    $ConversionReportPaths = @(Assert-ConversionReports -SearchRootPath $WorkspaceRootPath)
     $BackendManifestPath = Join-Path $OutputRootPath "runtime\runtime-physics-backend.json"
     Assert-BackendManifest -ManifestPath $BackendManifestPath
     $WindowsBuildManifestPath = Get-OnlyFile -SearchRootPath $WorkspaceRootPath -FileName "windows-build-manifest.json"
@@ -605,4 +621,4 @@ Write-Host "HelPhysics stack Windows build complete."
 Write-Host "Executable: $ExecutablePath"
 Write-Host "Backend manifest: $BackendManifestPath"
 Write-Host "Build manifest: $WindowsBuildManifestPath"
-Write-Host "Conversion report: $ConversionReportPath"
+Write-Host "Conversion reports: $($ConversionReportPaths -join ', ')"
