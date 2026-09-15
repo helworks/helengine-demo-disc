@@ -159,7 +159,7 @@ namespace city.tests {
         }
 
         [Fact]
-        public void Creates_a_text_only_desktop_hud_with_compact_rows_and_invisible_return_target() {
+        public void Creates_compact_diagnostics_and_a_visible_main_menu_button() {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
             IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
             SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session);
@@ -170,7 +170,7 @@ namespace city.tests {
                 CreateHudFont()).RootEntities).ToArray();
             Entity desktopRoot = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerDesktopHudRoot");
             Entity[] desktopTree = FlattenEntities(new[] { desktopRoot }).ToArray();
-            Assert.Empty(desktopTree.SelectMany(entity => entity.Components.OfType<RoundedRectComponent>()));
+            Assert.Single(desktopTree.SelectMany(entity => entity.Components.OfType<RoundedRectComponent>()));
 
             var expectedRows = new[] {
                 (Name: "SoftwarePathTracerSppText", Position: new float3(4f, 4f, 0.1f)),
@@ -189,15 +189,15 @@ namespace city.tests {
 
             Entity returnTarget = desktopTree.Single(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnTarget");
             Assert.Contains(returnTarget, desktopRoot.Children);
-            Assert.Equal(new float3(4f, 40f, 0.1f), returnTarget.LocalPosition);
-            Assert.Equal(new int2(64, 12), Component<InteractableComponent>(returnTarget).Size);
+            Assert.Equal(new float3(208f, 4f, 0.1f), returnTarget.LocalPosition);
+            Assert.Equal(new int2(108, 28), Component<InteractableComponent>(returnTarget).Size);
             Assert.Single(returnTarget.Components.OfType<DemoDiscReturnToMenuComponent>());
             Entity returnLabel = desktopTree.Single(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnLabel");
             Assert.Contains(returnLabel, returnTarget.Children);
             TextComponent returnText = Component<TextComponent>(returnLabel);
-            Assert.Equal(0.35f, returnText.FontScale);
-            Assert.Equal(TextAlignment.Left, returnText.Alignment);
-            Assert.Equal(new int2(64, 12), returnText.Size);
+            Assert.Equal(0.45f, returnText.FontScale);
+            Assert.Equal(TextAlignment.Center, returnText.Alignment);
+            Assert.Equal(new int2(100, 20), returnText.Size);
         }
 
         [Fact]
@@ -321,14 +321,14 @@ namespace city.tests {
             Entity handheldRoot = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerHandheldHudRoot"));
             Assert.True(IsDescendant(bottomViewportEntity, handheldRoot));
             Assert.True(IsDescendant(topCamera, desktopRoot));
-            Assert.Empty(FlattenEntities(new[] { desktopRoot }).SelectMany(entity => entity.Components.OfType<RoundedRectComponent>()));
+            Assert.Single(FlattenEntities(new[] { desktopRoot }).SelectMany(entity => entity.Components.OfType<RoundedRectComponent>()));
             Entity desktopReturn = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnTarget"));
             Assert.Contains(desktopReturn, desktopRoot.Children);
             InteractableComponent desktopInteractable = Component<InteractableComponent>(desktopReturn);
-            Assert.Equal(new int2(64, 12), desktopInteractable.Size);
+            Assert.Equal(new int2(108, 28), desktopInteractable.Size);
             DemoDiscReturnToMenuComponent desktopReturnComponent = Component<DemoDiscReturnToMenuComponent>(desktopReturn);
-            Assert.False(desktopReturnComponent.AllowKeyboardReturn);
-            Assert.False(desktopReturnComponent.AllowGamepadReturn);
+            Assert.True(desktopReturnComponent.AllowKeyboardReturn);
+            Assert.True(desktopReturnComponent.AllowGamepadReturn);
             Assert.True(desktopReturnComponent.AllowPointerReturn);
             Entity handheldReturn = Assert.Single(entities.Where(entity => EntityName(entity) == "SoftwarePathTracerHandheldReturnButton"));
             Assert.Single(handheldReturn.Components.OfType<InteractableComponent>());
@@ -367,9 +367,9 @@ namespace city.tests {
             Assert.Contains(sppEntity, desktopRoot.Children);
             Assert.Contains(elapsedEntity, desktopRoot.Children);
             Assert.Contains(raysPerSecondEntity, desktopRoot.Children);
-            Assert.Empty(FlattenEntities(new[] { desktopRoot }).SelectMany(entity => entity.Components.OfType<RoundedRectComponent>()));
+            Assert.Single(FlattenEntities(new[] { desktopRoot }).SelectMany(entity => entity.Components.OfType<RoundedRectComponent>()));
             Entity desktopReturnTarget = Assert.Single(desktopRoot.Children.Where(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnTarget"));
-            Assert.Equal(new int2(64, 12), Component<InteractableComponent>(desktopReturnTarget).Size);
+            Assert.Equal(new int2(108, 28), Component<InteractableComponent>(desktopReturnTarget).Size);
             Assert.Single(desktopReturnTarget.Components.OfType<DemoDiscReturnToMenuComponent>());
 
             MaterializeRuntimeIds(roots);
@@ -392,7 +392,7 @@ namespace city.tests {
         }
 
         [Fact]
-        public void Return_labels_keep_handheld_background_order_and_desktop_target_text_style() {
+        public void Return_labels_render_above_their_button_backgrounds() {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
             IEditorProjectAuthoringSession session = CreateReferenceOnlyAuthoringSession(graph);
             SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(session);
@@ -406,10 +406,10 @@ namespace city.tests {
             Entity handheldButton = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerHandheldReturnButton");
             Entity handheldLabel = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerHandheldReturnLabel");
             Assert.Contains(desktopLabel, desktopTarget.Children);
-            Assert.Equal(0.35f, Component<TextComponent>(desktopLabel).FontScale);
-            Assert.Equal(TextAlignment.Left, Component<TextComponent>(desktopLabel).Alignment);
-            Assert.Equal(new int2(64, 12), Component<TextComponent>(desktopLabel).Size);
-            Assert.Empty(FlattenEntities(new[] { desktopTarget }).SelectMany(entity => entity.Components.OfType<RoundedRectComponent>()));
+            Assert.Equal(0.45f, Component<TextComponent>(desktopLabel).FontScale);
+            Assert.Equal(TextAlignment.Center, Component<TextComponent>(desktopLabel).Alignment);
+            Assert.Equal(new int2(100, 20), Component<TextComponent>(desktopLabel).Size);
+            Assert.True(Component<TextComponent>(desktopLabel).RenderOrder2D > Component<RoundedRectComponent>(desktopTarget).RenderOrder2D);
             Assert.True(Component<TextComponent>(handheldLabel).RenderOrder2D > Component<RoundedRectComponent>(handheldButton).RenderOrder2D);
         }
 
@@ -424,6 +424,118 @@ namespace city.tests {
             Assert.Throws<ArgumentException>(() => factory.CreateSceneDefinition("", cube, font));
             Assert.Throws<ArgumentNullException>(() => factory.CreateSceneDefinition(CreateProjectRoot(), null, font));
             Assert.Throws<ArgumentNullException>(() => factory.CreateSceneDefinition(CreateProjectRoot(), cube, null));
+        }
+
+        /// <summary>Every sphere triangle faces outward so entering/exiting glass decisions remain correct.</summary>
+        [Fact]
+        public void Generated_sphere_has_outward_nondegenerate_triangles() {
+            ModelAsset sphere = SoftwareRayTracingMeshFactory.CreateSphere();
+            for (int i = 0; i < sphere.Indices16.Length; i += 3) {
+                float3 a = sphere.Positions[sphere.Indices16[i]];
+                float3 b = sphere.Positions[sphere.Indices16[i + 1]];
+                float3 c = sphere.Positions[sphere.Indices16[i + 2]];
+                float3 normal = float3.Cross(b - a, c - a);
+                Assert.True(float3.Dot(normal, (a + b + c) / 3f) > 0f);
+            }
+        }
+
+        /// <summary>The gallery presents twelve distinct materials in three comparable rows.</summary>
+        [Fact]
+        public void Creates_material_spheres_with_diffuse_mirror_and_glass_rows() {
+            using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
+            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(CreateReferenceOnlyAuthoringSession(graph));
+            GeneratedAuthoringSceneDefinition definition = factory.CreateShowcaseDefinition(CreateProjectRoot(), SoftwareRayTracingShowcaseFactory.SpheresSceneId, CreateHudFont(), global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(SoftwareRayTracingMeshFactory.SpherePath), global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(SoftwareRayTracingMeshFactory.TeapotPath));
+            Entity[] entities = FlattenEntities(definition.RootEntities).ToArray();
+            SoftwareModelComponent[] spheres = entities.Where(entity => EntityName(entity).StartsWith("MaterialSphere")).Select(Component<SoftwareModelComponent>).ToArray();
+            Assert.Equal(12, spheres.Length);
+            Assert.Equal(4, spheres.Count(model => model.Scattering[0].Kind == SoftwareMaterialKind.Diffuse));
+            Assert.Equal(4, spheres.Count(model => model.Scattering[0].Kind == SoftwareMaterialKind.Mirror));
+            Assert.Equal(4, spheres.Count(model => model.Scattering[0].Kind == SoftwareMaterialKind.Glass));
+            Assert.Equal(4, spheres.Where(model => model.Scattering[0].Kind == SoftwareMaterialKind.Glass).Select(model => model.Scattering[0].IndexOfRefraction).Distinct().Count());
+            Assert.Single(entities.SelectMany(entity => entity.Components.OfType<SoftwarePathTracerComponent>()));
+            Assert.Empty(entities.SelectMany(entity => entity.Components.OfType<MeshComponent>()));
+        }
+
+        /// <summary>All showcase graphs resolve their raw geometry and form a valid tracer scene.</summary>
+        [Theory]
+        [InlineData("scenes/rendering/ray_tracing_teapot.helen")]
+        [InlineData("scenes/rendering/ray_tracing_spheres.helen")]
+        [InlineData("scenes/rendering/ray_tracing_soft_shadows.helen")]
+        public void Showcase_geometry_builds_with_one_area_light(string sceneId) {
+            using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(CreateProjectRoot());
+            SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(CreateReferenceOnlyAuthoringSession(graph));
+            GeneratedAuthoringSceneDefinition definition = factory.CreateShowcaseDefinition(CreateProjectRoot(), sceneId, CreateHudFont(), global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(SoftwareRayTracingMeshFactory.SpherePath), global::helengine.SceneAssetReferenceFactory.CreateFileSystemModel(SoftwareRayTracingMeshFactory.TeapotPath));
+            Assert.Equal(sceneId, definition.SceneId);
+            Entity returnButton = FlattenEntities(definition.RootEntities).Single(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnTarget");
+            Assert.Equal(new int2(108, 28), Component<InteractableComponent>(returnButton).Size);
+            Assert.Single(returnButton.Components.OfType<RoundedRectComponent>());
+            DemoDiscReturnToMenuComponent returnAction = Component<DemoDiscReturnToMenuComponent>(returnButton);
+            Assert.True(returnAction.AllowKeyboardReturn);
+            Assert.True(returnAction.AllowGamepadReturn);
+            Assert.True(returnAction.AllowPointerReturn);
+            Assert.NotEmpty(ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneId));
+            using ShowcaseModelSource source = new ShowcaseModelSource();
+            SoftwareTraceScene scene = SoftwareTraceScene.Build(new List<Entity>(definition.RootEntities), source);
+            Assert.NotEmpty(scene.Triangles);
+            Assert.All(scene.Triangles, triangle => Assert.True(float.IsFinite(triangle.GeometricNormal.X)));
+            SoftwarePathTracerComponent camera = FlattenEntities(definition.RootEntities).SelectMany(entity => entity.Components.OfType<SoftwarePathTracerComponent>()).Single();
+            RenderShowcase(sceneId, scene, camera);
+        }
+
+        /// <summary>Exercises actual transport for every scene and optionally writes a review image outside the project.</summary>
+        static void RenderShowcase(string sceneId, SoftwareTraceScene scene, SoftwarePathTracerComponent camera) {
+            string previewDirectory = Environment.GetEnvironmentVariable("HELENGINE_RAY_PREVIEW_DIRECTORY");
+            int width = string.IsNullOrEmpty(previewDirectory) ? 32 : 160;
+            int height = width * 3 / 4;
+            int samples = string.IsNullOrEmpty(previewDirectory) ? 4 : 16;
+            SoftwarePathTracer tracer = new SoftwarePathTracer(scene.Triangles, scene.Materials, scene.AreaLight, SoftwareBvh.Build(scene.Triangles), new int[SoftwareBvh.TraversalStackCapacity]);
+            byte[] pixels = new byte[width * height * 3];
+            float tangent = (float)Math.Tan(camera.VerticalFieldOfViewDegrees * Math.PI / 360);
+            int lit = 0;
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    float3 sum = float3.Zero;
+                    for (int pass = 0; pass < samples; pass++) {
+                        float jitterX = SoftwarePathSampler.Sample01(x, y, pass, 0, 8);
+                        float jitterY = SoftwarePathSampler.Sample01(x, y, pass, 0, 9);
+                        float horizontal = (2f * (x + jitterX) / width - 1f) * tangent * width / height;
+                        float vertical = (1f - 2f * (y + jitterY) / height) * tangent;
+                        SoftwareRay ray = new SoftwareRay(camera.TraceCameraOrigin, float3.Normalize(camera.TraceCameraForward + camera.TraceCameraRight * horizontal + camera.TraceCameraUp * vertical));
+                        sum += tracer.TraceSample(ref ray, x, y, pass);
+                    }
+                    sum /= samples;
+                    if (sum.LengthSquared() > 0.0001f) lit++;
+                    int offset = (y * width + x) * 3;
+                    pixels[offset] = DisplayByte(sum.X);
+                    pixels[offset + 1] = DisplayByte(sum.Y);
+                    pixels[offset + 2] = DisplayByte(sum.Z);
+                }
+            }
+            Assert.Equal(0, tracer.NonFiniteSampleCount);
+            Assert.True(lit > width * height / 4, "The showcase must render a visible, illuminated composition.");
+            if (!string.IsNullOrEmpty(previewDirectory)) {
+                Directory.CreateDirectory(previewDirectory);
+                using FileStream output = File.Create(Path.Combine(previewDirectory, Path.GetFileNameWithoutExtension(sceneId) + ".ppm"));
+                byte[] header = System.Text.Encoding.ASCII.GetBytes("P6\n" + width + " " + height + "\n255\n");
+                output.Write(header); output.Write(pixels);
+            }
+        }
+
+        /// <summary>Maps linear radiance to a simple display curve for test previews.</summary>
+        static byte DisplayByte(float value) {
+            return (byte)(255f * Math.Pow(Math.Max(0f, value) / (1f + Math.Max(0f, value)), 1f / 2.2f));
+        }
+
+        /// <summary>Supplies the same generated raw models used by the authored showcases.</summary>
+        sealed class ShowcaseModelSource : ISoftwareModelAssetSource, IDisposable {
+            public ModelAsset LoadOwned(SceneAssetReference reference) {
+                if (reference.RelativePath == SoftwareRayTracingMeshFactory.SpherePath) return SoftwareRayTracingMeshFactory.CreateSphere();
+                if (reference.RelativePath == SoftwareRayTracingMeshFactory.TeapotPath) return SoftwareRayTracingMeshFactory.CreateTeapot();
+                ModelAsset cube = ModelUtils.GenerateCubeMesh(float3.Zero, float3.One);
+                cube.Submeshes = new[] { new ModelSubmeshAsset { MaterialSlotName = "Surface", IndexStart = 0, IndexCount = cube.Indices16.Length } };
+                return cube;
+            }
+            public void Dispose() { }
         }
 
         static void AssertSurface(Entity[] entities, string name, float3 position, float3 scale, float yaw, float3 diffuse) {

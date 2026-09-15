@@ -27,7 +27,7 @@
             "weight": 1,
             "params": {
               "texts": [
-                "Demo Scenes",
+                "Rendering Scenes",
                 "Physics Scenes",
                 "Games",
                 "Options"
@@ -41,9 +41,9 @@
         {
           "id": "node-demodisc-demo-scenes",
           "type": "menu_item",
-          "name": "Demo Scenes",
+          "name": "Rendering Scenes",
           "description": "Opens the rendering showcase catalog.",
-          "text": "Demo Scenes",
+          "text": "Rendering Scenes",
           "parentNodeId": null,
           "order": 0,
           "isOptional": false,
@@ -71,12 +71,12 @@
               "recognition": {
                 "clues": [
                   {
-                      "id": "node-demodisc-demo-scenes-selected",
+                    "id": "node-demodisc-demo-scenes-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
                       "candidates": [
-                        "Demo Scenes"
+                        "Rendering Scenes"
                       ],
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 8,
@@ -132,7 +132,7 @@
               "recognition": {
                 "clues": [
                   {
-                      "id": "node-demodisc-physics-scenes-selected",
+                    "id": "node-demodisc-physics-scenes-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -193,7 +193,7 @@
               "recognition": {
                 "clues": [
                   {
-                      "id": "node-demodisc-games-selected",
+                    "id": "node-demodisc-games-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -254,7 +254,7 @@
               "recognition": {
                 "clues": [
                   {
-                      "id": "node-demodisc-options-selected",
+                    "id": "node-demodisc-options-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -312,7 +312,7 @@
                 "PBR Material Gallery",
                 "PBR Textured Showcase",
                 "PBR Shadow Theater",
-                "Software Path Tracer"
+                "Ray Tracing"
               ],
               "minimumMatches": 2
             }
@@ -861,30 +861,30 @@
           ]
         },
         {
-          "id": "node-demodisc-rendering-software-path-tracer",
+          "id": "node-demodisc-ray-tracing",
           "type": "menu_item",
-          "name": "Software Path Tracer",
-          "description": "Launches the Software Path Tracer rendering showcase.",
-          "text": "Software Path Tracer",
+          "name": "Ray Tracing",
+          "description": "Opens scenes rendered by the shared software ray tracer.",
+          "text": "Ray Tracing",
           "parentNodeId": null,
           "order": 10,
           "isOptional": false,
           "interactions": [
             {
-              "id": "node-demodisc-rendering-software-path-tracer-previous",
+              "id": "node-demodisc-ray-tracing-previous",
               "kind": "move_previous",
               "isDefault": false
             },
             {
-              "id": "node-demodisc-rendering-software-path-tracer-next",
+              "id": "node-demodisc-ray-tracing-next",
               "kind": "move_next",
               "isDefault": false
             },
             {
-              "id": "node-demodisc-rendering-software-path-tracer-activate-surface-demodisc-showcase-scene",
+              "id": "node-demodisc-ray-tracing-activate-surface-demodisc-ray-tracing-menu",
               "kind": "activate",
               "isDefault": true,
-              "targetSurfaceId": "surface-demodisc-showcase-scene"
+              "targetSurfaceId": "surface-demodisc-ray-tracing-menu"
             }
           ],
           "states": [
@@ -893,18 +893,25 @@
               "recognition": {
                 "clues": [
                   {
-                    "id": "node-demodisc-rendering-software-path-tracer-selected",
+                    "id": "node-demodisc-ray-tracing-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
                       "candidates": [
-                        "Software Path Tracer"
+                        "Ray Tracing"
                       ],
                       "highlightColorHex": "#C993FF",
-                      "hueTolerance": 24,
+                      "hueTolerance": 8,
                       "minSaturation": 0.2,
-                      "includeArrowRegion": true,
-                      "requireArrowRegion": true,
+                      "minimumColorCoverage": 0.5,
+                      "region": {
+                        "x": 0.195,
+                        "y": 0.185,
+                        "width": 0.01,
+                        "height": 0.01
+                      },
+                      "includeArrowRegion": false,
+                      "requireArrowRegion": false,
                       "arrowOffsetX": -60,
                       "arrowWidth": 40
                     }
@@ -949,6 +956,306 @@
                 "clues": [
                   {
                     "id": "node-demodisc-rendering-back-selected",
+                    "type": "highlighted_text",
+                    "weight": 1,
+                    "params": {
+                      "candidates": [
+                        "Back"
+                      ],
+                      "highlightColorHex": "#C993FF",
+                      "hueTolerance": 24,
+                      "minSaturation": 0.2,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
+                      "arrowOffsetX": -60,
+                      "arrowWidth": 40
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "surface-demodisc-ray-tracing-menu",
+      "kind": "screen",
+      "parentId": null,
+      "name": "Demo Disc Ray Tracing Menu",
+      "description": "Scene selection for the shared software ray tracer.",
+      "capabilities": [
+        "selectable",
+        "activatable"
+      ],
+      "recognition": {
+        "clues": [
+          {
+            "id": "demodisc-ray-tracing-catalog-entries",
+            "type": "at_least_texts",
+            "weight": 1,
+            "params": {
+              "texts": [
+                "Ray Tracing",
+                "Cornell Box"
+              ],
+              "minimumMatches": 2
+            }
+          }
+        ]
+      },
+      "uiNodes": [
+        {
+          "id": "node-demodisc-ray-tracing-cornell-box",
+          "type": "menu_item",
+          "name": "Cornell Box",
+          "description": "Launches the Cornell Box scene using the shared software ray tracer.",
+          "text": "Cornell Box",
+          "parentNodeId": null,
+          "order": 0,
+          "isOptional": false,
+          "interactions": [
+            {
+              "id": "node-demodisc-ray-tracing-cornell-box-previous",
+              "kind": "move_previous",
+              "isDefault": false
+            },
+            {
+              "id": "node-demodisc-ray-tracing-cornell-box-next",
+              "kind": "move_next",
+              "isDefault": false
+            },
+            {
+              "id": "node-demodisc-ray-tracing-cornell-box-activate-surface-demodisc-showcase-scene",
+              "kind": "activate",
+              "isDefault": true,
+              "targetSurfaceId": "surface-demodisc-showcase-scene"
+            }
+          ],
+          "states": [
+            {
+              "name": "selected",
+              "recognition": {
+                "clues": [
+                  {
+                    "id": "node-demodisc-ray-tracing-cornell-box-selected",
+                    "type": "highlighted_text",
+                    "weight": 1,
+                    "params": {
+                      "candidates": [
+                        "Cornell Box"
+                      ],
+                      "highlightColorHex": "#C993FF",
+                      "hueTolerance": 24,
+                      "minSaturation": 0.2,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
+                      "arrowOffsetX": -60,
+                      "arrowWidth": 40
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "node-demodisc-ray-tracing-teapot",
+          "type": "menu_item",
+          "name": "Teapot",
+          "description": "Launches the Teapot scene using the shared software ray tracer.",
+          "text": "Teapot",
+          "parentNodeId": null,
+          "order": 1,
+          "isOptional": false,
+          "interactions": [
+            {
+              "id": "node-demodisc-ray-tracing-teapot-previous",
+              "kind": "move_previous",
+              "isDefault": false
+            },
+            {
+              "id": "node-demodisc-ray-tracing-teapot-next",
+              "kind": "move_next",
+              "isDefault": false
+            },
+            {
+              "id": "node-demodisc-ray-tracing-teapot-activate-surface-demodisc-showcase-scene",
+              "kind": "activate",
+              "isDefault": true,
+              "targetSurfaceId": "surface-demodisc-showcase-scene"
+            }
+          ],
+          "states": [
+            {
+              "name": "selected",
+              "recognition": {
+                "clues": [
+                  {
+                    "id": "node-demodisc-ray-tracing-teapot-selected",
+                    "type": "highlighted_text",
+                    "weight": 1,
+                    "params": {
+                      "candidates": [
+                        "Teapot"
+                      ],
+                      "highlightColorHex": "#C993FF",
+                      "hueTolerance": 24,
+                      "minSaturation": 0.2,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
+                      "arrowOffsetX": -60,
+                      "arrowWidth": 40
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "node-demodisc-ray-tracing-material-spheres",
+          "type": "menu_item",
+          "name": "Material Spheres",
+          "description": "Launches the Material Spheres scene using the shared software ray tracer.",
+          "text": "Material Spheres",
+          "parentNodeId": null,
+          "order": 2,
+          "isOptional": false,
+          "interactions": [
+            {
+              "id": "node-demodisc-ray-tracing-material-spheres-previous",
+              "kind": "move_previous",
+              "isDefault": false
+            },
+            {
+              "id": "node-demodisc-ray-tracing-material-spheres-next",
+              "kind": "move_next",
+              "isDefault": false
+            },
+            {
+              "id": "node-demodisc-ray-tracing-material-spheres-activate-surface-demodisc-showcase-scene",
+              "kind": "activate",
+              "isDefault": true,
+              "targetSurfaceId": "surface-demodisc-showcase-scene"
+            }
+          ],
+          "states": [
+            {
+              "name": "selected",
+              "recognition": {
+                "clues": [
+                  {
+                    "id": "node-demodisc-ray-tracing-material-spheres-selected",
+                    "type": "highlighted_text",
+                    "weight": 1,
+                    "params": {
+                      "candidates": [
+                        "Material Spheres"
+                      ],
+                      "highlightColorHex": "#C993FF",
+                      "hueTolerance": 24,
+                      "minSaturation": 0.2,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
+                      "arrowOffsetX": -60,
+                      "arrowWidth": 40
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "node-demodisc-ray-tracing-soft-shadows",
+          "type": "menu_item",
+          "name": "Soft Shadows",
+          "description": "Launches the Soft Shadows scene using the shared software ray tracer.",
+          "text": "Soft Shadows",
+          "parentNodeId": null,
+          "order": 3,
+          "isOptional": false,
+          "interactions": [
+            {
+              "id": "node-demodisc-ray-tracing-soft-shadows-previous",
+              "kind": "move_previous",
+              "isDefault": false
+            },
+            {
+              "id": "node-demodisc-ray-tracing-soft-shadows-next",
+              "kind": "move_next",
+              "isDefault": false
+            },
+            {
+              "id": "node-demodisc-ray-tracing-soft-shadows-activate-surface-demodisc-showcase-scene",
+              "kind": "activate",
+              "isDefault": true,
+              "targetSurfaceId": "surface-demodisc-showcase-scene"
+            }
+          ],
+          "states": [
+            {
+              "name": "selected",
+              "recognition": {
+                "clues": [
+                  {
+                    "id": "node-demodisc-ray-tracing-soft-shadows-selected",
+                    "type": "highlighted_text",
+                    "weight": 1,
+                    "params": {
+                      "candidates": [
+                        "Soft Shadows"
+                      ],
+                      "highlightColorHex": "#C993FF",
+                      "hueTolerance": 24,
+                      "minSaturation": 0.2,
+                      "includeArrowRegion": true,
+                      "requireArrowRegion": true,
+                      "arrowOffsetX": -60,
+                      "arrowWidth": 40
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "node-demodisc-ray-tracing-back",
+          "type": "menu_item",
+          "name": "Back",
+          "description": "Returns to Rendering Scenes.",
+          "text": "Back",
+          "parentNodeId": null,
+          "order": 4,
+          "isOptional": false,
+          "interactions": [
+            {
+              "id": "node-demodisc-ray-tracing-back-previous",
+              "kind": "move_previous",
+              "isDefault": false
+            },
+            {
+              "id": "node-demodisc-ray-tracing-back-next",
+              "kind": "move_next",
+              "isDefault": false
+            },
+            {
+              "id": "node-demodisc-ray-tracing-back-activate-surface-demodisc-demo-scenes-menu",
+              "kind": "activate",
+              "isDefault": true,
+              "targetSurfaceId": "surface-demodisc-demo-scenes-menu",
+              "inputActionId": "back"
+            }
+          ],
+          "states": [
+            {
+              "name": "selected",
+              "recognition": {
+                "clues": [
+                  {
+                    "id": "node-demodisc-ray-tracing-back-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -1494,7 +1801,7 @@
               "recognition": {
                 "clues": [
                   {
-                      "id": "node-demodisc-games-tilt-trial-selected",
+                    "id": "node-demodisc-games-tilt-trial-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -1555,7 +1862,7 @@
               "recognition": {
                 "clues": [
                   {
-                      "id": "node-demodisc-games-back-selected",
+                    "id": "node-demodisc-games-back-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -1830,7 +2137,7 @@
             "type": "image_must_match",
             "weight": 1,
             "params": {
-              "imagePath": "../assets/images/ui/tilt_trial/title/background.png",
+              "imagePath": "../assets/textures/ui/tilt_trial/title/background.png",
               "threshold": 0.9
             }
           },
@@ -1839,7 +2146,7 @@
             "type": "image_must_match",
             "weight": 1,
             "params": {
-              "imagePath": "../assets/images/ui/tilt_trial/title/button_primary_selected.png",
+              "imagePath": "../assets/textures/ui/tilt_trial/title/button_primary_selected.png",
               "threshold": 0.9
             }
           },
@@ -1848,7 +2155,7 @@
             "type": "image_must_match",
             "weight": 1,
             "params": {
-              "imagePath": "../assets/images/ui/tilt_trial/title/button_secondary_options_selected.png",
+              "imagePath": "../assets/textures/ui/tilt_trial/title/button_secondary_options_selected.png",
               "threshold": 0.9
             }
           },
@@ -1857,7 +2164,7 @@
             "type": "image_must_match",
             "weight": 1,
             "params": {
-              "imagePath": "../assets/images/ui/tilt_trial/title/button_secondary_demo_disc_selected.png",
+              "imagePath": "../assets/textures/ui/tilt_trial/title/button_secondary_demo_disc_selected.png",
               "threshold": 0.9
             }
           }
@@ -2312,7 +2619,7 @@
               "recognition": {
                 "clues": [
                   {
-                      "id": "node-tilt-console-level-1-selected",
+                    "id": "node-tilt-console-level-1-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -2372,7 +2679,7 @@
               "recognition": {
                 "clues": [
                   {
-                      "id": "node-tilt-console-level-2-selected",
+                    "id": "node-tilt-console-level-2-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -2432,7 +2739,7 @@
               "recognition": {
                 "clues": [
                   {
-                      "id": "node-tilt-console-level-3-selected",
+                    "id": "node-tilt-console-level-3-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -2492,7 +2799,7 @@
               "recognition": {
                 "clues": [
                   {
-                      "id": "node-tilt-console-level-4-selected",
+                    "id": "node-tilt-console-level-4-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -2552,7 +2859,7 @@
               "recognition": {
                 "clues": [
                   {
-                      "id": "node-tilt-console-level-5-selected",
+                    "id": "node-tilt-console-level-5-selected",
                     "type": "highlighted_text",
                     "weight": 1,
                     "params": {
@@ -3867,7 +4174,7 @@
           {
             "id": "tilt-level-1-debug-label",
             "type": "text_must_appear",
-          "weight": 1,
+            "weight": 1,
             "params": {
               "text": "Level 1"
             }
@@ -3884,14 +4191,14 @@
       },
       "uiNodes": [
         {
-         "id": "node-tilt-level-1-pause",
-         "type": "hidden_button",
-         "name": "Pause",
-         "description": "Toggles the active Tilt Trial pause state.",
-         "inputActionId": "pause",
-         "parentNodeId": null,
-         "order": 0,
-         "isOptional": false,
+          "id": "node-tilt-level-1-pause",
+          "type": "hidden_button",
+          "name": "Pause",
+          "description": "Toggles the active Tilt Trial pause state.",
+          "inputActionId": "pause",
+          "parentNodeId": null,
+          "order": 0,
+          "isOptional": false,
           "interactions": [
             {
               "id": "node-tilt-level-1-pause-activate",
@@ -3900,13 +4207,13 @@
               "inputActionId": "pause"
             }
           ],
-         "states": []
+          "states": []
         },
         {
-         "id": "node-tilt-level-1-console-clear-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Console Clear Results",
+          "id": "node-tilt-level-1-console-clear-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Console Clear Results",
           "description": "Metadata route for the authored console clear overlay.",
           "parentNodeId": null,
           "order": 1,
@@ -3922,10 +4229,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-level-1-handheld-clear-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Handheld Clear Results",
+          "id": "node-tilt-level-1-handheld-clear-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Handheld Clear Results",
           "description": "Metadata route for the authored handheld clear overlay.",
           "parentNodeId": null,
           "order": 2,
@@ -3941,10 +4248,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-level-1-time-up-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Time Up",
+          "id": "node-tilt-level-1-time-up-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Time Up",
           "description": "Metadata route for the authored time-up overlay.",
           "parentNodeId": null,
           "order": 3,
@@ -4002,7 +4309,7 @@
           {
             "id": "tilt-level-2-debug-label",
             "type": "text_must_appear",
-          "weight": 1,
+            "weight": 1,
             "params": {
               "text": "Level 2"
             }
@@ -4019,14 +4326,14 @@
       },
       "uiNodes": [
         {
-         "id": "node-tilt-level-2-pause",
-         "type": "hidden_button",
-         "name": "Pause",
-         "description": "Toggles the active Tilt Trial pause state.",
-         "inputActionId": "pause",
-         "parentNodeId": null,
-         "order": 0,
-         "isOptional": false,
+          "id": "node-tilt-level-2-pause",
+          "type": "hidden_button",
+          "name": "Pause",
+          "description": "Toggles the active Tilt Trial pause state.",
+          "inputActionId": "pause",
+          "parentNodeId": null,
+          "order": 0,
+          "isOptional": false,
           "interactions": [
             {
               "id": "node-tilt-level-2-pause-activate",
@@ -4035,13 +4342,13 @@
               "inputActionId": "pause"
             }
           ],
-         "states": []
+          "states": []
         },
         {
-         "id": "node-tilt-level-2-console-clear-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Console Clear Results",
+          "id": "node-tilt-level-2-console-clear-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Console Clear Results",
           "description": "Metadata route for the authored console clear overlay.",
           "parentNodeId": null,
           "order": 1,
@@ -4057,10 +4364,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-level-2-handheld-clear-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Handheld Clear Results",
+          "id": "node-tilt-level-2-handheld-clear-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Handheld Clear Results",
           "description": "Metadata route for the authored handheld clear overlay.",
           "parentNodeId": null,
           "order": 2,
@@ -4076,10 +4383,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-level-2-time-up-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Time Up",
+          "id": "node-tilt-level-2-time-up-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Time Up",
           "description": "Metadata route for the authored time-up overlay.",
           "parentNodeId": null,
           "order": 3,
@@ -4137,7 +4444,7 @@
           {
             "id": "tilt-level-3-debug-label",
             "type": "text_must_appear",
-          "weight": 1,
+            "weight": 1,
             "params": {
               "text": "Level 3"
             }
@@ -4154,14 +4461,14 @@
       },
       "uiNodes": [
         {
-         "id": "node-tilt-level-3-pause",
-         "type": "hidden_button",
-         "name": "Pause",
-         "description": "Toggles the active Tilt Trial pause state.",
-         "inputActionId": "pause",
-         "parentNodeId": null,
-         "order": 0,
-         "isOptional": false,
+          "id": "node-tilt-level-3-pause",
+          "type": "hidden_button",
+          "name": "Pause",
+          "description": "Toggles the active Tilt Trial pause state.",
+          "inputActionId": "pause",
+          "parentNodeId": null,
+          "order": 0,
+          "isOptional": false,
           "interactions": [
             {
               "id": "node-tilt-level-3-pause-activate",
@@ -4170,13 +4477,13 @@
               "inputActionId": "pause"
             }
           ],
-         "states": []
+          "states": []
         },
         {
-         "id": "node-tilt-level-3-console-clear-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Console Clear Results",
+          "id": "node-tilt-level-3-console-clear-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Console Clear Results",
           "description": "Metadata route for the authored console clear overlay.",
           "parentNodeId": null,
           "order": 1,
@@ -4192,10 +4499,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-level-3-handheld-clear-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Handheld Clear Results",
+          "id": "node-tilt-level-3-handheld-clear-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Handheld Clear Results",
           "description": "Metadata route for the authored handheld clear overlay.",
           "parentNodeId": null,
           "order": 2,
@@ -4211,10 +4518,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-level-3-time-up-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Time Up",
+          "id": "node-tilt-level-3-time-up-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Time Up",
           "description": "Metadata route for the authored time-up overlay.",
           "parentNodeId": null,
           "order": 3,
@@ -4272,7 +4579,7 @@
           {
             "id": "tilt-level-4-debug-label",
             "type": "text_must_appear",
-          "weight": 1,
+            "weight": 1,
             "params": {
               "text": "Level 4"
             }
@@ -4289,14 +4596,14 @@
       },
       "uiNodes": [
         {
-         "id": "node-tilt-level-4-pause",
-         "type": "hidden_button",
-         "name": "Pause",
-         "description": "Toggles the active Tilt Trial pause state.",
-         "inputActionId": "pause",
-         "parentNodeId": null,
-         "order": 0,
-         "isOptional": false,
+          "id": "node-tilt-level-4-pause",
+          "type": "hidden_button",
+          "name": "Pause",
+          "description": "Toggles the active Tilt Trial pause state.",
+          "inputActionId": "pause",
+          "parentNodeId": null,
+          "order": 0,
+          "isOptional": false,
           "interactions": [
             {
               "id": "node-tilt-level-4-pause-activate",
@@ -4305,13 +4612,13 @@
               "inputActionId": "pause"
             }
           ],
-         "states": []
+          "states": []
         },
         {
-         "id": "node-tilt-level-4-console-clear-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Console Clear Results",
+          "id": "node-tilt-level-4-console-clear-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Console Clear Results",
           "description": "Metadata route for the authored console clear overlay.",
           "parentNodeId": null,
           "order": 1,
@@ -4327,10 +4634,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-level-4-handheld-clear-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Handheld Clear Results",
+          "id": "node-tilt-level-4-handheld-clear-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Handheld Clear Results",
           "description": "Metadata route for the authored handheld clear overlay.",
           "parentNodeId": null,
           "order": 2,
@@ -4346,10 +4653,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-level-4-time-up-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Time Up",
+          "id": "node-tilt-level-4-time-up-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Time Up",
           "description": "Metadata route for the authored time-up overlay.",
           "parentNodeId": null,
           "order": 3,
@@ -4407,7 +4714,7 @@
           {
             "id": "tilt-level-5-debug-label",
             "type": "text_must_appear",
-          "weight": 1,
+            "weight": 1,
             "params": {
               "text": "Level 5"
             }
@@ -4424,14 +4731,14 @@
       },
       "uiNodes": [
         {
-         "id": "node-tilt-level-5-pause",
-         "type": "hidden_button",
-         "name": "Pause",
-         "description": "Toggles the active Tilt Trial pause state.",
-         "inputActionId": "pause",
-         "parentNodeId": null,
-         "order": 0,
-         "isOptional": false,
+          "id": "node-tilt-level-5-pause",
+          "type": "hidden_button",
+          "name": "Pause",
+          "description": "Toggles the active Tilt Trial pause state.",
+          "inputActionId": "pause",
+          "parentNodeId": null,
+          "order": 0,
+          "isOptional": false,
           "interactions": [
             {
               "id": "node-tilt-level-5-pause-activate",
@@ -4440,13 +4747,13 @@
               "inputActionId": "pause"
             }
           ],
-         "states": []
+          "states": []
         },
         {
-         "id": "node-tilt-level-5-console-clear-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Console Clear Results",
+          "id": "node-tilt-level-5-console-clear-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Console Clear Results",
           "description": "Metadata route for the authored console clear overlay.",
           "parentNodeId": null,
           "order": 1,
@@ -4462,10 +4769,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-level-5-handheld-clear-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Handheld Clear Results",
+          "id": "node-tilt-level-5-handheld-clear-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Handheld Clear Results",
           "description": "Metadata route for the authored handheld clear overlay.",
           "parentNodeId": null,
           "order": 2,
@@ -4481,10 +4788,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-level-5-time-up-route",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Time Up",
+          "id": "node-tilt-level-5-time-up-route",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Time Up",
           "description": "Metadata route for the authored time-up overlay.",
           "parentNodeId": null,
           "order": 3,
@@ -4533,10 +4840,10 @@
       },
       "uiNodes": [
         {
-         "id": "node-tilt-console-clear-1-retry",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Retry",
+          "id": "node-tilt-console-clear-1-retry",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Retry",
           "description": "Restarts console Tilt Trial Level 1.",
           "parentNodeId": null,
           "order": 0,
@@ -4552,10 +4859,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-console-clear-1-level-select",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Level Select",
+          "id": "node-tilt-console-clear-1-level-select",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Level Select",
           "description": "Returns to the console selector.",
           "parentNodeId": null,
           "order": 1,
@@ -4571,10 +4878,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-console-clear-1-next",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Next",
+          "id": "node-tilt-console-clear-1-next",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Next",
           "description": "Advances to the next console level or returns to the selector after Level 5.",
           "parentNodeId": null,
           "order": 2,
@@ -4957,10 +5264,10 @@
       },
       "uiNodes": [
         {
-         "id": "node-tilt-console-clear-2-retry",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Retry",
+          "id": "node-tilt-console-clear-2-retry",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Retry",
           "description": "Restarts console Tilt Trial Level 2.",
           "parentNodeId": null,
           "order": 0,
@@ -4976,10 +5283,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-console-clear-2-level-select",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Level Select",
+          "id": "node-tilt-console-clear-2-level-select",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Level Select",
           "description": "Returns to the console selector.",
           "parentNodeId": null,
           "order": 1,
@@ -4995,10 +5302,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-console-clear-2-next",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Next",
+          "id": "node-tilt-console-clear-2-next",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Next",
           "description": "Advances to the next console level or returns to the selector after Level 5.",
           "parentNodeId": null,
           "order": 2,
@@ -5381,10 +5688,10 @@
       },
       "uiNodes": [
         {
-         "id": "node-tilt-console-clear-3-retry",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Retry",
+          "id": "node-tilt-console-clear-3-retry",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Retry",
           "description": "Restarts console Tilt Trial Level 3.",
           "parentNodeId": null,
           "order": 0,
@@ -5400,10 +5707,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-console-clear-3-level-select",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Level Select",
+          "id": "node-tilt-console-clear-3-level-select",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Level Select",
           "description": "Returns to the console selector.",
           "parentNodeId": null,
           "order": 1,
@@ -5419,10 +5726,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-console-clear-3-next",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Next",
+          "id": "node-tilt-console-clear-3-next",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Next",
           "description": "Advances to the next console level or returns to the selector after Level 5.",
           "parentNodeId": null,
           "order": 2,
@@ -5805,10 +6112,10 @@
       },
       "uiNodes": [
         {
-         "id": "node-tilt-console-clear-4-retry",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Retry",
+          "id": "node-tilt-console-clear-4-retry",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Retry",
           "description": "Restarts console Tilt Trial Level 4.",
           "parentNodeId": null,
           "order": 0,
@@ -5824,10 +6131,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-console-clear-4-level-select",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Level Select",
+          "id": "node-tilt-console-clear-4-level-select",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Level Select",
           "description": "Returns to the console selector.",
           "parentNodeId": null,
           "order": 1,
@@ -5843,10 +6150,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-console-clear-4-next",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Next",
+          "id": "node-tilt-console-clear-4-next",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Next",
           "description": "Advances to the next console level or returns to the selector after Level 5.",
           "parentNodeId": null,
           "order": 2,
@@ -6229,10 +6536,10 @@
       },
       "uiNodes": [
         {
-         "id": "node-tilt-console-clear-5-retry",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Retry",
+          "id": "node-tilt-console-clear-5-retry",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Retry",
           "description": "Restarts console Tilt Trial Level 5.",
           "parentNodeId": null,
           "order": 0,
@@ -6248,10 +6555,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-console-clear-5-level-select",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Level Select",
+          "id": "node-tilt-console-clear-5-level-select",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Level Select",
           "description": "Returns to the console selector.",
           "parentNodeId": null,
           "order": 1,
@@ -6267,10 +6574,10 @@
           "states": []
         },
         {
-         "id": "node-tilt-console-clear-5-next",
-         "type": "hidden_button",
-         "inputActionId": "accept",
-         "name": "Next",
+          "id": "node-tilt-console-clear-5-next",
+          "type": "hidden_button",
+          "inputActionId": "accept",
+          "name": "Next",
           "description": "Advances to the next console level or returns to the selector after Level 5.",
           "parentNodeId": null,
           "order": 2,
@@ -6737,6 +7044,11 @@
       "y": 80
     },
     "surfacePositions": [
+      {
+        "surfaceId": "surface-demodisc-ray-tracing-menu",
+        "x": 1800,
+        "y": 0
+      },
       {
         "surfaceId": "surface-demodisc-main-menu",
         "x": 0,

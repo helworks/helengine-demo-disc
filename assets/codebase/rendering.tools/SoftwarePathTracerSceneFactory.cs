@@ -32,6 +32,21 @@ namespace city.rendering.tools {
         /// <param name="hudFont">Font assigned to the three diagnostic text entities.</param>
         /// <returns>The live-authored software path tracer scene definition.</returns>
         public GeneratedAuthoringSceneDefinition CreateSceneDefinition(string projectRootPath, SceneAssetReference cubeReference, FontAsset hudFont) {
+            return CreateSceneDefinitionCore(projectRootPath, cubeReference, hudFont, SceneId, null, null);
+        }
+
+        /// <summary>Creates one showcase with the same presentation, controls, diagnostics, and tracer as Cornell Box.</summary>
+        public GeneratedAuthoringSceneDefinition CreateShowcaseDefinition(string projectRootPath, string sceneId, FontAsset hudFont, SceneAssetReference sphereReference, SceneAssetReference teapotReference) {
+            if (sceneId != SoftwareRayTracingShowcaseFactory.TeapotSceneId && sceneId != SoftwareRayTracingShowcaseFactory.SpheresSceneId && sceneId != SoftwareRayTracingShowcaseFactory.ShadowsSceneId) {
+                throw new ArgumentException("Unknown ray tracing showcase.", nameof(sceneId));
+            }
+            if (sphereReference == null) throw new ArgumentNullException(nameof(sphereReference));
+            if (teapotReference == null) throw new ArgumentNullException(nameof(teapotReference));
+            return CreateSceneDefinitionCore(projectRootPath, EngineSceneAssetReferenceFactory.CreateCubeModel(), hudFont, sceneId, sphereReference, teapotReference);
+        }
+
+        /// <summary>Builds the shared presentation and selects only the authored geometry for each scene.</summary>
+        GeneratedAuthoringSceneDefinition CreateSceneDefinitionCore(string projectRootPath, SceneAssetReference cubeReference, FontAsset hudFont, string sceneId, SceneAssetReference sphereReference, SceneAssetReference teapotReference) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             } else if (cubeReference == null) {
@@ -59,17 +74,28 @@ namespace city.rendering.tools {
                 handheldSppTextEntity,
                 handheldElapsedTextEntity,
                 handheldRaysPerSecondTextEntity);
-            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerFloor", new float3(0f, -1f, 0f), new float3(2f, 0.05f, 2f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
-            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerCeiling", new float3(0f, 1f, 0f), new float3(2f, 0.05f, 2f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
-            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerBack", new float3(0f, 0f, -1f), new float3(2f, 2f, 0.05f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
-            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerLeft", new float3(-1f, 0f, 0f), new float3(0.05f, 2f, 2f), 0f, new float3(0.75f, 0.05f, 0.05f), cubeReference);
-            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerRight", new float3(1f, 0f, 0f), new float3(0.05f, 2f, 2f), 0f, new float3(0.05f, 0.75f, 0.05f), cubeReference);
-            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerShortBox", new float3(-0.35f, -0.55f, 0.15f), new float3(0.6f, 0.9f, 0.6f), 0.30f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
-            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerTallBox", new float3(0.38f, -0.25f, 0.35f), new float3(0.55f, 1.45f, 0.55f), -0.28f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
-            CreateEmitterEntity(controllerEntity, cubeReference);
+            if (sceneId == SceneId) {
+                CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerFloor", new float3(0f, -1f, 0f), new float3(2f, 0.05f, 2f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+                CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerCeiling", new float3(0f, 1f, 0f), new float3(2f, 0.05f, 2f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+                CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerBack", new float3(0f, 0f, -1f), new float3(2f, 2f, 0.05f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+                CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerLeft", new float3(-1f, 0f, 0f), new float3(0.05f, 2f, 2f), 0f, new float3(0.75f, 0.05f, 0.05f), cubeReference);
+                CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerRight", new float3(1f, 0f, 0f), new float3(0.05f, 2f, 2f), 0f, new float3(0.05f, 0.75f, 0.05f), cubeReference);
+                CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerShortBox", new float3(-0.35f, -0.55f, 0.15f), new float3(0.6f, 0.9f, 0.6f), 0.30f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+                CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerTallBox", new float3(0.38f, -0.25f, 0.35f), new float3(0.55f, 1.45f, 0.55f), -0.28f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+                CreateEmitterEntity(controllerEntity, cubeReference);
+            } else {
+                new SoftwareRayTracingShowcaseFactory(AssetAuthoringService).Populate(controllerEntity, sceneId, sphereReference, teapotReference);
+                string legend = sceneId == SoftwareRayTracingShowcaseFactory.SpheresSceneId
+                    ? "Front: diffuse | Middle: mirror | Back: glass\nGlass IOR left to right: 1.10, 1.33, 1.50, 1.80"
+                    : sceneId == SoftwareRayTracingShowcaseFactory.TeapotSceneId
+                        ? "Left: red diffuse | Right: silver mirror"
+                        : "Same sphere size, increasing height above the floor";
+                CreateHudTextEntity(sppTextEntity.Parent, "RayTracingLegend", legend, new float3(4f, 214f, 0.1f), hudFont, new int2(312, 24), 0.45f, TextAlignment.Left);
+                CreateHudTextEntity(handheldHudRoot, "RayTracingHandheldLegend", legend, new float3(16f, 104f, 0.1f), hudFont, new int2(224, 44), 0.45f, TextAlignment.Left);
+            }
 
             return new GeneratedAuthoringSceneDefinition {
-                SceneId = SceneId,
+                SceneId = sceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 RootEntities = new[] {
                     cameraEntity,
@@ -212,26 +238,31 @@ namespace city.rendering.tools {
                 new int2(128, 12),
                 0.35f,
                 TextAlignment.Left);
-            Entity returnTarget = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(root, "SoftwarePathTracerDesktopReturnTarget");
-            returnTarget.LayerMask = EditorLayerMasks.SceneObjects;
-            returnTarget.LocalPosition = new float3(4f, 40f, 0.1f);
-            returnTarget.LocalScale = float3.One;
-            returnTarget.LocalOrientation = float4.Identity;
-            returnTarget.AddComponent(new InteractableComponent { Size = new int2(64, 12) });
+            Entity returnTarget = CreateRoundedPanelEntity(
+                root,
+                "SoftwarePathTracerDesktopReturnTarget",
+                new float3(208f, 4f, 0.1f),
+                new int2(108, 28),
+                5f,
+                2f,
+                new byte4(40, 58, 87, 255),
+                new byte4(122, 147, 182, 255),
+                2);
+            returnTarget.AddComponent(new InteractableComponent { Size = new int2(108, 28) });
             returnTarget.AddComponent(new DemoDiscReturnToMenuComponent {
-                AllowKeyboardReturn = false,
-                AllowGamepadReturn = false,
+                AllowKeyboardReturn = true,
+                AllowGamepadReturn = true,
                 AllowPointerReturn = true
             });
             CreateHudTextEntity(
                 returnTarget,
                 "SoftwarePathTracerDesktopReturnLabel",
-                "RETURN",
-                new float3(0f, 0f, 0.1f),
+                "MAIN MENU",
+                new float3(4f, 4f, 0.1f),
                 hudFont,
-                new int2(64, 12),
-                0.35f,
-                TextAlignment.Left,
+                new int2(100, 20),
+                0.45f,
+                TextAlignment.Center,
                 3);
             return (sppText, elapsedText, raysPerSecondText);
         }
@@ -384,7 +415,7 @@ namespace city.rendering.tools {
                 2);
             button.AddComponent(new InteractableComponent { Size = new int2(224, 32) });
             button.AddComponent(new NintendoDsReturnOverlayComponent());
-            CreateHudTextEntity(button, "SoftwarePathTracerHandheldReturnLabel", "RETURN", new float3(80f, 6f, 0.1f), hudFont, 3);
+            CreateHudTextEntity(button, "SoftwarePathTracerHandheldReturnLabel", "MAIN MENU", new float3(4f, 4f, 0.1f), hudFont, new int2(216, 24), 0.6f, TextAlignment.Center, 3);
             return button;
         }
 

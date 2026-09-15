@@ -441,6 +441,9 @@ namespace city.rendering {
         /// </summary>
         public const int MaximumDiffuseBounces = 4;
 
+        /// <summary>Bounds total path segments, allowing glass entry/exit and mirror chains without unbounded work.</summary>
+        public const int MaximumPathBounces = 16;
+
         /// <summary>
         /// Shared world-space origin offset used for all secondary and shadow rays.
         /// </summary>
@@ -859,7 +862,9 @@ namespace city.rendering {
             float3 throughput = float3.One;
             SoftwareRay ray = primaryRay;
 
-            for (int bounce = 0; bounce < MaximumDiffuseBounces; bounce++) {
+            int diffuseBounces = 0;
+            bool previousSpecular = false;
+            for (int bounce = 0; bounce < MaximumPathBounces; bounce++) {
                 rayCount++;
                 if (!bvh.Intersect(triangles, ref ray, RayEpsilon, float.PositiveInfinity, traversalStack, out SoftwareHit hit, out int triangleIndex)) {
                     return radiance;
@@ -870,13 +875,34 @@ namespace city.rendering {
                 float3 orientedNormal = OrientAgainstIncoming(triangle.GeometricNormal, ray.Direction);
 
                 if (HasEmission(material.Emission)) {
-                    if (bounce == 0) {
+                    if (bounce == 0 || previousSpecular) {
                         radiance = AddColor(radiance, MultiplyColor(throughput, material.Emission));
                         if (!IsFinite(radiance)) {
                             return DiscardSample();
                         }
                     }
                     return radiance;
+                }
+
+                if (material.Kind == SoftwareMaterialKind.Mirror || material.Kind == SoftwareMaterialKind.Glass) {
+                    float3 specularDirection;
+                    if (material.Kind == SoftwareMaterialKind.Mirror) {
+                        specularDirection = SoftwareSpecularScattering.Reflect(ray.Direction, orientedNormal);
+                        throughput = MultiplyColor(throughput, material.ReflectionColor);
+                    } else {
+                        float radianceWeight;
+                        float branchSample = SoftwarePathSampler.Sample01(pixelX, pixelY, completedPass, bounce, 4);
+                        SoftwareSpecularScattering.SampleDielectric(ray.Direction, triangle.GeometricNormal, material.IndexOfRefraction, branchSample, out specularDirection, out radianceWeight);
+                        throughput = Scale(throughput, radianceWeight);
+                    }
+                    float offsetSide = float3.Dot(specularDirection, triangle.GeometricNormal) >= 0f ? 1f : -1f;
+                    float3 specularOrigin = Add(hit.Position, Scale(triangle.GeometricNormal, RayEpsilon * offsetSide));
+                    if (!IsFinite(specularDirection) || !IsFinite(specularOrigin) || !IsFinite(throughput)) {
+                        return DiscardSample();
+                    }
+                    ray = new SoftwareRay(specularOrigin, specularDirection);
+                    previousSpecular = true;
+                    continue;
                 }
 
                 float firstLightSample = SoftwarePathSampler.Sample01(pixelX, pixelY, completedPass, bounce, 0);
@@ -955,7 +981,8 @@ namespace city.rendering {
                 if (!IsFinite(throughput)) {
                     return DiscardSample();
                 }
-                if (bounce == MaximumDiffuseBounces - 1) {
+                diffuseBounces++;
+                if (diffuseBounces == MaximumDiffuseBounces) {
                     break;
                 }
 
@@ -970,6 +997,7 @@ namespace city.rendering {
                     return DiscardSample();
                 }
                 ray = new SoftwareRay(nextOrigin, outgoingDirection);
+                previousSpecular = false;
             }
 
             return IsFinite(radiance) ? radiance : DiscardSample();
@@ -1220,6 +1248,7 @@ namespace city.rendering {
 
             for (int materialIndex = 0; materialIndex < materials.Length; materialIndex++) {
                 SoftwareMaterialData material = materials[materialIndex];
+                SoftwareSpecularScattering.ValidateMaterial(material);
                 if (!IsFinite(material.DiffuseColor) || !IsFinite(material.Emission)) {
                     throw new ArgumentOutOfRangeException(nameof(materials), "Compact material values must be finite.");
                 }

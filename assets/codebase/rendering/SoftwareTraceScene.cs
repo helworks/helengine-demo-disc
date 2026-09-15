@@ -128,7 +128,7 @@ namespace city.rendering {
         /// <summary>
         /// Explicit owned bytes for one compact material element.
         /// </summary>
-        public const int OwnedBytes = 24;
+        public const int OwnedBytes = 44;
 
         /// <summary>
         /// Gets the diffuse color.
@@ -145,9 +145,31 @@ namespace city.rendering {
         /// </summary>
         /// <param name="diffuseColor">Diffuse color.</param>
         /// <param name="emission">Pre-multiplied emission.</param>
-        public SoftwareMaterialData(float3 diffuseColor, float3 emission) {
+        public SoftwareMaterialData(float3 diffuseColor, float3 emission)
+            : this(diffuseColor, emission, SoftwareMaterialKind.Diffuse, float3.One, 1.5f) {
+        }
+
+        /// <summary>Gets the surface scattering law.</summary>
+        public SoftwareMaterialKind Kind { get; }
+
+        /// <summary>Gets the ideal mirror reflectance.</summary>
+        public float3 ReflectionColor { get; }
+
+        /// <summary>Gets the glass refractive index relative to air.</summary>
+        public float IndexOfRefraction { get; }
+
+        /// <summary>Initializes a compact material with explicit scattering parameters.</summary>
+        /// <param name="diffuseColor">Diffuse albedo used by diffuse materials.</param>
+        /// <param name="emission">Pre-multiplied emitter radiance.</param>
+        /// <param name="kind">Scattering law.</param>
+        /// <param name="reflectionColor">Mirror reflectance in the unit color cube.</param>
+        /// <param name="indexOfRefraction">Glass index relative to air, at least one.</param>
+        public SoftwareMaterialData(float3 diffuseColor, float3 emission, SoftwareMaterialKind kind, float3 reflectionColor, float indexOfRefraction) {
             DiffuseColor = diffuseColor;
             Emission = emission;
+            Kind = kind;
+            ReflectionColor = reflectionColor;
+            IndexOfRefraction = indexOfRefraction;
         }
     }
 
@@ -502,10 +524,24 @@ namespace city.rendering {
         /// <param name="isEmissive">Receives whether any material emits.</param>
         static void AppendMaterials(SoftwareModelComponent component, List<SoftwareMaterialData> materials, out bool isEmissive) {
             isEmissive = false;
+            if (component.Scattering == null || (component.Scattering.Length != 0 && component.Scattering.Length != component.Materials.Length)) {
+                throw new InvalidOperationException("SoftwareModelComponent.Scattering must be empty or match the Materials array length.");
+            }
             for (int materialIndex = 0; materialIndex < component.Materials.Length; materialIndex++) {
                 SoftwareMaterial material = component.Materials[materialIndex];
                 float3 emission = material.EmissionColor * material.EmissionStrength;
-                materials.Add(new SoftwareMaterialData(material.DiffuseColor, emission));
+                SoftwareMaterialData compact;
+                if (component.Scattering.Length == 0) {
+                    compact = new SoftwareMaterialData(material.DiffuseColor, emission);
+                } else {
+                    SoftwareScatteringMaterial scattering = component.Scattering[materialIndex];
+                    if (scattering == null) {
+                        throw new InvalidOperationException("SoftwareModelComponent.Scattering entries cannot be null.");
+                    }
+                    compact = new SoftwareMaterialData(material.DiffuseColor, emission, scattering.Kind, scattering.ReflectionColor, scattering.IndexOfRefraction);
+                }
+                SoftwareSpecularScattering.ValidateMaterial(compact);
+                materials.Add(compact);
                 if (material.EmissionStrength > 0f && emission.LengthSquared() > GeometryTolerance * GeometryTolerance) {
                     isEmissive = true;
                 }

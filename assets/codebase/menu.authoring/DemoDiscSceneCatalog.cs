@@ -19,9 +19,23 @@ namespace city.menu {
                 new MenuItemDefinition("scene-pbr-material-gallery", "PBR Material Gallery", true, new MenuActionDefinition(MenuActionKind.LoadScene, "pbr_material_gallery")),
                 new MenuItemDefinition("scene-pbr-textured-showcase", "PBR Textured Showcase", true, new MenuActionDefinition(MenuActionKind.LoadScene, "pbr_textured_showcase")),
                 new MenuItemDefinition("scene-pbr-shadow-theater", "PBR Shadow Theater", true, new MenuActionDefinition(MenuActionKind.LoadScene, "pbr_shadow_theater")),
-                new MenuItemDefinition("scene-software-path-tracer", "Software Path Tracer", true, new MenuActionDefinition(MenuActionKind.LoadScene, "software_path_tracer")),
+                new MenuItemDefinition("scene-ray-tracing", "Ray Tracing", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "ray-tracing-select")),
                 new MenuItemDefinition("scene-back", "Back", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))
             };
+        }
+
+        /// <summary>
+        /// Builds the scenes rendered by the shared software ray tracer.
+        /// </summary>
+        /// <returns>Ray-traced scene entries followed by the category return action.</returns>
+        public MenuItemDefinition[] CreateSoftwareRayTracingSceneItems() {
+            return [
+                new MenuItemDefinition("scene-software-path-tracer", "Cornell Box", true, new MenuActionDefinition(MenuActionKind.LoadScene, "software_path_tracer")),
+                new MenuItemDefinition("scene-ray-tracing-teapot", "Teapot", true, new MenuActionDefinition(MenuActionKind.LoadScene, "ray_tracing_teapot")),
+                new MenuItemDefinition("scene-ray-tracing-spheres", "Material Spheres", true, new MenuActionDefinition(MenuActionKind.LoadScene, "ray_tracing_spheres")),
+                new MenuItemDefinition("scene-ray-tracing-soft-shadows", "Soft Shadows", true, new MenuActionDefinition(MenuActionKind.LoadScene, "ray_tracing_soft_shadows")),
+                new MenuItemDefinition("ray-tracing-back", "Back", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))
+            ];
         }
 
         /// <summary>

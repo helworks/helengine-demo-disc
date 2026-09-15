@@ -11,10 +11,11 @@ namespace city.menu {
             DemoDiscMenuTheme theme = new DemoDiscMenuTheme();
             DemoDiscSceneCatalog sceneCatalog = new DemoDiscSceneCatalog();
             MenuItemDefinition[] demoSceneItems = sceneCatalog.CreateDemoSceneItems();
+            MenuItemDefinition[] rayTracingSceneItems = sceneCatalog.CreateSoftwareRayTracingSceneItems();
             MenuItemDefinition[] physicsSceneItems = sceneCatalog.CreatePhysicsSceneItems();
             MenuItemDefinition[] gameSceneItems = sceneCatalog.CreateGameSceneItems();
             MenuItemDefinition[] mainMenuItems = [
-                new MenuItemDefinition("main-scenes", "Demo Scenes", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "scene-select")),
+                new MenuItemDefinition("main-scenes", "Rendering Scenes", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "scene-select")),
                 new MenuItemDefinition("main-physics", "Physics Scenes", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "physics-select")),
                 new MenuItemDefinition("main-games", "Games", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "games-select")),
                 new MenuItemDefinition("main-options", "Options", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "options"))
@@ -40,9 +41,14 @@ namespace city.menu {
                         mainMenuItems),
                     new MenuPanelDefinition(
                         "scene-select",
-                        "Demo Scenes",
+                        "Rendering Scenes",
                         4,
                         demoSceneItems),
+                    new MenuPanelDefinition(
+                        "ray-tracing-select",
+                        "Ray Tracing",
+                        4,
+                        rayTracingSceneItems),
                     new MenuPanelDefinition(
                         "physics-select",
                         "Physics Scenes",

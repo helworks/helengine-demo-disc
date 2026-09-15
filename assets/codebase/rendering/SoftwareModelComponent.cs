@@ -35,5 +35,12 @@ namespace city.rendering {
         /// Gets or sets the authored materials used by the software path tracer.
         /// </summary>
         public SoftwareMaterial[] Materials { get; set; } = Array.Empty<SoftwareMaterial>();
+
+        /// <summary>
+        /// Gets or sets optional scattering overrides aligned with Materials. An empty array keeps every material diffuse.
+        /// This append-only component field preserves the original unframed nested SoftwareMaterial payload.
+        /// </summary>
+        [ScenePersistenceAppend(0)]
+        public SoftwareScatteringMaterial[] Scattering { get; set; } = Array.Empty<SoftwareScatteringMaterial>();
     }
 }

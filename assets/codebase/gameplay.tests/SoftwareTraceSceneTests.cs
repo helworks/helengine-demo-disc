@@ -486,13 +486,33 @@ namespace city.tests {
             Assert.Equal(1, source.DisposedCount);
         }
 
+        /// <summary>Maps explicitly authored scattering settings to the compact trace material without losing defaults.</summary>
+        [Theory]
+        [InlineData(SoftwareMaterialKind.Mirror)]
+        [InlineData(SoftwareMaterialKind.Glass)]
+        public void Scattering_settings_survive_scene_flattening(SoftwareMaterialKind kind) {
+            using SceneFixture fixture = new SceneFixture();
+            SceneAssetReference reference = SceneAssetReferenceFactory.CreateFileSystemModel("models/cube.hasset");
+            FakeSoftwareModelAssetSource source = new FakeSoftwareModelAssetSource();
+            source.Register(reference, CreateCubeAsset);
+            Entity model = fixture.AddModel(reference, new SoftwareMaterial());
+            model.Components.OfType<SoftwareModelComponent>().Single().Scattering = new[] { new SoftwareScatteringMaterial { Kind = kind, ReflectionColor = new float3(0.2f, 0.5f, 1f), IndexOfRefraction = 1.33f } };
+            fixture.AddModel(reference, EmitterMaterial());
+
+            SoftwareTraceScene scene = SoftwareTraceScene.Build(fixture.Entities, source);
+            Assert.Equal(kind, scene.Materials[0].Kind);
+            Assert.Equal(1.33f, scene.Materials[0].IndexOfRefraction);
+            Assert.Equal(new float3(0.2f, 0.5f, 1f), scene.Materials[0].ReflectionColor);
+            Assert.Equal(SoftwareMaterialKind.Diffuse, scene.Materials[1].Kind);
+        }
         /// <summary>
         /// Ensures compact owned-byte constants are independently exact.
         /// </summary>
         [Fact]
         public void Compact_owned_byte_constants_are_exact() {
             Assert.Equal(88, city.rendering.SoftwareTriangle.OwnedBytes);
-            Assert.Equal(24, city.rendering.SoftwareMaterialData.OwnedBytes);
+            Assert.Equal(44, city.rendering.SoftwareMaterialData.OwnedBytes);
+            Assert.Equal(city.rendering.SoftwareMaterialData.OwnedBytes, System.Runtime.InteropServices.Marshal.SizeOf<city.rendering.SoftwareMaterialData>());
             Assert.Equal(72, city.rendering.SoftwareAreaLight.OwnedBytes);
         }
 
