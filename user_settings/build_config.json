@@ -1502,6 +1502,7 @@
     },
     {
       "platformId": "n64",
+      "selectedSceneReferences": [{"sourceKind":1,"relativePath":"scenes/rendering/cube_test.helen","providerId":"","assetId":"1ed004c77d564c9f9ceea9a2789c1744","contentHash":"sha256:e9857f6ebd194adf171e66caa188bce2d50e996ba3675a33777639b15745a9c0"}],
       "selectedSceneIds": [
         "cube_test"
       ],
