@@ -8,6 +8,21 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class CubeTestSceneFactory {
         /// <summary>
+        /// Stable N64 target id used by the authored scene's explicit platform exclusions.
+        /// </summary>
+        const string Nintendo64PlatformId = "n64";
+
+        /// <summary>
+        /// N64 target set used by the shared platform authoring helpers.
+        /// </summary>
+        static readonly string[] Nintendo64ExcludedPlatformIds = [Nintendo64PlatformId];
+
+        /// <summary>
+        /// Existing editor platform authoring service used to persist N64 entity and component exclusions.
+        /// </summary>
+        readonly PlatformSceneAuthoringHelperService PlatformSceneAuthoringHelperServiceValue = new();
+
+        /// <summary>
         /// Host-owned capability used to resolve generated control icons and fonts.
         /// </summary>
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
@@ -53,6 +68,14 @@ namespace city.rendering.tools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
+            Entity uiEntity = CreateUiEntity();
+            Entity directionalLightEntity = CreateDirectionalLightEntity();
+
+            ExcludeN64Root(projectRootPath, instructionOverlayEntity);
+            ExcludeN64Root(projectRootPath, consoleInstructionBlueprintEntity);
+            ExcludeN64Root(projectRootPath, uiEntity);
+            ExcludeN64Root(projectRootPath, directionalLightEntity);
+            ExcludeN64OrbitComponent(projectRootPath, cameraEntity);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -65,11 +88,47 @@ namespace city.rendering.tools {
                     cameraEntity,
                     instructionOverlayEntity,
                     consoleInstructionBlueprintEntity,
-                    CreateUiEntity(),
-                    CreateDirectionalLightEntity(),
+                    uiEntity,
+                    directionalLightEntity,
                     CreateCubeEntity(cubeModel, solidColorMaterial)
                 }
             };
+        }
+
+        /// <summary>
+        /// Excludes one authored root subtree from N64 while retaining the same root on every other configured platform.
+        /// </summary>
+        /// <param name="projectRootPath">Project root whose configured platform catalog drives persisted overrides.</param>
+        /// <param name="rootEntity">Root subtree to exclude on N64.</param>
+        void ExcludeN64Root(string projectRootPath, Entity rootEntity) {
+            if (rootEntity is not EditorEntity editorRootEntity) {
+                throw new InvalidOperationException("Cube-test N64 exclusions require editor entities.");
+            }
+
+            PlatformSceneAuthoringHelperServiceValue.ExcludeEntitySubtreeFromPlatforms(
+                projectRootPath,
+                editorRootEntity,
+                Nintendo64ExcludedPlatformIds);
+        }
+
+        /// <summary>
+        /// Removes the authored orbit controller only on N64 while preserving the camera on all platforms.
+        /// </summary>
+        /// <param name="projectRootPath">Project root whose configured platform catalog drives persisted overrides.</param>
+        /// <param name="cameraEntity">Authored camera entity containing the orbit controller.</param>
+        void ExcludeN64OrbitComponent(string projectRootPath, Entity cameraEntity) {
+            if (cameraEntity is not EditorEntity editorCameraEntity) {
+                throw new InvalidOperationException("Cube-test N64 camera exclusions require an editor entity.");
+            }
+
+            city.rendering.DemoDiscOrbitCameraComponent orbitComponent = cameraEntity.Components
+                .OfType<city.rendering.DemoDiscOrbitCameraComponent>()
+                .Single();
+            PlatformSceneAuthoringHelperServiceValue.ExcludeComponentFromPlatforms(
+                projectRootPath,
+                editorCameraEntity,
+                orbitComponent,
+                Nintendo64ExcludedPlatformIds);
         }
 
         /// <summary>

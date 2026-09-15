@@ -234,7 +234,7 @@ namespace city.rendering.tools {
                     throw new InvalidOperationException("Generated scene roots must be editor entities before platform-exclusive authoring can be applied.");
                 }
 
-                PlatformSceneAuthoringHelperServiceValue.ExcludeEntitySubtreeFromPlatforms(
+                PlatformSceneAuthoringHelperServiceValue.ExcludeEntitySubtreeFromPlatformsPreservingExisting(
                     ProjectRootPath,
                     editorRootEntity,
                     NintendoHandheldPlatformIds);

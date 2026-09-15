@@ -2,7 +2,7 @@
     "projectFormatVersion":  1,
     "name":  "city",
     "version":  "1.0.0",
-    "requiredEngineVersion":  "1.0.0+fb94b93fbfd8c1e895c910a57903970c0e303900",
+    "requiredEngineVersion":  "1.0.0+ec2d7ff8a5b2624bbc51784bd9eb0c9babed1843",
     "supportedPlatforms":  [
                                "windows",
                                "ps2",
@@ -11,6 +11,7 @@
                                "ds",
                                "3ds",
                                "gamecube",
+                               "n64",
                                "wii",
                                "switch",
                                "wiiu"

@@ -1499,6 +1499,34 @@
         "include-project-defined-preprocessor-symbols": "false",
         "load-native-runtime-metadata": "true"
       }
+    },
+    {
+      "platformId": "n64",
+      "selectedSceneIds": [
+        "cube_test"
+      ],
+      "sceneOrders": [
+        {
+          "sceneId": "cube_test",
+          "orderNumber": 1
+        }
+      ],
+      "outputDirectoryPath": "C:\\dev\\helworks\\builds\\helengine-n64\\cube-test\\editor-output",
+      "debugBuild": false,
+      "selectedEnvironmentId": "release",
+      "selectedBuildProfileId": "release",
+      "editorPrebuildCommandIdsByBuildProfileId": {
+        "release": [
+          "menu.generate-cube-test-scene"
+        ]
+      },
+      "selectedGraphicsProfileId": "n64-unlit",
+      "selectedBuildOptionValues": {},
+      "selectedGraphicsOptionValues": {},
+      "selectedCodegenProfileId": "default",
+      "selectedStorageProfileId": "dragonfs-package",
+      "selectedMediaProfileId": "n64-cartridge",
+      "selectedCodegenOptionValues": {}
     }
   ],
   "queueItems": []
