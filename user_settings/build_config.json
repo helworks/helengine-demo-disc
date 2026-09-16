@@ -1521,7 +1521,7 @@
           "menu.generate-cube-test-scene"
         ]
       },
-      "selectedGraphicsProfileId": "n64-unlit",
+      "selectedGraphicsProfileId": "n64-standard",
       "selectedBuildOptionValues": {},
       "selectedGraphicsOptionValues": {},
       "selectedCodegenProfileId": "default",

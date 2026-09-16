@@ -74,7 +74,6 @@ namespace city.rendering.tools {
             ExcludeN64Root(projectRootPath, instructionOverlayEntity);
             ExcludeN64Root(projectRootPath, consoleInstructionBlueprintEntity);
             ExcludeN64Root(projectRootPath, uiEntity);
-            ExcludeN64Root(projectRootPath, directionalLightEntity);
             ExcludeN64OrbitComponent(projectRootPath, cameraEntity);
 
             return new GeneratedAuthoringSceneDefinition {
