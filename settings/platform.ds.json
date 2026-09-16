@@ -1,16 +1,21 @@
 {
   "platformId": "ds",
+  "version": "1.0.0",
   "build": {
     "selectedBuildProfileId": "debug",
     "textureScalePercent": 100,
     "shaderVariantPruningEnabled": true,
     "selectedOptionValues": {
       "enable-native-runtime-diagnostics": "false",
-      "enable-native-fatal-error-console": "false"
+      "enable-native-fatal-error-console": "false",
+      "game-name": "Helengine Demodisc",
+      "game-description": "Made with helengine",
+      "startup-top-screen-color": "#FF0000",
+      "startup-bottom-screen-color": "#0000FF"
     }
   },
   "graphics": {
-    "selectedGraphicsProfileId": "",
+    "selectedGraphicsProfileId": "ds-main-2d",
     "defaultWidth": 1280,
     "defaultHeight": 720,
     "vSyncEnabled": true,
@@ -19,11 +24,16 @@
     "rendererShadowQualityTier": "medium",
     "rendererHdrEnabled": true,
     "rendererPostProcessTier": 2,
-    "selectedOptionValues": {}
+    "selectedOptionValues": {
+      "screen-layout": "main-top-sub-bottom"
+    }
   },
   "codegen": {
-    "selectedCodegenProfileId": "",
-    "selectedOptionValues": {}
+    "selectedCodegenProfileId": "default",
+    "selectedOptionValues": {
+      "codegen-forced-disabled-features": "debug_overlay;shaders;text_processing;physics3d.diagnostics",
+      "codegen-compact-native-exception-messages": "false"
+    }
   },
   "input": {
     "standardActions": {

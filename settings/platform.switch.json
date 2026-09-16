@@ -1,13 +1,16 @@
 {
   "platformId": "switch",
+  "version": "1.0.0",
   "build": {
-    "selectedBuildProfileId": "",
+    "selectedBuildProfileId": "debug",
     "textureScalePercent": 100,
     "shaderVariantPruningEnabled": true,
-    "selectedOptionValues": {}
+    "selectedOptionValues": {
+      "startup-clear-color": "#FFFF00"
+    }
   },
   "graphics": {
-    "selectedGraphicsProfileId": "",
+    "selectedGraphicsProfileId": "switch-native",
     "defaultWidth": 1280,
     "defaultHeight": 720,
     "vSyncEnabled": true,
@@ -16,11 +19,23 @@
     "rendererShadowQualityTier": "medium",
     "rendererHdrEnabled": true,
     "rendererPostProcessTier": 2,
-    "selectedOptionValues": {}
+    "selectedOptionValues": {
+      "default-width": "1280",
+      "default-height": "720",
+      "vsync-enabled": "true"
+    }
   },
   "codegen": {
-    "selectedCodegenProfileId": "",
-    "selectedOptionValues": {}
+    "selectedCodegenProfileId": "default",
+    "selectedOptionValues": {
+      "write-conversion-report": "true",
+      "include-project-defined-preprocessor-symbols": "false",
+      "load-native-runtime-metadata": "true",
+      "codegen-enabled-features": "host_file_system",
+      "generated-math-convention": "native-column-vector",
+      "pointer-size-bytes": "8",
+      "type-remaps": "System.Numerics.Vector2=helengine.float2;System.Numerics.Vector3=helengine.float3;System.Numerics.Vector4=helengine.float4;System.Numerics.Quaternion=helengine.float4"
+    }
   },
   "input": {
     "standardActions": {

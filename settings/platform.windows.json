@@ -1,26 +1,42 @@
 {
   "platformId": "windows",
+  "version": "1.0.0",
   "build": {
-    "selectedBuildProfileId": "",
+    "selectedBuildProfileId": "debug",
     "textureScalePercent": 100,
     "shaderVariantPruningEnabled": true,
-    "selectedOptionValues": {}
+    "selectedOptionValues": {
+      "texture-scale-percent": "100",
+      "shader-variant-pruning": "true"
+    }
   },
   "graphics": {
-    "selectedGraphicsProfileId": "",
+    "selectedGraphicsProfileId": "directx11",
     "defaultWidth": 1280,
     "defaultHeight": 720,
-    "vSyncEnabled": false,
+    "vSyncEnabled": true,
     "fullscreenEnabled": false,
     "rendererDepthPrepassMode": 0,
     "rendererShadowQualityTier": "medium",
     "rendererHdrEnabled": true,
     "rendererPostProcessTier": 2,
-    "selectedOptionValues": {}
+    "selectedOptionValues": {
+      "default-width": "1280",
+      "default-height": "720",
+      "vsync-enabled": "true",
+      "fullscreen-enabled": "false"
+    }
   },
   "codegen": {
-    "selectedCodegenProfileId": "",
-    "selectedOptionValues": {}
+    "selectedCodegenProfileId": "default",
+    "selectedOptionValues": {
+      "write-conversion-report": "true",
+      "include-project-defined-preprocessor-symbols": "false",
+      "load-native-runtime-metadata": "true",
+      "codegen-enabled-features": "host_file_system",
+      "codegen-generated-function-profiling": "false",
+      "codegen-generated-function-profiling-maintained-symbol-prefixes": "helengine.Core.UpdatePhysics(;helengine.BepuPhysicsWorld3D.Step(;helengine.BepuPhysicsWorld3D.CountAwakeDynamicBodies(;helengine.BepuPhysicsWorld3D.CollectTriggerEvents(;helengine.BepuPhysicsWorld3D.SynchronizeBodiesBackToEntities(;BepuPhysics.Simulation.Timestep(;BepuPhysics.DefaultTimestepper.Timestep(;BepuPhysics.Simulation.PredictBoundingBoxes(;BepuPhysics.PoseIntegrator.PredictBoundingBoxes(float, BepuUtilities.Memory.BufferPool,;BepuPhysics.Simulation.CollisionDetection(;BepuPhysics.CollisionDetection.BroadPhase.Update(;BepuPhysics.CollisionDetection.BroadPhase.Update2(;BepuPhysics.CollisionDetection.CollidableOverlapFinder.DispatchOverlaps(;BepuPhysics.Trees.Tree.GetSelfOverlaps(;BepuPhysics.CollisionDetection.CollisionBatcher.Flush(;BepuPhysics.CollisionDetection.NarrowPhase.Flush(;BepuPhysics.Simulation.Solve(;BepuPhysics.Solver.PrepareConstraintIntegrationResponsibilities(;BepuPhysics.Solver.Solve(;BepuPhysics.PoseIntegrator.IntegrateAfterSubstepping(;BepuPhysics.Simulation.IncrementallyOptimizeDataStructures("
+    }
   },
   "input": {
     "standardActions": {

@@ -1,26 +1,46 @@
 {
   "platformId": "wii",
+  "version": "1.0.0",
   "build": {
-    "selectedBuildProfileId": "",
+    "selectedBuildProfileId": "wii-default",
     "textureScalePercent": 100,
     "shaderVariantPruningEnabled": true,
-    "selectedOptionValues": {}
+    "selectedOptionValues": {
+      "game-name": "Helengine Demodisc",
+      "texture-scale-percent": "100",
+      "shader-variant-pruning": "true"
+    }
   },
   "graphics": {
-    "selectedGraphicsProfileId": "",
-    "defaultWidth": 640,
-    "defaultHeight": 480,
+    "selectedGraphicsProfileId": "gx",
+    "defaultWidth": 1280,
+    "defaultHeight": 720,
     "vSyncEnabled": true,
-    "fullscreenEnabled": true,
+    "fullscreenEnabled": false,
     "rendererDepthPrepassMode": 0,
-    "rendererShadowQualityTier": "disabled",
-    "rendererHdrEnabled": false,
-    "rendererPostProcessTier": 0,
-    "selectedOptionValues": {}
+    "rendererShadowQualityTier": "medium",
+    "rendererHdrEnabled": true,
+    "rendererPostProcessTier": 2,
+    "selectedOptionValues": {
+      "default-width": "640",
+      "default-height": "480",
+      "vsync-enabled": "true",
+      "fullscreen-enabled": "true"
+    }
   },
   "codegen": {
-    "selectedCodegenProfileId": "",
-    "selectedOptionValues": {}
+    "selectedCodegenProfileId": "default",
+    "selectedOptionValues": {
+      "write-conversion-report": "true",
+      "include-project-defined-preprocessor-symbols": "false",
+      "load-native-runtime-metadata": "true",
+      "codegen-enabled-features": "host_file_system",
+      "generated-math-convention": "native-column-vector",
+      "pointer-size-bytes": "4",
+      "type-remaps": "System.Numerics.Vector2=helengine.float2;System.Numerics.Vector3=helengine.float3;System.Numerics.Vector4=helengine.float4;System.Numerics.Quaternion=helengine.float4",
+      "native-file-system-header": "\u0022platform/wii/WiiDiscFileSystem.hpp\u0022",
+      "native-file-system-type": "helengine::wii::WiiDiscFileSystem"
+    }
   },
   "input": {
     "standardActions": {

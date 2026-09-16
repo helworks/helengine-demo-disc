@@ -1,15 +1,11 @@
 {
-  "platformId": "gamecube",
+  "platformId": "n64",
   "version": "1.0.0",
   "build": {
     "selectedBuildProfileId": "",
     "textureScalePercent": 100,
     "shaderVariantPruningEnabled": true,
-    "selectedOptionValues": {
-      "enable-direct-frame-diagnostic": "false",
-      "enable-logo-animation-diagnostic": "false",
-      "enable-input-trace-diagnostic": "false"
-    }
+    "selectedOptionValues": {}
   },
   "graphics": {
     "selectedGraphicsProfileId": "",

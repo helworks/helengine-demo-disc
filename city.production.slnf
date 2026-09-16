@@ -1,0 +1,13 @@
+{
+  "solution": {
+    "path": "city.sln",
+    "projects": [
+      "user_settings/generated_code/projects/gameplay/gameplay.csproj",
+      "user_settings/generated_code/projects/game.tools/game.tools.csproj",
+      "user_settings/generated_code/projects/menu.tools/menu.tools.csproj",
+      "user_settings/generated_code/projects/physics.tools/physics.tools.csproj",
+      "user_settings/generated_code/projects/rendering.tools/rendering.tools.csproj",
+      "user_settings/generated_code/projects/scene.tools/scene.tools.csproj"
+    ]
+  }
+}

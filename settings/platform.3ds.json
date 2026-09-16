@@ -1,12 +1,15 @@
 {
   "platformId": "3ds",
+  "version": "1.0.0",
   "build": {
     "selectedBuildProfileId": "3ds-default",
     "textureScalePercent": 100,
     "shaderVariantPruningEnabled": true,
     "selectedOptionValues": {
       "startup-top-screen-color": "#FF0000",
-      "startup-bottom-screen-color": "#0000FF"
+      "startup-bottom-screen-color": "#0000FF",
+      "game-name": "Helengine Demodisc",
+      "game-description": "Made with helengine"
     }
   },
   "graphics": {
@@ -23,7 +26,17 @@
   },
   "codegen": {
     "selectedCodegenProfileId": "default",
-    "selectedOptionValues": {}
+    "selectedOptionValues": {
+      "write-conversion-report": "true",
+      "include-project-defined-preprocessor-symbols": "false",
+      "load-native-runtime-metadata": "true",
+      "codegen-enabled-features": "host_file_system",
+      "generated-math-convention": "native-column-vector",
+      "pointer-size-bytes": "4",
+      "type-remaps": "System.Numerics.Vector2=helengine.float2;System.Numerics.Vector3=helengine.float3;System.Numerics.Vector4=helengine.float4;System.Numerics.Quaternion=helengine.float4",
+      "native-file-system-header": "\u0022platform/3ds/Nintendo3DsRomFsFileSystem.hpp\u0022",
+      "native-file-system-type": "helengine::nintendo3ds::Nintendo3DsRomFsFileSystem"
+    }
   },
   "input": {
     "standardActions": {

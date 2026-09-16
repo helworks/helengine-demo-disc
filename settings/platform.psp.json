@@ -1,26 +1,44 @@
 {
   "platformId": "psp",
+  "version": "1.0.0",
   "build": {
-    "selectedBuildProfileId": "",
+    "selectedBuildProfileId": "debug",
     "textureScalePercent": 100,
     "shaderVariantPruningEnabled": true,
-    "selectedOptionValues": {}
+    "selectedOptionValues": {
+      "game-name": "Helengine Demodisc",
+      "texture-scale-percent": "100",
+      "shader-variant-pruning": "true"
+    }
   },
   "graphics": {
-    "selectedGraphicsProfileId": "",
-    "defaultWidth": 480,
-    "defaultHeight": 272,
+    "selectedGraphicsProfileId": "psp-forward",
+    "defaultWidth": 1280,
+    "defaultHeight": 720,
     "vSyncEnabled": true,
-    "fullscreenEnabled": true,
+    "fullscreenEnabled": false,
     "rendererDepthPrepassMode": 0,
-    "rendererShadowQualityTier": "disabled",
-    "rendererHdrEnabled": false,
-    "rendererPostProcessTier": 0,
-    "selectedOptionValues": {}
+    "rendererShadowQualityTier": "medium",
+    "rendererHdrEnabled": true,
+    "rendererPostProcessTier": 2,
+    "selectedOptionValues": {
+      "default-width": "480",
+      "default-height": "272",
+      "vsync-enabled": "true",
+      "fullscreen-enabled": "true"
+    }
   },
   "codegen": {
-    "selectedCodegenProfileId": "",
-    "selectedOptionValues": {}
+    "selectedCodegenProfileId": "default",
+    "selectedOptionValues": {
+      "codegen-forced-disabled-features": "shaders",
+      "write-conversion-report": "true",
+      "include-project-defined-preprocessor-symbols": "false",
+      "load-native-runtime-metadata": "true",
+      "generated-math-convention": "native-column-vector",
+      "pointer-size-bytes": "4",
+      "type-remaps": "System.Numerics.Vector2=helengine.float2;System.Numerics.Vector3=helengine.float3;System.Numerics.Vector4=helengine.float4;System.Numerics.Quaternion=helengine.float4"
+    }
   },
   "input": {
     "standardActions": {
