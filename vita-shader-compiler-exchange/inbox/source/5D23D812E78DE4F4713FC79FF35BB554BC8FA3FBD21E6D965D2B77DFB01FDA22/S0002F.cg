@@ -1,0 +1,9 @@
+struct HelengineShadowDepthFragmentInput {
+    float depth : TEXCOORD0;
+};
+
+float4 PS(HelengineShadowDepthFragmentInput input) : COLOR {
+    float2 packedDepth = frac(input.depth * float2(1.0, 255.0));
+    packedDepth.x -= packedDepth.y * (1.0 / 255.0);
+    return float4(packedDepth, 0.0, 1.0);
+}

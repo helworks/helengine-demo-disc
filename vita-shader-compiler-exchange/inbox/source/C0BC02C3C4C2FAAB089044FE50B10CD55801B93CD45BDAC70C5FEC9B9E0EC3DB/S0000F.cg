@@ -1,0 +1,19 @@
+float4 HelengineBaseColor;
+float4 HelengineLightDirection;
+float4 HelengineLightColor;
+float4 HelengineAmbient;
+sampler2D HelengineDiffuseTexture;
+
+struct HelengineFragmentInput {
+    float3 normal : TEXCOORD0;
+    float2 texCoord : TEXCOORD1;
+};
+
+float4 PS(HelengineFragmentInput input) : COLOR {
+    float3 normal = normalize(input.normal);
+    float3 lightDirection = normalize(-HelengineLightDirection.xyz);
+    float diffuse = max(dot(normal, lightDirection), 0.0);
+    float3 lighting = HelengineAmbient.xyz + (HelengineLightColor.xyz * diffuse);
+    float4 diffuseSample = tex2D(HelengineDiffuseTexture, input.texCoord);
+    return float4(diffuseSample.rgb * HelengineBaseColor.rgb * lighting, diffuseSample.a * HelengineBaseColor.a);
+}

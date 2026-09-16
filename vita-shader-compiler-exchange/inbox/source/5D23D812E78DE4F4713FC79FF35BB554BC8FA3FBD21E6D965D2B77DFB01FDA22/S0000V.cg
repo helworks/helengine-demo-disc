@@ -1,0 +1,22 @@
+float4x4 HelengineWorldViewProjection;
+float4x4 HelengineNormalTransform;
+
+struct HelengineVertexInput {
+    float3 position : POSITION;
+    float3 normal : NORMAL;
+    float2 texCoord : TEXCOORD0;
+};
+
+struct HelengineVertexOutput {
+    float4 position : POSITION;
+    float3 normal : TEXCOORD0;
+    float2 texCoord : TEXCOORD1;
+};
+
+HelengineVertexOutput VS(HelengineVertexInput input) {
+    HelengineVertexOutput output;
+    output.position = mul(float4(input.position, 1.0), HelengineWorldViewProjection);
+    output.normal = mul(input.normal, (float3x3)HelengineNormalTransform);
+    output.texCoord = input.texCoord;
+    return output;
+}

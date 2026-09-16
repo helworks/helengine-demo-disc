@@ -1,0 +1,25 @@
+float4x4 HelengineWorldViewProjection;
+float4x4 HelengineNormalTransform;
+float4x4 HelengineLightViewProjection;
+
+struct HelengineVertexInput {
+    float3 position : POSITION;
+    float3 normal : NORMAL;
+    float2 texCoord : TEXCOORD0;
+};
+
+struct HelengineShadowedVertexOutput {
+    float4 position : POSITION;
+    float3 normal : TEXCOORD0;
+    float2 texCoord : TEXCOORD1;
+    float4 shadowPosition : TEXCOORD2;
+};
+
+HelengineShadowedVertexOutput VS(HelengineVertexInput input) {
+    HelengineShadowedVertexOutput output;
+    output.position = mul(float4(input.position, 1.0), HelengineWorldViewProjection);
+    output.normal = mul(input.normal, (float3x3)HelengineNormalTransform);
+    output.texCoord = input.texCoord;
+    output.shadowPosition = mul(float4(input.position, 1.0), HelengineLightViewProjection);
+    return output;
+}

@@ -1,0 +1,34 @@
+float4 HelengineBaseColor;
+float4 HelengineLightDirection;
+float4 HelengineLightColor;
+float4 HelengineAmbient;
+float4 HelengineShadowBias;
+sampler2D HelengineDiffuseTexture;
+sampler2D HelengineShadowTexture;
+
+struct HelengineShadowedFragmentInput {
+    float3 normal : TEXCOORD0;
+    float2 texCoord : TEXCOORD1;
+    float4 shadowPosition : TEXCOORD2;
+};
+
+float4 PS(HelengineShadowedFragmentInput input) : COLOR {
+    float3 normal = normalize(input.normal);
+    float3 lightDirection = normalize(-HelengineLightDirection.xyz);
+    float diffuse = max(dot(normal, lightDirection), 0.0);
+    float3 shadowCoordinate = input.shadowPosition.xyz / input.shadowPosition.w;
+    float2 shadowTextureCoordinate = float2(
+        (shadowCoordinate.x * 0.5) + 0.5,
+        (1.0 - shadowCoordinate.y) * 0.5);
+    float shadowMapContainsCoordinate = shadowCoordinate.x >= -1.0 && shadowCoordinate.x <= 1.0
+        && shadowCoordinate.y >= -1.0 && shadowCoordinate.y <= 1.0
+        && shadowCoordinate.z >= 0.0 && shadowCoordinate.z <= 1.0;
+    float2 packedShadowDepth = tex2D(HelengineShadowTexture, shadowTextureCoordinate).rg;
+    float shadowDepth = dot(packedShadowDepth, float2(1.0, 1.0 / 255.0));
+    float directLightVisibility = shadowMapContainsCoordinate > 0.5
+        ? (shadowCoordinate.z <= (shadowDepth + HelengineShadowBias.x) ? 1.0 : 0.0)
+        : 1.0;
+    float3 lighting = HelengineAmbient.xyz + (HelengineLightColor.xyz * diffuse * directLightVisibility);
+    float4 diffuseSample = tex2D(HelengineDiffuseTexture, input.texCoord);
+    return float4(diffuseSample.rgb * HelengineBaseColor.rgb * lighting, diffuseSample.a * HelengineBaseColor.a);
+}
