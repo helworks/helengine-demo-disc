@@ -24,7 +24,7 @@ namespace city.tests {
 
             string relativePath = catalog.RequireControlPath("keyboard", "wasd");
 
-            Assert.Equal("images/instructions/controls/generated/keyboard/wasd.png", relativePath);
+            Assert.Equal("textures/instructions/controls/generated/keyboard/wasd.png", relativePath);
         }
 
         [Fact]
@@ -32,11 +32,11 @@ namespace city.tests {
             city.rendering.tools.GeneratedControlIconCatalog catalog = city.rendering.tools.GeneratedControlIconCatalog.Load(
                 @"C:\dev\helprojs\demodisc");
 
-            Assert.Equal("images/instructions/controls/generated/3ds/circle_pad.png", catalog.RequireControlPath("3ds", "circle_pad"));
-            Assert.Equal("images/instructions/controls/generated/psp/analog.png", catalog.RequireControlPath("psp", "analog"));
-            Assert.Equal("images/instructions/controls/generated/gamecube/control_stick.png", catalog.RequireControlPath("gamecube", "control_stick"));
-            Assert.Equal("images/instructions/controls/generated/wii/stick.png", catalog.RequireControlPath("wii", "stick"));
-            Assert.Equal("images/instructions/controls/generated/n64/control_stick.png", catalog.RequireControlPath("n64", "control_stick"));
+            Assert.Equal("textures/instructions/controls/generated/3ds/circle_pad.png", catalog.RequireControlPath("3ds", "circle_pad"));
+            Assert.Equal("textures/instructions/controls/generated/psp/analog.png", catalog.RequireControlPath("psp", "analog"));
+            Assert.Equal("textures/instructions/controls/generated/gamecube/control_stick.png", catalog.RequireControlPath("gamecube", "control_stick"));
+            Assert.Equal("textures/instructions/controls/generated/wii/stick.png", catalog.RequireControlPath("wii", "stick"));
+            Assert.Equal("textures/instructions/controls/generated/n64/control_stick.png", catalog.RequireControlPath("n64", "control_stick"));
         }
 
         [Fact]
@@ -73,7 +73,7 @@ namespace city.tests {
                 Assert.Equal("ps2", resolved.PlatformId);
                 Assert.Equal("ps2", resolved.FamilyId);
                 Assert.Equal("r1", resolved.ControlId);
-                Assert.Equal("images/instructions/controls/generated/ps2/r1.png", resolved.SourcePngRelativePath);
+                Assert.Equal("textures/instructions/controls/generated/ps2/r1.png", resolved.SourcePngRelativePath);
                 Assert.False(string.IsNullOrWhiteSpace(resolved.ImportedTextureAssetId));
             } finally {
                 DeleteIconProject(projectRootPath);
@@ -113,7 +113,7 @@ namespace city.tests {
         [Fact]
         public void Nintendo_ds_accept_icon_is_32_pixels_and_uses_the_full_texture() {
             const string projectRootPath = @"C:\dev\helprojs\demodisc";
-            const string relativePath = "images/instructions/controls/generated/ds/a.png";
+            const string relativePath = "textures/instructions/controls/generated/ds/a.png";
             string fullPath = Path.Combine(projectRootPath, "assets", relativePath.Replace('/', Path.DirectorySeparatorChar));
             byte[] header = new byte[24];
             using (FileStream stream = File.OpenRead(fullPath)) {

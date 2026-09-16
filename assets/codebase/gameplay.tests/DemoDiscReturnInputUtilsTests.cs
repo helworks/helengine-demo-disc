@@ -6,6 +6,18 @@ namespace city.tests {
     /// </summary>
     public sealed class DemoDiscReturnInputUtilsTests {
         /// <summary>
+        /// Ensures PS2 scene exits use only the configured standard return action instead of the Circle fallback.
+        /// </summary>
+        [Fact]
+        public void Ps2_scene_return_uses_only_the_standard_platform_action() {
+            string utilitySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\menu\DemoDiscReturnInputUtils.cs");
+            string componentSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\menu\DemoDiscReturnToMenuComponent.cs");
+
+            Assert.Contains("!IsPs2Platform() && DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East)", utilitySource, StringComparison.Ordinal);
+            Assert.DoesNotContain("DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East)", componentSource, StringComparison.Ordinal);
+        }
+
+        /// <summary>
         /// Ensures one newly pressed East button is treated as a shared fallback return press.
         /// </summary>
         [Fact]

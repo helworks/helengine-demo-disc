@@ -327,14 +327,41 @@ namespace city.game {
         /// Applies the selected level start time to the details panel.
         /// </summary>
         void ApplyLevelTimerText(float startTimeSeconds) {
-            LevelTimerTextComponent.Text = $"Limit {FormatTimerSeconds(startTimeSeconds)}";
+            LevelTimerTextComponent.Text = UseDetailsStage
+                ? FormatMaximumTimeLabel(startTimeSeconds)
+                : $"Limit {FormatTimerSeconds(startTimeSeconds)}";
         }
 
         /// <summary>
         /// Applies the selected level medal thresholds to the details panel.
         /// </summary>
         void ApplyLevelTargetTimesText(float goldTimeSeconds, float silverTimeSeconds, float bronzeTimeSeconds) {
-            LevelTargetTimesTextComponent.Text = $"Gold  {FormatTimerSeconds(goldTimeSeconds)}\nSilver {FormatTimerSeconds(silverTimeSeconds)}\nBronze {FormatTimerSeconds(bronzeTimeSeconds)}";
+            LevelTargetTimesTextComponent.Text = FormatTargetTimesText(UseDetailsStage, goldTimeSeconds, silverTimeSeconds, bronzeTimeSeconds);
+        }
+
+        /// <summary>
+        /// Formats the single maximum duration shown by the compact handheld selector.
+        /// </summary>
+        /// <param name="seconds">Maximum playable duration in seconds.</param>
+        /// <returns>Compact maximum-time label.</returns>
+        public static string FormatMaximumTimeLabel(float seconds) {
+            return $"MAX {FormatTimerSeconds(seconds)}";
+        }
+
+        /// <summary>
+        /// Formats medal thresholds for the large selector while suppressing them on the compact handheld details stage.
+        /// </summary>
+        /// <param name="useDetailsStage">True when the compact handheld two-stage selector is active.</param>
+        /// <param name="goldTimeSeconds">Gold medal threshold in seconds.</param>
+        /// <param name="silverTimeSeconds">Silver medal threshold in seconds.</param>
+        /// <param name="bronzeTimeSeconds">Bronze medal threshold in seconds.</param>
+        /// <returns>Empty text for handheld presentation; otherwise the full medal summary.</returns>
+        public static string FormatTargetTimesText(bool useDetailsStage, float goldTimeSeconds, float silverTimeSeconds, float bronzeTimeSeconds) {
+            if (useDetailsStage) {
+                return string.Empty;
+            }
+
+            return $"Gold  {FormatTimerSeconds(goldTimeSeconds)}\nSilver {FormatTimerSeconds(silverTimeSeconds)}\nBronze {FormatTimerSeconds(bronzeTimeSeconds)}";
         }
 
         /// <summary>

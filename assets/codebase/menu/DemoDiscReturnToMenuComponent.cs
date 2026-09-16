@@ -106,8 +106,7 @@ namespace city.menu {
                 throw new ArgumentNullException(nameof(inputSystem));
             }
 
-            return DemoDiscReturnInputUtils.WasReturnPressed(inputSystem)
-                || city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East);
+            return DemoDiscReturnInputUtils.WasReturnPressed(inputSystem);
         }
 
         /// <summary>

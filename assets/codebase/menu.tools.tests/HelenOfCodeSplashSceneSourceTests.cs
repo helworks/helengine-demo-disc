@@ -17,7 +17,7 @@ namespace city.menu.tools.tests {
 
             Assert.Contains("HelenOfCodeSplash", source, StringComparison.Ordinal);
             Assert.Contains("HelenOfCodeSplashComponent", source, StringComparison.Ordinal);
-            Assert.Contains("images/splash/helen_of_code_logo.png", source, StringComparison.Ordinal);
+            Assert.Contains("textures/splash/helen_of_code_logo.png", source, StringComparison.Ordinal);
             Assert.Contains("DemoMenuLayout.CanvasHeight * 0.9d", source, StringComparison.Ordinal);
             Assert.Contains("new byte4(0, 0, 0, 255)", source, StringComparison.Ordinal);
             Assert.Contains("SceneEntityIdAllocator.Allocate()", source, StringComparison.Ordinal);

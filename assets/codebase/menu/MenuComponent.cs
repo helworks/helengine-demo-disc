@@ -186,8 +186,8 @@ namespace city.menu {
             InputSystem inputSystem = Core.Instance.Input;
 #if DESKTOP_PLATFORM
             HandleKeyboardInput(inputSystem);
-            HandleMouseInput(inputSystem);
 #endif
+            HandlePointerInput(inputSystem);
             HandleGamepadInput(inputSystem);
         }
 
@@ -455,12 +455,13 @@ namespace city.menu {
                 NavigateBack();
             }
         }
+#endif
 
         /// <summary>
-        /// Handles pointer hover and click activation for the active baked panel.
+        /// Handles pointer hover, touch, and click activation for the active baked panel.
         /// </summary>
         /// <param name="inputSystem">Input system supplying the current frame state.</param>
-        void HandleMouseInput(InputSystem inputSystem) {
+        void HandlePointerInput(InputSystem inputSystem) {
             if (ActivePanel == null) {
                 PressedPointerItem = null;
                 return;
@@ -471,16 +472,16 @@ namespace city.menu {
             MenuItemRuntime hoveredItem = FindHoveredItem(ActivePanel, pointerX, pointerY);
             if (hoveredItem != null
                 && hoveredItem.Index != ActivePanel.SelectedItemIndex
-                && IsMouseHoverSelectionUpdateRequired(inputSystem)) {
+                && IsPointerHoverSelectionUpdateRequired(inputSystem)) {
                 SetSelection(ActivePanel, hoveredItem.Index);
             }
 
-            if (inputSystem.WasMouseLeftButtonPressed()) {
+            if (inputSystem.WasPointerPrimaryPressed()) {
                 PressedPointerItem = hoveredItem;
                 return;
             }
 
-            if (inputSystem.WasMouseLeftButtonReleased()) {
+            if (inputSystem.WasPointerPrimaryReleased()) {
                 if (IsSameRuntimeItem(PressedPointerItem, hoveredItem)) {
                     ExecuteAction(hoveredItem.Definition);
                 }
@@ -490,22 +491,21 @@ namespace city.menu {
         }
 
         /// <summary>
-        /// Returns whether the current frame should allow passive mouse hover to retarget selection.
+        /// Returns whether the current frame should allow passive pointer hover to retarget selection.
         /// </summary>
         /// <param name="inputSystem">Input system supplying the current frame state.</param>
         /// <returns>True when pointer movement or a new press should update hover selection.</returns>
-        bool IsMouseHoverSelectionUpdateRequired(InputSystem inputSystem) {
+        bool IsPointerHoverSelectionUpdateRequired(InputSystem inputSystem) {
             if (inputSystem == null) {
                 throw new ArgumentNullException(nameof(inputSystem));
             }
 
-            if (inputSystem.GetMouseDeltaX() != 0 || inputSystem.GetMouseDeltaY() != 0) {
+            if (inputSystem.GetPointerDeltaX() != 0 || inputSystem.GetPointerDeltaY() != 0) {
                 return true;
             }
 
-            return inputSystem.WasMouseLeftButtonPressed();
+            return inputSystem.WasPointerPrimaryPressed();
         }
-#endif
 
         /// <summary>
         /// Handles d-pad, left-stick, and face-button navigation for the primary gamepad.
@@ -552,7 +552,6 @@ namespace city.menu {
                 && previousStickY < GamepadStickNavigationThreshold;
         }
 
-#if DESKTOP_PLATFORM
         /// <summary>
         /// Resolves the current pointer X coordinate in the menu root's local viewport space.
         /// </summary>
@@ -564,7 +563,7 @@ namespace city.menu {
             }
 
             float4 viewportBounds = ResolveMenuViewportBounds();
-            return inputSystem.GetMouseX() - (int)Math.Round(viewportBounds.X);
+            return inputSystem.GetPointerX() - (int)Math.Round(viewportBounds.X);
         }
 
         /// <summary>
@@ -578,9 +577,8 @@ namespace city.menu {
             }
 
             float4 viewportBounds = ResolveMenuViewportBounds();
-            return inputSystem.GetMouseY() - (int)Math.Round(viewportBounds.Y);
+            return inputSystem.GetPointerY() - (int)Math.Round(viewportBounds.Y);
         }
-#endif
 
         /// <summary>
         /// Resolves the current menu viewport bounds so pointer hit tests can normalize bottom-screen coordinates into menu-local space.

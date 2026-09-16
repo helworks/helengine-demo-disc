@@ -24,7 +24,7 @@ namespace city.menu.tools {
         /// <summary>
         /// Project-relative path to the splash logo texture.
         /// </summary>
-        public const string LogoTexturePath = "images/splash/helen_of_code_logo.png";
+        public const string LogoTexturePath = "textures/splash/helen_of_code_logo.png";
 
         /// <summary>
         /// Runtime layer mask used by the splash camera.

@@ -310,7 +310,18 @@ namespace city.rendering {
                 return true;
             }
 #endif
-            return inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.North);
+            return IsPs2Platform()
+                ? inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.East)
+                : inputSystem.WasGamepadButtonPressed(0, InputGamepadButton.North);
+        }
+
+        /// <summary>
+        /// Returns whether the active runtime platform is PlayStation 2.
+        /// </summary>
+        /// <returns>True when the active runtime platform is PS2.</returns>
+        static bool IsPs2Platform() {
+            PlatformInfo platformInfo = Core.Instance?.PlatformInfo;
+            return platformInfo != null && string.Equals(platformInfo.Name, "ps2", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

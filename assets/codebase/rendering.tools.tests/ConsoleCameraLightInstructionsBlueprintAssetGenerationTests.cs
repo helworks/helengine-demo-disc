@@ -33,18 +33,18 @@ namespace city.tests {
             Assert.DoesNotContain(EnumerateComponentTypes(root), componentType => componentType.Contains("BlueprintInstanceComponent", StringComparison.Ordinal));
             Assert.DoesNotContain(EnumerateComponentTypes(root), componentType => componentType.Contains("DemoDiscLightToggleComponent", StringComparison.Ordinal));
 
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/ps2/dpad.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/ps2/left_stick.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/ps2/circle.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/gamecube/dpad.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/gamecube/control_stick.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/gamecube/y.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/wii/dpad.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/wii/stick.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/wii/2.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/switch/dpad.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/switch/left_stick.png");
-            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "images/instructions/controls/generated/switch/x.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/ps2/dpad.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/ps2/left_stick.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/ps2/circle.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/gamecube/dpad.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/gamecube/control_stick.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/gamecube/y.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/wii/dpad.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/wii/stick.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/wii/2.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/switch/dpad.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/switch/left_stick.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/switch/x.png");
         }
 
         [Theory]

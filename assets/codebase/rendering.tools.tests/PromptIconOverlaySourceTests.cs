@@ -12,9 +12,9 @@ namespace city.tests {
             Assert.Contains("EnsurePlatformOverrideComponent", source, StringComparison.Ordinal);
             Assert.Contains("PersistPlatformOverride", source, StringComparison.Ordinal);
             Assert.DoesNotContain("DemoScenePlatformInstructionIconSetComponent", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("images/instructions/controls/xbox360_dpad.png", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("images/instructions/controls/ps2_r1.png", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("images/instructions/controls/switch_r.png", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("textures/instructions/controls/xbox360_dpad.png", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("textures/instructions/controls/ps2_r1.png", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("textures/instructions/controls/switch_r.png", source, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -64,8 +64,8 @@ namespace city.tests {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs");
 
             Assert.Contains("instructionOverlayFactory.CreateDesktopInstructionOverlayRoot", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("images/instructions/controls/xbox360_dpad.png", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("images/instructions/controls/generated/", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("textures/instructions/controls/xbox360_dpad.png", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("textures/instructions/controls/generated/", source, StringComparison.Ordinal);
         }
     }
 }

@@ -1,13 +1,13 @@
 namespace city.menu {
     /// <summary>
-    /// Resolves the shared demo-disc scene return input semantics so authored scene exits honor both the configured platform return action and the generic reject button.
+    /// Resolves the shared demo-disc scene return input semantics so authored scene exits honor the configured platform return action and retain the generic reject fallback outside PS2.
     /// </summary>
     public static class DemoDiscReturnInputUtils {
         /// <summary>
         /// Returns whether the current frame pressed one of the shared demo-disc return inputs.
         /// </summary>
         /// <param name="inputSystem">Input system supplying the current and previous frame state.</param>
-        /// <returns>True when either the configured standard return action or the fallback reject button was pressed this frame.</returns>
+        /// <returns>True when the configured standard return action was pressed, or when the fallback reject button was pressed on a non-PS2 platform.</returns>
         public static bool WasReturnPressed(InputSystem inputSystem) {
             if (inputSystem == null) {
                 throw new ArgumentNullException(nameof(inputSystem));
@@ -16,7 +16,16 @@ namespace city.menu {
             }
 
             return Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Return)
-                || DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East);
+                || (!IsPs2Platform() && DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East));
+        }
+
+        /// <summary>
+        /// Returns whether the active runtime platform is PlayStation 2.
+        /// </summary>
+        /// <returns>True when the active runtime platform is PS2.</returns>
+        static bool IsPs2Platform() {
+            PlatformInfo platformInfo = Core.Instance?.PlatformInfo;
+            return platformInfo != null && string.Equals(platformInfo.Name, "ps2", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

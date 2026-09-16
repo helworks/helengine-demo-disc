@@ -182,13 +182,13 @@ namespace city.tests {
             string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
             string menuSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltPlayMenuComponent.cs"));
 
-            Assert.Contains("images/ui/tilt_trial/title/background.png", source, StringComparison.Ordinal);
-            Assert.Contains("images/ui/tilt_trial/title/button_primary.png", source, StringComparison.Ordinal);
-            Assert.Contains("images/ui/tilt_trial/title/button_primary_selected.png", source, StringComparison.Ordinal);
-            Assert.Contains("images/ui/tilt_trial/title/button_secondary_options.png", source, StringComparison.Ordinal);
-            Assert.Contains("images/ui/tilt_trial/title/button_secondary_options_selected.png", source, StringComparison.Ordinal);
-            Assert.Contains("images/ui/tilt_trial/title/button_secondary_demo_disc.png", source, StringComparison.Ordinal);
-            Assert.Contains("images/ui/tilt_trial/title/button_secondary_demo_disc_selected.png", source, StringComparison.Ordinal);
+            Assert.Contains("textures/ui/tilt_trial/title/background.png", source, StringComparison.Ordinal);
+            Assert.Contains("textures/ui/tilt_trial/title/button_primary.png", source, StringComparison.Ordinal);
+            Assert.Contains("textures/ui/tilt_trial/title/button_primary_selected.png", source, StringComparison.Ordinal);
+            Assert.Contains("textures/ui/tilt_trial/title/button_secondary_options.png", source, StringComparison.Ordinal);
+            Assert.Contains("textures/ui/tilt_trial/title/button_secondary_options_selected.png", source, StringComparison.Ordinal);
+            Assert.Contains("textures/ui/tilt_trial/title/button_secondary_demo_disc.png", source, StringComparison.Ordinal);
+            Assert.Contains("textures/ui/tilt_trial/title/button_secondary_demo_disc_selected.png", source, StringComparison.Ordinal);
             Assert.Contains("new SpriteComponent", source, StringComparison.Ordinal);
             Assert.Contains("AssetAuthoringService.CreateFileReference(textureRelativePath, AssetEntryKind.Image)", source, StringComparison.Ordinal);
             Assert.Contains("Entity PlayButtonSelectedOverlay", menuSource, StringComparison.Ordinal);

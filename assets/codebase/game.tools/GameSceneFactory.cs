@@ -65,37 +65,37 @@ namespace city.game.tools {
         /// <summary>
         /// Project-relative opaque PNG backdrop for the Tilt Trial title screen.
         /// </summary>
-        const string TiltPlayTitleBackgroundTextureRelativePath = "images/ui/tilt_trial/title/background.png";
+        const string TiltPlayTitleBackgroundTextureRelativePath = "textures/ui/tilt_trial/title/background.png";
 
         /// <summary>
         /// Project-relative PNG for the normal primary title action.
         /// </summary>
-        const string TiltPlayPrimaryButtonTextureRelativePath = "images/ui/tilt_trial/title/button_primary.png";
+        const string TiltPlayPrimaryButtonTextureRelativePath = "textures/ui/tilt_trial/title/button_primary.png";
 
         /// <summary>
         /// Project-relative PNG for the focused primary title action.
         /// </summary>
-        const string TiltPlayPrimaryButtonSelectedTextureRelativePath = "images/ui/tilt_trial/title/button_primary_selected.png";
+        const string TiltPlayPrimaryButtonSelectedTextureRelativePath = "textures/ui/tilt_trial/title/button_primary_selected.png";
 
         /// <summary>
         /// Project-relative PNG for the normal Options title action.
         /// </summary>
-        const string TiltPlayOptionsButtonTextureRelativePath = "images/ui/tilt_trial/title/button_secondary_options.png";
+        const string TiltPlayOptionsButtonTextureRelativePath = "textures/ui/tilt_trial/title/button_secondary_options.png";
 
         /// <summary>
         /// Project-relative PNG for the focused Options title action.
         /// </summary>
-        const string TiltPlayOptionsButtonSelectedTextureRelativePath = "images/ui/tilt_trial/title/button_secondary_options_selected.png";
+        const string TiltPlayOptionsButtonSelectedTextureRelativePath = "textures/ui/tilt_trial/title/button_secondary_options_selected.png";
 
         /// <summary>
         /// Project-relative PNG for the normal Demo Disc return title action.
         /// </summary>
-        const string TiltPlayDemoDiscButtonTextureRelativePath = "images/ui/tilt_trial/title/button_secondary_demo_disc.png";
+        const string TiltPlayDemoDiscButtonTextureRelativePath = "textures/ui/tilt_trial/title/button_secondary_demo_disc.png";
 
         /// <summary>
         /// Project-relative PNG for the focused Demo Disc return title action.
         /// </summary>
-        const string TiltPlayDemoDiscButtonSelectedTextureRelativePath = "images/ui/tilt_trial/title/button_secondary_demo_disc_selected.png";
+        const string TiltPlayDemoDiscButtonSelectedTextureRelativePath = "textures/ui/tilt_trial/title/button_secondary_demo_disc_selected.png";
 
         /// <summary>
         /// Shared generated cube model used by the authored Tilt Trial course geometry.

@@ -291,7 +291,7 @@ namespace city.game {
             materialAsset.ConstantBuffers = constantBuffers;
 
             edgeMaterial = core.RenderManager3D.BuildMaterialFromRaw(materialAsset, shaderAsset);
-            StandardMaterialTextureBindingDefaults.Apply(ShaderRuntimeMaterialAccess.Require(edgeMaterial));
+            StandardMaterialTextureBindingDefaults.Apply(ShaderRuntimeMaterialAccess.Require(edgeMaterial), core.RenderManager2D);
         }
 
         bool IsSupportedWindowsRuntime(Core core) {

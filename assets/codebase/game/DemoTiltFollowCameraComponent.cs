@@ -351,12 +351,12 @@ namespace city.game {
             double gamepadYaw = 0d;
             bool invertPspShoulderCamera = IsPspPlatform();
             if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.LeftShoulder)) {
-                gamepadYaw += invertPspShoulderCamera ? 1d : -1d;
-            }
-            if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.RightShoulder)) {
                 gamepadYaw += invertPspShoulderCamera ? -1d : 1d;
             }
-            gamepadYaw += NormalizeStickAxis(city.menu.DemoDiscGamepadInput.GetRightStickX(inputSystem));
+            if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.RightShoulder)) {
+                gamepadYaw += invertPspShoulderCamera ? 1d : -1d;
+            }
+            gamepadYaw -= NormalizeStickAxis(city.menu.DemoDiscGamepadInput.GetRightStickX(inputSystem));
 
             return Math.Clamp(keyboardYaw + gamepadYaw, -1d, 1d);
         }
@@ -390,7 +390,7 @@ namespace city.game {
 #endif
 
             double gamepadPitch = 0d;
-            gamepadPitch += -NormalizeStickAxis(city.menu.DemoDiscGamepadInput.GetRightStickY(inputSystem));
+            gamepadPitch += NormalizeStickAxis(city.menu.DemoDiscGamepadInput.GetRightStickY(inputSystem));
 
             return Math.Clamp(keyboardPitch + gamepadPitch, -1d, 1d);
         }
