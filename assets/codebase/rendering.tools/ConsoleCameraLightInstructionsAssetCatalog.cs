@@ -11,6 +11,6 @@ namespace city.rendering.tools {
         /// <summary>
         /// Console platform ids that receive the shared Blueprint instance.
         /// </summary>
-        public static readonly string[] ConsolePlatformIds = ["ps2", "gamecube", "wii", "switch", "wiiu"];
+        public static readonly string[] ConsolePlatformIds = ["ps2", "gamecube", "wii", "switch", "wiiu", "n64"];
     }
 }

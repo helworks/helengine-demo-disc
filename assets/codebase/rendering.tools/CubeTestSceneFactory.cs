@@ -13,9 +13,20 @@ namespace city.rendering.tools {
         const string Nintendo64PlatformId = "n64";
 
         /// <summary>
-        /// N64 target set used by the shared platform authoring helpers.
+        /// Stable Dreamcast target id; its v0.2 runtime supports the same camera, cube and spin subset as N64.
         /// </summary>
-        static readonly string[] Nintendo64ExcludedPlatformIds = [Nintendo64PlatformId];
+        const string DreamcastPlatformId = "dc";
+
+        /// <summary>
+        /// Targets whose runtimes support neither the instruction overlay, the UI root nor the orbit camera.
+        /// </summary>
+        static readonly string[] MinimalRuntimeExcludedPlatformIds = [Nintendo64PlatformId, DreamcastPlatformId];
+
+        /// <summary>
+        /// Targets that cannot draw the shared console instruction Blueprint at all. The N64 runtime renders
+        /// its authored sprite icons, so only Dreamcast still drops the whole root.
+        /// </summary>
+        static readonly string[] SpritelessRuntimeExcludedPlatformIds = [DreamcastPlatformId];
 
         /// <summary>
         /// Existing editor platform authoring service used to persist N64 entity and component exclusions.
@@ -71,10 +82,10 @@ namespace city.rendering.tools {
             Entity uiEntity = CreateUiEntity();
             Entity directionalLightEntity = CreateDirectionalLightEntity();
 
-            ExcludeN64Root(projectRootPath, instructionOverlayEntity);
-            ExcludeN64Root(projectRootPath, consoleInstructionBlueprintEntity);
-            ExcludeN64Root(projectRootPath, uiEntity);
-            ExcludeN64OrbitComponent(projectRootPath, cameraEntity);
+            ExcludeN64Root(projectRootPath, instructionOverlayEntity, MinimalRuntimeExcludedPlatformIds);
+            ExcludeN64Root(projectRootPath, consoleInstructionBlueprintEntity, SpritelessRuntimeExcludedPlatformIds);
+            ExcludeN64Root(projectRootPath, uiEntity, MinimalRuntimeExcludedPlatformIds);
+            ExcludeN64OrbitComponent(projectRootPath, cameraEntity, MinimalRuntimeExcludedPlatformIds);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -98,8 +109,9 @@ namespace city.rendering.tools {
         /// Excludes one authored root subtree from N64 while retaining the same root on every other configured platform.
         /// </summary>
         /// <param name="projectRootPath">Project root whose configured platform catalog drives persisted overrides.</param>
-        /// <param name="rootEntity">Root subtree to exclude on N64.</param>
-        void ExcludeN64Root(string projectRootPath, Entity rootEntity) {
+        /// <param name="rootEntity">Root subtree to exclude.</param>
+        /// <param name="excludedPlatformIds">Platform ids that must not receive this root.</param>
+        void ExcludeN64Root(string projectRootPath, Entity rootEntity, string[] excludedPlatformIds) {
             if (rootEntity is not EditorEntity editorRootEntity) {
                 throw new InvalidOperationException("Cube-test N64 exclusions require editor entities.");
             }
@@ -107,7 +119,7 @@ namespace city.rendering.tools {
             PlatformSceneAuthoringHelperServiceValue.ExcludeEntitySubtreeFromPlatforms(
                 projectRootPath,
                 editorRootEntity,
-                Nintendo64ExcludedPlatformIds);
+                excludedPlatformIds);
         }
 
         /// <summary>
@@ -115,7 +127,8 @@ namespace city.rendering.tools {
         /// </summary>
         /// <param name="projectRootPath">Project root whose configured platform catalog drives persisted overrides.</param>
         /// <param name="cameraEntity">Authored camera entity containing the orbit controller.</param>
-        void ExcludeN64OrbitComponent(string projectRootPath, Entity cameraEntity) {
+        /// <param name="excludedPlatformIds">Platform ids that must not receive the orbit controller.</param>
+        void ExcludeN64OrbitComponent(string projectRootPath, Entity cameraEntity, string[] excludedPlatformIds) {
             if (cameraEntity is not EditorEntity editorCameraEntity) {
                 throw new InvalidOperationException("Cube-test N64 camera exclusions require an editor entity.");
             }
@@ -127,7 +140,7 @@ namespace city.rendering.tools {
                 projectRootPath,
                 editorCameraEntity,
                 orbitComponent,
-                Nintendo64ExcludedPlatformIds);
+                excludedPlatformIds);
         }
 
         /// <summary>
