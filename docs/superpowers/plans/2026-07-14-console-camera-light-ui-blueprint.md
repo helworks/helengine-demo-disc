@@ -36,7 +36,7 @@
   ```csharp
   Assert.Equal("wii", GeneratedControlIconPlatformMap.ResolveFamilyId("wiiu"));
   Assert.Equal(
-      "images/instructions/controls/generated/wii/dpad.png",
+      "textures/instructions/controls/generated/wii/dpad.png",
       catalog.RequireControlPath("wii", "dpad"));
   ```
 

@@ -51,10 +51,10 @@ public void Catalog_returns_generated_png_paths_for_circle_pad_and_analog_contro
         city.rendering.tools.GeneratedControlIconCatalog.Load(@"C:\dev\helprojs\demodisc");
 
     Assert.Equal(
-        "images/instructions/controls/generated/3ds/circle_pad.png",
+        "textures/instructions/controls/generated/3ds/circle_pad.png",
         catalog.RequireControlPath("3ds", "circle_pad"));
     Assert.Equal(
-        "images/instructions/controls/generated/psp/analog.png",
+        "textures/instructions/controls/generated/psp/analog.png",
         catalog.RequireControlPath("psp", "analog"));
 }
 ```
@@ -235,7 +235,7 @@ git commit -m "feat: add dual-input camera prompt row"
 **Files:**
 - Modify: `assets/scenes/rendering/*.helen`
 - Modify: `assets/scenes/physics/*.helen`
-- Modify: any touched generated control-icon `.hasset` sidecars under `assets/images/instructions/controls/generated/`
+- Modify: any touched generated control-icon `.hasset` sidecars under `assets/textures/instructions/controls/generated/`
 
 - [ ] **Step 1: Regenerate the rendering scenes**
 
@@ -266,7 +266,7 @@ Expected:
 Run:
 
 ```powershell
-rtk powershell -NoProfile -Command "git diff --stat -- assets/codebase/rendering.tools assets/codebase/rendering.tools.tests assets/scenes assets/images/instructions/controls/generated"
+rtk powershell -NoProfile -Command "git diff --stat -- assets/codebase/rendering.tools assets/codebase/rendering.tools.tests assets/scenes assets/textures/instructions/controls/generated"
 ```
 
 Expected:
@@ -279,7 +279,7 @@ Expected:
 - [ ] **Step 4: Commit the regenerated scene outputs**
 
 ```bash
-git add assets/scenes assets/images/instructions/controls/generated
+git add assets/scenes assets/textures/instructions/controls/generated
 git commit -m "chore: regenerate dual-input camera prompt scenes"
 ```
 

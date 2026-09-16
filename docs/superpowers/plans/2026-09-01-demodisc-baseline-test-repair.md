@@ -376,10 +376,10 @@ const byte NintendoDsLightSwatchRenderOrder = 222;
 Retain the D-pad and stick assertions, but replace the four obsolete Blueprint face-action references with:
 
 ```text
-images/instructions/controls/generated/ps2/circle.png
-images/instructions/controls/generated/gamecube/y.png
-images/instructions/controls/generated/wii/2.png
-images/instructions/controls/generated/switch/x.png
+textures/instructions/controls/generated/ps2/circle.png
+textures/instructions/controls/generated/gamecube/y.png
+textures/instructions/controls/generated/wii/2.png
+textures/instructions/controls/generated/switch/x.png
 ```
 
 Do not modify or stage the dirty Blueprint.

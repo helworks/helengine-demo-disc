@@ -34,4 +34,4 @@ Validate it on this Windows host with:
 powershell.exe -NoProfile -File .\tools\helenui\validate-demodisc-profile.ps1
 ```
 
-The profile’s image clues use paths such as `../assets/images/ui/tilt_trial/title/...`, resolved relative to `helenui/demodisc.json`; keep the profile in this repository location so NavigatorService can load the authored assets.
+The profile’s image clues use paths such as `../assets/textures/ui/tilt_trial/title/...`, resolved relative to `helenui/demodisc.json`; keep the profile in this repository location so NavigatorService can load the authored assets.

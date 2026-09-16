@@ -4,7 +4,7 @@
 
 **Goal:** Add one shared raw control-icon resolver backed by the generated manifest and migrate the shared rendering/physics instruction overlay to one scene-authored prompt surface that swaps icon textures per platform through editor component overrides.
 
-**Architecture:** Keep the generated control pack under `assets/images/instructions/controls/generated` as the only source of truth. The shared utility resolves `platform id + raw control id` into both the generated PNG path and the imported texture asset id, but the scene-authoring layer must still persist file-backed texture references because `SceneAssetReferenceValidationService` currently rejects generated texture references. The shared overlay migration therefore uses `ComponentPlatformEditingService` to author per-platform `SpriteComponent` overrides for texture and size while leaving layout ownership in `DemoSceneInstructionOverlayFactory`.
+**Architecture:** Keep the generated control pack under `assets/textures/instructions/controls/generated` as the only source of truth. The shared utility resolves `platform id + raw control id` into both the generated PNG path and the imported texture asset id, but the scene-authoring layer must still persist file-backed texture references because `SceneAssetReferenceValidationService` currently rejects generated texture references. The shared overlay migration therefore uses `ComponentPlatformEditingService` to author per-platform `SpriteComponent` overrides for texture and size while leaving layout ownership in `DemoSceneInstructionOverlayFactory`.
 
 **Tech Stack:** C#, `System.Text.Json`, HelEngine editor import pipeline, HelEngine component platform override authoring APIs, xUnit source/behavior tests, editor-command scene regeneration
 
@@ -39,7 +39,7 @@ namespace city.tests {
 
             string relativePath = catalog.RequireControlPath("keyboard", "wasd");
 
-            Assert.Equal("images/instructions/controls/generated/keyboard/wasd.png", relativePath);
+            Assert.Equal("textures/instructions/controls/generated/keyboard/wasd.png", relativePath);
         }
 
         [Fact]
@@ -74,7 +74,7 @@ Extend the same file with behavior tests for the shared resolver entry point.
             Assert.Equal("ps2", resolved.PlatformId);
             Assert.Equal("ps2", resolved.FamilyId);
             Assert.Equal("r1", resolved.ControlId);
-            Assert.Equal("images/instructions/controls/generated/ps2/r1.png", resolved.SourcePngRelativePath);
+            Assert.Equal("textures/instructions/controls/generated/ps2/r1.png", resolved.SourcePngRelativePath);
             Assert.False(string.IsNullOrWhiteSpace(resolved.ImportedTextureAssetId));
         }
 
@@ -177,7 +177,7 @@ namespace city.rendering.tools {
 
 - [ ] **Step 2: Add the manifest loader without duplicating catalog data in source**
 
-Create `GeneratedControlIconCatalog.cs` and parse `assets/images/instructions/controls/generated/manifest.json` with `System.Text.Json`.
+Create `GeneratedControlIconCatalog.cs` and parse `assets/textures/instructions/controls/generated/manifest.json` with `System.Text.Json`.
 
 ```csharp
 using System.Text.Json;
@@ -187,7 +187,7 @@ namespace city.rendering.tools {
     /// Loads and validates the generated control-icon manifest.
     /// </summary>
     public sealed class GeneratedControlIconCatalog {
-        const string ManifestRelativePath = "assets/images/instructions/controls/generated/manifest.json";
+        const string ManifestRelativePath = "assets/textures/instructions/controls/generated/manifest.json";
         readonly Dictionary<string, HashSet<string>> ControlIdsByFamilyId;
 
         GeneratedControlIconCatalog(Dictionary<string, HashSet<string>> controlIdsByFamilyId) {
@@ -230,7 +230,7 @@ namespace city.rendering.tools {
                 throw new InvalidOperationException($"Generated control icon '{familyId}/{controlId}' was not found in the manifest.");
             }
 
-            return "images/instructions/controls/generated/" + familyId + "/" + controlId + ".png";
+            return "textures/instructions/controls/generated/" + familyId + "/" + controlId + ".png";
         }
     }
 }
@@ -322,9 +322,9 @@ namespace city.tests {
             Assert.Contains("EnsurePlatformOverrideComponent", source, StringComparison.Ordinal);
             Assert.Contains("PersistPlatformOverride", source, StringComparison.Ordinal);
             Assert.DoesNotContain("DemoScenePlatformInstructionIconSetComponent", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("images/instructions/controls/xbox360_dpad.png", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("images/instructions/controls/ps2_r1.png", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("images/instructions/controls/switch_r.png", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("textures/instructions/controls/xbox360_dpad.png", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("textures/instructions/controls/ps2_r1.png", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("textures/instructions/controls/switch_r.png", source, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -350,8 +350,8 @@ Extend the same file with a guardrail around the shared physics consumer.
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\physics.tools\PhysicsSceneFactory.cs");
 
             Assert.Contains("instructionOverlayFactory.CreateDesktopInstructionOverlayRoot", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("images/instructions/controls/xbox360_dpad.png", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("images/instructions/controls/generated/", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("textures/instructions/controls/xbox360_dpad.png", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("textures/instructions/controls/generated/", source, StringComparison.Ordinal);
         }
     }
 }
@@ -660,8 +660,8 @@ Expected: the editor command exits successfully after rewriting the physics scen
 Run:
 
 ```bash
-rtk powershell -NoProfile -Command "& { rg -a 'images/instructions/controls/(xbox360_|ps2_|switch_)' 'C:\dev\helprojs\demodisc\assets\scenes\rendering' 'C:\dev\helprojs\demodisc\assets\scenes\physics'; if ($LASTEXITCODE -eq 0) { throw 'Legacy control prompt paths are still present in generated scenes.' } }"
-rtk powershell -NoProfile -Command "& { rg -a 'images/instructions/controls/generated/' 'C:\dev\helprojs\demodisc\assets\scenes\rendering' 'C:\dev\helprojs\demodisc\assets\scenes\physics' }"
+rtk powershell -NoProfile -Command "& { rg -a 'textures/instructions/controls/(xbox360_|ps2_|switch_)' 'C:\dev\helprojs\demodisc\assets\scenes\rendering' 'C:\dev\helprojs\demodisc\assets\scenes\physics'; if ($LASTEXITCODE -eq 0) { throw 'Legacy control prompt paths are still present in generated scenes.' } }"
+rtk powershell -NoProfile -Command "& { rg -a 'textures/instructions/controls/generated/' 'C:\dev\helprojs\demodisc\assets\scenes\rendering' 'C:\dev\helprojs\demodisc\assets\scenes\physics' }"
 ```
 
 Expected:

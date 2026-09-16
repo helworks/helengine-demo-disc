@@ -67,7 +67,7 @@ Retry routes back to the same level, `Next` routes to the next catalog level and
 ## Recognition and routing
 
 - Use `text_must_appear`, `any_of_texts`, and `highlighted_text` for stable menu and HUD labels.
-- Use project-relative `image_must_match` clues for the icon-only Tilt Play title background and selected button assets. Paths resolve from the profile’s Demodisc repository location under `assets/images/ui/tilt_trial/title`.
+- Use project-relative `image_must_match` clues for the icon-only Tilt Play title background and selected button assets. Paths resolve from the profile’s Demodisc repository location under `assets/textures/ui/tilt_trial/title`.
 - Use distinct recognition clues for each selector and overlay so a route can confirm the resulting surface instead of relying on a scene-load assumption.
 - Give each actionable node stable IDs, unique order values, and explicit default activation interactions.
 - Every cross-surface interaction names its `targetSurfaceId`. Local movement interactions use `move_previous`/`move_next` and the shared keyboard action catalog maps them to Up/Down, with `accept`, `back`, and `pause` available for explicit actions.

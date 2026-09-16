@@ -21,7 +21,7 @@ The project will contain a generated `HelenOfCodeSplash` scene with a camera and
 
 The splash camera is drawn after the menu camera and does not clear the frame, allowing the splash sprites to obscure the additive menu until their alpha reaches zero. The menu scene remains responsible for all menu input and navigation.
 
-The source PNG will be copied into `assets/images/splash/helen_of_code_logo.png` and referenced through normal texture asset persistence. Generated scene output will be refreshed through the existing editor build/generation pipeline rather than hand-edited.
+The source PNG will be copied into `assets/textures/splash/helen_of_code_logo.png` and referenced through normal texture asset persistence. Generated scene output will be refreshed through the existing editor build/generation pipeline rather than hand-edited.
 
 ## Build configuration
 

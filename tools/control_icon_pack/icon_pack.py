@@ -17,7 +17,7 @@ Color = Tuple[int, int, int, int]
 Point = Tuple[float, float]
 
 CANVAS_SIZE = 256
-ASSET_ROOT = Path("assets/images/instructions/controls/generated")
+ASSET_ROOT = Path("assets/textures/instructions/controls/generated")
 FONT_CANDIDATES = (
     Path("C:/Windows/Fonts/segoeuib.ttf"),
     Path("C:/Windows/Fonts/arialbd.ttf"),
