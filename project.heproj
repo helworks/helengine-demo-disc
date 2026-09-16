@@ -1,22 +1,23 @@
 {
-    "projectFormatVersion":  1,
-    "name":  "city",
-    "version":  "1.0.0",
-    "requiredEngineVersion":  "1.0.0+ec2d7ff8a5b2624bbc51784bd9eb0c9babed1843",
-    "supportedPlatforms":  [
-                               "windows",
-                               "ps2",
-                               "psp",
-                               "psvita",
-                               "ds",
-                               "3ds",
-                               "gamecube",
-                               "n64",
-                               "wii",
-                               "switch",
-                               "wiiu"
-                           ],
-    "created":  "2026-04-08T22:28:00.3959454Z",
-    "lastOpened":  "2026-04-28T16:20:48.8005795Z",
-    "description":  null
+    "projectFormatVersion": 1,
+    "name": "city",
+    "version": "1.0.0",
+    "requiredEngineVersion": "1.0.0+ec2d7ff8a5b2624bbc51784bd9eb0c9babed1843",
+    "supportedPlatforms": [
+        "windows",
+        "ps2",
+        "psp",
+        "psvita",
+        "ds",
+        "3ds",
+        "gamecube",
+        "n64",
+        "wii",
+        "switch",
+        "wiiu",
+        "dc"
+    ],
+    "created": "2026-04-08T22:28:00.3959454Z",
+    "lastOpened": "2026-04-28T16:20:48.8005795Z",
+    "description": null
 }

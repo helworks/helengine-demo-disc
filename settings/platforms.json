@@ -1,6 +1,7 @@
 {
   "supportedPlatforms": [
     "3ds",
+    "dc",
     "ds",
     "gamecube",
     "n64",

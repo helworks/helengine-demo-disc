@@ -1528,6 +1528,31 @@
       "selectedStorageProfileId": "dragonfs-package",
       "selectedMediaProfileId": "n64-cartridge",
       "selectedCodegenOptionValues": {}
+    },
+    {
+      "platformId": "dc",
+      "selectedSceneReferences": [{"sourceKind":1,"relativePath":"scenes/rendering/cube_test.helen","providerId":"","assetId":"1ed004c77d564c9f9ceea9a2789c1744","contentHash":"sha256:b908a7c342763d1000bdb51088fe859b5c86f0d77bb04974ea3c6c370014cf21"}],
+      "selectedSceneIds": [
+        "cube_test"
+      ],
+      "sceneOrders": [
+        {
+          "sceneId": "cube_test",
+          "orderNumber": 1
+        }
+      ],
+      "outputDirectoryPath": "C:\\dev\\helworks\\builds\\helengine-dc\\v03\\cube-test\\editor-output",
+      "debugBuild": false,
+      "selectedEnvironmentId": "release",
+      "selectedBuildProfileId": "release",
+      "editorPrebuildCommandIdsByBuildProfileId": {},
+      "selectedGraphicsProfileId": "dc-standard",
+      "selectedBuildOptionValues": {},
+      "selectedGraphicsOptionValues": {},
+      "selectedCodegenProfileId": "default",
+      "selectedStorageProfileId": "romfs-package",
+      "selectedMediaProfileId": "dreamcast-elf",
+      "selectedCodegenOptionValues": {}
     }
   ],
   "queueItems": []
