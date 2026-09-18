@@ -33,6 +33,7 @@ namespace city.rendering.tools {
                 FontScale = 2f
             });
             PspFpsComponentOverrideService.Apply(entity);
+            Nintendo64FpsComponentOverrideService.Apply(entity);
             entity.AddComponent(new city.menu.DemoDiscReturnToMenuComponent());
             entity.AddComponent(new city.rendering.DemoDiscLightToggleComponent());
             DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory(AssetAuthoringService);

@@ -56,6 +56,39 @@ namespace city.tests {
             Assert.True(fontReferenceIndex < overrideSerializationIndex);
         }
 
+        [Fact]
+        public void N64_fps_override_uses_a_quarter_scale_and_persists_the_font_reference_before_serializing_the_override() {
+            string sourcePath = DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "Nintendo64FpsComponentOverrideService.cs");
+            string source = File.ReadAllText(sourcePath);
+
+            Assert.Contains("const string Nintendo64PlatformId = \"n64\";", source, StringComparison.Ordinal);
+            Assert.Contains("const float Nintendo64FpsFontScale = 0.5f;", source, StringComparison.Ordinal);
+
+            int fontReferenceIndex = source.IndexOf("saveComponent.SetAssetReference(", StringComparison.Ordinal);
+            int overrideSerializationIndex = source.IndexOf(
+                "FPSComponent overrideComponent = (FPSComponent)PlatformEditingService.EnsurePlatformOverrideComponent",
+                StringComparison.Ordinal);
+
+            Assert.True(fontReferenceIndex >= 0);
+            Assert.True(overrideSerializationIndex >= 0);
+            Assert.True(fontReferenceIndex < overrideSerializationIndex);
+        }
+
+        [Fact]
+        public void Demo_disc_ui_kit_applies_the_n64_override_between_the_psp_override_and_the_return_to_menu_component() {
+            string kitSource = File.ReadAllText(DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "DemoDiscSceneUiKitFactory.cs"));
+
+            int pspApplyIndex = kitSource.IndexOf("PspFpsComponentOverrideService.Apply(entity);", StringComparison.Ordinal);
+            int n64ApplyIndex = kitSource.IndexOf("Nintendo64FpsComponentOverrideService.Apply(entity);", StringComparison.Ordinal);
+            int returnToMenuIndex = kitSource.IndexOf("entity.AddComponent(new city.menu.DemoDiscReturnToMenuComponent());", StringComparison.Ordinal);
+
+            Assert.True(pspApplyIndex >= 0);
+            Assert.True(n64ApplyIndex >= 0);
+            Assert.True(returnToMenuIndex >= 0);
+            Assert.True(pspApplyIndex < n64ApplyIndex);
+            Assert.True(n64ApplyIndex < returnToMenuIndex);
+        }
+
         /// <summary>
         /// Ensures the shared handheld scaffold keeps DS button labels at the common scale while authoring a centered half-scale 3DS override.
         /// </summary>

@@ -29,6 +29,19 @@ namespace city.rendering.tools {
         static readonly string[] SpritelessRuntimeExcludedPlatformIds = [DreamcastPlatformId];
 
         /// <summary>
+        /// Targets that cannot draw authored text. The N64 runtime now renders the shared 2D command list, so
+        /// it keeps the UI root; only Dreamcast still drops it.
+        /// </summary>
+        static readonly string[] TextlessRuntimeExcludedPlatformIds = [DreamcastPlatformId];
+
+        /// <summary>
+        /// N64 alone. Used to strip authored controls that require input handling the N64 runtime does not
+        /// provide, without also stripping them from Dreamcast, which already excludes the whole UI root at
+        /// the textless tier above.
+        /// </summary>
+        static readonly string[] Nintendo64OnlyExcludedPlatformIds = [Nintendo64PlatformId];
+
+        /// <summary>
         /// Existing editor platform authoring service used to persist N64 entity and component exclusions.
         /// </summary>
         readonly PlatformSceneAuthoringHelperService PlatformSceneAuthoringHelperServiceValue = new();
@@ -84,7 +97,8 @@ namespace city.rendering.tools {
 
             ExcludeN64Root(projectRootPath, instructionOverlayEntity, MinimalRuntimeExcludedPlatformIds);
             ExcludeN64Root(projectRootPath, consoleInstructionBlueprintEntity, SpritelessRuntimeExcludedPlatformIds);
-            ExcludeN64Root(projectRootPath, uiEntity, MinimalRuntimeExcludedPlatformIds);
+            ExcludeN64Root(projectRootPath, uiEntity, TextlessRuntimeExcludedPlatformIds);
+            ExcludeN64UiInputComponents(projectRootPath, uiEntity, Nintendo64OnlyExcludedPlatformIds);
             ExcludeN64OrbitComponent(projectRootPath, cameraEntity, MinimalRuntimeExcludedPlatformIds);
 
             return new GeneratedAuthoringSceneDefinition {
@@ -140,6 +154,38 @@ namespace city.rendering.tools {
                 projectRootPath,
                 editorCameraEntity,
                 orbitComponent,
+                excludedPlatformIds);
+        }
+
+        /// <summary>
+        /// Removes the authored return-to-menu and light-toggle controls only on N64 while preserving the rest
+        /// of the UI root on every configured platform. Both components sit on the same entity as the FPS
+        /// overlay, so excluding the entity is not an option; N64 has no input handling to drive either one.
+        /// </summary>
+        /// <param name="projectRootPath">Project root whose configured platform catalog drives persisted overrides.</param>
+        /// <param name="uiEntity">Authored UI root entity containing the return-to-menu and light-toggle controls.</param>
+        /// <param name="excludedPlatformIds">Platform ids that must not receive the two input-driven components.</param>
+        void ExcludeN64UiInputComponents(string projectRootPath, Entity uiEntity, string[] excludedPlatformIds) {
+            if (uiEntity is not EditorEntity editorUiEntity) {
+                throw new InvalidOperationException("Cube-test N64 UI input exclusions require an editor entity.");
+            }
+
+            city.menu.DemoDiscReturnToMenuComponent returnToMenuComponent = uiEntity.Components
+                .OfType<city.menu.DemoDiscReturnToMenuComponent>()
+                .Single();
+            PlatformSceneAuthoringHelperServiceValue.ExcludeComponentFromPlatforms(
+                projectRootPath,
+                editorUiEntity,
+                returnToMenuComponent,
+                excludedPlatformIds);
+
+            city.rendering.DemoDiscLightToggleComponent lightToggleComponent = uiEntity.Components
+                .OfType<city.rendering.DemoDiscLightToggleComponent>()
+                .Single();
+            PlatformSceneAuthoringHelperServiceValue.ExcludeComponentFromPlatforms(
+                projectRootPath,
+                editorUiEntity,
+                lightToggleComponent,
                 excludedPlatformIds);
         }
 
