@@ -14,12 +14,13 @@ namespace city.rendering.tools {
         const string Nintendo64PlatformId = "n64";
 
         /// <summary>
-        /// N64 font scale. The shared overlay is authored at two times for desktop resolutions and PSP already
-        /// halves it to one for a 480x272 screen; the N64 frame buffer is 320x240, so it takes a quarter of the
-        /// shared scale. This is a starting value tuned against a capture in the final task, not a derived one,
-        /// so it should not be treated as sacred.
+        /// N64 font scale, tuned against an emulator capture rather than derived. The shared overlay is authored
+        /// at two times for desktop resolutions and PSP halves it to one for a 480x272 screen. A quarter of the
+        /// shared scale was tried first for this 320x240 frame buffer and rejected: it produced glyphs roughly
+        /// four pixels tall, which the pass's one-bit alpha cutout reduced to unreadable smears. The same value
+        /// PSP uses is the next step up and keeps the two rows inside the frame.
         /// </summary>
-        const float Nintendo64FpsFontScale = 0.5f;
+        const float Nintendo64FpsFontScale = 1f;
 
         /// <summary>
         /// Adds the persisted N64 font-scale override to the FPS component owned by one generated entity.
