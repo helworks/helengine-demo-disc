@@ -2,7 +2,7 @@
     "projectFormatVersion": 1,
     "name": "city",
     "version": "1.0.0",
-    "requiredEngineVersion": "1.0.0+ec2d7ff8a5b2624bbc51784bd9eb0c9babed1843",
+    "requiredEngineVersion": "1.0.0+7d5e78dcc7a5948cf8f3f23e9e6ffcd5f578390f",
     "supportedPlatforms": [
         "windows",
         "ps2",
