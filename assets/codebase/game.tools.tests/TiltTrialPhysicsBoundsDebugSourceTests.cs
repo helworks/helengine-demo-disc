@@ -72,8 +72,7 @@ namespace city.tests {
         public void Tilt_trial_presentation_attachment_excludes_physics_bounds_root_from_windows_release_cooks() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\TiltTrialGameplayPresentationAttachmentService.cs");
 
-            Assert.Contains("EnvironmentId = \"release\"", source, StringComparison.Ordinal);
-            Assert.Contains("PlatformId = \"windows\"", source, StringComparison.Ordinal);
+            Assert.Contains("SceneOverrideScopePath.PlatformBuildConfig(\"windows\", \"release\")", source, StringComparison.Ordinal);
             Assert.Contains("Exists = false", source, StringComparison.Ordinal);
         }
 
@@ -91,7 +90,7 @@ namespace city.tests {
 
             Assert.Contains("ApplyWindowsOnlyDebugStatusOverrideToConsoleBlueprint(fullProjectRootPath);", source, StringComparison.Ordinal);
             Assert.Contains("statusText.PlatformExistenceOverrides = CreateWindowsOnlyDebugStatusOverrides();", source, StringComparison.Ordinal);
-            Assert.Contains("EnvironmentId = \"release\"", source, StringComparison.Ordinal);
+            Assert.Contains("SceneOverrideScopePath.PlatformBuildConfig(\"windows\", \"release\")", source, StringComparison.Ordinal);
         }
     }
 }

@@ -95,11 +95,11 @@ namespace city.rendering.tools {
             Entity uiEntity = CreateUiEntity();
             Entity directionalLightEntity = CreateDirectionalLightEntity();
 
-            ExcludeN64Root(projectRootPath, instructionOverlayEntity, MinimalRuntimeExcludedPlatformIds);
-            ExcludeN64Root(projectRootPath, consoleInstructionBlueprintEntity, SpritelessRuntimeExcludedPlatformIds);
-            ExcludeN64Root(projectRootPath, uiEntity, TextlessRuntimeExcludedPlatformIds);
-            ExcludeN64UiInputComponents(projectRootPath, uiEntity, Nintendo64OnlyExcludedPlatformIds);
-            ExcludeN64OrbitComponent(projectRootPath, cameraEntity, MinimalRuntimeExcludedPlatformIds);
+            ExcludeN64Root(instructionOverlayEntity, MinimalRuntimeExcludedPlatformIds);
+            ExcludeN64Root(consoleInstructionBlueprintEntity, SpritelessRuntimeExcludedPlatformIds);
+            ExcludeN64Root(uiEntity, TextlessRuntimeExcludedPlatformIds);
+            ExcludeN64UiInputComponents(uiEntity, Nintendo64OnlyExcludedPlatformIds);
+            ExcludeN64OrbitComponent(cameraEntity, MinimalRuntimeExcludedPlatformIds);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -120,29 +120,28 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Excludes one authored root subtree from N64 while retaining the same root on every other configured platform.
+        /// Excludes one authored root subtree from the listed runtimes while retaining the same root on every other configured platform.
         /// </summary>
-        /// <param name="projectRootPath">Project root whose configured platform catalog drives persisted overrides.</param>
         /// <param name="rootEntity">Root subtree to exclude.</param>
         /// <param name="excludedPlatformIds">Platform ids that must not receive this root.</param>
-        void ExcludeN64Root(string projectRootPath, Entity rootEntity, string[] excludedPlatformIds) {
+        void ExcludeN64Root(Entity rootEntity, string[] excludedPlatformIds) {
             if (rootEntity is not EditorEntity editorRootEntity) {
                 throw new InvalidOperationException("Cube-test N64 exclusions require editor entities.");
             }
 
-            PlatformSceneAuthoringHelperServiceValue.ExcludeEntitySubtreeFromPlatforms(
-                projectRootPath,
-                editorRootEntity,
-                excludedPlatformIds);
+            for (int index = 0; index < excludedPlatformIds.Length; index++) {
+                PlatformSceneAuthoringHelperServiceValue.ExcludeEntitySubtreeFromScope(
+                    editorRootEntity,
+                    DemoDiscOverrideScopes.Platform(excludedPlatformIds[index]));
+            }
         }
 
         /// <summary>
         /// Removes the authored orbit controller only on N64 while preserving the camera on all platforms.
         /// </summary>
-        /// <param name="projectRootPath">Project root whose configured platform catalog drives persisted overrides.</param>
         /// <param name="cameraEntity">Authored camera entity containing the orbit controller.</param>
         /// <param name="excludedPlatformIds">Platform ids that must not receive the orbit controller.</param>
-        void ExcludeN64OrbitComponent(string projectRootPath, Entity cameraEntity, string[] excludedPlatformIds) {
+        void ExcludeN64OrbitComponent(Entity cameraEntity, string[] excludedPlatformIds) {
             if (cameraEntity is not EditorEntity editorCameraEntity) {
                 throw new InvalidOperationException("Cube-test N64 camera exclusions require an editor entity.");
             }
@@ -150,11 +149,12 @@ namespace city.rendering.tools {
             city.rendering.DemoDiscOrbitCameraComponent orbitComponent = cameraEntity.Components
                 .OfType<city.rendering.DemoDiscOrbitCameraComponent>()
                 .Single();
-            PlatformSceneAuthoringHelperServiceValue.ExcludeComponentFromPlatforms(
-                projectRootPath,
-                editorCameraEntity,
-                orbitComponent,
-                excludedPlatformIds);
+            for (int index = 0; index < excludedPlatformIds.Length; index++) {
+                PlatformSceneAuthoringHelperServiceValue.ExcludeComponentFromScope(
+                    editorCameraEntity,
+                    orbitComponent,
+                    DemoDiscOverrideScopes.Platform(excludedPlatformIds[index]));
+            }
         }
 
         /// <summary>
@@ -162,10 +162,9 @@ namespace city.rendering.tools {
         /// of the UI root on every configured platform. Both components sit on the same entity as the FPS
         /// overlay, so excluding the entity is not an option; N64 has no input handling to drive either one.
         /// </summary>
-        /// <param name="projectRootPath">Project root whose configured platform catalog drives persisted overrides.</param>
         /// <param name="uiEntity">Authored UI root entity containing the return-to-menu and light-toggle controls.</param>
         /// <param name="excludedPlatformIds">Platform ids that must not receive the two input-driven components.</param>
-        void ExcludeN64UiInputComponents(string projectRootPath, Entity uiEntity, string[] excludedPlatformIds) {
+        void ExcludeN64UiInputComponents(Entity uiEntity, string[] excludedPlatformIds) {
             if (uiEntity is not EditorEntity editorUiEntity) {
                 throw new InvalidOperationException("Cube-test N64 UI input exclusions require an editor entity.");
             }
@@ -173,20 +172,14 @@ namespace city.rendering.tools {
             city.menu.DemoDiscReturnToMenuComponent returnToMenuComponent = uiEntity.Components
                 .OfType<city.menu.DemoDiscReturnToMenuComponent>()
                 .Single();
-            PlatformSceneAuthoringHelperServiceValue.ExcludeComponentFromPlatforms(
-                projectRootPath,
-                editorUiEntity,
-                returnToMenuComponent,
-                excludedPlatformIds);
-
             city.rendering.DemoDiscLightToggleComponent lightToggleComponent = uiEntity.Components
                 .OfType<city.rendering.DemoDiscLightToggleComponent>()
                 .Single();
-            PlatformSceneAuthoringHelperServiceValue.ExcludeComponentFromPlatforms(
-                projectRootPath,
-                editorUiEntity,
-                lightToggleComponent,
-                excludedPlatformIds);
+            for (int index = 0; index < excludedPlatformIds.Length; index++) {
+                EditorOverrideScope excludedScope = DemoDiscOverrideScopes.Platform(excludedPlatformIds[index]);
+                PlatformSceneAuthoringHelperServiceValue.ExcludeComponentFromScope(editorUiEntity, returnToMenuComponent, excludedScope);
+                PlatformSceneAuthoringHelperServiceValue.ExcludeComponentFromScope(editorUiEntity, lightToggleComponent, excludedScope);
+            }
         }
 
         /// <summary>

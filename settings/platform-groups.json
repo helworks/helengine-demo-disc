@@ -1,0 +1,52 @@
+{
+  "groups": [
+    {
+      "id": "consoles",
+      "displayName": "Consoles",
+      "platformIds": [
+        "dc",
+        "gamecube",
+        "n64",
+        "ps1",
+        "ps2",
+        "ps3",
+        "wii",
+        "wiiu",
+        "x360"
+      ],
+      "children": []
+    },
+    {
+      "id": "handhelds",
+      "displayName": "Handhelds",
+      "platformIds": [
+        "psp",
+        "psvita",
+        "switch"
+      ],
+      "children": [
+        {
+          "id": "nintendo-dual-screen",
+          "displayName": "Nintendo dual-screen",
+          "platformIds": [
+            "ds",
+            "3ds"
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "desktop",
+      "displayName": "Desktop",
+      "platformIds": [
+        "windows"
+      ],
+      "children": []
+    }
+  ],
+  "defaultLevelOrder": [
+    "Platform",
+    "BuildConfig"
+  ]
+}

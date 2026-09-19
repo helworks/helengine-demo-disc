@@ -176,7 +176,8 @@ namespace city.rendering.tools {
             EntitySaveComponent sourceSaveComponent = FindRequiredSaveComponent(sourceEntity);
             EntitySaveComponent clonedSaveComponent = FindRequiredSaveComponent(clonedEntity);
             clonedSaveComponent.EntityId = sourceSaveComponent.EntityId;
-            clonedSaveComponent.ActiveTransformPlatformId = sourceSaveComponent.ActiveTransformPlatformId;
+            clonedSaveComponent.ActiveTransformScope = sourceSaveComponent.ActiveTransformScope;
+            clonedSaveComponent.OverrideLevelOrder = sourceSaveComponent.OverrideLevelOrder;
             clonedSaveComponent.HasCommonTransformSnapshot = sourceSaveComponent.HasCommonTransformSnapshot;
             clonedSaveComponent.CommonLocalPositionSnapshot = sourceSaveComponent.CommonLocalPositionSnapshot;
             clonedSaveComponent.CommonLocalScaleSnapshot = sourceSaveComponent.CommonLocalScaleSnapshot;
@@ -193,23 +194,23 @@ namespace city.rendering.tools {
             }
 
             foreach (SceneEntityPlatformExistenceOverrideAsset existenceOverride in sourceSaveComponent.EnumerateExistencePlatformOverrides()) {
-                if (existenceOverride == null || string.IsNullOrWhiteSpace(existenceOverride.PlatformId)) {
+                if (existenceOverride == null) {
                     continue;
                 }
 
-                clonedSaveComponent.SetExistencePlatformOverride(existenceOverride.PlatformId, new SceneEntityPlatformExistenceOverrideAsset {
-                    PlatformId = existenceOverride.PlatformId,
+                clonedSaveComponent.SetExistencePlatformOverride(EditorOverrideScope.FromSteps(existenceOverride.Scope), new SceneEntityPlatformExistenceOverrideAsset {
+                    Scope = SceneOverrideScopePath.Normalize(existenceOverride.Scope),
                     Exists = existenceOverride.Exists
                 });
             }
 
             foreach (SceneEntityPlatformTransformOverrideAsset transformOverride in sourceSaveComponent.EnumerateTransformPlatformOverrides()) {
-                if (transformOverride == null || string.IsNullOrWhiteSpace(transformOverride.PlatformId)) {
+                if (transformOverride == null) {
                     continue;
                 }
 
-                clonedSaveComponent.SetTransformPlatformOverride(transformOverride.PlatformId, new SceneEntityPlatformTransformOverrideAsset {
-                    PlatformId = transformOverride.PlatformId,
+                clonedSaveComponent.SetTransformPlatformOverride(EditorOverrideScope.FromSteps(transformOverride.Scope), new SceneEntityPlatformTransformOverrideAsset {
+                    Scope = SceneOverrideScopePath.Normalize(transformOverride.Scope),
                     HasLocalPositionOverride = transformOverride.HasLocalPositionOverride,
                     LocalPosition = transformOverride.LocalPosition,
                     HasLocalScaleOverride = transformOverride.HasLocalScaleOverride,
@@ -220,12 +221,12 @@ namespace city.rendering.tools {
             }
 
             foreach (EntityPlatformComponentOverrideState componentOverride in sourceSaveComponent.EnumerateComponentPlatformOverrides()) {
-                if (componentOverride == null || string.IsNullOrWhiteSpace(componentOverride.PlatformId)) {
+                if (componentOverride == null) {
                     continue;
                 }
 
                 ApplyPlatformComponentOverrideState(
-                    clonedSaveComponent.GetOrCreateComponentPlatformOverride(componentOverride.PlatformId),
+                    clonedSaveComponent.GetOrCreateComponentPlatformOverride(componentOverride.Scope),
                     componentOverride);
             }
         }
@@ -305,11 +306,11 @@ namespace city.rendering.tools {
             }
 
             foreach (EntityComponentPlatformOverrideState platformOverride in sourceSaveState.EnumeratePlatformOverrides()) {
-                if (platformOverride == null || string.IsNullOrWhiteSpace(platformOverride.PlatformId)) {
+                if (platformOverride == null) {
                     continue;
                 }
 
-                destinationSaveState.SetPlatformOverride(platformOverride.PlatformId, CloneComponentPlatformOverrideState(platformOverride));
+                destinationSaveState.SetScopedPlatformOverride(platformOverride.Scope, CloneComponentPlatformOverrideState(platformOverride));
             }
         }
 
@@ -324,7 +325,7 @@ namespace city.rendering.tools {
             }
 
             EntityComponentPlatformOverrideState clonedOverrideState = new EntityComponentPlatformOverrideState {
-                PlatformId = sourceOverrideState.PlatformId,
+                Scope = sourceOverrideState.Scope,
                 Payload = sourceOverrideState.Payload != null ? (byte[])sourceOverrideState.Payload.Clone() : Array.Empty<byte>()
             };
             foreach (KeyValuePair<string, SceneAssetReference> assetReference in sourceOverrideState.EnumerateNamedAssetReferences()) {
@@ -351,7 +352,7 @@ namespace city.rendering.tools {
             }
 
             EntityPlatformComponentOverrideState clonedOverrideState = new EntityPlatformComponentOverrideState {
-                PlatformId = sourceOverrideState.PlatformId
+                Scope = sourceOverrideState.Scope
             };
             ApplyPlatformComponentOverrideState(clonedOverrideState, sourceOverrideState);
             return clonedOverrideState;
@@ -371,7 +372,7 @@ namespace city.rendering.tools {
                 throw new ArgumentNullException(nameof(sourceOverrideState));
             }
 
-            destinationOverrideState.PlatformId = sourceOverrideState.PlatformId;
+            destinationOverrideState.Scope = sourceOverrideState.Scope;
             foreach (string removedComponentKey in sourceOverrideState.EnumerateRemovedComponentKeys()) {
                 destinationOverrideState.MarkComponentRemoved(removedComponentKey);
             }

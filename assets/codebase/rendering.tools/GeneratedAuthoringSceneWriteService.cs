@@ -7,11 +7,6 @@ namespace city.rendering.tools {
     /// </summary>
     public sealed class GeneratedAuthoringSceneWriteService {
         /// <summary>
-        /// Stable platform identifiers used by the Nintendo handheld scene augmentation path.
-        /// </summary>
-        static readonly string[] NintendoHandheldPlatformIds = ["ds", "3ds"];
-
-        /// <summary>
         /// Shared Nintendo DS scaffold builder used to derive companion scenes from generated showcase roots.
         /// </summary>
         readonly NintendoDsRenderingSceneScaffoldFactory NintendoDsRenderingSceneScaffoldFactoryValue;
@@ -42,9 +37,21 @@ namespace city.rendering.tools {
         readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
+        /// Lazily created scope rewriter backing <see cref="GroupFirstScopeRewriteServiceValue"/>.
+        /// </summary>
+        GeneratedSceneGroupFirstScopeRewriteService GroupFirstScopeRewriteServiceStorage;
+
+        /// <summary>
         /// Canonical project root supplied by the owning authoring session.
         /// </summary>
         string ProjectRootPath => Path.GetFullPath(AuthoringSession.ProjectRootPath);
+
+        /// <summary>
+        /// Gets the scope rewriter used when a scene gains Nintendo dual-screen augmentation, created on first use
+        /// so scenes without a handheld companion never read the platform group settings.
+        /// </summary>
+        GeneratedSceneGroupFirstScopeRewriteService GroupFirstScopeRewriteServiceValue =>
+            GroupFirstScopeRewriteServiceStorage ??= new GeneratedSceneGroupFirstScopeRewriteService(ProjectRootPath);
 
         /// <summary>
         /// Initializes one generated authored-scene writer with a project component resolver and the required host capability.
@@ -212,9 +219,9 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Excludes the common root set from Nintendo handheld builds so only the handheld augmentation remains after platform pruning.
+        /// Excludes the common root set from the Nintendo dual-screen group so only the handheld augmentation remains after platform pruning.
         /// </summary>
-        /// <param name="roots">Common scene roots that should not survive on Nintendo handheld builds.</param>
+        /// <param name="roots">Common scene roots that should not survive on Nintendo dual-screen builds.</param>
         void ExcludeRootsFromNintendoHandheldPlatforms(Entity[] roots) {
             if (roots == null) {
                 throw new ArgumentNullException(nameof(roots));
@@ -234,11 +241,8 @@ namespace city.rendering.tools {
                     throw new InvalidOperationException("Generated scene roots must be editor entities before platform-exclusive authoring can be applied.");
                 }
 
-                PlatformSceneAuthoringHelperServiceValue.ExcludeEntitySubtreeFromPlatformsPreservingExisting(
-                    ProjectRootPath,
-                    editorRootEntity,
-                    NintendoHandheldPlatformIds);
-
+                AdoptGroupFirstLevelOrder(editorRootEntity);
+                PlatformSceneAuthoringHelperServiceValue.ExcludeEntitySubtreeFromScope(editorRootEntity, DemoDiscOverrideScopes.NintendoDualScreen);
             }
         }
 
@@ -266,7 +270,8 @@ namespace city.rendering.tools {
         }
 
         /// <summary>
-        /// Restricts the Nintendo handheld augmentation roots so they only survive on DS and 3DS builds.
+        /// Restricts the Nintendo handheld augmentation roots so they only survive beneath the Nintendo dual-screen group.
+        /// Every platform outside that group, current or future, resolves the Common value and drops the augmentation.
         /// </summary>
         /// <param name="roots">Nintendo handheld augmentation roots.</param>
         void RestrictRootsToNintendoHandheldPlatforms(Entity[] roots) {
@@ -284,11 +289,23 @@ namespace city.rendering.tools {
                     throw new InvalidOperationException("Nintendo handheld augmentation roots must be editor entities before platform-exclusive authoring can be applied.");
                 }
 
-                PlatformSceneAuthoringHelperServiceValue.RestrictEntitySubtreeToPlatforms(
-                    ProjectRootPath,
-                    editorRootEntity,
-                    NintendoHandheldPlatformIds);
+                AdoptGroupFirstLevelOrder(editorRootEntity);
+                PlatformSceneAuthoringHelperServiceValue.RestrictEntitySubtreeToScope(editorRootEntity, DemoDiscOverrideScopes.NintendoDualScreen);
             }
+        }
+
+        /// <summary>
+        /// Moves one generated subtree onto the group-first level order, re-pathing the per-platform scopes the
+        /// scene factories authored under the default order so none of them stops matching its build target.
+        /// </summary>
+        /// <param name="rootEntity">Generated root whose subtree should adopt the group-first level order.</param>
+        void AdoptGroupFirstLevelOrder(EditorEntity rootEntity) {
+            if (rootEntity == null) {
+                throw new ArgumentNullException(nameof(rootEntity));
+            }
+
+            GroupFirstScopeRewriteServiceValue.RewriteSubtree(rootEntity);
+            PlatformSceneAuthoringHelperServiceValue.SetEntitySubtreeLevelOrder(rootEntity, DemoDiscOverrideScopes.GroupFirstLevelOrder);
         }
 
         /// <summary>

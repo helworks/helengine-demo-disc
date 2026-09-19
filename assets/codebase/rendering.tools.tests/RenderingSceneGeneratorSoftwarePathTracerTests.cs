@@ -126,14 +126,14 @@ namespace city.tests {
             Assert.Equal(240, presentationViewport.ReferenceHeight);
             ViewportComponent dsPresentationViewport = DeserializeOverrideComponent<ViewportComponent>(
                 presentationViewportRecord,
-                Assert.Single(overridePayloadService.ReadOverrideStates(presentationViewportRecord), state => state.PlatformId == "ds"),
+                Assert.Single(overridePayloadService.ReadOverrideStates(presentationViewportRecord), state => global::city.testing.DemoDiscOverrideScopeReader.PlatformIdOf(state.Scope) == "ds"),
                 registry);
             Assert.Equal(new int2(256, 192), dsPresentationViewport.FixedSize);
             Assert.Equal(256, dsPresentationViewport.ReferenceWidth);
             Assert.Equal(192, dsPresentationViewport.ReferenceHeight);
             ViewportComponent threeDsPresentationViewport = DeserializeOverrideComponent<ViewportComponent>(
                 presentationViewportRecord,
-                Assert.Single(overridePayloadService.ReadOverrideStates(presentationViewportRecord), state => state.PlatformId == "3ds"),
+                Assert.Single(overridePayloadService.ReadOverrideStates(presentationViewportRecord), state => global::city.testing.DemoDiscOverrideScopeReader.PlatformIdOf(state.Scope) == "3ds"),
                 registry);
             Assert.Equal(new int2(400, 240), threeDsPresentationViewport.FixedSize);
             Assert.Equal(400, threeDsPresentationViewport.ReferenceWidth);
@@ -151,7 +151,7 @@ namespace city.tests {
             Assert.Equal(192, bottomViewport.ReferenceHeight);
             ViewportComponent threeDsBottomViewport = DeserializeOverrideComponent<ViewportComponent>(
                 bottomViewportRecord,
-                Assert.Single(overridePayloadService.ReadOverrideStates(bottomViewportRecord), state => state.PlatformId == "3ds"),
+                Assert.Single(overridePayloadService.ReadOverrideStates(bottomViewportRecord), state => global::city.testing.DemoDiscOverrideScopeReader.PlatformIdOf(state.Scope) == "3ds"),
                 registry);
             Assert.Equal(new int2(320, 240), threeDsBottomViewport.FixedSize);
             Assert.Equal(256, threeDsBottomViewport.ReferenceWidth);
@@ -176,9 +176,15 @@ namespace city.tests {
 
             EntityComponentPlatformOverrideState[] handheldOverrides = overridePayloadService
                 .ReadOverrideStates(tracerRecord)
-                .Where(state => state.PlatformId == "ds" || state.PlatformId == "3ds")
+                .Where(state => global::city.testing.DemoDiscOverrideScopeReader.PlatformIdOf(state.Scope) == "ds"
+                    || global::city.testing.DemoDiscOverrideScopeReader.PlatformIdOf(state.Scope) == "3ds")
                 .ToArray();
-            Assert.Equal(new[] { "3ds", "ds" }, handheldOverrides.Select(state => state.PlatformId).OrderBy(platformId => platformId, StringComparer.Ordinal).ToArray());
+            Assert.Equal(
+                new[] { "3ds", "ds" },
+                handheldOverrides
+                    .Select(state => global::city.testing.DemoDiscOverrideScopeReader.PlatformIdOf(state.Scope))
+                    .OrderBy(platformId => platformId, StringComparer.Ordinal)
+                    .ToArray());
             string[] expectedOverrideProperties = {
                 nameof(SoftwarePathTracerComponent.ElapsedTextEntityReference),
                 nameof(SoftwarePathTracerComponent.RaysPerSecondTextEntityReference),
@@ -210,23 +216,22 @@ namespace city.tests {
             SceneComponentAssetRecord outputSpriteRecord = Assert.Single(outputEntity.Components, component => component.ComponentTypeId == spriteTypeId);
             EntityComponentPlatformOverrideState dsOutputOverride = Assert.Single(
                 overridePayloadService.ReadOverrideStates(outputSpriteRecord),
-                state => state.PlatformId == "ds");
+                state => global::city.testing.DemoDiscOverrideScopeReader.PlatformIdOf(state.Scope) == "ds");
             SpriteComponent dsOutputSprite = DeserializeOverrideComponent<SpriteComponent>(outputSpriteRecord, dsOutputOverride, registry);
             Assert.Equal(new int2(256, 192), dsOutputSprite.Size);
             Assert.Equal(new int2(320, 240), DeserializeComponent<SpriteComponent>(overridePayloadService.UnwrapBaseRecord(outputSpriteRecord), registry).Size);
             Assert.Contains(outputEntity.PlatformTransformOverrides ?? Array.Empty<SceneEntityPlatformTransformOverrideAsset>(),
-                transform => transform.PlatformId == "3ds" && transform.HasLocalPositionOverride && transform.LocalPosition.X == 40f);
+                transform => global::city.testing.DemoDiscOverrideScopeReader.PlatformIdOf(transform.Scope) == "3ds"
+                    && transform.HasLocalPositionOverride
+                    && transform.LocalPosition.X == 40f);
 
             SceneEntityAsset desktopHudRoot = Assert.Single(entities, entity => entity.Name == "SoftwarePathTracerDesktopHudRoot");
             SceneEntityAsset bottomCamera = Assert.Single(entities, entity => entity.Name == "SoftwarePathTracerBottomScreenCamera");
-            Assert.Contains(desktopHudRoot.PlatformExistenceOverrides ?? Array.Empty<SceneEntityPlatformExistenceOverrideAsset>(),
-                overrideAsset => overrideAsset.PlatformId == "ds" && !overrideAsset.Exists);
-            Assert.Contains(desktopHudRoot.PlatformExistenceOverrides ?? Array.Empty<SceneEntityPlatformExistenceOverrideAsset>(),
-                overrideAsset => overrideAsset.PlatformId == "3ds" && !overrideAsset.Exists);
+            Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(desktopHudRoot, "ds"));
+            Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(desktopHudRoot, "3ds"));
             string[] nonHandheldPlatforms = { "windows", "gamecube", "ps2", "psp", "psvita", "wii", "wiiu", "switch" };
             foreach (string platformId in nonHandheldPlatforms) {
-                Assert.Contains(bottomCamera.PlatformExistenceOverrides ?? Array.Empty<SceneEntityPlatformExistenceOverrideAsset>(),
-                    overrideAsset => overrideAsset.PlatformId == platformId && !overrideAsset.Exists);
+                Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(bottomCamera, platformId));
             }
         }
 

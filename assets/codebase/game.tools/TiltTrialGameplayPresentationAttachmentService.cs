@@ -52,8 +52,20 @@ namespace city.game.tools {
                 SceneAsset sceneAsset = LoadScene(fullProjectRootPath, scenePath);
                 RemoveCurrentPresentationRoots(sceneAsset);
                 ApplyWindowsOnlyDebugRootOverride(sceneAsset);
-                AddPresentationRoot(fullProjectRootPath, sceneAsset, "TiltTrialConsolePresentation", TiltTrialGameplayPresentationBlueprintGenerator.ConsoleBlueprintRelativePath, CreateConsolePresentationPlatformOverrides());
-                AddPresentationRoot(fullProjectRootPath, sceneAsset, "TiltTrialHandheldPresentation", TiltTrialGameplayPresentationBlueprintGenerator.HandheldBlueprintRelativePath, CreateHandheldOnlyPlatformOverrides());
+                AddPresentationRoot(
+                    fullProjectRootPath,
+                    sceneAsset,
+                    "TiltTrialConsolePresentation",
+                    TiltTrialGameplayPresentationBlueprintGenerator.ConsoleBlueprintRelativePath,
+                    CreateConsolePresentationPlatformOverrides(),
+                    DemoDiscOverrideScopes.CreateGroupFirstLevelOrder());
+                AddPresentationRoot(
+                    fullProjectRootPath,
+                    sceneAsset,
+                    "TiltTrialHandheldPresentation",
+                    TiltTrialGameplayPresentationBlueprintGenerator.HandheldBlueprintRelativePath,
+                    CreateHandheldOnlyPlatformOverrides(),
+                    null);
                 SaveScene(fullProjectRootPath, scenePath, sceneAsset);
             }
         }
@@ -154,7 +166,14 @@ namespace city.game.tools {
         /// <param name="name">Instance root name.</param>
         /// <param name="blueprintPath">Project-relative Blueprint path.</param>
         /// <param name="existenceOverrides">Platform existence rules for the instance root.</param>
-        void AddPresentationRoot(string projectRootPath, SceneAsset sceneAsset, string name, string blueprintPath, SceneEntityPlatformExistenceOverrideAsset[] existenceOverrides) {
+        /// <param name="overrideLevelOrder">Level order the existence rules are authored against, or null for the project default.</param>
+        void AddPresentationRoot(
+            string projectRootPath,
+            SceneAsset sceneAsset,
+            string name,
+            string blueprintPath,
+            SceneEntityPlatformExistenceOverrideAsset[] existenceOverrides,
+            SceneOverrideScopeStepKind[] overrideLevelOrder) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             } else if (sceneAsset == null) {
@@ -184,6 +203,8 @@ namespace city.game.tools {
                 LocalOrientation = float4.Identity,
                 Components = [registry.GetDescriptor(blueprintInstance).SerializeComponent(blueprintInstance, 0, new EntityComponentSaveState())],
                 PlatformExistenceOverrides = existenceOverrides,
+                HasOverrideLevelOrder = overrideLevelOrder != null,
+                OverrideLevelOrder = overrideLevelOrder ?? Array.Empty<SceneOverrideScopeStepKind>(),
                 Children = Array.Empty<SceneEntityAsset>()
             };
 
@@ -271,14 +292,15 @@ namespace city.game.tools {
         }
 
         /// <summary>
-        /// Creates platform exclusions that leave the handheld presentation only on DS and 3DS.
+        /// Creates platform exclusions that keep the handheld presentation off every platform that ships its own
+        /// console presentation. The list stays per platform because it is narrower than any one group.
         /// </summary>
         /// <returns>Handheld-only platform existence overrides.</returns>
         static SceneEntityPlatformExistenceOverrideAsset[] CreateHandheldOnlyPlatformOverrides() {
             SceneEntityPlatformExistenceOverrideAsset[] overrides = new SceneEntityPlatformExistenceOverrideAsset[HandheldOnlyPlatformIds.Length];
             for (int index = 0; index < HandheldOnlyPlatformIds.Length; index++) {
                 overrides[index] = new SceneEntityPlatformExistenceOverrideAsset {
-                    PlatformId = HandheldOnlyPlatformIds[index],
+                    Scope = SceneOverrideScopePath.Platform(HandheldOnlyPlatformIds[index]),
                     Exists = false
                 };
             }
@@ -287,48 +309,45 @@ namespace city.game.tools {
         }
 
         /// <summary>
-        /// Creates platform exclusions that leave the console presentation absent from Nintendo handheld platforms while preserving it on Windows Release.
+        /// Creates the group exclusion that leaves the console presentation absent from the Nintendo dual-screen
+        /// rigs while preserving it everywhere else, Windows Release included. The owning root records the
+        /// group-first level order so the group step resolves.
         /// </summary>
         /// <returns>Console presentation platform existence overrides.</returns>
         static SceneEntityPlatformExistenceOverrideAsset[] CreateConsolePresentationPlatformOverrides() {
             return [
-                new SceneEntityPlatformExistenceOverrideAsset { PlatformId = "ds", Exists = false },
-                new SceneEntityPlatformExistenceOverrideAsset { PlatformId = "3ds", Exists = false }
+                new SceneEntityPlatformExistenceOverrideAsset {
+                    Scope = DemoDiscOverrideScopes.NintendoDualScreen.ToSteps(),
+                    Exists = false
+                }
             ];
         }
 
         /// <summary>
-        /// Creates platform and environment exclusions that leave the debug-only entity absent from Nintendo handheld and Windows Release platforms.
+        /// Creates platform and environment exclusions that leave the debug-only entity absent from the Nintendo
+        /// dual-screen rigs and from Windows Release. The two handheld ids stay per platform so the Windows Release
+        /// path on the same entity keeps resolving under the default level order.
         /// </summary>
         /// <returns>Windows-only debug platform and environment existence overrides.</returns>
         static SceneEntityPlatformExistenceOverrideAsset[] CreateWindowsOnlyDebugPlatformOverrides() {
             return [
-                new SceneEntityPlatformExistenceOverrideAsset { PlatformId = "ds", Exists = false },
-                new SceneEntityPlatformExistenceOverrideAsset { PlatformId = "3ds", Exists = false },
-                new SceneEntityPlatformExistenceOverrideAsset { PlatformId = "windows", EnvironmentId = "release", Exists = false }
+                new SceneEntityPlatformExistenceOverrideAsset { Scope = SceneOverrideScopePath.Platform("ds"), Exists = false },
+                new SceneEntityPlatformExistenceOverrideAsset { Scope = SceneOverrideScopePath.Platform("3ds"), Exists = false },
+                new SceneEntityPlatformExistenceOverrideAsset { Scope = SceneOverrideScopePath.PlatformBuildConfig("windows", "release"), Exists = false }
             ];
         }
 
         /// <summary>
-        /// Creates the full platform and environment exclusions for the separately authored F3 status row.
+        /// Creates the platform and environment exclusions for the separately authored F3 status row: absent
+        /// everywhere by default, present on Windows, and absent again on Windows Release.
         /// </summary>
         /// <returns>F3 status-row platform and environment existence overrides.</returns>
         static SceneEntityPlatformExistenceOverrideAsset[] CreateWindowsOnlyDebugStatusOverrides() {
-            string[] nonWindowsPlatformIds = ["ps2", "psp", "psvita", "gamecube", "wii", "wiiu", "switch", "ds", "3ds"];
-            SceneEntityPlatformExistenceOverrideAsset[] overrides = new SceneEntityPlatformExistenceOverrideAsset[nonWindowsPlatformIds.Length + 1];
-            for (int platformIndex = 0; platformIndex < nonWindowsPlatformIds.Length; platformIndex++) {
-                overrides[platformIndex] = new SceneEntityPlatformExistenceOverrideAsset {
-                    PlatformId = nonWindowsPlatformIds[platformIndex],
-                    Exists = false
-                };
-            }
-
-            overrides[^1] = new SceneEntityPlatformExistenceOverrideAsset {
-                PlatformId = "windows",
-                EnvironmentId = "release",
-                Exists = false
-            };
-            return overrides;
+            return [
+                new SceneEntityPlatformExistenceOverrideAsset { Scope = SceneOverrideScopePath.Common(), Exists = false },
+                new SceneEntityPlatformExistenceOverrideAsset { Scope = SceneOverrideScopePath.Platform("windows"), Exists = true },
+                new SceneEntityPlatformExistenceOverrideAsset { Scope = SceneOverrideScopePath.PlatformBuildConfig("windows", "release"), Exists = false }
+            ];
         }
 
         /// <summary>

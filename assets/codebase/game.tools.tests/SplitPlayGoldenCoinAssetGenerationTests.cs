@@ -120,7 +120,9 @@ namespace city.tests {
             SceneComponentAssetRecord meshComponent = meshRoot.Components[0];
             ComponentPlatformOverridePayloadService overridePayloadService = new ComponentPlatformOverridePayloadService();
             IReadOnlyList<EntityComponentPlatformOverrideState> overrideStates = overridePayloadService.ReadOverrideStates(meshComponent);
-            EntityComponentPlatformOverrideState dsOverride = Assert.Single(overrideStates, state => state.PlatformId == "ds");
+            EntityComponentPlatformOverrideState dsOverride = Assert.Single(
+                overrideStates,
+                state => global::city.testing.DemoDiscOverrideScopeReader.PlatformIdOf(state.Scope) == "ds");
             SceneComponentAssetRecord unwrappedMeshComponent = overridePayloadService.UnwrapBaseRecord(meshComponent);
             ComponentPersistenceRegistry registry = GeneratedScenePersistenceRegistryFactory.Create();
             MeshComponent restoredMeshComponent = Assert.IsType<MeshComponent>(

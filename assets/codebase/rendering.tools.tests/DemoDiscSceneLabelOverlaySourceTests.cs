@@ -106,8 +106,6 @@ namespace city.tests {
             Assert.Contains("public override void ComponentAdded(Entity entity)", runtimeSource, StringComparison.Ordinal);
 
             string physicsSource = File.ReadAllText(paths[1]);
-            Assert.Contains("static readonly string[] NintendoHandheldPlatformIds = [\"ds\", \"3ds\"];", physicsSource, StringComparison.Ordinal);
-            Assert.Contains("authoredSceneAsset.RootEntities = RemoveNintendoHandheldOnlyEntities(authoredSceneAsset.RootEntities, supportedPlatformIds);", physicsSource, StringComparison.Ordinal);
             Assert.Contains("SceneEntityAsset[] RemoveNintendoHandheldOnlyEntities", physicsSource, StringComparison.Ordinal);
             Assert.Contains("return existsOnNintendoHandheld && !existsOnNonHandheld;", physicsSource, StringComparison.Ordinal);
         }

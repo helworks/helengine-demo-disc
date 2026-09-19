@@ -67,28 +67,16 @@ namespace city.tests {
             Assert.Contains(
                 blueprintRoot.Components,
                 component => component.ComponentTypeId.Contains("BlueprintInstanceComponent", StringComparison.Ordinal));
-            Assert.Contains(
-                blueprintRoot.PlatformExistenceOverrides,
-                overrideAsset => overrideAsset.PlatformId == "windows" && !overrideAsset.Exists);
-            Assert.Contains(
-                blueprintRoot.PlatformExistenceOverrides,
-                overrideAsset => overrideAsset.PlatformId == "psp" && !overrideAsset.Exists);
-            Assert.Contains(
-                blueprintRoot.PlatformExistenceOverrides,
-                overrideAsset => overrideAsset.PlatformId == "psvita" && !overrideAsset.Exists);
-            Assert.Contains(
-                blueprintRoot.PlatformExistenceOverrides,
-                overrideAsset => overrideAsset.PlatformId == "ds" && !overrideAsset.Exists);
-            Assert.Contains(
-                blueprintRoot.PlatformExistenceOverrides,
-                overrideAsset => overrideAsset.PlatformId == "3ds" && !overrideAsset.Exists);
+            Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "windows"));
+            Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "psp"));
+            Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "psvita"));
+            Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "ds"));
+            Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "3ds"));
 
             SceneEntityAsset legacyOverlayRoot = Assert.Single(
                 scene.RootEntities,
                 entity => entity != null && entity.Name == "DemoSceneInstructionViewport");
-            Assert.Contains(
-                legacyOverlayRoot.PlatformExistenceOverrides,
-                overrideAsset => overrideAsset.PlatformId == "ps2" && !overrideAsset.Exists);
+            Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(legacyOverlayRoot, "ps2"));
         }
 
         static IEnumerable<SceneEntityAsset> EnumerateEntities(SceneEntityAsset root) {

@@ -13,11 +13,6 @@ namespace city.physics.tools {
         const string PhysicsSceneFolderRelativePath = "scenes/physics";
 
         /// <summary>
-        /// Platform identifiers that represent the Nintendo handheld build family.
-        /// </summary>
-        static readonly string[] NintendoHandheldPlatformIds = ["ds", "3ds"];
-
-        /// <summary>
         /// Writer used to persist canonical scenes through the shared generated authored-scene pipeline.
         /// </summary>
         readonly GeneratedAuthoringSceneWriteService SceneWriteService;
@@ -93,7 +88,13 @@ namespace city.physics.tools {
             IReadOnlyList<string> supportedPlatformIds = AssetAuthoringService.GetSupportedPlatformIds();
             string authoredSceneRelativePath = PhysicsSceneFolderRelativePath + "/" + sceneEntry.SceneId + ".helen";
             SceneAsset authoredSceneAsset = LoadSceneAssetWithoutSharedMusic(authoredSceneRelativePath);
-            authoredSceneAsset.RootEntities = RemoveNintendoHandheldOnlyEntities(authoredSceneAsset.RootEntities, supportedPlatformIds);
+            EditorOverrideScopeResolver overrideScopeResolver = DemoDiscOverrideScopes.CreateResolver(fullProjectRootPath);
+            EditorProjectPlatformGroupsDocument platformGroupsDocument = new EditorProjectPlatformGroupsService(fullProjectRootPath).Read();
+            authoredSceneAsset.RootEntities = RemoveNintendoHandheldOnlyEntities(
+                authoredSceneAsset.RootEntities,
+                supportedPlatformIds,
+                overrideScopeResolver,
+                platformGroupsDocument);
             SceneLoadService sceneLoadService = new SceneLoadService(
                 fullProjectRootPath,
                 persistenceRegistry,
@@ -126,17 +127,31 @@ namespace city.physics.tools {
         /// </summary>
         /// <param name="entities">Serialized entities that may include stale handheld-only augmentation subtrees.</param>
         /// <param name="supportedPlatformIds">Project-supported platform identifiers.</param>
+        /// <param name="overrideScopeResolver">Resolver used to build each platform's override target path.</param>
+        /// <param name="platformGroupsDocument">Platform group tree used to decide which platforms are Nintendo dual-screen rigs.</param>
         /// <returns>Serialized entities that should remain as the common scene root set.</returns>
-        SceneEntityAsset[] RemoveNintendoHandheldOnlyEntities(SceneEntityAsset[] entities, IReadOnlyList<string> supportedPlatformIds) {
+        SceneEntityAsset[] RemoveNintendoHandheldOnlyEntities(
+            SceneEntityAsset[] entities,
+            IReadOnlyList<string> supportedPlatformIds,
+            EditorOverrideScopeResolver overrideScopeResolver,
+            EditorProjectPlatformGroupsDocument platformGroupsDocument) {
             if (entities == null) {
                 throw new ArgumentNullException(nameof(entities));
             } else if (supportedPlatformIds == null) {
                 throw new ArgumentNullException(nameof(supportedPlatformIds));
+            } else if (overrideScopeResolver == null) {
+                throw new ArgumentNullException(nameof(overrideScopeResolver));
+            } else if (platformGroupsDocument == null) {
+                throw new ArgumentNullException(nameof(platformGroupsDocument));
             }
 
             List<SceneEntityAsset> filteredEntities = new List<SceneEntityAsset>(entities.Length);
             for (int index = 0; index < entities.Length; index++) {
-                SceneEntityAsset filteredEntity = RemoveNintendoHandheldOnlyEntity(entities[index], supportedPlatformIds);
+                SceneEntityAsset filteredEntity = RemoveNintendoHandheldOnlyEntity(
+                    entities[index],
+                    supportedPlatformIds,
+                    overrideScopeResolver,
+                    platformGroupsDocument);
                 if (filteredEntity != null) {
                     filteredEntities.Add(filteredEntity);
                 }
@@ -150,33 +165,57 @@ namespace city.physics.tools {
         /// </summary>
         /// <param name="entity">Serialized scene entity that may include stale handheld-only augmentation children.</param>
         /// <param name="supportedPlatformIds">Project-supported platform identifiers.</param>
+        /// <param name="overrideScopeResolver">Resolver used to build each platform's override target path.</param>
+        /// <param name="platformGroupsDocument">Platform group tree used to decide which platforms are Nintendo dual-screen rigs.</param>
         /// <returns>Serialized entity without stale handheld-only descendants, or null when the entity itself is handheld-only.</returns>
-        SceneEntityAsset RemoveNintendoHandheldOnlyEntity(SceneEntityAsset entity, IReadOnlyList<string> supportedPlatformIds) {
+        SceneEntityAsset RemoveNintendoHandheldOnlyEntity(
+            SceneEntityAsset entity,
+            IReadOnlyList<string> supportedPlatformIds,
+            EditorOverrideScopeResolver overrideScopeResolver,
+            EditorProjectPlatformGroupsDocument platformGroupsDocument) {
             if (supportedPlatformIds == null) {
                 throw new ArgumentNullException(nameof(supportedPlatformIds));
+            } else if (overrideScopeResolver == null) {
+                throw new ArgumentNullException(nameof(overrideScopeResolver));
+            } else if (platformGroupsDocument == null) {
+                throw new ArgumentNullException(nameof(platformGroupsDocument));
             } else if (entity == null) {
                 return null;
             }
 
-            if (IsNintendoHandheldOnlyEntity(entity, supportedPlatformIds)) {
+            if (IsNintendoHandheldOnlyEntity(entity, supportedPlatformIds, overrideScopeResolver, platformGroupsDocument)) {
                 return null;
             }
 
-            entity.Children = RemoveNintendoHandheldOnlyEntities(entity.Children ?? Array.Empty<SceneEntityAsset>(), supportedPlatformIds);
+            entity.Children = RemoveNintendoHandheldOnlyEntities(
+                entity.Children ?? Array.Empty<SceneEntityAsset>(),
+                supportedPlatformIds,
+                overrideScopeResolver,
+                platformGroupsDocument);
             return entity;
         }
 
         /// <summary>
-        /// Returns whether one serialized canonical scene entity exists only on Nintendo handheld platforms.
+        /// Returns whether one serialized canonical scene entity exists only on the Nintendo dual-screen rigs.
         /// </summary>
         /// <param name="entity">Serialized canonical scene entity under evaluation.</param>
         /// <param name="supportedPlatformIds">Project-supported platform identifiers.</param>
-        /// <returns>True when the entity exists on Nintendo handheld platforms and is removed from every non-handheld platform.</returns>
-        bool IsNintendoHandheldOnlyEntity(SceneEntityAsset entity, IReadOnlyList<string> supportedPlatformIds) {
+        /// <param name="overrideScopeResolver">Resolver used to build each platform's override target path.</param>
+        /// <param name="platformGroupsDocument">Platform group tree used to decide which platforms are Nintendo dual-screen rigs.</param>
+        /// <returns>True when the entity exists on a Nintendo dual-screen rig and is removed from every other platform.</returns>
+        bool IsNintendoHandheldOnlyEntity(
+            SceneEntityAsset entity,
+            IReadOnlyList<string> supportedPlatformIds,
+            EditorOverrideScopeResolver overrideScopeResolver,
+            EditorProjectPlatformGroupsDocument platformGroupsDocument) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
             } else if (supportedPlatformIds == null) {
                 throw new ArgumentNullException(nameof(supportedPlatformIds));
+            } else if (overrideScopeResolver == null) {
+                throw new ArgumentNullException(nameof(overrideScopeResolver));
+            } else if (platformGroupsDocument == null) {
+                throw new ArgumentNullException(nameof(platformGroupsDocument));
             }
 
             bool existsOnNintendoHandheld = false;
@@ -187,8 +226,8 @@ namespace city.physics.tools {
                     continue;
                 }
 
-                bool existsOnPlatform = ResolveEntityExists(entity, supportedPlatformId);
-                if (IsNintendoHandheldPlatformId(supportedPlatformId)) {
+                bool existsOnPlatform = ResolveEntityExists(entity, supportedPlatformId, overrideScopeResolver);
+                if (IsNintendoDualScreenPlatformId(platformGroupsDocument, supportedPlatformId)) {
                     existsOnNintendoHandheld |= existsOnPlatform;
                 } else {
                     existsOnNonHandheld |= existsOnPlatform;
@@ -199,17 +238,21 @@ namespace city.physics.tools {
         }
 
         /// <summary>
-        /// Returns whether the supplied platform id belongs to the Nintendo handheld platform family.
+        /// Returns whether the supplied platform belongs to the Nintendo dual-screen group anywhere on its group chain.
         /// </summary>
+        /// <param name="platformGroupsDocument">Platform group tree that owns the group chain.</param>
         /// <param name="platformId">Platform identifier under evaluation.</param>
-        /// <returns>True when the platform id is `ds` or `3ds`.</returns>
-        static bool IsNintendoHandheldPlatformId(string platformId) {
-            if (string.IsNullOrWhiteSpace(platformId)) {
+        /// <returns>True when the platform's group chain contains the Nintendo dual-screen group.</returns>
+        static bool IsNintendoDualScreenPlatformId(EditorProjectPlatformGroupsDocument platformGroupsDocument, string platformId) {
+            if (platformGroupsDocument == null) {
+                throw new ArgumentNullException(nameof(platformGroupsDocument));
+            } else if (string.IsNullOrWhiteSpace(platformId)) {
                 return false;
             }
 
-            for (int index = 0; index < NintendoHandheldPlatformIds.Length; index++) {
-                if (string.Equals(platformId, NintendoHandheldPlatformIds[index], StringComparison.OrdinalIgnoreCase)) {
+            IReadOnlyList<string> groupChain = EditorProjectPlatformGroupsService.FindGroupChain(platformGroupsDocument, platformId);
+            for (int index = 0; index < groupChain.Count; index++) {
+                if (string.Equals(groupChain[index], DemoDiscOverrideScopes.NintendoDualScreenGroupId, StringComparison.OrdinalIgnoreCase)) {
                     return true;
                 }
             }
@@ -218,31 +261,31 @@ namespace city.physics.tools {
         }
 
         /// <summary>
-        /// Resolves whether one serialized entity should exist on the supplied platform by applying its authored existence overrides.
+        /// Resolves whether one serialized entity should exist on the supplied platform by selecting the existence
+        /// override authored on the deepest prefix of that platform's target path.
         /// </summary>
         /// <param name="entity">Serialized entity under evaluation.</param>
         /// <param name="platformId">Platform identifier whose effective entity existence should be resolved.</param>
+        /// <param name="overrideScopeResolver">Resolver used to build the platform's override target path.</param>
         /// <returns>True when the entity should exist on the supplied platform.</returns>
-        static bool ResolveEntityExists(SceneEntityAsset entity, string platformId) {
+        static bool ResolveEntityExists(SceneEntityAsset entity, string platformId, EditorOverrideScopeResolver overrideScopeResolver) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
+            } else if (overrideScopeResolver == null) {
+                throw new ArgumentNullException(nameof(overrideScopeResolver));
             } else if (string.IsNullOrWhiteSpace(platformId)) {
                 throw new ArgumentException("Platform id must be provided.", nameof(platformId));
             }
 
+            IReadOnlyList<SceneOverrideScopeStepKind> levelOrder = overrideScopeResolver.ResolveLevelOrder(
+                entity.HasOverrideLevelOrder ? entity.OverrideLevelOrder : null);
+            EditorOverrideScope targetScope = overrideScopeResolver.BuildTargetPath(levelOrder, platformId, string.Empty);
             SceneEntityPlatformExistenceOverrideAsset[] overrides = entity.PlatformExistenceOverrides ?? Array.Empty<SceneEntityPlatformExistenceOverrideAsset>();
-            for (int index = 0; index < overrides.Length; index++) {
-                SceneEntityPlatformExistenceOverrideAsset overrideAsset = overrides[index];
-                if (overrideAsset == null || string.IsNullOrWhiteSpace(overrideAsset.PlatformId)) {
-                    continue;
-                }
-
-                if (string.Equals(overrideAsset.PlatformId, platformId, StringComparison.OrdinalIgnoreCase)) {
-                    return overrideAsset.Exists;
-                }
-            }
-
-            return true;
+            return !EditorOverrideScopeResolver.TrySelectDeepest(
+                overrides,
+                overrideAsset => EditorOverrideScope.FromSteps(overrideAsset.Scope),
+                targetScope,
+                out SceneEntityPlatformExistenceOverrideAsset selectedOverride) || selectedOverride.Exists;
         }
 
         /// <summary>

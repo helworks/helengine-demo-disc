@@ -39,9 +39,9 @@ namespace city.menu.tools {
             }
 
             Dictionary<string, IReadOnlyList<string>> excludedPlatformsByPanelId = BuildExcludedPlatformsByPanelId(definition, configuredSceneIdsByPlatform);
-            ApplySceneItemExclusions(projectRootPath, sceneDefinition, definition, configuredSceneIdsByPlatform);
-            ApplyPanelExclusions(projectRootPath, sceneDefinition, excludedPlatformsByPanelId);
-            ApplyOpenPanelItemExclusions(projectRootPath, sceneDefinition, definition, excludedPlatformsByPanelId);
+            ApplySceneItemExclusions(sceneDefinition, definition, configuredSceneIdsByPlatform);
+            ApplyPanelExclusions(sceneDefinition, excludedPlatformsByPanelId);
+            ApplyOpenPanelItemExclusions(sceneDefinition, definition, excludedPlatformsByPanelId);
         }
 
         /// <summary>
@@ -83,18 +83,14 @@ namespace city.menu.tools {
         /// <summary>
         /// Applies scene-loading item exclusions for platforms that do not package the target scene.
         /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <param name="sceneDefinition">Generated scene definition whose item entities should receive exclusions.</param>
         /// <param name="definition">Canonical menu definition used to author the scene hierarchy.</param>
         /// <param name="configuredSceneIdsByPlatform">Configured selected scene ids keyed by platform id.</param>
         void ApplySceneItemExclusions(
-            string projectRootPath,
             GeneratedAuthoringSceneDefinition sceneDefinition,
             MenuDefinition definition,
             Dictionary<string, HashSet<string>> configuredSceneIdsByPlatform) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            } else if (sceneDefinition == null) {
+            if (sceneDefinition == null) {
                 throw new ArgumentNullException(nameof(sceneDefinition));
             } else if (definition == null) {
                 throw new ArgumentNullException(nameof(definition));
@@ -119,7 +115,7 @@ namespace city.menu.tools {
                     }
 
                     IReadOnlyList<string> excludedPlatformIds = ResolveExcludedPlatformsForSceneId(itemDefinition.Action.TargetId, configuredSceneIdsByPlatform);
-                    ApplyEntityExclusionsByName(projectRootPath, sceneDefinition, BuildItemEntityName(itemDefinition.ItemId), excludedPlatformIds);
+                    ApplyEntityExclusionsByName(sceneDefinition, BuildItemEntityName(itemDefinition.ItemId), excludedPlatformIds);
                 }
             }
         }
@@ -178,16 +174,12 @@ namespace city.menu.tools {
         /// <summary>
         /// Applies scene-panel exclusions for platforms that do not package any of the panel's scene targets.
         /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <param name="sceneDefinition">Generated scene definition whose panel entities should receive exclusions.</param>
         /// <param name="excludedPlatformsByPanelId">Excluded platform lists keyed by scene-bearing panel id.</param>
         void ApplyPanelExclusions(
-            string projectRootPath,
             GeneratedAuthoringSceneDefinition sceneDefinition,
             Dictionary<string, IReadOnlyList<string>> excludedPlatformsByPanelId) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            } else if (sceneDefinition == null) {
+            if (sceneDefinition == null) {
                 throw new ArgumentNullException(nameof(sceneDefinition));
             } else if (excludedPlatformsByPanelId == null) {
                 throw new ArgumentNullException(nameof(excludedPlatformsByPanelId));
@@ -195,7 +187,6 @@ namespace city.menu.tools {
 
             foreach (KeyValuePair<string, IReadOnlyList<string>> excludedPlatformsByPanelEntry in excludedPlatformsByPanelId) {
                 ApplyEntityExclusionsByName(
-                    projectRootPath,
                     sceneDefinition,
                     BuildPanelEntityName(excludedPlatformsByPanelEntry.Key),
                     excludedPlatformsByPanelEntry.Value);
@@ -205,18 +196,14 @@ namespace city.menu.tools {
         /// <summary>
         /// Applies exclusions to top-level main-menu open-panel items when their target panels do not exist for a platform build.
         /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <param name="sceneDefinition">Generated scene definition whose item entities should receive exclusions.</param>
         /// <param name="definition">Canonical menu definition used to author the scene hierarchy.</param>
         /// <param name="excludedPlatformsByPanelId">Excluded platform lists keyed by scene-bearing panel id.</param>
         void ApplyOpenPanelItemExclusions(
-            string projectRootPath,
             GeneratedAuthoringSceneDefinition sceneDefinition,
             MenuDefinition definition,
             Dictionary<string, IReadOnlyList<string>> excludedPlatformsByPanelId) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            } else if (sceneDefinition == null) {
+            if (sceneDefinition == null) {
                 throw new ArgumentNullException(nameof(sceneDefinition));
             } else if (definition == null) {
                 throw new ArgumentNullException(nameof(definition));
@@ -243,7 +230,7 @@ namespace city.menu.tools {
                         continue;
                     }
 
-                    ApplyEntityExclusionsByName(projectRootPath, sceneDefinition, BuildItemEntityName(itemDefinition.ItemId), excludedOpenPanelPlatformIds);
+                    ApplyEntityExclusionsByName(sceneDefinition, BuildItemEntityName(itemDefinition.ItemId), excludedOpenPanelPlatformIds);
                 }
             }
         }
@@ -348,14 +335,11 @@ namespace city.menu.tools {
         /// <summary>
         /// Applies subtree exclusions to every generated menu entity that matches the supplied stable entity name.
         /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
         /// <param name="sceneDefinition">Generated scene definition whose roots should be searched.</param>
         /// <param name="entityName">Stable generated entity name to search for.</param>
         /// <param name="excludedPlatformIds">Configured platform ids that should exclude the subtree.</param>
-        void ApplyEntityExclusionsByName(string projectRootPath, GeneratedAuthoringSceneDefinition sceneDefinition, string entityName, IReadOnlyList<string> excludedPlatformIds) {
-            if (string.IsNullOrWhiteSpace(projectRootPath)) {
-                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
-            } else if (sceneDefinition == null) {
+        void ApplyEntityExclusionsByName(GeneratedAuthoringSceneDefinition sceneDefinition, string entityName, IReadOnlyList<string> excludedPlatformIds) {
+            if (sceneDefinition == null) {
                 throw new ArgumentNullException(nameof(sceneDefinition));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
                 throw new ArgumentException("Entity name must be provided.", nameof(entityName));
@@ -373,7 +357,11 @@ namespace city.menu.tools {
             }
 
             for (int index = 0; index < matches.Count; index++) {
-                PlatformSceneAuthoringHelperService.ExcludeEntitySubtreeFromPlatforms(projectRootPath, matches[index], excludedPlatformIds);
+                for (int platformIndex = 0; platformIndex < excludedPlatformIds.Count; platformIndex++) {
+                    PlatformSceneAuthoringHelperService.ExcludeEntitySubtreeFromScope(
+                        matches[index],
+                        DemoDiscOverrideScopes.Platform(excludedPlatformIds[platformIndex]));
+                }
             }
         }
 

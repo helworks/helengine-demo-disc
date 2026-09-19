@@ -194,8 +194,8 @@ namespace city.tests {
             string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "TiltTrialGameplayPresentationAttachmentService.cs"));
 
             Assert.Contains("TiltTrialPhysicsBoundsDebug", source, StringComparison.Ordinal);
-            Assert.Contains("PlatformId = \"ds\", Exists = false", source, StringComparison.Ordinal);
-            Assert.Contains("PlatformId = \"3ds\", Exists = false", source, StringComparison.Ordinal);
+            Assert.Contains("Scope = SceneOverrideScopePath.Platform(\"ds\"), Exists = false", source, StringComparison.Ordinal);
+            Assert.Contains("Scope = SceneOverrideScopePath.Platform(\"3ds\"), Exists = false", source, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -212,8 +212,8 @@ namespace city.tests {
                 SceneAsset sceneAsset = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
                 SceneEntityAsset debugRoot = Assert.Single(sceneAsset.RootEntities.Where(entity => entity != null && entity.Name == "TiltTrialPhysicsBoundsDebug"));
 
-                Assert.Contains(debugRoot.PlatformExistenceOverrides, overrideAsset => overrideAsset.PlatformId == "ds" && !overrideAsset.Exists);
-                Assert.Contains(debugRoot.PlatformExistenceOverrides, overrideAsset => overrideAsset.PlatformId == "3ds" && !overrideAsset.Exists);
+                Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(debugRoot, "ds"));
+                Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(debugRoot, "3ds"));
             }
         }
 

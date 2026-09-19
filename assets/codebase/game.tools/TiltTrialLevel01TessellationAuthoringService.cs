@@ -130,7 +130,7 @@ namespace city.game.tools {
             for (int index = 0; index < overrides.Count; index++) {
                 EntityComponentPlatformOverrideState overrideState = overrides[index];
                 if (overrideState != null) {
-                    saveState.SetPlatformOverride(overrideState.PlatformId, overrideState);
+                    saveState.SetScopedPlatformOverride(overrideState.Scope, overrideState);
                 }
             }
 
