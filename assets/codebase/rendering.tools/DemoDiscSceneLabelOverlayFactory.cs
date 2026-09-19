@@ -6,7 +6,9 @@ namespace city.rendering.tools {
         const string NintendoDsPlatformId = "ds";
         const string Nintendo3DsPlatformId = "3ds";
         const string SceneLabelFontRelativePath = "Fonts/DemoDiscBody.ttf";
+        const string ViewportEntityName = "DemoDiscSceneLabelViewport";
         const int SceneLabelCanvasWidth = 1280;
+        const int SceneLabelCanvasHeight = 720;
         const float SceneLabelRight = 24f;
         const float SceneLabelTop = 72f;
         const int SceneLabelWidth = 656;
@@ -27,7 +29,19 @@ namespace city.rendering.tools {
             }
 
             ushort overlayLayerMask = sceneUiEntity.LayerMask;
-            Entity labelEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(sceneUiEntity, LabelEntityName);
+            // The label is authored against the 1280-wide canvas the constants below subtract from, but it had
+            // no viewport, so that canvas was an assumption rather than something the runtime enforced. On a
+            // 320x240 frame buffer its 656-wide box therefore began past the right edge and the label never
+            // appeared at all. Wrapping it in a reference-canvas viewport is what every other overlay in this
+            // project does and is what makes the authored coordinates mean what they say on any screen size.
+            Entity viewportEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(sceneUiEntity, ViewportEntityName);
+            viewportEntity.LayerMask = overlayLayerMask;
+            viewportEntity.AddComponent(new ViewportComponent {
+                BindingMode = ViewportComponent.ScreenBindingMode,
+                ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
+                FixedSize = new int2(SceneLabelCanvasWidth, SceneLabelCanvasHeight)
+            });
+            Entity labelEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(viewportEntity, LabelEntityName);
             labelEntity.LocalPosition = new float3(
                 SceneLabelCanvasWidth - SceneLabelRight - SceneLabelWidth,
                 SceneLabelTop,

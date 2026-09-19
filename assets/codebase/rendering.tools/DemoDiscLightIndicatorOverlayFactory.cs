@@ -118,8 +118,15 @@ namespace city.rendering.tools {
             ushort overlayLayerMask = sceneUiEntity.LayerMask;
             Entity viewportEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(sceneUiEntity, IndicatorViewportEntityName);
             viewportEntity.LayerMask = overlayLayerMask;
+            // ScalingMode is load-bearing and was missing here. ViewportComponent.Update returns before
+            // applying any scale unless the mode is ReferenceCanvasScalingMode, so without it the reference
+            // size below is recorded and never acted on: the label and swatch render at their authored size
+            // whatever the screen is. That stayed invisible while every target was close to the 1280-wide
+            // reference, and showed up the moment this overlay reached a 320x240 frame buffer, where the word
+            // "Light" covered a quarter of the screen. Every other viewport in this project sets it.
             viewportEntity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
+                ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
                 FixedSize = new int2(ReferenceViewportWidth, ReferenceViewportHeight)
             });
 
