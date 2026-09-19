@@ -217,6 +217,31 @@ namespace city.tests {
             }
         }
 
+        /// <summary>
+        /// Ensures the handheld presentation root is restricted to the Nintendo dual-screen group rather than
+        /// enumerating the platforms it should skip, so a platform outside the group never receives it — including
+        /// ones the old exclusion list never named and ones added to the project later.
+        /// </summary>
+        [Fact]
+        public void Authored_gameplay_scenes_scope_handheld_presentation_root_to_the_dual_screen_group() {
+            string sceneDirectory = global::city.testing.DemoDiscTestProject.GetPath("assets", "scenes", "games", "tilt");
+            string[] scenePaths = Directory.GetFiles(sceneDirectory, "tilt_trial_level_*.helen");
+            string[] excludedPlatformIds = ["windows", "ps2", "n64", "ps1", "dc", "ps3", "x360", "psp", "psvita", "switch"];
+
+            Assert.NotEmpty(scenePaths);
+            foreach (string scenePath in scenePaths) {
+                using FileStream stream = File.OpenRead(scenePath);
+                SceneAsset sceneAsset = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
+                SceneEntityAsset handheldRoot = Assert.Single(sceneAsset.RootEntities.Where(entity => entity != null && entity.Name == "TiltTrialHandheldPresentation"));
+
+                Assert.True(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(handheldRoot, "ds"));
+                Assert.True(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(handheldRoot, "3ds"));
+                for (int index = 0; index < excludedPlatformIds.Length; index++) {
+                    Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(handheldRoot, excludedPlatformIds[index]));
+                }
+            }
+        }
+
         static IEnumerable<SceneEntityAsset> EnumerateEntities(SceneEntityAsset root) {
             if (root == null) {
                 yield break;

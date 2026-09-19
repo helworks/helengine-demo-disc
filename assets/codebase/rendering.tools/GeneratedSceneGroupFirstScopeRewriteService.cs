@@ -11,6 +11,12 @@ namespace city.rendering.tools {
     /// would silently vanish from every build. Rewriting each such scope to <c>group:…/platform:ps2</c> keeps every
     /// authored per-platform rule intact while the subtree gains a Group level for the Nintendo dual-screen rules.
     /// </para>
+    /// <para>
+    /// This belongs in the engine, not here. The editor owns both the level order and the group tree, so
+    /// relocating an authored override when an entity's level order changes — inserting the group chain the new
+    /// order demands — is behaviour every project needs, not demo-disc policy. When the engine grows it, delete
+    /// this class and <c>GeneratedSceneGroupFirstScopeRewriteServiceTests</c> and call the engine instead.
+    /// </para>
     /// </summary>
     public sealed class GeneratedSceneGroupFirstScopeRewriteService {
         /// <summary>

@@ -18,11 +18,6 @@ namespace city.game.tools {
         readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
-        /// Platform ids that should receive only the handheld presentation root.
-        /// </summary>
-        static readonly string[] HandheldOnlyPlatformIds = ["windows", "ps2", "psp", "gamecube", "wii", "wiiu", "psvita", "switch"];
-
-        /// <summary>
         /// Initializes one Tilt Trial presentation attachment service.
         /// </summary>
         /// <param name="scriptTypeResolver">Editor resolver for generated project component types.</param>
@@ -65,7 +60,7 @@ namespace city.game.tools {
                     "TiltTrialHandheldPresentation",
                     TiltTrialGameplayPresentationBlueprintGenerator.HandheldBlueprintRelativePath,
                     CreateHandheldOnlyPlatformOverrides(),
-                    null);
+                    DemoDiscOverrideScopes.CreateGroupFirstLevelOrder());
                 SaveScene(fullProjectRootPath, scenePath, sceneAsset);
             }
         }
@@ -292,20 +287,20 @@ namespace city.game.tools {
         }
 
         /// <summary>
-        /// Creates platform exclusions that keep the handheld presentation off every platform that ships its own
-        /// console presentation. The list stays per platform because it is narrower than any one group.
+        /// Creates the group restriction that leaves the handheld presentation only on the Nintendo dual-screen
+        /// rigs: absent everywhere by default, present beneath the group. Every platform outside the group,
+        /// current or future, resolves the Common value and never receives the root. The owning root records the
+        /// group-first level order so the group step resolves.
         /// </summary>
         /// <returns>Handheld-only platform existence overrides.</returns>
         static SceneEntityPlatformExistenceOverrideAsset[] CreateHandheldOnlyPlatformOverrides() {
-            SceneEntityPlatformExistenceOverrideAsset[] overrides = new SceneEntityPlatformExistenceOverrideAsset[HandheldOnlyPlatformIds.Length];
-            for (int index = 0; index < HandheldOnlyPlatformIds.Length; index++) {
-                overrides[index] = new SceneEntityPlatformExistenceOverrideAsset {
-                    Scope = SceneOverrideScopePath.Platform(HandheldOnlyPlatformIds[index]),
-                    Exists = false
-                };
-            }
-
-            return overrides;
+            return [
+                new SceneEntityPlatformExistenceOverrideAsset { Scope = SceneOverrideScopePath.Common(), Exists = false },
+                new SceneEntityPlatformExistenceOverrideAsset {
+                    Scope = DemoDiscOverrideScopes.NintendoDualScreen.ToSteps(),
+                    Exists = true
+                }
+            ];
         }
 
         /// <summary>
