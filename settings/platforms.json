@@ -6,11 +6,13 @@
     "gamecube",
     "n64",
     "ps2",
+    "ps3",
     "psp",
     "psvita",
     "switch",
     "wii",
     "wiiu",
-    "windows"
+    "windows",
+    "x360"
   ]
 }

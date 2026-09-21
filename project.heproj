@@ -1,23 +1,26 @@
 {
-    "projectFormatVersion": 1,
-    "name": "city",
-    "version": "1.0.0",
-    "requiredEngineVersion": "1.0.0+7d5e78dcc7a5948cf8f3f23e9e6ffcd5f578390f",
-    "supportedPlatforms": [
-        "windows",
-        "ps2",
-        "psp",
-        "psvita",
-        "ds",
-        "3ds",
-        "gamecube",
-        "n64",
-        "wii",
-        "switch",
-        "wiiu",
-        "dc"
-    ],
-    "created": "2026-04-08T22:28:00.3959454Z",
-    "lastOpened": "2026-04-28T16:20:48.8005795Z",
-    "description": null
+  "projectFormatVersion": 1,
+  "name": "DemoDisc",
+  "version": "1.0.0",
+  "requiredEngineVersion": "1.0.0\u002B7d5e78dcc7a5948cf8f3f23e9e6ffcd5f578390f",
+  "supportedPlatforms": [
+    "windows",
+    "ps2",
+    "ps3",
+    "psp",
+    "psvita",
+    "ds",
+    "3ds",
+    "gamecube",
+    "n64",
+    "wii",
+    "switch",
+    "wiiu",
+    "dc",
+    "x360"
+  ],
+  "created": "2026-04-08T22:28:00.3959454Z",
+  "lastOpened": "2026-04-28T16:20:48.8005795Z",
+  "description": null,
+  "sceneRouting": null
 }
