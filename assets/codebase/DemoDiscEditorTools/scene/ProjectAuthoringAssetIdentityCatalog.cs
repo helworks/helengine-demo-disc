@@ -41,8 +41,7 @@ namespace DemoDisc.EditorTools {
                 ["scenes/games/tilt/tilt_trial_level_02.helen"] = "10000000000000000000000000000034",
                 ["scenes/games/tilt/tilt_trial_level_03.helen"] = "10000000000000000000000000000035",
                 ["scenes/games/tilt/tilt_trial_level_04.helen"] = "10000000000000000000000000000036",
-                ["scenes/games/tilt/tilt_trial_level_05.helen"] = "10000000000000000000000000000037",
-                ["scenes/games/zombislayer.helen"] = "10000000000000000000000000000038"
+                ["scenes/games/tilt/tilt_trial_level_05.helen"] = "10000000000000000000000000000037"
             };
 
         static readonly IReadOnlyDictionary<string, string> NativeAssetIdentities =

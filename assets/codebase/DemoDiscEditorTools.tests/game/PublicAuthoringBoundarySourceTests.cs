@@ -11,12 +11,9 @@ namespace DemoDisc.EditorTools.tests {
         [Fact]
         public void Gameplay_scene_factories_use_the_public_authoring_capability_for_references() {
             string gameSceneFactorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\GameSceneFactory.cs");
-            string zombislayerSceneFactorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\ZombislayerSceneFactory.cs");
 
             Assert.DoesNotContain("DemoDiscEditorAssetReferenceFactory", gameSceneFactorySource, StringComparison.Ordinal);
-            Assert.DoesNotContain("DemoDiscEditorAssetReferenceFactory", zombislayerSceneFactorySource, StringComparison.Ordinal);
             Assert.Contains("AssetAuthoringService.CreateFileReference", gameSceneFactorySource, StringComparison.Ordinal);
-            Assert.Contains("AuthoringSession.CreateFileReference", zombislayerSceneFactorySource, StringComparison.Ordinal);
         }
 
         /// <summary>

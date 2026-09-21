@@ -61,12 +61,6 @@ namespace DemoDisc.EditorTools {
             TiltTrialHandheldLevelSelectSceneFactory handheldLevelSelectSceneFactory = new TiltTrialHandheldLevelSelectSceneFactory();
             GeneratedAuthoringSceneDefinition handheldLevelSelectScene = handheldLevelSelectSceneFactory.Create(factory);
             sceneWriteService.WriteScene(handheldLevelSelectScene);
-
-            ZombislayerAssetPreparationService zombislayerAssetPreparationService = new ZombislayerAssetPreparationService(AssetAuthoringService);
-            ZombislayerGenerationAssets zombislayerAssets = zombislayerAssetPreparationService.Prepare();
-            ZombislayerSceneFactory zombislayerSceneFactory = new ZombislayerSceneFactory(zombislayerAssets, AssetAuthoringService);
-            GeneratedAuthoringSceneDefinition zombislayerScene = zombislayerSceneFactory.CreateGameplayScene();
-            sceneWriteService.WriteScene(zombislayerScene);
         }
 
         /// <summary>

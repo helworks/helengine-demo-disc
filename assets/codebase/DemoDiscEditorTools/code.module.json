@@ -3,7 +3,6 @@
   "dependencyModuleIds": [
     "DemoDisc",
     "TiltPlay",
-    "Zombislayer",
     "Raytracing"
   ],
   "loadScopes": [
