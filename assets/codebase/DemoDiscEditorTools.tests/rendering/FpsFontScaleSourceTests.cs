@@ -59,13 +59,11 @@ namespace DemoDisc.EditorTools.tests {
         /// </summary>
         [Fact]
         public void Nintendo_handheld_button_labels_use_centered_text_and_a_half_scale_3ds_override() {
-            string sourcePath = DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "NintendoDsRenderingSceneScaffoldFactory.cs");
-            string source = File.ReadAllText(sourcePath);
+            string uiKitSource = File.ReadAllText(DemoDiscTestProject.GetPath(
+                "assets", "codebase", "DemoDiscEditorTools", "rendering", "DemoDiscSceneUiKitFactory.cs"));
 
-            Assert.Contains("const float NintendoDsBottomOverlayFontScale = 1f;", source, StringComparison.Ordinal);
-            Assert.Contains("const float Nintendo3DsFpsFontScale = 1f;", source, StringComparison.Ordinal);
-            Assert.Contains("EnsurePlatformOverrideComponent", source, StringComparison.Ordinal);
-            Assert.Contains("nameof(FPSComponent.FontScale)", source, StringComparison.Ordinal);
+            Assert.Contains("const float HandheldFpsScale = 1f;", uiKitSource, StringComparison.Ordinal);
+            Assert.Contains("FontScale = HandheldFpsScale", uiKitSource, StringComparison.Ordinal);
 
             string chromeSource = File.ReadAllText(DemoDiscTestProject.GetPath(
                 "assets", "codebase", "DemoDiscEditorTools", "rendering", "HandheldBottomScreenChromeBlueprintGenerator.cs"));
@@ -77,14 +75,16 @@ namespace DemoDisc.EditorTools.tests {
         }
 
         /// <summary>
-        /// Ensures Cube Test keeps the shared bottom-screen scaffold so its generated 3DS overrides are authored into the scene.
+        /// Ensures Cube Test authors a dual-screen presentation that mounts its own bottom-screen UI.
         /// </summary>
         [Fact]
-        public void Cube_test_uses_the_shared_bottom_screen_scaffold() {
+        public void Cube_test_authors_a_dual_screen_presentation() {
             string sourcePath = DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "CubeTestSceneFactory.cs");
             string source = File.ReadAllText(sourcePath);
 
-            Assert.Contains("UseDefaultBottomOverlay = true", source, StringComparison.Ordinal);
+            Assert.Contains("NintendoDsScene = new GeneratedDsSceneDefinition", source, StringComparison.Ordinal);
+            Assert.Contains("BottomScreenRootEntities = [CreateHandheldUiEntity()]", source, StringComparison.Ordinal);
+            Assert.Contains("DesktopPresentationRootEntities", source, StringComparison.Ordinal);
         }
 
         [Fact]

@@ -112,7 +112,6 @@ namespace DemoDisc.EditorTools {
                     SceneSettings = authoredSceneAsset.SceneSettings,
                     RootEntities = rootEntities,
                     NintendoDsScene = new GeneratedDsSceneDefinition {
-                        UseDefaultBottomOverlay = true,
                         BottomScreenRootEntities = Array.Empty<Entity>()
                     }
                 });
@@ -320,8 +319,7 @@ namespace DemoDisc.EditorTools {
                 sceneEntry.SceneId,
                 true);
             sceneDefinition.NintendoDsScene = new GeneratedDsSceneDefinition {
-                UseDefaultBottomOverlay = true,
-                BottomScreenRootEntities = Array.Empty<Entity>()
+                BottomScreenRootEntities = [physicsSceneFactory.CreateHandheldShowcaseUi(sceneEntry.SceneId)]
             };
             try {
                 SceneWriteService.WriteScene(sceneDefinition);

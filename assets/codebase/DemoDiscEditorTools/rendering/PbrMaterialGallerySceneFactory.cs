@@ -72,25 +72,26 @@ namespace DemoDisc.EditorTools {
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
 
             Entity[] sphereEntities = CreateSphereEntities(sphereModel, galleryMaterials);
-            Entity[] rootEntities = new Entity[sphereEntities.Length + 8];
+            Entity[] rootEntities = new Entity[sphereEntities.Length + 5];
             rootEntities[0] = CreateCameraEntity();
-            rootEntities[1] = CreateUiEntity();
-            rootEntities[2] = CreateDirectionalLightEntity();
-            rootEntities[3] = CreateDirectionalFillLightEntity();
-            rootEntities[4] = CreateAmbientLightEntity();
-            rootEntities[5] = instructionOverlayEntity;
-            rootEntities[6] = consoleInstructionBlueprintEntity;
-            rootEntities[7] = CreateGroundEntity(planeModel, groundMaterial);
-            Array.Copy(sphereEntities, 0, rootEntities, 8, sphereEntities.Length);
+            rootEntities[1] = CreateDirectionalLightEntity();
+            rootEntities[2] = CreateDirectionalFillLightEntity();
+            rootEntities[3] = CreateAmbientLightEntity();
+            rootEntities[4] = CreateGroundEntity(planeModel, groundMaterial);
+            Array.Copy(sphereEntities, 0, rootEntities, 5, sphereEntities.Length);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = Array.Empty<Entity>()
+                    BottomScreenRootEntities = [CreateHandheldUiEntity()]
                 },
-                RootEntities = rootEntities
+                RootEntities = rootEntities,
+                DesktopPresentationRootEntities = new[] {
+                    CreateUiEntity(),
+                    instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity
+                }
             };
         }
 
@@ -138,6 +139,14 @@ namespace DemoDisc.EditorTools {
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
             return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("PbrMaterialGalleryUi", "13. PBR Gallery");
+        }
+
+        /// <summary>
+        /// Creates the bottom-screen UI root shown on the dual-screen rigs.
+        /// </summary>
+        /// <returns>Live authored bottom-screen UI root entity.</returns>
+        Entity CreateHandheldUiEntity() {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateHandheldSceneUi("PbrMaterialGalleryUi", "13. PBR Gallery");
         }
 
         /// <summary>

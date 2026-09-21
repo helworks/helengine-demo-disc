@@ -61,18 +61,19 @@ namespace DemoDisc.EditorTools {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = Array.Empty<Entity>()
+                    BottomScreenRootEntities = [CreateHandheldUiEntity()]
                 },
                 RootEntities = new[] {
                     CreateCameraEntity(),
-                    CreateUiEntity(),
                     CreateDirectionalLightEntity(),
-                    instructionOverlayEntity,
-                    consoleInstructionBlueprintEntity,
                     CreateGroundEntity(planeModel, groundMaterial),
                     CreatePropEntity("PbrTexturedShowcaseMetalProp", new float3(-2.6f, 1.2f, 0f), new float3(2.4f, 2.4f, 2.4f), cubeModel, metalMaterial),
                     CreatePropEntity("PbrTexturedShowcaseWoodProp", new float3(2.6f, 1.2f, 0f), new float3(2.4f, 2.4f, 2.4f), cubeModel, woodMaterial)
+                },
+                DesktopPresentationRootEntities = new[] {
+                    CreateUiEntity(),
+                    instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity
                 }
             };
         }
@@ -121,6 +122,14 @@ namespace DemoDisc.EditorTools {
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
             return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("PbrTexturedShowcaseUi", "14. PBR Textures");
+        }
+
+        /// <summary>
+        /// Creates the bottom-screen UI root shown on the dual-screen rigs.
+        /// </summary>
+        /// <returns>Live authored bottom-screen UI root entity.</returns>
+        Entity CreateHandheldUiEntity() {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateHandheldSceneUi("PbrTexturedShowcaseUi", "14. PBR Textures");
         }
 
         /// <summary>

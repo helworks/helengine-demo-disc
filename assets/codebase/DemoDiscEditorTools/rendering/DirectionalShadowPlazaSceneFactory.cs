@@ -99,14 +99,10 @@ namespace DemoDisc.EditorTools {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont)
+                    BottomScreenRootEntities = [.. instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont), CreateHandheldUiEntity()]
                 },
                 RootEntities = new[] {
                     cameraEntity,
-                    instructionOverlayEntity,
-                    consoleInstructionBlueprintEntity,
-                    CreateFpsEntity(),
                     CreateDirectionalLightEntity(),
                     CreateGroundEntity(planeModel, standardMaterial),
                     CreateShadowMastEntity(cubeModel, standardMaterial),
@@ -118,6 +114,11 @@ namespace DemoDisc.EditorTools {
                     CreateBuildingEntity("DirectionalShadowPlazaSouthCentralBlock", new float3(-4f, 2.5f, 14f), new float3(5f, 5f, 5f), cubeModel, standardMaterial),
                     CreateBuildingEntity("DirectionalShadowPlazaNortheastBlock", new float3(13f, 2f, 11f), new float3(4f, 4f, 4f), cubeModel, standardMaterial),
                     CreateBuildingEntity("DirectionalShadowPlazaMidriseBlock", new float3(8f, 3.5f, 2f), new float3(5f, 7f, 5f), cubeModel, standardMaterial)
+                },
+                DesktopPresentationRootEntities = new[] {
+                    instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity,
+                    CreateFpsEntity()
                 }
             };
         }
@@ -166,6 +167,14 @@ namespace DemoDisc.EditorTools {
         /// <returns>Live authored FPS overlay entity.</returns>
         Entity CreateFpsEntity() {
             return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("DirectionalShadowPlazaFps", "7. Shadow Plaza");
+        }
+
+        /// <summary>
+        /// Creates the bottom-screen UI root shown on the dual-screen rigs.
+        /// </summary>
+        /// <returns>Live authored bottom-screen UI root entity.</returns>
+        Entity CreateHandheldUiEntity() {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateHandheldSceneUi("DirectionalShadowPlazaFps", "7. Shadow Plaza");
         }
 
         /// <summary>

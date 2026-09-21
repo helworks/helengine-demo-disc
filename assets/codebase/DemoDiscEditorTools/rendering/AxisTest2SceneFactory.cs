@@ -136,14 +136,10 @@ namespace DemoDisc.EditorTools {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont)
+                    BottomScreenRootEntities = [.. instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont), CreateHandheldUiEntity()]
                 },
                 RootEntities = new[] {
                     cameraEntity,
-                    instructionOverlayEntity,
-                    consoleInstructionBlueprintEntity,
-                    CreateUiEntity(),
                     CreateDirectionalLightRigEntity(projectRootPath, arrowModel, axisMaterials[4]),
                     CreateFloorEntity(cubeModel, axisMaterials[3]),
                     CreateGroundEntity(cubeModel, axisMaterials[3]),
@@ -154,6 +150,11 @@ namespace DemoDisc.EditorTools {
                     CreateXAxisMarkerEntity(cubeModel, axisMaterials[4]),
                     CreateYAxisMarkerEntity(cubeModel, axisMaterials[4]),
                     CreateZAxisMarkerEntity(cubeModel, axisMaterials[4])
+                },
+                DesktopPresentationRootEntities = new[] {
+                    instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity,
+                    CreateUiEntity()
                 }
             };
         }
@@ -210,6 +211,14 @@ namespace DemoDisc.EditorTools {
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
             return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("AxisTest2Ui", "5. Axis 2");
+        }
+
+        /// <summary>
+        /// Creates the bottom-screen UI root shown on the dual-screen rigs.
+        /// </summary>
+        /// <returns>Live authored bottom-screen UI root entity.</returns>
+        Entity CreateHandheldUiEntity() {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateHandheldSceneUi("AxisTest2Ui", "5. Axis 2");
         }
 
         /// <summary>

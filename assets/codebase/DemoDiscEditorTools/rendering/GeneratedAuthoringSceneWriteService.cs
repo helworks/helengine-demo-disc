@@ -17,10 +17,6 @@ namespace DemoDisc.EditorTools {
         /// </summary>
         readonly PlatformSceneAuthoringHelperService PlatformSceneAuthoringHelperServiceValue;
 
-        /// <summary>
-        /// In-memory generated scene clone service used to duplicate top-screen roots before the handheld scaffold mutates them.
-        /// </summary>
-        readonly GeneratedSceneEntityCloneService GeneratedSceneEntityCloneServiceValue;
 
         /// <summary>
         /// Resolver backed by the currently loaded city gameplay assemblies so temporary clone round-trips can restore project-authored components.
@@ -71,7 +67,6 @@ namespace DemoDisc.EditorTools {
             Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
             NintendoDsRenderingSceneScaffoldFactoryValue = new NintendoDsRenderingSceneScaffoldFactory(authoringSession);
             PlatformSceneAuthoringHelperServiceValue = new PlatformSceneAuthoringHelperService();
-            GeneratedSceneEntityCloneServiceValue = new GeneratedSceneEntityCloneService(authoringSession);
             ScriptTypeResolverValue = scriptTypeResolver;
         }
 
@@ -94,16 +89,24 @@ namespace DemoDisc.EditorTools {
             List<Entity> rootsToDispose = new List<Entity>();
 
             try {
+                Entity[] desktopPresentationRoots = sceneDefinition.DesktopPresentationRootEntities ?? Array.Empty<Entity>();
                 AddUniqueRoots(rootsToDispose, sceneDefinition.RootEntities);
+                AddUniqueRoots(rootsToDispose, desktopPresentationRoots);
                 AdoptGroupFirstLevelOrderForRoots(sceneDefinition.RootEntities);
-                Entity[] rootsToWrite = sceneDefinition.RootEntities;
+                AdoptGroupFirstLevelOrderForRoots(desktopPresentationRoots);
+                Entity[] rootsToWrite = CombineRootSets(sceneDefinition.RootEntities, desktopPresentationRoots);
                 if (sceneDefinition.NintendoDsScene != null) {
+                    // The content roots are shared: only the presentation varies by group, so the single-screen
+                    // presentation steps aside on the dual-screen rigs and the handheld one takes its place.
                     Entity[] nintendoDsSceneRoots = BuildNintendoHandheldSceneRoots(
                         sceneDefinition);
                     AddUniqueRoots(rootsToDispose, nintendoDsSceneRoots);
-                    ExcludeRootsFromNintendoHandheldPlatforms(sceneDefinition.RootEntities);
+                    ExcludeRootsFromNintendoHandheldPlatforms(desktopPresentationRoots);
                     RestrictRootsToNintendoHandheldPlatforms(nintendoDsSceneRoots);
-                    rootsToWrite = CombineRootSets(sceneDefinition.RootEntities, nintendoDsSceneRoots);
+                    // Generators number their own roots, some from a private counter, so the dual-screen
+                    // presentation takes ids above everything already in the scene rather than risking a clash.
+                    AssignEntityIdsAbove(nintendoDsSceneRoots, FindMaximumEntityId(rootsToWrite));
+                    rootsToWrite = CombineRootSets(rootsToWrite, nintendoDsSceneRoots);
                 }
 
                 SaveSceneAsset(
@@ -136,28 +139,8 @@ namespace DemoDisc.EditorTools {
                 return authoredNintendoHandheldRoots;
             }
 
-            FontAsset bottomOverlayFont = ResolveRequiredBottomOverlayFont();
-            Entity[] clonedTopScreenRoots = CloneSceneRoots(sceneDefinition.RootEntities);
-            return NintendoDsRenderingSceneScaffoldFactoryValue.CreateSceneRoots(
-                clonedTopScreenRoots,
-                sceneDefinition.NintendoDsScene.UseDefaultBottomOverlay,
-                sceneDefinition.NintendoDsScene.MoveTopScreen2DRootsToBottomScreen,
-                sceneDefinition.NintendoDsScene.BottomScreenRootEntities ?? Array.Empty<Entity>(),
-                bottomOverlayFont);
-        }
-
-        /// <summary>
-        /// Loads the dedicated project body font used by the Nintendo DS bottom overlay through the normal authored source-font import pipeline.
-        /// </summary>
-        /// <returns>Imported project body font asset.</returns>
-        FontAsset ResolveRequiredBottomOverlayFont() {
-            SceneAssetReference fontReference = DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AuthoringSession);
-            if (fontReference == null || fontReference.SourceKind != SceneAssetReferenceSourceKind.FileSystem || string.IsNullOrWhiteSpace(fontReference.RelativePath)) {
-                throw new InvalidOperationException("The demo-disc body font reference must resolve to one file-backed source font path.");
-            }
-
-            string fullSourcePath = Path.Combine(ProjectRootPath, "assets", fontReference.RelativePath.Replace('/', Path.DirectorySeparatorChar));
-            return AuthoringSession.ResolveFontAsset(fullSourcePath);
+            return NintendoDsRenderingSceneScaffoldFactoryValue.CreateBottomScreenRoots(
+                sceneDefinition.NintendoDsScene.BottomScreenRootEntities ?? Array.Empty<Entity>());
         }
 
         /// <summary>
@@ -204,20 +187,6 @@ namespace DemoDisc.EditorTools {
             } finally {
                 RestoreHiddenUserSceneRoots(hiddenRootSnapshots);
             }
-        }
-
-        /// <summary>
-        /// Clones one generated scene root set through the editor serialization pipeline so Nintendo handheld scaffolding may mutate copies without rewriting the common authored roots.
-        /// </summary>
-        /// <param name="sourceRoots">Root entities that should be cloned.</param>
-        /// <returns>Detached editor roots cloned in memory.</returns>
-        EditorEntity[] CloneSceneRoots(Entity[] sourceRoots) {
-            if (sourceRoots == null) {
-                throw new ArgumentNullException(nameof(sourceRoots));
-            }
-            EditorEntity[] clonedRoots = GeneratedSceneEntityCloneServiceValue.CloneRoots(sourceRoots);
-            AssignFreshGeneratedEntityIds(clonedRoots);
-            return clonedRoots;
         }
 
         /// <summary>
@@ -344,6 +313,101 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
+        /// Finds the largest authored entity id across one root set.
+        /// </summary>
+        /// <param name="roots">Roots to scan.</param>
+        /// <returns>Largest authored entity id, or zero when none carry one.</returns>
+        static uint FindMaximumEntityId(Entity[] roots) {
+            uint maximumId = 0u;
+            for (int index = 0; index < roots.Length; index++) {
+                maximumId = Math.Max(maximumId, FindMaximumEntityId(roots[index]));
+            }
+
+            return maximumId;
+        }
+
+        /// <summary>
+        /// Finds the largest authored entity id in one hierarchy.
+        /// </summary>
+        /// <param name="entity">Hierarchy root to scan.</param>
+        /// <returns>Largest authored entity id in the subtree.</returns>
+        static uint FindMaximumEntityId(Entity entity) {
+            if (entity == null) {
+                return 0u;
+            }
+
+            uint maximumId = TryFindEntitySaveComponent(entity, out EntitySaveComponent saveComponent) ? saveComponent.EntityId : 0u;
+            if (entity.Children == null) {
+                return maximumId;
+            }
+
+            for (int index = 0; index < entity.Children.Count; index++) {
+                maximumId = Math.Max(maximumId, FindMaximumEntityId(entity.Children[index]));
+            }
+
+            return maximumId;
+        }
+
+        /// <summary>
+        /// Renumbers one root set so every entity sits above the supplied id. The dual-screen presentation
+        /// holds no entity references, so renumbering it cannot invalidate an authored binding.
+        /// </summary>
+        /// <param name="roots">Roots to renumber.</param>
+        /// <param name="minimumExclusiveId">Id every renumbered entity must exceed.</param>
+        static void AssignEntityIdsAbove(Entity[] roots, uint minimumExclusiveId) {
+            uint nextId = minimumExclusiveId + 1u;
+            for (int index = 0; index < roots.Length; index++) {
+                AssignEntityIdsAbove(roots[index], ref nextId);
+            }
+        }
+
+        /// <summary>
+        /// Renumbers one hierarchy from the supplied running id.
+        /// </summary>
+        /// <param name="entity">Hierarchy root to renumber.</param>
+        /// <param name="nextId">Running id, advanced for every visited entity.</param>
+        static void AssignEntityIdsAbove(Entity entity, ref uint nextId) {
+            if (entity == null) {
+                return;
+            }
+
+            if (TryFindEntitySaveComponent(entity, out EntitySaveComponent saveComponent)) {
+                saveComponent.EntityId = nextId;
+                nextId++;
+            }
+
+            if (entity.Children == null) {
+                return;
+            }
+
+            for (int index = 0; index < entity.Children.Count; index++) {
+                AssignEntityIdsAbove(entity.Children[index], ref nextId);
+            }
+        }
+
+        /// <summary>
+        /// Attempts to resolve the hidden save component attached by the editor entity factory.
+        /// </summary>
+        /// <param name="entity">Entity whose save component should be resolved.</param>
+        /// <param name="saveComponent">Resolved save component when one is attached.</param>
+        /// <returns>True when the entity carries a save component.</returns>
+        static bool TryFindEntitySaveComponent(Entity entity, out EntitySaveComponent saveComponent) {
+            saveComponent = null;
+            if (entity == null || entity.Components == null) {
+                return false;
+            }
+
+            for (int index = 0; index < entity.Components.Count; index++) {
+                if (entity.Components[index] is EntitySaveComponent match) {
+                    saveComponent = match;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Combines two root arrays into one deterministic root set while preserving the original order inside each source array.
         /// </summary>
         /// <param name="commonRoots">Common scene roots written for every non-handheld platform.</param>
@@ -360,82 +424,6 @@ namespace DemoDisc.EditorTools {
             Array.Copy(commonRoots, 0, combinedRoots, 0, commonRoots.Length);
             Array.Copy(nintendoHandheldRoots, 0, combinedRoots, commonRoots.Length, nintendoHandheldRoots.Length);
             return combinedRoots;
-        }
-
-        /// <summary>
-        /// Assigns fresh non-zero scene entity ids across one cloned root set so the handheld augmentation can coexist with the common roots inside one canonical scene asset.
-        /// </summary>
-        /// <param name="roots">Cloned root entities that should receive fresh ids.</param>
-        void AssignFreshGeneratedEntityIds(IReadOnlyList<EditorEntity> roots) {
-            if (roots == null) {
-                throw new ArgumentNullException(nameof(roots));
-            }
-
-            EditorSceneEntityIdAllocator entityIdAllocator = ResolveRequiredSceneEntityIdAllocator();
-            for (int index = 0; index < roots.Count; index++) {
-                if (roots[index] == null) {
-                    continue;
-                }
-
-                AssignFreshGeneratedEntityIds(roots[index], entityIdAllocator);
-            }
-        }
-
-        /// <summary>
-        /// Assigns fresh non-zero scene entity ids throughout one cloned editor subtree.
-        /// </summary>
-        /// <param name="entity">Cloned editor subtree root that should receive fresh ids.</param>
-        /// <param name="entityIdAllocator">Allocator that owns numeric scene entity ids for the active editor host.</param>
-        void AssignFreshGeneratedEntityIds(EditorEntity entity, EditorSceneEntityIdAllocator entityIdAllocator) {
-            if (entity == null) {
-                throw new ArgumentNullException(nameof(entity));
-            } else if (entityIdAllocator == null) {
-                throw new ArgumentNullException(nameof(entityIdAllocator));
-            }
-
-            FindRequiredEntitySaveComponent(entity).EntityId = entityIdAllocator.Allocate();
-            if (entity.Children == null) {
-                return;
-            }
-
-            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
-                if (entity.Children[childIndex] is EditorEntity childEntity) {
-                    AssignFreshGeneratedEntityIds(childEntity, entityIdAllocator);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Resolves the active editor-owned scene entity id allocator required for cloned handheld augmentation roots.
-        /// </summary>
-        /// <returns>Active editor-owned scene entity id allocator.</returns>
-        EditorSceneEntityIdAllocator ResolveRequiredSceneEntityIdAllocator() {
-            if (AuthoringSession.OwningCore is not EditorCore editorCore) {
-                throw new InvalidOperationException("Cloning generated handheld scene roots requires an active EditorCore.");
-            } else if (editorCore.SceneEntityIdAllocator == null) {
-                throw new InvalidOperationException("Cloning generated handheld scene roots requires EditorCore.SceneEntityIdAllocator.");
-            }
-
-            return editorCore.SceneEntityIdAllocator;
-        }
-
-        /// <summary>
-        /// Resolves the hidden save component attached to one cloned editor entity.
-        /// </summary>
-        /// <param name="entity">Editor entity whose save component should be returned.</param>
-        /// <returns>Attached hidden save component.</returns>
-        static EntitySaveComponent FindRequiredEntitySaveComponent(EditorEntity entity) {
-            if (entity == null || entity.Components == null) {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                if (entity.Components[componentIndex] is EntitySaveComponent saveComponent) {
-                    return saveComponent;
-                }
-            }
-
-            throw new InvalidOperationException("Generated handheld scene roots must carry one EntitySaveComponent before they can be cloned.");
         }
 
         /// <summary>

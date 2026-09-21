@@ -2,27 +2,21 @@ using DemoDisc.rendering;
 
 namespace DemoDisc.EditorTools {
     /// <summary>
-    /// Stores one generated Nintendo handheld scene augmentation merged into the canonical authored scene with per-platform entity existence rules.
+    /// Stores the dual-screen presentation of one generated scene. It is merged into the canonical authored
+    /// scene and restricted to the dual-screen platform group, so the shared content is authored once and only
+    /// the presentation varies by group.
     /// </summary>
     public sealed class GeneratedDsSceneDefinition {
         /// <summary>
-        /// Gets or sets optional live root entities that should be merged directly into the canonical scene when the handheld build needs a custom authored layout.
+        /// Gets or sets complete dual-screen roots authored by the generator. When present the shared
+        /// bottom-screen scaffold is bypassed entirely and these roots are used as-is.
         /// </summary>
         public Entity[] RootEntities { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the standard DS bottom overlay should be emitted automatically.
-        /// </summary>
-        public bool UseDefaultBottomOverlay { get; set; }
-
-        /// <summary>
-        /// Gets or sets optional custom bottom-screen root entities supplied by a generator when it opts out of the default overlay.
+        /// Gets or sets the bottom-screen content mounted beneath the shared bottom-screen viewport, above the
+        /// chrome Blueprint the scaffold instances.
         /// </summary>
         public Entity[] BottomScreenRootEntities { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether authored 2D roots should be relocated beneath the shared bottom-screen viewport.
-        /// </summary>
-        public bool MoveTopScreen2DRootsToBottomScreen { get; set; } = true;
     }
 }

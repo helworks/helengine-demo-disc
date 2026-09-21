@@ -26,12 +26,20 @@ namespace DemoDisc.EditorTools {
         public SceneSettingsAsset SceneSettings { get; set; }
 
         /// <summary>
-        /// Gets or sets the live root entities that define the scene.
+        /// Gets or sets the live root entities that define the scene. These carry the content every platform
+        /// shares and are written without any platform scope.
         /// </summary>
         public Entity[] RootEntities { get; set; }
 
         /// <summary>
-        /// Gets or sets the optional Nintendo handheld scene augmentation merged into the canonical generated scene.
+        /// Gets or sets the roots that present the scene on a single screen: its instruction panels and the
+        /// standard UI kit. They are excluded from the dual-screen group, which presents the same content
+        /// through <see cref="NintendoDsScene"/> instead.
+        /// </summary>
+        public Entity[] DesktopPresentationRootEntities { get; set; }
+
+        /// <summary>
+        /// Gets or sets the optional dual-screen presentation merged into the canonical generated scene.
         /// </summary>
         public GeneratedDsSceneDefinition NintendoDsScene { get; set; }
     }

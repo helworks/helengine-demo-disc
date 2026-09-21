@@ -64,20 +64,21 @@ namespace DemoDisc.EditorTools {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = Array.Empty<Entity>()
+                    BottomScreenRootEntities = [CreateHandheldUiEntity()]
                 },
                 RootEntities = new[] {
                     CreateCameraEntity(),
-                    CreateUiEntity(),
                     CreateDirectionalLightEntity(),
                     CreateSpotLightEntity(),
-                    instructionOverlayEntity,
-                    consoleInstructionBlueprintEntity,
                     CreatePedestalEntity(cubeModel, pedestalMaterial),
                     CreateClusterSphereEntity("PbrShadowTheaterSphereLowRoughMetal", new float3(-1.3f, 1.8f, 0f), sphereModel, lowRoughnessMetal),
                     CreateClusterSphereEntity("PbrShadowTheaterSphereHighRoughMetal", new float3(1.3f, 1.8f, 0f), sphereModel, highRoughnessMetal),
                     CreateClusterSphereEntity("PbrShadowTheaterSphereDielectric", new float3(0f, 1.8f, 1.6f), sphereModel, lowRoughnessDielectric)
+                },
+                DesktopPresentationRootEntities = new[] {
+                    CreateUiEntity(),
+                    instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity
                 }
             };
         }
@@ -126,6 +127,14 @@ namespace DemoDisc.EditorTools {
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
             return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("PbrShadowTheaterUi", "15. PBR Shadow Theater");
+        }
+
+        /// <summary>
+        /// Creates the bottom-screen UI root shown on the dual-screen rigs.
+        /// </summary>
+        /// <returns>Live authored bottom-screen UI root entity.</returns>
+        Entity CreateHandheldUiEntity() {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateHandheldSceneUi("PbrShadowTheaterUi", "15. PBR Shadow Theater");
         }
 
         /// <summary>

@@ -1660,8 +1660,8 @@ namespace DemoDisc.EditorTools {
                 throw new InvalidOperationException($"Scene '{sceneId}' is not one of the playable physics showcases.");
             }
 
-            List<Entity> rootEntities = new List<Entity> {
-                cameraEntity,
+            List<Entity> rootEntities = new List<Entity> { cameraEntity };
+            List<Entity> desktopPresentationRoots = new List<Entity> {
                 CreateLivePhysicsShowcaseUiEntity(ResolveDemoDiscSceneLabel(normalizedSceneId))
             };
             if (includeDesktopInstructionOverlay) {
@@ -1669,26 +1669,22 @@ namespace DemoDisc.EditorTools {
                 FontAsset instructionFont = ResolveRequiredEditorFont();
                 Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
                 DemoDisc.EditorTools.ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new DemoDisc.EditorTools.ConsoleCameraLightInstructionsSceneAttachmentService();
-                rootEntities.Insert(1, instructionOverlayEntity);
-                rootEntities.Insert(2, consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService));
+                desktopPresentationRoots.Insert(0, instructionOverlayEntity);
+                desktopPresentationRoots.Insert(1, consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService));
             }
 
             IReadOnlyList<EditorEntity> scenarioRoots = LoadPlayablePhysicsShowcaseScenarioRoots(projectRootPath, authoredSceneAsset);
             for (int index = 0; index < scenarioRoots.Count; index++) {
                 rootEntities.Add(scenarioRoots[index]);
             }
-            for (int index = 0; index < rootEntities.Count; index++) {
-                if (rootEntities[index] is not EditorEntity editorRootEntity) {
-                    throw new InvalidOperationException("Playable physics showcase roots must be editor entities before they can be saved.");
-                }
-
-                AssignFreshGeneratedEditorEntityIds(editorRootEntity);
-            }
+            AssignFreshGeneratedEditorEntityIds(rootEntities);
+            AssignFreshGeneratedEditorEntityIds(desktopPresentationRoots);
 
             return new DemoDisc.EditorTools.GeneratedAuthoringSceneDefinition {
                 SceneId = normalizedSceneId,
                 SceneSettings = authoredSceneAsset.SceneSettings,
-                RootEntities = rootEntities.ToArray()
+                RootEntities = rootEntities.ToArray(),
+                DesktopPresentationRootEntities = desktopPresentationRoots.ToArray()
             };
         }
 
@@ -1807,6 +1803,44 @@ namespace DemoDisc.EditorTools {
                 AutoYawSpeedRadians = 0f
             });
             return entity;
+        }
+
+        /// <summary>
+        /// Assigns fresh generated ids across one authored root list.
+        /// </summary>
+        /// <param name="roots">Authored roots that should receive fresh ids.</param>
+        void AssignFreshGeneratedEditorEntityIds(List<Entity> roots) {
+            for (int index = 0; index < roots.Count; index++) {
+                if (roots[index] is not EditorEntity editorRootEntity) {
+                    throw new InvalidOperationException("Playable physics showcase roots must be editor entities before they can be saved.");
+                }
+
+                AssignFreshGeneratedEditorEntityIds(editorRootEntity);
+            }
+        }
+
+        /// <summary>
+        /// Creates the bottom-screen UI root shown on the dual-screen rigs for one playable showcase.
+        /// </summary>
+        /// <param name="sceneId">Authored or logical playable showcase scene id.</param>
+        /// <returns>Live authored bottom-screen UI root entity.</returns>
+        public Entity CreateHandheldShowcaseUi(string sceneId) {
+            return CreateHandheldPhysicsShowcaseUiEntity(
+                ResolveDemoDiscSceneLabel(NormalizePlayablePhysicsShowcaseSceneId(sceneId)));
+        }
+
+        /// <summary>
+        /// Creates the bottom-screen UI root shown on the dual-screen rigs.
+        /// </summary>
+        /// <param name="sceneLabel">Numbered scene label shown by debug-environment builds.</param>
+        /// <returns>Live authored bottom-screen UI root entity.</returns>
+        EditorEntity CreateHandheldPhysicsShowcaseUiEntity(string sceneLabel) {
+            Entity entity = new DemoDisc.EditorTools.DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateHandheldSceneUi("ShowcaseUi", sceneLabel);
+            if (entity is EditorEntity editorEntity) {
+                return editorEntity;
+            }
+
+            throw new InvalidOperationException("The physics showcase UI root must be authored through editor entities.");
         }
 
         /// <summary>

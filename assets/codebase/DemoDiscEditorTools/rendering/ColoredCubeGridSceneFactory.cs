@@ -182,23 +182,24 @@ namespace DemoDisc.EditorTools {
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
 
             Entity[] cubeEntities = CreateCubeEntities(cubeModel, coloredMaterials);
-            Entity[] rootEntities = new Entity[cubeEntities.Length + 5];
+            Entity[] rootEntities = new Entity[cubeEntities.Length + 2];
             Entity cameraEntity = CreateCameraEntity();
             rootEntities[0] = cameraEntity;
-            rootEntities[1] = CreateUiEntity();
-            rootEntities[2] = CreateDirectionalLightEntity();
-            rootEntities[3] = instructionOverlayEntity;
-            rootEntities[4] = consoleInstructionBlueprintEntity;
-            Array.Copy(cubeEntities, 0, rootEntities, 5, cubeEntities.Length);
+            rootEntities[1] = CreateDirectionalLightEntity();
+            Array.Copy(cubeEntities, 0, rootEntities, 2, cubeEntities.Length);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = Array.Empty<Entity>()
+                    BottomScreenRootEntities = [CreateHandheldUiEntity()]
                 },
-                RootEntities = rootEntities
+                RootEntities = rootEntities,
+                DesktopPresentationRootEntities = new[] {
+                    CreateUiEntity(),
+                    instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity
+                }
             };
         }
 
@@ -268,6 +269,14 @@ namespace DemoDisc.EditorTools {
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
             return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("ColoredCubeGridUi", "2. Colored Cubes");
+        }
+
+        /// <summary>
+        /// Creates the bottom-screen UI root shown on the dual-screen rigs.
+        /// </summary>
+        /// <returns>Live authored bottom-screen UI root entity.</returns>
+        Entity CreateHandheldUiEntity() {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateHandheldSceneUi("ColoredCubeGridUi", "2. Colored Cubes");
         }
 
         /// <summary>

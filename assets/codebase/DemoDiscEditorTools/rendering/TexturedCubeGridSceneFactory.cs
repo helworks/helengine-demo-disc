@@ -357,26 +357,27 @@ namespace DemoDisc.EditorTools {
             FontAsset instructionFont = ResolveRequiredEditorFont();
             DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction);
             Entity[] cubeEntities = CreateCubeEntities(cubeModel, texturedMaterials);
-            Entity[] rootEntities = new Entity[cubeEntities.Length + 5];
+            Entity[] rootEntities = new Entity[cubeEntities.Length + 2];
             Entity cameraEntity = CreateCameraEntity();
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
             rootEntities[0] = cameraEntity;
-            rootEntities[1] = instructionOverlayEntity;
-            rootEntities[2] = consoleInstructionBlueprintEntity;
-            rootEntities[3] = CreateUiEntity();
-            rootEntities[4] = CreateDirectionalLightEntity();
-            Array.Copy(cubeEntities, 0, rootEntities, 5, cubeEntities.Length);
+            rootEntities[1] = CreateDirectionalLightEntity();
+            Array.Copy(cubeEntities, 0, rootEntities, 2, cubeEntities.Length);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont)
+                    BottomScreenRootEntities = [.. instructionOverlayFactory.CreateNintendoDsBottomInstructionRoots(instructionFont), CreateHandheldUiEntity()]
                 },
-                RootEntities = rootEntities
+                RootEntities = rootEntities,
+                DesktopPresentationRootEntities = new[] {
+                    instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity,
+                    CreateUiEntity()
+                }
             };
         }
 
@@ -437,6 +438,14 @@ namespace DemoDisc.EditorTools {
         /// <returns>Live authored UI entity.</returns>
         Entity CreateUiEntity() {
             return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("TexturedCubeGridUi", "3. Textured Cubes");
+        }
+
+        /// <summary>
+        /// Creates the bottom-screen UI root shown on the dual-screen rigs.
+        /// </summary>
+        /// <returns>Live authored bottom-screen UI root entity.</returns>
+        Entity CreateHandheldUiEntity() {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateHandheldSceneUi("TexturedCubeGridUi", "3. Textured Cubes");
         }
 
         /// <summary>

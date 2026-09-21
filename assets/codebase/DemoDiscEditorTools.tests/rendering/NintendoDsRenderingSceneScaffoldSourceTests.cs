@@ -114,6 +114,40 @@ namespace DemoDisc.EditorTools.tests {
         }
 
         /// <summary>
+        /// Ensures a generated showcase authors its content once and varies only the presentation by group:
+        /// the content reaches every device, the single-screen presentation stops at the dual-screen rigs, and
+        /// the bottom screen exists only there.
+        /// </summary>
+        [Fact]
+        public void Generated_showcase_shares_its_content_and_varies_only_the_presentation() {
+            string scenePath = global::DemoDisc.testing.DemoDiscTestProject.GetPath(
+                "assets", "scenes", "rendering", "cube_test.helen");
+            using FileStream stream = File.OpenRead(scenePath);
+            SceneAsset sceneAsset = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
+
+            SceneEntityAsset cube = Assert.Single(sceneAsset.RootEntities.Where(entity => entity != null && entity.Name == "CubeTestCube"));
+            SceneEntityAsset camera = Assert.Single(sceneAsset.RootEntities.Where(entity => entity != null && entity.Name == "CubeTestCamera"));
+            SceneEntityAsset desktopUi = Assert.Single(sceneAsset.RootEntities.Where(entity => entity != null && entity.Name == "CubeTestUi"));
+            SceneEntityAsset bottomScreenCamera = Assert.Single(sceneAsset.RootEntities.Where(entity => entity != null && entity.Name == "DemoDiscBottomScreenCamera"));
+
+            // Content and camera are authored once and reach every device.
+            foreach (string platformId in new[] { "windows", "ps2", "ds", "3ds" }) {
+                Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(cube, platformId));
+                Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(camera, platformId));
+            }
+
+            Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(desktopUi, "windows"));
+            Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(desktopUi, "ps2"));
+            Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(desktopUi, "ds"));
+            Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(desktopUi, "3ds"));
+
+            Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(bottomScreenCamera, "ds"));
+            Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(bottomScreenCamera, "3ds"));
+            Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(bottomScreenCamera, "windows"));
+            Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(bottomScreenCamera, "ps2"));
+        }
+
+        /// <summary>
         /// Loads the generated shared bottom-screen chrome Blueprint root.
         /// </summary>
         /// <returns>Root entity of the chrome Blueprint.</returns>

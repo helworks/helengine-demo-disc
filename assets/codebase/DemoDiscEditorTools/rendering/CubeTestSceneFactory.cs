@@ -60,16 +60,17 @@ namespace DemoDisc.EditorTools {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = Array.Empty<Entity>()
+                    BottomScreenRootEntities = [CreateHandheldUiEntity()]
                 },
                 RootEntities = new[] {
                     cameraEntity,
-                    instructionOverlayEntity,
-                    consoleInstructionBlueprintEntity,
-                    uiEntity,
                     directionalLightEntity,
                     CreateCubeEntity(cubeModel, solidColorMaterial)
+                },
+                DesktopPresentationRootEntities = new[] {
+                    instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity,
+                    uiEntity
                 }
             };
         }
@@ -151,6 +152,14 @@ namespace DemoDisc.EditorTools {
         /// <returns>Live authored UI root entity.</returns>
         Entity CreateUiEntity() {
             return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("CubeTestUi", "1. Cube Test");
+        }
+
+        /// <summary>
+        /// Creates the bottom-screen UI root shown on the dual-screen rigs.
+        /// </summary>
+        /// <returns>Live authored bottom-screen UI root entity.</returns>
+        Entity CreateHandheldUiEntity() {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateHandheldSceneUi("CubeTestUi", "1. Cube Test");
         }
 
         /// <summary>

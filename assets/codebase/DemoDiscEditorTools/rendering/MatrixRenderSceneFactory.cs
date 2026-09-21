@@ -110,16 +110,17 @@ namespace DemoDisc.EditorTools {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
-                    UseDefaultBottomOverlay = true,
-                    BottomScreenRootEntities = Array.Empty<Entity>()
+                    BottomScreenRootEntities = [CreateHandheldUiEntity()]
                 },
                 RootEntities = new[] {
                     CreateCameraEntity(),
-                    CreateUiEntity(),
                     CreateKeyLightEntity(),
-                    instructionOverlayEntity,
-                    consoleInstructionBlueprintEntity,
                     CreateHeroEntity(cubeModel, CreateRuntimeMaterial())
+                },
+                DesktopPresentationRootEntities = new[] {
+                    CreateUiEntity(),
+                    instructionOverlayEntity,
+                    consoleInstructionBlueprintEntity
                 }
             };
         }
@@ -190,6 +191,14 @@ namespace DemoDisc.EditorTools {
             });
             phaseStatusEntity.AddComponent(new DemoDisc.rendering.MatrixRenderPhaseStatusTextComponent());
             return entity;
+        }
+
+        /// <summary>
+        /// Creates the bottom-screen UI root shown on the dual-screen rigs.
+        /// </summary>
+        /// <returns>Live authored bottom-screen UI root entity.</returns>
+        Entity CreateHandheldUiEntity() {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateHandheldSceneUi("MatrixRenderUi", "6. Matrix Render");
         }
 
         /// <summary>
