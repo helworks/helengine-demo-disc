@@ -1,6 +1,5 @@
 using System.Text.Json;
 using DemoDisc.EditorTools;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>
@@ -22,7 +21,7 @@ namespace DemoDisc.EditorTools.tests {
                     selectedSceneIds.Add(sceneId.GetString() ?? string.Empty);
                 }
 
-                Assert.DoesNotContain(DemoDisc.game.ZombislayerSceneIds.GameplaySceneId, selectedSceneIds);
+                Assert.DoesNotContain(DemoDisc.Zombislayer.ZombislayerSceneIds.GameplaySceneId, selectedSceneIds);
             }
         }
     }

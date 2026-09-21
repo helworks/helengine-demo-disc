@@ -1,6 +1,5 @@
 using System.Text.Json;
 using DemoDisc.EditorTools;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>
@@ -8,11 +7,11 @@ namespace DemoDisc.EditorTools.tests {
     /// </summary>
     public sealed class TiltTrialBuildConfigTests {
         static readonly string[] RequiredTiltTrialGameplaySceneIds = [
-            DemoDisc.game.TiltTrialSceneIds.Level01SceneId,
-            DemoDisc.game.TiltTrialSceneIds.Level02SceneId,
-            DemoDisc.game.TiltTrialSceneIds.Level03SceneId,
-            DemoDisc.game.TiltTrialSceneIds.Level04SceneId,
-            DemoDisc.game.TiltTrialSceneIds.Level05SceneId
+            DemoDisc.TiltPlay.TiltTrialSceneIds.Level01SceneId,
+            DemoDisc.TiltPlay.TiltTrialSceneIds.Level02SceneId,
+            DemoDisc.TiltPlay.TiltTrialSceneIds.Level03SceneId,
+            DemoDisc.TiltPlay.TiltTrialSceneIds.Level04SceneId,
+            DemoDisc.TiltPlay.TiltTrialSceneIds.Level05SceneId
         ];
 
         [Fact]
@@ -28,8 +27,8 @@ namespace DemoDisc.EditorTools.tests {
                     selectedSceneIds.Add(sceneId.GetString() ?? string.Empty);
                 }
 
-                if (!selectedSceneIds.Contains(DemoDisc.game.TiltTrialSceneIds.LevelSelectSceneId)
-                    && !selectedSceneIds.Contains(DemoDisc.game.TiltTrialSceneIds.HandheldLevelSelectSceneId)) {
+                if (!selectedSceneIds.Contains(DemoDisc.TiltPlay.TiltTrialSceneIds.LevelSelectSceneId)
+                    && !selectedSceneIds.Contains(DemoDisc.TiltPlay.TiltTrialSceneIds.HandheldLevelSelectSceneId)) {
                     continue;
                 }
 
@@ -79,7 +78,7 @@ namespace DemoDisc.EditorTools.tests {
             HashSet<string> selectedSceneIds = new HashSet<string>(
                 dsPlatform.GetProperty("selectedSceneIds").EnumerateArray().Select(sceneId => sceneId.GetString() ?? string.Empty),
                 StringComparer.Ordinal);
-            Assert.Contains(DemoDisc.game.TiltTrialSceneIds.HandheldLevelSelectSceneId, selectedSceneIds);
+            Assert.Contains(DemoDisc.TiltPlay.TiltTrialSceneIds.HandheldLevelSelectSceneId, selectedSceneIds);
             Assert.Contains(helengine.PlatformMenuSceneResolver.NintendoHandheldMainMenuSceneId, selectedSceneIds);
             foreach (string requiredSceneId in RequiredTiltTrialGameplaySceneIds) {
                 Assert.Contains(requiredSceneId, selectedSceneIds);
@@ -87,15 +86,15 @@ namespace DemoDisc.EditorTools.tests {
 
             Assert.Contains(
                 dsPlatform.GetProperty("sceneOrders").EnumerateArray(),
-                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), DemoDisc.game.TiltTrialSceneIds.HandheldLevelSelectSceneId, StringComparison.Ordinal)
+                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), DemoDisc.TiltPlay.TiltTrialSceneIds.HandheldLevelSelectSceneId, StringComparison.Ordinal)
                     && sceneOrder.GetProperty("orderNumber").GetInt32() == 12);
             Assert.Contains(
                 dsPlatform.GetProperty("sceneOrders").EnumerateArray(),
-                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), DemoDisc.game.TiltTrialSceneIds.Level01SceneId, StringComparison.Ordinal)
+                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), DemoDisc.TiltPlay.TiltTrialSceneIds.Level01SceneId, StringComparison.Ordinal)
                     && sceneOrder.GetProperty("orderNumber").GetInt32() == 13);
             Assert.Contains(
                 dsPlatform.GetProperty("sceneOrders").EnumerateArray(),
-                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), DemoDisc.game.TiltTrialSceneIds.Level05SceneId, StringComparison.Ordinal)
+                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), DemoDisc.TiltPlay.TiltTrialSceneIds.Level05SceneId, StringComparison.Ordinal)
                     && sceneOrder.GetProperty("orderNumber").GetInt32() == 17);
         }
 
@@ -113,8 +112,8 @@ namespace DemoDisc.EditorTools.tests {
                 platform.GetProperty("selectedSceneIds").EnumerateArray().Select(sceneId => sceneId.GetString() ?? string.Empty),
                 StringComparer.Ordinal);
 
-            Assert.Contains(DemoDisc.game.TiltTrialSceneIds.HandheldLevelSelectSceneId, selectedSceneIds);
-            Assert.DoesNotContain(DemoDisc.game.TiltTrialSceneIds.LevelSelectSceneId, selectedSceneIds);
+            Assert.Contains(DemoDisc.TiltPlay.TiltTrialSceneIds.HandheldLevelSelectSceneId, selectedSceneIds);
+            Assert.DoesNotContain(DemoDisc.TiltPlay.TiltTrialSceneIds.LevelSelectSceneId, selectedSceneIds);
             foreach (string requiredSceneId in RequiredTiltTrialGameplaySceneIds) {
                 Assert.Contains(requiredSceneId, selectedSceneIds);
             }

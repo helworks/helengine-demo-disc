@@ -5,6 +5,7 @@ using DemoDisc.EditorTools;
 using helengine;
 using helengine.editor;
 using System.Reflection;
+using DemoDisc.Raytracing;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>

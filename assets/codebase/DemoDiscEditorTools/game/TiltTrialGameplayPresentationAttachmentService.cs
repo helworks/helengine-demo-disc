@@ -1,5 +1,4 @@
 using helengine.editor;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools {
     /// <summary>
@@ -42,7 +41,7 @@ namespace DemoDisc.EditorTools {
 
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             ApplyWindowsOnlyDebugStatusOverrideToConsoleBlueprint(fullProjectRootPath);
-            foreach (global::DemoDisc.game.TiltTrialLevelCatalogEntry levelEntry in global::DemoDisc.game.TiltTrialLevelCatalog.CreateEntries()) {
+            foreach (global::DemoDisc.TiltPlay.TiltTrialLevelCatalogEntry levelEntry in global::DemoDisc.TiltPlay.TiltTrialLevelCatalog.CreateEntries()) {
                 string scenePath = ResolveAuthoredScenePath(fullProjectRootPath, levelEntry.SceneId);
                 SceneAsset sceneAsset = LoadScene(fullProjectRootPath, scenePath);
                 RemoveCurrentPresentationRoots(sceneAsset);

@@ -1,6 +1,7 @@
 using DemoDisc.rendering;
 using System.Runtime.CompilerServices;
 using DemoDisc.EditorTools;
+using DemoDisc.Raytracing;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>Verifies scattering additions preserve existing nested material bytes and persist through editor authoring.</summary>
@@ -45,7 +46,7 @@ namespace DemoDisc.EditorTools.tests {
                 SceneEntityAsset entity = pending.Pop();
                 foreach (SceneEntityAsset child in entity.Children ?? Array.Empty<SceneEntityAsset>()) pending.Push(child);
                 foreach (SceneComponentAssetRecord record in entity.Components ?? Array.Empty<SceneComponentAssetRecord>()) {
-                    if (!record.ComponentTypeId.StartsWith("DemoDisc.rendering.SoftwareModelComponent,", StringComparison.Ordinal)) continue;
+                    if (!record.ComponentTypeId.StartsWith("DemoDisc.Raytracing.SoftwareModelComponent,", StringComparison.Ordinal)) continue;
                     SoftwareModelComponent model = Assert.IsType<SoftwareModelComponent>(descriptor.DeserializeComponent(overrides.UnwrapBaseRecord(record), null, null));
                     Assert.Single(model.Materials);
                     Assert.Empty(model.Scattering);
@@ -71,7 +72,7 @@ namespace DemoDisc.EditorTools.tests {
                 SceneEntityAsset entity = pending.Pop();
                 foreach (SceneEntityAsset child in entity.Children ?? Array.Empty<SceneEntityAsset>()) pending.Push(child);
                 foreach (SceneComponentAssetRecord record in entity.Components ?? Array.Empty<SceneComponentAssetRecord>()) {
-                    if (!record.ComponentTypeId.StartsWith("DemoDisc.rendering.SoftwareModelComponent,", StringComparison.Ordinal)) continue;
+                    if (!record.ComponentTypeId.StartsWith("DemoDisc.Raytracing.SoftwareModelComponent,", StringComparison.Ordinal)) continue;
                     SoftwareModelComponent model = Assert.IsType<SoftwareModelComponent>(descriptor.DeserializeComponent(overrides.UnwrapBaseRecord(record), null, null));
                     if (model.ModelReference.SourceKind != SceneAssetReferenceSourceKind.FileSystem) continue;
                     Assert.Equal(32, model.ModelReference.AssetId.Length);

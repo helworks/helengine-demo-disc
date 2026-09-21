@@ -1,5 +1,4 @@
 using System.Globalization;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools {
     /// <summary>

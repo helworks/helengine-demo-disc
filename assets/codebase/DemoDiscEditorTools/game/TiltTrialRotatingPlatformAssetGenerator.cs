@@ -2,7 +2,6 @@
 using CityGeneratedMaterialAssetWriteService = DemoDisc.EditorTools.GeneratedMaterialAssetWriteService;
 using CityGeneratedMaterialPlatformDefinition = DemoDisc.EditorTools.GeneratedMaterialPlatformDefinition;
 using helengine.editor;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools {
     /// <summary>
@@ -116,7 +115,7 @@ namespace DemoDisc.EditorTools {
             };
             SceneComponentAssetRecord rigidBodyRecord = registry.GetDescriptor(platformRigidBody).SerializeComponent(platformRigidBody, 1, null);
             SceneComponentAssetRecord colliderRecord = registry.GetDescriptor(platformCollider).SerializeComponent(platformCollider, 2, null);
-            SceneComponentAssetRecord spinRecord = AutomaticDescriptor.SerializeComponent(new DemoDisc.game.TiltTrialRotatingPlatformComponent(), 3, null);
+            SceneComponentAssetRecord spinRecord = AutomaticDescriptor.SerializeComponent(new DemoDisc.TiltPlay.TiltTrialRotatingPlatformComponent(), 3, null);
 
             return new BlueprintAsset {
                 Id = RotatingPlatformBlueprintRelativePath,

@@ -1,5 +1,4 @@
 using DemoDisc.EditorTools;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>
@@ -43,7 +42,7 @@ namespace DemoDisc.EditorTools.tests {
         /// </summary>
         [Fact]
         public void Session_component_binds_handheld_result_button_visuals_by_stable_role() {
-            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialSessionComponent.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltTrialSessionComponent.cs"));
 
             Assert.Contains("TiltTrialResultRetryButton", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialResultExitButton", source, StringComparison.Ordinal);
@@ -59,7 +58,7 @@ namespace DemoDisc.EditorTools.tests {
         /// </summary>
         [Fact]
         public void Session_component_does_not_depend_on_presentation_child_order() {
-            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialSessionComponent.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltTrialSessionComponent.cs"));
 
             Assert.Contains("TryFindNamedEntity(Parent, \"TiltTrialTimerText\")", source, StringComparison.Ordinal);
             Assert.Contains("TryFindNamedEntity(Parent, \"TiltTrialResultsOverlay\")", source, StringComparison.Ordinal);
@@ -72,14 +71,14 @@ namespace DemoDisc.EditorTools.tests {
         [Fact]
         public void Handheld_gameplay_controller_owns_bottom_screen_presentation() {
             string factorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "GameSceneFactory.cs"));
-            string sessionSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialSessionComponent.cs"));
+            string sessionSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltTrialSessionComponent.cs"));
             sessionSource = sessionSource.Replace("\r\n", "\n", StringComparison.Ordinal);
 
             Assert.Contains("CreateHandheldGameplayControllerEntity", factorySource, StringComparison.Ordinal);
             Assert.Contains("root.AddChild(CreateHandheldGameplayControllerEntity(levelEntry));", factorySource, StringComparison.Ordinal);
             Assert.Contains("CreateHandheldGameplayBottomScreenCameraEntity", factorySource, StringComparison.Ordinal);
             Assert.Contains("TiltTrialHandheldGameplayBottomScreenRoot", factorySource, StringComparison.Ordinal);
-            Assert.Contains("controllerEntity.AddComponent(new DemoDisc.game.TiltTrialSessionComponent());", factorySource, StringComparison.Ordinal);
+            Assert.Contains("controllerEntity.AddComponent(new DemoDisc.TiltPlay.TiltTrialSessionComponent());", factorySource, StringComparison.Ordinal);
             Assert.DoesNotContain("CreateHandheldBottomUiEntity", factorySource, StringComparison.Ordinal);
             Assert.Contains("if (ResultsBodyTextComponent == null)", sessionSource, StringComparison.Ordinal);
             Assert.DoesNotContain("missingDependencies.Add(\"timer text\")", sessionSource, StringComparison.Ordinal);
@@ -108,7 +107,7 @@ namespace DemoDisc.EditorTools.tests {
             Assert.False(resultsOverlay.Enabled);
             Assert.False(failOverlay.Enabled);
 
-            string roleComponentTypeId = global::helengine.editor.AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(DemoDisc.game.TiltTrialPresentationRoleComponent));
+            string roleComponentTypeId = global::helengine.editor.AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(DemoDisc.TiltPlay.TiltTrialPresentationRoleComponent));
             SceneComponentAssetRecord startOverlayComponent = Assert.Single(startOverlay.Components);
             Assert.Equal(roleComponentTypeId, startOverlayComponent.ComponentTypeId);
             Assert.Equal(

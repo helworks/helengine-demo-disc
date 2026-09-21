@@ -4,7 +4,6 @@ using helengine.ui;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using DemoDisc.EditorTools;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>

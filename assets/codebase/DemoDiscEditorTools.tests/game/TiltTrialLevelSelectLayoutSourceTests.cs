@@ -1,5 +1,4 @@
 using DemoDisc.EditorTools;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>
@@ -28,7 +27,7 @@ namespace DemoDisc.EditorTools.tests {
             Assert.Contains("new byte4(26, 40, 61, 255), new byte4(122, 147, 182, 255)", source, StringComparison.Ordinal);
             Assert.DoesNotContain("TiltTrialLevelSelectPreviewPlaceholder", source, StringComparison.Ordinal);
 
-            string componentSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialLevelSelectComponent.cs"));
+            string componentSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltTrialLevelSelectComponent.cs"));
             Assert.Contains("public void HandleAction(TiltTrialLevelSelectAction action, int stageIndex)", componentSource, StringComparison.Ordinal);
             Assert.Contains("ShowDetails();", componentSource, StringComparison.Ordinal);
             Assert.Contains("ShowStageList();", componentSource, StringComparison.Ordinal);
@@ -148,7 +147,7 @@ namespace DemoDisc.EditorTools.tests {
         /// </summary>
         [Fact]
         public void Level_select_controller_formats_medals_one_per_line_on_all_platforms() {
-            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialLevelSelectComponent.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltTrialLevelSelectComponent.cs"));
 
             Assert.DoesNotContain("UseDetailsStage\n                ? $\"Targets G", source, StringComparison.Ordinal);
             Assert.Contains("$\"Gold  {FormatTimerSeconds(goldTimeSeconds)}\\nSilver {FormatTimerSeconds(silverTimeSeconds)}\\nBronze {FormatTimerSeconds(bronzeTimeSeconds)}\"", source, StringComparison.Ordinal);
@@ -159,7 +158,7 @@ namespace DemoDisc.EditorTools.tests {
         /// </summary>
         [Fact]
         public void Level_select_controller_uses_generated_platform_action_prompts() {
-            string componentSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialLevelSelectComponent.cs"));
+            string componentSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltTrialLevelSelectComponent.cs"));
             string factorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "GameSceneFactory.cs"));
 
             Assert.DoesNotContain("ResolvePlatformHintText", componentSource, StringComparison.Ordinal);
@@ -191,7 +190,7 @@ namespace DemoDisc.EditorTools.tests {
         /// </summary>
         [Fact]
         public void Level_select_controller_reuses_one_catalog_across_frames() {
-            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialLevelSelectComponent.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltTrialLevelSelectComponent.cs"));
 
             Assert.Contains("readonly IReadOnlyList<TiltTrialLevelCatalogEntry> LevelEntries;", source, StringComparison.Ordinal);
             Assert.Contains("LevelEntries = TiltTrialLevelCatalog.CreateEntries();", source, StringComparison.Ordinal);
@@ -203,7 +202,7 @@ namespace DemoDisc.EditorTools.tests {
         /// </summary>
         [Fact]
         public void Level_select_controller_supports_detail_action_stick_navigation() {
-            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialLevelSelectComponent.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltTrialLevelSelectComponent.cs"));
 
             Assert.Contains("int DetailActionIndex;", source, StringComparison.Ordinal);
             Assert.Contains("WasLeftStickUpPressed()", source, StringComparison.Ordinal);
@@ -218,7 +217,7 @@ namespace DemoDisc.EditorTools.tests {
         /// </summary>
         [Fact]
         public void Level_select_controller_supports_shared_keyboard_face_buttons() {
-            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialLevelSelectComponent.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltTrialLevelSelectComponent.cs"));
 
             Assert.Contains("inputSystem.WasKeyPressed(Keys.J)", source, StringComparison.Ordinal);
             Assert.Contains("inputSystem.WasKeyPressed(Keys.K)", source, StringComparison.Ordinal);

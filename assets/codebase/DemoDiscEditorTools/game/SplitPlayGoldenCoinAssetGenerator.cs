@@ -2,7 +2,6 @@ using CityGeneratedMaterialAssetDefinition = DemoDisc.EditorTools.GeneratedMater
 using CityGeneratedMaterialAssetWriteService = DemoDisc.EditorTools.GeneratedMaterialAssetWriteService;
 using CityGeneratedMaterialPlatformDefinition = DemoDisc.EditorTools.GeneratedMaterialPlatformDefinition;
 using helengine.editor;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools {
     /// <summary>
@@ -100,8 +99,8 @@ namespace DemoDisc.EditorTools {
             ComponentPersistenceRegistry registry = GeneratedScenePersistenceRegistryFactory.Create();
             SceneComponentAssetRecord baseRecord = registry.GetDescriptor(meshComponent).SerializeComponent(meshComponent, 0, saveState);
             SceneComponentAssetRecord meshRecord = new ComponentPlatformOverridePayloadService().Wrap(baseRecord, saveState);
-            SceneComponentAssetRecord collectibleRecord = AutomaticDescriptor.SerializeComponent(new DemoDisc.game.TiltTrialCollectibleCoinComponent(), 1, null);
-            SceneComponentAssetRecord idleMotionRecord = AutomaticDescriptor.SerializeComponent(new DemoDisc.game.SplitPlayIdleMotionComponent(), 2, null);
+            SceneComponentAssetRecord collectibleRecord = AutomaticDescriptor.SerializeComponent(new DemoDisc.TiltPlay.TiltTrialCollectibleCoinComponent(), 1, null);
+            SceneComponentAssetRecord idleMotionRecord = AutomaticDescriptor.SerializeComponent(new DemoDisc.TiltPlay.SplitPlayIdleMotionComponent(), 2, null);
             SceneComponentAssetRecord observerRecord = SerializeWithStableKey(registry, new global::helengine.SceneEntityTriggerObserverComponent(), 3, TriggerObserverComponentKey);
             SceneComponentAssetRecord rigidBodyRecord = SerializeWithStableKey(registry, new RigidBody3DComponent {
                 BodyKind = BodyKind3D.Kinematic,

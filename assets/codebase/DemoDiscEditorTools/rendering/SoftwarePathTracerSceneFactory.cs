@@ -2,6 +2,7 @@ using DemoDisc.rendering;
 using DemoDisc.menu;
 using helengine;
 using helengine.editor;
+using DemoDisc.Raytracing;
 
 namespace DemoDisc.EditorTools {
     /// <summary>

@@ -1,7 +1,10 @@
 {
   "moduleId": "DemoDiscEditorTools",
   "dependencyModuleIds": [
-    "DemoDisc"
+    "DemoDisc",
+    "TiltPlay",
+    "Zombislayer",
+    "Raytracing"
   ],
   "loadScopes": [
     "always-loaded"

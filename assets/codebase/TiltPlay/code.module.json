@@ -1,0 +1,10 @@
+{
+  "moduleId": "TiltPlay",
+  "dependencyModuleIds": [
+    "DemoDisc"
+  ],
+  "loadScopes": [
+    "always-loaded"
+  ],
+  "moduleKind": "runtime"
+}

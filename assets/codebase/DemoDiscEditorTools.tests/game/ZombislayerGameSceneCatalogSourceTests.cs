@@ -1,5 +1,4 @@
 using DemoDisc.EditorTools;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>
@@ -13,7 +12,7 @@ namespace DemoDisc.EditorTools.tests {
         public void Scene_catalog_reuses_runtime_zombislayer_scene_id() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\GameSceneCatalog.cs");
 
-            Assert.Contains("global::DemoDisc.game.ZombislayerSceneIds.GameplaySceneId", source, StringComparison.Ordinal);
+            Assert.Contains("global::DemoDisc.Zombislayer.ZombislayerSceneIds.GameplaySceneId", source, StringComparison.Ordinal);
         }
     }
 }

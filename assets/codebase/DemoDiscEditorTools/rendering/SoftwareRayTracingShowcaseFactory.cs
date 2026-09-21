@@ -1,6 +1,7 @@
 using helengine;
 using helengine.editor;
 using DemoDisc.rendering;
+using DemoDisc.Raytracing;
 
 namespace DemoDisc.EditorTools {
     /// <summary>Authors three distinct compositions for the shared software tracer.</summary>

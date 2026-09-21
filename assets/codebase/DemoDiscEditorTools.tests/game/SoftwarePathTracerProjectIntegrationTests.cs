@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using DemoDisc.EditorTools;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>
@@ -147,7 +146,7 @@ namespace DemoDisc.EditorTools.tests {
             Assert.Equal("directx11", windows.GetProperty("selectedGraphicsProfileId").GetString());
 
             foreach (string platformId in ExpectedPlatformIds) {
-                DemoDisc.rendering.SoftwareTraceResolution resolution = DemoDisc.rendering.SoftwareTraceResolution.ForPlatform(platformId);
+                DemoDisc.Raytracing.SoftwareTraceResolution resolution = DemoDisc.Raytracing.SoftwareTraceResolution.ForPlatform(platformId);
                 if (platformId == "ds") {
                     Assert.Equal(256, resolution.Width);
                     Assert.Equal(192, resolution.Height);

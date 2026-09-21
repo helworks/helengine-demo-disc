@@ -1,5 +1,4 @@
 using helengine.editor;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools {
     /// <summary>
@@ -150,7 +149,7 @@ namespace DemoDisc.EditorTools {
             entity.LocalPosition = new float3(0f, 1.65f, 0f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new DemoDisc.game.ZombislayerFpsControllerComponent());
+            entity.AddComponent(new DemoDisc.Zombislayer.ZombislayerFpsControllerComponent());
             Entity cameraPivotEntity = CreateCameraPivotEntity(entity);
             CreateCameraEntity(cameraPivotEntity);
             CreateWeaponEntity(cameraPivotEntity);
@@ -172,7 +171,7 @@ namespace DemoDisc.EditorTools {
                 throw new ArgumentNullException(nameof(parent));
             }
 
-            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, DemoDisc.game.ZombislayerFpsControllerComponent.CameraPivotEntityName);
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, DemoDisc.Zombislayer.ZombislayerFpsControllerComponent.CameraPivotEntityName);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
@@ -247,12 +246,12 @@ namespace DemoDisc.EditorTools {
                 throw new ArgumentNullException(nameof(parent));
             }
 
-            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, DemoDisc.game.ZombislayerFpsControllerComponent.SessionRootEntityName);
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, DemoDisc.Zombislayer.ZombislayerFpsControllerComponent.SessionRootEntityName);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new DemoDisc.game.ZombislayerSessionComponent());
+            entity.AddComponent(new DemoDisc.Zombislayer.ZombislayerSessionComponent());
             entity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
                 FixedSize = new int2(1280, 720)

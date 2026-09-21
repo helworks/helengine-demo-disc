@@ -1,5 +1,4 @@
 using helengine.editor;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools {
     /// <summary>

@@ -2,7 +2,6 @@ using CityGeneratedMaterialAssetDefinition = DemoDisc.EditorTools.GeneratedMater
 using CityGeneratedMaterialAssetWriteService = DemoDisc.EditorTools.GeneratedMaterialAssetWriteService;
 using CityGeneratedMaterialPlatformDefinition = DemoDisc.EditorTools.GeneratedMaterialPlatformDefinition;
 using helengine.editor;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools {
     /// <summary>
@@ -102,7 +101,7 @@ namespace DemoDisc.EditorTools {
             SceneComponentAssetRecord baseRecord = registry.GetDescriptor(meshComponent).SerializeComponent(meshComponent, 0, saveState);
             SceneComponentAssetRecord meshRecord = new ComponentPlatformOverridePayloadService().Wrap(baseRecord, saveState);
 
-            SceneComponentAssetRecord goalRecord = SerializeWithStableKey(registry, new global::DemoDisc.game.TiltTrialGoalComponent(), 1, GoalComponentKey);
+            SceneComponentAssetRecord goalRecord = SerializeWithStableKey(registry, new global::DemoDisc.TiltPlay.TiltTrialGoalComponent(), 1, GoalComponentKey);
             SceneComponentAssetRecord observerRecord = SerializeWithStableKey(registry, new global::helengine.SceneEntityTriggerObserverComponent(), 2, TriggerObserverComponentKey);
             SceneComponentAssetRecord rigidBodyRecord = SerializeWithStableKey(registry, new RigidBody3DComponent {
                 BodyKind = BodyKind3D.Kinematic,

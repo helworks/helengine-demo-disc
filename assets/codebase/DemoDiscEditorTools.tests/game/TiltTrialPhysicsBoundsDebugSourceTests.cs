@@ -1,5 +1,4 @@
 using DemoDisc.EditorTools;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>
@@ -12,12 +11,12 @@ namespace DemoDisc.EditorTools.tests {
 
             Assert.Contains("CreatePhysicsBoundsDebugEntity()", source, StringComparison.Ordinal);
             Assert.Contains("Create(\"TiltTrialPhysicsBoundsDebug\")", source, StringComparison.Ordinal);
-            Assert.Contains("entity.AddComponent(new global::DemoDisc.game.TiltTrialPhysicsBoundsDebugDrawComponent());", source, StringComparison.Ordinal);
+            Assert.Contains("entity.AddComponent(new global::DemoDisc.TiltPlay.TiltTrialPhysicsBoundsDebugDrawComponent());", source, StringComparison.Ordinal);
         }
 
         [Fact]
         public void Tilt_trial_physics_bounds_debug_component_keeps_the_windows_only_f3_toggle_contract() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialPhysicsBoundsDebugDrawComponent.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\TiltPlay\TiltTrialPhysicsBoundsDebugDrawComponent.cs");
 
             Assert.Contains("const Keys ToggleKey = Keys.F3;", source, StringComparison.Ordinal);
             Assert.Contains("const string WindowsPlatformId = \"windows\";", source, StringComparison.Ordinal);
@@ -29,7 +28,7 @@ namespace DemoDisc.EditorTools.tests {
 
         [Fact]
         public void Tilt_trial_physics_bounds_debug_behavior_is_compiled_only_for_debug_environment() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialPhysicsBoundsDebugDrawComponent.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\TiltPlay\TiltTrialPhysicsBoundsDebugDrawComponent.cs");
 
             Assert.Contains("#if HELENGINE_ENV_DEBUG && DESKTOP_PLATFORM", source, StringComparison.Ordinal);
             Assert.Contains("#if HELENGINE_ENV_DEBUG", source, StringComparison.Ordinal);
@@ -37,7 +36,7 @@ namespace DemoDisc.EditorTools.tests {
 
         [Fact]
         public void Tilt_trial_physics_bounds_debug_component_scales_authored_box_collider_size_by_entity_scale() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\TiltTrialPhysicsBoundsDebugDrawComponent.cs");
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\TiltPlay\TiltTrialPhysicsBoundsDebugDrawComponent.cs");
 
             Assert.Contains("boxBounds.Size.X * entityScale.X", source, StringComparison.Ordinal);
             Assert.Contains("float3 halfExtents = CreateBoxHalfExtents(scaledSize);", source, StringComparison.Ordinal);
@@ -49,7 +48,7 @@ namespace DemoDisc.EditorTools.tests {
 
             Assert.Contains("\"TiltTrialPhysicsBoundsStatusText\"", source, StringComparison.Ordinal);
             Assert.Contains("\"F3 Bounds Off\"", source, StringComparison.Ordinal);
-            Assert.Contains("physicsBoundsStatusTextEntity.AddComponent(new DemoDisc.game.TiltTrialPhysicsBoundsStatusTextComponent());", source, StringComparison.Ordinal);
+            Assert.Contains("physicsBoundsStatusTextEntity.AddComponent(new DemoDisc.TiltPlay.TiltTrialPhysicsBoundsStatusTextComponent());", source, StringComparison.Ordinal);
         }
 
         /// <summary>

@@ -2,7 +2,6 @@ using System.Reflection;
 using DemoDisc.EditorTools;
 using helengine;
 using helengine.editor;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>

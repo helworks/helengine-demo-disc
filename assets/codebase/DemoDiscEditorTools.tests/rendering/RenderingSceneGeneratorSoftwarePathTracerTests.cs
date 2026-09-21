@@ -2,6 +2,7 @@ using DemoDisc.rendering;
 using DemoDisc.EditorTools;
 using helengine;
 using helengine.editor;
+using DemoDisc.Raytracing;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>

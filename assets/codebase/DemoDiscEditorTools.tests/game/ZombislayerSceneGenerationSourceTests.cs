@@ -1,5 +1,4 @@
 using DemoDisc.EditorTools;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>
@@ -27,8 +26,8 @@ namespace DemoDisc.EditorTools.tests {
         public void Zombislayer_scene_factory_authors_imported_models_session_and_fps_controller() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\ZombislayerSceneFactory.cs");
 
-            Assert.Contains("new DemoDisc.game.ZombislayerSessionComponent()", source, StringComparison.Ordinal);
-            Assert.Contains("new DemoDisc.game.ZombislayerFpsControllerComponent()", source, StringComparison.Ordinal);
+            Assert.Contains("new DemoDisc.Zombislayer.ZombislayerSessionComponent()", source, StringComparison.Ordinal);
+            Assert.Contains("new DemoDisc.Zombislayer.ZombislayerFpsControllerComponent()", source, StringComparison.Ordinal);
             Assert.Contains("\"ZombislayerWeapon\"", source, StringComparison.Ordinal);
             Assert.Contains("\"ZombislayerPauseOverlay\"", source, StringComparison.Ordinal);
             Assert.Contains("AuthoringSession.CreateFileReference(ZombislayerAssetCatalog.EnvironmentModelRelativePath, AssetEntryKind.Model)", source, StringComparison.Ordinal);
@@ -71,7 +70,7 @@ namespace DemoDisc.EditorTools.tests {
             SceneAsset scene = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
 
             Assert.Equal(expectedIdentity, scene.AuthoringAssetId);
-            Assert.Equal("zombislayer", global::DemoDisc.game.ZombislayerSceneIds.GameplaySceneId);
+            Assert.Equal("zombislayer", global::DemoDisc.Zombislayer.ZombislayerSceneIds.GameplaySceneId);
             Assert.Contains(scene.AssetReferences, reference => string.Equals(
                 reference.RelativePath,
                 global::DemoDisc.EditorTools.ZombislayerAssetCatalog.EnvironmentModelRelativePath,

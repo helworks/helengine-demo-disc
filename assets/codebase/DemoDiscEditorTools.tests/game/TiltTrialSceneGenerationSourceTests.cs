@@ -1,5 +1,4 @@
 using DemoDisc.EditorTools;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>
@@ -41,8 +40,8 @@ namespace DemoDisc.EditorTools.tests {
             Assert.Contains("const string TiltTrialGameplaySceneAssetDirectoryRelativePath = \"scenes/games/tilt\";", source, StringComparison.Ordinal);
             Assert.Contains("SceneAssetRelativePath = TiltTrialLevelSelectSceneAssetRelativePath", source, StringComparison.Ordinal);
             Assert.Contains("SceneAssetRelativePath = BuildTiltTrialGameplaySceneAssetRelativePath(levelEntry.SceneId)", source, StringComparison.Ordinal);
-            Assert.Contains("new DemoDisc.game.TiltTrialLevelSettingsComponent", source, StringComparison.Ordinal);
-            Assert.Contains("new DemoDisc.game.TiltTrialSessionComponent", source, StringComparison.Ordinal);
+            Assert.Contains("new DemoDisc.TiltPlay.TiltTrialLevelSettingsComponent", source, StringComparison.Ordinal);
+            Assert.Contains("new DemoDisc.TiltPlay.TiltTrialSessionComponent", source, StringComparison.Ordinal);
             Assert.Contains("CreateTiltTrialConsolePresentationRoot", source, StringComparison.Ordinal);
             Assert.Contains("CreateTiltTrialHandheldPresentationRoot", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialPresentationActionComponent", source, StringComparison.Ordinal);
@@ -58,7 +57,7 @@ namespace DemoDisc.EditorTools.tests {
             Assert.Contains("CreateTiltTrialStartPromptPlatformOverride", source, StringComparison.Ordinal);
             Assert.Contains("\"ps2\", \"ps2\", \"cross\"", source, StringComparison.Ordinal);
             Assert.DoesNotContain("Press \\\"X\\\" to start", source, StringComparison.Ordinal);
-            Assert.Contains("new DemoDisc.game.TiltTrialLevelSelectComponent", source, StringComparison.Ordinal);
+            Assert.Contains("new DemoDisc.TiltPlay.TiltTrialLevelSelectComponent", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltTrialCoinText\"", source, StringComparison.Ordinal);
             Assert.Contains("\"Coins 0/0\"", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltTrialTargetTimesText\"", source, StringComparison.Ordinal);
@@ -116,8 +115,8 @@ namespace DemoDisc.EditorTools.tests {
             Assert.Contains("\"TiltPlayOptionsPanel\"", source, StringComparison.Ordinal);
             Assert.Contains("\"Settings coming soon\"", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltPlayLevelSelectPanel\"", source, StringComparison.Ordinal);
-            Assert.Contains("new DemoDisc.game.TiltPlayMenuComponent()", source, StringComparison.Ordinal);
-            Assert.Contains("new DemoDisc.game.TiltPlayMenuActionComponent", source, StringComparison.Ordinal);
+            Assert.Contains("new DemoDisc.TiltPlay.TiltPlayMenuComponent()", source, StringComparison.Ordinal);
+            Assert.Contains("new DemoDisc.TiltPlay.TiltPlayMenuActionComponent", source, StringComparison.Ordinal);
             Assert.Contains("new float3(12f, 2f, 0.1f)", source, StringComparison.Ordinal);
             Assert.Contains("new int2(size.X - 16, size.Y - 8)", source, StringComparison.Ordinal);
         }
@@ -129,7 +128,7 @@ namespace DemoDisc.EditorTools.tests {
         public void Tilt_trial_front_door_title_panel_has_its_required_presentation_role() {
             string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "GameSceneFactory.cs"));
 
-            Assert.Contains("titlePanel.AddComponent(new DemoDisc.game.TiltTrialPresentationRoleComponent {", source, StringComparison.Ordinal);
+            Assert.Contains("titlePanel.AddComponent(new DemoDisc.TiltPlay.TiltTrialPresentationRoleComponent {", source, StringComparison.Ordinal);
             Assert.Contains("Role = \"TiltPlayTitlePanel\"", source, StringComparison.Ordinal);
         }
 
@@ -140,7 +139,7 @@ namespace DemoDisc.EditorTools.tests {
         public void Tilt_trial_front_door_sprite_factory_assigns_the_sprite_role() {
             string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "GameSceneFactory.cs"));
 
-            Assert.Contains("spriteEntity.AddComponent(new DemoDisc.game.TiltTrialPresentationRoleComponent {", source, StringComparison.Ordinal);
+            Assert.Contains("spriteEntity.AddComponent(new DemoDisc.TiltPlay.TiltTrialPresentationRoleComponent {", source, StringComparison.Ordinal);
             Assert.Contains("Role = name", source, StringComparison.Ordinal);
         }
 
@@ -150,14 +149,14 @@ namespace DemoDisc.EditorTools.tests {
         [Fact]
         public void Tilt_trial_front_door_generates_the_arena_title_treatment() {
             string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "GameSceneFactory.cs"));
-            string menuSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltPlayMenuComponent.cs"));
+            string menuSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltPlayMenuComponent.cs"));
 
             Assert.Contains("CreateTiltPlayViewportBackgroundEntity()", source, StringComparison.Ordinal);
             Assert.Contains("\"TiltPlayPlayButton\"", source, StringComparison.Ordinal);
             Assert.Contains("new int2(520, 72)", source, StringComparison.Ordinal);
-            Assert.Contains("DemoDisc.game.TiltPlayMenuAction.Play", source, StringComparison.Ordinal);
-            Assert.Contains("DemoDisc.game.TiltPlayMenuAction.Options", source, StringComparison.Ordinal);
-            Assert.Contains("DemoDisc.game.TiltPlayMenuAction.BackToDemoDisc", source, StringComparison.Ordinal);
+            Assert.Contains("DemoDisc.TiltPlay.TiltPlayMenuAction.Play", source, StringComparison.Ordinal);
+            Assert.Contains("DemoDisc.TiltPlay.TiltPlayMenuAction.Options", source, StringComparison.Ordinal);
+            Assert.Contains("DemoDisc.TiltPlay.TiltPlayMenuAction.BackToDemoDisc", source, StringComparison.Ordinal);
             Assert.Contains("ApplyTitleActionSelection", menuSource, StringComparison.Ordinal);
             Assert.Contains("PlayButtonSelectedOverlay.Enabled", menuSource, StringComparison.Ordinal);
             Assert.Contains("OptionsButtonSelectedOverlay.Enabled", menuSource, StringComparison.Ordinal);
@@ -183,7 +182,7 @@ namespace DemoDisc.EditorTools.tests {
         [Fact]
         public void Tilt_trial_front_door_uses_authored_png_sprites_for_title_chrome() {
             string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "GameSceneFactory.cs"));
-            string menuSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltPlayMenuComponent.cs"));
+            string menuSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltPlayMenuComponent.cs"));
 
             Assert.Contains("textures/ui/tilt_trial/title/background.png", source, StringComparison.Ordinal);
             Assert.Contains("textures/ui/tilt_trial/title/button_primary.png", source, StringComparison.Ordinal);
@@ -244,7 +243,7 @@ namespace DemoDisc.EditorTools.tests {
         /// </summary>
         [Fact]
         public void Gameplay_session_refreshes_target_times_from_current_level() {
-            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialSessionComponent.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltTrialSessionComponent.cs"));
 
             Assert.Contains("TargetTimesTextComponent", source, StringComparison.Ordinal);
             Assert.Contains("TryFindNamedEntity(Parent, \"TiltTrialTargetTimesText\")", source, StringComparison.Ordinal);

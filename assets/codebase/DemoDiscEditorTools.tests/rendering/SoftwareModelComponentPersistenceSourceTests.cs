@@ -17,15 +17,15 @@ namespace DemoDisc.EditorTools.tests {
                 "1234567890abcdef1234567890abcdef",
                 "models/software-path-tracer-probe.hmodel",
                 "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef");
-            DemoDisc.rendering.SoftwareModelComponent component = new DemoDisc.rendering.SoftwareModelComponent {
+            DemoDisc.Raytracing.SoftwareModelComponent component = new DemoDisc.Raytracing.SoftwareModelComponent {
                 ModelReference = modelReference,
                 Materials = new[] {
-                    new DemoDisc.rendering.SoftwareMaterial {
+                    new DemoDisc.Raytracing.SoftwareMaterial {
                         DiffuseColor = new float3(0.1f, 0.2f, 0.3f),
                         EmissionColor = new float3(0.4f, 0.5f, 0.6f),
                         EmissionStrength = 1.25f
                     },
-                    new DemoDisc.rendering.SoftwareMaterial {
+                    new DemoDisc.Raytracing.SoftwareMaterial {
                         DiffuseColor = new float3(0.7f, 0.8f, 0.9f),
                         EmissionColor = new float3(0.9f, 0.8f, 0.7f),
                         EmissionStrength = 4.5f
@@ -39,7 +39,7 @@ namespace DemoDisc.EditorTools.tests {
                 component,
                 componentIndex: 0,
                 saveState: new EntityComponentSaveState());
-            DemoDisc.rendering.SoftwareModelComponent restored = Assert.IsType<DemoDisc.rendering.SoftwareModelComponent>(
+            DemoDisc.Raytracing.SoftwareModelComponent restored = Assert.IsType<DemoDisc.Raytracing.SoftwareModelComponent>(
                 descriptor.DeserializeComponent(record, saveComponent: null, referenceResolver: null));
 
             Assert.NotNull(restored.ModelReference);
@@ -72,10 +72,10 @@ namespace DemoDisc.EditorTools.tests {
         [Fact]
         public void Automatic_persistence_schema_has_no_runtime_model_member_path() {
             ScriptComponentReflectionSchema schema = new ScriptComponentReflectionSchemaBuilder().Build(
-                typeof(DemoDisc.rendering.SoftwareModelComponent));
+                typeof(DemoDisc.Raytracing.SoftwareModelComponent));
 
-            Assert.Contains(schema.Members, member => member.Name == nameof(DemoDisc.rendering.SoftwareModelComponent.ModelReference));
-            Assert.Contains(schema.Members, member => member.Name == nameof(DemoDisc.rendering.SoftwareModelComponent.Materials));
+            Assert.Contains(schema.Members, member => member.Name == nameof(DemoDisc.Raytracing.SoftwareModelComponent.ModelReference));
+            Assert.Contains(schema.Members, member => member.Name == nameof(DemoDisc.Raytracing.SoftwareModelComponent.Materials));
             Assert.DoesNotContain(schema.Members, member => member.Name == "Model");
             Assert.DoesNotContain(schema.Members, member => member.Name == "RuntimeModel");
             Assert.DoesNotContain(schema.Members, member => member.ValueType == typeof(RuntimeModel));

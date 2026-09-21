@@ -2,7 +2,6 @@
 using CityGeneratedMaterialAssetWriteService = DemoDisc.EditorTools.GeneratedMaterialAssetWriteService;
 using CityGeneratedMaterialPlatformDefinition = DemoDisc.EditorTools.GeneratedMaterialPlatformDefinition;
 using helengine.editor;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools {
     /// <summary>
@@ -140,7 +139,7 @@ namespace DemoDisc.EditorTools {
             ComponentPersistenceRegistry registry = GeneratedScenePersistenceRegistryFactory.Create();
             SceneComponentAssetRecord baseRecord = registry.GetDescriptor(meshComponent).SerializeComponent(meshComponent, 0, saveState);
             SceneComponentAssetRecord meshRecord = new ComponentPlatformOverridePayloadService().Wrap(baseRecord, saveState);
-            SceneComponentAssetRecord swingRecord = AutomaticDescriptor.SerializeComponent(new DemoDisc.game.TiltTrialPendulumHammerComponent(), 1, null);
+            SceneComponentAssetRecord swingRecord = AutomaticDescriptor.SerializeComponent(new DemoDisc.TiltPlay.TiltTrialPendulumHammerComponent(), 1, null);
 
             RigidBody3DComponent headRigidBody = new RigidBody3DComponent {
                 BodyKind = BodyKind3D.Kinematic,

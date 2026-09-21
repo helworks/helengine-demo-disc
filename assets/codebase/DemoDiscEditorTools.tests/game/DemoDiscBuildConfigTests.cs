@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Runtime.CompilerServices;
 using DemoDisc.EditorTools;
-using DemoDisc.game;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>
