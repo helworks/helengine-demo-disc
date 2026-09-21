@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     public sealed class DemoDiscSceneLabelOverlaySourceTests {
         static readonly string ProjectRootPath = ResolveProjectRoot();
 
@@ -31,7 +31,7 @@ namespace city.tests {
             Assert.Contains("AssetAuthoringService.CreateFileReference(SceneLabelFontRelativePath, AssetEntryKind.Font)", source, StringComparison.Ordinal);
             Assert.Contains("const int SceneLabelRenderOrder = 7;", source, StringComparison.Ordinal);
             Assert.Contains("RenderOrder2D = SceneLabelRenderOrder", source, StringComparison.Ordinal);
-            Assert.Contains("sceneUiEntity.AddComponent(new city.rendering.DemoDiscDebugSceneLabelComponent())", source, StringComparison.Ordinal);
+            Assert.Contains("sceneUiEntity.AddComponent(new DemoDisc.rendering.DemoDiscDebugSceneLabelComponent())", source, StringComparison.Ordinal);
             Assert.Contains("labelEntity.Enabled = true;", source, StringComparison.Ordinal);
         }
 

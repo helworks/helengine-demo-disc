@@ -1,6 +1,6 @@
-using city.menu;
+using DemoDisc.menu;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the canonical live-authored scene definition for the minimal ground-and-cube probe scene.
     /// </summary>
@@ -95,7 +95,7 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = float3.Zero,
                 AutoYawSpeedRadians = 0f
             });

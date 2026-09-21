@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Drives the playable Tilt Trial sphere with camera-relative planar velocity steering while leaving the authored course fixed in place.
     /// </summary>
@@ -258,21 +258,21 @@ namespace city.game {
             }
 #endif
 
-            if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.DPadLeft)) {
+            if (DemoDisc.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.DPadLeft)) {
                 horizontal -= 1d;
             }
-            if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.DPadRight)) {
+            if (DemoDisc.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.DPadRight)) {
                 horizontal += 1d;
             }
-            if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.DPadUp)) {
+            if (DemoDisc.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.DPadUp)) {
                 forward += 1d;
             }
-            if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.DPadDown)) {
+            if (DemoDisc.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.DPadDown)) {
                 forward -= 1d;
             }
 
-            horizontal += NormalizeStickAxis(city.menu.DemoDiscGamepadInput.GetLeftStickX(inputSystem));
-            forward += -NormalizeStickAxis(city.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem));
+            horizontal += NormalizeStickAxis(DemoDisc.menu.DemoDiscGamepadInput.GetLeftStickX(inputSystem));
+            forward += -NormalizeStickAxis(DemoDisc.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem));
 
             return new float2(
                 (float)Math.Clamp(horizontal, -1d, 1d),

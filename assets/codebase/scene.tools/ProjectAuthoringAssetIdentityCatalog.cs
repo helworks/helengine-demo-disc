@@ -1,4 +1,4 @@
-namespace city.scene.tools {
+namespace DemoDisc.scene.tools {
     /// <summary>
     /// Explicit identities assigned to project-authored native outputs.
     /// </summary>

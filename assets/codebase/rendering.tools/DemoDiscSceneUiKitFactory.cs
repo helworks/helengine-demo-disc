@@ -1,4 +1,4 @@
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the standard demo-disc scene UI root so every rendering and physics showcase scene shares one 2D overlay kit.
     /// </summary>
@@ -34,8 +34,8 @@ namespace city.rendering.tools {
             });
             PspFpsComponentOverrideService.Apply(entity);
             Nintendo64FpsComponentOverrideService.Apply(entity);
-            entity.AddComponent(new city.menu.DemoDiscReturnToMenuComponent());
-            entity.AddComponent(new city.rendering.DemoDiscLightToggleComponent());
+            entity.AddComponent(new DemoDisc.menu.DemoDiscReturnToMenuComponent());
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscLightToggleComponent());
             DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory(AssetAuthoringService);
             lightIndicatorOverlayFactory.AttachToSceneUi(entity, font);
             if (!string.IsNullOrWhiteSpace(sceneLabel)) {

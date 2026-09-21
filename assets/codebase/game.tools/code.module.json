@@ -1,7 +1,7 @@
 {
   "moduleId": "game.tools",
   "dependencyModuleIds": [
-    "gameplay",
+    "DemoDisc",
     "rendering.tools"
   ],
   "loadScopes": [

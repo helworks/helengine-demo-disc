@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Describes the behavior executed by one city demo-disc menu item when the player confirms it.
     /// </summary>

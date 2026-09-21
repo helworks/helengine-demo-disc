@@ -1,4 +1,4 @@
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Placeholder authored component that preserves scene-memory probe scene generation after the original runtime probe system was removed.
     /// </summary>

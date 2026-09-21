@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Stores one authored directional light state so the demo-disc light cycle can restore the original intensity and shadow behavior for any active color state.
     /// </summary>

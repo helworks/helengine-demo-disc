@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Stores authored per-level Tilt Trial metadata used by timer, medals, and next-scene flow.
     /// </summary>

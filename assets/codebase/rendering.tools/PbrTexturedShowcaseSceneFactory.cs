@@ -1,8 +1,8 @@
-using city.menu;
+using DemoDisc.menu;
 using helengine.editor;
 using helengine;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the authored PBR textured showcase scene: a scuffed-metal prop and a wood-plank prop lit by one shadow-casting sun.
     /// </summary>
@@ -107,7 +107,7 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = new float3(0f, 1.2f, 0f),
                 AutoYawSpeedRadians = 0.08f
             });

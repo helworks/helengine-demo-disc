@@ -1,4 +1,4 @@
-namespace city.menu.tools.tests {
+namespace DemoDisc.menu.tools.tests {
     /// <summary>
     /// Verifies that generated menu button labels use the shared purple outline style.
     /// </summary>
@@ -8,8 +8,8 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Menu_button_labels_use_darker_purple_outline_size_two() {
-            string standardFactorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
-            string handheldFactorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscHandheldMainMenuSceneFactory.cs"));
+            string standardFactorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
+            string handheldFactorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscHandheldMainMenuSceneFactory.cs"));
             string outlineAssignment = "definition.SurfaceBorderColor,\n                2f";
             standardFactorySource = standardFactorySource.Replace("\r\n", "\n", StringComparison.Ordinal);
             handheldFactorySource = handheldFactorySource.Replace("\r\n", "\n", StringComparison.Ordinal);
@@ -27,7 +27,7 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Standard_menu_selected_button_uses_the_teal_secondary_accent_for_its_border() {
-            string standardFactorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
+            string standardFactorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
 
             Assert.Contains("byte4 selectedFillColor = definition.AccentColor;", standardFactorySource, StringComparison.Ordinal);
             Assert.Contains("byte4 selectedBorderColor = definition.AccentSecondaryColor;", standardFactorySource, StringComparison.Ordinal);
@@ -38,7 +38,7 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Standard_menu_authors_the_helen_of_code_footer_identity() {
-            string standardFactorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
+            string standardFactorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
 
             Assert.Contains("MADE BY HELENA / HELEN OF CODE", standardFactorySource, StringComparison.Ordinal);
             Assert.Contains("CreateFooterIdentityEntity(generatedRootEntity, definition)", standardFactorySource, StringComparison.Ordinal);
@@ -54,8 +54,8 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Standard_menu_authors_a_continuous_footer_identity_marquee() {
-            string standardFactorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
-            string marqueeComponentSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "FooterIdentityMarqueeComponent.cs"));
+            string standardFactorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
+            string marqueeComponentSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "FooterIdentityMarqueeComponent.cs"));
 
             Assert.Contains("new float3(DemoMenuLayout.CanvasWidth, 2f, 0.2f)", standardFactorySource, StringComparison.Ordinal);
             Assert.Contains("new FooterIdentityMarqueeComponent", standardFactorySource, StringComparison.Ordinal);
@@ -73,8 +73,8 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Footer_marquee_scales_its_runtime_geometry_to_the_viewport() {
-            string standardFactorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
-            string marqueeComponentSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "FooterIdentityMarqueeComponent.cs"));
+            string standardFactorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
+            string marqueeComponentSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "FooterIdentityMarqueeComponent.cs"));
 
             Assert.Contains("FooterTextComponent.Font.MeasureTight(FooterTextComponent.Text).Width", marqueeComponentSource, StringComparison.Ordinal);
             Assert.Contains("FooterTextComponent.FontScale", marqueeComponentSource, StringComparison.Ordinal);
@@ -91,8 +91,8 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Standard_menu_authors_animated_grid_and_scanline_background() {
-            string standardFactorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
-            string motionComponentSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "MenuBackgroundMotionComponent.cs"));
+            string standardFactorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
+            string motionComponentSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "MenuBackgroundMotionComponent.cs"));
 
             Assert.Contains("CreateAnimatedBackgroundEntity(generatedRootEntity, definition)", standardFactorySource, StringComparison.Ordinal);
             Assert.Contains("DemoDiscAnimatedBackgroundGrid", standardFactorySource, StringComparison.Ordinal);
@@ -104,7 +104,7 @@ namespace city.menu.tools.tests {
             Assert.Contains("ScanlinePixelsPerSecond", motionComponentSource, StringComparison.Ordinal);
             Assert.Contains("GridPixelsPerSecond = 0.6f", standardFactorySource, StringComparison.Ordinal);
             Assert.Contains("ScanlinePixelsPerSecond = 0.2f", standardFactorySource, StringComparison.Ordinal);
-            Assert.Contains("LogoBottomMargin => 76", File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.authoring", "DemoDiscMenuTheme.cs")), StringComparison.Ordinal);
+            Assert.Contains("LogoBottomMargin => 76", File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.authoring", "DemoDiscMenuTheme.cs")), StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -112,8 +112,8 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Standard_menu_authors_title_and_platform_marquee_copy() {
-            string standardFactorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
-            string marqueeComponentSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "FooterIdentityMarqueeComponent.cs"));
+            string standardFactorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscStandardMainMenuSceneFactory.cs"));
+            string marqueeComponentSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "FooterIdentityMarqueeComponent.cs"));
 
             Assert.Contains("\"HELENGINE\"", standardFactorySource, StringComparison.Ordinal);
             Assert.Contains("\"DEMO DISC\"", standardFactorySource, StringComparison.Ordinal);

@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the Zombislayer asset-preparation layer stages the imported environment and weapon models through explicit project-relative asset catalog entries.
     /// </summary>

@@ -1,7 +1,7 @@
 using helengine;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Writes the authored walnut material assigned to the Tilt Trial player sphere.
     /// </summary>

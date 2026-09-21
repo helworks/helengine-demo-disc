@@ -1,13 +1,13 @@
 using System.Collections.Generic;
-using city.rendering;
-using city.menu;
-using city.rendering.tools;
-using city.scene.tools;
+using DemoDisc.rendering;
+using DemoDisc.menu;
+using DemoDisc.rendering.tools;
+using DemoDisc.scene.tools;
 using helengine;
 using helengine.editor;
 using System.Reflection;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the fixed common authoring graph used by the software path tracer.
     /// </summary>

@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the generated game-scene catalog reuses the runtime Zombislayer scene id instead of duplicating a string literal.
     /// </summary>
@@ -10,7 +10,7 @@ namespace city.tests {
         public void Scene_catalog_reuses_runtime_zombislayer_scene_id() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\GameSceneCatalog.cs");
 
-            Assert.Contains("global::city.game.ZombislayerSceneIds.GameplaySceneId", source, StringComparison.Ordinal);
+            Assert.Contains("global::DemoDisc.game.ZombislayerSceneIds.GameplaySceneId", source, StringComparison.Ordinal);
         }
     }
 }

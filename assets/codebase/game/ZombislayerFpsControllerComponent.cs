@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Drives the Zombislayer Windows first-person camera root using keyboard movement and relative mouse look.
     /// </summary>

@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>Defines optional scattering parameters for one matching entry in a model's existing material array.</summary>
     public sealed class SoftwareScatteringMaterial {
         /// <summary>Gets or sets the scattering law; diffuse preserves the original material behavior.</summary>

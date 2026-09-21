@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace city.testing {
+namespace DemoDisc.testing {
     public static class DemoDiscTestProject {
         public static readonly string RootPath = ResolveRootPath();
 

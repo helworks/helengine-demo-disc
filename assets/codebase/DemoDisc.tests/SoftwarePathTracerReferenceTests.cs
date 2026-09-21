@@ -1,8 +1,8 @@
 using System;
-using city.rendering;
+using DemoDisc.rendering;
 using helengine;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies one deterministic 16x16 Cornell enclosure through the complete software tracer.
     /// </summary>

@@ -1,4 +1,4 @@
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Describes one shared physics demo material authored through the per-platform material settings flow.
     /// </summary>

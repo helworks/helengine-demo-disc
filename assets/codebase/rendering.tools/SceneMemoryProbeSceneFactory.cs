@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds one persistent authored scene that retains metadata for the retired scene-memory probe.
     /// </summary>

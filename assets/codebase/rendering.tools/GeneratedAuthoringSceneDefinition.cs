@@ -1,4 +1,4 @@
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Stores one generated live-authored scene definition before editor serialization persists it.
     /// </summary>

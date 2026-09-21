@@ -2,7 +2,7 @@ using helengine;
 using helengine.editor;
 using System.IO.Compression;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Resolves generated control icons into both source paths and imported texture asset ids.
     /// </summary>

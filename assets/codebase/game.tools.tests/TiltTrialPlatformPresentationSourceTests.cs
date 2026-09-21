@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies that Tilt Trial platform presentation is authored as cook-time Blueprints and semantic actions.
     /// </summary>
@@ -8,7 +8,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Presentation_generator_writes_only_console_and_handheld_blueprints() {
-            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "TiltTrialGameplayPresentationBlueprintGenerator.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "TiltTrialGameplayPresentationBlueprintGenerator.cs"));
 
             Assert.Contains("TiltTrialConsolePresentation.hblueprint", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialHandheldPresentation.hblueprint", source, StringComparison.Ordinal);
@@ -22,7 +22,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Handheld_presentation_uses_serialized_semantic_action_bridges() {
-            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("TiltTrialPresentationActionComponent", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialSessionAction.LevelSelect", source, StringComparison.Ordinal);
@@ -40,7 +40,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Session_component_binds_handheld_result_button_visuals_by_stable_role() {
-            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialSessionComponent.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialSessionComponent.cs"));
 
             Assert.Contains("TiltTrialResultRetryButton", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialResultExitButton", source, StringComparison.Ordinal);
@@ -56,7 +56,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Session_component_does_not_depend_on_presentation_child_order() {
-            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialSessionComponent.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialSessionComponent.cs"));
 
             Assert.Contains("TryFindNamedEntity(Parent, \"TiltTrialTimerText\")", source, StringComparison.Ordinal);
             Assert.Contains("TryFindNamedEntity(Parent, \"TiltTrialResultsOverlay\")", source, StringComparison.Ordinal);
@@ -68,15 +68,15 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Handheld_gameplay_controller_owns_bottom_screen_presentation() {
-            string factorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
-            string sessionSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialSessionComponent.cs"));
+            string factorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
+            string sessionSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game", "TiltTrialSessionComponent.cs"));
             sessionSource = sessionSource.Replace("\r\n", "\n", StringComparison.Ordinal);
 
             Assert.Contains("CreateHandheldGameplayControllerEntity", factorySource, StringComparison.Ordinal);
             Assert.Contains("root.AddChild(CreateHandheldGameplayControllerEntity(levelEntry));", factorySource, StringComparison.Ordinal);
             Assert.Contains("CreateHandheldGameplayBottomScreenCameraEntity", factorySource, StringComparison.Ordinal);
             Assert.Contains("TiltTrialHandheldGameplayBottomScreenRoot", factorySource, StringComparison.Ordinal);
-            Assert.Contains("controllerEntity.AddComponent(new city.game.TiltTrialSessionComponent());", factorySource, StringComparison.Ordinal);
+            Assert.Contains("controllerEntity.AddComponent(new DemoDisc.game.TiltTrialSessionComponent());", factorySource, StringComparison.Ordinal);
             Assert.DoesNotContain("CreateHandheldBottomUiEntity", factorySource, StringComparison.Ordinal);
             Assert.Contains("if (ResultsBodyTextComponent == null)", sessionSource, StringComparison.Ordinal);
             Assert.DoesNotContain("missingDependencies.Add(\"timer text\")", sessionSource, StringComparison.Ordinal);
@@ -90,7 +90,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Handheld_pre_start_screen_contains_only_the_start_prompt_ui() {
-            string blueprintPath = global::city.testing.DemoDiscTestProject.GetPath("assets", "blueprints", "games", "tilt", "TiltTrialHandheldPresentation.hblueprint");
+            string blueprintPath = global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "blueprints", "games", "tilt", "TiltTrialHandheldPresentation.hblueprint");
             using FileStream stream = File.OpenRead(blueprintPath);
             global::helengine.BlueprintAsset blueprint = Assert.IsType<global::helengine.BlueprintAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
             SceneEntityAsset[] entities = EnumerateEntities(blueprint.RootEntity).ToArray();
@@ -105,7 +105,7 @@ namespace city.tests {
             Assert.False(resultsOverlay.Enabled);
             Assert.False(failOverlay.Enabled);
 
-            string roleComponentTypeId = global::helengine.editor.AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(city.game.TiltTrialPresentationRoleComponent));
+            string roleComponentTypeId = global::helengine.editor.AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(DemoDisc.game.TiltTrialPresentationRoleComponent));
             SceneComponentAssetRecord startOverlayComponent = Assert.Single(startOverlay.Components);
             Assert.Equal(roleComponentTypeId, startOverlayComponent.ComponentTypeId);
             Assert.Equal(
@@ -118,7 +118,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Handheld_results_screen_uses_background_swap_buttons_without_an_outer_panel() {
-            string blueprintPath = global::city.testing.DemoDiscTestProject.GetPath("assets", "blueprints", "games", "tilt", "TiltTrialHandheldPresentation.hblueprint");
+            string blueprintPath = global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "blueprints", "games", "tilt", "TiltTrialHandheldPresentation.hblueprint");
             using FileStream stream = File.OpenRead(blueprintPath);
             global::helengine.BlueprintAsset blueprint = Assert.IsType<global::helengine.BlueprintAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
             SceneEntityAsset[] entities = EnumerateEntities(blueprint.RootEntity).ToArray();
@@ -126,7 +126,7 @@ namespace city.tests {
             string roundedRectTypeId = global::helengine.editor.AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(RoundedRectComponent));
             string spriteTypeId = global::helengine.editor.AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(SpriteComponent));
             string textTypeId = global::helengine.editor.AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(TextComponent));
-            ComponentPersistenceRegistry registry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
+            ComponentPersistenceRegistry registry = DemoDisc.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
 
             Assert.DoesNotContain(resultsOverlay.Components, component => component.ComponentTypeId == roundedRectTypeId);
             string[] expectedButtonNames = [
@@ -156,7 +156,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Nintendo_ds_start_prompt_uses_the_full_texture_source_rect() {
-            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
             source = source.Replace("\r\n", "\n", StringComparison.Ordinal);
 
             Assert.Contains(
@@ -170,14 +170,14 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Handheld_level_selector_presents_only_the_maximum_time() {
-            string scenePath = global::city.testing.DemoDiscTestProject.GetPath("assets", "scenes", "games", "tilt", "tilt_trial_ds.helen");
+            string scenePath = global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "scenes", "games", "tilt", "tilt_trial_ds.helen");
             using FileStream stream = File.OpenRead(scenePath);
             SceneAsset sceneAsset = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
             SceneEntityAsset[] entities = sceneAsset.RootEntities.SelectMany(EnumerateEntities).ToArray();
             SceneEntityAsset maximumTimeEntity = Assert.Single(entities, entity => entity.Name == "TiltTrialLevelSelectTimer");
             SceneEntityAsset targetTimesEntity = Assert.Single(entities, entity => entity.Name == "TiltTrialLevelSelectTargetTimes");
             string textTypeId = global::helengine.editor.AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(TextComponent));
-            ComponentPersistenceRegistry registry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
+            ComponentPersistenceRegistry registry = DemoDisc.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
             TextComponent maximumTimeText = DeserializeTextComponent(maximumTimeEntity, textTypeId, registry);
             TextComponent targetTimesText = DeserializeTextComponent(targetTimesEntity, textTypeId, registry);
 
@@ -191,7 +191,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Authored_gameplay_scenes_exclude_windows_only_debug_root_from_handheld_platforms() {
-            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "TiltTrialGameplayPresentationAttachmentService.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "TiltTrialGameplayPresentationAttachmentService.cs"));
 
             Assert.Contains("TiltTrialPhysicsBoundsDebug", source, StringComparison.Ordinal);
             Assert.Contains("Scope = SceneOverrideScopePath.Platform(\"ds\"), Exists = false", source, StringComparison.Ordinal);
@@ -203,7 +203,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Authored_gameplay_scenes_scope_windows_only_debug_root_to_windows() {
-            string sceneDirectory = global::city.testing.DemoDiscTestProject.GetPath("assets", "scenes", "games", "tilt");
+            string sceneDirectory = global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "scenes", "games", "tilt");
             string[] scenePaths = Directory.GetFiles(sceneDirectory, "tilt_trial_level_*.helen");
 
             Assert.NotEmpty(scenePaths);
@@ -212,8 +212,8 @@ namespace city.tests {
                 SceneAsset sceneAsset = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
                 SceneEntityAsset debugRoot = Assert.Single(sceneAsset.RootEntities.Where(entity => entity != null && entity.Name == "TiltTrialPhysicsBoundsDebug"));
 
-                Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(debugRoot, "ds"));
-                Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(debugRoot, "3ds"));
+                Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(debugRoot, "ds"));
+                Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(debugRoot, "3ds"));
             }
         }
 
@@ -224,7 +224,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Authored_gameplay_scenes_scope_handheld_presentation_root_to_the_dual_screen_group() {
-            string sceneDirectory = global::city.testing.DemoDiscTestProject.GetPath("assets", "scenes", "games", "tilt");
+            string sceneDirectory = global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "scenes", "games", "tilt");
             string[] scenePaths = Directory.GetFiles(sceneDirectory, "tilt_trial_level_*.helen");
             string[] excludedPlatformIds = ["windows", "ps2", "n64", "ps1", "dc", "ps3", "x360", "psp", "psvita", "switch"];
 
@@ -234,10 +234,10 @@ namespace city.tests {
                 SceneAsset sceneAsset = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
                 SceneEntityAsset handheldRoot = Assert.Single(sceneAsset.RootEntities.Where(entity => entity != null && entity.Name == "TiltTrialHandheldPresentation"));
 
-                Assert.True(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(handheldRoot, "ds"));
-                Assert.True(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(handheldRoot, "3ds"));
+                Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(handheldRoot, "ds"));
+                Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(handheldRoot, "3ds"));
                 for (int index = 0; index < excludedPlatformIds.Length; index++) {
-                    Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(handheldRoot, excludedPlatformIds[index]));
+                    Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(handheldRoot, excludedPlatformIds[index]));
                 }
             }
         }

@@ -1,8 +1,8 @@
-using city.menu;
-using city.rendering.tools;
+using DemoDisc.menu;
+using DemoDisc.rendering.tools;
 using helengine.editor;
 
-namespace city.physics.tools {
+namespace DemoDisc.physics.tools {
     /// <summary>
     /// Augments curated physics showcase scenes with Nintendo handheld-only roots inside their canonical authored scene assets.
     /// </summary>
@@ -387,7 +387,7 @@ namespace city.physics.tools {
                 SceneAssetReference reference = existingAssetReferences[index];
                 if (reference == null) {
                     continue;
-                } else if (string.Equals(reference.RelativePath, city.scene.tools.GeneratedSceneMusicAuthoringService.RenderingAndPhysicsMusicAudioPath, StringComparison.Ordinal)) {
+                } else if (string.Equals(reference.RelativePath, DemoDisc.scene.tools.GeneratedSceneMusicAuthoringService.RenderingAndPhysicsMusicAudioPath, StringComparison.Ordinal)) {
                     continue;
                 }
 

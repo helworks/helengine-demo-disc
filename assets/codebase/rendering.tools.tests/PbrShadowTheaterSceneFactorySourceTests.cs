@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     public sealed class PbrShadowTheaterSceneFactorySourceTests {
         const string ProjectRootPath = @"C:\dev\helprojs\demodisc";
 

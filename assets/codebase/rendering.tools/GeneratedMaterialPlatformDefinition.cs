@@ -1,4 +1,4 @@
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Stores one platform's schema id plus authored material field values.
     /// </summary>

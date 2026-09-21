@@ -1,7 +1,7 @@
 using helengine.editor;
-using city.menu;
+using DemoDisc.menu;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Persists generated live-authored scenes through the editor scene save pipeline.
     /// </summary>
@@ -190,7 +190,7 @@ namespace city.rendering.tools {
 
             try {
                 string stableIdentity = string.IsNullOrWhiteSpace(authoringAssetId)
-                    ? global::city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneRelativePathToSave)
+                    ? global::DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneRelativePathToSave)
                     : authoringAssetId;
                 using SceneSaveService sceneSaveService = new SceneSaveService(AuthoringSession, persistenceRegistry);
                 sceneSaveService.Save(

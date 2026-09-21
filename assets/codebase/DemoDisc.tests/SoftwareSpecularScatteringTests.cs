@@ -1,7 +1,7 @@
-using city.rendering;
+using DemoDisc.rendering;
 using helengine;
 
-namespace city.gameplay.tests {
+namespace DemoDisc.tests {
     /// <summary>Checks ideal reflection and dielectric transport against analytic directions and radiance.</summary>
     public sealed class SoftwareSpecularScatteringTests {
         /// <summary>A mirror preserves tangential direction and reverses the normal component.</summary>

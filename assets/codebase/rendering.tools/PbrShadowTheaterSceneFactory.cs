@@ -1,8 +1,8 @@
-using city.menu;
+using DemoDisc.menu;
 using helengine.editor;
 using helengine;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the authored PBR shadow theater scene: a metallic sphere cluster on a pedestal, lit by both a shadow-casting sun and a shadow-casting spotlight.
     /// </summary>
@@ -112,7 +112,7 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = new float3(0f, 1.6f, 0f),
                 AutoYawSpeedRadians = 0.1f
             });

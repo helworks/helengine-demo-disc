@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Returns the active demo-disc scene to the main menu when the temporary back bind is pressed.
     /// </summary>

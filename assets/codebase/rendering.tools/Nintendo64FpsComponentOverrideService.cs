@@ -1,4 +1,4 @@
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Persists the N64-specific FPS overlay scale on generated Demo Disc scene entities.
     /// </summary>

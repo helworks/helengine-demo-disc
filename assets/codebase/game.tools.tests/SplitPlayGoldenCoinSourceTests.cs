@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies gameplay generation now invokes the Split Play coin asset generator.
     /// </summary>

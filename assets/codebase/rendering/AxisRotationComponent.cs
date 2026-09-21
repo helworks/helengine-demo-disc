@@ -1,4 +1,4 @@
-namespace gameplay.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Rotates the parent entity around one authored local-space axis using frame-rate-independent delta time.
     /// </summary>

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using city.menu;
+using DemoDisc.menu;
 using helengine;
 
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Describes the owned-resource stages of one progressive software trace.
     /// </summary>

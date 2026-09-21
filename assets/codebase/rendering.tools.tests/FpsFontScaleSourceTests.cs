@@ -1,9 +1,9 @@
 ﻿using helengine;
 using helengine.editor;
 
-using city.testing;
+using DemoDisc.testing;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies that non-Nintendo DS FPS overlays use the shared demo-disc font scale.
     /// </summary>
@@ -33,7 +33,7 @@ namespace city.tests {
             foreach (string sourcePath in kitFactorySourcePaths) {
                 string source = File.ReadAllText(sourcePath);
                 string sourceForUiKitAssertion = source.Replace(
-                    "new city.rendering.tools.DemoDiscSceneUiKitFactory",
+                    "new DemoDisc.rendering.tools.DemoDiscSceneUiKitFactory",
                     "new DemoDiscSceneUiKitFactory",
                     StringComparison.Ordinal);
                 Assert.Contains("new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi", sourceForUiKitAssertion, StringComparison.Ordinal);

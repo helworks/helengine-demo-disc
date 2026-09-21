@@ -1,7 +1,7 @@
 using helengine;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Writes the two authored materials used by the PBR textured showcase: a metallic scuffed-metal prop and a non-metallic wood-plank prop.
     /// </summary>

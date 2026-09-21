@@ -1,28 +1,28 @@
 using helengine;
 using helengine.editor;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the generated scene-memory probe asset does not carry the editor-only placeholder component into packaged scene data.
     /// </summary>
     public sealed class SceneMemoryProbeSceneGenerationTests {
         static readonly string ProjectRootPath = ResolveProjectRoot();
         const string SceneRelativePath = @"assets\scenes\rendering\scene_memory_probe.helen";
-        const string PlaceholderComponentTypeId = "city.rendering.tools.SceneMemoryProbeComponent, rendering.tools";
+        const string PlaceholderComponentTypeId = "DemoDisc.rendering.tools.SceneMemoryProbeComponent, rendering.tools";
 
         [Fact]
         public void Fresh_scene_memory_probe_factory_output_contains_no_editor_only_placeholder_component() {
             string projectRootPath = Path.Combine(Path.GetTempPath(), "city-scene-memory-probe-tests", Guid.NewGuid().ToString("N"));
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(projectRootPath);
             IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(projectRootPath);
-            city.rendering.tools.SceneMemoryProbeSceneFactory factory = new city.rendering.tools.SceneMemoryProbeSceneFactory(authoringSession);
+            DemoDisc.rendering.tools.SceneMemoryProbeSceneFactory factory = new DemoDisc.rendering.tools.SceneMemoryProbeSceneFactory(authoringSession);
 
-            city.rendering.tools.GeneratedAuthoringSceneDefinition definition = factory.CreateSceneDefinition();
+            DemoDisc.rendering.tools.GeneratedAuthoringSceneDefinition definition = factory.CreateSceneDefinition();
 
             Assert.DoesNotContain(
                 FlattenComponents(definition.RootEntities),
-                component => component is city.rendering.tools.SceneMemoryProbeComponent);
-            Assert.Equal(city.rendering.tools.SceneMemoryProbeSceneFactory.SceneId, definition.SceneId);
+                component => component is DemoDisc.rendering.tools.SceneMemoryProbeComponent);
+            Assert.Equal(DemoDisc.rendering.tools.SceneMemoryProbeSceneFactory.SceneId, definition.SceneId);
             Assert.True(definition.SceneSettings.DontUnload);
             Assert.Single(definition.RootEntities);
         }

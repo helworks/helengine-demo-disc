@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Moves the parent entity around one authored world-space orbit center using deterministic absolute time.
     /// </summary>

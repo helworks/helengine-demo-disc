@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the Tilt Trial session controller drives timeout and completion flow deterministically.
     /// </summary>
@@ -10,9 +10,9 @@ namespace city.tests {
         public void Resolve_coin_trigger_observer_returns_wrapper_trigger_for_coin_child() {
             global::helengine.SceneEntityTriggerObserverComponent wrapperTriggerObserver = new global::helengine.SceneEntityTriggerObserverComponent();
             helengine.Entity wrapperEntity = CreateEntity(null, [wrapperTriggerObserver]);
-            helengine.Entity coinEntity = CreateEntity(wrapperEntity, [new city.game.TiltTrialCollectibleCoinComponent()]);
+            helengine.Entity coinEntity = CreateEntity(wrapperEntity, [new DemoDisc.game.TiltTrialCollectibleCoinComponent()]);
 
-            global::helengine.SceneEntityTriggerObserverComponent resolvedTriggerObserver = city.game.TiltTrialSessionComponent.ResolveCoinTriggerObserver(coinEntity);
+            global::helengine.SceneEntityTriggerObserverComponent resolvedTriggerObserver = DemoDisc.game.TiltTrialSessionComponent.ResolveCoinTriggerObserver(coinEntity);
 
             Assert.Same(wrapperTriggerObserver, resolvedTriggerObserver);
         }
@@ -20,7 +20,7 @@ namespace city.tests {
         [Fact]
         public void Collect_coin_disables_direct_parent_when_no_wrapper_trigger_entity_is_present() {
             helengine.Entity wrapperEntity = CreateEntity(null, []);
-            city.game.TiltTrialCollectibleCoinComponent coinComponent = AttachComponent<city.game.TiltTrialCollectibleCoinComponent>();
+            DemoDisc.game.TiltTrialCollectibleCoinComponent coinComponent = AttachComponent<DemoDisc.game.TiltTrialCollectibleCoinComponent>();
             helengine.Entity coinEntity = CreateEntity(wrapperEntity, [coinComponent]);
             SetChildren(wrapperEntity, [coinEntity]);
 
@@ -32,36 +32,36 @@ namespace city.tests {
 
         [Fact]
         public void Resolve_medal_returns_gold_for_fastest_clear() {
-            city.game.TiltTrialLevelSettingsComponent settings = new city.game.TiltTrialLevelSettingsComponent {
+            DemoDisc.game.TiltTrialLevelSettingsComponent settings = new DemoDisc.game.TiltTrialLevelSettingsComponent {
                 LevelId = "tilt-trial-01",
                 DisplayName = "Level 1",
-                SceneId = city.game.TiltTrialSceneIds.Level01SceneId,
+                SceneId = DemoDisc.game.TiltTrialSceneIds.Level01SceneId,
                 StartTimeSeconds = 99f,
                 GoldTimeSeconds = 20f,
                 SilverTimeSeconds = 35f,
                 BronzeTimeSeconds = 50f
             };
 
-            city.game.TiltTrialMedal medal = city.game.TiltTrialSessionComponent.ResolveMedal(settings, 19.5f);
-            Assert.Equal(city.game.TiltTrialMedal.Gold, medal);
+            DemoDisc.game.TiltTrialMedal medal = DemoDisc.game.TiltTrialSessionComponent.ResolveMedal(settings, 19.5f);
+            Assert.Equal(DemoDisc.game.TiltTrialMedal.Gold, medal);
         }
 
         [Fact]
         public void Resolve_next_scene_id_returns_level_select_when_current_level_is_last() {
-            string nextSceneId = city.game.TiltTrialSessionComponent.ResolveNextSceneId(
+            string nextSceneId = DemoDisc.game.TiltTrialSessionComponent.ResolveNextSceneId(
                 "tilt-trial-05",
-                city.game.TiltTrialSceneIds.LevelSelectSceneId);
+                DemoDisc.game.TiltTrialSceneIds.LevelSelectSceneId);
 
-            Assert.Equal(city.game.TiltTrialSceneIds.LevelSelectSceneId, nextSceneId);
+            Assert.Equal(DemoDisc.game.TiltTrialSceneIds.LevelSelectSceneId, nextSceneId);
         }
 
         [Fact]
         public void Requires_explicit_scene_reload_returns_true_when_target_scene_is_already_loaded() {
-            bool requiresReload = city.game.TiltTrialSessionComponent.RequiresExplicitSceneReload(
-                city.game.TiltTrialSceneIds.Level01SceneId,
+            bool requiresReload = DemoDisc.game.TiltTrialSessionComponent.RequiresExplicitSceneReload(
+                DemoDisc.game.TiltTrialSceneIds.Level01SceneId,
                 [
-                    city.game.TiltTrialSceneIds.LevelSelectSceneId,
-                    city.game.TiltTrialSceneIds.Level01SceneId
+                    DemoDisc.game.TiltTrialSceneIds.LevelSelectSceneId,
+                    DemoDisc.game.TiltTrialSceneIds.Level01SceneId
                 ]);
 
             Assert.True(requiresReload);
@@ -69,10 +69,10 @@ namespace city.tests {
 
         [Fact]
         public void Requires_explicit_scene_reload_returns_false_when_target_scene_is_not_loaded() {
-            bool requiresReload = city.game.TiltTrialSessionComponent.RequiresExplicitSceneReload(
-                city.game.TiltTrialSceneIds.Level01SceneId,
+            bool requiresReload = DemoDisc.game.TiltTrialSessionComponent.RequiresExplicitSceneReload(
+                DemoDisc.game.TiltTrialSceneIds.Level01SceneId,
                 [
-                    city.game.TiltTrialSceneIds.LevelSelectSceneId
+                    DemoDisc.game.TiltTrialSceneIds.LevelSelectSceneId
                 ]);
 
             Assert.False(requiresReload);
@@ -80,13 +80,13 @@ namespace city.tests {
 
         [Fact]
         public void Build_state_machine_transitions_from_playing_to_failed_when_timeout_occurs() {
-            helengine.FiniteStateMachine<city.game.TiltTrialSessionState> machine = city.game.TiltTrialSessionComponent.CreateStateMachine();
+            helengine.FiniteStateMachine<DemoDisc.game.TiltTrialSessionState> machine = DemoDisc.game.TiltTrialSessionComponent.CreateStateMachine();
 
-            machine.Initialize(city.game.TiltTrialSessionState.Playing);
-            bool changed = machine.TryChangeState(city.game.TiltTrialSessionState.Failed);
+            machine.Initialize(DemoDisc.game.TiltTrialSessionState.Playing);
+            bool changed = machine.TryChangeState(DemoDisc.game.TiltTrialSessionState.Failed);
 
             Assert.True(changed);
-            Assert.Equal(city.game.TiltTrialSessionState.Failed, machine.CurrentState);
+            Assert.Equal(DemoDisc.game.TiltTrialSessionState.Failed, machine.CurrentState);
         }
 
         /// <summary>
@@ -94,13 +94,13 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Build_state_machine_starts_waiting_for_accept_and_transitions_to_playing() {
-            helengine.FiniteStateMachine<city.game.TiltTrialSessionState> machine = city.game.TiltTrialSessionComponent.CreateStateMachine();
+            helengine.FiniteStateMachine<DemoDisc.game.TiltTrialSessionState> machine = DemoDisc.game.TiltTrialSessionComponent.CreateStateMachine();
 
-            machine.Initialize(city.game.TiltTrialSessionState.Start);
-            bool changed = machine.TryChangeState(city.game.TiltTrialSessionState.Playing);
+            machine.Initialize(DemoDisc.game.TiltTrialSessionState.Start);
+            bool changed = machine.TryChangeState(DemoDisc.game.TiltTrialSessionState.Playing);
 
             Assert.True(changed);
-            Assert.Equal(city.game.TiltTrialSessionState.Playing, machine.CurrentState);
+            Assert.Equal(DemoDisc.game.TiltTrialSessionState.Playing, machine.CurrentState);
         }
 
         /// <summary>
@@ -108,11 +108,11 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Gameplay_panel_is_visible_only_while_the_session_is_playing() {
-            Assert.False(city.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(city.game.TiltTrialSessionState.Start));
-            Assert.True(city.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(city.game.TiltTrialSessionState.Playing));
-            Assert.False(city.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(city.game.TiltTrialSessionState.Paused));
-            Assert.False(city.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(city.game.TiltTrialSessionState.Results));
-            Assert.False(city.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(city.game.TiltTrialSessionState.Failed));
+            Assert.False(DemoDisc.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(DemoDisc.game.TiltTrialSessionState.Start));
+            Assert.True(DemoDisc.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(DemoDisc.game.TiltTrialSessionState.Playing));
+            Assert.False(DemoDisc.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(DemoDisc.game.TiltTrialSessionState.Paused));
+            Assert.False(DemoDisc.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(DemoDisc.game.TiltTrialSessionState.Results));
+            Assert.False(DemoDisc.game.TiltTrialSessionComponent.ShouldShowGameplayPanel(DemoDisc.game.TiltTrialSessionState.Failed));
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace city.tests {
 
         [Fact]
         public void Format_coin_progress_returns_expected_hud_label() {
-            string label = city.game.TiltTrialSessionComponent.FormatCoinProgress(3, 7);
+            string label = DemoDisc.game.TiltTrialSessionComponent.FormatCoinProgress(3, 7);
 
             Assert.Equal("Coins 3/7", label);
         }
@@ -198,15 +198,15 @@ namespace city.tests {
         [InlineData(1, "tilt_trial_level_01")]
         [InlineData(2, "tilt_trial")]
         public void Result_selection_resolves_next_retry_and_back_to_menu_in_visible_order(int selectionIndex, string expectedSceneId) {
-            city.game.TiltTrialSessionComponent session = new city.game.TiltTrialSessionComponent();
-            city.game.TiltTrialLevelCatalogEntry currentLevel = Assert.Single(
-                city.game.TiltTrialLevelCatalog.CreateEntries(),
+            DemoDisc.game.TiltTrialSessionComponent session = new DemoDisc.game.TiltTrialSessionComponent();
+            DemoDisc.game.TiltTrialLevelCatalogEntry currentLevel = Assert.Single(
+                DemoDisc.game.TiltTrialLevelCatalog.CreateEntries(),
                 entry => entry.LevelId == "tilt-trial-01");
-            typeof(city.game.TiltTrialSessionComponent).GetField("CurrentLevel", BindingFlags.Instance | BindingFlags.NonPublic)!
+            typeof(DemoDisc.game.TiltTrialSessionComponent).GetField("CurrentLevel", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(session, currentLevel);
-            typeof(city.game.TiltTrialSessionComponent).GetField("OverlaySelectionIndex", BindingFlags.Instance | BindingFlags.NonPublic)!
+            typeof(DemoDisc.game.TiltTrialSessionComponent).GetField("OverlaySelectionIndex", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(session, selectionIndex);
-            MethodInfo resolveMethod = typeof(city.game.TiltTrialSessionComponent).GetMethod("ResolveResultAcceptSceneId", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            MethodInfo resolveMethod = typeof(DemoDisc.game.TiltTrialSessionComponent).GetMethod("ResolveResultAcceptSceneId", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
             string sceneId = Assert.IsType<string>(resolveMethod.Invoke(session, null));
 
@@ -229,18 +229,18 @@ namespace city.tests {
             helengine.Entity exitButton = CreateEntity(null, [exitBackground]);
             SetChildren(nextButton, [CreateEntity(nextButton, [
                 nextLabel,
-                new city.game.TiltTrialPresentationRoleComponent { Role = "TiltTrialResultNextButtonLabel" }
+                new DemoDisc.game.TiltTrialPresentationRoleComponent { Role = "TiltTrialResultNextButtonLabel" }
             ])]);
             SetChildren(retryButton, [CreateEntity(retryButton, [
                 retryLabel,
-                new city.game.TiltTrialPresentationRoleComponent { Role = "TiltTrialResultRetryButtonLabel" }
+                new DemoDisc.game.TiltTrialPresentationRoleComponent { Role = "TiltTrialResultRetryButtonLabel" }
             ])]);
             SetChildren(exitButton, [CreateEntity(exitButton, [
                 exitLabel,
-                new city.game.TiltTrialPresentationRoleComponent { Role = "TiltTrialResultExitButtonLabel" }
+                new DemoDisc.game.TiltTrialPresentationRoleComponent { Role = "TiltTrialResultExitButtonLabel" }
             ])]);
-            city.game.TiltTrialSessionComponent session = new city.game.TiltTrialSessionComponent();
-            Type sessionType = typeof(city.game.TiltTrialSessionComponent);
+            DemoDisc.game.TiltTrialSessionComponent session = new DemoDisc.game.TiltTrialSessionComponent();
+            Type sessionType = typeof(DemoDisc.game.TiltTrialSessionComponent);
             sessionType.GetField("ResultsNextButtonEntity", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, nextButton);
             sessionType.GetField("ResultsRetryButtonEntity", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, retryButton);
             sessionType.GetField("ResultsExitButtonEntity", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, exitButton);

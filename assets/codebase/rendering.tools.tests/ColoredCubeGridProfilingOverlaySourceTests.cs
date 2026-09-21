@@ -1,6 +1,6 @@
-using city.testing;
+using DemoDisc.testing;
 
-namespace city.rendering.tools.tests {
+namespace DemoDisc.rendering.tools.tests {
     /// <summary>
     /// Verifies the Colored Cubes scene uses the shared demo-disc UI kit plus the shared camera and light instruction overlays.
     /// </summary>

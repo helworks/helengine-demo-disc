@@ -1,7 +1,7 @@
-using city.rendering.tools;
+using DemoDisc.rendering.tools;
 using helengine.editor;
 
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Generates the authored city gameplay scene set inside the active project.
     /// </summary>

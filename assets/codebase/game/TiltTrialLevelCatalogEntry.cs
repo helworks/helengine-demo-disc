@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Stores one ordered Tilt Trial level entry shared by selector and gameplay progression.
     /// </summary>

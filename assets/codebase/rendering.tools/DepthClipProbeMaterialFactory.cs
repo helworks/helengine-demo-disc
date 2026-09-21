@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Creates the authored shared blue solid-color material used by the depth-clip-probe scene and writes its per-platform material settings.
     /// </summary>

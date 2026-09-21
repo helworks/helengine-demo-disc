@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.scene.tools {
+namespace DemoDisc.scene.tools {
     /// <summary>
     /// Authors the shared looping background-music root used by generated showcase scenes.
     /// </summary>

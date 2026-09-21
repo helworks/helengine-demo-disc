@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the console camera/light Blueprint pipeline is wired through the shared authoring code.
     /// </summary>

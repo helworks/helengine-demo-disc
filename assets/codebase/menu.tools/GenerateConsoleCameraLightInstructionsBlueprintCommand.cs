@@ -1,7 +1,7 @@
-using city.rendering.tools;
+using DemoDisc.rendering.tools;
 using helengine.editor;
 
-namespace city.menu.tools {
+namespace DemoDisc.menu.tools {
     /// <summary>
     /// Exposes explicit editor generation for the shared console camera/light instruction Blueprint.
     /// </summary>

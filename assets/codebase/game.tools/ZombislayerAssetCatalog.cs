@@ -1,4 +1,4 @@
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Centralizes the project-relative imported model source paths used by the Zombislayer scene generator.
     /// </summary>

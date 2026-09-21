@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Stores one authored software-path-tracer material description.
     /// </summary>

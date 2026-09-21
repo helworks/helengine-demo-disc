@@ -1,11 +1,11 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the first Tilt Trial gameplay level now uses a dedicated beginner layout with collectible coins and a finish flag blueprint.
     /// </summary>
     public sealed class TiltTrialLevel01SceneSourceTests {
         [Fact]
         public void Game_scene_factory_authors_dedicated_cube_layouts_for_levels_02_through_05() {
-            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("CreateTiltTrialLevel02StageRootEntity()", source, StringComparison.Ordinal);
             Assert.Contains("CreateTiltTrialLevel03StageRootEntity()", source, StringComparison.Ordinal);
@@ -23,7 +23,7 @@ namespace city.tests {
 
         [Fact]
         public void Game_scene_factory_authors_dedicated_level_01_layout_with_beginner_collectibles_and_flag() {
-            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("CreateStageRootEntity(levelEntry)", source, StringComparison.Ordinal);
             Assert.Contains("CreateTiltTrialLevel01StageRootEntity()", source, StringComparison.Ordinal);
@@ -41,7 +41,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Game_scene_factory_uses_one_authored_clipping_probe_cube() {
-            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("CreateLevel01RenderOnlyCourseBoxEntity(\"ClipProbeCube\", float3.Zero, new float3(5f, 1f, 5f), float4.Identity)", source, StringComparison.Ordinal);
             Assert.DoesNotContain("CreateLevel01RenderOnlyCourseBoxEntity(\"ClipProbeCube\", float3.Zero, new float3(5f, 1f, 5f), float4.Identity, true)", source, StringComparison.Ordinal);
@@ -54,7 +54,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Game_scene_factory_configures_playable_level_01_walls_and_ground_for_ps2_and_psp_tessellation() {
-            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
 
             Assert.Contains("CreateKinematicCourseBoxEntity(\"StartPad\", new float3(0f, 0f, -6.6f), new float3(7f, 1f, 7f), float4.Identity, true)", source, StringComparison.Ordinal);
             Assert.Contains("CreateKinematicCourseBoxEntity(\"Ramp\", new float3(0f, -0.05f, -0.1f), new float3(6f, 0.9f, 8f), orientation, true)", source, StringComparison.Ordinal);
@@ -69,8 +69,8 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Level_01_tessellation_authoring_command_targets_the_existing_playable_scene() {
-            string commandSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "ApplyTiltTrialLevel01TessellationCommand.cs"));
-            string serviceSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "TiltTrialLevel01TessellationAuthoringService.cs"));
+            string commandSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "ApplyTiltTrialLevel01TessellationCommand.cs"));
+            string serviceSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "TiltTrialLevel01TessellationAuthoringService.cs"));
 
             Assert.Contains("menu.apply-tilt-trial-level-01-tessellation", commandSource, StringComparison.Ordinal);
             Assert.Contains("ApplyToAuthoredLevel01Scene", commandSource, StringComparison.Ordinal);
@@ -90,17 +90,17 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Tessellation_authoring_sources_use_current_modifier_stack_api() {
-            string gameFactorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
-            string levelServiceSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "TiltTrialLevel01TessellationAuthoringService.cs"));
-            string depthProbeSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "DepthClipProbeSceneFactory.cs"));
-            string renderingTextureSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "TexturedCubeGridSceneFactory.cs"));
-            string physicsTextureSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "physics.tools", "PhysicsSceneFactory.cs"));
-            string iconResolverSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "GeneratedControlIconAssetResolver.cs"));
-            string courseTextureSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "TiltTrialCourseTextureFactory.cs"));
-            string pbrTextureSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "PbrTexturedShowcaseMaterialFactory.cs"));
-            string walnutTextureSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "TiltTrialPlayerSphereWalnutMaterialFactory.cs"));
-            string marbleTextureSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "TiltTrialPlayerSphereMarbleMaterialFactory.cs"));
-            string clippingProbeTextureSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "TiltTrialClippingProbeTextureFactory.cs"));
+            string gameFactorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs"));
+            string levelServiceSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "TiltTrialLevel01TessellationAuthoringService.cs"));
+            string depthProbeSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "DepthClipProbeSceneFactory.cs"));
+            string renderingTextureSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "TexturedCubeGridSceneFactory.cs"));
+            string physicsTextureSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "physics.tools", "PhysicsSceneFactory.cs"));
+            string iconResolverSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "GeneratedControlIconAssetResolver.cs"));
+            string courseTextureSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "TiltTrialCourseTextureFactory.cs"));
+            string pbrTextureSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "PbrTexturedShowcaseMaterialFactory.cs"));
+            string walnutTextureSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "TiltTrialPlayerSphereWalnutMaterialFactory.cs"));
+            string marbleTextureSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "TiltTrialPlayerSphereMarbleMaterialFactory.cs"));
+            string clippingProbeTextureSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "rendering.tools", "TiltTrialClippingProbeTextureFactory.cs"));
 
             Assert.DoesNotContain("MeshComponentTessellationSettingsService", gameFactorySource, StringComparison.Ordinal);
             Assert.DoesNotContain("MeshComponentTessellationSettingsService", levelServiceSource, StringComparison.Ordinal);

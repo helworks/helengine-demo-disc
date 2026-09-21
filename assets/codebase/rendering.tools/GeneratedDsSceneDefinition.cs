@@ -1,4 +1,4 @@
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Stores one generated Nintendo handheld scene augmentation merged into the canonical authored scene with per-platform entity existence rules.
     /// </summary>

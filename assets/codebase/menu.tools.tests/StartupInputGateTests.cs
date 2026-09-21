@@ -1,4 +1,4 @@
-namespace city.menu.tools.tests {
+namespace DemoDisc.menu.tools.tests {
     /// <summary>
     /// Verifies the boot-time gate that temporarily owns Demo Disc menu input.
     /// </summary>

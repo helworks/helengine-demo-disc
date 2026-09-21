@@ -1,9 +1,9 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the runtime menu binder resolves the generated menu subtree by its runtime panel-component subtree instead of assuming the menu root has exactly one child.
     /// </summary>
     public sealed class MenuComponentGeneratedRootResolutionSourceTests {
-        static string MenuComponentSourcePath => global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "MenuComponent.cs");
+        static string MenuComponentSourcePath => global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "MenuComponent.cs");
 
         /// <summary>
         /// Ensures menu runtime binding remains compatible with additional menu-root helper children such as the shared looping music entity.
@@ -44,8 +44,8 @@ namespace city.tests {
         [Fact]
         public void Menu_runtime_components_override_component_dispose() {
             string menuComponentSource = File.ReadAllText(MenuComponentSourcePath);
-            string returnOverlaySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "DemoDiscReturnToMenuComponent.cs"));
-            string handheldReturnOverlaySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "NintendoDsReturnOverlayComponent.cs"));
+            string returnOverlaySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "DemoDiscReturnToMenuComponent.cs"));
+            string handheldReturnOverlaySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "NintendoDsReturnOverlayComponent.cs"));
 
             Assert.Contains("public override void Dispose()", menuComponentSource, StringComparison.Ordinal);
             Assert.Contains("public override void Dispose()", returnOverlaySource, StringComparison.Ordinal);
@@ -60,7 +60,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Demo_disc_scene_generator_applies_build_scene_availability_to_handheld_menu() {
-            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscSceneGenerator.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscSceneGenerator.cs"));
 
             int firstAvailabilityCall = source.IndexOf(
                 "MenuBuildSceneAuthoringService.ApplyBuildSceneAvailability(projectRootPath, standardSceneDefinition, definition);",
@@ -82,7 +82,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Demo_disc_menu_cook_filter_resolves_handheld_scene_aliases() {
-            string source = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscMenuBuildSceneAuthoringService.cs"));
+            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "DemoDiscMenuBuildSceneAuthoringService.cs"));
 
             Assert.Contains("ResolveConfiguredSceneIdForPlatform", source, StringComparison.Ordinal);
             Assert.Contains("sceneId + \"_ds\"", source, StringComparison.Ordinal);

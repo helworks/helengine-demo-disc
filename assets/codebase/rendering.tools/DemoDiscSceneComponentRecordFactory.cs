@@ -1,7 +1,7 @@
-using city.menu;
+using DemoDisc.menu;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Creates shared scripted scene component records used across the rendering showcase scenes.
     /// </summary>

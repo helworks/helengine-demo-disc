@@ -1,7 +1,7 @@
 {
   "moduleId": "menu.tools",
   "dependencyModuleIds": [
-    "gameplay",
+    "DemoDisc",
     "physics.tools",
     "rendering.tools"
   ],

@@ -1,7 +1,7 @@
 using helengine;
 using helengine.editor;
 
-namespace city.menu.tools {
+namespace DemoDisc.menu.tools {
     /// <summary>
     /// Authors the current native animation clip used by the demo-disc logo.
     /// </summary>
@@ -49,7 +49,7 @@ namespace city.menu.tools {
                 ]
             };
 
-            animationClip.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(AnimationRelativePath);
+            animationClip.AuthoringAssetId = DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(AnimationRelativePath);
             animationClip.FormerAuthoringAssetIds = Array.Empty<string>();
             Transaction.WriteAsset(AnimationRelativePath, animationClip);
         }

@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Writes the twenty-five metallic-by-roughness material assets and builds their in-memory runtime materials for the PBR material gallery showcase.
     /// </summary>

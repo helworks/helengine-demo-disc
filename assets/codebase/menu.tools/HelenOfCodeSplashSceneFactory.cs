@@ -1,9 +1,9 @@
-using city.menu;
-using city.rendering.tools;
+using DemoDisc.menu;
+using DemoDisc.rendering.tools;
 using helengine;
 using helengine.editor;
 
-namespace city.menu.tools {
+namespace DemoDisc.menu.tools {
     /// <summary>
     /// Authors the additive Helen of Code splash scene used before the standard demo-disc menu.
     /// </summary>

@@ -1,7 +1,7 @@
 using helengine.editor;
-using city.rendering.tools;
+using DemoDisc.rendering.tools;
 
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Attaches platform-pruned Tilt Trial presentation Blueprint roots to existing authored gameplay scenes.
     /// </summary>
@@ -42,7 +42,7 @@ namespace city.game.tools {
 
             string fullProjectRootPath = Path.GetFullPath(projectRootPath);
             ApplyWindowsOnlyDebugStatusOverrideToConsoleBlueprint(fullProjectRootPath);
-            foreach (global::city.game.TiltTrialLevelCatalogEntry levelEntry in global::city.game.TiltTrialLevelCatalog.CreateEntries()) {
+            foreach (global::DemoDisc.game.TiltTrialLevelCatalogEntry levelEntry in global::DemoDisc.game.TiltTrialLevelCatalog.CreateEntries()) {
                 string scenePath = ResolveAuthoredScenePath(fullProjectRootPath, levelEntry.SceneId);
                 SceneAsset sceneAsset = LoadScene(fullProjectRootPath, scenePath);
                 RemoveCurrentPresentationRoots(sceneAsset);
@@ -225,7 +225,7 @@ namespace city.game.tools {
         /// <param name="blueprintPath">Project-relative Blueprint asset path.</param>
         /// <param name="blueprintAsset">Blueprint asset to serialize.</param>
         void SaveBlueprintAsset(string blueprintPath, BlueprintAsset blueprintAsset) {
-            blueprintAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(blueprintPath);
+            blueprintAsset.AuthoringAssetId = DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(blueprintPath);
             blueprintAsset.FormerAuthoringAssetIds = Array.Empty<string>();
             Transaction.WriteAsset(blueprintPath, blueprintAsset);
         }
@@ -386,7 +386,7 @@ namespace city.game.tools {
         /// <param name="sceneAsset">Scene asset to write.</param>
         void SaveScene(string projectRootPath, string scenePath, SceneAsset sceneAsset) {
             string relativePath = Path.GetRelativePath(Path.Combine(projectRootPath, "assets"), scenePath).Replace('\\', '/');
-            sceneAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(relativePath);
+            sceneAsset.AuthoringAssetId = DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(relativePath);
             sceneAsset.FormerAuthoringAssetIds = Array.Empty<string>();
             Transaction.WriteAsset(relativePath, sceneAsset);
         }

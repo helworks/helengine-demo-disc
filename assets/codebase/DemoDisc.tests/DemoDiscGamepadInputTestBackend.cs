@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Supplies deterministic gamepad frames to aggregation tests without requiring a platform backend.
     /// </summary>

@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Guards the source-level boundary between the fixed common scene and later platform rollout tasks.
     /// </summary>

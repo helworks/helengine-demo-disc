@@ -1,7 +1,7 @@
 using System.Reflection;
 using helengine;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the Tilt Trial planar ball-drive steering behavior exposed by the gameplay controller.
     /// </summary>
@@ -11,7 +11,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Tilt_trial_planar_drive_preserves_vertical_velocity_normalizes_diagonal_input_limits_acceleration_and_brakes_to_rest() {
-            MethodInfo steeringMethod = typeof(city.game.DemoTiltStageComponent).GetMethod(
+            MethodInfo steeringMethod = typeof(DemoDisc.game.DemoTiltStageComponent).GetMethod(
                 "ResolveDrivenLinearVelocity",
                 BindingFlags.Public | BindingFlags.Static);
 
@@ -50,7 +50,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Tilt_trial_planar_drive_keeps_current_velocity_when_elapsed_time_is_zero() {
-            MethodInfo steeringMethod = typeof(city.game.DemoTiltStageComponent).GetMethod(
+            MethodInfo steeringMethod = typeof(DemoDisc.game.DemoTiltStageComponent).GetMethod(
                 "ResolveDrivenLinearVelocity",
                 BindingFlags.Public | BindingFlags.Static);
 
@@ -93,7 +93,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Tilt_trial_controller_defaults_to_requested_planar_speed_and_acceleration() {
-            city.game.DemoTiltStageComponent component = new city.game.DemoTiltStageComponent();
+            DemoDisc.game.DemoTiltStageComponent component = new DemoDisc.game.DemoTiltStageComponent();
 
             AssertApproximatelyEqual(11.25f, component.MaximumPlanarSpeed);
             AssertApproximatelyEqual(4.25f, component.PlanarAccelerationUnitsPerSecond);
@@ -104,7 +104,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Tilt_trial_follow_camera_predicts_orbit_center_from_target_velocity() {
-            float3 orbitCenter = city.game.DemoTiltFollowCameraComponent.ResolvePredictedOrbitCenter(
+            float3 orbitCenter = DemoDisc.game.DemoTiltFollowCameraComponent.ResolvePredictedOrbitCenter(
                 new float3(2f, 3f, 4f),
                 new float3(0f, 0.65f, 0f),
                 new float3(1.5f, -2f, 0.25f),
@@ -120,7 +120,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Tilt_trial_speed_hud_formats_current_ball_speed_in_kilometers_per_hour() {
-            string speedText = city.game.DemoTiltSpeedTextComponent.FormatSpeedKilometersPerHour(new float3(3f, 4f, 0f));
+            string speedText = DemoDisc.game.DemoTiltSpeedTextComponent.FormatSpeedKilometersPerHour(new float3(3f, 4f, 0f));
 
             Assert.Equal("18\nkm/h", speedText);
         }

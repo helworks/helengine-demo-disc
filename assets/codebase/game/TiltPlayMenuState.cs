@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Identifies the visible high-level panel in the Tilt Play front-door menu.
     /// </summary>

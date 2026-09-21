@@ -1,7 +1,7 @@
 using helengine;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Attaches the shared console camera/light Blueprint on console targets.
     /// </summary>

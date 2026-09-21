@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Describes one selectable entry rendered inside a city demo-disc menu panel.
     /// </summary>

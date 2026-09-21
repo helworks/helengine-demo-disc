@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using helengine;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Records accepted render-manager texture ownership and rectangular upload calls for session tests.
     /// </summary>

@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Describes one logical city demo-disc menu screen hosted inside the shared menu scene.
     /// </summary>

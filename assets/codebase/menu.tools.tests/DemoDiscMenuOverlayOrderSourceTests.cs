@@ -1,4 +1,4 @@
-namespace city.menu.tools.tests {
+namespace DemoDisc.menu.tools.tests {
     /// <summary>
     /// Protects the standard menu logo from being submitted beneath its panel surface.
     /// </summary>

@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Applies a continuous authored local Z-axis rotation to the owning entity so 2D sprites can spin through the normal update path.
     /// </summary>

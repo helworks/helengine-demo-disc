@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Resolves the shared demo-disc scene return input semantics so authored scene exits honor the configured platform return action and retain the generic reject fallback outside PS2.
     /// </summary>

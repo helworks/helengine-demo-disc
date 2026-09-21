@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the Tilt Trial scene uses one dedicated authored course material instead of the shared engine standard material.
     /// </summary>

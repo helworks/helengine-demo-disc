@@ -1,10 +1,10 @@
-using CityGeneratedMaterialAssetDefinition = city.rendering.tools.GeneratedMaterialAssetDefinition;
-using CityGeneratedMaterialAssetWriteService = city.rendering.tools.GeneratedMaterialAssetWriteService;
-using CityGeneratedMaterialPlatformDefinition = city.rendering.tools.GeneratedMaterialPlatformDefinition;
-using city.rendering.tools;
+using CityGeneratedMaterialAssetDefinition = DemoDisc.rendering.tools.GeneratedMaterialAssetDefinition;
+using CityGeneratedMaterialAssetWriteService = DemoDisc.rendering.tools.GeneratedMaterialAssetWriteService;
+using CityGeneratedMaterialPlatformDefinition = DemoDisc.rendering.tools.GeneratedMaterialPlatformDefinition;
+using DemoDisc.rendering.tools;
 using helengine.editor;
 
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Generates the reusable Split Play goal-flag support assets.
     /// </summary>
@@ -102,7 +102,7 @@ namespace city.game.tools {
             SceneComponentAssetRecord baseRecord = registry.GetDescriptor(meshComponent).SerializeComponent(meshComponent, 0, saveState);
             SceneComponentAssetRecord meshRecord = new ComponentPlatformOverridePayloadService().Wrap(baseRecord, saveState);
 
-            SceneComponentAssetRecord goalRecord = SerializeWithStableKey(registry, new global::city.game.TiltTrialGoalComponent(), 1, GoalComponentKey);
+            SceneComponentAssetRecord goalRecord = SerializeWithStableKey(registry, new global::DemoDisc.game.TiltTrialGoalComponent(), 1, GoalComponentKey);
             SceneComponentAssetRecord observerRecord = SerializeWithStableKey(registry, new global::helengine.SceneEntityTriggerObserverComponent(), 2, TriggerObserverComponentKey);
             SceneComponentAssetRecord rigidBodyRecord = SerializeWithStableKey(registry, new RigidBody3DComponent {
                 BodyKind = BodyKind3D.Kinematic,

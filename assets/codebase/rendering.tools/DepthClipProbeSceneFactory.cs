@@ -1,8 +1,8 @@
-using city.menu;
-using gameplay.rendering;
+using DemoDisc.menu;
+using DemoDisc.rendering;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the canonical live-authored scene definition for the minimal two-cube depth-ordering and near-plane-clipping probe.
     /// </summary>
@@ -91,7 +91,7 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = float3.Zero,
                 AutoYawSpeedRadians = 0f
             });

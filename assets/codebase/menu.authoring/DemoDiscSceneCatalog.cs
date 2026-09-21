@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Stores the curated playable scene items shown by the first-pass demo-disc scene selector.
     /// </summary>

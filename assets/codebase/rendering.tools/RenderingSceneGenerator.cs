@@ -1,7 +1,7 @@
-using city.scene.tools;
+using DemoDisc.scene.tools;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Generates the complete city rendering showcase scene set inside the active project.
     /// </summary>

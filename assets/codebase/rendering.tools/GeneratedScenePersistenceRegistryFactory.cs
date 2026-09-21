@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Creates the persistence registry used by generated city scene save and load workflows.
     /// </summary>

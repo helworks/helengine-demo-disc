@@ -1,4 +1,4 @@
-namespace city.physics.tools {
+namespace DemoDisc.physics.tools {
     /// <summary>
     /// Enumerates the exportable physics validation scenes authored for end-to-end runtime testing.
     /// </summary>

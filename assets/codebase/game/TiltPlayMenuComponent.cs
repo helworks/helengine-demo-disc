@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Owns the high-level Tilt Play title, options, and level-selector state contract.
     /// </summary>
@@ -163,7 +163,7 @@ namespace city.game {
             InitializeStateWhenNeeded();
             TiltPlayMenuState currentState = StateMachine.CurrentState;
             if (action == TiltPlayMenuAction.BackToDemoDisc) {
-                Core.Instance.SceneManager.RequestSceneTransition(global::city.menu.DemoDiscMainMenuSceneResolver.ResolveRuntimeSceneId());
+                Core.Instance.SceneManager.RequestSceneTransition(global::DemoDisc.menu.DemoDiscMainMenuSceneResolver.ResolveRuntimeSceneId());
                 return;
             } else if (action == TiltPlayMenuAction.Back) {
                 if (currentState != TiltPlayMenuState.Title) {
@@ -276,9 +276,9 @@ namespace city.game {
                 return true;
             }
 #endif
-            return global::city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp)
-                || (global::city.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem) <= -GamepadStickNavigationThreshold
-                    && global::city.menu.DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem) > -GamepadStickNavigationThreshold);
+            return global::DemoDisc.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp)
+                || (global::DemoDisc.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem) <= -GamepadStickNavigationThreshold
+                    && global::DemoDisc.menu.DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem) > -GamepadStickNavigationThreshold);
         }
 
         /// <summary>
@@ -292,9 +292,9 @@ namespace city.game {
                 return true;
             }
 #endif
-            return global::city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown)
-                || (global::city.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem) >= GamepadStickNavigationThreshold
-                    && global::city.menu.DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem) < GamepadStickNavigationThreshold);
+            return global::DemoDisc.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown)
+                || (global::DemoDisc.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem) >= GamepadStickNavigationThreshold
+                    && global::DemoDisc.menu.DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem) < GamepadStickNavigationThreshold);
         }
 
         /// <summary>
@@ -308,7 +308,7 @@ namespace city.game {
                 return true;
             }
 #endif
-            return global::city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)
+            return global::DemoDisc.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)
                 || Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept);
         }
 
@@ -323,7 +323,7 @@ namespace city.game {
                 return true;
             }
 #endif
-            return global::city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East);
+            return global::DemoDisc.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East);
         }
 
         /// <summary>

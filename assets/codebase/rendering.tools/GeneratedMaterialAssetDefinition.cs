@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Describes one authored material asset plus its per-platform material settings.
     /// </summary>

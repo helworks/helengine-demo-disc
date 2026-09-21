@@ -1,7 +1,7 @@
 using helengine;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Writes the lit textured material that keeps the clipping probe on the same platform runtime path as the PS2 investigation target.
     /// </summary>

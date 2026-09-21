@@ -1,8 +1,8 @@
-using city.testing;
+using DemoDisc.testing;
 using helengine;
 using helengine.editor;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the committed console camera/light Blueprint has the requested serialized shape.
     /// </summary>
@@ -67,16 +67,16 @@ namespace city.tests {
             Assert.Contains(
                 blueprintRoot.Components,
                 component => component.ComponentTypeId.Contains("BlueprintInstanceComponent", StringComparison.Ordinal));
-            Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "windows"));
-            Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "psp"));
-            Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "psvita"));
-            Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "ds"));
-            Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "3ds"));
+            Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "windows"));
+            Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "psp"));
+            Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "psvita"));
+            Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "ds"));
+            Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "3ds"));
 
             SceneEntityAsset legacyOverlayRoot = Assert.Single(
                 scene.RootEntities,
                 entity => entity != null && entity.Name == "DemoSceneInstructionViewport");
-            Assert.False(global::city.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(legacyOverlayRoot, "ps2"));
+            Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(legacyOverlayRoot, "ps2"));
         }
 
         static IEnumerable<SceneEntityAsset> EnumerateEntities(SceneEntityAsset root) {

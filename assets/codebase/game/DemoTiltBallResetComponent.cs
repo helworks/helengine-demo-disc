@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Resets the playable Tilt Trial sphere back to its authored spawn pose after it falls below the supported course bounds.
     /// </summary>

@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Captures the published generated assets and their timestamps so a
     /// repeated authoring command can prove byte-level and path-level no-op

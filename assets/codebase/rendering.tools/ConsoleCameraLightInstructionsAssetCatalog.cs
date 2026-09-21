@@ -1,4 +1,4 @@
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Centralizes the reusable console camera/light instruction Blueprint path and target platforms.
     /// </summary>

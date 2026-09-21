@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the Zombislayer game-scene generator writes a dedicated gameplay scene backed by imported environment and weapon assets.
     /// </summary>
@@ -24,9 +24,9 @@ namespace city.tests {
         public void Zombislayer_scene_factory_authors_imported_models_session_and_fps_controller() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game.tools\ZombislayerSceneFactory.cs");
 
-            Assert.Contains("using city.rendering.tools;", source, StringComparison.Ordinal);
-            Assert.Contains("new city.game.ZombislayerSessionComponent()", source, StringComparison.Ordinal);
-            Assert.Contains("new city.game.ZombislayerFpsControllerComponent()", source, StringComparison.Ordinal);
+            Assert.Contains("using DemoDisc.rendering.tools;", source, StringComparison.Ordinal);
+            Assert.Contains("new DemoDisc.game.ZombislayerSessionComponent()", source, StringComparison.Ordinal);
+            Assert.Contains("new DemoDisc.game.ZombislayerFpsControllerComponent()", source, StringComparison.Ordinal);
             Assert.Contains("\"ZombislayerWeapon\"", source, StringComparison.Ordinal);
             Assert.Contains("\"ZombislayerPauseOverlay\"", source, StringComparison.Ordinal);
             Assert.Contains("AuthoringSession.CreateFileReference(ZombislayerAssetCatalog.EnvironmentModelRelativePath, AssetEntryKind.Model)", source, StringComparison.Ordinal);
@@ -45,9 +45,9 @@ namespace city.tests {
             const string runtimeSceneId = "zombislayer";
             const string expectedIdentity = "10000000000000000000000000000038";
 
-            Assert.Equal(expectedIdentity, global::city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(canonicalPath));
-            Assert.Throws<InvalidOperationException>(() => global::city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(runtimeSceneId));
-            Assert.Throws<InvalidOperationException>(() => global::city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity("zombislayer.helen"));
+            Assert.Equal(expectedIdentity, global::DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(canonicalPath));
+            Assert.Throws<InvalidOperationException>(() => global::DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(runtimeSceneId));
+            Assert.Throws<InvalidOperationException>(() => global::DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity("zombislayer.helen"));
         }
 
         /// <summary>
@@ -69,14 +69,14 @@ namespace city.tests {
             SceneAsset scene = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
 
             Assert.Equal(expectedIdentity, scene.AuthoringAssetId);
-            Assert.Equal("zombislayer", global::city.game.ZombislayerSceneIds.GameplaySceneId);
+            Assert.Equal("zombislayer", global::DemoDisc.game.ZombislayerSceneIds.GameplaySceneId);
             Assert.Contains(scene.AssetReferences, reference => string.Equals(
                 reference.RelativePath,
-                global::city.game.tools.ZombislayerAssetCatalog.EnvironmentModelRelativePath,
+                global::DemoDisc.game.tools.ZombislayerAssetCatalog.EnvironmentModelRelativePath,
                 StringComparison.OrdinalIgnoreCase));
             Assert.Contains(scene.AssetReferences, reference => string.Equals(
                 reference.RelativePath,
-                global::city.game.tools.ZombislayerAssetCatalog.WeaponModelRelativePath,
+                global::DemoDisc.game.tools.ZombislayerAssetCatalog.WeaponModelRelativePath,
                 StringComparison.OrdinalIgnoreCase));
         }
     }

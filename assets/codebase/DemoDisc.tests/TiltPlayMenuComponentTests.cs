@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the presentation-independent Tilt Play title-menu state contract.
     /// </summary>
@@ -8,11 +8,11 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void CreateStateMachine_starts_at_title_when_initialized() {
-            global::helengine.FiniteStateMachine<city.game.TiltPlayMenuState> machine = city.game.TiltPlayMenuComponent.CreateStateMachine();
+            global::helengine.FiniteStateMachine<DemoDisc.game.TiltPlayMenuState> machine = DemoDisc.game.TiltPlayMenuComponent.CreateStateMachine();
 
-            machine.Initialize(city.game.TiltPlayMenuState.Title);
+            machine.Initialize(DemoDisc.game.TiltPlayMenuState.Title);
 
-            Assert.Equal(city.game.TiltPlayMenuState.Title, machine.CurrentState);
+            Assert.Equal(DemoDisc.game.TiltPlayMenuState.Title, machine.CurrentState);
         }
 
         /// <summary>
@@ -20,8 +20,8 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void ResolveActionState_routes_play_and_options_to_their_panels() {
-            Assert.Equal(city.game.TiltPlayMenuState.LevelSelect, city.game.TiltPlayMenuComponent.ResolveActionState(city.game.TiltPlayMenuAction.Play));
-            Assert.Equal(city.game.TiltPlayMenuState.Options, city.game.TiltPlayMenuComponent.ResolveActionState(city.game.TiltPlayMenuAction.Options));
+            Assert.Equal(DemoDisc.game.TiltPlayMenuState.LevelSelect, DemoDisc.game.TiltPlayMenuComponent.ResolveActionState(DemoDisc.game.TiltPlayMenuAction.Play));
+            Assert.Equal(DemoDisc.game.TiltPlayMenuState.Options, DemoDisc.game.TiltPlayMenuComponent.ResolveActionState(DemoDisc.game.TiltPlayMenuAction.Options));
         }
 
         /// <summary>
@@ -29,8 +29,8 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void ResolveBackState_returns_title_from_submenus() {
-            Assert.Equal(city.game.TiltPlayMenuState.Title, city.game.TiltPlayMenuComponent.ResolveBackState(city.game.TiltPlayMenuState.Options));
-            Assert.Equal(city.game.TiltPlayMenuState.Title, city.game.TiltPlayMenuComponent.ResolveBackState(city.game.TiltPlayMenuState.LevelSelect));
+            Assert.Equal(DemoDisc.game.TiltPlayMenuState.Title, DemoDisc.game.TiltPlayMenuComponent.ResolveBackState(DemoDisc.game.TiltPlayMenuState.Options));
+            Assert.Equal(DemoDisc.game.TiltPlayMenuState.Title, DemoDisc.game.TiltPlayMenuComponent.ResolveBackState(DemoDisc.game.TiltPlayMenuState.LevelSelect));
         }
 
         /// <summary>
@@ -38,9 +38,9 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void ShouldLevelSelectorProcessInput_is_only_true_in_level_select_state() {
-            Assert.False(city.game.TiltPlayMenuComponent.ShouldLevelSelectorProcessInput(city.game.TiltPlayMenuState.Title));
-            Assert.False(city.game.TiltPlayMenuComponent.ShouldLevelSelectorProcessInput(city.game.TiltPlayMenuState.Options));
-            Assert.True(city.game.TiltPlayMenuComponent.ShouldLevelSelectorProcessInput(city.game.TiltPlayMenuState.LevelSelect));
+            Assert.False(DemoDisc.game.TiltPlayMenuComponent.ShouldLevelSelectorProcessInput(DemoDisc.game.TiltPlayMenuState.Title));
+            Assert.False(DemoDisc.game.TiltPlayMenuComponent.ShouldLevelSelectorProcessInput(DemoDisc.game.TiltPlayMenuState.Options));
+            Assert.True(DemoDisc.game.TiltPlayMenuComponent.ShouldLevelSelectorProcessInput(DemoDisc.game.TiltPlayMenuState.LevelSelect));
         }
 
         /// <summary>
@@ -48,8 +48,8 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void ResolveTitleActionIndexAfterNavigation_wraps_at_both_ends() {
-            Assert.Equal(2, city.game.TiltPlayMenuComponent.ResolveTitleActionIndexAfterNavigation(0, false));
-            Assert.Equal(0, city.game.TiltPlayMenuComponent.ResolveTitleActionIndexAfterNavigation(2, true));
+            Assert.Equal(2, DemoDisc.game.TiltPlayMenuComponent.ResolveTitleActionIndexAfterNavigation(0, false));
+            Assert.Equal(0, DemoDisc.game.TiltPlayMenuComponent.ResolveTitleActionIndexAfterNavigation(2, true));
         }
 
         /// <summary>

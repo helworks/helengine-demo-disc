@@ -1,25 +1,25 @@
 using helengine;
 using helengine.editor;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies generated control-icon lookup stays manifest-driven and strict.
     /// </summary>
     public sealed class GeneratedControlIconAssetResolverTests {
         [Fact]
         public void Platform_map_defaults_windows_and_win32_to_keyboard() {
-            Assert.Equal("keyboard", city.rendering.tools.GeneratedControlIconPlatformMap.ResolveFamilyId("windows"));
-            Assert.Equal("keyboard", city.rendering.tools.GeneratedControlIconPlatformMap.ResolveFamilyId("win32"));
+            Assert.Equal("keyboard", DemoDisc.rendering.tools.GeneratedControlIconPlatformMap.ResolveFamilyId("windows"));
+            Assert.Equal("keyboard", DemoDisc.rendering.tools.GeneratedControlIconPlatformMap.ResolveFamilyId("win32"));
         }
 
         [Fact]
         public void Platform_map_uses_wii_family_for_wiiu_fallback() {
-            Assert.Equal("wii", city.rendering.tools.GeneratedControlIconPlatformMap.ResolveFamilyId("wiiu"));
+            Assert.Equal("wii", DemoDisc.rendering.tools.GeneratedControlIconPlatformMap.ResolveFamilyId("wiiu"));
         }
 
         [Fact]
         public void Catalog_returns_generated_png_path_for_known_family_and_control() {
-            city.rendering.tools.GeneratedControlIconCatalog catalog = city.rendering.tools.GeneratedControlIconCatalog.Load(
+            DemoDisc.rendering.tools.GeneratedControlIconCatalog catalog = DemoDisc.rendering.tools.GeneratedControlIconCatalog.Load(
                 @"C:\dev\helprojs\demodisc");
 
             string relativePath = catalog.RequireControlPath("keyboard", "wasd");
@@ -29,7 +29,7 @@ namespace city.tests {
 
         [Fact]
         public void Catalog_returns_generated_png_paths_for_camera_stick_equivalents() {
-            city.rendering.tools.GeneratedControlIconCatalog catalog = city.rendering.tools.GeneratedControlIconCatalog.Load(
+            DemoDisc.rendering.tools.GeneratedControlIconCatalog catalog = DemoDisc.rendering.tools.GeneratedControlIconCatalog.Load(
                 @"C:\dev\helprojs\demodisc");
 
             Assert.Equal("textures/instructions/controls/generated/3ds/circle_pad.png", catalog.RequireControlPath("3ds", "circle_pad"));
@@ -41,7 +41,7 @@ namespace city.tests {
 
         [Fact]
         public void Catalog_throws_for_missing_control() {
-            city.rendering.tools.GeneratedControlIconCatalog catalog = city.rendering.tools.GeneratedControlIconCatalog.Load(
+            DemoDisc.rendering.tools.GeneratedControlIconCatalog catalog = DemoDisc.rendering.tools.GeneratedControlIconCatalog.Load(
                 @"C:\dev\helprojs\demodisc");
 
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
@@ -61,9 +61,9 @@ namespace city.tests {
                 IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(projectRootPath);
                 InstallIconManifest(projectRootPath);
                 using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
-                city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
+                DemoDisc.rendering.tools.GeneratedControlIconAssetResolver resolver = new DemoDisc.rendering.tools.GeneratedControlIconAssetResolver();
 
-                city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
+                DemoDisc.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
                     projectRootPath,
                     "ps2",
                     "r1",
@@ -88,9 +88,9 @@ namespace city.tests {
                 IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(projectRootPath);
                 InstallIconManifest(projectRootPath);
                 using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
-                city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
+                DemoDisc.rendering.tools.GeneratedControlIconAssetResolver resolver = new DemoDisc.rendering.tools.GeneratedControlIconAssetResolver();
 
-                city.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
+                DemoDisc.rendering.tools.ResolvedControlIcon resolved = resolver.RequireIcon(
                     projectRootPath,
                     "xbox360",
                     "rb",
@@ -128,7 +128,7 @@ namespace city.tests {
 
         [Fact]
         public void Resolver_throws_for_unknown_platform() {
-            city.rendering.tools.GeneratedControlIconAssetResolver resolver = new city.rendering.tools.GeneratedControlIconAssetResolver();
+            DemoDisc.rendering.tools.GeneratedControlIconAssetResolver resolver = new DemoDisc.rendering.tools.GeneratedControlIconAssetResolver();
 
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
                 () => resolver.RequireIcon(

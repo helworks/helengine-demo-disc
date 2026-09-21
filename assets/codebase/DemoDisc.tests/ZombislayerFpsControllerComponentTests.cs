@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the Zombislayer first-person controller exposes deterministic camera clamp and planar-movement helpers.
     /// </summary>
@@ -8,7 +8,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Clamp_pitch_degrees_caps_positive_overflow() {
-            float clamped = city.game.ZombislayerFpsControllerComponent.ClampPitchDegrees(120f);
+            float clamped = DemoDisc.game.ZombislayerFpsControllerComponent.ClampPitchDegrees(120f);
 
             Assert.Equal(80f, clamped);
         }
@@ -18,7 +18,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Clamp_pitch_degrees_caps_negative_overflow() {
-            float clamped = city.game.ZombislayerFpsControllerComponent.ClampPitchDegrees(-120f);
+            float clamped = DemoDisc.game.ZombislayerFpsControllerComponent.ClampPitchDegrees(-120f);
 
             Assert.Equal(-80f, clamped);
         }
@@ -28,7 +28,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Build_planar_move_direction_uses_negative_z_as_forward_at_zero_yaw() {
-            float3 direction = city.game.ZombislayerFpsControllerComponent.BuildPlanarMoveDirection(0f, 1f, 0f);
+            float3 direction = DemoDisc.game.ZombislayerFpsControllerComponent.BuildPlanarMoveDirection(0f, 1f, 0f);
 
             AssertApproximatelyEqual(0f, direction.X);
             AssertApproximatelyEqual(0f, direction.Y);
@@ -40,7 +40,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Build_planar_move_direction_normalizes_combined_input() {
-            float3 direction = city.game.ZombislayerFpsControllerComponent.BuildPlanarMoveDirection(0f, 1f, 1f);
+            float3 direction = DemoDisc.game.ZombislayerFpsControllerComponent.BuildPlanarMoveDirection(0f, 1f, 1f);
 
             AssertApproximatelyEqual(0.70710677f, direction.X);
             AssertApproximatelyEqual(0f, direction.Y);

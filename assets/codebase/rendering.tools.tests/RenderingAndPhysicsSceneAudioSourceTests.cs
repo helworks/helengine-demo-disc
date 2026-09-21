@@ -1,7 +1,7 @@
 using helengine;
 using helengine.editor;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the generated rendering and physics showcase scenes remain silent until music is intentionally reintroduced.
     /// </summary>

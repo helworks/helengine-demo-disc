@@ -1,4 +1,4 @@
-namespace city.menu.tools.tests {
+namespace DemoDisc.menu.tools.tests {
     /// <summary>
     /// Verifies the timing contract used by the initial Helen of Code splash transition.
     /// </summary>

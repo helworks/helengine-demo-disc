@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
-using city.menu;
-using city.rendering;
+using DemoDisc.menu;
+using DemoDisc.rendering;
 using helengine;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the DemoDisc-owned progressive software path tracing session and component contract.
     /// </summary>

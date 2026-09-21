@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Creates the authored shared solid-color material used by the cube-test scene and writes its per-platform material settings.
     /// </summary>

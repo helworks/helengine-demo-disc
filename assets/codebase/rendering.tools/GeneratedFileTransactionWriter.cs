@@ -1,7 +1,7 @@
 using helengine;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Routes generated source, import-settings, and cache bytes through the
     /// caller-owned editor transaction.

@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Stores reusable colors, font paths, and decorative artwork paths for the first-pass demo-disc menu.
     /// </summary>

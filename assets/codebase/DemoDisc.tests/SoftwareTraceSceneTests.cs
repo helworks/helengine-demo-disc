@@ -1,7 +1,7 @@
 using helengine;
-using city.rendering;
+using DemoDisc.rendering;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies CPU-only flattening and area-light extraction for software trace scenes.
     /// </summary>
@@ -60,7 +60,7 @@ namespace city.tests {
             fixture.AddModel(reference, new SoftwareMaterial());
             fixture.AddModel(reference, EmitterMaterial());
 
-            city.rendering.SoftwareTraceScene scene = city.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
+            DemoDisc.rendering.SoftwareTraceScene scene = DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
 
             Assert.Equal(24, scene.Triangles.Length);
             Assert.Equal(1, source.LoadCount);
@@ -78,7 +78,7 @@ namespace city.tests {
             source.Register(reference, () => CreateTriangleAsset16());
             fixture.AddModel(reference, EmitterMaterial());
 
-            city.rendering.SoftwareTraceScene scene = city.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
+            DemoDisc.rendering.SoftwareTraceScene scene = DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
 
             Assert.Equal(2, scene.Triangles.Length);
         }
@@ -94,7 +94,7 @@ namespace city.tests {
             source.Register(reference, () => CreateTriangleAsset32());
             fixture.AddModel(reference, EmitterMaterial());
 
-            city.rendering.SoftwareTraceScene scene = city.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
+            DemoDisc.rendering.SoftwareTraceScene scene = DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
 
             Assert.Equal(2, scene.Triangles.Length);
         }
@@ -119,8 +119,8 @@ namespace city.tests {
             float4.CreateFromAxisAngle(axis, 0.5f, out float4 orientation);
             entity.LocalOrientation = orientation;
 
-            city.rendering.SoftwareTraceScene scene = city.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
-            city.rendering.SoftwareTriangle triangle = scene.Triangles[0];
+            DemoDisc.rendering.SoftwareTraceScene scene = DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
+            DemoDisc.rendering.SoftwareTriangle triangle = scene.Triangles[0];
             float3 expectedP0 = Transform(new float3(1f, 0f, 0f), entity.WorldTransformMatrix);
             float3 expectedP1 = Transform(new float3(1f, 1f, 0f), entity.WorldTransformMatrix);
             float3 expectedP2 = Transform(new float3(0f, 1f, 0f), entity.WorldTransformMatrix);
@@ -146,7 +146,7 @@ namespace city.tests {
             fixture.AddModel(reference, new SoftwareMaterial { DiffuseColor = new float3(1f, 0f, 0f) }, new SoftwareMaterial { DiffuseColor = new float3(0f, 1f, 0f) });
             fixture.AddModel(reference, new SoftwareMaterial { DiffuseColor = new float3(0f, 0f, 1f), EmissionColor = float3.One, EmissionStrength = 1f }, new SoftwareMaterial { DiffuseColor = new float3(1f, 1f, 0f), EmissionColor = float3.One, EmissionStrength = 1f });
 
-            city.rendering.SoftwareTraceScene scene = city.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
+            DemoDisc.rendering.SoftwareTraceScene scene = DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
 
             Assert.Equal(4, scene.Triangles.Length);
             Assert.Equal(0, scene.Triangles[0].MaterialIndex);
@@ -167,7 +167,7 @@ namespace city.tests {
             source.Register(reference, CreateTriangleAsset16);
             fixture.AddModel(reference, new SoftwareMaterial(), EmitterMaterial());
 
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
 
             Assert.Contains("exactly", exception.Message, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("submesh", exception.Message, StringComparison.OrdinalIgnoreCase);
@@ -188,7 +188,7 @@ namespace city.tests {
             fixture.AddModel(first, new SoftwareMaterial());
             fixture.AddModel(second, EmitterMaterial());
 
-            city.rendering.SoftwareTraceScene scene = city.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
+            DemoDisc.rendering.SoftwareTraceScene scene = DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
 
             Assert.Equal(2, source.LoadCount);
             Assert.Equal(2, source.DisposedCount);
@@ -206,7 +206,7 @@ namespace city.tests {
             source.Register(reference, () => new ModelAsset { Positions = null, Indices16 = new ushort[] { 0, 1, 2 }, Submeshes = Array.Empty<ModelSubmeshAsset>() });
             fixture.AddModel(reference, new SoftwareMaterial());
 
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
 
             Assert.Contains("positions", exception.Message, StringComparison.OrdinalIgnoreCase);
             Assert.Equal(1, source.DisposedCount);
@@ -230,7 +230,7 @@ namespace city.tests {
             source.Register(reference, () => CreateInvalidAsset(failureKind));
             fixture.AddModel(reference, failureKind == 5 ? null : new SoftwareMaterial());
 
-            Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+            Assert.Throws<InvalidOperationException>(() => DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
             Assert.Equal(1, source.DisposedCount);
         }
 
@@ -249,7 +249,7 @@ namespace city.tests {
             fixture.AddModel(second, EmitterMaterial());
             fixture.Entities[1].LocalPosition = new float3(0f, 1f, 0f);
 
-            city.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
+            DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
 
             Assert.Equal(new[] { "models/first.hasset", "models/second.hasset" }, source.LoadedRelativePaths);
             Assert.True(source.LoadObservedAllPreviousAssetsDisposed);
@@ -266,7 +266,7 @@ namespace city.tests {
             source.Register(reference, () => CreateInvalidAsset(4));
             fixture.AddModel(reference, new SoftwareMaterial());
 
-            Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+            Assert.Throws<InvalidOperationException>(() => DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
             Assert.Equal(1, source.DisposedCount);
         }
 
@@ -280,7 +280,7 @@ namespace city.tests {
             FakeSoftwareModelAssetSource zeroSource = new FakeSoftwareModelAssetSource();
             zeroSource.Register(diffuseReference, CreateTriangleAsset16);
             zeroFixture.AddModel(diffuseReference, new SoftwareMaterial());
-            Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(zeroFixture.Entities, zeroSource));
+            Assert.Throws<InvalidOperationException>(() => DemoDisc.rendering.SoftwareTraceScene.Build(zeroFixture.Entities, zeroSource));
 
             using SceneFixture multipleFixture = new SceneFixture();
             SceneAssetReference first = SceneAssetReferenceFactory.CreateFileSystemModel("models/first-emitter.hasset");
@@ -290,7 +290,7 @@ namespace city.tests {
             multipleSource.Register(second, CreateTriangleAsset16);
             multipleFixture.AddModel(first, new SoftwareMaterial { EmissionColor = float3.One, EmissionStrength = 1f });
             multipleFixture.AddModel(second, new SoftwareMaterial { EmissionColor = float3.One, EmissionStrength = 1f });
-            Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(multipleFixture.Entities, multipleSource));
+            Assert.Throws<InvalidOperationException>(() => DemoDisc.rendering.SoftwareTraceScene.Build(multipleFixture.Entities, multipleSource));
         }
 
         /// <summary>
@@ -310,7 +310,7 @@ namespace city.tests {
             emitterEntity.LocalPosition = new float3(0f, 1f, 0f);
             emitterEntity.LocalScale = new float3(0.55f, 0.025f, 0.45f);
 
-            city.rendering.SoftwareTraceScene scene = city.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
+            DemoDisc.rendering.SoftwareTraceScene scene = DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
 
             Assert.Equal(24, scene.Triangles.Length);
             Assert.InRange(scene.AreaLight.FirstTriangleIndex, 12, 23);
@@ -347,7 +347,7 @@ namespace city.tests {
             fixture.AddModel(emitterReference, EmitterMaterial(), new SoftwareMaterial());
             fixture.Entities[1].LocalPosition = new float3(0f, 1f, 0f);
 
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
 
             Assert.Contains("emissive", exception.Message, StringComparison.OrdinalIgnoreCase);
             Assert.Equal(2, source.DisposedCount);
@@ -364,7 +364,7 @@ namespace city.tests {
             source.Register(reference, CreateAmbiguousEmitterAsset);
             fixture.AddModel(reference, new SoftwareMaterial { EmissionColor = float3.One, EmissionStrength = 1f });
 
-            Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+            Assert.Throws<InvalidOperationException>(() => DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
             Assert.Equal(1, source.DisposedCount);
         }
 
@@ -381,9 +381,9 @@ namespace city.tests {
             fixture.AddModel(reference, new SoftwareMaterial { EmissionColor = float3.One, EmissionStrength = 1f });
             fixture.Entities[1].LocalPosition = new float3(0f, 1f, 0f);
 
-            city.rendering.SoftwareTraceScene scene = city.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
+            DemoDisc.rendering.SoftwareTraceScene scene = DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source);
 
-            Assert.Equal(scene.SteadyStateOwnedBytes, scene.Triangles.Length * city.rendering.SoftwareTraceScene.SoftwareTriangleBytes + scene.Materials.Length * city.rendering.SoftwareTraceScene.SoftwareMaterialDataBytes + city.rendering.SoftwareTraceScene.SoftwareAreaLightBytes);
+            Assert.Equal(scene.SteadyStateOwnedBytes, scene.Triangles.Length * DemoDisc.rendering.SoftwareTraceScene.SoftwareTriangleBytes + scene.Materials.Length * DemoDisc.rendering.SoftwareTraceScene.SoftwareMaterialDataBytes + DemoDisc.rendering.SoftwareTraceScene.SoftwareAreaLightBytes);
             Assert.True(scene.InitializationPeakOwnedBytes >= scene.SteadyStateOwnedBytes);
         }
 
@@ -402,7 +402,7 @@ namespace city.tests {
             });
             fixture.AddModel(reference, new SoftwareMaterial());
 
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
 
             Assert.Contains("Submeshes[0]", exception.Message, StringComparison.Ordinal);
             Assert.Equal(1, source.DisposedCount);
@@ -422,7 +422,7 @@ namespace city.tests {
             }));
             fixture.AddModel(reference, new SoftwareMaterial(), new SoftwareMaterial());
 
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
 
             Assert.Contains("overlap", exception.Message, StringComparison.OrdinalIgnoreCase);
             Assert.Equal(1, source.DisposedCount);
@@ -441,7 +441,7 @@ namespace city.tests {
             }));
             fixture.AddModel(reference, new SoftwareMaterial());
 
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
 
             Assert.Contains("do not cover", exception.Message, StringComparison.OrdinalIgnoreCase);
             Assert.Equal(1, source.DisposedCount);
@@ -462,7 +462,7 @@ namespace city.tests {
             });
             fixture.AddModel(reference, new SoftwareMaterial());
 
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
 
             Assert.Contains("Positions", exception.Message, StringComparison.Ordinal);
             Assert.Equal(1, source.DisposedCount);
@@ -480,7 +480,7 @@ namespace city.tests {
             Entity entity = fixture.AddModel(reference, new SoftwareMaterial());
             entity.LocalScale = new float3(1f, 0f, 1f);
 
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => city.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => DemoDisc.rendering.SoftwareTraceScene.Build(fixture.Entities, source));
 
             Assert.Contains("degenerate", exception.Message, StringComparison.OrdinalIgnoreCase);
             Assert.Equal(1, source.DisposedCount);
@@ -510,10 +510,10 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Compact_owned_byte_constants_are_exact() {
-            Assert.Equal(88, city.rendering.SoftwareTriangle.OwnedBytes);
-            Assert.Equal(44, city.rendering.SoftwareMaterialData.OwnedBytes);
-            Assert.Equal(city.rendering.SoftwareMaterialData.OwnedBytes, System.Runtime.InteropServices.Marshal.SizeOf<city.rendering.SoftwareMaterialData>());
-            Assert.Equal(72, city.rendering.SoftwareAreaLight.OwnedBytes);
+            Assert.Equal(88, DemoDisc.rendering.SoftwareTriangle.OwnedBytes);
+            Assert.Equal(44, DemoDisc.rendering.SoftwareMaterialData.OwnedBytes);
+            Assert.Equal(DemoDisc.rendering.SoftwareMaterialData.OwnedBytes, System.Runtime.InteropServices.Marshal.SizeOf<DemoDisc.rendering.SoftwareMaterialData>());
+            Assert.Equal(72, DemoDisc.rendering.SoftwareAreaLight.OwnedBytes);
         }
 
         /// <summary>
@@ -666,7 +666,7 @@ namespace city.tests {
             public Entity AddModel(SceneAssetReference reference, params SoftwareMaterial[] materials) {
                 Entity entity = new Entity(core);
                 entity.InitComponents();
-                entity.AddComponent(new city.rendering.SoftwareModelComponent { ModelReference = reference, Materials = materials });
+                entity.AddComponent(new DemoDisc.rendering.SoftwareModelComponent { ModelReference = reference, Materials = materials });
                 Entities.Add(entity);
                 return entity;
             }

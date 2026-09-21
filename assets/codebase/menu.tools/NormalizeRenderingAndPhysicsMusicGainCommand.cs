@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.menu.tools {
+namespace DemoDisc.menu.tools {
     /// <summary>
     /// Normalizes serialized rendering and physics showcase scene-music gains back to the shared authored value.
     /// </summary>
@@ -125,11 +125,11 @@ namespace city.menu.tools {
                 EntitySaveComponent saveComponent = new EntitySaveComponent();
                 AudioSourceComponent audioSource = (AudioSourceComponent)descriptor.DeserializeComponent(record, saveComponent, null);
                 if (!string.Equals(audioSource.BusId, "music", StringComparison.Ordinal)
-                    || Math.Abs(audioSource.Gain - city.scene.tools.GeneratedSceneMusicAuthoringService.RenderingAndPhysicsMusicGain) < 0.001f) {
+                    || Math.Abs(audioSource.Gain - DemoDisc.scene.tools.GeneratedSceneMusicAuthoringService.RenderingAndPhysicsMusicGain) < 0.001f) {
                     continue;
                 }
 
-                audioSource.Gain = city.scene.tools.GeneratedSceneMusicAuthoringService.RenderingAndPhysicsMusicGain;
+                audioSource.Gain = DemoDisc.scene.tools.GeneratedSceneMusicAuthoringService.RenderingAndPhysicsMusicGain;
                 SceneComponentAssetRecord updatedRecord = descriptor.SerializeComponent(
                     audioSource,
                     record.ComponentIndex,

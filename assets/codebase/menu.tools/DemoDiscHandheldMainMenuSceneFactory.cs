@@ -1,10 +1,10 @@
-using city.menu;
-using city.rendering;
-using city.rendering.tools;
+using DemoDisc.menu;
+using DemoDisc.rendering;
+using DemoDisc.rendering.tools;
 using helengine;
 using helengine.editor;
 
-namespace city.menu.tools {
+namespace DemoDisc.menu.tools {
     /// <summary>
     /// Authors the live demo-disc main menu scene hierarchy before it is persisted through the editor save pipeline.
     /// </summary>

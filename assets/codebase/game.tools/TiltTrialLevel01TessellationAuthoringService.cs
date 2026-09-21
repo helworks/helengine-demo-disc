@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Updates only the scalable course MeshComponents in the existing authored Tilt Trial Level 01 scene with cook-time tessellation settings.
     /// </summary>
@@ -76,7 +76,7 @@ namespace city.game.tools {
             }
 
             string relativePath = Level01SceneRelativePath.Substring("assets/".Length);
-            sceneAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(relativePath);
+            sceneAsset.AuthoringAssetId = DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(relativePath);
             sceneAsset.FormerAuthoringAssetIds = Array.Empty<string>();
             Transaction.WriteAsset(relativePath, sceneAsset);
         }

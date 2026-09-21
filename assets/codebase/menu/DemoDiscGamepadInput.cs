@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Aggregates the separate console controller devices exposed by the engine into the shared Demo Disc game input surface.
     /// </summary>

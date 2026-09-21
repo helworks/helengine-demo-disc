@@ -1,4 +1,4 @@
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Exposes explicit editor generation for the reusable Tilt Trial pendulum hammer assets.
     /// </summary>

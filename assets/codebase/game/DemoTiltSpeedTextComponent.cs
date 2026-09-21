@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Updates the Tilt Trial HUD with the current player-ball speed in kilometers per hour.
     /// </summary>

@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Drives one manual orbit camera that follows a serialized target entity by position while ignoring the target's physical rotation.
     /// </summary>

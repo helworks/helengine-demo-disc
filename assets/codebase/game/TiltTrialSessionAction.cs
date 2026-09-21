@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Identifies presentation-independent commands that can be sent to an active Tilt Trial session.
     /// </summary>

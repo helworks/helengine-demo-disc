@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Resolves city menu-definition providers from assembly-qualified type names persisted in scenes.
     /// </summary>

@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the shared Tilt Trial level catalog stays complete and deterministic.
     /// </summary>
@@ -8,12 +8,12 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Catalog_returns_exactly_five_ordered_levels() {
-            IReadOnlyList<city.game.TiltTrialLevelCatalogEntry> entries = city.game.TiltTrialLevelCatalog.CreateEntries();
+            IReadOnlyList<DemoDisc.game.TiltTrialLevelCatalogEntry> entries = DemoDisc.game.TiltTrialLevelCatalog.CreateEntries();
 
             Assert.Equal(5, entries.Count);
             Assert.Equal("tilt-trial-01", entries[0].LevelId);
             Assert.Equal("Level 1", entries[0].DisplayName);
-            Assert.Equal(city.game.TiltTrialSceneIds.Level01SceneId, entries[0].SceneId);
+            Assert.Equal(DemoDisc.game.TiltTrialSceneIds.Level01SceneId, entries[0].SceneId);
             Assert.Equal("tilt-trial-05", entries[4].LevelId);
         }
 
@@ -22,7 +22,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Catalog_entries_expose_scene_name_timer_medals_and_optional_preview() {
-            foreach (city.game.TiltTrialLevelCatalogEntry entry in city.game.TiltTrialLevelCatalog.CreateEntries()) {
+            foreach (DemoDisc.game.TiltTrialLevelCatalogEntry entry in DemoDisc.game.TiltTrialLevelCatalog.CreateEntries()) {
                 Assert.False(string.IsNullOrWhiteSpace(entry.LevelId));
                 Assert.False(string.IsNullOrWhiteSpace(entry.DisplayName));
                 Assert.False(string.IsNullOrWhiteSpace(entry.SceneId));

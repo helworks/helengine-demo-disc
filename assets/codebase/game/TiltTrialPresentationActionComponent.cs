@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Converts a serialized interactable press into a semantic action on the active Tilt Trial session.
     /// </summary>

@@ -1,7 +1,7 @@
 using helengine;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Creates the positive-Y-only model used to isolate the implicated PlayStation 2 textured fast-path face from shared scene geometry.
     /// </summary>
@@ -80,7 +80,7 @@ namespace city.rendering.tools {
             }
 
             ModelAsset modelAsset = CreateModelAsset();
-            modelAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(ModelRelativePath);
+            modelAsset.AuthoringAssetId = DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(ModelRelativePath);
             modelAsset.FormerAuthoringAssetIds = Array.Empty<string>();
             transaction.WriteAsset(ModelRelativePath, modelAsset);
         }

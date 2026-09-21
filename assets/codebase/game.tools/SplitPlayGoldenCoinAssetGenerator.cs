@@ -1,10 +1,10 @@
-using CityGeneratedMaterialAssetDefinition = city.rendering.tools.GeneratedMaterialAssetDefinition;
-using CityGeneratedMaterialAssetWriteService = city.rendering.tools.GeneratedMaterialAssetWriteService;
-using CityGeneratedMaterialPlatformDefinition = city.rendering.tools.GeneratedMaterialPlatformDefinition;
-using city.rendering.tools;
+using CityGeneratedMaterialAssetDefinition = DemoDisc.rendering.tools.GeneratedMaterialAssetDefinition;
+using CityGeneratedMaterialAssetWriteService = DemoDisc.rendering.tools.GeneratedMaterialAssetWriteService;
+using CityGeneratedMaterialPlatformDefinition = DemoDisc.rendering.tools.GeneratedMaterialPlatformDefinition;
+using DemoDisc.rendering.tools;
 using helengine.editor;
 
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Generates the reusable Split Play coin support assets.
     /// </summary>
@@ -100,8 +100,8 @@ namespace city.game.tools {
             ComponentPersistenceRegistry registry = GeneratedScenePersistenceRegistryFactory.Create();
             SceneComponentAssetRecord baseRecord = registry.GetDescriptor(meshComponent).SerializeComponent(meshComponent, 0, saveState);
             SceneComponentAssetRecord meshRecord = new ComponentPlatformOverridePayloadService().Wrap(baseRecord, saveState);
-            SceneComponentAssetRecord collectibleRecord = AutomaticDescriptor.SerializeComponent(new city.game.TiltTrialCollectibleCoinComponent(), 1, null);
-            SceneComponentAssetRecord idleMotionRecord = AutomaticDescriptor.SerializeComponent(new city.game.SplitPlayIdleMotionComponent(), 2, null);
+            SceneComponentAssetRecord collectibleRecord = AutomaticDescriptor.SerializeComponent(new DemoDisc.game.TiltTrialCollectibleCoinComponent(), 1, null);
+            SceneComponentAssetRecord idleMotionRecord = AutomaticDescriptor.SerializeComponent(new DemoDisc.game.SplitPlayIdleMotionComponent(), 2, null);
             SceneComponentAssetRecord observerRecord = SerializeWithStableKey(registry, new global::helengine.SceneEntityTriggerObserverComponent(), 3, TriggerObserverComponentKey);
             SceneComponentAssetRecord rigidBodyRecord = SerializeWithStableKey(registry, new RigidBody3DComponent {
                 BodyKind = BodyKind3D.Kinematic,

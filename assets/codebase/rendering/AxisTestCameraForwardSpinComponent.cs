@@ -1,4 +1,4 @@
-namespace gameplay.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Rotates the parent entity around one supplied camera-forward axis using deterministic absolute runtime time.
     /// </summary>

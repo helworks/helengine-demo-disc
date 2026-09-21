@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Controls whether the initial boot sequence currently owns Demo Disc menu input.
     /// </summary>

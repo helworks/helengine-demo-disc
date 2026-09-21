@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Swings a pendulum hammer around its pivot through one arc and back so the kinematic hammer head pushes the player sphere.
     /// </summary>

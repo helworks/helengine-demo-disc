@@ -1,4 +1,4 @@
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Bundles the runtime models and materials required to compose the city rendering showcase scenes.
     /// </summary>

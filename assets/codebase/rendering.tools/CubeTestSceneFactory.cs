@@ -1,8 +1,8 @@
-using city.menu;
-using gameplay.rendering;
+using DemoDisc.menu;
+using DemoDisc.rendering;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the canonical live-authored scene definition for the minimal rotating cube rendering test.
     /// </summary>
@@ -146,8 +146,8 @@ namespace city.rendering.tools {
                 throw new InvalidOperationException("Cube-test N64 camera exclusions require an editor entity.");
             }
 
-            city.rendering.DemoDiscOrbitCameraComponent orbitComponent = cameraEntity.Components
-                .OfType<city.rendering.DemoDiscOrbitCameraComponent>()
+            DemoDisc.rendering.DemoDiscOrbitCameraComponent orbitComponent = cameraEntity.Components
+                .OfType<DemoDisc.rendering.DemoDiscOrbitCameraComponent>()
                 .Single();
             for (int index = 0; index < excludedPlatformIds.Length; index++) {
                 PlatformSceneAuthoringHelperServiceValue.ExcludeComponentFromScope(
@@ -169,11 +169,11 @@ namespace city.rendering.tools {
                 throw new InvalidOperationException("Cube-test N64 UI input exclusions require an editor entity.");
             }
 
-            city.menu.DemoDiscReturnToMenuComponent returnToMenuComponent = uiEntity.Components
-                .OfType<city.menu.DemoDiscReturnToMenuComponent>()
+            DemoDisc.menu.DemoDiscReturnToMenuComponent returnToMenuComponent = uiEntity.Components
+                .OfType<DemoDisc.menu.DemoDiscReturnToMenuComponent>()
                 .Single();
-            city.rendering.DemoDiscLightToggleComponent lightToggleComponent = uiEntity.Components
-                .OfType<city.rendering.DemoDiscLightToggleComponent>()
+            DemoDisc.rendering.DemoDiscLightToggleComponent lightToggleComponent = uiEntity.Components
+                .OfType<DemoDisc.rendering.DemoDiscLightToggleComponent>()
                 .Single();
             for (int index = 0; index < excludedPlatformIds.Length; index++) {
                 EditorOverrideScope excludedScope = DemoDiscOverrideScopes.Platform(excludedPlatformIds[index]);
@@ -212,7 +212,7 @@ namespace city.rendering.tools {
                 }
             };
             entity.AddComponent(cameraComponent);
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = float3.Zero,
                 AutoYawSpeedRadians = 0f
             });
@@ -280,7 +280,7 @@ namespace city.rendering.tools {
                 RenderOrder3D = 0
             };
             entity.AddComponent(meshComponent);
-            entity.AddComponent(new city.rendering.CubeTestSpinComponent {
+            entity.AddComponent(new DemoDisc.rendering.CubeTestSpinComponent {
                 BaseYawRadians = 0f,
                 AngularSpeedRadians = CubeAngularSpeedRadians
             });

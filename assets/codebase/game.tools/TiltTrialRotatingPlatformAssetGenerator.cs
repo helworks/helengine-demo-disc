@@ -1,10 +1,10 @@
-﻿using CityGeneratedMaterialAssetDefinition = city.rendering.tools.GeneratedMaterialAssetDefinition;
-using CityGeneratedMaterialAssetWriteService = city.rendering.tools.GeneratedMaterialAssetWriteService;
-using CityGeneratedMaterialPlatformDefinition = city.rendering.tools.GeneratedMaterialPlatformDefinition;
-using city.rendering.tools;
+﻿using CityGeneratedMaterialAssetDefinition = DemoDisc.rendering.tools.GeneratedMaterialAssetDefinition;
+using CityGeneratedMaterialAssetWriteService = DemoDisc.rendering.tools.GeneratedMaterialAssetWriteService;
+using CityGeneratedMaterialPlatformDefinition = DemoDisc.rendering.tools.GeneratedMaterialPlatformDefinition;
+using DemoDisc.rendering.tools;
 using helengine.editor;
 
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Generates the reusable Tilt Trial rotating platform support assets.
     /// </summary>
@@ -116,7 +116,7 @@ namespace city.game.tools {
             };
             SceneComponentAssetRecord rigidBodyRecord = registry.GetDescriptor(platformRigidBody).SerializeComponent(platformRigidBody, 1, null);
             SceneComponentAssetRecord colliderRecord = registry.GetDescriptor(platformCollider).SerializeComponent(platformCollider, 2, null);
-            SceneComponentAssetRecord spinRecord = AutomaticDescriptor.SerializeComponent(new city.game.TiltTrialRotatingPlatformComponent(), 3, null);
+            SceneComponentAssetRecord spinRecord = AutomaticDescriptor.SerializeComponent(new DemoDisc.game.TiltTrialRotatingPlatformComponent(), 3, null);
 
             return new BlueprintAsset {
                 Id = RotatingPlatformBlueprintRelativePath,

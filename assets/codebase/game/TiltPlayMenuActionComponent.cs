@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Converts a serialized Tilt Play action-host press into a semantic menu action.
     /// </summary>

@@ -1,9 +1,9 @@
 using System;
 using System.Reflection;
-using city.rendering;
+using DemoDisc.rendering;
 using helengine;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies stateless deterministic software path sampling.
     /// </summary>

@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Applies the current platform name and version to the demo-disc menu overlay text.
     /// </summary>

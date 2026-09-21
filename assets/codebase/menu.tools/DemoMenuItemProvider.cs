@@ -1,4 +1,4 @@
-namespace city.menu.tools {
+namespace DemoDisc.menu.tools {
     /// <summary>
     /// Contributes the demo workflow menu items used by the city project inside the editor menu strip.
     /// </summary>

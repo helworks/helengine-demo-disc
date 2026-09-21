@@ -1,4 +1,4 @@
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Stores one authored step for the scene-memory probe placeholder component.
     /// </summary>

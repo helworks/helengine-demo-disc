@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Loads and validates the generated control-icon manifest.
     /// </summary>

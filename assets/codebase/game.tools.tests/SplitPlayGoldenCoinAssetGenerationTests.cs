@@ -1,10 +1,10 @@
 using helengine;
 using helengine.editor;
-using city.game.tools;
-using city.rendering.tools;
+using DemoDisc.game.tools;
+using DemoDisc.rendering.tools;
 using System.Linq;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies Split Play support asset generation writes one common coin model, one DS override model, one shared material, and one blueprint with the expected model override and collectible behavior.
     /// </summary>
@@ -122,7 +122,7 @@ namespace city.tests {
             IReadOnlyList<EntityComponentPlatformOverrideState> overrideStates = overridePayloadService.ReadOverrideStates(meshComponent);
             EntityComponentPlatformOverrideState dsOverride = Assert.Single(
                 overrideStates,
-                state => global::city.testing.DemoDiscOverrideScopeReader.PlatformIdOf(state.Scope) == "ds");
+                state => global::DemoDisc.testing.DemoDiscOverrideScopeReader.PlatformIdOf(state.Scope) == "ds");
             SceneComponentAssetRecord unwrappedMeshComponent = overridePayloadService.UnwrapBaseRecord(meshComponent);
             ComponentPersistenceRegistry registry = GeneratedScenePersistenceRegistryFactory.Create();
             MeshComponent restoredMeshComponent = Assert.IsType<MeshComponent>(

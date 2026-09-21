@@ -1,4 +1,4 @@
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Regenerates only the Tilt Trial front-door scene through the city-owned authoring pipeline.
     /// </summary>

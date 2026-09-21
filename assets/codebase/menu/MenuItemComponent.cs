@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Stores the serialized runtime metadata required to navigate one baked city demo menu item.
     /// </summary>
@@ -11,7 +11,7 @@ namespace city.menu {
         /// <summary>
         /// Stable serialized component type id used by baked menu item scene records.
         /// </summary>
-        public const string SerializedComponentTypeId = "city.menu.MenuItemComponent, gameplay";
+        public const string SerializedComponentTypeId = "DemoDisc.menu.MenuItemComponent, DemoDisc";
 
         /// <summary>
         /// Backing field for the owning panel id.

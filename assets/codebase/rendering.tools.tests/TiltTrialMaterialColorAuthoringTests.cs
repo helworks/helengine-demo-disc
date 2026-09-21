@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies Tilt Trial authored material colors use the shared <c>#RRGGBBAA</c> contract with fully opaque alpha.
     /// </summary>

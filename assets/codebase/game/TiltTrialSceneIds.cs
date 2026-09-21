@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Stores the shared runtime scene ids used by the Tilt Trial selector and gameplay flow.
     /// </summary>

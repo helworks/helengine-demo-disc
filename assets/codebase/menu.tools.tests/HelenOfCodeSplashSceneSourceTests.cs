@@ -1,4 +1,4 @@
-namespace city.menu.tools.tests {
+namespace DemoDisc.menu.tools.tests {
     /// <summary>
     /// Verifies the authored source contract for the generated Helen of Code splash scene.
     /// </summary>
@@ -8,7 +8,7 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Splash_factory_authors_centered_ninety_percent_logo_scene() {
-            string sourcePath = global::city.testing.DemoDiscTestProject.GetPath(
+            string sourcePath = global::DemoDisc.testing.DemoDiscTestProject.GetPath(
                 "assets",
                 "codebase",
                 "menu.tools",
@@ -30,7 +30,7 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Splash_factory_authors_an_opaque_black_solid_background() {
-            string sourcePath = global::city.testing.DemoDiscTestProject.GetPath(
+            string sourcePath = global::DemoDisc.testing.DemoDiscTestProject.GetPath(
                 "assets",
                 "codebase",
                 "menu.tools",
@@ -49,7 +49,7 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Splash_factory_nests_the_sprite_subtree_under_its_overlay_camera() {
-            string sourcePath = global::city.testing.DemoDiscTestProject.GetPath(
+            string sourcePath = global::DemoDisc.testing.DemoDiscTestProject.GetPath(
                 "assets",
                 "codebase",
                 "menu.tools",
@@ -68,8 +68,8 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Splash_factory_keeps_its_blackout_background_outside_the_fitted_canvas() {
-            string factorySource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "HelenOfCodeSplashSceneFactory.cs")).ReplaceLineEndings("\n");
-            string componentSource = File.ReadAllText(global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "HelenOfCodeSplashComponent.cs"));
+            string factorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.tools", "HelenOfCodeSplashSceneFactory.cs")).ReplaceLineEndings("\n");
+            string componentSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu", "HelenOfCodeSplashComponent.cs"));
 
             Assert.Contains("Entity backgroundEntity = CreateBackgroundEntity(cameraEntity);", factorySource, StringComparison.Ordinal);
             Assert.Contains("BackgroundRectangle.Size = Core.Instance.RenderManager3D.MainWindowSize", componentSource, StringComparison.Ordinal);
@@ -81,7 +81,7 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Splash_factory_assigns_the_dedicated_runtime_layer_to_every_splash_entity() {
-            string sourcePath = global::city.testing.DemoDiscTestProject.GetPath(
+            string sourcePath = global::DemoDisc.testing.DemoDiscTestProject.GetPath(
                 "assets",
                 "codebase",
                 "menu.tools",
@@ -96,7 +96,7 @@ namespace city.menu.tools.tests {
         /// </summary>
         [Fact]
         public void Committed_splash_scene_preserves_overlay_layer_on_the_sprite_subtree() {
-            string scenePath = global::city.testing.DemoDiscTestProject.GetPath("assets", "scenes", "HelenOfCodeSplash.helen");
+            string scenePath = global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "scenes", "HelenOfCodeSplash.helen");
             using FileStream stream = File.OpenRead(scenePath);
             SceneAsset scene = Assert.IsType<SceneAsset>(global::helengine.AssetSerializer.Deserialize(stream));
 

@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Stores baked menu metadata and drives runtime navigation against the generated city menu hierarchy.
     /// </summary>
@@ -11,7 +11,7 @@ namespace city.menu {
         /// <summary>
         /// Stable serialized component type id used by baked city menu scene records.
         /// </summary>
-        public const string SerializedComponentTypeId = "city.menu.MenuComponent, gameplay";
+        public const string SerializedComponentTypeId = "DemoDisc.menu.MenuComponent, DemoDisc";
 
         /// <summary>
         /// Minimum signed left-stick axis magnitude required to produce one menu navigation event.

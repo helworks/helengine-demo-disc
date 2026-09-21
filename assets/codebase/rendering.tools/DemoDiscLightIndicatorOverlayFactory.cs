@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Authors the shared top-left light indicator row used by the rendering demo-disc scenes.
     /// </summary>

@@ -1,6 +1,6 @@
-using city.rendering.tools;
+using DemoDisc.rendering.tools;
 
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Provides the separately generated handheld Tilt Trial level-selector scene definition.
     /// </summary>

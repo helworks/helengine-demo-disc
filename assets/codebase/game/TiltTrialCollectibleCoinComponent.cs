@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Marks one Tilt Trial entity as a collectible coin and tracks whether it has already been collected.
     /// </summary>

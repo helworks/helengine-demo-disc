@@ -1,8 +1,8 @@
-using city.menu;
-using city.rendering.tools;
+using DemoDisc.menu;
+using DemoDisc.rendering.tools;
 using helengine.editor;
 
-namespace city.menu.tools {
+namespace DemoDisc.menu.tools {
     /// <summary>
     /// Generates the authored demo-disc main menu scene inside the active city project.
     /// </summary>

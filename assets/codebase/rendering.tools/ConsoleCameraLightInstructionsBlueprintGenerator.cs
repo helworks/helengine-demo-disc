@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Generates the shared console camera/light instruction Blueprint.
     /// </summary>
@@ -44,7 +44,7 @@ namespace city.rendering.tools {
                 AssetAuthoringService.WriteNativeBlueprint(
                     ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath,
                     GeneratedScenePersistenceRegistryFactory.Create(),
-                    city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(
+                    DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(
                         ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath),
                     Transaction);
             } finally {

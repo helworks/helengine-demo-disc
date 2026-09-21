@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Re-paths the override scopes of one generated entity subtree from the project's default level order onto
     /// <see cref="DemoDiscOverrideScopes.GroupFirstLevelOrder"/>.

@@ -1,7 +1,7 @@
-using city.rendering.tools;
+using DemoDisc.rendering.tools;
 using helengine.editor;
 
-namespace city.physics.tools {
+namespace DemoDisc.physics.tools {
     public sealed class PhysicsSceneGenerator {
         /// <summary>
         /// Host-owned capability used by the generated physics scenes to resolve fonts and author import settings.

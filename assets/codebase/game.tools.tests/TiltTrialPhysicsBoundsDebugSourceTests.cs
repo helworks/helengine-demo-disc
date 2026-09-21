@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies Tilt Trial gameplay scenes wire the Windows-only physics bounds debug overlay and keep its F3 toggle contract stable.
     /// </summary>
@@ -9,7 +9,7 @@ namespace city.tests {
 
             Assert.Contains("CreatePhysicsBoundsDebugEntity()", source, StringComparison.Ordinal);
             Assert.Contains("Create(\"TiltTrialPhysicsBoundsDebug\")", source, StringComparison.Ordinal);
-            Assert.Contains("entity.AddComponent(new global::city.game.TiltTrialPhysicsBoundsDebugDrawComponent());", source, StringComparison.Ordinal);
+            Assert.Contains("entity.AddComponent(new global::DemoDisc.game.TiltTrialPhysicsBoundsDebugDrawComponent());", source, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace city.tests {
 
             Assert.Contains("\"TiltTrialPhysicsBoundsStatusText\"", source, StringComparison.Ordinal);
             Assert.Contains("\"F3 Bounds Off\"", source, StringComparison.Ordinal);
-            Assert.Contains("physicsBoundsStatusTextEntity.AddComponent(new city.game.TiltTrialPhysicsBoundsStatusTextComponent());", source, StringComparison.Ordinal);
+            Assert.Contains("physicsBoundsStatusTextEntity.AddComponent(new DemoDisc.game.TiltTrialPhysicsBoundsStatusTextComponent());", source, StringComparison.Ordinal);
         }
 
         /// <summary>

@@ -1,9 +1,9 @@
 using helengine;
 using helengine.editor;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
-    /// Covers <see cref="city.rendering.tools.GeneratedSceneGroupFirstScopeRewriteService"/>: when a generated
+    /// Covers <see cref="DemoDisc.rendering.tools.GeneratedSceneGroupFirstScopeRewriteService"/>: when a generated
     /// subtree adopts the group-first level order, every scope that names a platform must be re-pathed through
     /// that platform's group chain, because an override only applies to a build target whose path it prefixes.
     /// <para>
@@ -145,7 +145,7 @@ namespace city.tests {
             IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(projectRootPath);
             EditorEntity entity = CreateEntityWithDefaultOrderOverrides(authoringSession, out Component component);
             EntitySaveComponent saveComponent = FindSaveComponent(entity);
-            city.rendering.tools.GeneratedSceneGroupFirstScopeRewriteService rewriteService = CreateRewriteService();
+            DemoDisc.rendering.tools.GeneratedSceneGroupFirstScopeRewriteService rewriteService = CreateRewriteService();
 
             rewriteService.RewriteSubtree(entity);
             rewriteService.RewriteSubtree(entity);
@@ -190,8 +190,8 @@ namespace city.tests {
         /// generators author against.
         /// </summary>
         /// <returns>Rewrite service bound to the demo-disc project settings.</returns>
-        static city.rendering.tools.GeneratedSceneGroupFirstScopeRewriteService CreateRewriteService() {
-            return new city.rendering.tools.GeneratedSceneGroupFirstScopeRewriteService(global::city.testing.DemoDiscTestProject.RootPath);
+        static DemoDisc.rendering.tools.GeneratedSceneGroupFirstScopeRewriteService CreateRewriteService() {
+            return new DemoDisc.rendering.tools.GeneratedSceneGroupFirstScopeRewriteService(global::DemoDisc.testing.DemoDiscTestProject.RootPath);
         }
 
         /// <summary>

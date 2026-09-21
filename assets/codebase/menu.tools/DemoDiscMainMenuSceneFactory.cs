@@ -1,7 +1,7 @@
-using city.menu;
-using city.rendering.tools;
+using DemoDisc.menu;
+using DemoDisc.rendering.tools;
 
-namespace city.menu.tools {
+namespace DemoDisc.menu.tools {
     /// <summary>
     /// Coordinates demo-disc main-menu scene authoring across the standard and Nintendo handheld scene builders.
     /// </summary>

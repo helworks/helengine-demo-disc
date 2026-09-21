@@ -1,4 +1,4 @@
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Regenerates the authored city gameplay scenes through the city-owned generated-scene pipeline.
     /// </summary>

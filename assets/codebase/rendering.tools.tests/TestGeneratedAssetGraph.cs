@@ -2,7 +2,7 @@ using helengine;
 using helengine.editor;
 using helengine.ui;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Composes one explicit public authoring graph for rendering definition
     /// tests that require transaction-bound factory construction.

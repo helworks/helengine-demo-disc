@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Spins a platform around its local Y axis at constant speed and feeds the kinematic platform body its exact pose and angular velocity so surface friction carries the player.
     /// </summary>

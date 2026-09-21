@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the authored Tilt Trial lighting source keeps the requested stronger key and fill contribution for the player sphere.
     /// </summary>
@@ -8,7 +8,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Tilt_trial_scene_source_authors_stronger_key_and_shadowless_fill_light() {
-            string sourcePath = global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs");
+            string sourcePath = global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "game.tools", "GameSceneFactory.cs");
             string source = File.ReadAllText(sourcePath);
 
             Assert.Contains("Entity entity = OwningCore.EntityFactory.Create(\"TiltTrialSun\");", source, StringComparison.Ordinal);

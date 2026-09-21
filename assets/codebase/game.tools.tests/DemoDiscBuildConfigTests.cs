@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Runtime.CompilerServices;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the menu-browsable scene package for standard platforms and the isolated renderer-performance package for PS2.
     /// </summary>

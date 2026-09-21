@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Identifies one semantic action available from the Tilt Play front-door menu.
     /// </summary>

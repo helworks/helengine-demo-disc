@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Identifies one baked city demo menu panel inside the generated menu hierarchy.
     /// </summary>
@@ -11,7 +11,7 @@ namespace city.menu {
         /// <summary>
         /// Stable serialized component type id used by baked menu panel scene records.
         /// </summary>
-        public const string SerializedComponentTypeId = "city.menu.MenuPanelComponent, gameplay";
+        public const string SerializedComponentTypeId = "DemoDisc.menu.MenuPanelComponent, DemoDisc";
 
         /// <summary>
         /// Backing field for the stable panel id.

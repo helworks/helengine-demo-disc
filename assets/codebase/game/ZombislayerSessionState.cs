@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Enumerates the high-level runtime states used by the Zombislayer gameplay session.
     /// </summary>

@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Drives the dedicated Tilt Trial level-select scene.
     /// </summary>
@@ -394,7 +394,7 @@ namespace city.game {
                 return true;
             }
 #endif
-            return city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp)
+            return DemoDisc.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp)
                 || WasLeftStickUpPressed();
         }
 
@@ -408,7 +408,7 @@ namespace city.game {
                 return true;
             }
 #endif
-            return city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown)
+            return DemoDisc.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown)
                 || WasLeftStickDownPressed();
         }
 
@@ -417,8 +417,8 @@ namespace city.game {
         /// </summary>
         bool WasLeftStickUpPressed() {
             InputSystem inputSystem = Core.Instance.Input;
-            short currentStickY = city.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem);
-            short previousStickY = city.menu.DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem);
+            short currentStickY = DemoDisc.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem);
+            short previousStickY = DemoDisc.menu.DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem);
             return currentStickY <= -GamepadStickNavigationThreshold
                 && previousStickY > -GamepadStickNavigationThreshold;
         }
@@ -428,8 +428,8 @@ namespace city.game {
         /// </summary>
         bool WasLeftStickDownPressed() {
             InputSystem inputSystem = Core.Instance.Input;
-            short currentStickY = city.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem);
-            short previousStickY = city.menu.DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem);
+            short currentStickY = DemoDisc.menu.DemoDiscGamepadInput.GetLeftStickY(inputSystem);
+            short previousStickY = DemoDisc.menu.DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem);
             return currentStickY >= GamepadStickNavigationThreshold
                 && previousStickY < GamepadStickNavigationThreshold;
         }
@@ -444,7 +444,7 @@ namespace city.game {
                 return true;
             }
 #endif
-            return city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)
+            return DemoDisc.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)
                 || Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept);
         }
 
@@ -458,7 +458,7 @@ namespace city.game {
                 return true;
             }
 #endif
-            return city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East);
+            return DemoDisc.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East);
         }
 
         /// <summary>

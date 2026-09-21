@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.testing {
+namespace DemoDisc.testing {
     /// <summary>
     /// Reads authored override scopes out of generated assets the way the packager does, so tests assert the
     /// effective per-platform outcome instead of the shape of one authored scope path.

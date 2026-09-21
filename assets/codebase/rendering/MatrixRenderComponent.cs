@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Drives one render-only showcase cube through a deterministic transform phase loop for matrix-order debugging.
     /// </summary>

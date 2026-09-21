@@ -1,11 +1,11 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies per-level Tilt Trial metadata rejects invalid authoring.
     /// </summary>
     public sealed class TiltTrialLevelSettingsComponentTests {
         [Fact]
         public void Validate_throws_when_scene_id_is_missing() {
-            city.game.TiltTrialLevelSettingsComponent component = new city.game.TiltTrialLevelSettingsComponent {
+            DemoDisc.game.TiltTrialLevelSettingsComponent component = new DemoDisc.game.TiltTrialLevelSettingsComponent {
                 LevelId = "tilt-trial-01",
                 DisplayName = "Level 1",
                 SceneId = string.Empty,
@@ -21,10 +21,10 @@ namespace city.tests {
 
         [Fact]
         public void Validate_throws_when_medal_times_are_not_ascending() {
-            city.game.TiltTrialLevelSettingsComponent component = new city.game.TiltTrialLevelSettingsComponent {
+            DemoDisc.game.TiltTrialLevelSettingsComponent component = new DemoDisc.game.TiltTrialLevelSettingsComponent {
                 LevelId = "tilt-trial-01",
                 DisplayName = "Level 1",
-                SceneId = city.game.TiltTrialSceneIds.Level01SceneId,
+                SceneId = DemoDisc.game.TiltTrialSceneIds.Level01SceneId,
                 StartTimeSeconds = 99f,
                 GoldTimeSeconds = 40f,
                 SilverTimeSeconds = 30f,

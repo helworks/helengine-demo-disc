@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Describes one curated game showcase scene surfaced by the demo-disc menu.
     /// </summary>

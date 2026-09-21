@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Resolves the runtime demo-disc main-menu scene id, including the dedicated Nintendo handheld fallback when the logical desktop menu id is not packaged.
     /// </summary>

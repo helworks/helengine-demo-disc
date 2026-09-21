@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Keeps the showcase camera on a slow elevated orbit while always looking back toward the plaza center.
     /// </summary>

@@ -1,8 +1,8 @@
 using System;
 using helengine;
-using city.rendering;
+using DemoDisc.rendering;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the scalar software tracing intersection contract.
     /// </summary>
@@ -16,8 +16,8 @@ namespace city.tests {
             SoftwareRay frontRay = new SoftwareRay(new float3(0.25f, 0.25f, 1f), new float3(0f, 0f, -1f));
             SoftwareRay backRay = new SoftwareRay(new float3(0.25f, 0.25f, -1f), new float3(0f, 0f, 1f));
 
-            Assert.True(city.rendering.SoftwareBvh.IntersectTriangle(ref frontRay, ref triangle, 0f, 10f, out SoftwareHit frontHit));
-            Assert.True(city.rendering.SoftwareBvh.IntersectTriangle(ref backRay, ref triangle, 0f, 10f, out SoftwareHit backHit));
+            Assert.True(DemoDisc.rendering.SoftwareBvh.IntersectTriangle(ref frontRay, ref triangle, 0f, 10f, out SoftwareHit frontHit));
+            Assert.True(DemoDisc.rendering.SoftwareBvh.IntersectTriangle(ref backRay, ref triangle, 0f, 10f, out SoftwareHit backHit));
             Assert.Equal(1f, frontHit.Distance, precision: 5);
             Assert.Equal(1f, backHit.Distance, precision: 5);
             Assert.Equal(0.25f, frontHit.U, precision: 5);
@@ -32,7 +32,7 @@ namespace city.tests {
             SoftwareTriangle triangle = CreateTriangle();
             SoftwareRay ray = new SoftwareRay(new float3(1.1f, 0.1f, 1f), new float3(0f, 0f, -1f));
 
-            Assert.False(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 10f, out SoftwareHit hit));
+            Assert.False(DemoDisc.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 10f, out SoftwareHit hit));
             Assert.Equal(default, hit);
         }
 
@@ -44,7 +44,7 @@ namespace city.tests {
             SoftwareTriangle triangle = CreateTriangle();
             SoftwareRay ray = new SoftwareRay(new float3(0.5f, 0.5f, 1f), new float3(0f, 0f, -1f));
 
-            Assert.True(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 10f, out SoftwareHit hit));
+            Assert.True(DemoDisc.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 10f, out SoftwareHit hit));
             Assert.Equal(0.5f, hit.U, precision: 5);
             Assert.Equal(0.5f, hit.V, precision: 5);
         }
@@ -58,12 +58,12 @@ namespace city.tests {
             SoftwareRay ray = new SoftwareRay(new float3(0.25f, 0.25f, 2f), new float3(0f, 0f, -1f));
             SoftwareRay awayRay = new SoftwareRay(new float3(0.25f, 0.25f, -1f), new float3(0f, 0f, -1f));
 
-            Assert.True(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 10f, out SoftwareHit hit));
+            Assert.True(DemoDisc.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 10f, out SoftwareHit hit));
             Assert.Equal(2f, hit.Distance, precision: 5);
-            Assert.True(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 2f, 2f, out _));
-            Assert.False(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 2.001f, 10f, out _));
-            Assert.False(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 1.999f, out _));
-            Assert.False(city.rendering.SoftwareBvh.IntersectTriangle(ref awayRay, ref triangle, 0f, 10f, out _));
+            Assert.True(DemoDisc.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 2f, 2f, out _));
+            Assert.False(DemoDisc.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 2.001f, 10f, out _));
+            Assert.False(DemoDisc.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 1.999f, out _));
+            Assert.False(DemoDisc.rendering.SoftwareBvh.IntersectTriangle(ref awayRay, ref triangle, 0f, 10f, out _));
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace city.tests {
             SoftwareTriangle triangle = CreateTriangle();
             SoftwareRay ray = new SoftwareRay(new float3(0.25f, 0.25f, 1f), new float3(0f, 0f, -2f));
 
-            Assert.True(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 10f, out SoftwareHit hit));
+            Assert.True(DemoDisc.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 10f, out SoftwareHit hit));
             Assert.Equal(0.5f, hit.Distance, precision: 5);
             Assert.Equal(0.25f, hit.Position.X, precision: 5);
             Assert.Equal(0.25f, hit.Position.Y, precision: 5);
@@ -89,7 +89,7 @@ namespace city.tests {
             SoftwareTriangle triangle = CreateTriangle();
             SoftwareRay ray = new SoftwareRay(new float3(0.25f, 0.25f, 1f), new float3(1f, 0f, 0f));
 
-            Assert.False(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 10f, out _));
+            Assert.False(DemoDisc.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 10f, out _));
         }
 
         /// <summary>
@@ -101,8 +101,8 @@ namespace city.tests {
             SoftwareRay ray = new SoftwareRay(new float3(0.5f, 0.5f, 0.5f), new float3(1f, 0f, 0f));
             SoftwareRay outsideRay = new SoftwareRay(new float3(-1f, 0.5f, 0.5f), new float3(1f, 0f, 0f));
 
-            Assert.True(city.rendering.SoftwareBvh.IntersectBounds(ref ray, ref bounds, 0.5f));
-            Assert.False(city.rendering.SoftwareBvh.IntersectBounds(ref outsideRay, ref bounds, 0.99f));
+            Assert.True(DemoDisc.rendering.SoftwareBvh.IntersectBounds(ref ray, ref bounds, 0.5f));
+            Assert.False(DemoDisc.rendering.SoftwareBvh.IntersectBounds(ref outsideRay, ref bounds, 0.99f));
         }
 
         /// <summary>
@@ -113,8 +113,8 @@ namespace city.tests {
             SoftwareBounds bounds = new SoftwareBounds(new float3(0f, 0f, 0f), new float3(1f, 1f, 1f));
             SoftwareRay ray = new SoftwareRay(new float3(0.5f, -1f, 0.5f), new float3(0f, 1f, 0f));
 
-            Assert.True(city.rendering.SoftwareBvh.IntersectBounds(ref ray, ref bounds, 2f));
-            Assert.False(city.rendering.SoftwareBvh.IntersectBounds(ref ray, ref bounds, 0.99f));
+            Assert.True(DemoDisc.rendering.SoftwareBvh.IntersectBounds(ref ray, ref bounds, 2f));
+            Assert.False(DemoDisc.rendering.SoftwareBvh.IntersectBounds(ref ray, ref bounds, 0.99f));
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace city.tests {
             SoftwareBounds bounds = new SoftwareBounds(new float3(0f, 0f, 0f), new float3(1f, 1f, 1f));
             SoftwareRay ray = new SoftwareRay(new float3(-1f, 0f, 0.5f), new float3(1f, 0f, 0f));
 
-            Assert.True(city.rendering.SoftwareBvh.IntersectBounds(ref ray, ref bounds, 2f));
+            Assert.True(DemoDisc.rendering.SoftwareBvh.IntersectBounds(ref ray, ref bounds, 2f));
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace city.tests {
             SoftwareTriangle triangle = CreateTriangle();
             SoftwareRay ray = new SoftwareRay(new float3(0.25f, 0.25f, 1f), new float3(0f, 0f, -0.00000001f));
 
-            Assert.False(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 200000000f, out _));
+            Assert.False(DemoDisc.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 200000000f, out _));
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace city.tests {
             SoftwareTriangle triangle = CreateTriangle();
             SoftwareRay ray = new SoftwareRay(new float3(0.2f, 0.3f, 1f), new float3(0f, 0f, -1f));
 
-            Assert.True(city.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 10f, out SoftwareHit hit));
+            Assert.True(DemoDisc.rendering.SoftwareBvh.IntersectTriangle(ref ray, ref triangle, 0f, 10f, out SoftwareHit hit));
             Assert.True(float.IsFinite(hit.Distance));
             Assert.True(float.IsFinite(hit.U));
             Assert.True(float.IsFinite(hit.V));

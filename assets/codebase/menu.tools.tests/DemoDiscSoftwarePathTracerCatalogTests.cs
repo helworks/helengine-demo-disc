@@ -3,7 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
-namespace city.menu.tools.tests {
+namespace DemoDisc.menu.tools.tests {
     /// <summary>Verifies scene navigation through the dedicated software ray-tracing category.</summary>
     public sealed class DemoDiscSoftwarePathTracerCatalogTests {
         /// <summary>Ensures the existing Cornell Box scene is reachable only through its dedicated category.</summary>

@@ -1,9 +1,9 @@
-using city.menu;
-using city.rendering;
+using DemoDisc.menu;
+using DemoDisc.rendering;
 using helengine.editor;
 using System.Globalization;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the shared Nintendo DS dual-screen scaffold used by generated city rendering showcase companion scenes.
     /// </summary>

@@ -1,5 +1,5 @@
 {
-  "moduleId": "gameplay",
+  "moduleId": "DemoDisc",
   "dependencyModuleIds": [],
   "loadScopes": [
     "always-loaded"

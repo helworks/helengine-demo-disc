@@ -1,7 +1,7 @@
 using helengine.editor;
-using city.rendering.tools;
+using DemoDisc.rendering.tools;
 
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Generates the console and DS/3DS gameplay presentation Blueprints without rewriting authored level scenes.
     /// </summary>
@@ -62,7 +62,7 @@ namespace city.game.tools {
                 AssetAuthoringService.WriteNativeBlueprint(
                     relativePath,
                     GeneratedScenePersistenceRegistryFactory.Create(),
-                    city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(relativePath),
+                    DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(relativePath),
                     Transaction);
             } finally {
                 root.Dispose();

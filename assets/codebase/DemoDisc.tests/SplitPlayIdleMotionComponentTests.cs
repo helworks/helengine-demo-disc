@@ -1,13 +1,13 @@
 using helengine;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the reusable Split Play idle motion component keeps collectible pickups on the requested slow looping bob and spin tuning.
     /// </summary>
     public sealed class SplitPlayIdleMotionComponentTests {
         [Fact]
         public void Split_play_idle_motion_defaults_to_slow_bob_and_spin() {
-            city.game.SplitPlayIdleMotionComponent component = new city.game.SplitPlayIdleMotionComponent();
+            DemoDisc.game.SplitPlayIdleMotionComponent component = new DemoDisc.game.SplitPlayIdleMotionComponent();
 
             AssertApproximatelyEqual(0.15f, component.VerticalAmplitude);
             AssertApproximatelyEqual(1.4f, component.VerticalBobAngularSpeedRadians);
@@ -16,7 +16,7 @@ namespace city.tests {
 
         [Fact]
         public void Split_play_idle_motion_vertical_offset_follows_sine_wave() {
-            float offset = city.game.SplitPlayIdleMotionComponent.ResolveVerticalOffset(
+            float offset = DemoDisc.game.SplitPlayIdleMotionComponent.ResolveVerticalOffset(
                 elapsedSeconds: MathF.PI * 0.5f,
                 verticalAmplitude: 0.15f,
                 verticalBobAngularSpeedRadians: 1f,

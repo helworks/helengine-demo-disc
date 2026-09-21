@@ -1,7 +1,7 @@
 using System;
 using helengine;
 
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Describes one validated CPU-trace image resolution and its accumulator footprint.
     /// </summary>

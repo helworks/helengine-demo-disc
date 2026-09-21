@@ -1,7 +1,7 @@
 using System.Reflection;
 using helengine;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the authored-data contract of the software model component.
     /// </summary>
@@ -11,7 +11,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Software_model_component_uses_the_exact_name_and_component_base_type() {
-            Type componentType = typeof(city.rendering.SoftwareModelComponent);
+            Type componentType = typeof(DemoDisc.rendering.SoftwareModelComponent);
 
             Assert.Equal("SoftwareModelComponent", componentType.Name);
             Assert.Equal(typeof(Component), componentType.BaseType);
@@ -22,17 +22,17 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Software_model_component_exposes_authored_reference_and_material_defaults() {
-            Type componentType = typeof(city.rendering.SoftwareModelComponent);
-            PropertyInfo modelReferenceProperty = componentType.GetProperty(nameof(city.rendering.SoftwareModelComponent.ModelReference));
-            PropertyInfo materialsProperty = componentType.GetProperty(nameof(city.rendering.SoftwareModelComponent.Materials));
-            city.rendering.SoftwareModelComponent component = new city.rendering.SoftwareModelComponent();
+            Type componentType = typeof(DemoDisc.rendering.SoftwareModelComponent);
+            PropertyInfo modelReferenceProperty = componentType.GetProperty(nameof(DemoDisc.rendering.SoftwareModelComponent.ModelReference));
+            PropertyInfo materialsProperty = componentType.GetProperty(nameof(DemoDisc.rendering.SoftwareModelComponent.Materials));
+            DemoDisc.rendering.SoftwareModelComponent component = new DemoDisc.rendering.SoftwareModelComponent();
 
             Assert.NotNull(modelReferenceProperty);
             Assert.Equal(typeof(SceneAssetReference), modelReferenceProperty.PropertyType);
             Assert.Null(component.ModelReference);
 
             Assert.NotNull(materialsProperty);
-            Assert.Equal(typeof(city.rendering.SoftwareMaterial[]), materialsProperty.PropertyType);
+            Assert.Equal(typeof(DemoDisc.rendering.SoftwareMaterial[]), materialsProperty.PropertyType);
             Assert.NotNull(component.Materials);
             Assert.Empty(component.Materials);
         }
@@ -42,7 +42,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Software_material_uses_neutral_default_values() {
-            city.rendering.SoftwareMaterial material = new city.rendering.SoftwareMaterial();
+            DemoDisc.rendering.SoftwareMaterial material = new DemoDisc.rendering.SoftwareMaterial();
 
             Assert.Equal(1f, material.DiffuseColor.X);
             Assert.Equal(1f, material.DiffuseColor.Y);
@@ -58,8 +58,8 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Software_model_component_marks_model_reference_as_cpu_readable() {
-            PropertyInfo modelReferenceProperty = typeof(city.rendering.SoftwareModelComponent)
-                .GetProperty(nameof(city.rendering.SoftwareModelComponent.ModelReference));
+            PropertyInfo modelReferenceProperty = typeof(DemoDisc.rendering.SoftwareModelComponent)
+                .GetProperty(nameof(DemoDisc.rendering.SoftwareModelComponent.ModelReference));
 
             Assert.NotNull(modelReferenceProperty);
             Assert.NotNull(modelReferenceProperty.GetCustomAttribute<CpuReadableModelReferenceAttribute>());
@@ -70,16 +70,16 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Software_material_scalars_round_trip_through_object_state() {
-            city.rendering.SoftwareMaterial material = new city.rendering.SoftwareMaterial {
+            DemoDisc.rendering.SoftwareMaterial material = new DemoDisc.rendering.SoftwareMaterial {
                 DiffuseColor = new float3(0.2f, 0.4f, 0.6f),
                 EmissionColor = new float3(0.7f, 0.5f, 0.3f),
                 EmissionStrength = 3.25f
             };
-            city.rendering.SoftwareModelComponent component = new city.rendering.SoftwareModelComponent {
+            DemoDisc.rendering.SoftwareModelComponent component = new DemoDisc.rendering.SoftwareModelComponent {
                 Materials = new[] { material }
             };
 
-            city.rendering.SoftwareMaterial restoredMaterial = component.Materials[0];
+            DemoDisc.rendering.SoftwareMaterial restoredMaterial = component.Materials[0];
 
             Assert.Equal(0.2f, restoredMaterial.DiffuseColor.X);
             Assert.Equal(0.4f, restoredMaterial.DiffuseColor.Y);
@@ -95,7 +95,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Software_model_component_has_no_runtime_model_or_mesh_component_surface() {
-            Type componentType = typeof(city.rendering.SoftwareModelComponent);
+            Type componentType = typeof(DemoDisc.rendering.SoftwareModelComponent);
 
             Assert.Null(componentType.GetProperty("Model", BindingFlags.Instance | BindingFlags.Public));
             Assert.Null(componentType.GetProperty("RuntimeModel", BindingFlags.Instance | BindingFlags.Public));

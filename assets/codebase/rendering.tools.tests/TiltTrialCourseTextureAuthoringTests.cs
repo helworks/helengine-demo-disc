@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the Tilt Trial course material is backed by one generated lilac grid texture.
     /// </summary>

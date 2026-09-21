@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Enables the authored scene-name overlay only for debug-environment builds.
     /// </summary>

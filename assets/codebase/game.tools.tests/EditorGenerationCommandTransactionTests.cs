@@ -1,9 +1,9 @@
 using System.Reflection;
-using city.game.tools;
+using DemoDisc.game.tools;
 using helengine;
 using helengine.editor;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Exercises a production editor generation command at its public
     /// boundary, including a deterministic pre-commit staging failure after

@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Produces one city-owned menu definition that can be materialized by the city demo-disc runtime menu host.
     /// </summary>

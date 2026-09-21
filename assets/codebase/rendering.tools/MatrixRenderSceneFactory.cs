@@ -1,4 +1,4 @@
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Authors the Matrix Render transform-inspection scene through the live rendering scene pipeline.
     /// </summary>
@@ -162,7 +162,7 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = new float3(0f, 0f, 2.5f),
                 AutoYawSpeedRadians = 0.08f
             });
@@ -186,7 +186,7 @@ namespace city.rendering.tools {
                 FontScale = 1.5f,
                 RenderOrder2D = 1,
             });
-            phaseStatusEntity.AddComponent(new city.rendering.MatrixRenderPhaseStatusTextComponent());
+            phaseStatusEntity.AddComponent(new DemoDisc.rendering.MatrixRenderPhaseStatusTextComponent());
             return entity;
         }
 
@@ -227,7 +227,7 @@ namespace city.rendering.tools {
                 Materials = new[] { heroMaterial },
                 RenderOrder3D = 0
             });
-            entity.AddComponent(new city.rendering.MatrixRenderComponent {
+            entity.AddComponent(new DemoDisc.rendering.MatrixRenderComponent {
                 BaseLocalPosition = float3.Zero,
                 MotionOffset = new float3(0f, 0f, 5f),
                 BaseLocalScale = new float3(2f, 2f, 2f),

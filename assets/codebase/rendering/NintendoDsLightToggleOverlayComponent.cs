@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Owns Nintendo DS companion-scene light-cycle behavior from the scaffold-owned light button and handheld shoulder input.
     /// </summary>

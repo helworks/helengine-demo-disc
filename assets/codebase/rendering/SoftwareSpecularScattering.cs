@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>Provides allocation-free ideal reflection and clear dielectric scattering for CPU tracing.</summary>
     public static class SoftwareSpecularScattering {
         /// <summary>Reflects a unit incoming ray around a unit surface normal.</summary>

@@ -1,7 +1,7 @@
 using System.Reflection;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Clones generated editor-scene entity graphs in memory so handheld scaffold generation can mutate private copies without round-tripping through scene load services.
     /// </summary>

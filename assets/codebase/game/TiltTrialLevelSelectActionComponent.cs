@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Converts a handheld selector button release into a command on the owning level-select controller.
     /// </summary>

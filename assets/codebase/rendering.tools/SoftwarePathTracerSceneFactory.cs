@@ -1,9 +1,9 @@
-using city.rendering;
-using city.menu;
+using DemoDisc.rendering;
+using DemoDisc.menu;
 using helengine;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the fixed common Cornell-box authoring graph for the software path tracer.
     /// </summary>

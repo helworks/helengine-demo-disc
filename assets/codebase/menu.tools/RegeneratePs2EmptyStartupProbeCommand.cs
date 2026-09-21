@@ -1,7 +1,7 @@
-using city.rendering.tools;
+using DemoDisc.rendering.tools;
 using helengine.editor;
 
-namespace city.menu.tools {
+namespace DemoDisc.menu.tools {
     /// <summary>
     /// Regenerates the demo-disc startup scene as a temporary empty camera-only probe for PS2 leak isolation.
     /// </summary>

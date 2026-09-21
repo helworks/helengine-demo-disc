@@ -1,9 +1,9 @@
-using city.menu;
-using city.rendering.tools;
+using DemoDisc.menu;
+using DemoDisc.rendering.tools;
 using helengine;
 using helengine.editor;
 
-namespace city.menu.tools {
+namespace DemoDisc.menu.tools {
     /// <summary>
     /// Authors the persistent full-screen loading overlay used by normal Demo Disc scene transitions.
     /// </summary>

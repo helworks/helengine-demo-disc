@@ -1,7 +1,7 @@
-using city.rendering;
+using DemoDisc.rendering;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the shared platform-aware instruction overlays used by the menu-visible rendering demo scenes.
     /// </summary>

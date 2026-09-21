@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Stores the runtime objects created for one enabled menu item inside a materialized city menu panel.
     /// </summary>

@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Prepares the runtime imported models required by the Zombislayer gameplay scene generator.
     /// </summary>

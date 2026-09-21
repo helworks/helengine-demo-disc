@@ -1,6 +1,6 @@
-using city.rendering.tools;
+using DemoDisc.rendering.tools;
 
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Exposes explicit editor generation for the two cook-time Tilt Trial gameplay presentation Blueprints.
     /// </summary>

@@ -1,8 +1,8 @@
-﻿using city.menu;
-using gameplay.rendering;
+﻿using DemoDisc.menu;
+using DemoDisc.rendering;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the canonical live-authored scene definition for the spotlight street-slice showcase.
     /// </summary>
@@ -176,7 +176,7 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = new float3(0f, 2f, 0f),
                 AutoYawSpeedRadians = 0.05f
             });

@@ -1,4 +1,4 @@
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Centralizes Tilt Trial collectible and goal support asset ids and project-relative output paths.
     /// </summary>

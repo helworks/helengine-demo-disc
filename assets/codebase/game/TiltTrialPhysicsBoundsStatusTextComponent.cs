@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Mirrors the Windows-only Tilt Trial physics-bounds debug visibility into one gameplay HUD text row.
     /// </summary>

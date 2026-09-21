@@ -1,8 +1,8 @@
 using helengine;
 using helengine.editor;
-using city.scene.tools;
+using DemoDisc.scene.tools;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>Generates compact raw meshes for software tracing without imported source files.</summary>
     public static class SoftwareRayTracingMeshFactory {
         /// <summary>Stable identity-backed sphere asset path.</summary>

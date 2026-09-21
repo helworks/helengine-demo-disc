@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Identifies the behavior performed when a city demo-disc menu item is activated.
     /// </summary>

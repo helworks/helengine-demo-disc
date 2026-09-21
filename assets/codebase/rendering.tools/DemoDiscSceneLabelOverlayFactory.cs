@@ -1,4 +1,4 @@
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     public sealed class DemoDiscSceneLabelOverlayFactory {
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
         const string LabelEntityName = "DemoDiscSceneLabelText";
@@ -63,7 +63,7 @@ namespace city.rendering.tools {
                 labelComponent,
                 FontReferenceName,
                 AssetAuthoringService.CreateFileReference(SceneLabelFontRelativePath, AssetEntryKind.Font));
-            sceneUiEntity.AddComponent(new city.rendering.DemoDiscDebugSceneLabelComponent());
+            sceneUiEntity.AddComponent(new DemoDisc.rendering.DemoDiscDebugSceneLabelComponent());
             saveComponent.GetOrCreateExistencePlatformOverride(NintendoDsPlatformId).Exists = false;
             saveComponent.GetOrCreateExistencePlatformOverride(Nintendo3DsPlatformId).Exists = false;
             labelEntity.Enabled = true;

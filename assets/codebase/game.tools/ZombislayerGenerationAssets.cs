@@ -1,4 +1,4 @@
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Bundles the runtime assets required to compose the generated Zombislayer gameplay scene.
     /// </summary>

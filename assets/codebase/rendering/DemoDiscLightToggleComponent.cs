@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Cycles authored directional lights through the fixed demo-disc color palette and mirrors the active state into the shared light-indicator swatch.
     /// </summary>

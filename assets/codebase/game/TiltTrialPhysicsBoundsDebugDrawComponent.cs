@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.game {
+namespace DemoDisc.game {
 #if HELENGINE_ENV_DEBUG && DESKTOP_PLATFORM
     /// <summary>
     /// Toggles one Windows-only physics-bounds debug overlay that draws wireframe bounds around supported collider volumes.

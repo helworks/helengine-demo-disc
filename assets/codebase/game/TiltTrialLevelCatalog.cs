@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Exposes the canonical Tilt Trial level order used by selector and Next progression.
     /// </summary>

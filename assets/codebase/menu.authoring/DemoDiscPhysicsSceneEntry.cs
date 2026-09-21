@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Describes one curated physics showcase scene exposed by the demo-disc menu and handheld scene augmentation pipeline.
     /// </summary>

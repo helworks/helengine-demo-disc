@@ -1,16 +1,16 @@
 using System.Text.Json;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies project build configurations package every Tilt Trial gameplay scene when the selector front door is selected.
     /// </summary>
     public sealed class TiltTrialBuildConfigTests {
         static readonly string[] RequiredTiltTrialGameplaySceneIds = [
-            city.game.TiltTrialSceneIds.Level01SceneId,
-            city.game.TiltTrialSceneIds.Level02SceneId,
-            city.game.TiltTrialSceneIds.Level03SceneId,
-            city.game.TiltTrialSceneIds.Level04SceneId,
-            city.game.TiltTrialSceneIds.Level05SceneId
+            DemoDisc.game.TiltTrialSceneIds.Level01SceneId,
+            DemoDisc.game.TiltTrialSceneIds.Level02SceneId,
+            DemoDisc.game.TiltTrialSceneIds.Level03SceneId,
+            DemoDisc.game.TiltTrialSceneIds.Level04SceneId,
+            DemoDisc.game.TiltTrialSceneIds.Level05SceneId
         ];
 
         [Fact]
@@ -26,8 +26,8 @@ namespace city.tests {
                     selectedSceneIds.Add(sceneId.GetString() ?? string.Empty);
                 }
 
-                if (!selectedSceneIds.Contains(city.game.TiltTrialSceneIds.LevelSelectSceneId)
-                    && !selectedSceneIds.Contains(city.game.TiltTrialSceneIds.HandheldLevelSelectSceneId)) {
+                if (!selectedSceneIds.Contains(DemoDisc.game.TiltTrialSceneIds.LevelSelectSceneId)
+                    && !selectedSceneIds.Contains(DemoDisc.game.TiltTrialSceneIds.HandheldLevelSelectSceneId)) {
                     continue;
                 }
 
@@ -77,7 +77,7 @@ namespace city.tests {
             HashSet<string> selectedSceneIds = new HashSet<string>(
                 dsPlatform.GetProperty("selectedSceneIds").EnumerateArray().Select(sceneId => sceneId.GetString() ?? string.Empty),
                 StringComparer.Ordinal);
-            Assert.Contains(city.game.TiltTrialSceneIds.HandheldLevelSelectSceneId, selectedSceneIds);
+            Assert.Contains(DemoDisc.game.TiltTrialSceneIds.HandheldLevelSelectSceneId, selectedSceneIds);
             Assert.Contains(helengine.PlatformMenuSceneResolver.NintendoHandheldMainMenuSceneId, selectedSceneIds);
             foreach (string requiredSceneId in RequiredTiltTrialGameplaySceneIds) {
                 Assert.Contains(requiredSceneId, selectedSceneIds);
@@ -85,15 +85,15 @@ namespace city.tests {
 
             Assert.Contains(
                 dsPlatform.GetProperty("sceneOrders").EnumerateArray(),
-                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), city.game.TiltTrialSceneIds.HandheldLevelSelectSceneId, StringComparison.Ordinal)
+                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), DemoDisc.game.TiltTrialSceneIds.HandheldLevelSelectSceneId, StringComparison.Ordinal)
                     && sceneOrder.GetProperty("orderNumber").GetInt32() == 12);
             Assert.Contains(
                 dsPlatform.GetProperty("sceneOrders").EnumerateArray(),
-                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), city.game.TiltTrialSceneIds.Level01SceneId, StringComparison.Ordinal)
+                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), DemoDisc.game.TiltTrialSceneIds.Level01SceneId, StringComparison.Ordinal)
                     && sceneOrder.GetProperty("orderNumber").GetInt32() == 13);
             Assert.Contains(
                 dsPlatform.GetProperty("sceneOrders").EnumerateArray(),
-                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), city.game.TiltTrialSceneIds.Level05SceneId, StringComparison.Ordinal)
+                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), DemoDisc.game.TiltTrialSceneIds.Level05SceneId, StringComparison.Ordinal)
                     && sceneOrder.GetProperty("orderNumber").GetInt32() == 17);
         }
 
@@ -111,8 +111,8 @@ namespace city.tests {
                 platform.GetProperty("selectedSceneIds").EnumerateArray().Select(sceneId => sceneId.GetString() ?? string.Empty),
                 StringComparer.Ordinal);
 
-            Assert.Contains(city.game.TiltTrialSceneIds.HandheldLevelSelectSceneId, selectedSceneIds);
-            Assert.DoesNotContain(city.game.TiltTrialSceneIds.LevelSelectSceneId, selectedSceneIds);
+            Assert.Contains(DemoDisc.game.TiltTrialSceneIds.HandheldLevelSelectSceneId, selectedSceneIds);
+            Assert.DoesNotContain(DemoDisc.game.TiltTrialSceneIds.LevelSelectSceneId, selectedSceneIds);
             foreach (string requiredSceneId in RequiredTiltTrialGameplaySceneIds) {
                 Assert.Contains(requiredSceneId, selectedSceneIds);
             }

@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Identifies a gameplay entity by a stable serialized role that survives scene and Blueprint boundaries.
     /// </summary>

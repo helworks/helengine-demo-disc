@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Identifies pointer actions exposed by the handheld Tilt Trial level selector.
     /// </summary>

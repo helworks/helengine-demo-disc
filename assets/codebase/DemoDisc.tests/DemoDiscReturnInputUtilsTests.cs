@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the shared demo-disc return-input helper recognizes the generic reject button used by handheld scene exits.
     /// </summary>
@@ -26,7 +26,7 @@ namespace city.tests {
             InputGamepadState currentState = CreateConnectedState();
             currentState.SetButtonDown(InputGamepadButton.East, true);
 
-            bool wasPressed = city.menu.DemoDiscReturnInputUtils.WasFallbackRejectButtonPressed(currentState, previousState);
+            bool wasPressed = DemoDisc.menu.DemoDiscReturnInputUtils.WasFallbackRejectButtonPressed(currentState, previousState);
 
             Assert.True(wasPressed);
         }
@@ -40,7 +40,7 @@ namespace city.tests {
             InputGamepadState currentState = new InputGamepadState();
             currentState.SetButtonDown(InputGamepadButton.East, true);
 
-            bool wasPressed = city.menu.DemoDiscReturnInputUtils.WasFallbackRejectButtonPressed(currentState, previousState);
+            bool wasPressed = DemoDisc.menu.DemoDiscReturnInputUtils.WasFallbackRejectButtonPressed(currentState, previousState);
 
             Assert.False(wasPressed);
         }

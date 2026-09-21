@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Stores one authored box bounds definition consumed only by the Tilt Trial physics debug overlay.
     /// </summary>

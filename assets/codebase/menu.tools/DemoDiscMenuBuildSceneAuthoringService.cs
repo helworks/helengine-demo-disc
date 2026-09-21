@@ -1,7 +1,7 @@
-using city.rendering.tools;
+using DemoDisc.rendering.tools;
 using helengine.editor;
 
-namespace city.menu.tools {
+namespace DemoDisc.menu.tools {
     /// <summary>
     /// Applies platform-specific menu item and panel existence overrides based on the local build scene selections stored in <c>user_settings/build_config.json</c>.
     /// </summary>

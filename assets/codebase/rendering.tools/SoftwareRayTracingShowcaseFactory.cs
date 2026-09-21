@@ -1,8 +1,8 @@
 using helengine;
 using helengine.editor;
-using city.rendering;
+using DemoDisc.rendering;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>Authors three distinct compositions for the shared software tracer.</summary>
     public sealed class SoftwareRayTracingShowcaseFactory {
         /// <summary>Stable path for the procedural teapot composition.</summary>

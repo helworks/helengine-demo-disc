@@ -1,4 +1,4 @@
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Writes one generated raw model asset beneath the city project assets tree.
     /// </summary>
@@ -20,7 +20,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(modelAsset));
             }
 
-            modelAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(relativePath);
+            modelAsset.AuthoringAssetId = DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(relativePath);
             modelAsset.FormerAuthoringAssetIds = Array.Empty<string>();
             Transaction.WriteAsset(relativePath, modelAsset);
         }

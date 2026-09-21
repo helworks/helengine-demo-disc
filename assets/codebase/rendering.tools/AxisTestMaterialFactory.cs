@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Authors the five fixed-color materials used by the axis showcase scenes.
     /// </summary>

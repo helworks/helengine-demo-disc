@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>Regenerates the four ray tracing scenes and their two procedural model assets.</summary>
     public sealed class RegenerateRayTracingShowcasesCommand : IEditorCommand {
         /// <summary>Stable headless editor command identifier.</summary>

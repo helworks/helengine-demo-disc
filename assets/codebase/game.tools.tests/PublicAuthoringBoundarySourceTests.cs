@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies gameplay generation reaches file-backed assets only through the public editor authoring capability.
     /// </summary>
@@ -110,7 +110,7 @@ namespace city.tests {
         public void Generated_native_writers_supply_explicit_project_identities() {
             string codebasePath = Path.Combine(@"C:\dev\helprojs\demodisc", "assets", "codebase");
             string generatedSceneWriterSource = File.ReadAllText(Path.Combine(codebasePath, "rendering.tools", "GeneratedAuthoringSceneWriteService.cs"));
-            Assert.Contains("global::city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity", generatedSceneWriterSource, StringComparison.Ordinal);
+            Assert.Contains("global::DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity", generatedSceneWriterSource, StringComparison.Ordinal);
 
             string[] productionSourcePaths = Directory.GetFiles(codebasePath, "*.cs", SearchOption.AllDirectories)
                 .Where(path => !path.Contains(".tests", StringComparison.OrdinalIgnoreCase))
@@ -141,7 +141,7 @@ namespace city.tests {
             };
             HashSet<string> identities = new HashSet<string>(StringComparer.Ordinal);
             foreach (string relativePath in nativeAssetPaths) {
-                string identity = global::city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(relativePath);
+                string identity = global::DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetNativeAssetIdentity(relativePath);
                 Assert.Matches("^[0-9a-f]{32}$", identity);
                 Assert.True(identities.Add(identity), $"Duplicate project identity '{identity}' for '{relativePath}'.");
             }
@@ -149,7 +149,7 @@ namespace city.tests {
             for (int metallicIndex = 0; metallicIndex < 5; metallicIndex++) {
                 for (int roughnessIndex = 0; roughnessIndex < 5; roughnessIndex++) {
                     string relativePath = $"materials/rendering/pbr_gallery/M{metallicIndex}R{roughnessIndex}.hasset";
-                    string identity = global::city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetMaterialIdentity(relativePath);
+                    string identity = global::DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetMaterialIdentity(relativePath);
                     Assert.Matches("^[0-9a-f]{32}$", identity);
                     Assert.True(identities.Add(identity), $"Duplicate project identity '{identity}' for '{relativePath}'.");
                 }
@@ -166,10 +166,10 @@ namespace city.tests {
                 for (int roughnessIndex = 0; roughnessIndex < 5; roughnessIndex++) {
                     string relativePath = $"materials/rendering/pbr_gallery/M{metallicIndex}R{roughnessIndex}.hasset";
                     string expectedIdentity = $"220000000000000000000000000000{metallicIndex:X1}{roughnessIndex:X1}";
-                    string identity = global::city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetMaterialIdentity(relativePath);
+                    string identity = global::DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetMaterialIdentity(relativePath);
 
                     Assert.Equal(expectedIdentity, identity);
-                    Assert.Equal(identity, global::city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetMaterialIdentity(relativePath));
+                    Assert.Equal(identity, global::DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetMaterialIdentity(relativePath));
                     Assert.Matches("^[0-9a-f]{32}$", identity);
                     Assert.True(identities.Add(identity), $"Duplicate PBR gallery identity '{identity}' for '{relativePath}'.");
                 }

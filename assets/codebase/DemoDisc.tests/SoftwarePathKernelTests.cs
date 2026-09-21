@@ -1,9 +1,9 @@
 using System;
 using System.Reflection;
-using city.rendering;
+using DemoDisc.rendering;
 using helengine;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies finite deterministic radiance samples through the real compact BVH.
     /// </summary>

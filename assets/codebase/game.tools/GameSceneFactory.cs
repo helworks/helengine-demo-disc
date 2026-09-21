@@ -1,8 +1,8 @@
-using city.menu;
-using city.rendering.tools;
+using DemoDisc.menu;
+using DemoDisc.rendering.tools;
 using helengine.editor;
 
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Builds the generated authored gameplay scenes contributed by the city demo-disc project.
     /// </summary>
@@ -332,7 +332,7 @@ namespace city.game.tools {
         EditorEntity CreateTiltPlayShellUiEntity() {
             Entity shell = OwningCore.EntityFactory.Create("TiltPlayShellUi");
             shell.LayerMask = EditorLayerMasks.SceneObjects;
-            shell.AddComponent(new city.game.TiltPlayMenuComponent());
+            shell.AddComponent(new DemoDisc.game.TiltPlayMenuComponent());
             shell.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
                 FixedSize = new int2(1280, 720)
@@ -344,12 +344,12 @@ namespace city.game.tools {
 
             Entity titlePanel = OwningCore.EntityFactory.CreateChild(shell, "TiltPlayTitlePanel");
             titlePanel.LayerMask = EditorLayerMasks.SceneObjects;
-            titlePanel.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+            titlePanel.AddComponent(new DemoDisc.game.TiltTrialPresentationRoleComponent {
                 Role = "TiltPlayTitlePanel"
             });
-            CreateTiltPlayActionButton(titlePanel, "TiltPlayPlayButton", new float3(380f, 398f, 0.1f), new int2(520, 72), city.game.TiltPlayMenuAction.Play, TiltPlayPrimaryButtonTextureRelativePath, TiltPlayPrimaryButtonSelectedTextureRelativePath);
-            CreateTiltPlayActionButton(titlePanel, "TiltPlayOptionsButton", new float3(380f, 486f, 0.1f), new int2(250, 52), city.game.TiltPlayMenuAction.Options, TiltPlayOptionsButtonTextureRelativePath, TiltPlayOptionsButtonSelectedTextureRelativePath);
-            CreateTiltPlayActionButton(titlePanel, "TiltPlayDemoDiscButton", new float3(650f, 486f, 0.1f), new int2(250, 52), city.game.TiltPlayMenuAction.BackToDemoDisc, TiltPlayDemoDiscButtonTextureRelativePath, TiltPlayDemoDiscButtonSelectedTextureRelativePath);
+            CreateTiltPlayActionButton(titlePanel, "TiltPlayPlayButton", new float3(380f, 398f, 0.1f), new int2(520, 72), DemoDisc.game.TiltPlayMenuAction.Play, TiltPlayPrimaryButtonTextureRelativePath, TiltPlayPrimaryButtonSelectedTextureRelativePath);
+            CreateTiltPlayActionButton(titlePanel, "TiltPlayOptionsButton", new float3(380f, 486f, 0.1f), new int2(250, 52), DemoDisc.game.TiltPlayMenuAction.Options, TiltPlayOptionsButtonTextureRelativePath, TiltPlayOptionsButtonSelectedTextureRelativePath);
+            CreateTiltPlayActionButton(titlePanel, "TiltPlayDemoDiscButton", new float3(650f, 486f, 0.1f), new int2(250, 52), DemoDisc.game.TiltPlayMenuAction.BackToDemoDisc, TiltPlayDemoDiscButtonTextureRelativePath, TiltPlayDemoDiscButtonSelectedTextureRelativePath);
 
             Entity optionsPanel = CreateRoundedPanelEntity(shell, "TiltPlayOptionsPanel", new float3(0f, 0f, 0f), new int2(1280, 720), 0f, 0f, new byte4(18, 29, 45, 255), new byte4(18, 29, 45, 255), 1);
             optionsPanel.Enabled = false;
@@ -358,7 +358,7 @@ namespace city.game.tools {
             CreateTiltPlayOptionsBackButton(optionsPanel);
 
             Entity levelSelectPanel = CreateLevelSelectUiEntity(useOwnViewport: false);
-            levelSelectPanel.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+            levelSelectPanel.AddComponent(new DemoDisc.game.TiltTrialPresentationRoleComponent {
                 Role = "TiltPlayLevelSelectPanel"
             });
             levelSelectPanel.Enabled = false;
@@ -409,7 +409,7 @@ namespace city.game.tools {
         /// <returns>Generated handheld selector scene definition with a game-owned top screen and empty bottom screen.</returns>
         public GeneratedAuthoringSceneDefinition CreateTiltTrialHandheldLevelSelectScene() {
             return new GeneratedAuthoringSceneDefinition {
-                SceneId = global::city.game.TiltTrialSceneIds.HandheldLevelSelectSceneId,
+                SceneId = global::DemoDisc.game.TiltTrialSceneIds.HandheldLevelSelectSceneId,
                 SceneAssetRelativePath = "scenes/games/tilt/tilt_trial_ds.helen",
                 SceneSettings = new SceneSettingsAsset(),
                 RootEntities = [],
@@ -518,7 +518,7 @@ namespace city.game.tools {
             Entity entity = OwningCore.EntityFactory.Create("TiltTrialHandheldLevelSelectUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.AddComponent(new DemoDiscReturnToMenuComponent());
-            entity.AddComponent(new city.game.TiltTrialLevelSelectComponent {
+            entity.AddComponent(new DemoDisc.game.TiltTrialLevelSelectComponent {
                 UseDetailsStage = true
             });
             ViewportComponent viewportComponent = new ViewportComponent {
@@ -538,7 +538,7 @@ namespace city.game.tools {
             CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTimer", new float3(12f, 40f, 0.1f), "MAX 99.00", new int2(220, 18), 0.65f, 3, new byte4(255, 214, 138, 255), TextAlignment.Left);
             Entity targetTimesEntity = CreateUiTextEntity(detailsPanelEntity, "TiltTrialLevelSelectTargetTimes", new float3(12f, 64f, 0.1f), string.Empty, new int2(220, 18), 0.7f, 3, new byte4(223, 230, 239, 255), TextAlignment.Left);
             targetTimesEntity.Enabled = false;
-            IReadOnlyList<global::city.game.TiltTrialLevelCatalogEntry> levelEntries = global::city.game.TiltTrialLevelCatalog.CreateEntries();
+            IReadOnlyList<global::DemoDisc.game.TiltTrialLevelCatalogEntry> levelEntries = global::DemoDisc.game.TiltTrialLevelCatalog.CreateEntries();
             for (int index = 0; index < levelEntries.Count; index++) {
                 int oneBasedIndex = index + 1;
                 CreateLevelSelectActionButton(
@@ -546,12 +546,12 @@ namespace city.game.tools {
                     $"TiltTrialLevelRow{oneBasedIndex:00}",
                     new float3(0f, 3f + (index * 32f), 0f), new int2(244, 30),
                     levelEntries[index].DisplayName,
-                    city.game.TiltTrialLevelSelectAction.SelectStage,
+                    DemoDisc.game.TiltTrialLevelSelectAction.SelectStage,
                     index);
             }
 
-            Entity backButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectBackButton", new float3(6f, 116f, 0f), new int2(232, 28), "BACK", city.game.TiltTrialLevelSelectAction.BackToStages, -1);
-            Entity playButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectPlayButton", new float3(6f, 150f, 0f), new int2(232, 34), "PLAY", city.game.TiltTrialLevelSelectAction.PlaySelectedStage, -1);
+            Entity backButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectBackButton", new float3(6f, 116f, 0f), new int2(232, 28), "BACK", DemoDisc.game.TiltTrialLevelSelectAction.BackToStages, -1);
+            Entity playButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectPlayButton", new float3(6f, 150f, 0f), new int2(232, 34), "PLAY", DemoDisc.game.TiltTrialLevelSelectAction.PlaySelectedStage, -1);
             backButtonEntity.Enabled = false;
             playButtonEntity.Enabled = false;
 
@@ -563,7 +563,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Ordered scaffolded gameplay scenes for all current Tilt Trial levels.</returns>
         public IReadOnlyList<GeneratedAuthoringSceneDefinition> CreateTiltTrialLevelScenes() {
-            IReadOnlyList<global::city.game.TiltTrialLevelCatalogEntry> levelEntries = global::city.game.TiltTrialLevelCatalog.CreateEntries();
+            IReadOnlyList<global::DemoDisc.game.TiltTrialLevelCatalogEntry> levelEntries = global::DemoDisc.game.TiltTrialLevelCatalog.CreateEntries();
             GeneratedAuthoringSceneDefinition[] scenes = new GeneratedAuthoringSceneDefinition[levelEntries.Count];
             for (int index = 0; index < levelEntries.Count; index++) {
                 scenes[index] = CreateTiltTrialGameplayScene(levelEntries[index]);
@@ -577,7 +577,7 @@ namespace city.game.tools {
         /// </summary>
         /// <returns>Single editor root containing the console camera, lighting, and HUD.</returns>
         public EditorEntity CreateTiltTrialConsolePresentationRoot() {
-            global::city.game.TiltTrialLevelCatalogEntry levelEntry = global::city.game.TiltTrialLevelCatalog.CreateEntries()[0];
+            global::DemoDisc.game.TiltTrialLevelCatalogEntry levelEntry = global::DemoDisc.game.TiltTrialLevelCatalog.CreateEntries()[0];
             EditorEntity root = CreatePresentationRoot("TiltTrialConsolePresentationRoot");
             root.AddChild(CreateCameraEntity());
             root.AddChild(CreateDirectionalLightEntity());
@@ -597,7 +597,7 @@ namespace city.game.tools {
             root.AddChild(CreateDirectionalLightEntity());
             root.AddChild(CreateDirectionalFillLightEntity());
             root.AddChild(CreateAmbientLightEntity());
-            global::city.game.TiltTrialLevelCatalogEntry levelEntry = global::city.game.TiltTrialLevelCatalog.CreateEntries()[0];
+            global::DemoDisc.game.TiltTrialLevelCatalogEntry levelEntry = global::DemoDisc.game.TiltTrialLevelCatalog.CreateEntries()[0];
             root.AddChild(CreateHandheldGameplayControllerEntity(levelEntry));
             return root;
         }
@@ -625,14 +625,14 @@ namespace city.game.tools {
         /// </summary>
         /// <param name="levelEntry">Shared level metadata used to seed the bottom-screen HUD.</param>
         /// <returns>Gameplay controller containing the bottom-screen camera and HUD hierarchy.</returns>
-        EditorEntity CreateHandheldGameplayControllerEntity(global::city.game.TiltTrialLevelCatalogEntry levelEntry) {
+        EditorEntity CreateHandheldGameplayControllerEntity(global::DemoDisc.game.TiltTrialLevelCatalogEntry levelEntry) {
             if (levelEntry == null) {
                 throw new ArgumentNullException(nameof(levelEntry));
             }
 
             Entity controllerEntity = OwningCore.EntityFactory.Create("TiltTrialHandheldGameplayController");
             controllerEntity.LayerMask = EditorLayerMasks.SceneObjects;
-            controllerEntity.AddComponent(new city.game.TiltTrialSessionComponent());
+            controllerEntity.AddComponent(new DemoDisc.game.TiltTrialSessionComponent());
             controllerEntity.AddChild(CreateHandheldGameplayBottomScreenCameraEntity(levelEntry));
             if (controllerEntity is EditorEntity editorEntity) {
                 return editorEntity;
@@ -646,7 +646,7 @@ namespace city.game.tools {
         /// </summary>
         /// <param name="levelEntry">Shared level metadata used to seed the HUD values.</param>
         /// <returns>Bottom-screen camera containing the gameplay HUD.</returns>
-        EditorEntity CreateHandheldGameplayBottomScreenCameraEntity(global::city.game.TiltTrialLevelCatalogEntry levelEntry) {
+        EditorEntity CreateHandheldGameplayBottomScreenCameraEntity(global::DemoDisc.game.TiltTrialLevelCatalogEntry levelEntry) {
             if (levelEntry == null) {
                 throw new ArgumentNullException(nameof(levelEntry));
             }
@@ -696,7 +696,7 @@ namespace city.game.tools {
         /// </summary>
         /// <param name="levelEntry">Shared level metadata used to seed the HUD values.</param>
         /// <returns>Bottom-screen HUD root with the names consumed by the gameplay session.</returns>
-        EditorEntity CreateHandheldGameplayUiEntity(global::city.game.TiltTrialLevelCatalogEntry levelEntry) {
+        EditorEntity CreateHandheldGameplayUiEntity(global::DemoDisc.game.TiltTrialLevelCatalogEntry levelEntry) {
             if (levelEntry == null) {
                 throw new ArgumentNullException(nameof(levelEntry));
             }
@@ -715,7 +715,7 @@ namespace city.game.tools {
 
             Entity panelEntity = CreateRoundedPanelEntity(entity, "TiltTrialHandheldGameplayPanel", new float3(6f, 6f, 0f), new int2(244, 180), 6f, 2f, new byte4(26, 40, 61, 255), new byte4(96, 128, 168, 255), 1);
             panelEntity.Enabled = false;
-            CreateUiTextEntity(panelEntity, "TiltTrialTimerText", new float3(12f, 10f, 0.1f), global::city.game.TiltTrialLevelSelectComponent.FormatTimerSeconds(levelEntry.StartTimeSeconds), new int2(104, 26), 0.8f, 2, new byte4(255, 246, 223, 255), TextAlignment.Left);
+            CreateUiTextEntity(panelEntity, "TiltTrialTimerText", new float3(12f, 10f, 0.1f), global::DemoDisc.game.TiltTrialLevelSelectComponent.FormatTimerSeconds(levelEntry.StartTimeSeconds), new int2(104, 26), 0.8f, 2, new byte4(255, 246, 223, 255), TextAlignment.Left);
             CreateUiTextEntity(panelEntity, "TiltTrialCoinText", new float3(124f, 10f, 0.1f), "Coins 0/0", new int2(106, 26), 0.65f, 2, new byte4(255, 246, 223, 255), TextAlignment.Right);
             CreateUiTextEntity(panelEntity, "TiltTrialTargetTimesText", new float3(12f, 40f, 0.1f), "Targets G00.00 S00.00 B00.00", new int2(220, 18), 0.48f, 2, new byte4(223, 230, 239, 255), TextAlignment.Left);
 
@@ -733,7 +733,7 @@ namespace city.game.tools {
             };
             speedTextEntity.AddComponent(speedTextComponent);
             ApplyFontReference(speedTextEntity, speedTextComponent, TiltTrialSpeedHudFontRelativePath);
-            speedTextEntity.AddComponent(new city.game.DemoTiltSpeedTextComponent {
+            speedTextEntity.AddComponent(new DemoDisc.game.DemoTiltSpeedTextComponent {
                 TargetEntityName = "PlayerSphere",
                 TargetEntityRole = "PlayerSphere"
             });
@@ -743,7 +743,7 @@ namespace city.game.tools {
             Entity startOverlayEntity = OwningCore.EntityFactory.CreateChild(entity, "TiltTrialStartOverlay");
             startOverlayEntity.LocalPosition = new float3(16f, 58f, 0f);
             startOverlayEntity.Static = false;
-            startOverlayEntity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+            startOverlayEntity.AddComponent(new DemoDisc.game.TiltTrialPresentationRoleComponent {
                 Role = "TiltTrialStartOverlay"
             });
             CreateTiltTrialStartPrompt(startOverlayEntity, new float3(12f, 18f, 0.1f), new int2(200, 32), 0.72f, 5, new int2(32, 32));
@@ -751,14 +751,14 @@ namespace city.game.tools {
             Entity resultsOverlayEntity = OwningCore.EntityFactory.CreateChild(entity, "TiltTrialResultsOverlay");
             resultsOverlayEntity.LocalPosition = new float3(16f, 8f, 0f);
             resultsOverlayEntity.Static = false;
-            resultsOverlayEntity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+            resultsOverlayEntity.AddComponent(new DemoDisc.game.TiltTrialPresentationRoleComponent {
                 Role = "TiltTrialResultsOverlay"
             });
             resultsOverlayEntity.Enabled = false;
             CreateUiTextEntity(resultsOverlayEntity, "TiltTrialResultsBodyText", new float3(12f, 6f, 0.1f), "Time 00.00", new int2(200, 22), 0.72f, 5, new byte4(247, 248, 252, 255), TextAlignment.Center);
-            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultNextButton", new float3(12f, 40f, 0.1f), new int2(200, 30), "NEXT", city.game.TiltTrialSessionAction.Next);
-            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultRetryButton", new float3(12f, 78f, 0.1f), new int2(200, 30), "RETRY", city.game.TiltTrialSessionAction.Retry);
-            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultExitButton", new float3(12f, 116f, 0.1f), new int2(200, 30), "BACK TO MENU", city.game.TiltTrialSessionAction.LevelSelect);
+            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultNextButton", new float3(12f, 40f, 0.1f), new int2(200, 30), "NEXT", DemoDisc.game.TiltTrialSessionAction.Next);
+            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultRetryButton", new float3(12f, 78f, 0.1f), new int2(200, 30), "RETRY", DemoDisc.game.TiltTrialSessionAction.Retry);
+            CreateTiltTrialResultActionButton(resultsOverlayEntity, "TiltTrialResultExitButton", new float3(12f, 116f, 0.1f), new int2(200, 30), "BACK TO MENU", DemoDisc.game.TiltTrialSessionAction.LevelSelect);
 
             Entity failOverlayEntity = CreateRoundedPanelEntity(entity, "TiltTrialFailOverlay", new float3(16f, 26f, 0f), new int2(224, 140), 6f, 2f, new byte4(43, 23, 28, 245), new byte4(214, 112, 112, 255), 4);
             failOverlayEntity.Enabled = false;
@@ -884,12 +884,12 @@ namespace city.game.tools {
         /// <param name="label">Visible button label.</param>
         /// <param name="action">Semantic selector action emitted on release.</param>
         /// <param name="stageIndex">Zero-based stage index for stage selection, or -1 for non-stage actions.</param>
-        Entity CreateLevelSelectActionButton(Entity parent, string name, float3 position, int2 size, string label, city.game.TiltTrialLevelSelectAction action, int stageIndex) {
+        Entity CreateLevelSelectActionButton(Entity parent, string name, float3 position, int2 size, string label, DemoDisc.game.TiltTrialLevelSelectAction action, int stageIndex) {
             Entity buttonEntity = CreateRoundedPanelEntity(parent, name, position, size, 5f, 0f, new byte4(40, 58, 87, 255), new byte4(0, 0, 0, 0), 1);
             buttonEntity.AddComponent(new InteractableComponent {
                 Size = size
             });
-            buttonEntity.AddComponent(new city.game.TiltTrialLevelSelectActionComponent {
+            buttonEntity.AddComponent(new DemoDisc.game.TiltTrialLevelSelectActionComponent {
                 Action = action,
                 StageIndex = stageIndex
             });
@@ -976,12 +976,12 @@ namespace city.game.tools {
         /// <param name="normalTextureRelativePath">Project-relative PNG used while the action is not selected.</param>
         /// <param name="selectedTextureRelativePath">Project-relative PNG used while the action is selected.</param>
         /// <returns>Generated action button entity.</returns>
-        Entity CreateTiltPlayActionButton(Entity parent, string name, float3 position, int2 size, city.game.TiltPlayMenuAction action, string normalTextureRelativePath, string selectedTextureRelativePath) {
+        Entity CreateTiltPlayActionButton(Entity parent, string name, float3 position, int2 size, DemoDisc.game.TiltPlayMenuAction action, string normalTextureRelativePath, string selectedTextureRelativePath) {
             Entity buttonEntity = CreateTiltPlaySpriteEntity(parent, name, position, size, normalTextureRelativePath, 4);
             buttonEntity.AddComponent(new InteractableComponent {
                 Size = size
             });
-            buttonEntity.AddComponent(new city.game.TiltPlayMenuActionComponent {
+            buttonEntity.AddComponent(new DemoDisc.game.TiltPlayMenuActionComponent {
                 Action = action
             });
             Entity selectedOverlayEntity = CreateTiltPlaySpriteEntity(buttonEntity, name + "SelectedOverlay", new float3(0f, 0f, 0.1f), size, selectedTextureRelativePath, 5);
@@ -1008,7 +1008,7 @@ namespace city.game.tools {
                 RenderOrder2D = renderOrder
             };
             spriteEntity.AddComponent(spriteComponent);
-            spriteEntity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+            spriteEntity.AddComponent(new DemoDisc.game.TiltTrialPresentationRoleComponent {
                 Role = name
             });
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(spriteEntity);
@@ -1025,8 +1025,8 @@ namespace city.game.tools {
             buttonEntity.AddComponent(new InteractableComponent {
                 Size = new int2(440, 48)
             });
-            buttonEntity.AddComponent(new city.game.TiltPlayMenuActionComponent {
-                Action = city.game.TiltPlayMenuAction.Back
+            buttonEntity.AddComponent(new DemoDisc.game.TiltPlayMenuActionComponent {
+                Action = DemoDisc.game.TiltPlayMenuAction.Back
             });
             CreateUiTextEntity(buttonEntity, "TiltPlayOptionsBackButtonLabel", new float3(12f, 2f, 0.1f), "BACK", new int2(416, 44), 1f, 5, new byte4(247, 248, 252, 255), TextAlignment.Center);
         }
@@ -1056,7 +1056,7 @@ namespace city.game.tools {
         /// <param name="size">Button dimensions in authored pixels.</param>
         /// <param name="label">Visible button label.</param>
         /// <param name="action">Semantic action emitted by the button.</param>
-        void CreateTiltTrialResultActionButton(Entity parent, string name, float3 position, int2 size, string label, city.game.TiltTrialSessionAction action) {
+        void CreateTiltTrialResultActionButton(Entity parent, string name, float3 position, int2 size, string label, DemoDisc.game.TiltTrialSessionAction action) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(name)) {
@@ -1069,7 +1069,7 @@ namespace city.game.tools {
             buttonEntity.AddComponent(new InteractableComponent {
                 Size = size
             });
-            buttonEntity.AddComponent(new city.game.TiltTrialPresentationActionComponent {
+            buttonEntity.AddComponent(new DemoDisc.game.TiltTrialPresentationActionComponent {
                 Action = action
             });
             CreateUiTextEntity(buttonEntity, name + "Label", new float3(8f, 5f, 0.1f), label, new int2(size.X - 16, size.Y - 8), 0.7f, 6, new byte4(247, 248, 252, 255), TextAlignment.Center);
@@ -1080,7 +1080,7 @@ namespace city.game.tools {
         /// </summary>
         /// <param name="levelEntry">Shared level entry defining scene id and timer metadata.</param>
         /// <returns>Generated authored gameplay scene.</returns>
-        GeneratedAuthoringSceneDefinition CreateTiltTrialGameplayScene(global::city.game.TiltTrialLevelCatalogEntry levelEntry) {
+        GeneratedAuthoringSceneDefinition CreateTiltTrialGameplayScene(global::DemoDisc.game.TiltTrialLevelCatalogEntry levelEntry) {
             if (levelEntry == null) {
                 throw new ArgumentNullException(nameof(levelEntry));
             }
@@ -1191,7 +1191,7 @@ namespace city.game.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.game.DemoTiltFollowCameraComponent {
+            entity.AddComponent(new DemoDisc.game.DemoTiltFollowCameraComponent {
                 TargetEntityName = "PlayerSphere",
                 TargetEntityRole = "PlayerSphere",
                 TargetOffset = new float3(0f, 0.65f, 0f)
@@ -1280,7 +1280,7 @@ namespace city.game.tools {
         EditorEntity CreateLevelSelectUiEntity(bool useOwnViewport) {
             Entity entity = OwningCore.EntityFactory.Create("TiltTrialLevelSelectUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.AddComponent(new city.game.TiltTrialLevelSelectComponent {
+            entity.AddComponent(new DemoDisc.game.TiltTrialLevelSelectComponent {
                 UseDetailsStage = false
             });
             if (useOwnViewport) {
@@ -1321,7 +1321,7 @@ namespace city.game.tools {
                 new byte4(223, 230, 239, 255),
                 TextAlignment.Center);
 
-            IReadOnlyList<global::city.game.TiltTrialLevelCatalogEntry> levelEntries = global::city.game.TiltTrialLevelCatalog.CreateEntries();
+            IReadOnlyList<global::DemoDisc.game.TiltTrialLevelCatalogEntry> levelEntries = global::DemoDisc.game.TiltTrialLevelCatalog.CreateEntries();
             for (int index = 0; index < levelEntries.Count; index++) {
                 float top = 22f + (index * 94f);
                 int oneBasedIndex = index + 1;
@@ -1329,8 +1329,8 @@ namespace city.game.tools {
                 CreateUiTextEntity(rowEntity, $"TiltTrialLevelRow{oneBasedIndex:00}Label", new float3(20f, 18f, 0.1f), levelEntries[index].DisplayName, new int2(320, 40), 1.55f, 3, new byte4(247, 248, 252, 255), TextAlignment.Left);
             }
 
-            Entity backButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectBackButton", new float3(28f, 430f, 0f), new int2(320, 56), "BACK", city.game.TiltTrialLevelSelectAction.BackToStages, -1);
-            Entity playButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectPlayButton", new float3(28f, 500f, 0f), new int2(320, 56), "PLAY", city.game.TiltTrialLevelSelectAction.PlaySelectedStage, -1);
+            Entity backButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectBackButton", new float3(28f, 430f, 0f), new int2(320, 56), "BACK", DemoDisc.game.TiltTrialLevelSelectAction.BackToStages, -1);
+            Entity playButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectPlayButton", new float3(28f, 500f, 0f), new int2(320, 56), "PLAY", DemoDisc.game.TiltTrialLevelSelectAction.PlaySelectedStage, -1);
             CreateLevelSelectActionPrompt(entity, "TiltTrialLevelSelectPlayPrompt", new float3(848f, 638f, 0f), "enter", "PLAY");
             CreateLevelSelectActionPrompt(entity, "TiltTrialLevelSelectMenuPrompt", new float3(1056f, 638f, 0f), "escape", "MENU");
             ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(backButtonEntity);
@@ -1412,14 +1412,14 @@ namespace city.game.tools {
         /// </summary>
         /// <param name="levelEntry">Shared level entry defining scene id and timer metadata.</param>
         /// <returns>Generated metadata root entity.</returns>
-        Entity CreateLevelMetadataEntity(global::city.game.TiltTrialLevelCatalogEntry levelEntry) {
+        Entity CreateLevelMetadataEntity(global::DemoDisc.game.TiltTrialLevelCatalogEntry levelEntry) {
             if (levelEntry == null) {
                 throw new ArgumentNullException(nameof(levelEntry));
             }
 
             Entity entity = OwningCore.EntityFactory.Create("TiltTrialLevelMetadata");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.AddComponent(new city.game.TiltTrialLevelSettingsComponent {
+            entity.AddComponent(new DemoDisc.game.TiltTrialLevelSettingsComponent {
                 LevelId = levelEntry.LevelId,
                 DisplayName = levelEntry.DisplayName,
                 SceneId = levelEntry.SceneId,
@@ -1436,10 +1436,10 @@ namespace city.game.tools {
         /// Creates the authored UI root that owns gameplay HUD and session overlay behavior while a Tilt Trial level is active.
         /// </summary>
         /// <returns>Generated UI root entity.</returns>
-        EditorEntity CreateGameplayUiEntity(global::city.game.TiltTrialLevelCatalogEntry levelEntry) {
+        EditorEntity CreateGameplayUiEntity(global::DemoDisc.game.TiltTrialLevelCatalogEntry levelEntry) {
             Entity entity = OwningCore.EntityFactory.Create("TiltTrialUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.AddComponent(new city.game.TiltTrialSessionComponent());
+            entity.AddComponent(new DemoDisc.game.TiltTrialSessionComponent());
             entity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
                 FixedSize = new int2(1280, 720)
@@ -1453,7 +1453,7 @@ namespace city.game.tools {
                 ResolveRequiredEditorFont(),
                 levelEntry.DisplayName);
 
-            CreateUiTextEntity(entity, "TiltTrialTimerText", new float3(530f, 16f, 0f), global::city.game.TiltTrialLevelSelectComponent.FormatTimerSeconds(levelEntry.StartTimeSeconds), new int2(220, 56), 2.2f, 1, new byte4(255, 246, 223, 255), TextAlignment.Center);
+            CreateUiTextEntity(entity, "TiltTrialTimerText", new float3(530f, 16f, 0f), global::DemoDisc.game.TiltTrialLevelSelectComponent.FormatTimerSeconds(levelEntry.StartTimeSeconds), new int2(220, 56), 2.2f, 1, new byte4(255, 246, 223, 255), TextAlignment.Center);
 
             Entity speedTextEntity = OwningCore.EntityFactory.CreateChild(entity, "TiltTrialSpeedText");
             speedTextEntity.LocalPosition = new float3(16f, 600f, 0f);
@@ -1473,7 +1473,7 @@ namespace city.game.tools {
             speedTextAnchorComponent.SetAnchorDistances(left: 16f, bottom: 16f);
             speedTextEntity.AddComponent(speedTextAnchorComponent);
             ApplyFontReference(speedTextEntity, speedTextComponent, TiltTrialSpeedHudFontRelativePath);
-            speedTextEntity.AddComponent(new city.game.DemoTiltSpeedTextComponent {
+            speedTextEntity.AddComponent(new DemoDisc.game.DemoTiltSpeedTextComponent {
                 TargetEntityName = "PlayerSphere",
                 TargetEntityRole = "PlayerSphere"
             });
@@ -1509,7 +1509,7 @@ namespace city.game.tools {
             coinTextAnchorComponent.SetAnchorDistances(left: 16f, top: 16f);
             coinTextEntity.AddComponent(coinTextAnchorComponent);
             ApplyFontReference(coinTextEntity, coinTextComponent, TiltTrialSpeedHudFontRelativePath);
-            coinTextEntity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+            coinTextEntity.AddComponent(new DemoDisc.game.TiltTrialPresentationRoleComponent {
                 Role = "TiltTrialCoinText"
             });
 
@@ -1531,7 +1531,7 @@ namespace city.game.tools {
             physicsBoundsStatusAnchorComponent.SetAnchorDistances(left: 16f, top: 56f);
             physicsBoundsStatusTextEntity.AddComponent(physicsBoundsStatusAnchorComponent);
             ApplyFontReference(physicsBoundsStatusTextEntity, physicsBoundsStatusTextComponent, TiltTrialSpeedHudFontRelativePath);
-            physicsBoundsStatusTextEntity.AddComponent(new city.game.TiltTrialPhysicsBoundsStatusTextComponent());
+            physicsBoundsStatusTextEntity.AddComponent(new DemoDisc.game.TiltTrialPhysicsBoundsStatusTextComponent());
             EntitySaveComponent physicsBoundsStatusTextEntitySaveComponent = FindRequiredEntitySaveComponent(physicsBoundsStatusTextEntity);
             string[] nonWindowsPlatformIds = ["ps2", "psp", "psvita", "gamecube", "wii", "wiiu", "switch", "ds", "3ds"];
             for (int platformIndex = 0; platformIndex < nonWindowsPlatformIds.Length; platformIndex++) {
@@ -1556,7 +1556,7 @@ namespace city.game.tools {
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new global::city.game.TiltTrialPhysicsBoundsDebugDrawComponent());
+            entity.AddComponent(new global::DemoDisc.game.TiltTrialPhysicsBoundsDebugDrawComponent());
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             saveComponent.GetOrCreateExistencePlatformOverride(new global::helengine.EditorOverrideScope("windows", "release")).Exists = false;
             return entity;
@@ -1566,7 +1566,7 @@ namespace city.game.tools {
         /// Creates the authored stage root that owns the runtime tilt controller and the kinematic support geometry it manipulates.
         /// </summary>
         /// <returns>Generated editor stage root.</returns>
-        EditorEntity CreateStageRootEntity(global::city.game.TiltTrialLevelCatalogEntry levelEntry) {
+        EditorEntity CreateStageRootEntity(global::DemoDisc.game.TiltTrialLevelCatalogEntry levelEntry) {
             if (levelEntry == null) {
                 throw new ArgumentNullException(nameof(levelEntry));
             }
@@ -1596,7 +1596,7 @@ namespace city.game.tools {
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new city.game.DemoTiltStageComponent {
+            entity.AddComponent(new DemoDisc.game.DemoTiltStageComponent {
                 MaximumPlanarSpeed = 11.25f,
                 PlanarAccelerationUnitsPerSecond = 4.25f
             });
@@ -1623,7 +1623,7 @@ namespace city.game.tools {
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new city.game.DemoTiltStageComponent {
+            entity.AddComponent(new DemoDisc.game.DemoTiltStageComponent {
                 MaximumPlanarSpeed = 11.25f,
                 PlanarAccelerationUnitsPerSecond = 4.25f
             });
@@ -1674,7 +1674,7 @@ namespace city.game.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = float3.Zero,
                 AutoYawSpeedRadians = 0f,
                 ManualYawSpeedRadians = 0f,
@@ -1963,7 +1963,7 @@ namespace city.game.tools {
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new city.game.DemoTiltStageComponent {
+            entity.AddComponent(new DemoDisc.game.DemoTiltStageComponent {
                 MaximumPlanarSpeed = maximumPlanarSpeed,
                 PlanarAccelerationUnitsPerSecond = 4.25f
             });
@@ -2002,7 +2002,7 @@ namespace city.game.tools {
                 RenderOrder3D = 0
             };
             entity.AddComponent(meshComponent);
-            entity.AddComponent(new city.game.TiltTrialEntityRoleComponent {
+            entity.AddComponent(new DemoDisc.game.TiltTrialEntityRoleComponent {
                 Role = "PlayerSphere"
             });
             ApplyTiltTrialPlayerSphereMaterialReference(entity, meshComponent);
@@ -2014,10 +2014,10 @@ namespace city.game.tools {
             entity.AddComponent(new SphereCollider3DComponent {
                 Radius = 0.5f
             });
-            entity.AddComponent(new global::city.game.TiltTrialPhysicsDebugSphereBoundsComponent {
+            entity.AddComponent(new global::DemoDisc.game.TiltTrialPhysicsDebugSphereBoundsComponent {
                 Radius = 0.5f
             });
-            entity.AddComponent(new city.game.DemoTiltBallResetComponent {
+            entity.AddComponent(new DemoDisc.game.DemoTiltBallResetComponent {
                 SpawnPosition = new float3(0f, 1.2f, -7f),
                 SpawnOrientation = float4.Identity,
                 ResetHeight = -12f
@@ -2278,7 +2278,7 @@ namespace city.game.tools {
                 // Collider sizes compose with entity scale, so the unit box tracks editor rescales.
                 Size = float3.One
             });
-            entity.AddComponent(new global::city.game.TiltTrialPhysicsDebugBoxBoundsComponent {
+            entity.AddComponent(new global::DemoDisc.game.TiltTrialPhysicsDebugBoxBoundsComponent {
                 Size = float3.One
             });
             return entity;
@@ -2315,7 +2315,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(playerSphereEntity));
             }
 
-            city.game.DemoTiltFollowCameraComponent followCameraComponent = FindRequiredFollowCameraComponent(cameraEntity);
+            DemoDisc.game.DemoTiltFollowCameraComponent followCameraComponent = FindRequiredFollowCameraComponent(cameraEntity);
             EntitySaveComponent playerSaveComponent = FindRequiredEntitySaveComponent(playerSphereEntity);
             followCameraComponent.TargetEntityReference = new SceneEntityReference {
                 EntityId = playerSaveComponent.EntityId
@@ -2334,7 +2334,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(playerSphereEntity));
             }
 
-            city.game.DemoTiltSpeedTextComponent speedTextComponent = FindRequiredSpeedTextComponent(uiEntity);
+            DemoDisc.game.DemoTiltSpeedTextComponent speedTextComponent = FindRequiredSpeedTextComponent(uiEntity);
             EntitySaveComponent playerSaveComponent = FindRequiredEntitySaveComponent(playerSphereEntity);
             speedTextComponent.TargetEntityReference = new SceneEntityReference {
                 EntityId = playerSaveComponent.EntityId
@@ -2419,13 +2419,13 @@ namespace city.game.tools {
         /// </summary>
         /// <param name="cameraEntity">Generated camera entity whose follow-camera component should be returned.</param>
         /// <returns>Attached Tilt Trial follow camera component.</returns>
-        city.game.DemoTiltFollowCameraComponent FindRequiredFollowCameraComponent(EditorEntity cameraEntity) {
+        DemoDisc.game.DemoTiltFollowCameraComponent FindRequiredFollowCameraComponent(EditorEntity cameraEntity) {
             if (cameraEntity == null || cameraEntity.Components == null) {
                 throw new ArgumentNullException(nameof(cameraEntity));
             }
 
             for (int componentIndex = 0; componentIndex < cameraEntity.Components.Count; componentIndex++) {
-                if (cameraEntity.Components[componentIndex] is city.game.DemoTiltFollowCameraComponent followCameraComponent) {
+                if (cameraEntity.Components[componentIndex] is DemoDisc.game.DemoTiltFollowCameraComponent followCameraComponent) {
                     return followCameraComponent;
                 }
             }
@@ -2438,7 +2438,7 @@ namespace city.game.tools {
         /// </summary>
         /// <param name="uiEntity">Generated UI root whose HUD updater should be returned.</param>
         /// <returns>Attached Tilt Trial speed HUD updater.</returns>
-        city.game.DemoTiltSpeedTextComponent FindRequiredSpeedTextComponent(EditorEntity uiEntity) {
+        DemoDisc.game.DemoTiltSpeedTextComponent FindRequiredSpeedTextComponent(EditorEntity uiEntity) {
             if (uiEntity == null || uiEntity.Children == null) {
                 throw new ArgumentNullException(nameof(uiEntity));
             }
@@ -2450,7 +2450,7 @@ namespace city.game.tools {
                 }
 
                 for (int componentIndex = 0; componentIndex < child.Components.Count; componentIndex++) {
-                    if (child.Components[componentIndex] is city.game.DemoTiltSpeedTextComponent speedTextComponent) {
+                    if (child.Components[componentIndex] is DemoDisc.game.DemoTiltSpeedTextComponent speedTextComponent) {
                         return speedTextComponent;
                     }
                 }
@@ -2556,7 +2556,7 @@ namespace city.game.tools {
                 BorderColor = borderColor,
                 RenderOrder2D = renderOrder2D,
             });
-            entity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+            entity.AddComponent(new DemoDisc.game.TiltTrialPresentationRoleComponent {
                 Role = entityName
             });
             return entity;
@@ -2596,7 +2596,7 @@ namespace city.game.tools {
             };
             entity.AddComponent(textComponent);
             ApplyFontReference(entity, textComponent, TiltTrialSpeedHudFontRelativePath);
-            entity.AddComponent(new city.game.TiltTrialPresentationRoleComponent {
+            entity.AddComponent(new DemoDisc.game.TiltTrialPresentationRoleComponent {
                 Role = entityName
             });
             return entity;

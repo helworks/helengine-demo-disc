@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies every configured target packages and regenerates the shared software path tracer scene.
     /// </summary>
@@ -145,7 +145,7 @@ namespace city.tests {
             Assert.Equal("directx11", windows.GetProperty("selectedGraphicsProfileId").GetString());
 
             foreach (string platformId in ExpectedPlatformIds) {
-                city.rendering.SoftwareTraceResolution resolution = city.rendering.SoftwareTraceResolution.ForPlatform(platformId);
+                DemoDisc.rendering.SoftwareTraceResolution resolution = DemoDisc.rendering.SoftwareTraceResolution.ForPlatform(platformId);
                 if (platformId == "ds") {
                     Assert.Equal(256, resolution.Width);
                     Assert.Equal(192, resolution.Height);

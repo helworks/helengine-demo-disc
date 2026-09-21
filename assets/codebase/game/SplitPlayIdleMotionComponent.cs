@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Applies the reusable Split Play collectible idle loop: a slow vertical bob paired with a slow continuous spin.
     /// </summary>

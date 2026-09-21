@@ -1,8 +1,8 @@
-using city.menu;
-using gameplay.rendering;
+using DemoDisc.menu;
+using DemoDisc.rendering;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the canonical live-authored scene definition for the scaled-cube rendering test.
     /// </summary>
@@ -98,7 +98,7 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = new float3(0f, 10f, 0f),
                 AutoYawSpeedRadians = 0.07f
             });

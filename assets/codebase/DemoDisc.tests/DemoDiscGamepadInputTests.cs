@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies Demo Disc actions aggregate the separate Wii controller devices exposed by the engine.
     /// </summary>
@@ -20,7 +20,7 @@ namespace city.tests {
             inputSystem.Update();
             inputSystem.EarlyUpdate();
 
-            Assert.True(city.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South));
+            Assert.True(DemoDisc.menu.DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South));
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace city.tests {
             inputSystem.SetBackend(backend);
             inputSystem.EarlyUpdate();
 
-            Assert.Equal((short)-20000, city.menu.DemoDiscGamepadInput.GetLeftStickX(inputSystem));
+            Assert.Equal((short)-20000, DemoDisc.menu.DemoDiscGamepadInput.GetLeftStickX(inputSystem));
         }
 
         /// <summary>

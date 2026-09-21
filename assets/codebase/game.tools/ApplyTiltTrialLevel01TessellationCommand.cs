@@ -1,4 +1,4 @@
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Applies constrained-platform MeshComponent tessellation metadata to the existing authored Tilt Trial Level 01 scene.
     /// </summary>

@@ -1,7 +1,7 @@
 using System;
 using helengine;
 
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Stores a world-space ray for scalar software tracing.
     /// </summary>

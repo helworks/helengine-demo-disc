@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Builds single-sided primitive meshes for generated gameplay models from the engine's shared gizmo mesh
     /// factory, so generators never hand-roll vertex winding.

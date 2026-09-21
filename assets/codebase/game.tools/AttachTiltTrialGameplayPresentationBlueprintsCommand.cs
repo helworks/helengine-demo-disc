@@ -1,4 +1,4 @@
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Attaches the generated Tilt Trial presentation Blueprints to existing authored gameplay level scenes.
     /// </summary>

@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the Tilt Trial follow camera maps shoulder buttons to the requested orbit directions.
     /// </summary>
@@ -13,7 +13,7 @@ namespace city.tests {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\DemoTiltFollowCameraComponent.cs").Replace("\r\n", "\n");
 
             Assert.Contains(
-                "if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.LeftShoulder)) {\n                gamepadYaw += invertPspShoulderCamera ? -1d : 1d;\n            }\n            if (city.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.RightShoulder)) {\n                gamepadYaw += invertPspShoulderCamera ? 1d : -1d;",
+                "if (DemoDisc.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.LeftShoulder)) {\n                gamepadYaw += invertPspShoulderCamera ? -1d : 1d;\n            }\n            if (DemoDisc.menu.DemoDiscGamepadInput.IsButtonDown(inputSystem, InputGamepadButton.RightShoulder)) {\n                gamepadYaw += invertPspShoulderCamera ? 1d : -1d;",
                 source,
                 StringComparison.Ordinal);
         }
@@ -26,11 +26,11 @@ namespace city.tests {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\game\DemoTiltFollowCameraComponent.cs").Replace("\r\n", "\n");
 
             Assert.Contains(
-                "gamepadYaw -= NormalizeStickAxis(city.menu.DemoDiscGamepadInput.GetRightStickX(inputSystem));",
+                "gamepadYaw -= NormalizeStickAxis(DemoDisc.menu.DemoDiscGamepadInput.GetRightStickX(inputSystem));",
                 source,
                 StringComparison.Ordinal);
             Assert.Contains(
-                "gamepadPitch += NormalizeStickAxis(city.menu.DemoDiscGamepadInput.GetRightStickY(inputSystem));",
+                "gamepadPitch += NormalizeStickAxis(DemoDisc.menu.DemoDiscGamepadInput.GetRightStickY(inputSystem));",
                 source,
                 StringComparison.Ordinal);
         }

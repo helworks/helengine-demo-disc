@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Canonical override scope paths and level order that the demo-disc scene generators author against.
     /// A rule such as "only the Nintendo dual-screen rigs" needs the Group level ahead of Platform, which is what

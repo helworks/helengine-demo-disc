@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Rotates the cube-test entity around its local Y axis using deterministic absolute time.
     /// </summary>

@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using city.rendering;
+using DemoDisc.rendering;
 using helengine;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies fixed-resolution progressive software tracing and CPU presentation.
     /// </summary>
@@ -14,7 +14,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void Default_allocator_adapter_is_removed() {
-            Assert.Null(typeof(SoftwarePathTracer).Assembly.GetType("city.rendering.DefaultSoftwareTraceBufferAllocator"));
+            Assert.Null(typeof(SoftwarePathTracer).Assembly.GetType("DemoDisc.rendering.DefaultSoftwareTraceBufferAllocator"));
         }
 
         /// <summary>

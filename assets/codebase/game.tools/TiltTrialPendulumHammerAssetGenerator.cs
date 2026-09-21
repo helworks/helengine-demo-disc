@@ -1,10 +1,10 @@
-﻿using CityGeneratedMaterialAssetDefinition = city.rendering.tools.GeneratedMaterialAssetDefinition;
-using CityGeneratedMaterialAssetWriteService = city.rendering.tools.GeneratedMaterialAssetWriteService;
-using CityGeneratedMaterialPlatformDefinition = city.rendering.tools.GeneratedMaterialPlatformDefinition;
-using city.rendering.tools;
+﻿using CityGeneratedMaterialAssetDefinition = DemoDisc.rendering.tools.GeneratedMaterialAssetDefinition;
+using CityGeneratedMaterialAssetWriteService = DemoDisc.rendering.tools.GeneratedMaterialAssetWriteService;
+using CityGeneratedMaterialPlatformDefinition = DemoDisc.rendering.tools.GeneratedMaterialPlatformDefinition;
+using DemoDisc.rendering.tools;
 using helengine.editor;
 
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Generates the reusable Tilt Trial pendulum hammer support assets.
     /// </summary>
@@ -140,7 +140,7 @@ namespace city.game.tools {
             ComponentPersistenceRegistry registry = GeneratedScenePersistenceRegistryFactory.Create();
             SceneComponentAssetRecord baseRecord = registry.GetDescriptor(meshComponent).SerializeComponent(meshComponent, 0, saveState);
             SceneComponentAssetRecord meshRecord = new ComponentPlatformOverridePayloadService().Wrap(baseRecord, saveState);
-            SceneComponentAssetRecord swingRecord = AutomaticDescriptor.SerializeComponent(new city.game.TiltTrialPendulumHammerComponent(), 1, null);
+            SceneComponentAssetRecord swingRecord = AutomaticDescriptor.SerializeComponent(new DemoDisc.game.TiltTrialPendulumHammerComponent(), 1, null);
 
             RigidBody3DComponent headRigidBody = new RigidBody3DComponent {
                 BodyKind = BodyKind3D.Kinematic,

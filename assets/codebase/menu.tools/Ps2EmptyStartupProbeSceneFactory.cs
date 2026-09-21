@@ -1,7 +1,7 @@
-using city.rendering.tools;
+using DemoDisc.rendering.tools;
 using helengine.editor;
 
-namespace city.menu.tools {
+namespace DemoDisc.menu.tools {
     /// <summary>
     /// Builds one temporary camera-only startup scene that overwrites the demo-disc main menu during PS2 leak isolation.
     /// </summary>

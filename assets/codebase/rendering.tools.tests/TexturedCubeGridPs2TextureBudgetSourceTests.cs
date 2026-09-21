@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies that the textured-cube diagnostic scene uses a PS2-sized texture representation.
     /// </summary>

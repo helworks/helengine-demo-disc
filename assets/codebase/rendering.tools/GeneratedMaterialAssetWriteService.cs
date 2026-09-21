@@ -1,4 +1,4 @@
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Writes generated material assets through the public editor material authoring API.
     /// </summary>
@@ -44,7 +44,7 @@ namespace city.rendering.tools {
                 }
             }
 
-            editorDefinition.MaterialAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetMaterialIdentity(relativePath);
+            editorDefinition.MaterialAsset.AuthoringAssetId = DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetMaterialIdentity(relativePath);
             AuthoringSession.WriteGeneratedMaterial(relativePath, editorDefinition, Transaction);
         }
     }

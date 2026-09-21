@@ -1,10 +1,10 @@
 using helengine;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Provides fresh owned raw model assets to software trace scene tests and observes release ordering.
     /// </summary>
-    public sealed class FakeSoftwareModelAssetSource : city.rendering.ISoftwareModelAssetSource {
+    public sealed class FakeSoftwareModelAssetSource : DemoDisc.rendering.ISoftwareModelAssetSource {
         readonly List<Entry> entries = new List<Entry>();
         readonly List<ModelAsset> loadedAssets = new List<ModelAsset>();
         readonly List<string> loadedRelativePaths = new List<string>();

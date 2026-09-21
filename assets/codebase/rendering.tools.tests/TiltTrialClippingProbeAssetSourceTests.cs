@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the colored-face clipping probe factories keep their deterministic model, atlas, and textured material source contracts.
     /// </summary>

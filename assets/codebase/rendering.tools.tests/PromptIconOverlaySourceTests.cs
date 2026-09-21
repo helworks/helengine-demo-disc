@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies rendering and physics prompt overlays consume the shared generated control-icon resolver.
     /// </summary>

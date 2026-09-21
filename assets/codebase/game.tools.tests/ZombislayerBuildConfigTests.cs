@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies Zombislayer is not part of any current demo-disc platform build.
     /// </summary>
@@ -20,7 +20,7 @@ namespace city.tests {
                     selectedSceneIds.Add(sceneId.GetString() ?? string.Empty);
                 }
 
-                Assert.DoesNotContain(city.game.ZombislayerSceneIds.GameplaySceneId, selectedSceneIds);
+                Assert.DoesNotContain(DemoDisc.game.ZombislayerSceneIds.GameplaySceneId, selectedSceneIds);
             }
         }
     }

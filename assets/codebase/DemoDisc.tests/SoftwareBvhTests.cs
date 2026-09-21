@@ -1,9 +1,9 @@
 using System;
 using System.Reflection;
 using helengine;
-using city.rendering;
+using DemoDisc.rendering;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the deterministic bounded software BVH contract.
     /// </summary>

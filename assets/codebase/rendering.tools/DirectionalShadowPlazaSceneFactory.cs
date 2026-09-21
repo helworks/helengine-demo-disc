@@ -1,7 +1,7 @@
-using city.menu;
+using DemoDisc.menu;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the canonical authored scene asset for the directional-shadow plaza showcase.
     /// </summary>
@@ -152,7 +152,7 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = new float3(0f, 0f, 0f),
                 AutoYawSpeedRadians = 0.07f
             });
@@ -232,7 +232,7 @@ namespace city.rendering.tools {
         /// <returns>Live authored orbit hero entity.</returns>
         Entity CreateOrbitHeroEntity(RuntimeModel model, RuntimeMaterial material) {
             Entity entity = CreateMeshEntity("DirectionalShadowPlazaHeroSphere", new float3(0f, 2.5f, 10f), new float3(3f, 3f, 3f), model, material);
-            entity.AddComponent(new city.rendering.DirectionalShadowOrbitComponent {
+            entity.AddComponent(new DemoDisc.rendering.DirectionalShadowOrbitComponent {
                 OrbitCenter = new float3(0f, 0f, 0f),
                 OrbitRadius = 10f,
                 OrbitHeight = 2.5f,

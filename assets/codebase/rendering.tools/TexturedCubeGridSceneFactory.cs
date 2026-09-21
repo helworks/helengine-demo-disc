@@ -1,8 +1,8 @@
-using city.menu;
+using DemoDisc.menu;
 using helengine;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the authored textured cube-grid scene plus its file-backed textures and materials.
     /// </summary>
@@ -423,7 +423,7 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = float3.Zero,
                 AutoYawSpeedRadians = 0.09f
             });
@@ -515,7 +515,7 @@ namespace city.rendering.tools {
                 Materials = new[] { material },
                 RenderOrder3D = 0
             });
-            entity.AddComponent(new gameplay.rendering.AxisRotationComponent {
+            entity.AddComponent(new DemoDisc.rendering.AxisRotationComponent {
                 Axis = new float3(0f, 1f, 0f),
                 AngularSpeedRadiansPerSecond = GetCubeAngularSpeedRadiansPerSecond(cubeIndex, row, column)
             });

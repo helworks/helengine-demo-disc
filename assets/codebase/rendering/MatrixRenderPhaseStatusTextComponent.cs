@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Updates the Matrix Render scene status label so the active transform operation remains visible in the bottom-left overlay.
     /// </summary>

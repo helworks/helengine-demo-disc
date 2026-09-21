@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Owns Nintendo DS companion-scene return behavior from the bottom-screen back overlay.
     /// </summary>

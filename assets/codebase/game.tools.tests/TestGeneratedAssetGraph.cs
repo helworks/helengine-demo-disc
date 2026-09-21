@@ -4,7 +4,7 @@ using helengine.ui;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Composes one complete public editor authoring graph for generation
     /// behavior tests.  All generators in a test share this graph and the

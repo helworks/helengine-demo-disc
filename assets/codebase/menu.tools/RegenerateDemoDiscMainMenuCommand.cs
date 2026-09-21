@@ -1,4 +1,4 @@
-namespace city.menu.tools {
+namespace DemoDisc.menu.tools {
     /// <summary>
     /// Regenerates the authored demo-disc main menu scene through the city-owned live scene generator.
     /// </summary>

@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Writes serialized scene component records for generated city rendering showcase runtime components.
     /// </summary>
@@ -8,32 +8,32 @@ namespace city.rendering.tools {
         /// <summary>
         /// Stable serialized component type id for the tower-spin runtime component.
         /// </summary>
-        const string TowerSpinTypeId = "city.rendering.DirectionalShadowTowerSpinComponent, gameplay";
+        const string TowerSpinTypeId = "DemoDisc.rendering.DirectionalShadowTowerSpinComponent, DemoDisc";
 
         /// <summary>
         /// Stable serialized component type id for the axis-test Z-spin runtime component.
         /// </summary>
-        const string AxisTestZSpinTypeId = "gameplay.rendering.AxisTestZSpinComponent, gameplay";
+        const string AxisTestZSpinTypeId = "DemoDisc.rendering.AxisTestZSpinComponent, DemoDisc";
 
         /// <summary>
         /// Stable serialized component type id for the axis-test-2 camera-forward spin runtime component.
         /// </summary>
-        const string AxisTestCameraForwardSpinTypeId = "gameplay.rendering.AxisTestCameraForwardSpinComponent, gameplay";
+        const string AxisTestCameraForwardSpinTypeId = "DemoDisc.rendering.AxisTestCameraForwardSpinComponent, DemoDisc";
 
         /// <summary>
         /// Stable serialized component type id for the orbit runtime component.
         /// </summary>
-        const string OrbitTypeId = "city.rendering.DirectionalShadowOrbitComponent, gameplay";
+        const string OrbitTypeId = "DemoDisc.rendering.DirectionalShadowOrbitComponent, DemoDisc";
 
         /// <summary>
         /// Stable serialized component type id for the sun-sweep runtime component.
         /// </summary>
-        const string SunSweepTypeId = "city.rendering.DirectionalShadowSunSweepComponent, gameplay";
+        const string SunSweepTypeId = "DemoDisc.rendering.DirectionalShadowSunSweepComponent, DemoDisc";
 
         /// <summary>
         /// Stable serialized component type id for the camera-orbit runtime component.
         /// </summary>
-        const string CameraOrbitTypeId = "city.rendering.DirectionalShadowCameraOrbitComponent, gameplay";
+        const string CameraOrbitTypeId = "DemoDisc.rendering.DirectionalShadowCameraOrbitComponent, DemoDisc";
 
         /// <summary>
         /// Creates one serialized tower-spin component record.

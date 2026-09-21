@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Produces the canonical demo-disc menu definition used by the generated city menu scene.
     /// </summary>

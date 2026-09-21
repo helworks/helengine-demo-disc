@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Stores the high-level Tilt Trial session states used by gameplay overlays and progression flow.
     /// </summary>

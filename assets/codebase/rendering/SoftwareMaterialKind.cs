@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>Selects the scattering law used by a software-traced surface.</summary>
     public enum SoftwareMaterialKind {
         /// <summary>Cosine-weighted diffuse scattering, preserving existing authored scenes.</summary>

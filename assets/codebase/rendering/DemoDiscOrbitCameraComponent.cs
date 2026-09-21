@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Drives one shared demo-disc orbit camera that can hand control to the player and then smoothly return to auto rotation after inactivity.
     /// </summary>

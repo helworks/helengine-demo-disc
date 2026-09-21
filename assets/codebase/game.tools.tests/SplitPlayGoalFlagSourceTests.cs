@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies gameplay generation invokes the Split Play goal-flag asset generator.
     /// </summary>

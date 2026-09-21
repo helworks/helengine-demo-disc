@@ -1,7 +1,7 @@
-using city.rendering;
+using DemoDisc.rendering;
 using System.Runtime.CompilerServices;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>Verifies scattering additions preserve existing nested material bytes and persist through editor authoring.</summary>
     public sealed class SoftwareScatteringPersistenceTests {
         /// <summary>The nested material format has no field framing, so its original member set must stay fixed.</summary>
@@ -44,7 +44,7 @@ namespace city.tests {
                 SceneEntityAsset entity = pending.Pop();
                 foreach (SceneEntityAsset child in entity.Children ?? Array.Empty<SceneEntityAsset>()) pending.Push(child);
                 foreach (SceneComponentAssetRecord record in entity.Components ?? Array.Empty<SceneComponentAssetRecord>()) {
-                    if (!record.ComponentTypeId.StartsWith("city.rendering.SoftwareModelComponent,", StringComparison.Ordinal)) continue;
+                    if (!record.ComponentTypeId.StartsWith("DemoDisc.rendering.SoftwareModelComponent,", StringComparison.Ordinal)) continue;
                     SoftwareModelComponent model = Assert.IsType<SoftwareModelComponent>(descriptor.DeserializeComponent(overrides.UnwrapBaseRecord(record), null, null));
                     Assert.Single(model.Materials);
                     Assert.Empty(model.Scattering);
@@ -70,7 +70,7 @@ namespace city.tests {
                 SceneEntityAsset entity = pending.Pop();
                 foreach (SceneEntityAsset child in entity.Children ?? Array.Empty<SceneEntityAsset>()) pending.Push(child);
                 foreach (SceneComponentAssetRecord record in entity.Components ?? Array.Empty<SceneComponentAssetRecord>()) {
-                    if (!record.ComponentTypeId.StartsWith("city.rendering.SoftwareModelComponent,", StringComparison.Ordinal)) continue;
+                    if (!record.ComponentTypeId.StartsWith("DemoDisc.rendering.SoftwareModelComponent,", StringComparison.Ordinal)) continue;
                     SoftwareModelComponent model = Assert.IsType<SoftwareModelComponent>(descriptor.DeserializeComponent(overrides.UnwrapBaseRecord(record), null, null));
                     if (model.ModelReference.SourceKind != SceneAssetReferenceSourceKind.FileSystem) continue;
                     Assert.Equal(32, model.ModelReference.AssetId.Length);
@@ -99,8 +99,8 @@ namespace city.tests {
                 SceneEntityAsset entity = pending.Pop();
                 foreach (SceneEntityAsset child in entity.Children ?? Array.Empty<SceneEntityAsset>()) pending.Push(child);
                 foreach (SceneComponentAssetRecord record in entity.Components ?? Array.Empty<SceneComponentAssetRecord>()) {
-                    if (!record.ComponentTypeId.StartsWith("city.menu.DemoDiscReturnToMenuComponent,", StringComparison.Ordinal)) continue;
-                    city.menu.DemoDiscReturnToMenuComponent action = Assert.IsType<city.menu.DemoDiscReturnToMenuComponent>(descriptor.DeserializeComponent(overrides.UnwrapBaseRecord(record), null, null));
+                    if (!record.ComponentTypeId.StartsWith("DemoDisc.menu.DemoDiscReturnToMenuComponent,", StringComparison.Ordinal)) continue;
+                    DemoDisc.menu.DemoDiscReturnToMenuComponent action = Assert.IsType<DemoDisc.menu.DemoDiscReturnToMenuComponent>(descriptor.DeserializeComponent(overrides.UnwrapBaseRecord(record), null, null));
                     Assert.True(action.AllowKeyboardReturn);
                     Assert.True(action.AllowGamepadReturn);
                     Assert.True(action.AllowPointerReturn);

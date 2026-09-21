@@ -1,6 +1,6 @@
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Stores the authored-scene ownership state captured before generated-scene serialization temporarily excludes an editor root.
     /// </summary>

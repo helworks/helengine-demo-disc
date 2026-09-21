@@ -1,4 +1,4 @@
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Describes one generated control icon resolved from the manifest and editor import pipeline.
     /// </summary>

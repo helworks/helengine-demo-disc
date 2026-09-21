@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Identifies one presentation entity by a stable serialized HUD role.
     /// </summary>

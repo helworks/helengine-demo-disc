@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies platform-specific material settings for the Tilt Trial player sphere.
     /// </summary>
@@ -14,16 +14,16 @@ namespace city.tests {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(projectRootPath);
             IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(projectRootPath);
             using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
-            city.rendering.tools.TiltTrialPlayerSphereMarbleMaterialFactory factory = new city.rendering.tools.TiltTrialPlayerSphereMarbleMaterialFactory(
+            DemoDisc.rendering.tools.TiltTrialPlayerSphereMarbleMaterialFactory factory = new DemoDisc.rendering.tools.TiltTrialPlayerSphereMarbleMaterialFactory(
                 authoringSession,
                 transaction);
-            MethodInfo createDefinitionMethod = typeof(city.rendering.tools.TiltTrialPlayerSphereMarbleMaterialFactory).GetMethod(
+            MethodInfo createDefinitionMethod = typeof(DemoDisc.rendering.tools.TiltTrialPlayerSphereMarbleMaterialFactory).GetMethod(
                 "CreateDefinition",
                 BindingFlags.Instance | BindingFlags.NonPublic)!;
 
-            city.rendering.tools.GeneratedMaterialAssetDefinition definition = Assert.IsType<city.rendering.tools.GeneratedMaterialAssetDefinition>(
+            DemoDisc.rendering.tools.GeneratedMaterialAssetDefinition definition = Assert.IsType<DemoDisc.rendering.tools.GeneratedMaterialAssetDefinition>(
                 createDefinitionMethod.Invoke(factory, new object[] { "diffuse-texture-id", "roughness-texture-id" }));
-            city.rendering.tools.GeneratedMaterialPlatformDefinition dsDefinition = definition.Platforms["ds"];
+            DemoDisc.rendering.tools.GeneratedMaterialPlatformDefinition dsDefinition = definition.Platforms["ds"];
 
             Assert.Equal("ds-standard-lit", dsDefinition.SchemaId);
             Assert.False(dsDefinition.FieldValues.ContainsKey("texture-id"));
@@ -41,16 +41,16 @@ namespace city.tests {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(projectRootPath);
             IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(projectRootPath);
             using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
-            city.rendering.tools.TiltTrialPlayerSphereWalnutMaterialFactory factory = new city.rendering.tools.TiltTrialPlayerSphereWalnutMaterialFactory(
+            DemoDisc.rendering.tools.TiltTrialPlayerSphereWalnutMaterialFactory factory = new DemoDisc.rendering.tools.TiltTrialPlayerSphereWalnutMaterialFactory(
                 authoringSession,
                 transaction);
-            MethodInfo createDefinitionMethod = typeof(city.rendering.tools.TiltTrialPlayerSphereWalnutMaterialFactory).GetMethod(
+            MethodInfo createDefinitionMethod = typeof(DemoDisc.rendering.tools.TiltTrialPlayerSphereWalnutMaterialFactory).GetMethod(
                 "CreateDefinition",
                 BindingFlags.Instance | BindingFlags.NonPublic)!;
 
-            city.rendering.tools.GeneratedMaterialAssetDefinition first = Assert.IsType<city.rendering.tools.GeneratedMaterialAssetDefinition>(
+            DemoDisc.rendering.tools.GeneratedMaterialAssetDefinition first = Assert.IsType<DemoDisc.rendering.tools.GeneratedMaterialAssetDefinition>(
                 createDefinitionMethod.Invoke(factory, new object[] { "diffuse-texture-id" }));
-            city.rendering.tools.GeneratedMaterialAssetDefinition second = Assert.IsType<city.rendering.tools.GeneratedMaterialAssetDefinition>(
+            DemoDisc.rendering.tools.GeneratedMaterialAssetDefinition second = Assert.IsType<DemoDisc.rendering.tools.GeneratedMaterialAssetDefinition>(
                 createDefinitionMethod.Invoke(factory, new object[] { "diffuse-texture-id" }));
 
             Assert.False(string.IsNullOrWhiteSpace(first.MaterialAsset.AuthoringAssetId));

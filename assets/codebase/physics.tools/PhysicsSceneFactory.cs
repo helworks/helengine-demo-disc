@@ -1,6 +1,6 @@
-﻿using city.rendering.tools;
+﻿using DemoDisc.rendering.tools;
 
-namespace city.physics.tools {
+namespace DemoDisc.physics.tools {
     /// <summary>
     /// Creates exportable scene assets for physics validation and demo playback.
     /// </summary>
@@ -369,7 +369,7 @@ namespace city.physics.tools {
         /// <summary>
         /// Shared editor-authored scene writer used for the playable physics showcases so their instruction overlays follow the standard city save pipeline.
         /// </summary>
-        readonly city.rendering.tools.GeneratedAuthoringSceneWriteService AuthoringSceneWriteService;
+        readonly DemoDisc.rendering.tools.GeneratedAuthoringSceneWriteService AuthoringSceneWriteService;
 
         /// <summary>
         /// Initializes the validation-scene factory with a fresh scene-local entity id allocator.
@@ -381,9 +381,9 @@ namespace city.physics.tools {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
             SceneEntityIdAllocator = new SceneEntityAssetIdAllocator();
-            PersistenceRegistry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
+            PersistenceRegistry = DemoDisc.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
             OverridePayloadService = new ComponentPlatformOverridePayloadService();
-            AuthoringSceneWriteService = new city.rendering.tools.GeneratedAuthoringSceneWriteService(null, AssetAuthoringService, Transaction);
+            AuthoringSceneWriteService = new DemoDisc.rendering.tools.GeneratedAuthoringSceneWriteService(null, AssetAuthoringService, Transaction);
         }
 
         /// <summary>
@@ -457,7 +457,7 @@ namespace city.physics.tools {
 
                 SceneAsset sceneAsset = CreateSceneAsset(sceneId);
                 string fullPath = GetSceneFullPath(projectRootPath, sceneId);
-                sceneAsset.AuthoringAssetId = city.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneId);
+                sceneAsset.AuthoringAssetId = DemoDisc.scene.tools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity(sceneId);
                 sceneAsset.FormerAuthoringAssetIds = Array.Empty<string>();
                 Transaction.WriteAsset(sceneId, sceneAsset);
             }
@@ -886,7 +886,7 @@ namespace city.physics.tools {
                 LocalOrientation = orientation,
                 Components = new[] {
                     CreateCameraComponentRecord(),
-                    CreateAutomaticComponentRecord(new city.rendering.DemoDiscOrbitCameraComponent {
+                    CreateAutomaticComponentRecord(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                         OrbitCenter = float3.Zero,
                         AutoYawSpeedRadians = 0f
                     }, 1)
@@ -1075,7 +1075,7 @@ namespace city.physics.tools {
                 LocalOrientation = orientation,
                 Components = new[] {
                     CreateCameraComponentRecord(),
-                    CreateAutomaticComponentRecord(new city.rendering.DemoDiscOrbitCameraComponent {
+                    CreateAutomaticComponentRecord(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                         OrbitCenter = orbitCenter,
                         AutoYawSpeedRadians = 0f
                     }, 1)
@@ -1096,7 +1096,7 @@ namespace city.physics.tools {
                 throw new InvalidOperationException("Creating the physics showcase instruction overlay requires an active project root path.");
             }
 
-            city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction);
+            DemoDisc.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoDisc.rendering.tools.DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction);
             Entity overlayRootEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(CurrentProjectRootPath, ResolveRequiredEditorFont());
             if (overlayRootEntity is not EditorEntity editorOverlayRootEntity) {
                 throw new InvalidOperationException("The physics showcase instruction overlay must be authored through editor entities.");
@@ -1594,7 +1594,7 @@ namespace city.physics.tools {
         /// <param name="projectRootPath">Absolute project root path that owns the `assets` directory.</param>
         /// <param name="sceneId">Stable playable scene id to write.</param>
         void WritePlayablePhysicsShowcaseScene(string projectRootPath, string sceneId) {
-            city.rendering.tools.GeneratedAuthoringSceneDefinition sceneDefinition = CreatePlayablePhysicsShowcaseSceneDefinition(projectRootPath, sceneId, true);
+            DemoDisc.rendering.tools.GeneratedAuthoringSceneDefinition sceneDefinition = CreatePlayablePhysicsShowcaseSceneDefinition(projectRootPath, sceneId, true);
             AuthoringSceneWriteService.WriteScene(sceneDefinition);
         }
 
@@ -1605,7 +1605,7 @@ namespace city.physics.tools {
         /// <param name="sceneId">Stable playable scene id to build.</param>
         /// <param name="includeDesktopInstructionOverlay">True when the desktop instruction overlay root should remain in the returned root-entity list.</param>
         /// <returns>Generated live-authored playable scene definition.</returns>
-        public city.rendering.tools.GeneratedAuthoringSceneDefinition CreatePlayablePhysicsShowcaseSceneDefinition(
+        public DemoDisc.rendering.tools.GeneratedAuthoringSceneDefinition CreatePlayablePhysicsShowcaseSceneDefinition(
             string projectRootPath,
             string sceneId,
             bool includeDesktopInstructionOverlay) {
@@ -1665,10 +1665,10 @@ namespace city.physics.tools {
                 CreateLivePhysicsShowcaseUiEntity(ResolveDemoDiscSceneLabel(normalizedSceneId))
             };
             if (includeDesktopInstructionOverlay) {
-                city.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new city.rendering.tools.DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction);
+                DemoDisc.rendering.tools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoDisc.rendering.tools.DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction);
                 FontAsset instructionFont = ResolveRequiredEditorFont();
                 Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
-                city.rendering.tools.ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new city.rendering.tools.ConsoleCameraLightInstructionsSceneAttachmentService();
+                DemoDisc.rendering.tools.ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new DemoDisc.rendering.tools.ConsoleCameraLightInstructionsSceneAttachmentService();
                 rootEntities.Insert(1, instructionOverlayEntity);
                 rootEntities.Insert(2, consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService));
             }
@@ -1685,7 +1685,7 @@ namespace city.physics.tools {
                 AssignFreshGeneratedEditorEntityIds(editorRootEntity);
             }
 
-            return new city.rendering.tools.GeneratedAuthoringSceneDefinition {
+            return new DemoDisc.rendering.tools.GeneratedAuthoringSceneDefinition {
                 SceneId = normalizedSceneId,
                 SceneSettings = authoredSceneAsset.SceneSettings,
                 RootEntities = rootEntities.ToArray()
@@ -1731,7 +1731,7 @@ namespace city.physics.tools {
             }
 
             SceneEntityAsset scenarioRootEntity = ResolveRequiredPlayablePhysicsShowcaseScenarioRoot(authoredSceneAsset);
-            ComponentPersistenceRegistry persistenceRegistry = city.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
+            ComponentPersistenceRegistry persistenceRegistry = DemoDisc.rendering.tools.GeneratedScenePersistenceRegistryFactory.Create();
             ISceneAssetReferenceResolver referenceResolver = AssetAuthoringService.CreateSceneAssetReferenceResolver();
             SceneLoadService sceneLoadService = new SceneLoadService(
                 persistenceRegistry,
@@ -1802,7 +1802,7 @@ namespace city.physics.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = orbitCenter,
                 AutoYawSpeedRadians = 0f
             });
@@ -1814,7 +1814,7 @@ namespace city.physics.tools {
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
         EditorEntity CreateLivePhysicsShowcaseUiEntity(string sceneLabel) {
-            Entity entity = new city.rendering.tools.DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("ShowcaseUi", sceneLabel);
+            Entity entity = new DemoDisc.rendering.tools.DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("ShowcaseUi", sceneLabel);
             if (entity is EditorEntity editorEntity) {
                 return editorEntity;
             }
@@ -2075,7 +2075,7 @@ namespace city.physics.tools {
             string castsShadowValue = castsShadows ? "true" : "false";
             string receivesShadowValue = receivesShadows ? "true" : "false";
 
-            city.rendering.tools.GeneratedMaterialAssetDefinition definition = new city.rendering.tools.GeneratedMaterialAssetDefinition {
+            DemoDisc.rendering.tools.GeneratedMaterialAssetDefinition definition = new DemoDisc.rendering.tools.GeneratedMaterialAssetDefinition {
                 MaterialAsset = new ShaderMaterialAsset {
                     Id = assetId,
                     RenderState = new MaterialRenderState(),
@@ -2084,7 +2084,7 @@ namespace city.physics.tools {
                 }
             };
 
-            city.rendering.tools.GeneratedMaterialPlatformDefinition windowsSettings = definition.GetOrCreatePlatform("windows");
+            DemoDisc.rendering.tools.GeneratedMaterialPlatformDefinition windowsSettings = definition.GetOrCreatePlatform("windows");
             windowsSettings.SchemaId = StandardShaderSchemaId;
             windowsSettings.SetFieldValue(UseCustomShaderFieldId, "false");
             windowsSettings.SetFieldValue(ShaderAssetIdFieldId, StandardShaderAssetId);
@@ -2093,7 +2093,7 @@ namespace city.physics.tools {
             windowsSettings.SetFieldValue(ReceivesShadowFieldId, receivesShadowValue);
             windowsSettings.SetFieldValue(BaseColorFieldId, baseColor);
 
-            city.rendering.tools.GeneratedMaterialPlatformDefinition ps2Settings = definition.GetOrCreatePlatform("ps2");
+            DemoDisc.rendering.tools.GeneratedMaterialPlatformDefinition ps2Settings = definition.GetOrCreatePlatform("ps2");
             ps2Settings.SchemaId = Ps2MaterialSchemaId;
             ps2Settings.SetFieldValue(TextureAssetIdFieldId, PhysicsDemoSphereTileTextureAssetId);
             ps2Settings.SetFieldValue(AlphaModeFieldId, "opaque");
@@ -2102,7 +2102,7 @@ namespace city.physics.tools {
             ps2Settings.SetFieldValue(VertexColorModeFieldId, "ignore");
             ps2Settings.SetFieldValue(BaseColorFieldId, baseColor);
 
-            city.rendering.tools.GeneratedMaterialPlatformDefinition pspSettings = definition.GetOrCreatePlatform("psp");
+            DemoDisc.rendering.tools.GeneratedMaterialPlatformDefinition pspSettings = definition.GetOrCreatePlatform("psp");
             pspSettings.SchemaId = StandardShaderSchemaId;
             pspSettings.SetFieldValue(UseCustomShaderFieldId, "false");
             pspSettings.SetFieldValue(ShaderAssetIdFieldId, StandardShaderAssetId);
@@ -2111,7 +2111,7 @@ namespace city.physics.tools {
             pspSettings.SetFieldValue(ReceivesShadowFieldId, receivesShadowValue);
             pspSettings.SetFieldValue(BaseColorFieldId, baseColor);
 
-            city.rendering.tools.GeneratedMaterialPlatformDefinition gameCubeSettings = definition.GetOrCreatePlatform("gamecube");
+            DemoDisc.rendering.tools.GeneratedMaterialPlatformDefinition gameCubeSettings = definition.GetOrCreatePlatform("gamecube");
             gameCubeSettings.SchemaId = GameCubeMaterialSchemaId;
             gameCubeSettings.SetFieldValue(TextureAssetIdFieldId, PhysicsDemoSphereTileTextureAssetId);
             gameCubeSettings.SetFieldValue(GameCubeTextureRelativePathFieldId, "cooked/imported/" + PhysicsDemoSphereTileTextureAssetId);
@@ -2120,7 +2120,7 @@ namespace city.physics.tools {
             gameCubeSettings.SetFieldValue(BaseColorFieldId, baseColor);
             gameCubeSettings.SetFieldValue(LightingModeFieldId, "lit");
 
-            city.rendering.tools.GeneratedMaterialPlatformDefinition dsSettings = definition.GetOrCreatePlatform("ds");
+            DemoDisc.rendering.tools.GeneratedMaterialPlatformDefinition dsSettings = definition.GetOrCreatePlatform("ds");
             dsSettings.SchemaId = DsMaterialSchemaId;
             dsSettings.SetFieldValue(TextureAssetIdFieldId, PhysicsDemoSphereTileTextureAssetId);
             dsSettings.SetFieldValue(DsTextureRelativePathFieldId, "cooked/imported/" + PhysicsDemoSphereTileTextureAssetId);
@@ -2129,7 +2129,7 @@ namespace city.physics.tools {
             dsSettings.SetFieldValue(BaseColorFieldId, baseColor);
             dsSettings.SetFieldValue(LightingModeFieldId, "lit");
 
-            city.rendering.tools.GeneratedMaterialAssetWriteService writeService = new city.rendering.tools.GeneratedMaterialAssetWriteService(AssetAuthoringService, Transaction);
+            DemoDisc.rendering.tools.GeneratedMaterialAssetWriteService writeService = new DemoDisc.rendering.tools.GeneratedMaterialAssetWriteService(AssetAuthoringService, Transaction);
             writeService.WriteMaterial(relativePath, definition);
         }
 
@@ -2312,7 +2312,7 @@ namespace city.physics.tools {
                 throw new ArgumentException("Asset id must be provided.", nameof(assetId));
             }
 
-            city.rendering.tools.GeneratedMaterialAssetDefinition definition = new city.rendering.tools.GeneratedMaterialAssetDefinition {
+            DemoDisc.rendering.tools.GeneratedMaterialAssetDefinition definition = new DemoDisc.rendering.tools.GeneratedMaterialAssetDefinition {
                 MaterialAsset = new ShaderMaterialAsset {
                     Id = assetId,
                     RenderState = new MaterialRenderState(),
@@ -2323,7 +2323,7 @@ namespace city.physics.tools {
 
             IReadOnlyList<string> supportedPlatforms = AssetAuthoringService.GetSupportedPlatformIds();
             for (int platformIndex = 0; platformIndex < supportedPlatforms.Count; platformIndex++) {
-                city.rendering.tools.GeneratedMaterialPlatformDefinition platformDefinition = definition.GetOrCreatePlatform(supportedPlatforms[platformIndex]);
+                DemoDisc.rendering.tools.GeneratedMaterialPlatformDefinition platformDefinition = definition.GetOrCreatePlatform(supportedPlatforms[platformIndex]);
                 platformDefinition.SchemaId = StandardShaderSchemaId;
                 platformDefinition.SetFieldValue(UseCustomShaderFieldId, "false");
                 platformDefinition.SetFieldValue(TextureAssetIdFieldId, string.Empty);
@@ -2332,7 +2332,7 @@ namespace city.physics.tools {
                 platformDefinition.SetFieldValue(BaseColorFieldId, ConvertColorToHtml(surfaceColor));
             }
 
-            new city.rendering.tools.GeneratedMaterialAssetWriteService(AssetAuthoringService, Transaction)
+            new DemoDisc.rendering.tools.GeneratedMaterialAssetWriteService(AssetAuthoringService, Transaction)
                 .WriteMaterial(relativePath, definition);
         }
 

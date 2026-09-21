@@ -1,4 +1,4 @@
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Stores the awarded Tilt Trial result tier for one completed run.
     /// </summary>

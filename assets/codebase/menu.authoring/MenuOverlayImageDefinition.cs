@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Describes one decorative city menu overlay image baked into the generated demo-disc scene.
     /// </summary>

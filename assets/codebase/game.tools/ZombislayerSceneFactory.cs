@@ -1,7 +1,7 @@
 using helengine.editor;
-using city.rendering.tools;
+using DemoDisc.rendering.tools;
 
-namespace city.game.tools {
+namespace DemoDisc.game.tools {
     /// <summary>
     /// Builds the generated authored Zombislayer gameplay scene contributed by the city demo-disc project.
     /// </summary>
@@ -150,7 +150,7 @@ namespace city.game.tools {
             entity.LocalPosition = new float3(0f, 1.65f, 0f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new city.game.ZombislayerFpsControllerComponent());
+            entity.AddComponent(new DemoDisc.game.ZombislayerFpsControllerComponent());
             Entity cameraPivotEntity = CreateCameraPivotEntity(entity);
             CreateCameraEntity(cameraPivotEntity);
             CreateWeaponEntity(cameraPivotEntity);
@@ -172,7 +172,7 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(parent));
             }
 
-            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, city.game.ZombislayerFpsControllerComponent.CameraPivotEntityName);
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, DemoDisc.game.ZombislayerFpsControllerComponent.CameraPivotEntityName);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
@@ -247,12 +247,12 @@ namespace city.game.tools {
                 throw new ArgumentNullException(nameof(parent));
             }
 
-            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, city.game.ZombislayerFpsControllerComponent.SessionRootEntityName);
+            Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, DemoDisc.game.ZombislayerFpsControllerComponent.SessionRootEntityName);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new city.game.ZombislayerSessionComponent());
+            entity.AddComponent(new DemoDisc.game.ZombislayerSessionComponent());
             entity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
                 FixedSize = new int2(1280, 720)

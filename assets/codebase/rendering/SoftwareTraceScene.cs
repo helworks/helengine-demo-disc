@@ -1,6 +1,6 @@
 using helengine;
 
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Loads owned CPU-readable model assets for software trace-scene construction.
     /// </summary>

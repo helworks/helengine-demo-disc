@@ -1,4 +1,4 @@
-namespace city.rendering {
+namespace DemoDisc.rendering {
     /// <summary>
     /// Applies a continuous authored local Y-axis rotation to the owning city showcase entity.
     /// </summary>

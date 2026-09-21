@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Animates the standard menu's grid and scanline roots with continuous wrapped movement.
     /// </summary>

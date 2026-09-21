@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Captures the complete city menu host configuration including panels, theme colors, and fonts.
     /// </summary>

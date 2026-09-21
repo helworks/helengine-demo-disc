@@ -1,7 +1,7 @@
 using helengine;
 using helengine.editor;
 
-namespace city.rendering.tools.tests {
+namespace DemoDisc.rendering.tools.tests {
     /// <summary>
     /// Verifies the software model component survives automatic authored-component persistence without runtime model resolution.
     /// </summary>
@@ -15,15 +15,15 @@ namespace city.rendering.tools.tests {
                 "1234567890abcdef1234567890abcdef",
                 "models/software-path-tracer-probe.hmodel",
                 "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef");
-            city.rendering.SoftwareModelComponent component = new city.rendering.SoftwareModelComponent {
+            DemoDisc.rendering.SoftwareModelComponent component = new DemoDisc.rendering.SoftwareModelComponent {
                 ModelReference = modelReference,
                 Materials = new[] {
-                    new city.rendering.SoftwareMaterial {
+                    new DemoDisc.rendering.SoftwareMaterial {
                         DiffuseColor = new float3(0.1f, 0.2f, 0.3f),
                         EmissionColor = new float3(0.4f, 0.5f, 0.6f),
                         EmissionStrength = 1.25f
                     },
-                    new city.rendering.SoftwareMaterial {
+                    new DemoDisc.rendering.SoftwareMaterial {
                         DiffuseColor = new float3(0.7f, 0.8f, 0.9f),
                         EmissionColor = new float3(0.9f, 0.8f, 0.7f),
                         EmissionStrength = 4.5f
@@ -37,7 +37,7 @@ namespace city.rendering.tools.tests {
                 component,
                 componentIndex: 0,
                 saveState: new EntityComponentSaveState());
-            city.rendering.SoftwareModelComponent restored = Assert.IsType<city.rendering.SoftwareModelComponent>(
+            DemoDisc.rendering.SoftwareModelComponent restored = Assert.IsType<DemoDisc.rendering.SoftwareModelComponent>(
                 descriptor.DeserializeComponent(record, saveComponent: null, referenceResolver: null));
 
             Assert.NotNull(restored.ModelReference);
@@ -70,10 +70,10 @@ namespace city.rendering.tools.tests {
         [Fact]
         public void Automatic_persistence_schema_has_no_runtime_model_member_path() {
             ScriptComponentReflectionSchema schema = new ScriptComponentReflectionSchemaBuilder().Build(
-                typeof(city.rendering.SoftwareModelComponent));
+                typeof(DemoDisc.rendering.SoftwareModelComponent));
 
-            Assert.Contains(schema.Members, member => member.Name == nameof(city.rendering.SoftwareModelComponent.ModelReference));
-            Assert.Contains(schema.Members, member => member.Name == nameof(city.rendering.SoftwareModelComponent.Materials));
+            Assert.Contains(schema.Members, member => member.Name == nameof(DemoDisc.rendering.SoftwareModelComponent.ModelReference));
+            Assert.Contains(schema.Members, member => member.Name == nameof(DemoDisc.rendering.SoftwareModelComponent.Materials));
             Assert.DoesNotContain(schema.Members, member => member.Name == "Model");
             Assert.DoesNotContain(schema.Members, member => member.Name == "RuntimeModel");
             Assert.DoesNotContain(schema.Members, member => member.ValueType == typeof(RuntimeModel));

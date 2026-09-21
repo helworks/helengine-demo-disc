@@ -2,7 +2,7 @@ using helengine;
 using helengine.editor;
 using System.Reflection;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Writes the deterministic six-cell bitmap atlas used by the colored-face clipping probe.
     /// </summary>

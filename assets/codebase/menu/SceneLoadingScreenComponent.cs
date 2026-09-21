@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Presents the persistent scene-transition overlay and maps engine loading progress onto its bottom progress bar.
     /// </summary>

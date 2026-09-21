@@ -1,7 +1,7 @@
-using city.physics.tools;
+using DemoDisc.physics.tools;
 using helengine.editor;
 
-namespace city.menu.tools {
+namespace DemoDisc.menu.tools {
     /// <summary>
     /// Generates the authored physics showcase scene set inside the active project.
     /// </summary>

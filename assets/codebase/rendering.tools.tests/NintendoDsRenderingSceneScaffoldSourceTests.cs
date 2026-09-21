@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies that generated Nintendo DS bottom-screen controls retain their authored presentation details.
     /// </summary>

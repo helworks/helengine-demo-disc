@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Stores the fixed layout constants and generated entity names used by the city demo-disc menu.
     /// </summary>

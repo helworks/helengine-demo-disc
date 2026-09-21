@@ -1,10 +1,10 @@
 using System.Globalization;
 using System.Text;
-using city.menu;
-using gameplay.rendering;
+using DemoDisc.menu;
+using DemoDisc.rendering;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the live-authored axis-test-2 scene and its generated directional-light arrow model.
     /// </summary>
@@ -197,7 +197,7 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = float3.Zero,
                 AutoYawSpeedRadians = 0.08f
             });
@@ -266,7 +266,7 @@ namespace city.rendering.tools {
                 ShadowStrength = 1f,
                 ShadowDistance = 32f
             });
-            entity.AddComponent(new gameplay.rendering.AxisRotationComponent {
+            entity.AddComponent(new DemoDisc.rendering.AxisRotationComponent {
                 Axis = new float3(1f, 0f, 0f),
                 AngularSpeedRadiansPerSecond = ArrowAngularSpeedRadians
             });

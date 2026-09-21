@@ -1,6 +1,6 @@
-using city.menu;
+using DemoDisc.menu;
 
-namespace city.game {
+namespace DemoDisc.game {
     /// <summary>
     /// Owns the Zombislayer gameplay session state, pause-overlay visibility, and return-to-menu flow.
     /// </summary>

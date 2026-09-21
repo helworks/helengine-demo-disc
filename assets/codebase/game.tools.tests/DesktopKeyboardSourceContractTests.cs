@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Protects non-desktop generated game cores from authored keyboard references.
     /// </summary>
@@ -6,7 +6,7 @@ namespace city.tests {
         /// <summary>
         /// Absolute path to the authored runtime source root.
         /// </summary>
-        static readonly string RuntimeSourceRootPath = global::city.testing.DemoDiscTestProject.GetPath("assets", "codebase");
+        static readonly string RuntimeSourceRootPath = global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase");
 
         /// <summary>
         /// Runtime source directories that may be compiled into console and handheld game cores.

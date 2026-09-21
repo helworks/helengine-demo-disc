@@ -1,8 +1,8 @@
-using city.menu;
+using DemoDisc.menu;
 using helengine;
 using helengine.editor;
 
-namespace city.rendering.tools {
+namespace DemoDisc.rendering.tools {
     /// <summary>
     /// Builds the authored PBR material gallery scene: a five by five sphere grid sweeping metallic and roughness under a three-light rig.
     /// </summary>
@@ -124,7 +124,7 @@ namespace city.rendering.tools {
                     PostProcessTier = PostProcessTier.Disabled
                 }
             });
-            entity.AddComponent(new city.rendering.DemoDiscOrbitCameraComponent {
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
                 OrbitCenter = float3.Zero,
                 AutoYawSpeedRadians = 0.08f
             });

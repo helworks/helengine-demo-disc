@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Moves the serialized footer identity text left across the menu strip and restarts it beyond the right screen edge.
     /// </summary>

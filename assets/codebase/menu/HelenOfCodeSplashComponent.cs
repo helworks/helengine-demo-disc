@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Loads the standard main menu behind the initial Helen of Code splash and fades the splash away after a short hold.
     /// </summary>

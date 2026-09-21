@@ -1,4 +1,4 @@
-namespace city.tests {
+namespace DemoDisc.tests {
     /// <summary>
     /// Verifies the Tilt Trial selector formats its compact handheld timing presentation independently from the full desktop medal summary.
     /// </summary>
@@ -8,7 +8,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void FormatMaximumTimeLabel_presents_one_maximum_value() {
-            System.Reflection.MethodInfo formatter = typeof(city.game.TiltTrialLevelSelectComponent).GetMethod(
+            System.Reflection.MethodInfo formatter = typeof(DemoDisc.game.TiltTrialLevelSelectComponent).GetMethod(
                 "FormatMaximumTimeLabel",
                 System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 
@@ -21,7 +21,7 @@ namespace city.tests {
         /// </summary>
         [Fact]
         public void FormatTargetTimesText_hides_handheld_medals_and_retains_desktop_summary() {
-            System.Reflection.MethodInfo formatter = typeof(city.game.TiltTrialLevelSelectComponent).GetMethod(
+            System.Reflection.MethodInfo formatter = typeof(DemoDisc.game.TiltTrialLevelSelectComponent).GetMethod(
                 "FormatTargetTimesText",
                 System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 

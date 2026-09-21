@@ -1,4 +1,4 @@
-namespace city.menu {
+namespace DemoDisc.menu {
     /// <summary>
     /// Describes the layout used for the demo-disc platform information overlay in authored city menu scenes.
     /// </summary>
