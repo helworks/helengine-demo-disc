@@ -1,4 +1,4 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raytracing", "cache/generat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiltPlay", "cache/generated_code/projects/TiltPlay/TiltPlay.csproj", "{94B05D8C-1FDF-56A4-B0EE-C22E9D874000}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zombislayer", "cache/generated_code/projects/Zombislayer/Zombislayer.csproj", "{DFD08680-5DC7-5210-8A9D-03EB3126E12F}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoDisc.tests", "cache/generated_code/projects/DemoDisc.tests/DemoDisc.tests.csproj", "{B0557F96-DC97-59C2-8ADD-86F16382123E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoDiscEditorTools.tests", "cache/generated_code/projects/DemoDiscEditorTools.tests/DemoDiscEditorTools.tests.csproj", "{8DE86EE8-B828-5CCB-9607-24638F8B531D}"
@@ -17,6 +19,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raytracing.tests", "cache/generated_code/projects/Raytracing.tests/Raytracing.tests.csproj", "{06B40328-4FCA-5F9B-A8C7-7507D4995B09}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiltPlay.tests", "cache/generated_code/projects/TiltPlay.tests/TiltPlay.tests.csproj", "{4A283E2D-37F9-5CB8-8960-76F6B0F24336}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zombislayer.tests", "cache/generated_code/projects/Zombislayer.tests/Zombislayer.tests.csproj", "{D279CE91-AA1A-5466-8310-100CEF109748}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Runtime", "Runtime", "{2C969F8E-397D-55AA-A892-3E05CE800F5D}"
 EndProject
@@ -44,6 +48,10 @@ Global
 		{94B05D8C-1FDF-56A4-B0EE-C22E9D874000}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94B05D8C-1FDF-56A4-B0EE-C22E9D874000}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94B05D8C-1FDF-56A4-B0EE-C22E9D874000}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFD08680-5DC7-5210-8A9D-03EB3126E12F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFD08680-5DC7-5210-8A9D-03EB3126E12F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFD08680-5DC7-5210-8A9D-03EB3126E12F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFD08680-5DC7-5210-8A9D-03EB3126E12F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B0557F96-DC97-59C2-8ADD-86F16382123E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B0557F96-DC97-59C2-8ADD-86F16382123E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0557F96-DC97-59C2-8ADD-86F16382123E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -60,15 +68,21 @@ Global
 		{4A283E2D-37F9-5CB8-8960-76F6B0F24336}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A283E2D-37F9-5CB8-8960-76F6B0F24336}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A283E2D-37F9-5CB8-8960-76F6B0F24336}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D279CE91-AA1A-5466-8310-100CEF109748}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D279CE91-AA1A-5466-8310-100CEF109748}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D279CE91-AA1A-5466-8310-100CEF109748}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D279CE91-AA1A-5466-8310-100CEF109748}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F058E86F-DDB5-5C0A-8631-E605D3A8DA49} = {2C969F8E-397D-55AA-A892-3E05CE800F5D}
 		{8C4238F5-D511-5D66-ABB9-B8CE4F81B12F} = {911BED1F-8F33-57E3-86E0-093592AFC849}
 		{09738D32-360E-510E-B598-26A0E1A02BCA} = {2C969F8E-397D-55AA-A892-3E05CE800F5D}
 		{94B05D8C-1FDF-56A4-B0EE-C22E9D874000} = {2C969F8E-397D-55AA-A892-3E05CE800F5D}
+		{DFD08680-5DC7-5210-8A9D-03EB3126E12F} = {2C969F8E-397D-55AA-A892-3E05CE800F5D}
 		{B0557F96-DC97-59C2-8ADD-86F16382123E} = {2C969F8E-397D-55AA-A892-3E05CE800F5D}
 		{8DE86EE8-B828-5CCB-9607-24638F8B531D} = {911BED1F-8F33-57E3-86E0-093592AFC849}
 		{06B40328-4FCA-5F9B-A8C7-7507D4995B09} = {2C969F8E-397D-55AA-A892-3E05CE800F5D}
 		{4A283E2D-37F9-5CB8-8960-76F6B0F24336} = {2C969F8E-397D-55AA-A892-3E05CE800F5D}
+		{D279CE91-AA1A-5466-8310-100CEF109748} = {2C969F8E-397D-55AA-A892-3E05CE800F5D}
 	EndGlobalSection
 EndGlobal

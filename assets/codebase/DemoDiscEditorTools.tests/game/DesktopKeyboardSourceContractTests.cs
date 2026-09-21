@@ -13,7 +13,7 @@ namespace DemoDisc.EditorTools.tests {
         /// <summary>
         /// Runtime source directories that may be compiled into console and handheld game cores.
         /// </summary>
-        static readonly string[] RuntimeSourceDirectoryNames = ["menu", "rendering", "TiltPlay", "Raytracing"];
+        static readonly string[] RuntimeSourceDirectoryNames = ["menu", "rendering", "TiltPlay", "Zombislayer", "Raytracing"];
 
         /// <summary>
         /// Input member names available exclusively to desktop game cores.

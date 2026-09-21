@@ -40,6 +40,11 @@ namespace DemoDisc.EditorTools {
         public const string TiltTrialLevel05SceneId = global::DemoDisc.TiltPlay.TiltTrialSceneIds.Level05SceneId;
 
         /// <summary>
+        /// Stable scene id used by the generated Zombislayer gameplay scene.
+        /// </summary>
+        public const string ZombislayerSceneId = global::DemoDisc.Zombislayer.ZombislayerSceneIds.GameplaySceneId;
+
+        /// <summary>
         /// Returns the complete generated game-scene id set currently emitted by the city project.
         /// </summary>
         /// <returns>Ordered generated game-scene ids.</returns>
@@ -52,6 +57,7 @@ namespace DemoDisc.EditorTools {
                 TiltTrialLevel03SceneId,
                 TiltTrialLevel04SceneId,
                 TiltTrialLevel05SceneId,
+                ZombislayerSceneId,
             ];
         }
     }

@@ -1,0 +1,10 @@
+{
+  "moduleId": "Zombislayer",
+  "dependencyModuleIds": [
+    "DemoDisc"
+  ],
+  "loadScopes": [
+    "always-loaded"
+  ],
+  "moduleKind": "runtime"
+}
