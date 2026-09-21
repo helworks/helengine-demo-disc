@@ -1,0 +1,24 @@
+using DemoDisc.EditorTools;
+using DemoDisc.rendering;
+
+namespace DemoDisc.EditorTools.tests {
+    public sealed class PbrTexturedShowcaseMaterialFactorySourceTests {
+        const string ProjectRootPath = @"C:\dev\helprojs\demodisc";
+
+        [Fact]
+        public void Textured_showcase_material_factory_references_downloaded_textures_and_metallic_split() {
+            string sourcePath = Path.Combine(ProjectRootPath, "assets", "codebase", "DemoDiscEditorTools", "rendering", "PbrTexturedShowcaseMaterialFactory.cs");
+            Assert.True(File.Exists(sourcePath), $"Expected '{sourcePath}' to exist.");
+            string source = File.ReadAllText(sourcePath);
+            Assert.Contains("textures/rendering/pbr_textured_showcase/Metal032Albedo.jpg", source, StringComparison.Ordinal);
+            Assert.Contains("textures/rendering/pbr_textured_showcase/Metal032Roughness.jpg", source, StringComparison.Ordinal);
+            Assert.Contains("textures/rendering/pbr_textured_showcase/WoodFloor041Albedo.jpg", source, StringComparison.Ordinal);
+            Assert.Contains("textures/rendering/pbr_textured_showcase/WoodFloor041Roughness.jpg", source, StringComparison.Ordinal);
+            Assert.Contains("public const string MetalMaterialRelativePath", source, StringComparison.Ordinal);
+            Assert.Contains("public const string WoodMaterialRelativePath", source, StringComparison.Ordinal);
+            Assert.Contains("public void WriteMaterialAssets(string projectRootPath, IEditorProjectAuthoringSession assetAuthoringService)", source, StringComparison.Ordinal);
+            Assert.Contains("metallic: \"1.0\"", source, StringComparison.Ordinal);
+            Assert.Contains("metallic: \"0.0\"", source, StringComparison.Ordinal);
+        }
+    }
+}

@@ -1,0 +1,177 @@
+using helengine;
+using helengine.editor;
+using DemoDisc.EditorTools;
+using DemoDisc.rendering;
+
+namespace DemoDisc.EditorTools.tests {
+    /// <summary>
+    /// Verifies generated control-icon lookup stays manifest-driven and strict.
+    /// </summary>
+    public sealed class GeneratedControlIconAssetResolverTests {
+        [Fact]
+        public void Platform_map_defaults_windows_and_win32_to_keyboard() {
+            Assert.Equal("keyboard", DemoDisc.EditorTools.GeneratedControlIconPlatformMap.ResolveFamilyId("windows"));
+            Assert.Equal("keyboard", DemoDisc.EditorTools.GeneratedControlIconPlatformMap.ResolveFamilyId("win32"));
+        }
+
+        [Fact]
+        public void Platform_map_uses_wii_family_for_wiiu_fallback() {
+            Assert.Equal("wii", DemoDisc.EditorTools.GeneratedControlIconPlatformMap.ResolveFamilyId("wiiu"));
+        }
+
+        [Fact]
+        public void Catalog_returns_generated_png_path_for_known_family_and_control() {
+            DemoDisc.EditorTools.GeneratedControlIconCatalog catalog = DemoDisc.EditorTools.GeneratedControlIconCatalog.Load(
+                @"C:\dev\helprojs\demodisc");
+
+            string relativePath = catalog.RequireControlPath("keyboard", "wasd");
+
+            Assert.Equal("textures/instructions/controls/generated/keyboard/wasd.png", relativePath);
+        }
+
+        [Fact]
+        public void Catalog_returns_generated_png_paths_for_camera_stick_equivalents() {
+            DemoDisc.EditorTools.GeneratedControlIconCatalog catalog = DemoDisc.EditorTools.GeneratedControlIconCatalog.Load(
+                @"C:\dev\helprojs\demodisc");
+
+            Assert.Equal("textures/instructions/controls/generated/3ds/circle_pad.png", catalog.RequireControlPath("3ds", "circle_pad"));
+            Assert.Equal("textures/instructions/controls/generated/psp/analog.png", catalog.RequireControlPath("psp", "analog"));
+            Assert.Equal("textures/instructions/controls/generated/gamecube/control_stick.png", catalog.RequireControlPath("gamecube", "control_stick"));
+            Assert.Equal("textures/instructions/controls/generated/wii/stick.png", catalog.RequireControlPath("wii", "stick"));
+            Assert.Equal("textures/instructions/controls/generated/n64/control_stick.png", catalog.RequireControlPath("n64", "control_stick"));
+        }
+
+        [Fact]
+        public void Catalog_throws_for_missing_control() {
+            DemoDisc.EditorTools.GeneratedControlIconCatalog catalog = DemoDisc.EditorTools.GeneratedControlIconCatalog.Load(
+                @"C:\dev\helprojs\demodisc");
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => {
+                    catalog.RequireControlPath("ps2", "not-a-real-control");
+                });
+
+            Assert.Contains("ps2", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("not-a-real-control", exception.Message, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Resolver_returns_generated_png_path_and_imported_texture_asset_id() {
+            string projectRootPath = CreateIconProject("ps2", "r1");
+            try {
+                using RenderingTestGeneratedAssetGraph graph = new RenderingTestGeneratedAssetGraph(projectRootPath);
+                IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(projectRootPath);
+                InstallIconManifest(projectRootPath);
+                using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
+                DemoDisc.EditorTools.GeneratedControlIconAssetResolver resolver = new DemoDisc.EditorTools.GeneratedControlIconAssetResolver();
+
+                DemoDisc.EditorTools.ResolvedControlIcon resolved = resolver.RequireIcon(
+                    projectRootPath,
+                    "ps2",
+                    "r1",
+                    authoringSession,
+                    transaction);
+
+                Assert.Equal("ps2", resolved.PlatformId);
+                Assert.Equal("ps2", resolved.FamilyId);
+                Assert.Equal("r1", resolved.ControlId);
+                Assert.Equal("textures/instructions/controls/generated/ps2/r1.png", resolved.SourcePngRelativePath);
+                Assert.False(string.IsNullOrWhiteSpace(resolved.ImportedTextureAssetId));
+            } finally {
+                DeleteIconProject(projectRootPath);
+            }
+        }
+
+        [Fact]
+        public void Resolver_returns_trimmed_source_rect_and_aspect_fit_size_for_wide_icons() {
+            string projectRootPath = CreateIconProject("xbox360", "rb");
+            try {
+                using RenderingTestGeneratedAssetGraph graph = new RenderingTestGeneratedAssetGraph(projectRootPath);
+                IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(projectRootPath);
+                InstallIconManifest(projectRootPath);
+                using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
+                DemoDisc.EditorTools.GeneratedControlIconAssetResolver resolver = new DemoDisc.EditorTools.GeneratedControlIconAssetResolver();
+
+                DemoDisc.EditorTools.ResolvedControlIcon resolved = resolver.RequireIcon(
+                    projectRootPath,
+                    "xbox360",
+                    "rb",
+                    authoringSession,
+                    transaction);
+
+                Assert.Equal(32f / 256f, resolved.SourceRect.X, 3);
+                Assert.Equal(82f / 256f, resolved.SourceRect.Y, 3);
+                Assert.Equal(193f / 256f, resolved.SourceRect.Z, 3);
+                Assert.Equal(93f / 256f, resolved.SourceRect.W, 3);
+                Assert.Equal(new int2(78, 38), resolved.FitDisplaySizeWithin(new int2(78, 45)));
+            } finally {
+                DeleteIconProject(projectRootPath);
+            }
+        }
+
+        /// <summary>
+        /// Ensures the DS Accept icon is authored at native OBJ size with no transparent source padding.
+        /// </summary>
+        [Fact]
+        public void Nintendo_ds_accept_icon_is_32_pixels_and_uses_the_full_texture() {
+            const string projectRootPath = @"C:\dev\helprojs\demodisc";
+            const string relativePath = "textures/instructions/controls/generated/ds/a.png";
+            string fullPath = Path.Combine(projectRootPath, "assets", relativePath.Replace('/', Path.DirectorySeparatorChar));
+            byte[] header = new byte[24];
+            using (FileStream stream = File.OpenRead(fullPath)) {
+                stream.ReadExactly(header);
+            }
+
+            int width = System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(header.AsSpan(16, 4));
+            int height = System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(header.AsSpan(20, 4));
+            Assert.Equal(32, width);
+            Assert.Equal(32, height);
+        }
+
+        [Fact]
+        public void Resolver_throws_for_unknown_platform() {
+            DemoDisc.EditorTools.GeneratedControlIconAssetResolver resolver = new DemoDisc.EditorTools.GeneratedControlIconAssetResolver();
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => resolver.RequireIcon(
+                    @"C:\dev\helprojs\demodisc",
+                    "saturn",
+                    "a",
+                    null,
+                    null));
+
+            Assert.Contains("saturn", exception.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        static string CreateIconProject(string familyId, string controlId) {
+            string sourceProjectRoot = @"C:\dev\helprojs\demodisc";
+            string projectRootPath = Path.Combine(Path.GetTempPath(), "demodisc-icon-resolver-" + Guid.NewGuid().ToString("N"));
+            string relativeDirectory = Path.Combine("images", "instructions", "controls", "generated", familyId);
+            string destinationDirectory = Path.Combine(projectRootPath, "assets", relativeDirectory);
+            Directory.CreateDirectory(destinationDirectory);
+            string sourceRelativePath = Path.Combine(relativeDirectory, controlId + ".png");
+            File.Copy(
+                Path.Combine(sourceProjectRoot, "assets", sourceRelativePath),
+                Path.Combine(projectRootPath, "assets", sourceRelativePath));
+            string settingsRelativePath = sourceRelativePath + ".hasset";
+            File.Copy(
+                Path.Combine(sourceProjectRoot, "assets", settingsRelativePath),
+                Path.Combine(projectRootPath, "assets", settingsRelativePath));
+            return projectRootPath;
+        }
+
+        static void InstallIconManifest(string projectRootPath) {
+            string sourceProjectRoot = @"C:\dev\helprojs\demodisc";
+            string destinationPath = Path.Combine(projectRootPath, "assets", "images", "instructions", "controls", "generated", "manifest.json");
+            File.Copy(
+                Path.Combine(sourceProjectRoot, "assets", "images", "instructions", "controls", "generated", "manifest.json"),
+                destinationPath);
+        }
+
+        static void DeleteIconProject(string projectRootPath) {
+            if (Directory.Exists(projectRootPath)) {
+                Directory.Delete(projectRootPath, true);
+            }
+        }
+    }
+}

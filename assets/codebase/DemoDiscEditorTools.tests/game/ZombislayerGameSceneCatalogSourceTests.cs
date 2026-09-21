@@ -1,0 +1,19 @@
+using DemoDisc.EditorTools;
+using DemoDisc.game;
+
+namespace DemoDisc.EditorTools.tests {
+    /// <summary>
+    /// Verifies the generated game-scene catalog reuses the runtime Zombislayer scene id instead of duplicating a string literal.
+    /// </summary>
+    public sealed class ZombislayerGameSceneCatalogSourceTests {
+        /// <summary>
+        /// Ensures the generated game-scene catalog points at the runtime-owned Zombislayer scene id.
+        /// </summary>
+        [Fact]
+        public void Scene_catalog_reuses_runtime_zombislayer_scene_id() {
+            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\GameSceneCatalog.cs");
+
+            Assert.Contains("global::DemoDisc.game.ZombislayerSceneIds.GameplaySceneId", source, StringComparison.Ordinal);
+        }
+    }
+}
