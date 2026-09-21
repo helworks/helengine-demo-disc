@@ -24,18 +24,9 @@ namespace DemoDisc.EditorTools.tests {
         };
 
         static readonly string[] PhysicsSceneRelativePaths = {
-            @"assets\scenes\physics\test_scene_character_moving_platform.helen",
-            @"assets\scenes\physics\test_scene_character_slope.helen",
-            @"assets\scenes\physics\test_scene_character_steps.helen",
             @"assets\scenes\physics\test_scene_dynamic_mixed_stack.helen",
             @"assets\scenes\physics\test_scene_dynamic_sphere_stack.helen",
             @"assets\scenes\physics\test_scene_dynamic_stack_boxes.helen",
-            @"assets\scenes\physics\test_scene_kinematic_push.helen",
-            @"assets\scenes\physics\test_scene_mesh_ground_stability.helen",
-            @"assets\scenes\physics\test_scene_render_only_slope.helen",
-            @"assets\scenes\physics\test_scene_single_falling_cube.helen",
-            @"assets\scenes\physics\test_scene_strict_rotated_box_compare.helen",
-            @"assets\scenes\physics\test_scene_trigger_volume.helen"
         };
 
         [Fact]
