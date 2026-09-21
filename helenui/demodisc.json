@@ -27,8 +27,8 @@
             "weight": 1,
             "params": {
               "texts": [
-                "Rendering Scenes",
-                "Physics Scenes",
+                "Rendering",
+                "Physics",
                 "Games",
                 "Options"
               ],
@@ -41,9 +41,9 @@
         {
           "id": "node-demodisc-demo-scenes",
           "type": "menu_item",
-          "name": "Rendering Scenes",
+          "name": "Rendering",
           "description": "Opens the rendering showcase catalog.",
-          "text": "Rendering Scenes",
+          "text": "Rendering",
           "parentNodeId": null,
           "order": 0,
           "isOptional": false,
@@ -76,7 +76,7 @@
                     "weight": 1,
                     "params": {
                       "candidates": [
-                        "Rendering Scenes"
+                        "Rendering"
                       ],
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 8,
@@ -102,9 +102,9 @@
         {
           "id": "node-demodisc-physics-scenes",
           "type": "menu_item",
-          "name": "Physics Scenes",
+          "name": "Physics",
           "description": "Opens the physics showcase catalog.",
-          "text": "Physics Scenes",
+          "text": "Physics",
           "parentNodeId": null,
           "order": 1,
           "isOptional": false,
@@ -137,7 +137,7 @@
                     "weight": 1,
                     "params": {
                       "candidates": [
-                        "Physics Scenes"
+                        "Physics"
                       ],
                       "highlightColorHex": "#C993FF",
                       "hueTolerance": 8,
@@ -288,7 +288,7 @@
       "id": "surface-demodisc-demo-scenes-menu",
       "kind": "screen",
       "parentId": null,
-      "name": "Demo Disc Rendering Scenes Menu",
+      "name": "Demo Disc Rendering Menu",
       "description": "The complete authored rendering-scene catalog.",
       "capabilities": [
         "selectable",
@@ -1225,7 +1225,7 @@
           "id": "node-demodisc-ray-tracing-back",
           "type": "menu_item",
           "name": "Back",
-          "description": "Returns to Rendering Scenes.",
+          "description": "Returns to Rendering.",
           "text": "Back",
           "parentNodeId": null,
           "order": 4,
@@ -1282,7 +1282,7 @@
       "id": "surface-demodisc-physics-scenes-menu",
       "kind": "screen",
       "parentId": null,
-      "name": "Demo Disc Physics Scenes Menu",
+      "name": "Demo Disc Physics Menu",
       "description": "The complete authored physics-scene catalog.",
       "capabilities": [
         "selectable",

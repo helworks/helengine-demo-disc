@@ -403,7 +403,7 @@ function Assert-RecognitionText([string]$SurfaceId, [string]$ExpectedText, [stri
 
 $expectedRenderingCatalog = @('Cube Test','Colored Cubes','Textured Cubes','Axis 1','Axis 2','Matrix Render','Directional Shadow Plaza','PBR Material Gallery','PBR Textured Showcase','PBR Shadow Theater','Back')
 $expectedPhysicsCatalog = @('Stacked Boxes','Sphere Stack','Mixed Stack','Static Mesh','Static Mesh Simple','Back')
-Assert-ExactTextOrder 'surface-demodisc-main-menu' @('Demo Scenes','Physics Scenes','Games','Options')
+Assert-ExactTextOrder 'surface-demodisc-main-menu' @('Rendering','Physics','Games','Options')
 Assert-ExactTextOrder 'surface-demodisc-demo-scenes-menu' $expectedRenderingCatalog
 Assert-ExactTextOrder 'surface-demodisc-physics-scenes-menu' $expectedPhysicsCatalog
 Assert-ExactTextOrder 'surface-demodisc-games-menu' @('Tilt Trial','Back')
