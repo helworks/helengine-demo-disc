@@ -3,7 +3,9 @@ using DemoDisc.menu;
 
 namespace DemoDisc.EditorTools {
     /// <summary>
-    /// Applies platform-specific menu item and panel existence overrides based on the local build scene selections stored in <c>user_settings/build_config.json</c>.
+    /// Applies platform-specific menu item and panel existence overrides based on the project-shared scene package
+    /// stored in <c>settings/build_config.json</c>. Local scene overrides in <c>user_settings</c> never shape the menu,
+    /// so a developer building a subset still generates the menu of the full game.
     /// </summary>
     public sealed class DemoDiscMenuBuildSceneAuthoringService {
         /// <summary>
@@ -51,19 +53,19 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
-        /// Loads the explicitly configured per-platform selected scene ids from the local build configuration document.
+        /// Loads the per-platform scene package from the project-shared build configuration document.
         /// </summary>
-        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        /// <returns>Configured selected scene ids keyed by platform id.</returns>
+        /// <param name="projectRootPath">Absolute or relative demo-disc project root path.</param>
+        /// <returns>Packaged scene ids keyed by platform id.</returns>
         static Dictionary<string, HashSet<string>> LoadConfiguredSceneIdsByPlatform(string projectRootPath) {
-            EditorBuildConfigDocument buildConfig = new EditorBuildConfigService(projectRootPath).TryLoadExisting();
+            EditorProjectBuildConfigDocument buildConfig = new EditorBuildConfigService(projectRootPath).TryLoadProjectBuildConfig();
             Dictionary<string, HashSet<string>> configuredSceneIdsByPlatform = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
             if (buildConfig == null || buildConfig.Platforms == null) {
                 return configuredSceneIdsByPlatform;
             }
 
             for (int index = 0; index < buildConfig.Platforms.Count; index++) {
-                EditorBuildPlatformConfigDocument platformConfig = buildConfig.Platforms[index];
+                EditorProjectPlatformBuildConfigDocument platformConfig = buildConfig.Platforms[index];
                 if (platformConfig == null || string.IsNullOrWhiteSpace(platformConfig.PlatformId)) {
                     continue;
                 } else if (platformConfig.SelectedSceneIds == null || platformConfig.SelectedSceneIds.Count < 1) {

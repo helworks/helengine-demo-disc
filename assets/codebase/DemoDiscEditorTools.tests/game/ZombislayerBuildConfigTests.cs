@@ -3,25 +3,18 @@ using DemoDisc.EditorTools;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>
-    /// Verifies Zombislayer is not part of any current demo-disc platform build.
+    /// Verifies Zombislayer is not part of any current demo-disc platform package.
     /// </summary>
     public sealed class ZombislayerBuildConfigTests {
         /// <summary>
-        /// Ensures every configured platform omits the retired Zombislayer scene.
+        /// Ensures every platform's project scene package omits the retired Zombislayer scene.
         /// </summary>
         [Fact]
         public void All_platform_builds_omit_zombislayer() {
-            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
-            using JsonDocument document = JsonDocument.Parse(json);
+            using JsonDocument document = DemoDiscBuildConfigTestPaths.ReadProjectBuildConfig();
 
-            JsonElement.ArrayEnumerator platforms = document.RootElement.GetProperty("platforms").EnumerateArray();
-            foreach (JsonElement platform in platforms) {
-                HashSet<string> selectedSceneIds = new HashSet<string>(StringComparer.Ordinal);
-                foreach (JsonElement sceneId in platform.GetProperty("selectedSceneIds").EnumerateArray()) {
-                    selectedSceneIds.Add(sceneId.GetString() ?? string.Empty);
-                }
-
-                Assert.DoesNotContain(DemoDisc.Zombislayer.ZombislayerSceneIds.GameplaySceneId, selectedSceneIds);
+            foreach (JsonElement platform in document.RootElement.GetProperty("platforms").EnumerateArray()) {
+                Assert.DoesNotContain(DemoDisc.Zombislayer.ZombislayerSceneIds.GameplaySceneId, DemoDiscBuildConfigTestPaths.SceneIdsOf(platform));
             }
         }
     }

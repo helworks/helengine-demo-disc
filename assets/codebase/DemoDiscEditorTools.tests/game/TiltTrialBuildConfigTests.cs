@@ -3,7 +3,7 @@ using DemoDisc.EditorTools;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>
-    /// Verifies project build configurations package every Tilt Trial gameplay scene when the selector front door is selected.
+    /// Verifies the project scene package ships every Tilt Trial gameplay scene wherever a selector front door is packaged.
     /// </summary>
     public sealed class TiltTrialBuildConfigTests {
         static readonly string[] RequiredTiltTrialGameplaySceneIds = [
@@ -16,17 +16,10 @@ namespace DemoDisc.EditorTools.tests {
 
         [Fact]
         public void Build_configs_that_package_tilt_trial_also_package_every_tilt_trial_level() {
-            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
-            using JsonDocument document = JsonDocument.Parse(json);
+            using JsonDocument document = DemoDiscBuildConfigTestPaths.ReadProjectBuildConfig();
 
-            JsonElement.ArrayEnumerator platforms = document.RootElement.GetProperty("platforms").EnumerateArray();
-            foreach (JsonElement platform in platforms) {
-                string platformId = platform.GetProperty("platformId").GetString() ?? string.Empty;
-                HashSet<string> selectedSceneIds = new HashSet<string>(StringComparer.Ordinal);
-                foreach (JsonElement sceneId in platform.GetProperty("selectedSceneIds").EnumerateArray()) {
-                    selectedSceneIds.Add(sceneId.GetString() ?? string.Empty);
-                }
-
+            foreach (JsonElement platform in document.RootElement.GetProperty("platforms").EnumerateArray()) {
+                HashSet<string> selectedSceneIds = new HashSet<string>(DemoDiscBuildConfigTestPaths.SceneIdsOf(platform), StringComparer.Ordinal);
                 if (!selectedSceneIds.Contains(DemoDisc.TiltPlay.TiltTrialSceneIds.LevelSelectSceneId)
                     && !selectedSceneIds.Contains(DemoDisc.TiltPlay.TiltTrialSceneIds.HandheldLevelSelectSceneId)) {
                     continue;
@@ -40,77 +33,47 @@ namespace DemoDisc.EditorTools.tests {
 
         [Fact]
         public void Windows_build_starts_with_demo_disc_main_menu_without_removing_other_tilt_trial_scenes() {
-            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
-            using JsonDocument document = JsonDocument.Parse(json);
+            using JsonDocument document = DemoDiscBuildConfigTestPaths.ReadProjectBuildConfig();
+            JsonElement windowsPlatform = DemoDiscBuildConfigTestPaths.FindPlatform(document, "windows");
+            string[] sceneIds = DemoDiscBuildConfigTestPaths.SceneIdsOf(windowsPlatform);
 
-            JsonElement windowsPlatform = document.RootElement
-                .GetProperty("platforms")
-                .EnumerateArray()
-                .Single(platform => string.Equals(platform.GetProperty("platformId").GetString(), "windows", StringComparison.Ordinal));
+            Assert.Equal("DemoDiscMainMenu", sceneIds[2]);
+            Assert.Equal(3, DemoDiscBuildConfigTestPaths.OrderNumberOf(windowsPlatform, "DemoDiscMainMenu"));
 
-            Assert.Equal("DemoDiscMainMenu", windowsPlatform.GetProperty("selectedSceneIds")[2].GetString());
-            Assert.Contains(
-                windowsPlatform.GetProperty("sceneOrders").EnumerateArray(),
-                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), "DemoDiscMainMenu", StringComparison.Ordinal)
-                    && sceneOrder.GetProperty("orderNumber").GetInt32() == 3);
-
-            HashSet<string> selectedSceneIds = new HashSet<string>(
-                windowsPlatform.GetProperty("selectedSceneIds").EnumerateArray().Select(sceneId => sceneId.GetString() ?? string.Empty),
-                StringComparer.Ordinal);
+            HashSet<string> selectedSceneIds = new HashSet<string>(sceneIds, StringComparer.Ordinal);
             foreach (string requiredSceneId in RequiredTiltTrialGameplaySceneIds) {
                 Assert.Contains(requiredSceneId, selectedSceneIds);
             }
         }
 
         /// <summary>
-        /// Ensures the Nintendo DS build packages the Tilt Trial selector and every authored Tilt Trial level with stable scene-order slots.
+        /// Ensures the Nintendo DS package ships the Tilt Trial selector and every authored Tilt Trial level with stable scene-order slots.
         /// </summary>
         [Fact]
         public void Nintendo_ds_build_packages_tilt_trial_selector_and_all_levels() {
-            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
-            using JsonDocument document = JsonDocument.Parse(json);
+            using JsonDocument document = DemoDiscBuildConfigTestPaths.ReadProjectBuildConfig();
+            JsonElement dsPlatform = DemoDiscBuildConfigTestPaths.FindPlatform(document, "ds");
+            HashSet<string> selectedSceneIds = new HashSet<string>(DemoDiscBuildConfigTestPaths.SceneIdsOf(dsPlatform), StringComparer.Ordinal);
 
-            JsonElement dsPlatform = document.RootElement
-                .GetProperty("platforms")
-                .EnumerateArray()
-                .Single(platform => string.Equals(platform.GetProperty("platformId").GetString(), "ds", StringComparison.Ordinal));
-
-            HashSet<string> selectedSceneIds = new HashSet<string>(
-                dsPlatform.GetProperty("selectedSceneIds").EnumerateArray().Select(sceneId => sceneId.GetString() ?? string.Empty),
-                StringComparer.Ordinal);
             Assert.Contains(DemoDisc.TiltPlay.TiltTrialSceneIds.HandheldLevelSelectSceneId, selectedSceneIds);
             Assert.Contains(helengine.PlatformMenuSceneResolver.NintendoHandheldMainMenuSceneId, selectedSceneIds);
             foreach (string requiredSceneId in RequiredTiltTrialGameplaySceneIds) {
                 Assert.Contains(requiredSceneId, selectedSceneIds);
             }
 
-            Assert.Contains(
-                dsPlatform.GetProperty("sceneOrders").EnumerateArray(),
-                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), DemoDisc.TiltPlay.TiltTrialSceneIds.HandheldLevelSelectSceneId, StringComparison.Ordinal)
-                    && sceneOrder.GetProperty("orderNumber").GetInt32() == 12);
-            Assert.Contains(
-                dsPlatform.GetProperty("sceneOrders").EnumerateArray(),
-                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), DemoDisc.TiltPlay.TiltTrialSceneIds.Level01SceneId, StringComparison.Ordinal)
-                    && sceneOrder.GetProperty("orderNumber").GetInt32() == 13);
-            Assert.Contains(
-                dsPlatform.GetProperty("sceneOrders").EnumerateArray(),
-                sceneOrder => string.Equals(sceneOrder.GetProperty("sceneId").GetString(), DemoDisc.TiltPlay.TiltTrialSceneIds.Level05SceneId, StringComparison.Ordinal)
-                    && sceneOrder.GetProperty("orderNumber").GetInt32() == 17);
+            Assert.Equal(12, DemoDiscBuildConfigTestPaths.OrderNumberOf(dsPlatform, DemoDisc.TiltPlay.TiltTrialSceneIds.HandheldLevelSelectSceneId));
+            Assert.Equal(13, DemoDiscBuildConfigTestPaths.OrderNumberOf(dsPlatform, DemoDisc.TiltPlay.TiltTrialSceneIds.Level01SceneId));
+            Assert.Equal(17, DemoDiscBuildConfigTestPaths.OrderNumberOf(dsPlatform, DemoDisc.TiltPlay.TiltTrialSceneIds.Level05SceneId));
         }
 
         /// <summary>
-        /// Ensures the Nintendo 3DS build selects its handheld selector while retaining the shared gameplay scenes.
+        /// Ensures the Nintendo 3DS package selects its handheld selector while retaining the shared gameplay scenes.
         /// </summary>
         [Fact]
         public void Nintendo_3ds_build_packages_handheld_selector_and_shared_levels() {
-            string json = File.ReadAllText(@"C:\dev\helprojs\demodisc\user_settings\build_config.json");
-            using JsonDocument document = JsonDocument.Parse(json);
-
-            JsonElement platform = document.RootElement.GetProperty("platforms").EnumerateArray()
-                .Single(value => string.Equals(value.GetProperty("platformId").GetString(), "3ds", StringComparison.Ordinal));
-            HashSet<string> selectedSceneIds = new HashSet<string>(
-                platform.GetProperty("selectedSceneIds").EnumerateArray().Select(sceneId => sceneId.GetString() ?? string.Empty),
-                StringComparer.Ordinal);
+            using JsonDocument document = DemoDiscBuildConfigTestPaths.ReadProjectBuildConfig();
+            JsonElement platform = DemoDiscBuildConfigTestPaths.FindPlatform(document, "3ds");
+            HashSet<string> selectedSceneIds = new HashSet<string>(DemoDiscBuildConfigTestPaths.SceneIdsOf(platform), StringComparer.Ordinal);
 
             Assert.Contains(DemoDisc.TiltPlay.TiltTrialSceneIds.HandheldLevelSelectSceneId, selectedSceneIds);
             Assert.DoesNotContain(DemoDisc.TiltPlay.TiltTrialSceneIds.LevelSelectSceneId, selectedSceneIds);

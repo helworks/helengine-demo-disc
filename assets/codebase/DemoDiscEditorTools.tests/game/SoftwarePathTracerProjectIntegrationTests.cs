@@ -80,23 +80,19 @@ namespace DemoDisc.EditorTools.tests {
         /// </summary>
         [Fact]
         public void Every_target_packages_software_path_tracer_after_pbr_shadow_theater() {
-            using JsonDocument buildConfig = LoadJson(Path.Combine("user_settings", "build_config.json"));
+            using JsonDocument buildConfig = LoadJson(Path.Combine("settings", "build_config.json"));
             JsonElement[] platforms = buildConfig.RootElement.GetProperty("platforms").EnumerateArray().ToArray();
 
             foreach (string platformId in ExpectedPlatformIds) {
                 JsonElement platform = Assert.Single(platforms, candidate => candidate.GetProperty("platformId").GetString() == platformId);
-                string[] selectedSceneIds = platform.GetProperty("selectedSceneIds")
-                    .EnumerateArray()
-                    .Select(sceneId => sceneId.GetString() ?? string.Empty)
-                    .ToArray();
+                string[] selectedSceneIds = DemoDiscBuildConfigTestPaths.SceneIdsOf(platform);
                 Assert.Equal(1, selectedSceneIds.Count(sceneId => sceneId == "software_path_tracer"));
                 int pbrSceneIndex = Array.IndexOf(selectedSceneIds, "pbr_shadow_theater");
                 Assert.Equal(pbrSceneIndex + 1, Array.IndexOf(selectedSceneIds, "software_path_tracer"));
 
-                JsonElement[] sceneOrders = platform.GetProperty("sceneOrders").EnumerateArray().ToArray();
-                JsonElement pbrSceneOrder = Assert.Single(sceneOrders, scene => scene.GetProperty("sceneId").GetString() == "pbr_shadow_theater");
-                JsonElement softwarePathTracerSceneOrder = Assert.Single(sceneOrders, scene => scene.GetProperty("sceneId").GetString() == "software_path_tracer");
-                Assert.Equal(pbrSceneOrder.GetProperty("orderNumber").GetInt32() + 1, softwarePathTracerSceneOrder.GetProperty("orderNumber").GetInt32());
+                int pbrOrderNumber = DemoDiscBuildConfigTestPaths.OrderNumberOf(platform, "pbr_shadow_theater");
+                Assert.True(pbrOrderNumber > 0);
+                Assert.Equal(pbrOrderNumber + 1, DemoDiscBuildConfigTestPaths.OrderNumberOf(platform, "software_path_tracer"));
             }
         }
 
