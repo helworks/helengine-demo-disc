@@ -1,13 +1,12 @@
 {
   "solution": {
-    "path": "demodisc.sln",
+    "path": "DemoDisc.sln",
     "projects": [
-      "user_settings/generated_code/projects/game.tools/game.tools.csproj",
-      "user_settings/generated_code/projects/gameplay/gameplay.csproj",
-      "user_settings/generated_code/projects/menu.tools/menu.tools.csproj",
-      "user_settings/generated_code/projects/physics.tools/physics.tools.csproj",
-      "user_settings/generated_code/projects/rendering.tools/rendering.tools.csproj",
-      "user_settings/generated_code/projects/scene.tools/scene.tools.csproj"
+      "user_settings/generated_code/projects/DemoDisc/DemoDisc.csproj",
+      "user_settings/generated_code/projects/DemoDiscEditorTools/DemoDiscEditorTools.csproj",
+      "user_settings/generated_code/projects/Raytracing/Raytracing.csproj",
+      "user_settings/generated_code/projects/TiltPlay/TiltPlay.csproj",
+      "user_settings/generated_code/projects/Zombislayer/Zombislayer.csproj"
     ]
   }
 }
