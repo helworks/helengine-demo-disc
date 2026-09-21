@@ -40,17 +40,17 @@ namespace DemoDisc.EditorTools.tests {
             CreateRewriteService().RewriteSubtree(entity);
 
             Assert.Equal(
-                "group:consoles/platform:ps2",
+                "group:sd/platform:ps2",
                 SceneOverrideScopePath.Format(Assert.Single(saveComponent.EnumerateExistencePlatformOverrides()).Scope));
             Assert.Equal(
-                "group:desktop/platform:windows/buildconfig:release",
+                "group:hd/platform:windows/buildconfig:release",
                 SceneOverrideScopePath.Format(Assert.Single(saveComponent.EnumerateTransformPlatformOverrides()).Scope));
             Assert.Equal(
-                "group:consoles/platform:n64",
+                "group:sd/platform:n64",
                 Assert.Single(saveComponent.EnumerateComponentPlatformOverrides()).Scope.ToString());
             Assert.True(saveComponent.TryGetComponentState(component, out EntityComponentSaveState componentSaveState));
             Assert.Equal(
-                "group:consoles/platform:ps2",
+                "group:sd/platform:ps2",
                 Assert.Single(componentSaveState.EnumeratePlatformOverrides()).Scope.ToString());
         }
 
@@ -153,17 +153,17 @@ namespace DemoDisc.EditorTools.tests {
             rewriteService.RewriteSubtree(entity);
 
             Assert.Equal(
-                "group:consoles/platform:ps2",
+                "group:sd/platform:ps2",
                 SceneOverrideScopePath.Format(Assert.Single(saveComponent.EnumerateExistencePlatformOverrides()).Scope));
             Assert.Equal(
-                "group:desktop/platform:windows/buildconfig:release",
+                "group:hd/platform:windows/buildconfig:release",
                 SceneOverrideScopePath.Format(Assert.Single(saveComponent.EnumerateTransformPlatformOverrides()).Scope));
             Assert.Equal(
-                "group:consoles/platform:n64",
+                "group:sd/platform:n64",
                 Assert.Single(saveComponent.EnumerateComponentPlatformOverrides()).Scope.ToString());
             Assert.True(saveComponent.TryGetComponentState(component, out EntityComponentSaveState componentSaveState));
             Assert.Equal(
-                "group:consoles/platform:ps2",
+                "group:sd/platform:ps2",
                 Assert.Single(componentSaveState.EnumeratePlatformOverrides()).Scope.ToString());
         }
 
@@ -183,7 +183,7 @@ namespace DemoDisc.EditorTools.tests {
             CreateRewriteService().RewriteSubtree(rootEntity);
 
             Assert.Equal(
-                "group:consoles/platform:ps2",
+                "group:sd/platform:ps2",
                 SceneOverrideScopePath.Format(Assert.Single(FindSaveComponent(childEntity).EnumerateExistencePlatformOverrides()).Scope));
         }
 

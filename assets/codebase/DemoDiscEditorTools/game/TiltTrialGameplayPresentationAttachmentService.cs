@@ -118,9 +118,10 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
-        /// Marks the Windows-only physics bounds debug root as absent from handheld scene cooks.
+        /// Marks the physics bounds debug root as debug-only: absent from every release build and from the
+        /// dual-screen rigs, present on every other device in debug builds.
         /// </summary>
-        /// <param name="sceneAsset">Authored Tilt Trial scene receiving the platform restriction.</param>
+        /// <param name="sceneAsset">Authored Tilt Trial scene receiving the restriction.</param>
         void ApplyWindowsOnlyDebugRootOverride(SceneAsset sceneAsset) {
             SceneEntityAsset[] roots = sceneAsset.RootEntities ?? Array.Empty<SceneEntityAsset>();
             for (int index = 0; index < roots.Length; index++) {
@@ -129,15 +130,18 @@ namespace DemoDisc.EditorTools {
                     continue;
                 }
 
+                root.HasOverrideLevelOrder = true;
+                root.OverrideLevelOrder = DemoDiscOverrideScopes.CreateBuildConfigFirstLevelOrder();
                 root.PlatformExistenceOverrides = CreateWindowsOnlyDebugPlatformOverrides();
                 return;
             }
 
-            throw new InvalidOperationException("Tilt Trial scene is missing the Windows-only physics bounds debug root.");
+            throw new InvalidOperationException("Tilt Trial scene is missing the physics bounds debug root.");
         }
 
         /// <summary>
-        /// Marks the F3 status row inside the console presentation Blueprint as absent from non-Windows and Windows Release cooks.
+        /// Marks the F3 status row inside the console presentation Blueprint as debug-only: present on every device
+        /// in debug builds, absent from every release build.
         /// </summary>
         /// <param name="projectRootPath">Absolute project root that owns the presentation Blueprint.</param>
         void ApplyWindowsOnlyDebugStatusOverrideToConsoleBlueprint(string projectRootPath) {
@@ -145,9 +149,11 @@ namespace DemoDisc.EditorTools {
             BlueprintAsset blueprintAsset = LoadBlueprintAsset(blueprintPath);
             SceneEntityAsset statusText = FindEntityByName(blueprintAsset.RootEntity, "TiltTrialPhysicsBoundsStatusText");
             if (statusText == null) {
-                throw new InvalidOperationException("Tilt Trial console presentation Blueprint is missing the Windows-only physics bounds status row.");
+                throw new InvalidOperationException("Tilt Trial console presentation Blueprint is missing the physics bounds status row.");
             }
 
+            statusText.HasOverrideLevelOrder = true;
+            statusText.OverrideLevelOrder = DemoDiscOverrideScopes.CreateBuildConfigFirstLevelOrder();
             statusText.PlatformExistenceOverrides = CreateWindowsOnlyDebugStatusOverrides();
             SaveBlueprintAsset(blueprintPath, blueprintAsset);
         }
@@ -296,7 +302,7 @@ namespace DemoDisc.EditorTools {
             return [
                 new SceneEntityPlatformExistenceOverrideAsset { Scope = SceneOverrideScopePath.Common(), Exists = false },
                 new SceneEntityPlatformExistenceOverrideAsset {
-                    Scope = DemoDiscOverrideScopes.NintendoDualScreen.ToSteps(),
+                    Scope = DemoDiscOverrideScopes.DualScreen.ToSteps(),
                     Exists = true
                 }
             ];
@@ -311,36 +317,32 @@ namespace DemoDisc.EditorTools {
         static SceneEntityPlatformExistenceOverrideAsset[] CreateConsolePresentationPlatformOverrides() {
             return [
                 new SceneEntityPlatformExistenceOverrideAsset {
-                    Scope = DemoDiscOverrideScopes.NintendoDualScreen.ToSteps(),
+                    Scope = DemoDiscOverrideScopes.DualScreen.ToSteps(),
                     Exists = false
                 }
             ];
         }
 
         /// <summary>
-        /// Creates platform and environment exclusions that leave the debug-only entity absent from the Nintendo
-        /// dual-screen rigs and from Windows Release. The two handheld ids stay per platform so the Windows Release
-        /// path on the same entity keeps resolving under the default level order.
+        /// Creates the build-config-first exclusions for the debug-only physics bounds root: absent from every
+        /// release build, and absent from the dual-screen rigs in debug builds.
         /// </summary>
-        /// <returns>Windows-only debug platform and environment existence overrides.</returns>
+        /// <returns>Debug-only existence overrides under <see cref="DemoDiscOverrideScopes.BuildConfigFirstLevelOrder"/>.</returns>
         static SceneEntityPlatformExistenceOverrideAsset[] CreateWindowsOnlyDebugPlatformOverrides() {
             return [
-                new SceneEntityPlatformExistenceOverrideAsset { Scope = SceneOverrideScopePath.Platform("ds"), Exists = false },
-                new SceneEntityPlatformExistenceOverrideAsset { Scope = SceneOverrideScopePath.Platform("3ds"), Exists = false },
-                new SceneEntityPlatformExistenceOverrideAsset { Scope = SceneOverrideScopePath.PlatformBuildConfig("windows", "release"), Exists = false }
+                new SceneEntityPlatformExistenceOverrideAsset { Scope = DemoDiscOverrideScopes.Release.ToSteps(), Exists = false },
+                new SceneEntityPlatformExistenceOverrideAsset { Scope = DemoDiscOverrideScopes.DebugDualScreen.ToSteps(), Exists = false }
             ];
         }
 
         /// <summary>
-        /// Creates the platform and environment exclusions for the separately authored F3 status row: absent
-        /// everywhere by default, present on Windows, and absent again on Windows Release.
+        /// Creates the build-config-first exclusion for the F3 status row: present everywhere in debug builds and
+        /// absent from every release build.
         /// </summary>
-        /// <returns>F3 status-row platform and environment existence overrides.</returns>
+        /// <returns>Debug-only existence overrides under <see cref="DemoDiscOverrideScopes.BuildConfigFirstLevelOrder"/>.</returns>
         static SceneEntityPlatformExistenceOverrideAsset[] CreateWindowsOnlyDebugStatusOverrides() {
             return [
-                new SceneEntityPlatformExistenceOverrideAsset { Scope = SceneOverrideScopePath.Common(), Exists = false },
-                new SceneEntityPlatformExistenceOverrideAsset { Scope = SceneOverrideScopePath.Platform("windows"), Exists = true },
-                new SceneEntityPlatformExistenceOverrideAsset { Scope = SceneOverrideScopePath.PlatformBuildConfig("windows", "release"), Exists = false }
+                new SceneEntityPlatformExistenceOverrideAsset { Scope = DemoDiscOverrideScopes.Release.ToSteps(), Exists = false }
             ];
         }
 

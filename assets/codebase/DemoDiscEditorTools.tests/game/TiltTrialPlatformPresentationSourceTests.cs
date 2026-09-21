@@ -189,22 +189,25 @@ namespace DemoDisc.EditorTools.tests {
         }
 
         /// <summary>
-        /// Ensures the Windows-only physics bounds debug root is excluded from handheld scene cooks.
+        /// Ensures the physics bounds debug root is authored build-config first: absent from every release build and
+        /// from the dual-screen group in debug builds, with no platform named anywhere.
         /// </summary>
         [Fact]
-        public void Authored_gameplay_scenes_exclude_windows_only_debug_root_from_handheld_platforms() {
+        public void Authored_gameplay_scenes_exclude_debug_root_from_release_and_dual_screen() {
             string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "TiltTrialGameplayPresentationAttachmentService.cs"));
 
             Assert.Contains("TiltTrialPhysicsBoundsDebug", source, StringComparison.Ordinal);
-            Assert.Contains("Scope = SceneOverrideScopePath.Platform(\"ds\"), Exists = false", source, StringComparison.Ordinal);
-            Assert.Contains("Scope = SceneOverrideScopePath.Platform(\"3ds\"), Exists = false", source, StringComparison.Ordinal);
+            Assert.Contains("Scope = DemoDiscOverrideScopes.Release.ToSteps(), Exists = false", source, StringComparison.Ordinal);
+            Assert.Contains("Scope = DemoDiscOverrideScopes.DebugDualScreen.ToSteps(), Exists = false", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("SceneOverrideScopePath.Platform(", source, StringComparison.Ordinal);
         }
 
         /// <summary>
-        /// Ensures every authored Tilt Trial level serializes the Windows-only debug root exclusion.
+        /// Ensures every authored Tilt Trial level serializes the debug root so it exists on every single-screen device
+        /// in debug builds, never on the dual-screen rigs, and never in release builds.
         /// </summary>
         [Fact]
-        public void Authored_gameplay_scenes_scope_windows_only_debug_root_to_windows() {
+        public void Authored_gameplay_scenes_keep_debug_root_out_of_release_and_dual_screen() {
             string sceneDirectory = global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "scenes", "games", "tilt");
             string[] scenePaths = Directory.GetFiles(sceneDirectory, "tilt_trial_level_*.helen");
 
@@ -214,8 +217,12 @@ namespace DemoDisc.EditorTools.tests {
                 SceneAsset sceneAsset = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
                 SceneEntityAsset debugRoot = Assert.Single(sceneAsset.RootEntities.Where(entity => entity != null && entity.Name == "TiltTrialPhysicsBoundsDebug"));
 
-                Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(debugRoot, "ds"));
-                Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(debugRoot, "3ds"));
+                Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(debugRoot, "windows", "debug"));
+                Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(debugRoot, "ps2", "debug"));
+                Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(debugRoot, "ds", "debug"));
+                Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(debugRoot, "3ds", "debug"));
+                Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(debugRoot, "windows", "release"));
+                Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(debugRoot, "ps2", "release"));
             }
         }
 

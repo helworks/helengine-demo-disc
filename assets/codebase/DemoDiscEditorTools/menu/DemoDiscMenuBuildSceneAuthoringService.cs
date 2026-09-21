@@ -12,6 +12,11 @@ namespace DemoDisc.EditorTools {
         readonly PlatformSceneAuthoringHelperService PlatformSceneAuthoringHelperService;
 
         /// <summary>
+        /// Platform group tree of the project being authored; tells dual-screen platforms apart without naming them.
+        /// </summary>
+        EditorProjectPlatformGroupsDocument PlatformGroupsDocument;
+
+        /// <summary>
         /// Initializes one demo-disc menu build-scene authoring service.
         /// </summary>
         public DemoDiscMenuBuildSceneAuthoringService() {
@@ -33,6 +38,7 @@ namespace DemoDisc.EditorTools {
                 throw new ArgumentNullException(nameof(definition));
             }
 
+            PlatformGroupsDocument = new EditorProjectPlatformGroupsService(projectRootPath).Read();
             Dictionary<string, HashSet<string>> configuredSceneIdsByPlatform = LoadConfiguredSceneIdsByPlatform(projectRootPath);
             if (configuredSceneIdsByPlatform.Count < 1) {
                 return;
@@ -126,7 +132,7 @@ namespace DemoDisc.EditorTools {
         /// <param name="definition">Canonical menu definition used to author the scene hierarchy.</param>
         /// <param name="configuredSceneIdsByPlatform">Configured selected scene ids keyed by platform id.</param>
         /// <returns>Excluded platform lists keyed by panel id.</returns>
-        static Dictionary<string, IReadOnlyList<string>> BuildExcludedPlatformsByPanelId(
+        Dictionary<string, IReadOnlyList<string>> BuildExcludedPlatformsByPanelId(
             MenuDefinition definition,
             Dictionary<string, HashSet<string>> configuredSceneIdsByPlatform) {
             if (definition == null) {
@@ -241,7 +247,7 @@ namespace DemoDisc.EditorTools {
         /// <param name="sceneId">Logical scene id targeted by one menu item.</param>
         /// <param name="configuredSceneIdsByPlatform">Configured selected scene ids keyed by platform id.</param>
         /// <returns>Configured platform ids that should exclude the target scene item.</returns>
-        static IReadOnlyList<string> ResolveExcludedPlatformsForSceneId(string sceneId, Dictionary<string, HashSet<string>> configuredSceneIdsByPlatform) {
+        IReadOnlyList<string> ResolveExcludedPlatformsForSceneId(string sceneId, Dictionary<string, HashSet<string>> configuredSceneIdsByPlatform) {
             if (string.IsNullOrWhiteSpace(sceneId)) {
                 throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
             } else if (configuredSceneIdsByPlatform == null) {
@@ -268,7 +274,7 @@ namespace DemoDisc.EditorTools {
         /// <param name="sceneId">Canonical scene id targeted by the menu item.</param>
         /// <param name="configuredSceneIds">Selected scene ids persisted for the platform.</param>
         /// <returns>True when the canonical scene or its platform-specific alias is selected.</returns>
-        static bool ContainsConfiguredScene(string platformId, string sceneId, HashSet<string> configuredSceneIds) {
+        bool ContainsConfiguredScene(string platformId, string sceneId, HashSet<string> configuredSceneIds) {
             if (string.IsNullOrWhiteSpace(platformId)) {
                 throw new ArgumentException("Platform id must be provided.", nameof(platformId));
             } else if (string.IsNullOrWhiteSpace(sceneId)) {
@@ -287,15 +293,15 @@ namespace DemoDisc.EditorTools {
         /// <param name="platformId">Platform whose scene naming convention should be applied.</param>
         /// <param name="sceneId">Canonical scene id targeted by the menu.</param>
         /// <returns>Selected-scene id used by the platform build configuration.</returns>
-        static string ResolveConfiguredSceneIdForPlatform(string platformId, string sceneId) {
+        string ResolveConfiguredSceneIdForPlatform(string platformId, string sceneId) {
             if (string.IsNullOrWhiteSpace(platformId)) {
                 throw new ArgumentException("Platform id must be provided.", nameof(platformId));
             } else if (string.IsNullOrWhiteSpace(sceneId)) {
                 throw new ArgumentException("Scene id must be provided.", nameof(sceneId));
             }
 
-            if ((string.Equals(platformId, "ds", StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(platformId, "3ds", StringComparison.OrdinalIgnoreCase))
+            // Dual-screen devices package the two-screen variant of the tilt scene under its own scene id.
+            if (DemoDiscOverrideScopes.IsDualScreenPlatformId(PlatformGroupsDocument, platformId)
                 && string.Equals(sceneId, "tilt_trial", StringComparison.Ordinal)) {
                 return sceneId + "_ds";
             }

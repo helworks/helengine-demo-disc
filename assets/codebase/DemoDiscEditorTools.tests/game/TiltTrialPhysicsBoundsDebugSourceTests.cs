@@ -52,30 +52,33 @@ namespace DemoDisc.EditorTools.tests {
         }
 
         /// <summary>
-        /// Ensures the F3 status row is removed from every non-Windows cooked gameplay scene.
+        /// Ensures the F3 status row is debug-only on every device: build config first, absent in release, no platform named.
         /// </summary>
         [Fact]
-        public void Game_scene_factory_cooks_f3_status_row_only_for_windows() {
+        public void Game_scene_factory_cooks_f3_status_row_in_debug_builds_only() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\GameSceneFactory.cs");
 
             Assert.Contains("EntitySaveComponent physicsBoundsStatusTextEntitySaveComponent = FindRequiredEntitySaveComponent(physicsBoundsStatusTextEntity);", source, StringComparison.Ordinal);
-            Assert.Contains("string[] nonWindowsPlatformIds = [\"ps2\", \"psp\", \"psvita\", \"gamecube\", \"wii\", \"wiiu\", \"switch\", \"ds\", \"3ds\"]", source, StringComparison.Ordinal);
-            Assert.Contains("GetOrCreateExistencePlatformOverride(nonWindowsPlatformIds[platformIndex]).Exists = false", source, StringComparison.Ordinal);
+            Assert.Contains("physicsBoundsStatusTextEntitySaveComponent.OverrideLevelOrder = DemoDiscOverrideScopes.CreateBuildConfigFirstLevelOrder();", source, StringComparison.Ordinal);
+            Assert.Contains("physicsBoundsStatusTextEntitySaveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.Release).Exists = false;", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("nonWindowsPlatformIds", source, StringComparison.Ordinal);
         }
 
         [Fact]
-        public void Game_scene_factory_excludes_f3_status_row_from_windows_release_cooks() {
+        public void Game_scene_factory_excludes_physics_bounds_debug_root_from_release_cooks() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\GameSceneFactory.cs");
 
-            Assert.Contains("GetOrCreateExistencePlatformOverride(new global::helengine.EditorOverrideScope(\"windows\", \"release\")).Exists = false;", source, StringComparison.Ordinal);
+            Assert.Contains("saveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.Release).Exists = false;", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("EditorOverrideScope(\"windows\", \"release\")", source, StringComparison.Ordinal);
         }
 
         [Fact]
-        public void Tilt_trial_presentation_attachment_excludes_physics_bounds_root_from_windows_release_cooks() {
+        public void Tilt_trial_presentation_attachment_excludes_physics_bounds_root_from_release_cooks() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\TiltTrialGameplayPresentationAttachmentService.cs");
 
-            Assert.Contains("SceneOverrideScopePath.PlatformBuildConfig(\"windows\", \"release\")", source, StringComparison.Ordinal);
-            Assert.Contains("Exists = false", source, StringComparison.Ordinal);
+            Assert.Contains("Scope = DemoDiscOverrideScopes.Release.ToSteps(), Exists = false", source, StringComparison.Ordinal);
+            Assert.Contains("Scope = DemoDiscOverrideScopes.DebugDualScreen.ToSteps(), Exists = false", source, StringComparison.Ordinal);
+            Assert.Contains("root.OverrideLevelOrder = DemoDiscOverrideScopes.CreateBuildConfigFirstLevelOrder();", source, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -87,12 +90,12 @@ namespace DemoDisc.EditorTools.tests {
         }
 
         [Fact]
-        public void Tilt_trial_presentation_attachment_prunes_f3_status_row_from_windows_release() {
+        public void Tilt_trial_presentation_attachment_prunes_f3_status_row_from_release() {
             string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\TiltTrialGameplayPresentationAttachmentService.cs");
 
             Assert.Contains("ApplyWindowsOnlyDebugStatusOverrideToConsoleBlueprint(fullProjectRootPath);", source, StringComparison.Ordinal);
             Assert.Contains("statusText.PlatformExistenceOverrides = CreateWindowsOnlyDebugStatusOverrides();", source, StringComparison.Ordinal);
-            Assert.Contains("SceneOverrideScopePath.PlatformBuildConfig(\"windows\", \"release\")", source, StringComparison.Ordinal);
+            Assert.Contains("statusText.OverrideLevelOrder = DemoDiscOverrideScopes.CreateBuildConfigFirstLevelOrder();", source, StringComparison.Ordinal);
         }
     }
 }

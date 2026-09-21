@@ -31,10 +31,8 @@ namespace DemoDisc.EditorTools {
             });
 
             EntitySaveComponent saveComponent = EnsureEntitySaveComponent(root);
-            string[] excludedPlatformIds = ["windows", "psp", "psvita", "ds", "3ds"];
-            for (int index = 0; index < excludedPlatformIds.Length; index++) {
-                saveComponent.GetOrCreateExistencePlatformOverride(excludedPlatformIds[index]).Exists = false;
-            }
+            // Dual-screen devices carry their instructions on the bottom screen; every other device shows this root.
+            saveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.DualScreen).Exists = false;
             return root;
         }
 

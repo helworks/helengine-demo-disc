@@ -121,7 +121,7 @@ namespace DemoDisc.EditorTools.tests {
             IReadOnlyList<EntityComponentPlatformOverrideState> overrideStates = overridePayloadService.ReadOverrideStates(meshComponent);
             EntityComponentPlatformOverrideState dsOverride = Assert.Single(
                 overrideStates,
-                state => global::DemoDisc.testing.DemoDiscOverrideScopeReader.PlatformIdOf(state.Scope) == "ds");
+                state => state.Scope == DemoDiscOverrideScopes.DualScreen);
             SceneComponentAssetRecord unwrappedMeshComponent = overridePayloadService.UnwrapBaseRecord(meshComponent);
             ComponentPersistenceRegistry registry = GeneratedScenePersistenceRegistryFactory.Create();
             MeshComponent restoredMeshComponent = Assert.IsType<MeshComponent>(

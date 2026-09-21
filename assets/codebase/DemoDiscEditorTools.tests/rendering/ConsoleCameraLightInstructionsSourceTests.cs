@@ -34,8 +34,8 @@ namespace DemoDisc.EditorTools.tests {
 
             Assert.Contains("BlueprintInstanceComponent", source, StringComparison.Ordinal);
             Assert.Contains("ConsoleCameraLightInstructionsBlueprintRelativePath", source, StringComparison.Ordinal);
-            Assert.Contains("\"windows\", \"psp\", \"psvita\", \"ds\", \"3ds\"", source, StringComparison.Ordinal);
-            Assert.Contains("GetOrCreateExistencePlatformOverride", source, StringComparison.Ordinal);
+            Assert.Contains("GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.DualScreen)", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("\"windows\"", source, StringComparison.Ordinal);
             Assert.Contains(".Exists = false", source, StringComparison.Ordinal);
         }
 

@@ -160,9 +160,8 @@ namespace DemoDisc.EditorTools {
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
             EntitySaveComponent cameraSave = FindRequiredEntitySaveComponent(entity);
-            foreach (string platformId in new[] { "windows", "gamecube", "ps2", "psp", "psvita", "wii", "wiiu", "switch" }) {
-                cameraSave.GetOrCreateExistencePlatformOverride(platformId).Exists = false;
-            }
+            cameraSave.GetOrCreateExistencePlatformOverride(EditorOverrideScope.Common).Exists = false;
+            cameraSave.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.DualScreen).Exists = true;
             entity.AddComponent(new CameraComponent {
                 CameraDrawOrder = 1,
                 LayerMask = EditorLayerMasks.SceneObjects,
@@ -209,8 +208,7 @@ namespace DemoDisc.EditorTools {
             root.LocalScale = float3.One;
             root.LocalOrientation = float4.Identity;
             EntitySaveComponent rootSave = FindRequiredEntitySaveComponent(root);
-            rootSave.GetOrCreateExistencePlatformOverride("ds").Exists = false;
-            rootSave.GetOrCreateExistencePlatformOverride("3ds").Exists = false;
+            rootSave.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.DualScreen).Exists = false;
 
             Entity sppText = CreateHudTextEntity(
                 root,

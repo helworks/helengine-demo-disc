@@ -177,17 +177,7 @@ namespace DemoDisc.EditorTools {
         readonly MeshComponentModifierStackService MeshComponentModifierStackServiceValue = new MeshComponentModifierStackService();
 
         /// <summary>
-        /// Stable platform identifier used for PlayStation 2-specific scene cooking.
-        /// </summary>
-        const string Ps2PlatformId = "ps2";
-
-        /// <summary>
-        /// Stable platform identifier used for PlayStation Portable-specific scene cooking.
-        /// </summary>
-        const string PspPlatformId = "psp";
-
-        /// <summary>
-        /// Maximum world-space edge length used to subdivide scaled Tilt Trial render-test course geometry on constrained platforms.
+        /// Maximum world-space edge length used to subdivide scaled Tilt Trial render-test course geometry on SD devices.
         /// </summary>
         const double TiltTrialRenderTestTessellationMaxEdgeLength = 1d;
 
@@ -1031,19 +1021,17 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
-        /// Removes a handheld-only selector action entity from every non-handheld platform cook while retaining the authored DS and 3DS version.
+        /// Keeps a dual-screen-only selector action entity beneath the dual-screen group and nowhere else.
         /// </summary>
-        /// <param name="entity">Handheld-only selector action entity to exclude from non-handheld cooks.</param>
-        void ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(Entity entity) {
+        /// <param name="entity">Dual-screen-only selector action entity.</param>
+        void RestrictEntityToDualScreenGroup(Entity entity) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            string[] nonHandheldPlatformIds = ["windows", "ps2", "psp", "psvita", "gamecube", "wii", "switch", "wiiu"];
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            for (int index = 0; index < nonHandheldPlatformIds.Length; index++) {
-                saveComponent.GetOrCreateExistencePlatformOverride(nonHandheldPlatformIds[index]).Exists = false;
-            }
+            saveComponent.GetOrCreateExistencePlatformOverride(global::helengine.EditorOverrideScope.Common).Exists = false;
+            saveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.DualScreen).Exists = true;
         }
 
         /// <summary>
@@ -1332,12 +1320,11 @@ namespace DemoDisc.EditorTools {
             Entity playButtonEntity = CreateLevelSelectActionButton(detailsPanelEntity, "TiltTrialLevelSelectPlayButton", new float3(28f, 500f, 0f), new int2(320, 56), "PLAY", DemoDisc.TiltPlay.TiltTrialLevelSelectAction.PlaySelectedStage, -1);
             CreateLevelSelectActionPrompt(entity, "TiltTrialLevelSelectPlayPrompt", new float3(848f, 638f, 0f), "enter", "PLAY");
             CreateLevelSelectActionPrompt(entity, "TiltTrialLevelSelectMenuPrompt", new float3(1056f, 638f, 0f), "escape", "MENU");
-            ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(backButtonEntity);
-            ExcludeHandheldOnlyEntityFromNonHandheldPlatforms(playButtonEntity);
+            RestrictEntityToDualScreenGroup(backButtonEntity);
+            RestrictEntityToDualScreenGroup(playButtonEntity);
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.GetOrCreateExistencePlatformOverride("ds").Exists = false;
-            saveComponent.GetOrCreateExistencePlatformOverride("3ds").Exists = false;
+            saveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.DualScreen).Exists = false;
 
             if (entity is EditorEntity editorEntity) {
                 return editorEntity;
@@ -1531,12 +1518,10 @@ namespace DemoDisc.EditorTools {
             physicsBoundsStatusTextEntity.AddComponent(physicsBoundsStatusAnchorComponent);
             ApplyFontReference(physicsBoundsStatusTextEntity, physicsBoundsStatusTextComponent, TiltTrialSpeedHudFontRelativePath);
             physicsBoundsStatusTextEntity.AddComponent(new DemoDisc.TiltPlay.TiltTrialPhysicsBoundsStatusTextComponent());
+            // Debug-only: build config is the first tree level, so one release scope hides the row on every device.
             EntitySaveComponent physicsBoundsStatusTextEntitySaveComponent = FindRequiredEntitySaveComponent(physicsBoundsStatusTextEntity);
-            string[] nonWindowsPlatformIds = ["ps2", "psp", "psvita", "gamecube", "wii", "wiiu", "switch", "ds", "3ds"];
-            for (int platformIndex = 0; platformIndex < nonWindowsPlatformIds.Length; platformIndex++) {
-                physicsBoundsStatusTextEntitySaveComponent.GetOrCreateExistencePlatformOverride(nonWindowsPlatformIds[platformIndex]).Exists = false;
-            }
-            physicsBoundsStatusTextEntitySaveComponent.GetOrCreateExistencePlatformOverride(new global::helengine.EditorOverrideScope("windows", "release")).Exists = false;
+            physicsBoundsStatusTextEntitySaveComponent.OverrideLevelOrder = DemoDiscOverrideScopes.CreateBuildConfigFirstLevelOrder();
+            physicsBoundsStatusTextEntitySaveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.Release).Exists = false;
 
             if (entity is EditorEntity editorEntity) {
                 return editorEntity;
@@ -1556,8 +1541,10 @@ namespace DemoDisc.EditorTools {
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new global::DemoDisc.TiltPlay.TiltTrialPhysicsBoundsDebugDrawComponent());
+            // Debug-only: build config is the first tree level, so one release scope hides the root on every device.
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.GetOrCreateExistencePlatformOverride(new global::helengine.EditorOverrideScope("windows", "release")).Exists = false;
+            saveComponent.OverrideLevelOrder = DemoDiscOverrideScopes.CreateBuildConfigFirstLevelOrder();
+            saveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.Release).Exists = false;
             return entity;
         }
 
@@ -1794,8 +1781,7 @@ namespace DemoDisc.EditorTools {
             MeshComponentModifier modifier = new MeshComponentModifier(MeshComponentModifier.TessellateKind) {
                 MaxEdgeLength = TiltTrialRenderTestTessellationMaxEdgeLength
             };
-            MeshComponentModifierStackServiceValue.SetStack(saveState, Ps2PlatformId, new[] { modifier });
-            MeshComponentModifierStackServiceValue.SetStack(saveState, PspPlatformId, new[] { modifier });
+            MeshComponentModifierStackServiceValue.SetStack(saveState, DemoDiscOverrideScopes.Sd, new[] { modifier });
         }
 
         /// <summary>

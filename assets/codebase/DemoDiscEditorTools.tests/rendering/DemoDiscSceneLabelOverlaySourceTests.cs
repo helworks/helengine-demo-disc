@@ -39,14 +39,12 @@ namespace DemoDisc.EditorTools.tests {
         }
 
         [Fact]
-        public void Shared_label_overlay_marks_text_component_absent_on_nintendo_handhelds() {
+        public void Shared_label_overlay_marks_text_component_absent_on_dual_screen_devices() {
             string sourcePath = Path.Combine(ProjectRootPath, "assets", "codebase", "DemoDiscEditorTools", "rendering", "DemoDiscSceneLabelOverlayFactory.cs");
             Assert.True(File.Exists(sourcePath), $"Expected '{sourcePath}' to exist.");
             string source = File.ReadAllText(sourcePath);
-            Assert.Contains("const string NintendoDsPlatformId = \"ds\";", source, StringComparison.Ordinal);
-            Assert.Contains("const string Nintendo3DsPlatformId = \"3ds\";", source, StringComparison.Ordinal);
-            Assert.Contains("saveComponent.GetOrCreateExistencePlatformOverride(NintendoDsPlatformId).Exists = false;", source, StringComparison.Ordinal);
-            Assert.Contains("saveComponent.GetOrCreateExistencePlatformOverride(Nintendo3DsPlatformId).Exists = false;", source, StringComparison.Ordinal);
+            Assert.Contains("saveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.DualScreen).Exists = false;", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("\"ds\"", source, StringComparison.Ordinal);
             Assert.DoesNotContain("RemoveComponent(labelComponent", source, StringComparison.Ordinal);
         }
 

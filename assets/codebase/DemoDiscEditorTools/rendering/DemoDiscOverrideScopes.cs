@@ -3,26 +3,40 @@ using DemoDisc.rendering;
 
 namespace DemoDisc.EditorTools {
     /// <summary>
-    /// Canonical override scope paths and level order that the demo-disc scene generators author against.
-    /// A rule such as "only the Nintendo dual-screen rigs" needs the Group level ahead of Platform, which is what
-    /// <see cref="GroupFirstLevelOrder"/> records. A scope only applies to a build target when it is a prefix of
-    /// that target's path, so a subtree that adopts the group-first order must have its existing one-step platform
-    /// scopes re-pathed through the platform's group chain; <see cref="GeneratedSceneGroupFirstScopeRewriteService"/>
-    /// does that at save time so individual generators keep authoring plain platform scopes.
+    /// The only override scopes the generators author. Every platform supports every feature, so generated scene
+    /// content never names a platform: it varies by platform group (HD, SD, dual-screen) and, for debug-only
+    /// content, by build config. A scope applies to a build target when it is a prefix of that target's path under
+    /// the entity's level order, so group scopes live on entities with <see cref="GroupFirstLevelOrder"/> and build
+    /// config scopes on entities with <see cref="BuildConfigFirstLevelOrder"/>.
     /// </summary>
     public static class DemoDiscOverrideScopes {
         /// <summary>
-        /// Group id of the handheld family in <c>settings/platform-groups.json</c>.
+        /// Group id of the HD devices (desktop and HD consoles) in <c>settings/platform-groups.json</c>.
         /// </summary>
-        public const string HandheldsGroupId = "handhelds";
+        public const string HdGroupId = "hd";
 
         /// <summary>
-        /// Group id of the Nintendo dual-screen family nested beneath <see cref="HandheldsGroupId"/>.
+        /// Group id of the SD devices; the dual-screen group nests beneath it.
         /// </summary>
-        public const string NintendoDualScreenGroupId = "nintendo-dual-screen";
+        public const string SdGroupId = "sd";
 
         /// <summary>
-        /// Level order for entities that vary by group before platform.
+        /// Group id of the dual-screen handhelds, nested beneath <see cref="SdGroupId"/>.
+        /// </summary>
+        public const string DualScreenGroupId = "dual-screen";
+
+        /// <summary>
+        /// Build config id of debug builds.
+        /// </summary>
+        public const string DebugBuildConfigId = "debug";
+
+        /// <summary>
+        /// Build config id of release builds; debug-only entities are absent at this scope.
+        /// </summary>
+        public const string ReleaseBuildConfigId = "release";
+
+        /// <summary>
+        /// Level order for ordinary generated entities: groups first, then platform, then build config.
         /// </summary>
         public static readonly IReadOnlyList<SceneOverrideScopeStepKind> GroupFirstLevelOrder = new[] {
             SceneOverrideScopeStepKind.Group,
@@ -31,31 +45,66 @@ namespace DemoDisc.EditorTools {
         };
 
         /// <summary>
+        /// Level order for debug-only entities: build config first so one <c>release</c> scope covers every
+        /// platform, then groups, then platform.
+        /// </summary>
+        public static readonly IReadOnlyList<SceneOverrideScopeStepKind> BuildConfigFirstLevelOrder = new[] {
+            SceneOverrideScopeStepKind.BuildConfig,
+            SceneOverrideScopeStepKind.Group,
+            SceneOverrideScopeStepKind.Platform
+        };
+
+        /// <summary>
         /// Builds a fresh mutable copy of <see cref="GroupFirstLevelOrder"/> for one serialized scene entity.
         /// </summary>
-        /// <returns>Group-first level order as a detached array.</returns>
         public static SceneOverrideScopeStepKind[] CreateGroupFirstLevelOrder() {
-            SceneOverrideScopeStepKind[] order = new SceneOverrideScopeStepKind[GroupFirstLevelOrder.Count];
-            for (int index = 0; index < GroupFirstLevelOrder.Count; index++) {
-                order[index] = GroupFirstLevelOrder[index];
-            }
-
-            return order;
+            return CopyLevelOrder(GroupFirstLevelOrder);
         }
 
         /// <summary>
-        /// Gets <c>handhelds/nintendo-dual-screen</c> — the DS and 3DS rigs.
+        /// Builds a fresh mutable copy of <see cref="BuildConfigFirstLevelOrder"/> for one serialized scene entity.
         /// </summary>
-        public static EditorOverrideScope NintendoDualScreen => EditorOverrideScope.Common
-            .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.Group, HandheldsGroupId))
-            .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.Group, NintendoDualScreenGroupId));
+        public static SceneOverrideScopeStepKind[] CreateBuildConfigFirstLevelOrder() {
+            return CopyLevelOrder(BuildConfigFirstLevelOrder);
+        }
+
+        /// <summary>
+        /// Gets <c>hd</c> under the group-first level order.
+        /// </summary>
+        public static EditorOverrideScope Hd => EditorOverrideScope.Common
+            .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.Group, HdGroupId));
+
+        /// <summary>
+        /// Gets <c>sd</c> under the group-first level order.
+        /// </summary>
+        public static EditorOverrideScope Sd => EditorOverrideScope.Common
+            .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.Group, SdGroupId));
+
+        /// <summary>
+        /// Gets <c>sd/dual-screen</c> under the group-first level order: the DS and 3DS rigs.
+        /// </summary>
+        public static EditorOverrideScope DualScreen => Sd
+            .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.Group, DualScreenGroupId));
+
+        /// <summary>
+        /// Gets <c>release</c> under the build-config-first level order: every platform's release build.
+        /// </summary>
+        public static EditorOverrideScope Release => EditorOverrideScope.Common
+            .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.BuildConfig, ReleaseBuildConfigId));
+
+        /// <summary>
+        /// Gets <c>debug/sd/dual-screen</c> under the build-config-first level order.
+        /// </summary>
+        public static EditorOverrideScope DebugDualScreen => EditorOverrideScope.Common
+            .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.BuildConfig, DebugBuildConfigId))
+            .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.Group, SdGroupId))
+            .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.Group, DualScreenGroupId));
 
         /// <summary>
         /// Builds one resolver over the project's platform group tree. Callers build one per generation pass and
         /// thread it through, so a generator never re-reads the settings files once per authored override.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative project root whose settings should be read.</param>
-        /// <returns>Resolver over the project's platform group tree.</returns>
         public static EditorOverrideScopeResolver CreateResolver(string projectRootPath) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
@@ -65,16 +114,51 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
-        /// Builds the one-step path for a single platform beneath the default level order.
+        /// Returns true when the platform sits in the dual-screen group of the project's group file.
+        /// </summary>
+        /// <param name="platformGroupsDocument">Loaded platform group tree.</param>
+        /// <param name="platformId">Platform id to classify.</param>
+        public static bool IsDualScreenPlatformId(EditorProjectPlatformGroupsDocument platformGroupsDocument, string platformId) {
+            if (platformGroupsDocument == null) {
+                throw new ArgumentNullException(nameof(platformGroupsDocument));
+            }
+            if (string.IsNullOrWhiteSpace(platformId)) {
+                return false;
+            }
+
+            IReadOnlyList<string> groupChain = EditorProjectPlatformGroupsService.FindGroupChain(platformGroupsDocument, platformId);
+            for (int index = 0; index < groupChain.Count; index++) {
+                if (string.Equals(groupChain[index], DualScreenGroupId, StringComparison.OrdinalIgnoreCase)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Builds the one-step path for a single platform. Only the build-config-driven menu exclusions use it;
+        /// generated scene content varies by group, never by platform.
         /// </summary>
         /// <param name="platformId">Platform identifier the override should apply to.</param>
-        /// <returns>One-step platform scope path.</returns>
         public static EditorOverrideScope Platform(string platformId) {
             if (string.IsNullOrWhiteSpace(platformId)) {
                 throw new ArgumentException("Platform id must be provided.", nameof(platformId));
             }
 
             return EditorOverrideScope.ForPlatform(platformId);
+        }
+
+        /// <summary>
+        /// Copies one level order into a detached array for asset fields.
+        /// </summary>
+        static SceneOverrideScopeStepKind[] CopyLevelOrder(IReadOnlyList<SceneOverrideScopeStepKind> order) {
+            SceneOverrideScopeStepKind[] copy = new SceneOverrideScopeStepKind[order.Count];
+            for (int index = 0; index < order.Count; index++) {
+                copy[index] = order[index];
+            }
+
+            return copy;
         }
     }
 }

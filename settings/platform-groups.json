@@ -1,48 +1,42 @@
 {
   "groups": [
     {
-      "id": "consoles",
-      "displayName": "Consoles",
+      "id": "hd",
+      "displayName": "HD devices",
+      "platformIds": [
+        "ps3",
+        "switch",
+        "wiiu",
+        "windows",
+        "x360"
+      ],
+      "children": []
+    },
+    {
+      "id": "sd",
+      "displayName": "SD devices",
       "platformIds": [
         "dc",
         "gamecube",
         "n64",
         "ps1",
         "ps2",
-        "ps3",
-        "wii",
-        "wiiu",
-        "x360"
-      ],
-      "children": []
-    },
-    {
-      "id": "handhelds",
-      "displayName": "Handhelds",
-      "platformIds": [
         "psp",
         "psvita",
-        "switch"
+        "wii",
+        "xbox"
       ],
       "children": [
         {
-          "id": "nintendo-dual-screen",
-          "displayName": "Nintendo dual-screen",
+          "id": "dual-screen",
+          "displayName": "Dual-screen devices",
           "platformIds": [
-            "ds",
-            "3ds"
+            "3ds",
+            "ds"
           ],
           "children": []
         }
       ]
-    },
-    {
-      "id": "desktop",
-      "displayName": "Desktop",
-      "platformIds": [
-        "windows"
-      ],
-      "children": []
     }
   ],
   "defaultLevelOrder": [

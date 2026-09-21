@@ -84,7 +84,8 @@ namespace DemoDisc.EditorTools.tests {
             Assert.Contains("LeftWall", serviceSource, StringComparison.Ordinal);
             Assert.Contains("RightWall", serviceSource, StringComparison.Ordinal);
             Assert.Contains("MeshBakeScaleMemberName = \"MeshBakeScale\"", serviceSource, StringComparison.Ordinal);
-            Assert.Contains("pspOverride.SetMemberValue(MeshBakeScaleMemberName, true.ToString(CultureInfo.InvariantCulture))", serviceSource, StringComparison.Ordinal);
+            Assert.Contains("ModifierStackService.SetStack(saveState, DemoDiscOverrideScopes.Sd, new[] { sdModifier });", serviceSource, StringComparison.Ordinal);
+            Assert.Contains("sdOverride.SetMemberValue(MeshBakeScaleMemberName, true.ToString(CultureInfo.InvariantCulture))", serviceSource, StringComparison.Ordinal);
         }
 
         /// <summary>

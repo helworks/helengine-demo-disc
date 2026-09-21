@@ -251,7 +251,7 @@ namespace DemoDisc.EditorTools {
 
             IReadOnlyList<string> groupChain = EditorProjectPlatformGroupsService.FindGroupChain(platformGroupsDocument, platformId);
             for (int index = 0; index < groupChain.Count; index++) {
-                if (string.Equals(groupChain[index], DemoDiscOverrideScopes.NintendoDualScreenGroupId, StringComparison.OrdinalIgnoreCase)) {
+                if (string.Equals(groupChain[index], DemoDiscOverrideScopes.DualScreenGroupId, StringComparison.OrdinalIgnoreCase)) {
                     return true;
                 }
             }

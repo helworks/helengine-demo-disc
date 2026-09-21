@@ -92,7 +92,7 @@ namespace DemoDisc.EditorTools {
             saveState.SetAssetReference("Model", commonModelReference);
             saveState.SetAssetReference("Materials[0]", materialReference);
 
-            EntityComponentPlatformOverrideState dsOverride = saveState.GetOrCreatePlatformOverride("ds");
+            EntityComponentPlatformOverrideState dsOverride = saveState.GetOrCreateScopedPlatformOverride(DemoDiscOverrideScopes.DualScreen);
             dsOverride.Payload = Array.Empty<byte>();
             dsOverride.SetAssetReference("Model", dsModelReference);
 
@@ -123,6 +123,9 @@ namespace DemoDisc.EditorTools {
                     LocalPosition = float3.Zero,
                     LocalScale = float3.One,
                     LocalOrientation = float4.Identity,
+                    // The mesh carries a dual-screen model override, so this entity resolves scopes group first.
+                    HasOverrideLevelOrder = true,
+                    OverrideLevelOrder = DemoDiscOverrideScopes.CreateGroupFirstLevelOrder(),
                     Components = [meshRecord, collectibleRecord, idleMotionRecord, observerRecord, rigidBodyRecord, colliderRecord],
                     Children = Array.Empty<SceneEntityAsset>()
                 },

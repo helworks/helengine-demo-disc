@@ -5,8 +5,6 @@ namespace DemoDisc.EditorTools {
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
         const string LabelEntityName = "DemoDiscSceneLabelText";
         const string FontReferenceName = "Font";
-        const string NintendoDsPlatformId = "ds";
-        const string Nintendo3DsPlatformId = "3ds";
         const string SceneLabelFontRelativePath = "Fonts/DemoDiscBody.ttf";
         const string ViewportEntityName = "DemoDiscSceneLabelViewport";
         const int SceneLabelCanvasWidth = 1280;
@@ -66,8 +64,7 @@ namespace DemoDisc.EditorTools {
                 FontReferenceName,
                 AssetAuthoringService.CreateFileReference(SceneLabelFontRelativePath, AssetEntryKind.Font));
             sceneUiEntity.AddComponent(new DemoDisc.rendering.DemoDiscDebugSceneLabelComponent());
-            saveComponent.GetOrCreateExistencePlatformOverride(NintendoDsPlatformId).Exists = false;
-            saveComponent.GetOrCreateExistencePlatformOverride(Nintendo3DsPlatformId).Exists = false;
+            saveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.DualScreen).Exists = false;
             labelEntity.Enabled = true;
         }
 

@@ -37,13 +37,25 @@ namespace DemoDisc.testing {
         /// <param name="platformId">Platform whose build is being resolved.</param>
         /// <returns>True when the entity exists on the supplied platform.</returns>
         public static bool ExistsOnPlatform(SceneEntityAsset entity, string platformId) {
+            return ExistsOnPlatform(entity, platformId, string.Empty);
+        }
+
+        /// <summary>
+        /// Resolves whether one serialized entity survives a build for the supplied platform and build config,
+        /// honouring the level order the entity records and the deepest authored prefix of that target path.
+        /// </summary>
+        /// <param name="entity">Serialized scene entity under evaluation.</param>
+        /// <param name="platformId">Platform whose build is being resolved.</param>
+        /// <param name="buildConfigId">Build config of the target, or empty for none.</param>
+        /// <returns>True when the entity exists on the supplied target.</returns>
+        public static bool ExistsOnPlatform(SceneEntityAsset entity, string platformId, string buildConfigId) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));
             }
 
             IReadOnlyList<SceneOverrideScopeStepKind> levelOrder = OverrideScopeResolver.ResolveLevelOrder(
                 entity.HasOverrideLevelOrder ? entity.OverrideLevelOrder : null);
-            EditorOverrideScope targetScope = OverrideScopeResolver.BuildTargetPath(levelOrder, platformId, string.Empty);
+            EditorOverrideScope targetScope = OverrideScopeResolver.BuildTargetPath(levelOrder, platformId, buildConfigId ?? string.Empty);
             SceneEntityPlatformExistenceOverrideAsset[] overrides = entity.PlatformExistenceOverrides ?? Array.Empty<SceneEntityPlatformExistenceOverrideAsset>();
             return !EditorOverrideScopeResolver.TrySelectDeepest(
                 overrides,

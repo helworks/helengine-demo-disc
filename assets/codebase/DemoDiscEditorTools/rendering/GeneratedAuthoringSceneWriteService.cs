@@ -95,6 +95,7 @@ namespace DemoDisc.EditorTools {
 
             try {
                 AddUniqueRoots(rootsToDispose, sceneDefinition.RootEntities);
+                AdoptGroupFirstLevelOrderForRoots(sceneDefinition.RootEntities);
                 Entity[] rootsToWrite = sceneDefinition.RootEntities;
                 if (sceneDefinition.NintendoDsScene != null) {
                     Entity[] nintendoDsSceneRoots = BuildNintendoHandheldSceneRoots(
@@ -233,41 +234,38 @@ namespace DemoDisc.EditorTools {
                     continue;
                 }
 
-                if (IsConsoleCameraLightInstructionsBlueprintRoot(roots[index])) {
-                    continue;
-                }
-
                 EditorEntity editorRootEntity = roots[index] as EditorEntity;
                 if (editorRootEntity == null) {
                     throw new InvalidOperationException("Generated scene roots must be editor entities before platform-exclusive authoring can be applied.");
                 }
 
-                AdoptGroupFirstLevelOrder(editorRootEntity);
-                PlatformSceneAuthoringHelperServiceValue.ExcludeEntitySubtreeFromScope(editorRootEntity, DemoDiscOverrideScopes.NintendoDualScreen);
+                PlatformSceneAuthoringHelperServiceValue.ExcludeEntitySubtreeFromScope(editorRootEntity, DemoDiscOverrideScopes.DualScreen);
             }
         }
 
         /// <summary>
-        /// Identifies the console-only instruction Blueprint root whose explicit platform rules must survive handheld augmentation.
+        /// Moves every canonical scene root onto the group-first level order. Generated scenes author their rules
+        /// against the platform groups, and a group scope only matches a build target once the entity's level order
+        /// starts with the Group level, so this runs for every written scene, with or without a handheld augmentation.
         /// </summary>
-        /// <param name="rootEntity">Generated root being considered for handheld exclusion.</param>
-        /// <returns>True when the root is the console camera/light Blueprint instance.</returns>
-        static bool IsConsoleCameraLightInstructionsBlueprintRoot(Entity rootEntity) {
-            if (rootEntity == null || rootEntity.Components == null) {
-                return false;
+        /// <param name="roots">Canonical scene roots being written.</param>
+        void AdoptGroupFirstLevelOrderForRoots(Entity[] roots) {
+            if (roots == null) {
+                throw new ArgumentNullException(nameof(roots));
             }
 
-            for (int index = 0; index < rootEntity.Components.Count; index++) {
-                if (rootEntity.Components[index] is BlueprintInstanceComponent blueprintInstance
-                    && string.Equals(
-                        blueprintInstance.BlueprintAssetReference?.RelativePath,
-                        ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath,
-                        StringComparison.Ordinal)) {
-                    return true;
+            for (int index = 0; index < roots.Length; index++) {
+                if (roots[index] == null) {
+                    continue;
                 }
-            }
 
-            return false;
+                EditorEntity editorRootEntity = roots[index] as EditorEntity;
+                if (editorRootEntity == null) {
+                    throw new InvalidOperationException("Generated scene roots must be editor entities before the group-first level order can be applied.");
+                }
+
+                AdoptGroupFirstLevelOrder(editorRootEntity);
+            }
         }
 
         /// <summary>
@@ -291,7 +289,7 @@ namespace DemoDisc.EditorTools {
                 }
 
                 AdoptGroupFirstLevelOrder(editorRootEntity);
-                PlatformSceneAuthoringHelperServiceValue.RestrictEntitySubtreeToScope(editorRootEntity, DemoDiscOverrideScopes.NintendoDualScreen);
+                PlatformSceneAuthoringHelperServiceValue.RestrictEntitySubtreeToScope(editorRootEntity, DemoDiscOverrideScopes.DualScreen);
             }
         }
 
@@ -306,7 +304,43 @@ namespace DemoDisc.EditorTools {
             }
 
             GroupFirstScopeRewriteServiceValue.RewriteSubtree(rootEntity);
-            PlatformSceneAuthoringHelperServiceValue.SetEntitySubtreeLevelOrder(rootEntity, DemoDiscOverrideScopes.GroupFirstLevelOrder);
+            SetGroupFirstLevelOrderWhereUnset(rootEntity);
+        }
+
+        /// <summary>
+        /// Gives every entity in the subtree the group-first level order unless a factory already recorded one, so
+        /// debug-only entities authored build-config first keep their order and their <c>release</c> scope.
+        /// </summary>
+        /// <param name="entity">Subtree root to visit.</param>
+        void SetGroupFirstLevelOrderWhereUnset(EditorEntity entity) {
+            EntitySaveComponent saveComponent = null;
+            if (entity.Components != null) {
+                for (int index = 0; index < entity.Components.Count; index++) {
+                    if (entity.Components[index] is EntitySaveComponent existingSaveComponent) {
+                        saveComponent = existingSaveComponent;
+                        break;
+                    }
+                }
+            }
+
+            if (saveComponent == null) {
+                saveComponent = new EntitySaveComponent();
+                entity.AddComponent(saveComponent);
+            }
+
+            if (saveComponent.OverrideLevelOrder == null) {
+                saveComponent.OverrideLevelOrder = DemoDiscOverrideScopes.CreateGroupFirstLevelOrder();
+            }
+
+            if (entity.Children == null) {
+                return;
+            }
+
+            for (int index = 0; index < entity.Children.Count; index++) {
+                if (entity.Children[index] is EditorEntity childEntity) {
+                    SetGroupFirstLevelOrderWhereUnset(childEntity);
+                }
+            }
         }
 
         /// <summary>

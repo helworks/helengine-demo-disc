@@ -21,22 +21,12 @@ namespace DemoDisc.EditorTools {
         const string MeshComponentTypeId = "helengine.MeshComponent";
 
         /// <summary>
-        /// Stable target platform identifier for PlayStation 2 cooking.
-        /// </summary>
-        const string Ps2PlatformId = "ps2";
-
-        /// <summary>
-        /// Stable target platform identifier for PlayStation Portable cooking.
-        /// </summary>
-        const string PspPlatformId = "psp";
-
-        /// <summary>
-        /// Stable detached PSP MeshComponent member that marks one cooked render variant as already scale-baked.
+        /// Stable detached MeshComponent member that marks one cooked render variant as already scale-baked.
         /// </summary>
         const string MeshBakeScaleMemberName = "MeshBakeScale";
 
         /// <summary>
-        /// World-space maximum edge length used for the constrained-platform course tessellation variants.
+        /// World-space maximum edge length used for the SD-device course tessellation variants.
         /// </summary>
         const double TessellationMaxEdgeLength = 0.5d;
 
@@ -101,16 +91,13 @@ namespace DemoDisc.EditorTools {
             int meshComponentIndex = FindRequiredMeshComponentIndex(entity, entityName);
             SceneComponentAssetRecord componentRecord = entity.Components[meshComponentIndex];
             EntityComponentSaveState saveState = CreateSaveStateWithExistingPlatformOverrides(componentRecord);
-            MeshComponentModifier ps2Modifier = new MeshComponentModifier(MeshComponentModifier.TessellateKind) {
+            // Every SD device gets the same cook-time tessellation and scale bake; HD devices render the course as authored.
+            MeshComponentModifier sdModifier = new MeshComponentModifier(MeshComponentModifier.TessellateKind) {
                 MaxEdgeLength = TessellationMaxEdgeLength
             };
-            MeshComponentModifier pspModifier = new MeshComponentModifier(MeshComponentModifier.TessellateKind) {
-                MaxEdgeLength = TessellationMaxEdgeLength
-            };
-            ModifierStackService.SetStack(saveState, Ps2PlatformId, new[] { ps2Modifier });
-            ModifierStackService.SetStack(saveState, PspPlatformId, new[] { pspModifier });
-            EntityComponentPlatformOverrideState pspOverride = saveState.GetOrCreatePlatformOverride(PspPlatformId);
-            pspOverride.SetMemberValue(MeshBakeScaleMemberName, true.ToString(CultureInfo.InvariantCulture));
+            ModifierStackService.SetStack(saveState, DemoDiscOverrideScopes.Sd, new[] { sdModifier });
+            EntityComponentPlatformOverrideState sdOverride = saveState.GetOrCreateScopedPlatformOverride(DemoDiscOverrideScopes.Sd);
+            sdOverride.SetMemberValue(MeshBakeScaleMemberName, true.ToString(CultureInfo.InvariantCulture));
             SceneComponentAssetRecord baseRecord = OverridePayloadService.UnwrapBaseRecord(componentRecord);
             entity.Components[meshComponentIndex] = OverridePayloadService.Wrap(baseRecord, saveState);
         }

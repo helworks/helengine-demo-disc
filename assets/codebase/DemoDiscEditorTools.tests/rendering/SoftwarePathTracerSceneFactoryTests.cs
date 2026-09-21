@@ -573,10 +573,19 @@ namespace DemoDisc.EditorTools.tests {
             return Assert.IsType<T>(field.GetValue(instance));
         }
 
+        /// <summary>
+        /// Resolves entity existence for one platform the way the packager does once the write service has moved the
+        /// subtree onto the group-first level order: deepest authored prefix of the platform's group-first path wins.
+        /// </summary>
         static bool ResolveExistence(EntitySaveComponent saveComponent, string platformId) {
-            return saveComponent.TryGetExistencePlatformOverride(platformId, out SceneEntityPlatformExistenceOverrideAsset overrideState)
-                ? overrideState.Exists
-                : true;
+            EditorOverrideScopeResolver resolver = EditorOverrideScopeResolver.Load(global::DemoDisc.testing.DemoDiscTestProject.RootPath);
+            EditorOverrideScope targetScope = resolver.BuildTargetPath(DemoDiscOverrideScopes.GroupFirstLevelOrder, platformId, string.Empty);
+            SceneEntityPlatformExistenceOverrideAsset[] overrides = saveComponent.EnumerateExistencePlatformOverrides().ToArray();
+            return !EditorOverrideScopeResolver.TrySelectDeepest(
+                overrides,
+                overrideAsset => EditorOverrideScope.FromSteps(overrideAsset.Scope),
+                targetScope,
+                out SceneEntityPlatformExistenceOverrideAsset selectedOverride) || selectedOverride.Exists;
         }
 
         static string EntityName(Entity entity) {

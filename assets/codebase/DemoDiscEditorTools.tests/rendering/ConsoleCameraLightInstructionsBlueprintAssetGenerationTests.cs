@@ -69,16 +69,19 @@ namespace DemoDisc.EditorTools.tests {
             Assert.Contains(
                 blueprintRoot.Components,
                 component => component.ComponentTypeId.Contains("BlueprintInstanceComponent", StringComparison.Ordinal));
-            Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "windows"));
-            Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "psp"));
-            Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "psvita"));
+            // Every device shows the console instruction root except the dual-screen group, whose bottom screen
+            // carries its own instructions.
+            Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "windows"));
+            Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "psp"));
+            Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "n64"));
+            Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "dc"));
             Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "ds"));
             Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprintRoot, "3ds"));
 
-            SceneEntityAsset legacyOverlayRoot = Assert.Single(
+            SceneEntityAsset desktopOverlayRoot = Assert.Single(
                 scene.RootEntities,
                 entity => entity != null && entity.Name == "DemoSceneInstructionViewport");
-            Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(legacyOverlayRoot, "ps2"));
+            Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(desktopOverlayRoot, "ps2"));
         }
 
         static IEnumerable<SceneEntityAsset> EnumerateEntities(SceneEntityAsset root) {
