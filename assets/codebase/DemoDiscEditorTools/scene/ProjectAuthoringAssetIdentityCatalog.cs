@@ -121,7 +121,6 @@ namespace DemoDisc.EditorTools {
                 ["materials/rendering/pbr_textured_showcase/ScuffedMetal.hasset"] = "2300000000000000000000000000000a",
                 ["materials/rendering/pbr_textured_showcase/WoodPlanks.hasset"] = "2300000000000000000000000000000b",
                 ["materials/rendering/tilt_trial/Course.hasset"] = "2300000000000000000000000000000c",
-                ["materials/rendering/tilt_trial/PlayerSphereWalnut.hasset"] = "2300000000000000000000000000000d",
                 ["materials/rendering/tilt_trial/PlayerSphereMarble.hasset"] = "2300000000000000000000000000000e",
                 ["materials/games/tilt/GoldenCoin.hasset"] = "23000000000000000000000000000010",
                 ["materials/games/tilt/GoalFlagPole.hasset"] = "23000000000000000000000000000011",

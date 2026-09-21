@@ -9,19 +9,6 @@ namespace DemoDisc.EditorTools.tests {
         /// <summary>
         /// Ensures the course and legacy walnut sphere colors keep an explicit opaque alpha channel while preserving the intended tint behavior.
         /// </summary>
-        [Fact]
-        public void Tilt_trial_authored_material_colors_keep_opaque_alpha_in_rgba_order() {
-            string courseSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\rendering\TiltTrialCourseMaterialFactory.cs";
-            string walnutSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\rendering\TiltTrialPlayerSphereWalnutMaterialFactory.cs";
-            string courseSource = File.ReadAllText(courseSourcePath);
-            string walnutSource = File.ReadAllText(walnutSourcePath);
-
-            Assert.Contains("const string CourseBaseColor = \"#FFFFFFFF\";", courseSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("const string CourseBaseColor = \"#FFFFFF\";", courseSource, StringComparison.Ordinal);
-            Assert.Contains("const string WalnutBaseColor = \"#F0E2CEFF\";", walnutSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("const string WalnutBaseColor = \"#FFF0E2CE\";", walnutSource, StringComparison.Ordinal);
-        }
-
         /// <summary>
         /// Ensures the course material factory writes the opaque white base color expected by the lilac textured ground path.
         /// </summary>

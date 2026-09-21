@@ -34,8 +34,7 @@ namespace DemoDisc.EditorTools {
                 Font = font,
                 FontScale = 2f
             });
-            PspFpsComponentOverrideService.Apply(entity);
-            Nintendo64FpsComponentOverrideService.Apply(entity);
+            SmallScreenFpsComponentOverrideService.Apply(entity);
             entity.AddComponent(new DemoDisc.menu.DemoDiscReturnToMenuComponent());
             entity.AddComponent(new DemoDisc.rendering.DemoDiscLightToggleComponent());
             DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory(AssetAuthoringService);

@@ -16,7 +16,7 @@ namespace DemoDisc.EditorTools.tests {
             Assert.Contains("FPSComponent", kitSource, StringComparison.Ordinal);
             Assert.DoesNotContain("FontScale = 1f", kitSource, StringComparison.Ordinal);
             Assert.Contains("FontScale = 2f", kitSource, StringComparison.Ordinal);
-            Assert.Contains("PspFpsComponentOverrideService.Apply", kitSource, StringComparison.Ordinal);
+            Assert.Contains("SmallScreenFpsComponentOverrideService.Apply", kitSource, StringComparison.Ordinal);
 
             string[] kitFactorySourcePaths = [
                 DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "AxisTestSceneFactory.cs"),
@@ -41,7 +41,7 @@ namespace DemoDisc.EditorTools.tests {
 
         [Fact]
         public void Psp_fps_override_persists_the_font_reference_before_serializing_the_override() {
-            string sourcePath = DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "PspFpsComponentOverrideService.cs");
+            string sourcePath = DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "SmallScreenFpsComponentOverrideService.cs");
             string source = File.ReadAllText(sourcePath);
 
             int fontReferenceIndex = source.IndexOf("saveComponent.SetAssetReference(", StringComparison.Ordinal);

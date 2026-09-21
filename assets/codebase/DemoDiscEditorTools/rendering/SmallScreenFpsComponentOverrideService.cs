@@ -2,30 +2,28 @@ using DemoDisc.rendering;
 
 namespace DemoDisc.EditorTools {
     /// <summary>
-    /// Persists the N64-specific FPS overlay scale on generated Demo Disc scene entities.
+    /// Persists the FPS overlay font scale used by the small-screen platforms on generated Demo Disc scene entities.
     /// </summary>
-    public static class Nintendo64FpsComponentOverrideService {
+    public static class SmallScreenFpsComponentOverrideService {
         /// <summary>
         /// Editor service that writes platform-specific component values into entity save state.
         /// </summary>
         static readonly ComponentPlatformEditingService PlatformEditingService = new ComponentPlatformEditingService();
 
         /// <summary>
-        /// Platform identifier used by N64 scene overrides.
+        /// Platforms whose frame buffers are too small for the shared two-times overlay: PSP at 480x272 and N64 at 320x240.
         /// </summary>
-        const string Nintendo64PlatformId = "n64";
+        static readonly string[] PlatformIds = ["psp", "n64"];
 
         /// <summary>
-        /// N64 font scale, tuned against an emulator capture rather than derived. The shared overlay is authored
-        /// at two times for desktop resolutions and PSP halves it to one for a 480x272 screen. A quarter of the
-        /// shared scale was tried first for this 320x240 frame buffer and rejected: it produced glyphs roughly
-        /// four pixels tall, which the pass's one-bit alpha cutout reduced to unreadable smears. The same value
-        /// PSP uses is the next step up and keeps the two rows inside the frame.
+        /// Small-screen font scale, half of the shared two-times overlay. The N64 value was tuned against an emulator
+        /// capture rather than derived: a quarter of the shared scale produced glyphs roughly four pixels tall, which
+        /// the pass's one-bit alpha cutout reduced to unreadable smears, so N64 shares the PSP value.
         /// </summary>
-        const float Nintendo64FpsFontScale = 1f;
+        const float FontScale = 1f;
 
         /// <summary>
-        /// Adds the persisted N64 font-scale override to the FPS component owned by one generated entity.
+        /// Adds the persisted small-screen font-scale override to the FPS component owned by one generated entity.
         /// </summary>
         /// <param name="entity">Generated entity containing one FPS component and editor save state.</param>
         public static void Apply(Entity entity) {
@@ -56,21 +54,24 @@ namespace DemoDisc.EditorTools {
                 fpsComponent,
                 "Font",
                 DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
-            FPSComponent overrideComponent = (FPSComponent)PlatformEditingService.EnsurePlatformOverrideComponent(
-                fpsComponent,
-                saveComponent,
-                Nintendo64PlatformId);
-            overrideComponent.FontScale = Nintendo64FpsFontScale;
-            PlatformEditingService.MarkPropertyOverride(
-                fpsComponent,
-                saveComponent,
-                Nintendo64PlatformId,
-                nameof(FPSComponent.FontScale));
-            PlatformEditingService.PersistPlatformOverride(
-                fpsComponent,
-                overrideComponent,
-                saveComponent,
-                Nintendo64PlatformId);
+            for (int index = 0; index < PlatformIds.Length; index++) {
+                string platformId = PlatformIds[index];
+                FPSComponent overrideComponent = (FPSComponent)PlatformEditingService.EnsurePlatformOverrideComponent(
+                    fpsComponent,
+                    saveComponent,
+                    platformId);
+                overrideComponent.FontScale = FontScale;
+                PlatformEditingService.MarkPropertyOverride(
+                    fpsComponent,
+                    saveComponent,
+                    platformId,
+                    nameof(FPSComponent.FontScale));
+                PlatformEditingService.PersistPlatformOverride(
+                    fpsComponent,
+                    overrideComponent,
+                    saveComponent,
+                    platformId);
+            }
         }
     }
 }

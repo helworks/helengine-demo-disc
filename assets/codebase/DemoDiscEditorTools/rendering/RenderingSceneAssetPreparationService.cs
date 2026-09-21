@@ -66,12 +66,10 @@ namespace DemoDisc.EditorTools {
             string fullProjectRootPath = Path.GetFullPath(AuthoringSession.ProjectRootPath);
             ForwardSolidColorMaterialFactory forwardSolidColorMaterialFactory = new ForwardSolidColorMaterialFactory(AuthoringSession, Transaction);
             TiltTrialCourseMaterialFactory tiltTrialCourseMaterialFactory = new TiltTrialCourseMaterialFactory(AuthoringSession, Transaction);
-            TiltTrialPlayerSphereWalnutMaterialFactory tiltTrialPlayerSphereWalnutMaterialFactory = new TiltTrialPlayerSphereWalnutMaterialFactory(AuthoringSession, Transaction);
             PbrTexturedShowcaseMaterialFactory pbrTexturedShowcaseMaterialFactory = new PbrTexturedShowcaseMaterialFactory(AuthoringSession, Transaction);
             AxisTestMaterialFactory axisTestMaterialFactory = new AxisTestMaterialFactory(AuthoringSession, Transaction);
             forwardSolidColorMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             tiltTrialCourseMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AuthoringSession);
-            tiltTrialPlayerSphereWalnutMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AuthoringSession);
             pbrTexturedShowcaseMaterialFactory.WriteMaterialAssets(fullProjectRootPath, AuthoringSession);
             axisTestMaterialFactory.WriteMaterialAssets(fullProjectRootPath);
             RuntimeModel generatedCubeModel = AuthoringSession.GeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.CubeAssetId);

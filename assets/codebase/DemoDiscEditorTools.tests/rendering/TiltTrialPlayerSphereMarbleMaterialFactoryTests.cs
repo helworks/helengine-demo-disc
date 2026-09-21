@@ -37,26 +37,5 @@ namespace DemoDisc.EditorTools.tests {
         /// <summary>
         /// Ensures repeated public generation keeps the native material identity stable.
         /// </summary>
-        [Fact]
-        public void Walnut_material_definition_uses_a_repeatable_authoring_identity() {
-            string projectRootPath = Path.Combine(Path.GetTempPath(), "city-walnut-material-tests", Guid.NewGuid().ToString("N"));
-            using RenderingTestGeneratedAssetGraph graph = new RenderingTestGeneratedAssetGraph(projectRootPath);
-            IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(projectRootPath);
-            using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
-            DemoDisc.EditorTools.TiltTrialPlayerSphereWalnutMaterialFactory factory = new DemoDisc.EditorTools.TiltTrialPlayerSphereWalnutMaterialFactory(
-                authoringSession,
-                transaction);
-            MethodInfo createDefinitionMethod = typeof(DemoDisc.EditorTools.TiltTrialPlayerSphereWalnutMaterialFactory).GetMethod(
-                "CreateDefinition",
-                BindingFlags.Instance | BindingFlags.NonPublic)!;
-
-            DemoDisc.EditorTools.GeneratedMaterialAssetDefinition first = Assert.IsType<DemoDisc.EditorTools.GeneratedMaterialAssetDefinition>(
-                createDefinitionMethod.Invoke(factory, new object[] { "diffuse-texture-id" }));
-            DemoDisc.EditorTools.GeneratedMaterialAssetDefinition second = Assert.IsType<DemoDisc.EditorTools.GeneratedMaterialAssetDefinition>(
-                createDefinitionMethod.Invoke(factory, new object[] { "diffuse-texture-id" }));
-
-            Assert.False(string.IsNullOrWhiteSpace(first.MaterialAsset.AuthoringAssetId));
-            Assert.Equal(first.MaterialAsset.AuthoringAssetId, second.MaterialAsset.AuthoringAssetId);
-        }
     }
 }
