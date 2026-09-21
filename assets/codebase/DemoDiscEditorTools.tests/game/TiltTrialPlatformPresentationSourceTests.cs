@@ -189,20 +189,6 @@ namespace DemoDisc.EditorTools.tests {
         }
 
         /// <summary>
-        /// Ensures the physics bounds debug root is authored build-config first: absent from every release build and
-        /// from the dual-screen group in debug builds, with no platform named anywhere.
-        /// </summary>
-        [Fact]
-        public void Authored_gameplay_scenes_exclude_debug_root_from_release_and_dual_screen() {
-            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "TiltTrialGameplayPresentationAttachmentService.cs"));
-
-            Assert.Contains("TiltTrialPhysicsBoundsDebug", source, StringComparison.Ordinal);
-            Assert.Contains("Scope = DemoDiscOverrideScopes.Release.ToSteps(), Exists = false", source, StringComparison.Ordinal);
-            Assert.Contains("Scope = DemoDiscOverrideScopes.DebugDualScreen.ToSteps(), Exists = false", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("SceneOverrideScopePath.Platform(", source, StringComparison.Ordinal);
-        }
-
-        /// <summary>
         /// Ensures every authored Tilt Trial level serializes the debug root so it exists on every single-screen device
         /// in debug builds, never on the dual-screen rigs, and never in release builds.
         /// </summary>
@@ -248,6 +234,29 @@ namespace DemoDisc.EditorTools.tests {
                 for (int index = 0; index < excludedPlatformIds.Length; index++) {
                     Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(handheldRoot, excludedPlatformIds[index]));
                 }
+            }
+        }
+
+        /// <summary>
+        /// Ensures every authored Tilt Trial level carries the console presentation root, that it survives on
+        /// single-screen devices in both build configs, and that the dual-screen rigs never receive it.
+        /// </summary>
+        [Fact]
+        public void Authored_gameplay_scenes_keep_console_presentation_off_the_dual_screen_rigs() {
+            string sceneDirectory = global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "scenes", "games", "tilt");
+            string[] scenePaths = Directory.GetFiles(sceneDirectory, "tilt_trial_level_*.helen");
+
+            Assert.NotEmpty(scenePaths);
+            foreach (string scenePath in scenePaths) {
+                using FileStream stream = File.OpenRead(scenePath);
+                SceneAsset sceneAsset = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
+                SceneEntityAsset consoleRoot = Assert.Single(sceneAsset.RootEntities.Where(entity => entity != null && entity.Name == "TiltTrialConsolePresentation"));
+
+                Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(consoleRoot, "windows", "debug"));
+                Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(consoleRoot, "windows", "release"));
+                Assert.True(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(consoleRoot, "ps2", "release"));
+                Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(consoleRoot, "ds"));
+                Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(consoleRoot, "3ds"));
             }
         }
 

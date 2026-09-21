@@ -1476,10 +1476,12 @@ namespace DemoDisc.EditorTools {
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
             entity.AddComponent(new global::DemoDisc.TiltPlay.TiltTrialPhysicsBoundsDebugDrawComponent());
-            // Debug-only: build config is the first tree level, so one release scope hides the root on every device.
+            // Debug-only: build config is the first tree level, so one release scope hides the root on every
+            // device, and the dual-screen rigs drop it in debug builds too.
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             saveComponent.OverrideLevelOrder = DemoDiscOverrideScopes.CreateBuildConfigFirstLevelOrder();
             saveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.Release).Exists = false;
+            saveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.DebugDualScreen).Exists = false;
             return entity;
         }
 

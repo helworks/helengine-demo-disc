@@ -30,13 +30,21 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
-        /// Writes the current authored city gameplay scenes into the supplied city project.
+        /// Writes the reusable gameplay assets every authored gameplay scene references: the shared course
+        /// props, the player sphere material, and the two platform presentation Blueprints. The scene pass
+        /// references these by path, so they are published before it runs.
         /// </summary>
         /// <param name="projectRootPath">Absolute or relative city project root path.</param>
-        public void Generate(string projectRootPath) {
+        public void GenerateReusableAssets(string projectRootPath) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
+
+            TiltTrialPendulumHammerAssetGenerator pendulumHammerAssetGenerator = new TiltTrialPendulumHammerAssetGenerator(AssetAuthoringService, Transaction);
+            pendulumHammerAssetGenerator.Generate(projectRootPath);
+
+            TiltTrialRotatingPlatformAssetGenerator rotatingPlatformAssetGenerator = new TiltTrialRotatingPlatformAssetGenerator(AssetAuthoringService, Transaction);
+            rotatingPlatformAssetGenerator.Generate(projectRootPath);
 
             SplitPlayGoalFlagAssetGenerator splitPlayGoalFlagAssetGenerator = new SplitPlayGoalFlagAssetGenerator(AssetAuthoringService, Transaction);
             splitPlayGoalFlagAssetGenerator.Generate(projectRootPath);
@@ -46,17 +54,31 @@ namespace DemoDisc.EditorTools {
 
             TiltTrialPlayerSphereMarbleMaterialFactory materialFactory = new TiltTrialPlayerSphereMarbleMaterialFactory(AssetAuthoringService, Transaction);
             materialFactory.WriteMaterialAsset(projectRootPath, AssetAuthoringService);
-            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(AssetAuthoringService, Transaction);
-            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare();
-            GameSceneFactory factory = new GameSceneFactory(assets, projectRootPath, AssetAuthoringService, Transaction);
-            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue, AssetAuthoringService, Transaction);
+
+            GameSceneFactory factory = CreateSceneFactory(projectRootPath);
             TiltTrialGameplayPresentationBlueprintGenerator presentationBlueprintGenerator = new TiltTrialGameplayPresentationBlueprintGenerator(AssetAuthoringService, Transaction);
             presentationBlueprintGenerator.Generate(factory);
+        }
+
+        /// <summary>
+        /// Writes the current authored city gameplay scenes into the supplied city project.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
+        public void Generate(string projectRootPath) {
+            if (string.IsNullOrWhiteSpace(projectRootPath)) {
+                throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
+            }
+
+            GameSceneFactory factory = CreateSceneFactory(projectRootPath);
+            GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue, AssetAuthoringService, Transaction);
+            TiltTrialGameplayPresentationRootFactory presentationRootFactory = new TiltTrialGameplayPresentationRootFactory(ScriptTypeResolverValue, AssetAuthoringService);
             GeneratedAuthoringSceneDefinition tiltTrialLevelSelectScene = factory.CreateTiltTrialScene();
             sceneWriteService.WriteScene(tiltTrialLevelSelectScene);
             IReadOnlyList<GeneratedAuthoringSceneDefinition> tiltTrialLevelScenes = factory.CreateTiltTrialLevelScenes();
             for (int index = 0; index < tiltTrialLevelScenes.Count; index++) {
-                sceneWriteService.WriteScene(tiltTrialLevelScenes[index]);
+                GeneratedAuthoringSceneDefinition levelScene = tiltTrialLevelScenes[index];
+                levelScene.RootEntities = presentationRootFactory.AppendPresentationRoots(levelScene.RootEntities);
+                sceneWriteService.WriteScene(levelScene);
             }
             TiltTrialHandheldLevelSelectSceneFactory handheldLevelSelectSceneFactory = new TiltTrialHandheldLevelSelectSceneFactory();
             GeneratedAuthoringSceneDefinition handheldLevelSelectScene = handheldLevelSelectSceneFactory.Create(factory);
@@ -78,15 +100,24 @@ namespace DemoDisc.EditorTools {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             }
 
-            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(AssetAuthoringService, Transaction);
-            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare();
-            GameSceneFactory factory = new GameSceneFactory(assets, projectRootPath, AssetAuthoringService, Transaction);
+            GameSceneFactory factory = CreateSceneFactory(projectRootPath);
             GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(ScriptTypeResolverValue, AssetAuthoringService, Transaction);
             GeneratedAuthoringSceneDefinition tiltTrialScene = factory.CreateTiltTrialScene();
             sceneWriteService.WriteScene(tiltTrialScene);
             TiltTrialHandheldLevelSelectSceneFactory handheldLevelSelectSceneFactory = new TiltTrialHandheldLevelSelectSceneFactory();
             GeneratedAuthoringSceneDefinition handheldLevelSelectScene = handheldLevelSelectSceneFactory.Create(factory);
             sceneWriteService.WriteScene(handheldLevelSelectScene);
+        }
+
+        /// <summary>
+        /// Builds one gameplay scene factory over the shared rendering assets of the active project.
+        /// </summary>
+        /// <param name="projectRootPath">Absolute or relative city project root path.</param>
+        /// <returns>Gameplay scene factory bound to this generator's transaction.</returns>
+        GameSceneFactory CreateSceneFactory(string projectRootPath) {
+            RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(AssetAuthoringService, Transaction);
+            RenderingSceneGenerationAssets assets = assetPreparationService.Prepare();
+            return new GameSceneFactory(assets, projectRootPath, AssetAuthoringService, Transaction);
         }
     }
 }

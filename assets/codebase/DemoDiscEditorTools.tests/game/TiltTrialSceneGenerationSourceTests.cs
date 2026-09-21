@@ -27,7 +27,7 @@ namespace DemoDisc.EditorTools.tests {
             Assert.Contains("CreateTiltTrialScene()", source, StringComparison.Ordinal);
             Assert.Contains("sceneWriteService.WriteScene(tiltTrialLevelSelectScene);", source, StringComparison.Ordinal);
             Assert.Contains("CreateTiltTrialLevelScenes()", source, StringComparison.Ordinal);
-            Assert.Contains("sceneWriteService.WriteScene(tiltTrialLevelScenes[index]);", source, StringComparison.Ordinal);
+            Assert.Contains("sceneWriteService.WriteScene(levelScene);", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialGameplayPresentationBlueprintGenerator", source, StringComparison.Ordinal);
             Assert.Contains("TiltTrialHandheldLevelSelectSceneFactory", source, StringComparison.Ordinal);
         }

@@ -5,7 +5,7 @@ using helengine.editor;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>
-    /// Exercises a production editor generation command at its public
+    /// Exercises a production editor generation pass at its public
     /// boundary, including a deterministic pre-commit staging failure after
     /// all model and material outputs have been prepared and a complete no-op rerun.
     /// </summary>
@@ -34,7 +34,7 @@ namespace DemoDisc.EditorTools.tests {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(ProjectRootPath);
             IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(ProjectRootPath);
 
-            ExecuteCommand(graph, authoringSession);
+            ExecuteCommand(authoringSession);
 
             string[] deliberatelyChangedPaths = GetDeliberatelyChangedPaths();
             MutatePublishedSeedState(ProjectRootPath);
@@ -57,7 +57,7 @@ namespace DemoDisc.EditorTools.tests {
             failureProxy.Inner = authoringSession;
 
             InjectedGenerationFailureException exception = Assert.Throws<InjectedGenerationFailureException>(
-                () => ExecuteCommand(graph, failingAuthoringSession));
+                () => ExecuteCommand(failingAuthoringSession));
 
             Assert.Equal(InjectedFailureMessage, exception.Message);
             Assert.True(failureProxy.CheckpointReached);
@@ -73,7 +73,7 @@ namespace DemoDisc.EditorTools.tests {
             beforeReferences.AssertUnchanged(authoringSession, GetGeneratedAssetKinds());
             AssertTransactionRootRetired(ProjectRootPath);
 
-            ExecuteCommand(graph, authoringSession);
+            ExecuteCommand(authoringSession);
             foreach (string path in deliberatelyChangedPaths) {
                 Assert.NotEqual(seededChangedBytes[path], File.ReadAllBytes(GetAssetPath(ProjectRootPath, path)));
             }
@@ -83,7 +83,7 @@ namespace DemoDisc.EditorTools.tests {
             GeneratedAssetReferenceSnapshot repairedReferences = GeneratedAssetReferenceSnapshot.Capture(
                 authoringSession,
                 GetGeneratedAssetKinds());
-            ExecuteCommand(graph, authoringSession);
+            ExecuteCommand(authoringSession);
             repairedSnapshot.AssertUnchanged();
             repairedReferences.AssertUnchanged(authoringSession, GetGeneratedAssetKinds());
             AssertTransactionRootRetired(ProjectRootPath);
@@ -94,7 +94,7 @@ namespace DemoDisc.EditorTools.tests {
             using TestGeneratedAssetGraph graph = new TestGeneratedAssetGraph(ProjectRootPath);
             IEditorProjectAuthoringSession authoringSession = graph.CreateAuthoringSession(ProjectRootPath);
 
-            ExecuteCommand(graph, authoringSession);
+            ExecuteCommand(authoringSession);
 
             string[] generatedPaths = GetGeneratedPaths();
             GeneratedAssetPublicationSnapshot firstSnapshot = GeneratedAssetPublicationSnapshot.Capture(ProjectRootPath);
@@ -103,24 +103,21 @@ namespace DemoDisc.EditorTools.tests {
                 authoringSession,
                 GetGeneratedAssetKinds());
 
-            ExecuteCommand(graph, authoringSession);
+            ExecuteCommand(authoringSession);
 
             firstSnapshot.AssertUnchanged();
             firstReferences.AssertUnchanged(authoringSession, GetGeneratedAssetKinds());
             AssertTransactionRootRetired(ProjectRootPath);
         }
 
-        void ExecuteCommand(TestGeneratedAssetGraph graph, IEditorProjectAuthoringSession authoringSession) {
-            EditorCommandContext context = new EditorCommandContext(
-                ProjectRootPath,
-                new ScriptTypeResolver(),
-                authoringSession,
-                graph.OwnerCore,
-                graph.InteractionServices,
-                graph.Registry,
-                graph.RendererResources);
-
-            new GenerateTiltTrialPendulumHammerCommand().Execute(context);
+        /// <summary>
+        /// Runs the pendulum hammer asset pass exactly as the game-scene command's first publication does.
+        /// </summary>
+        /// <param name="authoringSession">Session that owns the publication.</param>
+        void ExecuteCommand(IEditorProjectAuthoringSession authoringSession) {
+            using EditorAuthoringTransaction transaction = authoringSession.BeginTransaction();
+            new TiltTrialPendulumHammerAssetGenerator(authoringSession, transaction).Generate(ProjectRootPath);
+            transaction.Commit();
         }
 
         static string[] GetGeneratedPaths() {

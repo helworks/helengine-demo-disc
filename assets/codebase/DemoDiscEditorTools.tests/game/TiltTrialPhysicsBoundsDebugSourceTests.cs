@@ -72,30 +72,5 @@ namespace DemoDisc.EditorTools.tests {
             Assert.DoesNotContain("EditorOverrideScope(\"windows\", \"release\")", source, StringComparison.Ordinal);
         }
 
-        [Fact]
-        public void Tilt_trial_presentation_attachment_excludes_physics_bounds_root_from_release_cooks() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\TiltTrialGameplayPresentationAttachmentService.cs");
-
-            Assert.Contains("Scope = DemoDiscOverrideScopes.Release.ToSteps(), Exists = false", source, StringComparison.Ordinal);
-            Assert.Contains("Scope = DemoDiscOverrideScopes.DebugDualScreen.ToSteps(), Exists = false", source, StringComparison.Ordinal);
-            Assert.Contains("root.OverrideLevelOrder = DemoDiscOverrideScopes.CreateBuildConfigFirstLevelOrder();", source, StringComparison.Ordinal);
-        }
-
-        [Fact]
-        public void Tilt_trial_console_presentation_keeps_windows_release_scope_available() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\TiltTrialGameplayPresentationAttachmentService.cs");
-
-            Assert.Contains("CreateConsolePresentationPlatformOverrides()", source, StringComparison.Ordinal);
-            Assert.Contains("root.PlatformExistenceOverrides = CreateWindowsOnlyDebugPlatformOverrides();", source, StringComparison.Ordinal);
-        }
-
-        [Fact]
-        public void Tilt_trial_presentation_attachment_prunes_f3_status_row_from_release() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\TiltTrialGameplayPresentationAttachmentService.cs");
-
-            Assert.Contains("ApplyWindowsOnlyDebugStatusOverrideToConsoleBlueprint(fullProjectRootPath);", source, StringComparison.Ordinal);
-            Assert.Contains("statusText.PlatformExistenceOverrides = CreateWindowsOnlyDebugStatusOverrides();", source, StringComparison.Ordinal);
-            Assert.Contains("statusText.OverrideLevelOrder = DemoDiscOverrideScopes.CreateBuildConfigFirstLevelOrder();", source, StringComparison.Ordinal);
-        }
     }
 }
