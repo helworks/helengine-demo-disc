@@ -19,9 +19,6 @@ namespace DemoDisc.EditorTools {
                 ["scenes/rendering/pbr_textured_showcase.helen"] = "1000000000000000000000000000001c",
                 ["scenes/rendering/pbr_shadow_theater.helen"] = "1000000000000000000000000000001d",
                 ["scenes/rendering/test_scene_matrix_render.helen"] = "1000000000000000000000000000001e",
-                ["scenes/rendering/ray_tracing_teapot.helen"] = "10000000000000000000000000000040",
-                ["scenes/rendering/ray_tracing_spheres.helen"] = "10000000000000000000000000000041",
-                ["scenes/rendering/ray_tracing_soft_shadows.helen"] = "10000000000000000000000000000042",
                 ["scenes/rendering/software_path_tracer.helen"] = "1000000000000000000000000000001f",
                 ["scenes/physics/test_scene_dynamic_stack_boxes.helen"] = "10000000000000000000000000000023",
                 ["scenes/physics/test_scene_dynamic_sphere_stack.helen"] = "10000000000000000000000000000025",
@@ -37,8 +34,6 @@ namespace DemoDisc.EditorTools {
 
         static readonly IReadOnlyDictionary<string, string> NativeAssetIdentities =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
-                ["models/rendering/ray_tracing/sphere.hasset"] = "40000000000000000000000000000020",
-                ["models/rendering/ray_tracing/teapot.hasset"] = "40000000000000000000000000000021",
                 ["animations/DemoDiscLogoIdle.hanim"] = "40000000000000000000000000000001",
                 ["models/games/tilt/golden_coin.hasset"] = "40000000000000000000000000000002",
                 ["models/games/tilt/golden_coin_ds.hasset"] = "40000000000000000000000000000003",

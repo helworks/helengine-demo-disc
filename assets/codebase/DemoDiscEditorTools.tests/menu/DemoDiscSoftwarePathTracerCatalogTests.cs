@@ -22,11 +22,11 @@ namespace DemoDisc.EditorTools.tests {
             Assert.Equal(MenuActionKind.OpenPanel, category.Action.Kind);
             MenuPanelDefinition rayTracing = Assert.Single(definition.Panels, panel => panel.PanelId == category.Action.TargetId);
             Assert.Equal("Ray Tracing", rayTracing.Heading);
-            Assert.Equal(new[] { "Cornell Box", "Teapot", "Material Spheres", "Soft Shadows", "Back" }, rayTracing.Items.Select(item => item.Label));
+            Assert.Equal(new[] { "Cornell Box", "Back" }, rayTracing.Items.Select(item => item.Label));
             Assert.True(rayTracing.Items[0].Enabled);
             Assert.Equal(MenuActionKind.LoadScene, rayTracing.Items[0].Action.Kind);
             Assert.Equal("software_path_tracer", rayTracing.Items[0].Action.TargetId);
-            Assert.Equal(MenuActionKind.Back, rayTracing.Items[4].Action.Kind);
+            Assert.Equal(MenuActionKind.Back, rayTracing.Items[1].Action.Kind);
             Assert.Single(definition.Panels.SelectMany(panel => panel.Items), item => item.Action.TargetId == "software_path_tracer");
             Assert.DoesNotContain(new DemoDiscSceneCatalog().CreateDemoSceneItems(), item => item.Action.TargetId == "software_path_tracer");
         }
@@ -44,9 +44,9 @@ namespace DemoDisc.EditorTools.tests {
             JsonElement activate = Assert.Single(category.GetProperty("interactions").EnumerateArray(), item => item.GetProperty("kind").GetString() == "activate");
             JsonElement menu = FindSurface(document, activate.GetProperty("targetSurfaceId").GetString());
             JsonElement[] nodes = menu.GetProperty("uiNodes").EnumerateArray().ToArray();
-            Assert.Equal(new[] { "Cornell Box", "Teapot", "Material Spheres", "Soft Shadows", "Back" }, nodes.Select(node => node.GetProperty("text").GetString()));
+            Assert.Equal(new[] { "Cornell Box", "Back" }, nodes.Select(node => node.GetProperty("text").GetString()));
             Assert.Equal("surface-demodisc-showcase-scene", Assert.Single(nodes[0].GetProperty("interactions").EnumerateArray(), item => item.GetProperty("kind").GetString() == "activate").GetProperty("targetSurfaceId").GetString());
-            Assert.Equal("surface-demodisc-demo-scenes-menu", Assert.Single(nodes[4].GetProperty("interactions").EnumerateArray(), item => item.GetProperty("kind").GetString() == "activate").GetProperty("targetSurfaceId").GetString());
+            Assert.Equal("surface-demodisc-demo-scenes-menu", Assert.Single(nodes[1].GetProperty("interactions").EnumerateArray(), item => item.GetProperty("kind").GetString() == "activate").GetProperty("targetSurfaceId").GetString());
             JsonElement rendering = FindSurface(document, "surface-demodisc-demo-scenes-menu");
             Assert.DoesNotContain(rendering.GetProperty("uiNodes").EnumerateArray(), node => node.GetProperty("text").GetString() == "Software Path Tracer" || node.GetProperty("text").GetString() == "Cornell Box");
             Assert.Equal(Enumerable.Range(0, nodes.Length), nodes.Select(node => node.GetProperty("order").GetInt32()));

@@ -31,9 +31,6 @@ namespace DemoDisc.menu {
         public MenuItemDefinition[] CreateSoftwareRayTracingSceneItems() {
             return [
                 new MenuItemDefinition("scene-software-path-tracer", "Cornell Box", true, new MenuActionDefinition(MenuActionKind.LoadScene, "software_path_tracer")),
-                new MenuItemDefinition("scene-ray-tracing-teapot", "Teapot", true, new MenuActionDefinition(MenuActionKind.LoadScene, "ray_tracing_teapot")),
-                new MenuItemDefinition("scene-ray-tracing-spheres", "Material Spheres", true, new MenuActionDefinition(MenuActionKind.LoadScene, "ray_tracing_spheres")),
-                new MenuItemDefinition("scene-ray-tracing-soft-shadows", "Soft Shadows", true, new MenuActionDefinition(MenuActionKind.LoadScene, "ray_tracing_soft_shadows")),
                 new MenuItemDefinition("ray-tracing-back", "Back", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))
             ];
         }

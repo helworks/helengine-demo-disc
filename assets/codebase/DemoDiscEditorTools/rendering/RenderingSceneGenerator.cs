@@ -263,10 +263,6 @@ namespace DemoDisc.EditorTools {
             AuthoringSceneWriteService.WriteScene(pbrShadowTheaterSceneDefinition);
             AuthoringSceneWriteService.WriteScene(matrixRenderSceneDefinition);
             AuthoringSceneWriteService.WriteScene(softwarePathTracerSceneDefinition);
-            SoftwareRayTracingMeshFactory.WriteAssets(Transaction);
-            foreach (string sceneId in new[] { SoftwareRayTracingShowcaseFactory.TeapotSceneId, SoftwareRayTracingShowcaseFactory.SpheresSceneId, SoftwareRayTracingShowcaseFactory.ShadowsSceneId }) {
-                AuthoringSceneWriteService.WriteScene(SoftwarePathTracerFactory.CreateShowcaseDefinition(projectRootPath, sceneId, editorCore.DefaultFontAssetForEditor, Transaction.CreateReference(SoftwareRayTracingMeshFactory.SpherePath, AssetEntryKind.Model), Transaction.CreateReference(SoftwareRayTracingMeshFactory.TeapotPath, AssetEntryKind.Model)));
-            }
         }
 
     }

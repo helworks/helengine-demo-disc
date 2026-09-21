@@ -33,21 +33,6 @@ namespace DemoDisc.EditorTools {
         /// <param name="hudFont">Font assigned to the three diagnostic text entities.</param>
         /// <returns>The live-authored software path tracer scene definition.</returns>
         public GeneratedAuthoringSceneDefinition CreateSceneDefinition(string projectRootPath, SceneAssetReference cubeReference, FontAsset hudFont) {
-            return CreateSceneDefinitionCore(projectRootPath, cubeReference, hudFont, SceneId, null, null);
-        }
-
-        /// <summary>Creates one showcase with the same presentation, controls, diagnostics, and tracer as Cornell Box.</summary>
-        public GeneratedAuthoringSceneDefinition CreateShowcaseDefinition(string projectRootPath, string sceneId, FontAsset hudFont, SceneAssetReference sphereReference, SceneAssetReference teapotReference) {
-            if (sceneId != SoftwareRayTracingShowcaseFactory.TeapotSceneId && sceneId != SoftwareRayTracingShowcaseFactory.SpheresSceneId && sceneId != SoftwareRayTracingShowcaseFactory.ShadowsSceneId) {
-                throw new ArgumentException("Unknown ray tracing showcase.", nameof(sceneId));
-            }
-            if (sphereReference == null) throw new ArgumentNullException(nameof(sphereReference));
-            if (teapotReference == null) throw new ArgumentNullException(nameof(teapotReference));
-            return CreateSceneDefinitionCore(projectRootPath, EngineSceneAssetReferenceFactory.CreateCubeModel(), hudFont, sceneId, sphereReference, teapotReference);
-        }
-
-        /// <summary>Builds the shared presentation and selects only the authored geometry for each scene.</summary>
-        GeneratedAuthoringSceneDefinition CreateSceneDefinitionCore(string projectRootPath, SceneAssetReference cubeReference, FontAsset hudFont, string sceneId, SceneAssetReference sphereReference, SceneAssetReference teapotReference) {
             if (string.IsNullOrWhiteSpace(projectRootPath)) {
                 throw new ArgumentException("Project root path must be provided.", nameof(projectRootPath));
             } else if (cubeReference == null) {
@@ -75,28 +60,17 @@ namespace DemoDisc.EditorTools {
                 handheldSppTextEntity,
                 handheldElapsedTextEntity,
                 handheldRaysPerSecondTextEntity);
-            if (sceneId == SceneId) {
-                CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerFloor", new float3(0f, -1f, 0f), new float3(2f, 0.05f, 2f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
-                CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerCeiling", new float3(0f, 1f, 0f), new float3(2f, 0.05f, 2f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
-                CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerBack", new float3(0f, 0f, -1f), new float3(2f, 2f, 0.05f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
-                CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerLeft", new float3(-1f, 0f, 0f), new float3(0.05f, 2f, 2f), 0f, new float3(0.75f, 0.05f, 0.05f), cubeReference);
-                CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerRight", new float3(1f, 0f, 0f), new float3(0.05f, 2f, 2f), 0f, new float3(0.05f, 0.75f, 0.05f), cubeReference);
-                CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerShortBox", new float3(-0.35f, -0.55f, 0.15f), new float3(0.6f, 0.9f, 0.6f), 0.30f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
-                CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerTallBox", new float3(0.38f, -0.25f, 0.35f), new float3(0.55f, 1.45f, 0.55f), -0.28f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
-                CreateEmitterEntity(controllerEntity, cubeReference);
-            } else {
-                new SoftwareRayTracingShowcaseFactory(AssetAuthoringService).Populate(controllerEntity, sceneId, sphereReference, teapotReference);
-                string legend = sceneId == SoftwareRayTracingShowcaseFactory.SpheresSceneId
-                    ? "Front: diffuse | Middle: mirror | Back: glass\nGlass IOR left to right: 1.10, 1.33, 1.50, 1.80"
-                    : sceneId == SoftwareRayTracingShowcaseFactory.TeapotSceneId
-                        ? "Left: red diffuse | Right: silver mirror"
-                        : "Same sphere size, increasing height above the floor";
-                CreateHudTextEntity(sppTextEntity.Parent, "RayTracingLegend", legend, new float3(4f, 214f, 0.1f), hudFont, new int2(312, 24), 0.45f, TextAlignment.Left);
-                CreateHudTextEntity(handheldHudRoot, "RayTracingHandheldLegend", legend, new float3(16f, 104f, 0.1f), hudFont, new int2(224, 44), 0.45f, TextAlignment.Left);
-            }
+            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerFloor", new float3(0f, -1f, 0f), new float3(2f, 0.05f, 2f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerCeiling", new float3(0f, 1f, 0f), new float3(2f, 0.05f, 2f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerBack", new float3(0f, 0f, -1f), new float3(2f, 2f, 0.05f), 0f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerLeft", new float3(-1f, 0f, 0f), new float3(0.05f, 2f, 2f), 0f, new float3(0.75f, 0.05f, 0.05f), cubeReference);
+            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerRight", new float3(1f, 0f, 0f), new float3(0.05f, 2f, 2f), 0f, new float3(0.05f, 0.75f, 0.05f), cubeReference);
+            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerShortBox", new float3(-0.35f, -0.55f, 0.15f), new float3(0.6f, 0.9f, 0.6f), 0.30f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+            CreateSurfaceEntity(controllerEntity, "SoftwarePathTracerTallBox", new float3(0.38f, -0.25f, 0.35f), new float3(0.55f, 1.45f, 0.55f), -0.28f, new float3(0.75f, 0.75f, 0.75f), cubeReference);
+            CreateEmitterEntity(controllerEntity, cubeReference);
 
             return new GeneratedAuthoringSceneDefinition {
-                SceneId = sceneId,
+                SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 RootEntities = new[] {
                     cameraEntity,
