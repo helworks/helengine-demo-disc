@@ -1,4 +1,4 @@
-using DemoDisc.EditorTools;
+﻿using DemoDisc.EditorTools;
 
 namespace DemoDisc.EditorTools {
     /// <summary>
@@ -20,6 +20,16 @@ namespace DemoDisc.EditorTools {
         /// Cached authored physics-material references shared by every generated scene in one write pass.
         /// </summary>
         readonly Dictionary<string, SceneAssetReference> PhysicsDemoMaterialReferenceCache = new Dictionary<string, SceneAssetReference>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Stable generated provider identifier used for built-in primitive assets.
+        /// </summary>
+        const string GeneratedProviderId = EngineGeneratedAssetProvider.ProviderIdValue;
+
+        /// <summary>
+        /// Stable scene-asset source kind byte used for generated primitive references.
+        /// </summary>
+        const SceneAssetReferenceSourceKind GeneratedSourceKind = SceneAssetReferenceSourceKind.Generated;
 
         /// <summary>
         /// Stable render order assigned to generated debug geometry meshes.
@@ -45,6 +55,46 @@ namespace DemoDisc.EditorTools {
         /// Stable camera draw order assigned to validation-scene cameras.
         /// </summary>
         const byte DefaultCameraDrawOrder = 0;
+
+        /// <summary>
+        /// Stable tagged field name used for camera draw-order persistence.
+        /// </summary>
+        const string CameraDrawOrderFieldName = "CameraDrawOrder";
+
+        /// <summary>
+        /// Stable tagged field name used for camera layer-mask persistence.
+        /// </summary>
+        const string CameraLayerMaskFieldName = "LayerMask";
+
+        /// <summary>
+        /// Stable tagged field name used for camera viewport persistence.
+        /// </summary>
+        const string CameraViewportFieldName = "Viewport";
+
+        /// <summary>
+        /// Stable tagged field name used for camera near clip-plane persistence.
+        /// </summary>
+        const string CameraNearPlaneDistanceFieldName = "NearPlaneDistance";
+
+        /// <summary>
+        /// Stable tagged field name used for camera far clip-plane persistence.
+        /// </summary>
+        const string CameraFarPlaneDistanceFieldName = "FarPlaneDistance";
+
+        /// <summary>
+        /// Stable tagged field name used for camera clear-settings persistence.
+        /// </summary>
+        const string CameraClearSettingsFieldName = "ClearSettings";
+
+        /// <summary>
+        /// Stable tagged field name used for camera render-settings persistence.
+        /// </summary>
+        const string CameraRenderSettingsFieldName = "RenderSettings";
+
+        /// <summary>
+        /// File-system scene-asset source kind used for authored file-backed assets.
+        /// </summary>
+        const SceneAssetReferenceSourceKind FileSystemSourceKind = SceneAssetReferenceSourceKind.FileSystem;
 
         /// <summary>
         /// Stable texture importer identifier stored on the generated sphere-tile texture sidecar.
@@ -272,6 +322,21 @@ namespace DemoDisc.EditorTools {
         static readonly string PhysicsDemoSphereTileTextureAssetId = BuildImporterQualifiedAssetId(ComputeSourceChecksum(PhysicsDemoSphereTileTextureBytes), TextureImporterId);
 
         /// <summary>
+        /// Current payload version for serialized rigid-body component scene records.
+        /// </summary>
+        const byte RigidBodyComponentPayloadVersion = 1;
+
+        /// <summary>
+        /// Current payload version for serialized box-collider component scene records.
+        /// </summary>
+        const byte BoxColliderComponentPayloadVersion = 1;
+
+        /// <summary>
+        /// Current payload version for serialized sphere-collider component scene records.
+        /// </summary>
+        const byte SphereColliderComponentPayloadVersion = 1;
+
+        /// <summary>
         /// Serialized rigid-body kind byte for static bodies.
         /// </summary>
         const byte StaticBodyKindCode = 0;
@@ -333,12 +398,30 @@ namespace DemoDisc.EditorTools {
 
             SceneEntityIdAllocator.Reset();
             SceneAsset sceneAsset;
-            if (string.Equals(sceneId, PhysicsSceneCatalog.DynamicStackBoxesSceneId, StringComparison.Ordinal)) {
+            if (string.Equals(sceneId, PhysicsSceneCatalog.CharacterSlopeSceneId, StringComparison.Ordinal)) {
+                sceneAsset = CreateCharacterSlopeScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.CharacterStepsSceneId, StringComparison.Ordinal)) {
+                sceneAsset = CreateCharacterStepsScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.CharacterMovingPlatformSceneId, StringComparison.Ordinal)) {
+                sceneAsset = CreateCharacterMovingPlatformScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.DynamicStackBoxesSceneId, StringComparison.Ordinal)) {
                 sceneAsset = CreateDynamicStackBoxesScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.SingleFallingCubeSceneId, StringComparison.Ordinal)) {
+                sceneAsset = CreateSingleFallingCubeScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.DynamicSphereStackSceneId, StringComparison.Ordinal)) {
                 sceneAsset = CreateDynamicSphereStackScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.StrictRotatedBoxCompareSceneId, StringComparison.Ordinal)) {
+                sceneAsset = CreateStrictRotatedBoxCompareScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.RenderOnlySlopeSceneId, StringComparison.Ordinal)) {
+                sceneAsset = CreateRenderOnlySlopeScene();
             } else if (string.Equals(sceneId, PhysicsSceneCatalog.DynamicMixedStackSceneId, StringComparison.Ordinal)) {
                 sceneAsset = CreateDynamicMixedStackScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.KinematicPushSceneId, StringComparison.Ordinal)) {
+                sceneAsset = CreateKinematicPushScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.MeshGroundStabilitySceneId, StringComparison.Ordinal)) {
+                sceneAsset = CreateMeshGroundStabilityScene();
+            } else if (string.Equals(sceneId, PhysicsSceneCatalog.TriggerVolumeSceneId, StringComparison.Ordinal)) {
+                sceneAsset = CreateTriggerVolumeScene();
             } else {
                 throw new InvalidOperationException($"Unsupported physics validation scene id '{sceneId}'.");
             }
@@ -381,6 +464,73 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
+        /// Creates the character slope validation scene.
+        /// </summary>
+        /// <returns>Authored slope validation scene asset.</returns>
+        SceneAsset CreateCharacterSlopeScene() {
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "character_slope.scenario",
+                new[] {
+                    CreatePhysicsBoxMeshEntity("character_slope.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(14f, 1f, 14f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
+                    CreatePhysicsBoxMeshEntity("character_slope.ramp", "SlopeRamp", new float3(2.25f, 0.6f, 0f), new float3(5f, 0.6f, 3f), CreateYawPitchRollDegrees(0.0, 0.0, 18.0), StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath)),
+                    CreateCharacterControllerBoxMeshEntity("character_slope.controller", "CharacterController", new float3(-4f, 0.75f, 0f), new float3(0.9f, 1.5f, 0.9f), float4.Identity, new float3(1f, 0f, 0f), 3d, 1d, 0.75d, 0.3d, CreatePhysicsDemoMaterialReference(PhysicsDemoMagentaMaterialRelativePath)),
+                    CreateMarkerEntity("character_slope.spawn", "ControllerSpawn", new float3(-4f, 0.75f, 0f)),
+                    CreateMarkerEntity("character_slope.goal", "SlopeGoal", new float3(4.25f, 1.75f, 0f))
+                });
+            SceneEntityAsset cameraEntity = CreateCameraEntity("character_slope.camera", new float3(8.5f, 5f, 7.5f), CreateYawPitchRollDegrees(-135.0, -18.0, 0.0));
+            return CreateSceneAsset(PhysicsSceneCatalog.CharacterSlopeSceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
+        /// Creates the character steps validation scene.
+        /// </summary>
+        /// <returns>Authored steps validation scene asset.</returns>
+        SceneAsset CreateCharacterStepsScene() {
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "character_steps.scenario",
+                new[] {
+                    CreateCubeMeshEntity("character_steps.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(16f, 1f, 12f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
+                    CreateCubeMeshEntity("character_steps.step01", "Step01", new float3(0.75f, 0.15f, 0f), new float3(1.5f, 0.3f, 3f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath)),
+                    CreateCubeMeshEntity("character_steps.step02", "Step02", new float3(2.25f, 0.45f, 0f), new float3(1.5f, 0.9f, 3f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath)),
+                    CreateCubeMeshEntity("character_steps.step03", "Step03", new float3(3.75f, 0.75f, 0f), new float3(1.5f, 1.5f, 3f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
+                    CreateCubeMeshEntity("character_steps.step04", "Step04", new float3(5.25f, 1.05f, 0f), new float3(1.5f, 2.1f, 3f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoMagentaMaterialRelativePath)),
+                    CreateMarkerEntity("character_steps.spawn", "ControllerSpawn", new float3(-4.5f, 0.75f, 0f))
+                });
+            SceneEntityAsset cameraEntity = CreateCameraEntity("character_steps.camera", new float3(9f, 5.5f, 7f), CreateYawPitchRollDegrees(-138.0, -20.0, 0.0));
+            return CreateSceneAsset(PhysicsSceneCatalog.CharacterStepsSceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
+        /// Creates the character moving-platform validation scene.
+        /// </summary>
+        /// <returns>Authored moving-platform validation scene asset.</returns>
+        SceneAsset CreateCharacterMovingPlatformScene() {
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "character_moving_platform.scenario",
+                new[] {
+                    CreatePhysicsBoxMeshEntity("character_moving_platform.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(18f, 1f, 14f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
+                    CreatePhysicsBoxMeshEntity("character_moving_platform.gap_a", "GapEdgeA", new float3(-1.75f, 0.25f, 0f), new float3(4f, 0.5f, 4f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath)),
+                    CreatePhysicsBoxMeshEntity("character_moving_platform.gap_b", "GapEdgeB", new float3(4.75f, 0.25f, 0f), new float3(4f, 0.5f, 4f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
+                    CreateKinematicPhysicsBoxMeshEntity(
+                        "character_moving_platform.platform",
+                        "MovingPlatform",
+                        new float3(-0.5f, 0.75f, 0f),
+                        new float3(2.5f, 0.35f, 2.5f),
+                        float4.Identity,
+                        new float3(-0.5f, 0.75f, 0f),
+                        new float3(3.5f, 0.75f, 0f),
+                        2d,
+                        true,
+                        CreatePhysicsDemoMaterialReference(PhysicsDemoCyanMaterialRelativePath)),
+                    CreateMarkerEntity("character_moving_platform.platform_start", "PlatformStart", new float3(-0.5f, 0.75f, 0f)),
+                    CreateMarkerEntity("character_moving_platform.platform_end", "PlatformEnd", new float3(3.5f, 0.75f, 0f)),
+                    CreateMarkerEntity("character_moving_platform.spawn", "ControllerSpawn", new float3(-5f, 0.75f, 0f))
+                });
+            SceneEntityAsset cameraEntity = CreateCameraEntity("character_moving_platform.camera", new float3(10f, 5.75f, 8f), CreateYawPitchRollDegrees(-140.0, -18.0, 0.0));
+            return CreateSceneAsset(PhysicsSceneCatalog.CharacterMovingPlatformSceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
         /// Creates the stacked dynamic-body validation scene.
         /// </summary>
         /// <returns>Authored stacked-box validation scene asset.</returns>
@@ -400,6 +550,22 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
+        /// Creates the minimal falling-cube validation scene.
+        /// </summary>
+        /// <returns>Authored ground-and-cube validation scene asset.</returns>
+        SceneAsset CreateSingleFallingCubeScene() {
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "single_falling_cube.scenario",
+                new[] {
+                    CreatePhysicsBoxMeshEntity("single_falling_cube.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(14f, 1f, 14f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
+                    CreatePhysicsBoxMeshEntity("single_falling_cube.box01", "FallingCube", new float3(0f, 5f, 0f), new float3(1f, 1f, 1f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath)),
+                    CreateMarkerEntity("single_falling_cube.spawn", "DynamicSpawn", new float3(0f, 5f, 0f))
+                });
+            SceneEntityAsset cameraEntity = CreatePhysicsShowcaseCameraEntity("single_falling_cube.camera", new float3(7f, 4.5f, 7f), CreateYawPitchRollDegrees(-135.0, -16.0, 0.0), new float3(0f, 2.25f, 0f));
+            return CreatePhysicsShowcaseSceneAsset(PhysicsSceneCatalog.SingleFallingCubeSceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
         /// Creates the dynamic sphere-stack validation scene.
         /// </summary>
         /// <returns>Authored sphere-stack validation scene asset.</returns>
@@ -409,6 +575,44 @@ namespace DemoDisc.EditorTools {
                 CreateDynamicSphereStackChildren());
             SceneEntityAsset cameraEntity = CreatePhysicsShowcaseCameraEntity("dynamic_sphere_stack.camera", new float3(9.5f, 6.75f, 9f), CreateYawPitchRollDegrees(45.0, -18.0, 0.0), float3.Zero);
             return CreatePhysicsShowcaseSceneAsset(PhysicsSceneCatalog.DynamicSphereStackSceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
+        /// Creates the strict rotated-box parity validation scene.
+        /// </summary>
+        /// <returns>Authored parity scene that compares one render-only rotated box against one physics-backed rotated box.</returns>
+        SceneAsset CreateStrictRotatedBoxCompareScene() {
+            float4 rampOrientation = CreateYawPitchRollDegrees(0.0, 0.0, 18.0);
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "strict_rotated_box_compare.scenario",
+                new[] {
+                    CreatePhysicsBoxMeshEntity("strict_rotated_box_compare.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(24f, 1f, 18f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
+                    CreatePhysicsBoxMeshEntity("strict_rotated_box_compare.flat_box", "PhysicsFlatBox", new float3(0f, 0.5f, -5.5f), new float3(6f, 1f, 4f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath)),
+                    CreateCubeMeshEntity("strict_rotated_box_compare.control_box", "ControlVisualBox", new float3(-5f, 1f, 1.5f), new float3(6f, 1f, 10f), rampOrientation, CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath)),
+                    CreatePhysicsBoxMeshEntity("strict_rotated_box_compare.physics_box", "PhysicsVisualBox", new float3(5f, 1f, 1.5f), new float3(6f, 1f, 10f), rampOrientation, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoMagentaMaterialRelativePath)),
+                    CreatePhysicsSphereMeshEntity("strict_rotated_box_compare.physics_probe", "PhysicsProbe", new float3(5f, 4.5f, -1.25f), float4.Identity, DynamicBodyKindCode, true, CreateSphereStackMaterialReference(0)),
+                    CreateMarkerEntity("strict_rotated_box_compare.control_marker", "ControlMarker", new float3(-5f, 2.5f, 1.5f)),
+                    CreateMarkerEntity("strict_rotated_box_compare.physics_marker", "PhysicsMarker", new float3(5f, 2.5f, 1.5f))
+                });
+            SceneEntityAsset cameraEntity = CreatePhysicsShowcaseCameraEntity("strict_rotated_box_compare.camera", new float3(0f, 7.5f, 15.5f), CreateYawPitchRollDegrees(180.0, -20.0, 0.0), new float3(0f, 1.5f, 0f));
+            return CreatePhysicsShowcaseSceneAsset(PhysicsSceneCatalog.StrictRotatedBoxCompareSceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
+        /// Creates the render-only slope validation scene.
+        /// </summary>
+        /// <returns>Authored slope scene that keeps the same rotated mesh shape while removing BEPU rigid bodies and colliders from the ramp.</returns>
+        SceneAsset CreateRenderOnlySlopeScene() {
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "render_only_slope.scenario",
+                new[] {
+                    CreateCubeMeshEntity("render_only_slope.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(14f, 1f, 14f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
+                    CreateCubeMeshEntity("render_only_slope.ramp", "SlopeRamp", new float3(2.25f, 0.6f, 0f), new float3(5f, 0.6f, 3f), CreateYawPitchRollDegrees(0.0, 0.0, 18.0), CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath)),
+                    CreateMarkerEntity("render_only_slope.spawn", "SlopeStart", new float3(-4f, 0.75f, 0f)),
+                    CreateMarkerEntity("render_only_slope.goal", "SlopeGoal", new float3(4.25f, 1.75f, 0f))
+                });
+            SceneEntityAsset cameraEntity = CreateCameraEntity("render_only_slope.camera", new float3(8.5f, 5f, 7.5f), CreateYawPitchRollDegrees(45.0, -18.0, 0.0));
+            return CreateSceneAsset(PhysicsSceneCatalog.RenderOnlySlopeSceneId, cameraEntity, scenarioEntity);
         }
 
         /// <summary>
@@ -466,6 +670,71 @@ namespace DemoDisc.EditorTools {
                 CreatePhysicsSphereMeshEntity("dynamic_mixed_stack.sphere04", "StackSphere04", new float3(-0.04f, 7.5f, -0.05f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoSphereStackPurpleMaterialRelativePath)),
                 CreateMarkerEntity("dynamic_mixed_stack.spawn", "MixedStackSpawn", new float3(0f, 0.5f, 0f))
             };
+        }
+
+        /// <summary>
+        /// Creates the kinematic push validation scene.
+        /// </summary>
+        /// <returns>Authored kinematic push validation scene asset.</returns>
+        SceneAsset CreateKinematicPushScene() {
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "kinematic_push.scenario",
+                new[] {
+                    CreatePhysicsBoxMeshEntity("kinematic_push.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(16f, 1f, 12f), float4.Identity, StaticBodyKindCode, false, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
+                    CreatePhysicsBoxMeshEntity("kinematic_push.block", "DynamicTarget", new float3(1.5f, 0.5f, 0f), new float3(1f, 1f, 1f), float4.Identity, DynamicBodyKindCode, true, CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
+                    CreateKinematicPhysicsBoxMeshEntity(
+                        "kinematic_push.pusher",
+                        "KinematicPusher",
+                        new float3(-2f, 0.5f, 0f),
+                        new float3(1.5f, 1f, 1.5f),
+                        float4.Identity,
+                        new float3(-2f, 0.5f, 0f),
+                        new float3(0.5f, 0.5f, 0f),
+                        1d,
+                        true,
+                        CreatePhysicsDemoMaterialReference(PhysicsDemoCyanMaterialRelativePath)),
+                    CreateMarkerEntity("kinematic_push.start", "PusherStart", new float3(-3.5f, 0.5f, 0f)),
+                    CreateMarkerEntity("kinematic_push.end", "PusherEnd", new float3(0.5f, 0.5f, 0f)),
+                    CreateMarkerEntity("kinematic_push.dynamic_spawn", "DynamicSpawn", new float3(1.5f, 0.5f, 0f))
+                });
+            SceneEntityAsset cameraEntity = CreateCameraEntity("kinematic_push.camera", new float3(8.5f, 4.75f, 7.25f), CreateYawPitchRollDegrees(-135.0, -16.0, 0.0));
+            return CreateSceneAsset(PhysicsSceneCatalog.KinematicPushSceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
+        /// Creates the static-mesh ground stability validation scene.
+        /// </summary>
+        /// <returns>Authored static-ground stability validation scene asset.</returns>
+        SceneAsset CreateMeshGroundStabilityScene() {
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "mesh_ground_stability.scenario",
+                new[] {
+                    CreateCubeMeshEntity("mesh_ground_stability.base", "GroundBase", new float3(0f, -0.5f, 0f), new float3(20f, 1f, 14f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
+                    CreateCubeMeshEntity("mesh_ground_stability.section01", "StaticMeshGround01", new float3(-2.5f, 0.15f, 0f), new float3(3f, 0.3f, 4f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoBlueMaterialRelativePath)),
+                    CreateCubeMeshEntity("mesh_ground_stability.section02", "StaticMeshGround02", new float3(0.5f, 0.35f, 0f), new float3(3f, 0.7f, 4f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoGreenMaterialRelativePath)),
+                    CreateCubeMeshEntity("mesh_ground_stability.section03", "StaticMeshGround03", new float3(3.5f, 0.2f, 0f), new float3(3f, 0.4f, 4f), CreateYawPitchRollDegrees(0.0, 0.0, -6.0), CreatePhysicsDemoMaterialReference(PhysicsDemoMagentaMaterialRelativePath)),
+                    CreateCubeMeshEntity("mesh_ground_stability.section04", "StaticMeshGround04", new float3(6.5f, 0.45f, 0f), new float3(3f, 0.9f, 4f), CreateYawPitchRollDegrees(0.0, 0.0, 5.0), CreatePhysicsDemoMaterialReference(PhysicsDemoYellowMaterialRelativePath)),
+                    CreateMarkerEntity("mesh_ground_stability.spawn", "WalkerSpawn", new float3(-5.5f, 0.75f, 0f))
+                });
+            SceneEntityAsset cameraEntity = CreateCameraEntity("mesh_ground_stability.camera", new float3(11f, 6f, 8.5f), CreateYawPitchRollDegrees(-140.0, -18.0, 0.0));
+            return CreateSceneAsset(PhysicsSceneCatalog.MeshGroundStabilitySceneId, cameraEntity, scenarioEntity);
+        }
+
+        /// <summary>
+        /// Creates the trigger-volume validation scene.
+        /// </summary>
+        /// <returns>Authored trigger-volume validation scene asset.</returns>
+        SceneAsset CreateTriggerVolumeScene() {
+            SceneEntityAsset scenarioEntity = CreateScenarioRoot(
+                "trigger_volume.scenario",
+                new[] {
+                    CreateCubeMeshEntity("trigger_volume.ground", "Ground", new float3(0f, -0.5f, 0f), new float3(18f, 1f, 12f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoGroundMaterialRelativePath)),
+                    CreateCubeMeshEntity("trigger_volume.arch", "TriggerVolume", new float3(1.5f, 1.5f, 0f), new float3(2.5f, 3f, 2.5f), float4.Identity, CreatePhysicsDemoMaterialReference(PhysicsDemoCyanMaterialRelativePath)),
+                    CreateMarkerEntity("trigger_volume.start", "PlayerPathStart", new float3(-5f, 0.75f, 0f)),
+                    CreateMarkerEntity("trigger_volume.end", "PlayerPathEnd", new float3(5.5f, 0.75f, 0f))
+                });
+            SceneEntityAsset cameraEntity = CreateCameraEntity("trigger_volume.camera", new float3(9.5f, 5f, 7.5f), CreateYawPitchRollDegrees(-136.0, -18.0, 0.0));
+            return CreateSceneAsset(PhysicsSceneCatalog.TriggerVolumeSceneId, cameraEntity, scenarioEntity);
         }
 
         /// <summary>
@@ -593,6 +862,74 @@ namespace DemoDisc.EditorTools {
                 LocalOrientation = float4.Identity,
                 Components = Array.Empty<SceneComponentAssetRecord>(),
                 Children = sceneChildren
+            };
+        }
+
+        /// <summary>
+        /// Creates one camera root entity for a validation scene.
+        /// </summary>
+        /// <param name="entityId">Stable serialized entity id.</param>
+        /// <param name="position">Camera position.</param>
+        /// <param name="orientation">Camera orientation.</param>
+        /// <returns>Camera entity with a serialized camera component.</returns>
+        SceneEntityAsset CreateCameraEntity(string entityId, float3 position, float4 orientation) {
+            if (string.IsNullOrWhiteSpace(entityId)) {
+                throw new ArgumentException("Camera entity id must be provided.", nameof(entityId));
+            }
+
+            return new SceneEntityAsset {
+                Id = AllocateSceneEntityId(),
+                Name = "Camera",
+                LayerMask = EditorLayerMasks.SceneObjects,
+                LocalPosition = position,
+                LocalScale = float3.One,
+                LocalOrientation = orientation,
+                Components = new[] {
+                    CreateCameraComponentRecord(),
+                    CreateAutomaticComponentRecord(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
+                        OrbitCenter = float3.Zero,
+                        AutoYawSpeedRadians = 0f
+                    }, 1)
+                },
+                Children = Array.Empty<SceneEntityAsset>()
+            };
+        }
+
+        /// <summary>
+        /// Creates one mesh-backed cube entity for the validation scene.
+        /// </summary>
+        /// <param name="entityId">Stable serialized entity id.</param>
+        /// <param name="name">Authored entity name.</param>
+        /// <param name="position">Entity position.</param>
+        /// <param name="scale">Entity scale.</param>
+        /// <param name="orientation">Entity orientation.</param>
+        /// <returns>Mesh-backed entity.</returns>
+        SceneEntityAsset CreateCubeMeshEntity(
+            string entityId,
+            string name,
+            float3 position,
+            float3 scale,
+            float4 orientation,
+            SceneAssetReference materialReference) {
+            if (string.IsNullOrWhiteSpace(entityId)) {
+                throw new ArgumentException("Mesh entity id must be provided.", nameof(entityId));
+            }
+            if (string.IsNullOrWhiteSpace(name)) {
+                throw new ArgumentException("Mesh entity name must be provided.", nameof(name));
+            }
+            if (materialReference == null) {
+                throw new ArgumentNullException(nameof(materialReference));
+            }
+
+            return new SceneEntityAsset {
+                Id = AllocateSceneEntityId(),
+                Name = name,
+                LayerMask = EditorLayerMasks.SceneObjects,
+                LocalPosition = position,
+                LocalScale = scale,
+                LocalOrientation = orientation,
+                Components = new[] { CreateMeshComponentRecord(materialReference) },
+                Children = Array.Empty<SceneEntityAsset>()
             };
         }
 
@@ -809,6 +1146,109 @@ namespace DemoDisc.EditorTools {
                     CreateMeshComponentRecord(global::helengine.EngineSceneAssetReferenceFactory.CreateSphereModel(), materialReference),
                     CreateRigidBodyComponentRecord(bodyKindCode, useGravity, 1d, 1d, float3.Zero, 1),
                     CreateSphereColliderComponentRecord(0.5f, 2)
+                },
+                Children = Array.Empty<SceneEntityAsset>()
+            };
+        }
+
+        /// <summary>
+        /// Creates one mesh-backed box entity that also carries serialized 3D kinematic-motion records.
+        /// </summary>
+        /// <param name="entityId">Stable serialized entity id.</param>
+        /// <param name="name">Authored entity name.</param>
+        /// <param name="position">Entity position.</param>
+        /// <param name="scale">Entity scale and collider size.</param>
+        /// <param name="orientation">Entity orientation.</param>
+        /// <param name="startLocalPosition">Kinematic motion start position.</param>
+        /// <param name="endLocalPosition">Kinematic motion end position.</param>
+        /// <param name="travelDurationSeconds">One-way travel duration in seconds.</param>
+        /// <param name="pingPong">True when the motion should reverse at the end.</param>
+        /// <returns>Mesh-backed entity with serialized rigid-body, box-collider, and kinematic-motion records.</returns>
+        SceneEntityAsset CreateKinematicPhysicsBoxMeshEntity(
+            string entityId,
+            string name,
+            float3 position,
+            float3 scale,
+            float4 orientation,
+            float3 startLocalPosition,
+            float3 endLocalPosition,
+            double travelDurationSeconds,
+            bool pingPong,
+            SceneAssetReference materialReference) {
+            if (string.IsNullOrWhiteSpace(entityId)) {
+                throw new ArgumentException("Physics entity id must be provided.", nameof(entityId));
+            }
+            if (string.IsNullOrWhiteSpace(name)) {
+                throw new ArgumentException("Physics entity name must be provided.", nameof(name));
+            }
+            if (materialReference == null) {
+                throw new ArgumentNullException(nameof(materialReference));
+            }
+
+            return new SceneEntityAsset {
+                Id = AllocateSceneEntityId(),
+                Name = name,
+                LayerMask = EditorLayerMasks.SceneObjects,
+                LocalPosition = position,
+                LocalScale = scale,
+                LocalOrientation = orientation,
+                Components = new[] {
+                    CreateMeshComponentRecord(materialReference),
+                    CreateRigidBodyComponentRecord(KinematicBodyKindCode, false, 1d, 1d, float3.Zero, 1),
+                    CreateBoxColliderComponentRecord(float3.One, 2),
+                    CreateKinematicMotionComponentRecord(startLocalPosition, endLocalPosition, travelDurationSeconds, pingPong, 3)
+                },
+                Children = Array.Empty<SceneEntityAsset>()
+            };
+        }
+
+        /// <summary>
+        /// Creates one mesh-backed box entity that carries serialized 3D character-controller records.
+        /// </summary>
+        /// <param name="entityId">Stable serialized entity id.</param>
+        /// <param name="name">Authored entity name.</param>
+        /// <param name="position">Entity position.</param>
+        /// <param name="scale">Entity scale and collider size.</param>
+        /// <param name="orientation">Entity orientation.</param>
+        /// <param name="desiredMoveDirection">Desired local move direction used by the controller.</param>
+        /// <param name="moveSpeed">Horizontal move speed in world units per second.</param>
+        /// <param name="gravityScale">Gravity multiplier used by the controller.</param>
+        /// <param name="stepHeight">Maximum upward snap height used while climbing support surfaces.</param>
+        /// <param name="groundSnapDistance">Maximum downward snap distance used to keep the controller grounded.</param>
+        /// <returns>Mesh-backed entity with serialized box-collider and character-controller records.</returns>
+        SceneEntityAsset CreateCharacterControllerBoxMeshEntity(
+            string entityId,
+            string name,
+            float3 position,
+            float3 scale,
+            float4 orientation,
+            float3 desiredMoveDirection,
+            double moveSpeed,
+            double gravityScale,
+            double stepHeight,
+            double groundSnapDistance,
+            SceneAssetReference materialReference) {
+            if (string.IsNullOrWhiteSpace(entityId)) {
+                throw new ArgumentException("Character controller entity id must be provided.", nameof(entityId));
+            }
+            if (string.IsNullOrWhiteSpace(name)) {
+                throw new ArgumentException("Character controller entity name must be provided.", nameof(name));
+            }
+            if (materialReference == null) {
+                throw new ArgumentNullException(nameof(materialReference));
+            }
+
+            return new SceneEntityAsset {
+                Id = AllocateSceneEntityId(),
+                Name = name,
+                LayerMask = EditorLayerMasks.SceneObjects,
+                LocalPosition = position,
+                LocalScale = scale,
+                LocalOrientation = orientation,
+                Components = new[] {
+                    CreateMeshComponentRecord(materialReference),
+                    CreateBoxColliderComponentRecord(float3.One, 1),
+                    CreateCharacterControllerComponentRecord(desiredMoveDirection, moveSpeed, gravityScale, stepHeight, groundSnapDistance, 2)
                 },
                 Children = Array.Empty<SceneEntityAsset>()
             };
@@ -1129,7 +1569,9 @@ namespace DemoDisc.EditorTools {
         /// <returns>True when the scene id belongs to a playable physics showcase scene.</returns>
         static bool IsPlayablePhysicsShowcaseScene(string sceneId) {
             return string.Equals(sceneId, PhysicsSceneCatalog.DynamicStackBoxesSceneId, StringComparison.Ordinal)
+                || string.Equals(sceneId, PhysicsSceneCatalog.SingleFallingCubeSceneId, StringComparison.Ordinal)
                 || string.Equals(sceneId, PhysicsSceneCatalog.DynamicSphereStackSceneId, StringComparison.Ordinal)
+                || string.Equals(sceneId, PhysicsSceneCatalog.StrictRotatedBoxCompareSceneId, StringComparison.Ordinal)
                 || string.Equals(sceneId, PhysicsSceneCatalog.DynamicMixedStackSceneId, StringComparison.Ordinal);
         }
 
@@ -1186,6 +1628,13 @@ namespace DemoDisc.EditorTools {
                     new float3(2.25f, 4.8f, 10.25f),
                     CreateYawPitchRollDegrees(8.0, -16.0, 0.0),
                     new float3(0.75f, 1.5f, 0f));
+            } else if (string.Equals(normalizedSceneId, PhysicsSceneCatalog.SingleFallingCubeSceneId, StringComparison.Ordinal)) {
+                authoredSceneAsset = CreateSingleFallingCubeScene();
+                cameraEntity = CreateLivePhysicsShowcaseCameraEntity(
+                    "SingleFallingCubeCamera",
+                    new float3(7f, 4.5f, 7f),
+                    CreateYawPitchRollDegrees(-135.0, -16.0, 0.0),
+                    new float3(0f, 2.25f, 0f));
             } else if (string.Equals(normalizedSceneId, PhysicsSceneCatalog.DynamicSphereStackSceneId, StringComparison.Ordinal)) {
                 authoredSceneAsset = CreateDynamicSphereStackScene();
                 cameraEntity = CreateLivePhysicsShowcaseCameraEntity(
@@ -1193,6 +1642,13 @@ namespace DemoDisc.EditorTools {
                     new float3(7.75f, 4.75f, 7.5f),
                     CreateYawPitchRollDegrees(-135.0, -18.0, 0.0),
                     new float3(0f, 1.6f, 0f));
+            } else if (string.Equals(normalizedSceneId, PhysicsSceneCatalog.StrictRotatedBoxCompareSceneId, StringComparison.Ordinal)) {
+                authoredSceneAsset = CreateStrictRotatedBoxCompareScene();
+                cameraEntity = CreateLivePhysicsShowcaseCameraEntity(
+                    "StrictRotatedBoxCompareCamera",
+                    new float3(0f, 7.5f, 15.5f),
+                    CreateYawPitchRollDegrees(180.0, -20.0, 0.0),
+                    new float3(0f, 1.5f, 0f));
             } else if (string.Equals(normalizedSceneId, PhysicsSceneCatalog.DynamicMixedStackSceneId, StringComparison.Ordinal)) {
                 authoredSceneAsset = CreateDynamicMixedStackScene();
                 cameraEntity = CreateLivePhysicsShowcaseCameraEntity(
@@ -1248,8 +1704,12 @@ namespace DemoDisc.EditorTools {
 
             if (string.Equals(sceneId, "test_scene_dynamic_stack_boxes", StringComparison.Ordinal)) {
                 return PhysicsSceneCatalog.DynamicStackBoxesSceneId;
+            } else if (string.Equals(sceneId, "test_scene_single_falling_cube", StringComparison.Ordinal)) {
+                return PhysicsSceneCatalog.SingleFallingCubeSceneId;
             } else if (string.Equals(sceneId, "test_scene_dynamic_sphere_stack", StringComparison.Ordinal)) {
                 return PhysicsSceneCatalog.DynamicSphereStackSceneId;
+            } else if (string.Equals(sceneId, "test_scene_strict_rotated_box_compare", StringComparison.Ordinal)) {
+                return PhysicsSceneCatalog.StrictRotatedBoxCompareSceneId;
             } else if (string.Equals(sceneId, "test_scene_dynamic_mixed_stack", StringComparison.Ordinal)) {
                 return PhysicsSceneCatalog.DynamicMixedStackSceneId;
             }
@@ -1360,6 +1820,37 @@ namespace DemoDisc.EditorTools {
             }
 
             throw new InvalidOperationException("The physics showcase UI root must be authored through editor entities.");
+        }
+
+        /// <summary>
+        /// Finds one serialized scene entity by display name inside the supplied subtree.
+        /// </summary>
+        /// <param name="entities">Serialized scene entities to inspect.</param>
+        /// <param name="entityName">Display name to resolve.</param>
+        /// <returns>Matching serialized scene entity.</returns>
+        SceneEntityAsset FindRequiredSceneEntityAssetByName(SceneEntityAsset[] entities, string entityName) {
+            if (entities == null) {
+                throw new ArgumentNullException(nameof(entities));
+            } else if (string.IsNullOrWhiteSpace(entityName)) {
+                throw new ArgumentException("Entity name must be provided.", nameof(entityName));
+            }
+
+            for (int entityIndex = 0; entityIndex < entities.Length; entityIndex++) {
+                SceneEntityAsset entity = entities[entityIndex];
+                if (entity == null) {
+                    continue;
+                }
+                if (string.Equals(entity.Name, entityName, StringComparison.Ordinal)) {
+                    return entity;
+                }
+
+                SceneEntityAsset nestedMatch = FindSceneEntityAssetByNameOrNull(entity.Children, entityName);
+                if (nestedMatch != null) {
+                    return nestedMatch;
+                }
+            }
+
+            throw new InvalidOperationException($"Expected one serialized scene entity named '{entityName}'.");
         }
 
         /// <summary>
@@ -2142,6 +2633,84 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
+        /// Creates one serialized kinematic-motion component record.
+        /// </summary>
+        /// <param name="startLocalPosition">Motion path start position.</param>
+        /// <param name="endLocalPosition">Motion path end position.</param>
+        /// <param name="travelDurationSeconds">One-way travel duration in seconds.</param>
+        /// <param name="pingPong">True when the motion should reverse at the end.</param>
+        /// <param name="componentIndex">Entity-local component order index.</param>
+        /// <returns>Serialized kinematic-motion component record.</returns>
+        static SceneComponentAssetRecord CreateKinematicMotionComponentRecord(
+            float3 startLocalPosition,
+            float3 endLocalPosition,
+            double travelDurationSeconds,
+            bool pingPong,
+            int componentIndex) {
+            if (componentIndex < 0) {
+                throw new ArgumentOutOfRangeException(nameof(componentIndex), "Component index must be non-negative.");
+            }
+            if (double.IsNaN(travelDurationSeconds) || double.IsInfinity(travelDurationSeconds) || travelDurationSeconds <= 0d) {
+                throw new ArgumentOutOfRangeException(nameof(travelDurationSeconds), "Travel duration must be a finite value greater than zero.");
+            }
+
+            KinematicMotion3DComponent component = new KinematicMotion3DComponent {
+                StartLocalPosition = startLocalPosition,
+                EndLocalPosition = endLocalPosition,
+                TravelDurationSeconds = travelDurationSeconds,
+                PingPong = pingPong
+            };
+            return GeneratedScenePersistenceRegistryFactory.Create()
+                .GetDescriptor(component)
+                .SerializeComponent(component, componentIndex, null);
+        }
+
+        /// <summary>
+        /// Creates one serialized character-controller component record.
+        /// </summary>
+        /// <param name="desiredMoveDirection">Desired planar move direction.</param>
+        /// <param name="moveSpeed">Horizontal move speed in world units per second.</param>
+        /// <param name="gravityScale">Gravity multiplier used by the controller.</param>
+        /// <param name="stepHeight">Maximum upward snap height used while climbing support surfaces.</param>
+        /// <param name="groundSnapDistance">Maximum downward snap distance used to keep the controller grounded.</param>
+        /// <param name="componentIndex">Entity-local component order index.</param>
+        /// <returns>Serialized character-controller component record.</returns>
+        static SceneComponentAssetRecord CreateCharacterControllerComponentRecord(
+            float3 desiredMoveDirection,
+            double moveSpeed,
+            double gravityScale,
+            double stepHeight,
+            double groundSnapDistance,
+            int componentIndex) {
+            if (componentIndex < 0) {
+                throw new ArgumentOutOfRangeException(nameof(componentIndex), "Component index must be non-negative.");
+            }
+            if (double.IsNaN(moveSpeed) || double.IsInfinity(moveSpeed) || moveSpeed < 0d) {
+                throw new ArgumentOutOfRangeException(nameof(moveSpeed), "Move speed must be a finite value greater than or equal to zero.");
+            }
+            if (double.IsNaN(gravityScale) || double.IsInfinity(gravityScale) || gravityScale < 0d) {
+                throw new ArgumentOutOfRangeException(nameof(gravityScale), "Gravity scale must be a finite value greater than or equal to zero.");
+            }
+            if (double.IsNaN(stepHeight) || double.IsInfinity(stepHeight) || stepHeight < 0d) {
+                throw new ArgumentOutOfRangeException(nameof(stepHeight), "Step height must be a finite value greater than or equal to zero.");
+            }
+            if (double.IsNaN(groundSnapDistance) || double.IsInfinity(groundSnapDistance) || groundSnapDistance < 0d) {
+                throw new ArgumentOutOfRangeException(nameof(groundSnapDistance), "Ground snap distance must be a finite value greater than or equal to zero.");
+            }
+
+            CharacterController3DComponent component = new CharacterController3DComponent {
+                DesiredMoveDirection = desiredMoveDirection,
+                MoveSpeed = moveSpeed,
+                GravityScale = gravityScale,
+                StepHeight = stepHeight,
+                GroundSnapDistance = groundSnapDistance
+            };
+            return GeneratedScenePersistenceRegistryFactory.Create()
+                .GetDescriptor(component)
+                .SerializeComponent(component, componentIndex, null);
+        }
+
+        /// <summary>
         /// Writes one optional scene asset reference into a component payload.
         /// </summary>
         /// <param name="writer">Destination writer receiving the payload.</param>
@@ -2159,6 +2728,22 @@ namespace DemoDisc.EditorTools {
             writer.WriteString(reference.RelativePath);
             writer.WriteString(reference.ProviderId);
             writer.WriteString(reference.AssetId);
+        }
+
+        /// <summary>
+        /// Writes one `float4` payload into a binary component stream.
+        /// </summary>
+        /// <param name="writer">Destination writer receiving the payload.</param>
+        /// <param name="value">Vector value to write.</param>
+        static void WriteFloat4(EngineBinaryWriter writer, float4 value) {
+            if (writer == null) {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.WriteSingle(value.X);
+            writer.WriteSingle(value.Y);
+            writer.WriteSingle(value.Z);
+            writer.WriteSingle(value.W);
         }
 
         /// <summary>
