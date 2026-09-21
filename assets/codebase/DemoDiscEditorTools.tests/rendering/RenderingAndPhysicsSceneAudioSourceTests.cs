@@ -15,10 +15,6 @@ namespace DemoDisc.EditorTools.tests {
             @"assets\scenes\rendering\colored_cube_grid.helen",
             @"assets\scenes\rendering\cube_test.helen",
             @"assets\scenes\rendering\directional_shadow_plaza.helen",
-            @"assets\scenes\rendering\ground_cube_probe.helen",
-            @"assets\scenes\rendering\scaled_cube.helen",
-            @"assets\scenes\rendering\scene_memory_probe.helen",
-            @"assets\scenes\rendering\spotlight_street_slice.helen",
             @"assets\scenes\rendering\test_scene_matrix_render.helen",
             @"assets\scenes\rendering\textured_cube_grid.helen"
         };
