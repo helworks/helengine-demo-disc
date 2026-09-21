@@ -64,6 +64,7 @@ namespace DemoDisc.EditorTools {
                 ["blueprints/ui/ConsoleCameraLightInstructions.hblueprint"] = "4000000000000000000000000000000a",
                 ["blueprints/games/tilt/RotatingPlatform.hblueprint"] = "4000000000000000000000000000000f",
                 ["blueprints/games/tilt/PendulumHammer.hblueprint"] = "40000000000000000000000000000010",
+                ["blueprints/handheld/HandheldBottomScreenChrome.hblueprint"] = "40000000000000000000000000000011",
             };
 
         /// <summary>

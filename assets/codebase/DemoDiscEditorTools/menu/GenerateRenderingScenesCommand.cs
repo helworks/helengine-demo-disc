@@ -17,12 +17,18 @@ namespace DemoDisc.EditorTools {
         public string DisplayName => "Generate Rendering Scenes";
 
         /// <summary>
-        /// Generates the current city rendering showcase scenes.
+        /// Publishes the shared handheld bottom-screen chrome Blueprint, then generates the current
+        /// city rendering showcase scenes that instance it.
         /// </summary>
         /// <param name="context">Editor-safe command context supplied by the editor host.</param>
         public void Execute(IEditorCommandContext context) {
             if (context == null) {
                 throw new ArgumentNullException(nameof(context));
+            }
+
+            using (EditorAuthoringTransaction chromeTransaction = context.Authoring.BeginTransaction()) {
+                new HandheldBottomScreenChromeBlueprintGenerator(context.Authoring, chromeTransaction).Generate();
+                chromeTransaction.Commit();
             }
 
             using EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();

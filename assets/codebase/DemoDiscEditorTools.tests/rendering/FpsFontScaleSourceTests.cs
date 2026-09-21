@@ -63,13 +63,17 @@ namespace DemoDisc.EditorTools.tests {
             string source = File.ReadAllText(sourcePath);
 
             Assert.Contains("const float NintendoDsBottomOverlayFontScale = 1f;", source, StringComparison.Ordinal);
-            Assert.Contains("const float Nintendo3DsBottomButtonLabelFontScale = 0.5f;", source, StringComparison.Ordinal);
             Assert.Contains("const float Nintendo3DsFpsFontScale = 1f;", source, StringComparison.Ordinal);
-            Assert.Contains("const byte NintendoDsLightSwatchRenderOrder = 222;", source, StringComparison.Ordinal);
-            Assert.Contains("Alignment = TextAlignment.Center", source, StringComparison.Ordinal);
             Assert.Contains("EnsurePlatformOverrideComponent", source, StringComparison.Ordinal);
-            Assert.Contains("nameof(TextComponent.FontScale)", source, StringComparison.Ordinal);
             Assert.Contains("nameof(FPSComponent.FontScale)", source, StringComparison.Ordinal);
+
+            string chromeSource = File.ReadAllText(DemoDiscTestProject.GetPath(
+                "assets", "codebase", "DemoDiscEditorTools", "rendering", "HandheldBottomScreenChromeBlueprintGenerator.cs"));
+
+            Assert.Contains("const float Nintendo3DsBottomButtonLabelFontScale = 0.5f;", chromeSource, StringComparison.Ordinal);
+            Assert.Contains("const byte LightSwatchRenderOrder = 222;", chromeSource, StringComparison.Ordinal);
+            Assert.Contains("Alignment = TextAlignment.Center", chromeSource, StringComparison.Ordinal);
+            Assert.Contains("nameof(TextComponent.FontScale)", chromeSource, StringComparison.Ordinal);
         }
 
         /// <summary>

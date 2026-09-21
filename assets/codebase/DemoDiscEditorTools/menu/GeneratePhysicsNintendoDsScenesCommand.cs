@@ -25,6 +25,11 @@ namespace DemoDisc.EditorTools {
                 throw new ArgumentNullException(nameof(context));
             }
 
+            using (EditorAuthoringTransaction chromeTransaction = context.Authoring.BeginTransaction()) {
+                new HandheldBottomScreenChromeBlueprintGenerator(context.Authoring, chromeTransaction).Generate();
+                chromeTransaction.Commit();
+            }
+
             using EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
             PhysicsNintendoDsSceneGenerator generator = new PhysicsNintendoDsSceneGenerator(context.ScriptTypeResolver, context.Authoring, transaction);
             generator.Generate(context.ProjectRootPath);

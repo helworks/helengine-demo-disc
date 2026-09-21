@@ -21,10 +21,6 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
         /// </summary>
         const float NintendoDsBottomOverlayFontScale = 1f;
 
-        /// <summary>
-        /// Fixed font scale used by Nintendo 3DS light and back button labels after the shared DS reference canvas is resolved to the 3DS screen.
-        /// </summary>
-        const float Nintendo3DsBottomButtonLabelFontScale = 0.5f;
 
         /// <summary>
         /// Fixed font scale used by Nintendo 3DS FPS diagnostics after the shared DS reference canvas is resolved to the 3DS screen.
@@ -41,10 +37,6 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
         /// </summary>
         readonly ComponentPlatformEditingService PlatformEditingServiceValue = new ComponentPlatformEditingService();
 
-        /// <summary>
-        /// Runtime layer mask used by packaged 2D overlay drawables.
-        /// </summary>
-        const byte RuntimeLayerMask = 0b00000001;
 
         /// <summary>
         /// Runtime layer mask used by generated bottom-screen entities so the Nintendo DS cameras can render them.
@@ -62,117 +54,36 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
         const int ScreenHeight = 192;
 
         /// <summary>
-        /// <summary>
-        /// Fixed width used by the scaffold-owned Nintendo DS back button body.
-        /// </summary>
-        const int NintendoDsBackButtonWidth = 224;
 
-        /// <summary>
-        /// Fixed height used by the scaffold-owned Nintendo DS back button body.
-        /// </summary>
-        const int NintendoDsBackButtonHeight = 32;
 
-        /// <summary>
-        /// Fixed left offset used by the scaffold-owned Nintendo DS back button so it remains horizontally centered.
-        /// </summary>
-        const int NintendoDsBackButtonLeft = (ScreenWidth - NintendoDsBackButtonWidth) / 2;
 
-        /// <summary>
-        /// Fixed top offset used by the scaffold-owned Nintendo DS back button so it remains pinned near the bottom edge.
-        /// </summary>
-        const int NintendoDsBackButtonTop = ScreenHeight - NintendoDsBackButtonHeight - 6;
 
-        /// <summary>
-        /// Fixed horizontal inset used by the scaffold-owned Nintendo DS back button label.
-        /// </summary>
-        const int NintendoDsBackButtonLabelLeft = 80;
 
-        /// <summary>
-        /// Fixed vertical inset used by the scaffold-owned Nintendo DS back button label.
-        /// </summary>
-        const int NintendoDsBackButtonLabelTop = 6;
 
-        /// <summary>
-        /// Fixed width used by the scaffold-owned Nintendo DS back button label.
-        /// </summary>
-        const int NintendoDsBackButtonLabelWidth = 64;
 
-        /// <summary>
-        /// Fixed height used by the scaffold-owned Nintendo DS back button label.
-        /// </summary>
-        const int NintendoDsBackButtonLabelHeight = 20;
 
-        /// <summary>
-        /// Fixed top offset used by the scaffold-owned Nintendo DS light button so it remains stacked above the back button.
-        /// </summary>
-        const int NintendoDsLightButtonTop = NintendoDsBackButtonTop - NintendoDsBackButtonHeight - 8;
 
-        /// <summary>
-        /// Fixed horizontal inset used by the scaffold-owned Nintendo DS light button label.
-        /// </summary>
-        const int NintendoDsLightButtonLabelLeft = 64;
 
-        /// <summary>
-        /// Fixed vertical inset used by the scaffold-owned Nintendo DS light button label.
-        /// </summary>
-        const int NintendoDsLightButtonLabelTop = 6;
 
-        /// <summary>
-        /// Fixed width used by the scaffold-owned Nintendo DS light button label.
-        /// </summary>
-        const int NintendoDsLightButtonLabelWidth = 80;
 
-        /// <summary>
-        /// Fixed height used by the scaffold-owned Nintendo DS light button label.
-        /// </summary>
-        const int NintendoDsLightButtonLabelHeight = 20;
 
         /// <summary>
         /// Exact demo-disc lilac clear color reused by the shared Nintendo DS bottom-screen scaffold camera.
         /// </summary>
         static readonly float4 NintendoDsBottomScreenClearColor = new float4(30f / 255f, 17f / 255f, 41f / 255f, 1f);
 
-        /// <summary>
-        /// Fixed left offset used by the scaffold-owned Nintendo DS light swatch.
-        /// </summary>
-        const int NintendoDsLightSwatchLeft = 148;
 
-        /// <summary>
-        /// Fixed top offset used by the scaffold-owned Nintendo DS light swatch.
-        /// </summary>
-        const int NintendoDsLightSwatchTop = 4;
 
-        /// <summary>
-        /// Fixed square size used by the scaffold-owned Nintendo DS light swatch.
-        /// </summary>
-        const int NintendoDsLightSwatchSize = 16;
 
         /// <summary>
         /// Render order used by the scaffold-owned Nintendo DS light swatch. It must sit at 220 or above: the DS
         /// bottom-screen renderer only promotes orders >= 220 to the foreground OBJ priority, and at the base
         /// priority the earlier-drawn opaque button body wins the hardware tie and hides the swatch.
         /// </summary>
-        const byte NintendoDsLightSwatchRenderOrder = 222;
 
-        /// <summary>
-        /// Render order used by the scaffold-owned Nintendo DS back button sprite body.
-        /// </summary>
-        const byte NintendoDsBackButtonSpriteRenderOrder = 210;
 
-        /// <summary>
-        /// Render order used by the scaffold-owned Nintendo DS back button label.
-        /// </summary>
-        const byte NintendoDsBackButtonLabelRenderOrder = 221;
 
-        /// <summary>
-        /// Render order used by the transparent border overlays drawn over the DS bottom-screen action buttons.
-        /// </summary>
-        const byte NintendoDsBottomButtonBorderRenderOrder = 220;
 
-        /// <summary>
-        /// Border thickness used by the DS bottom-screen action buttons.
-        /// </summary>
-        const float NintendoDsBottomButtonBorderThickness = 2f;
 
         /// <summary>
         /// Creates one dual-screen Nintendo DS root set from top-screen scene content and optional bottom-screen content.
@@ -216,8 +127,7 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
                 : filteredTopScreenRoots;
 
             if (useDefaultBottomOverlay) {
-                CreateBottomScreenLightButton(bottomScreenViewportRoot, bottomOverlayFont);
-                CreateBottomScreenBackButton(bottomScreenViewportRoot, bottomOverlayFont);
+                AttachBottomScreenChrome(bottomScreenViewportRoot);
             }
             AttachBottomScreenRoots(bottomScreenViewportRoot, bottomScreenRoots);
             return CombineSceneRoots(adjustedTopScreenRoots, bottomScreenCameraEntity);
@@ -675,181 +585,6 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
         }
 
         /// <summary>
-        /// Creates the visible scaffold-owned Nintendo DS bottom-screen light button that routes touch interaction and shoulder input through the shared handheld light cycle.
-        /// </summary>
-        /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the light button.</param>
-        /// <param name="bottomOverlayFont">Font used by the light-button label.</param>
-        void CreateBottomScreenLightButton(Entity bottomScreenViewportRoot, FontAsset bottomOverlayFont) {
-            if (bottomScreenViewportRoot == null) {
-                throw new ArgumentNullException(nameof(bottomScreenViewportRoot));
-            } else if (bottomOverlayFont == null) {
-                throw new ArgumentNullException(nameof(bottomOverlayFont));
-            }
-
-            Entity lightButtonEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenLightButton");
-            lightButtonEntity.LocalPosition = new float3(NintendoDsBackButtonLeft, NintendoDsLightButtonTop, 0f);
-            lightButtonEntity.LayerMask = PersistedSceneLayerMask;
-            lightButtonEntity.Static = true;
-
-            CreateBottomScreenButtonBody(lightButtonEntity);
-            CreateBottomScreenButtonBorder(lightButtonEntity);
-
-            InteractableComponent interactableComponent = new InteractableComponent {
-                Size = new int2(NintendoDsBackButtonWidth, NintendoDsBackButtonHeight)
-            };
-            lightButtonEntity.AddComponent(interactableComponent);
-            lightButtonEntity.AddComponent(new NintendoDsLightToggleOverlayComponent());
-
-            Entity lightButtonLabelEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(lightButtonEntity, "DemoDiscBottomScreenLightButtonLabel");
-            lightButtonLabelEntity.LocalPosition = new float3(NintendoDsLightButtonLabelLeft, NintendoDsLightButtonLabelTop, 0f);
-            lightButtonLabelEntity.LayerMask = PersistedSceneLayerMask;
-            lightButtonLabelEntity.Static = true;
-
-            TextComponent labelComponent = new TextComponent {
-                Text = "LIGHT",
-                Font = bottomOverlayFont,
-                FontScale = NintendoDsBottomOverlayFontScale,
-                Alignment = TextAlignment.Center,
-                Color = new byte4(255, 255, 255, 255),
-                Size = new int2(NintendoDsLightButtonLabelWidth, NintendoDsLightButtonLabelHeight),
-                RenderOrder2D = NintendoDsBackButtonLabelRenderOrder,
-            };
-            lightButtonLabelEntity.AddComponent(labelComponent);
-            ApplyFontReference(lightButtonLabelEntity, labelComponent);
-            ApplyNintendo3DsButtonLabelOverride(lightButtonLabelEntity, labelComponent);
-
-            Entity lightSwatchEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(lightButtonEntity, "DemoDiscBottomScreenLightSwatch");
-            lightSwatchEntity.LocalPosition = new float3(NintendoDsLightSwatchLeft, NintendoDsLightSwatchTop, 0.1f);
-            lightSwatchEntity.LayerMask = PersistedSceneLayerMask;
-            lightSwatchEntity.Static = true;
-            lightSwatchEntity.AddComponent(new RoundedRectComponent {
-                Size = new int2(NintendoDsLightSwatchSize, NintendoDsLightSwatchSize),
-                Radius = 2f,
-                BorderThickness = 1f,
-                FillColor = new byte4(255, 255, 255, 255),
-                BorderColor = new byte4(30, 30, 30, 255),
-                RenderOrder2D = NintendoDsLightSwatchRenderOrder,
-            });
-        }
-
-        /// <summary>
-        /// Creates the visible scaffold-owned Nintendo DS bottom-screen back button that routes touch interaction back to the demo-disc menu.
-        /// </summary>
-        /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the back button.</param>
-        /// <param name="bottomOverlayFont">Font used by the back-button label.</param>
-        void CreateBottomScreenBackButton(Entity bottomScreenViewportRoot, FontAsset bottomOverlayFont) {
-            if (bottomScreenViewportRoot == null) {
-                throw new ArgumentNullException(nameof(bottomScreenViewportRoot));
-            } else if (bottomOverlayFont == null) {
-                throw new ArgumentNullException(nameof(bottomOverlayFont));
-            }
-
-            Entity backButtonEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(bottomScreenViewportRoot, "DemoDiscBottomScreenBackButton");
-            backButtonEntity.LocalPosition = new float3(NintendoDsBackButtonLeft, NintendoDsBackButtonTop, 0f);
-            backButtonEntity.LayerMask = PersistedSceneLayerMask;
-            backButtonEntity.Static = true;
-
-            CreateBottomScreenButtonBody(backButtonEntity);
-            CreateBottomScreenButtonBorder(backButtonEntity);
-
-            InteractableComponent interactableComponent = new InteractableComponent {
-                Size = new int2(NintendoDsBackButtonWidth, NintendoDsBackButtonHeight)
-            };
-            backButtonEntity.AddComponent(interactableComponent);
-            backButtonEntity.AddComponent(new NintendoDsReturnOverlayComponent());
-
-            Entity backButtonLabelEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(backButtonEntity, "DemoDiscBottomScreenBackButtonLabel");
-            backButtonLabelEntity.LocalPosition = new float3(NintendoDsBackButtonLabelLeft, NintendoDsBackButtonLabelTop, 0f);
-            backButtonLabelEntity.LayerMask = PersistedSceneLayerMask;
-            backButtonLabelEntity.Static = true;
-
-            TextComponent labelComponent = new TextComponent {
-                Text = "BACK",
-                Font = bottomOverlayFont,
-                FontScale = NintendoDsBottomOverlayFontScale,
-                Alignment = TextAlignment.Center,
-                Color = new byte4(255, 255, 255, 255),
-                Size = new int2(NintendoDsBackButtonLabelWidth, NintendoDsBackButtonLabelHeight),
-                RenderOrder2D = NintendoDsBackButtonLabelRenderOrder,
-            };
-            backButtonLabelEntity.AddComponent(labelComponent);
-            ApplyFontReference(backButtonLabelEntity, labelComponent);
-            ApplyNintendo3DsButtonLabelOverride(backButtonLabelEntity, labelComponent);
-        }
-
-        /// <summary>
-        /// Adds a palette-free solid body to one DS action button so the control remains visible after scene sprites consume OBJ palette banks.
-        /// </summary>
-        /// <param name="buttonEntity">Bottom-screen action-button entity receiving the body.</param>
-        void CreateBottomScreenButtonBody(Entity buttonEntity) {
-            if (buttonEntity == null) {
-                throw new ArgumentNullException(nameof(buttonEntity));
-            }
-
-            buttonEntity.AddComponent(new RoundedRectComponent {
-                Size = new int2(NintendoDsBackButtonWidth, NintendoDsBackButtonHeight),
-                Radius = 3f,
-                BorderThickness = 0f,
-                FillColor = new byte4(48, 29, 65, 255),
-                BorderColor = new byte4(48, 29, 65, 255),
-                RenderOrder2D = NintendoDsBackButtonSpriteRenderOrder,
-            });
-        }
-
-        /// <summary>
-        /// Adds a transparent rounded border above one bottom-screen action-button sprite so its edge remains visible on every handheld renderer.
-        /// </summary>
-        /// <param name="buttonEntity">Bottom-screen action-button entity receiving the border overlay.</param>
-        void CreateBottomScreenButtonBorder(Entity buttonEntity) {
-            if (buttonEntity == null) {
-                throw new ArgumentNullException(nameof(buttonEntity));
-            }
-
-            Entity borderEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(buttonEntity, "Border");
-            borderEntity.LocalPosition = new float3(0f, 0f, 0.1f);
-            borderEntity.LayerMask = PersistedSceneLayerMask;
-            borderEntity.Static = true;
-            borderEntity.AddComponent(new RoundedRectComponent {
-                Size = new int2(NintendoDsBackButtonWidth, NintendoDsBackButtonHeight),
-                Radius = 3f,
-                BorderThickness = NintendoDsBottomButtonBorderThickness,
-                FillColor = new byte4(0, 0, 0, 0),
-                BorderColor = new byte4(201, 147, 255, 255),
-                RenderOrder2D = NintendoDsBottomButtonBorderRenderOrder,
-            });
-        }
-
-        /// <summary>
-        /// Persists the smaller Nintendo 3DS label scale while retaining one centered shared label definition for DS and other platforms.
-        /// </summary>
-        /// <param name="labelEntity">Generated button-label entity receiving the platform override.</param>
-        /// <param name="commonLabelComponent">Shared label component used as the DS baseline.</param>
-        void ApplyNintendo3DsButtonLabelOverride(Entity labelEntity, TextComponent commonLabelComponent) {
-            if (labelEntity == null) {
-                throw new ArgumentNullException(nameof(labelEntity));
-            } else if (commonLabelComponent == null) {
-                throw new ArgumentNullException(nameof(commonLabelComponent));
-            }
-
-            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(labelEntity);
-            TextComponent overrideComponent = (TextComponent)PlatformEditingServiceValue.EnsurePlatformOverrideComponent(
-                commonLabelComponent,
-                saveComponent,
-                Nintendo3DsPlatformId);
-            overrideComponent.FontScale = Nintendo3DsBottomButtonLabelFontScale;
-            PlatformEditingServiceValue.MarkPropertyOverride(
-                commonLabelComponent,
-                saveComponent,
-                Nintendo3DsPlatformId,
-                nameof(TextComponent.FontScale));
-            PlatformEditingServiceValue.PersistPlatformOverride(
-                commonLabelComponent,
-                overrideComponent,
-                saveComponent,
-                Nintendo3DsPlatformId);
-        }
-
-        /// <summary>
         /// Persists the smaller Nintendo 3DS FPS scale while retaining the shared DS diagnostic definition.
         /// </summary>
         /// <param name="fpsEntity">Generated FPS entity receiving the platform override.</param>
@@ -877,6 +612,31 @@ public sealed class NintendoDsRenderingSceneScaffoldFactory {
                 overrideComponent,
                 saveComponent,
                 Nintendo3DsPlatformId);
+        }
+
+        /// <summary>
+        /// Attaches the shared bottom-screen chrome Blueprint beneath the resolved bottom viewport root. The
+        /// light and back buttons are identical in every handheld scene, so they arrive as one Blueprint
+        /// instance instead of being rebuilt per scene.
+        /// </summary>
+        /// <param name="bottomScreenViewportRoot">Bottom-screen viewport root that should own the chrome.</param>
+        void AttachBottomScreenChrome(Entity bottomScreenViewportRoot) {
+            if (bottomScreenViewportRoot == null) {
+                throw new ArgumentNullException(nameof(bottomScreenViewportRoot));
+            }
+
+            Entity chromeEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(
+                bottomScreenViewportRoot,
+                HandheldBottomScreenChromeBlueprintGenerator.ChromeRootEntityName);
+            chromeEntity.LayerMask = PersistedSceneLayerMask;
+            chromeEntity.LocalPosition = float3.Zero;
+            chromeEntity.LocalScale = float3.One;
+            chromeEntity.LocalOrientation = float4.Identity;
+            chromeEntity.AddComponent(new BlueprintInstanceComponent {
+                BlueprintAssetReference = AssetAuthoringService.CreateFileReference(
+                    HandheldBottomScreenChromeBlueprintGenerator.BlueprintRelativePath,
+                    AssetEntryKind.Blueprint)
+            });
         }
 
         /// <summary>
