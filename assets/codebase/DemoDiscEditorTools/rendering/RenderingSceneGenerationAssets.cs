@@ -11,7 +11,7 @@ namespace DemoDisc.EditorTools {
         public RuntimeModel GeneratedCubeModel { get; set; }
 
         /// <summary>
-        /// Gets or sets the generated plane runtime model used by the plaza and street scenes.
+        /// Gets or sets the generated plane runtime model used by the plaza and PBR scenes.
         /// </summary>
         public RuntimeModel GeneratedPlaneModel { get; set; }
 
@@ -36,54 +36,9 @@ namespace DemoDisc.EditorTools {
         public RuntimeMaterial TiltTrialCourseMaterial { get; set; }
 
         /// <summary>
-        /// Gets or sets the authored six-colored-face runtime model used only by the Tilt Trial clipping probe render scene.
-        /// </summary>
-        public RuntimeModel TiltTrialClippingProbeModel { get; set; }
-
-        /// <summary>
-        /// Gets or sets the authored textured runtime material used only by the Tilt Trial clipping probe render scene.
-        /// </summary>
-        public RuntimeMaterial TiltTrialClippingProbeMaterial { get; set; }
-
-        /// <summary>
-        /// Gets or sets the authored golden-coin runtime model used by render-only Tilt Trial probes.
-        /// </summary>
-        public RuntimeModel GoldenCoinModel { get; set; }
-
-        /// <summary>
-        /// Gets or sets the authored golden-coin runtime material used by render-only Tilt Trial probes.
-        /// </summary>
-        public RuntimeMaterial GoldenCoinMaterial { get; set; }
-
-        /// <summary>
-        /// Gets or sets the authored goal-flag runtime model used by render-only Tilt Trial probes.
-        /// </summary>
-        public RuntimeModel GoalFlagModel { get; set; }
-
-        /// <summary>
-        /// Gets or sets the authored goal-flag pole material used by render-only Tilt Trial probes.
-        /// </summary>
-        public RuntimeMaterial GoalFlagPoleMaterial { get; set; }
-
-        /// <summary>
-        /// Gets or sets the authored goal-flag banner material used by render-only Tilt Trial probes.
-        /// </summary>
-        public RuntimeMaterial GoalFlagBannerMaterial { get; set; }
-
-        /// <summary>
         /// Gets or sets the generated shared solid-color runtime material used by the cube-test scene.
         /// </summary>
         public RuntimeMaterial GeneratedCubeTestSolidMaterial { get; set; }
-
-        /// <summary>
-        /// Gets or sets the generated shared blue solid-color runtime material used by the depth-clip-probe scene.
-        /// </summary>
-        public RuntimeMaterial DepthClipProbeMaterial { get; set; }
-
-        /// <summary>
-        /// Gets or sets the generated shared green solid-color runtime material used by the depth-clip-probe scene's center box.
-        /// </summary>
-        public RuntimeMaterial DepthClipProbeCenterMaterial { get; set; }
 
         /// <summary>
         /// Gets or sets the generated directional-light arrow runtime model used by the axis showcase scenes.
@@ -94,21 +49,6 @@ namespace DemoDisc.EditorTools {
         /// Gets or sets the runtime materials assigned to the axis showcase scenes in X, Y, Z, ground, and marker order.
         /// </summary>
         public RuntimeMaterial[] AxisMaterials { get; set; }
-
-        /// <summary>
-        /// Gets or sets the runtime materials assigned to the racer imported model in submesh order.
-        /// </summary>
-        public RuntimeMaterial[] RacerMaterials { get; set; }
-
-        /// <summary>
-        /// Gets or sets the runtime lamppost model used by the spotlight street-slice scene.
-        /// </summary>
-        public RuntimeModel LamppostModel { get; set; }
-
-        /// <summary>
-        /// Gets or sets the runtime racer model used by the spotlight street-slice scene.
-        /// </summary>
-        public RuntimeModel RacerModel { get; set; }
 
         /// <summary>
         /// Gets or sets the authored scuffed-metal runtime material used by the PBR textured showcase scene.

@@ -67,19 +67,11 @@ namespace DemoDisc.EditorTools {
             ForwardSolidColorMaterialFactory forwardSolidColorMaterialFactory = new ForwardSolidColorMaterialFactory(AuthoringSession, Transaction);
             TiltTrialCourseMaterialFactory tiltTrialCourseMaterialFactory = new TiltTrialCourseMaterialFactory(AuthoringSession, Transaction);
             TiltTrialPlayerSphereWalnutMaterialFactory tiltTrialPlayerSphereWalnutMaterialFactory = new TiltTrialPlayerSphereWalnutMaterialFactory(AuthoringSession, Transaction);
-            TiltTrialClippingProbeModelFactory tiltTrialClippingProbeModelFactory = new TiltTrialClippingProbeModelFactory();
-            TiltTrialClippingProbeMaterialFactory tiltTrialClippingProbeMaterialFactory = new TiltTrialClippingProbeMaterialFactory(AuthoringSession, Transaction);
-            DepthClipProbeMaterialFactory depthClipProbeMaterialFactory = new DepthClipProbeMaterialFactory(AuthoringSession, Transaction);
-            DepthClipProbeCenterMaterialFactory depthClipProbeCenterMaterialFactory = new DepthClipProbeCenterMaterialFactory(AuthoringSession, Transaction);
             PbrTexturedShowcaseMaterialFactory pbrTexturedShowcaseMaterialFactory = new PbrTexturedShowcaseMaterialFactory(AuthoringSession, Transaction);
             AxisTestMaterialFactory axisTestMaterialFactory = new AxisTestMaterialFactory(AuthoringSession, Transaction);
             forwardSolidColorMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             tiltTrialCourseMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AuthoringSession);
             tiltTrialPlayerSphereWalnutMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AuthoringSession);
-            tiltTrialClippingProbeModelFactory.WriteModelAsset(AuthoringSession, Transaction);
-            tiltTrialClippingProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath, AuthoringSession);
-            depthClipProbeMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
-            depthClipProbeCenterMaterialFactory.WriteMaterialAsset(fullProjectRootPath);
             pbrTexturedShowcaseMaterialFactory.WriteMaterialAssets(fullProjectRootPath, AuthoringSession);
             axisTestMaterialFactory.WriteMaterialAssets(fullProjectRootPath);
             RuntimeModel generatedCubeModel = AuthoringSession.GeneratedModelCache.GetRuntimeModel(EngineGeneratedModelCache.CubeAssetId);
@@ -89,30 +81,13 @@ namespace DemoDisc.EditorTools {
             RuntimeMaterial generatedStandardMaterial = AuthoringSession.GeneratedMaterialCache.GetRuntimeMaterial(EngineGeneratedMaterialCache.StandardAssetId);
             RuntimeMaterial tiltTrialPlayerSphereMarbleMaterial = LoadRuntimeMaterial("materials/rendering/tilt_trial/PlayerSphereMarble.hasset");
             RuntimeMaterial tiltTrialCourseMaterial = LoadRuntimeMaterial(TiltTrialCourseMaterialFactory.MaterialRelativePath);
-            RuntimeModel tiltTrialClippingProbeModel = LoadImportedModelRuntime(TiltTrialClippingProbeModelFactory.ModelRelativePath);
-            RuntimeMaterial tiltTrialClippingProbeMaterial = LoadRuntimeMaterial(TiltTrialClippingProbeMaterialFactory.MaterialRelativePath);
-            RuntimeModel goldenCoinModel = LoadImportedModelRuntime("models/games/tilt/golden_coin.hasset");
-            RuntimeMaterial goldenCoinMaterial = LoadRuntimeMaterial("materials/games/tilt/GoldenCoin.hasset");
-            RuntimeModel goalFlagModel = LoadImportedModelRuntime("models/games/tilt/goal_flag.hasset");
-            RuntimeMaterial goalFlagPoleMaterial = LoadRuntimeMaterial("materials/games/tilt/GoalFlagPole.hasset");
-            RuntimeMaterial goalFlagBannerMaterial = LoadRuntimeMaterial("materials/games/tilt/GoalFlagBanner.hasset");
             RuntimeMaterial generatedCubeTestSolidMaterial = LoadRuntimeMaterial(ForwardSolidColorMaterialFactory.MaterialRelativePath);
-            RuntimeMaterial depthClipProbeMaterial = LoadRuntimeMaterial(DepthClipProbeMaterialFactory.MaterialRelativePath);
-            RuntimeMaterial depthClipProbeCenterMaterial = LoadRuntimeMaterial(DepthClipProbeCenterMaterialFactory.MaterialRelativePath);
             RuntimeMaterial[] axisMaterials = new[] {
                 LoadRuntimeMaterial("materials/rendering/axis_test/X.hasset"),
                 LoadRuntimeMaterial("materials/rendering/axis_test/Y.hasset"),
                 LoadRuntimeMaterial("materials/rendering/axis_test/Z.hasset"),
                 LoadRuntimeMaterial("materials/rendering/axis_test/Ground.hasset"),
                 LoadRuntimeMaterial("materials/rendering/axis_test/Marker.hasset")
-            };
-            RuntimeModel lamppostModel = LoadImportedModelRuntime("models/riemers/lamppost.x");
-            RuntimeModel racerModel = LoadImportedModelRuntime("models/riemers/racer.x");
-            RuntimeMaterial[] racerMaterials = new[] {
-                LoadRuntimeMaterial("models/riemers/racer/x3ds_mat_ruedas.hasset"),
-                LoadRuntimeMaterial("models/riemers/racer/x3ds_mat_Material__0_3.hasset"),
-                LoadRuntimeMaterial("models/riemers/racer/x3ds_mat_Material_1_2.hasset"),
-                LoadRuntimeMaterial("models/riemers/racer/x3ds_mat_Material_2_1.hasset")
             };
             RuntimeMaterial pbrTexturedShowcaseMetalMaterial = LoadRuntimeMaterial(PbrTexturedShowcaseMaterialFactory.MetalMaterialRelativePath);
             RuntimeMaterial pbrTexturedShowcaseWoodMaterial = LoadRuntimeMaterial(PbrTexturedShowcaseMaterialFactory.WoodMaterialRelativePath);
@@ -124,21 +99,9 @@ namespace DemoDisc.EditorTools {
                 GeneratedStandardMaterial = generatedStandardMaterial,
                 TiltTrialPlayerSphereMarbleMaterial = tiltTrialPlayerSphereMarbleMaterial,
                 TiltTrialCourseMaterial = tiltTrialCourseMaterial,
-                TiltTrialClippingProbeModel = tiltTrialClippingProbeModel,
-                TiltTrialClippingProbeMaterial = tiltTrialClippingProbeMaterial,
-                GoldenCoinModel = goldenCoinModel,
-                GoldenCoinMaterial = goldenCoinMaterial,
-                GoalFlagModel = goalFlagModel,
-                GoalFlagPoleMaterial = goalFlagPoleMaterial,
-                GoalFlagBannerMaterial = goalFlagBannerMaterial,
                 GeneratedCubeTestSolidMaterial = generatedCubeTestSolidMaterial,
-                DepthClipProbeMaterial = depthClipProbeMaterial,
-                DepthClipProbeCenterMaterial = depthClipProbeCenterMaterial,
                 GeneratedArrowModel = generatedArrowModel,
                 AxisMaterials = axisMaterials,
-                RacerMaterials = racerMaterials,
-                LamppostModel = lamppostModel,
-                RacerModel = racerModel,
                 PbrTexturedShowcaseMetalMaterial = pbrTexturedShowcaseMetalMaterial,
                 PbrTexturedShowcaseWoodMaterial = pbrTexturedShowcaseWoodMaterial
             };

@@ -110,18 +110,5 @@ namespace DemoDisc.EditorTools.tests {
             Assert.Contains("SceneEntityAsset[] RemoveNintendoHandheldOnlyEntities", physicsSource, StringComparison.Ordinal);
             Assert.Contains("return existsOnNintendoHandheld && !existsOnNonHandheld;", physicsSource, StringComparison.Ordinal);
         }
-
-        [Fact]
-        public void Non_menu_rendering_factories_remain_without_scene_labels() {
-            string[] paths = [
-                Path.Combine(ProjectRootPath, "assets", "codebase", "DemoDiscEditorTools", "rendering", "GroundCubeProbeSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "DemoDiscEditorTools", "rendering", "ScaledCubeSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "DemoDiscEditorTools", "rendering", "SpotlightStreetSliceSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "DemoDiscEditorTools", "rendering", "SceneMemoryProbeSceneFactory.cs")
-            ];
-            foreach (string path in paths) {
-                Assert.DoesNotContain("DemoDiscSceneLabelOverlayFactory", File.ReadAllText(path), StringComparison.Ordinal);
-            }
-        }
     }
 }

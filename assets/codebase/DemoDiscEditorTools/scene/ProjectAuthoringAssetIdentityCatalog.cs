@@ -11,15 +11,10 @@ namespace DemoDisc.EditorTools {
                 ["Scenes/SceneLoadingScreen.helen"] = "10000000000000000000000000000004",
                 ["scenes/rendering/cube_test.helen"] = "10000000000000000000000000000010",
                 ["scenes/rendering/colored_cube_grid.helen"] = "10000000000000000000000000000011",
-                ["scenes/rendering/scaled_cube.helen"] = "10000000000000000000000000000012",
                 ["scenes/rendering/directional_shadow_plaza.helen"] = "10000000000000000000000000000013",
-                ["scenes/rendering/ground_cube_probe.helen"] = "10000000000000000000000000000014",
                 ["scenes/rendering/textured_cube_grid.helen"] = "10000000000000000000000000000015",
-                ["scenes/rendering/spotlight_street_slice.helen"] = "10000000000000000000000000000016",
                 ["scenes/rendering/axis_test.helen"] = "10000000000000000000000000000017",
                 ["scenes/rendering/axis_test2.helen"] = "10000000000000000000000000000018",
-                ["scenes/rendering/depth_clip_probe.helen"] = "10000000000000000000000000000019",
-                ["scenes/rendering/scene_memory_probe.helen"] = "1000000000000000000000000000001a",
                 ["scenes/rendering/pbr_material_gallery.helen"] = "1000000000000000000000000000001b",
                 ["scenes/rendering/pbr_textured_showcase.helen"] = "1000000000000000000000000000001c",
                 ["scenes/rendering/pbr_shadow_theater.helen"] = "1000000000000000000000000000001d",
@@ -42,7 +37,6 @@ namespace DemoDisc.EditorTools {
                 ["scenes/physics/test_scene_trigger_volume.helen"] = "1000000000000000000000000000002b",
                 ["scenes/games/tilt/tilt_trial.helen"] = "10000000000000000000000000000030",
                 ["scenes/games/tilt/tilt_trial_ds.helen"] = "10000000000000000000000000000031",
-                ["scenes/physics/test_scene_tilt_trial_level_01_render.helen"] = "10000000000000000000000000000032",
                 ["scenes/games/tilt/tilt_trial_level_01.helen"] = "10000000000000000000000000000033",
                 ["scenes/games/tilt/tilt_trial_level_02.helen"] = "10000000000000000000000000000034",
                 ["scenes/games/tilt/tilt_trial_level_03.helen"] = "10000000000000000000000000000035",
@@ -70,7 +64,6 @@ namespace DemoDisc.EditorTools {
                 ["blueprints/ui/ConsoleCameraLightInstructions.hblueprint"] = "4000000000000000000000000000000a",
                 ["blueprints/games/tilt/RotatingPlatform.hblueprint"] = "4000000000000000000000000000000f",
                 ["blueprints/games/tilt/PendulumHammer.hblueprint"] = "40000000000000000000000000000010",
-                ["models/rendering/tilt_trial/clipping_probe_face_colors.hasset"] = "4000000000000000000000000000000b"
             };
 
         /// <summary>
@@ -134,8 +127,6 @@ namespace DemoDisc.EditorTools {
 
             IReadOnlyDictionary<string, string> fixedIdentities = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
                 ["materials/rendering/cube_test/CubeTestSolid.hasset"] = "23000000000000000000000000000001",
-                ["materials/rendering/depth_clip_probe/DepthClipProbeSolid.hasset"] = "23000000000000000000000000000002",
-                ["materials/rendering/depth_clip_probe/DepthClipProbeCenterSolid.hasset"] = "23000000000000000000000000000003",
                 ["materials/rendering/axis_test/X.hasset"] = "23000000000000000000000000000004",
                 ["materials/rendering/axis_test/Y.hasset"] = "23000000000000000000000000000005",
                 ["materials/rendering/axis_test/Z.hasset"] = "23000000000000000000000000000006",
@@ -147,7 +138,6 @@ namespace DemoDisc.EditorTools {
                 ["materials/rendering/tilt_trial/Course.hasset"] = "2300000000000000000000000000000c",
                 ["materials/rendering/tilt_trial/PlayerSphereWalnut.hasset"] = "2300000000000000000000000000000d",
                 ["materials/rendering/tilt_trial/PlayerSphereMarble.hasset"] = "2300000000000000000000000000000e",
-                ["materials/rendering/tilt_trial/ClippingProbeFaceColors.hasset"] = "2300000000000000000000000000000f",
                 ["materials/games/tilt/GoldenCoin.hasset"] = "23000000000000000000000000000010",
                 ["materials/games/tilt/GoalFlagPole.hasset"] = "23000000000000000000000000000011",
                 ["materials/games/tilt/GoalFlagBanner.hasset"] = "23000000000000000000000000000012",

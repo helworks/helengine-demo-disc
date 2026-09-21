@@ -37,16 +37,6 @@ namespace DemoDisc.EditorTools {
         public const string ColoredCubeGridNintendoDsSceneId = "scenes/rendering/ds/colored_cube_grid_ds.helen";
 
         /// <summary>
-        /// Stable scene id used by the scaled-cube showcase.
-        /// </summary>
-        public const string ScaledCubeSceneId = "scenes/rendering/scaled_cube.helen";
-
-        /// <summary>
-        /// Stable Nintendo DS companion-scene id used by the scaled-cube showcase.
-        /// </summary>
-        public const string ScaledCubeNintendoDsSceneId = "scenes/rendering/ds/scaled_cube_ds.helen";
-
-        /// <summary>
         /// Stable scene id used by the directional-shadow plaza showcase.
         /// </summary>
         public const string DirectionalShadowPlazaSceneId = "scenes/rendering/directional_shadow_plaza.helen";
@@ -57,16 +47,6 @@ namespace DemoDisc.EditorTools {
         public const string DirectionalShadowPlazaNintendoDsSceneId = "scenes/rendering/ds/directional_shadow_plaza_ds.helen";
 
         /// <summary>
-        /// Stable scene id used by the ground-cube probe showcase.
-        /// </summary>
-        public const string GroundCubeProbeSceneId = "scenes/rendering/ground_cube_probe.helen";
-
-        /// <summary>
-        /// Stable Nintendo DS companion-scene id used by the ground-cube probe showcase.
-        /// </summary>
-        public const string GroundCubeProbeNintendoDsSceneId = "scenes/rendering/ds/ground_cube_probe_ds.helen";
-
-        /// <summary>
         /// Stable scene id used by the textured cube-grid showcase.
         /// </summary>
         public const string TexturedCubeGridSceneId = "scenes/rendering/textured_cube_grid.helen";
@@ -75,16 +55,6 @@ namespace DemoDisc.EditorTools {
         /// Stable Nintendo DS companion-scene id used by the textured cube-grid showcase.
         /// </summary>
         public const string TexturedCubeGridNintendoDsSceneId = "scenes/rendering/ds/textured_cube_grid_ds.helen";
-
-        /// <summary>
-        /// Stable scene id used by the spotlight street-slice showcase.
-        /// </summary>
-        public const string SpotlightStreetSliceSceneId = "scenes/rendering/spotlight_street_slice.helen";
-
-        /// <summary>
-        /// Stable Nintendo DS companion-scene id used by the spotlight street-slice showcase.
-        /// </summary>
-        public const string SpotlightStreetSliceNintendoDsSceneId = "scenes/rendering/ds/spotlight_street_slice_ds.helen";
 
         /// <summary>
         /// Stable scene id used by the axis-test showcase.
@@ -107,21 +77,6 @@ namespace DemoDisc.EditorTools {
         public const string AxisTest2NintendoDsSceneId = "scenes/rendering/ds/axis_test2_ds.helen";
 
         /// <summary>
-        /// Stable scene id used by the two-cube depth-ordering and near-plane-clipping probe showcase.
-        /// </summary>
-        public const string DepthClipProbeSceneId = "scenes/rendering/depth_clip_probe.helen";
-
-        /// <summary>
-        /// Stable scene id used by the persistent scene-memory probe showcase.
-        /// </summary>
-        public const string SceneMemoryProbeSceneId = "scenes/rendering/scene_memory_probe.helen";
-
-        /// <summary>
-        /// Stable Nintendo DS companion-scene id used by the persistent scene-memory probe showcase.
-        /// </summary>
-        public const string SceneMemoryProbeNintendoDsSceneId = "scenes/rendering/ds/scene_memory_probe_ds.helen";
-
-        /// <summary>
         /// Stable scene id used by the PBR material gallery showcase.
         /// </summary>
         public const string PbrMaterialGallerySceneId = "scenes/rendering/pbr_material_gallery.helen";
@@ -142,11 +97,6 @@ namespace DemoDisc.EditorTools {
         public const string MatrixRenderSceneId = "scenes/rendering/test_scene_matrix_render.helen";
 
         /// <summary>
-        /// Obsolete physics-pipeline path where the Matrix Render scene was generated before it moved into the rendering pipeline.
-        /// </summary>
-        const string ObsoletePhysicsMatrixRenderSceneRelativePath = "scenes/physics/test_scene_matrix_render.helen";
-
-        /// <summary>
         /// Writer used to persist generated live-authored scenes through the editor save pipeline.
         /// </summary>
         readonly GeneratedAuthoringSceneWriteService AuthoringSceneWriteService;
@@ -157,29 +107,9 @@ namespace DemoDisc.EditorTools {
         readonly DirectionalShadowPlazaSceneFactory DirectionalShadowPlazaFactory;
 
         /// <summary>
-        /// Factory used to author the spotlight street-slice scene.
-        /// </summary>
-        readonly SpotlightStreetSliceSceneFactory SpotlightStreetSliceFactory;
-
-        /// <summary>
         /// Factory used to author the minimal cube-test scene.
         /// </summary>
         readonly CubeTestSceneFactory CubeTestFactory;
-
-        /// <summary>
-        /// Factory used to author the minimal ground-cube probe scene.
-        /// </summary>
-        readonly GroundCubeProbeSceneFactory GroundCubeProbeFactory;
-
-        /// <summary>
-        /// Factory used to author the scaled-cube scene.
-        /// </summary>
-        readonly ScaledCubeSceneFactory ScaledCubeFactory;
-
-        /// <summary>
-        /// Factory used to author the depth-clip-probe scene.
-        /// </summary>
-        readonly DepthClipProbeSceneFactory DepthClipProbeFactory;
 
         /// <summary>
         /// Factory used to author the colored cube-grid scene and its material assets.
@@ -200,11 +130,6 @@ namespace DemoDisc.EditorTools {
         /// Factory used to author the axis-test-2 scene and its material assets.
         /// </summary>
         readonly AxisTest2SceneFactory AxisTest2Factory;
-
-        /// <summary>
-        /// Factory used to author the persistent scene-memory probe scene.
-        /// </summary>
-        readonly SceneMemoryProbeSceneFactory SceneMemoryProbeFactory;
 
         /// <summary>
         /// Factory used to author the PBR material gallery materials.
@@ -254,16 +179,11 @@ namespace DemoDisc.EditorTools {
             Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
             AuthoringSceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver, AssetAuthoringService, Transaction);
             DirectionalShadowPlazaFactory = new DirectionalShadowPlazaSceneFactory(AssetAuthoringService, Transaction);
-            SpotlightStreetSliceFactory = new SpotlightStreetSliceSceneFactory(AssetAuthoringService, Transaction);
             CubeTestFactory = new CubeTestSceneFactory(AssetAuthoringService, Transaction);
-            GroundCubeProbeFactory = new GroundCubeProbeSceneFactory(AssetAuthoringService, Transaction);
-            ScaledCubeFactory = new ScaledCubeSceneFactory(AssetAuthoringService, Transaction);
-            DepthClipProbeFactory = new DepthClipProbeSceneFactory(AssetAuthoringService, Transaction);
             ColoredCubeGridFactory = new ColoredCubeGridSceneFactory(AssetAuthoringService, Transaction);
             TexturedCubeGridFactory = new TexturedCubeGridSceneFactory(AssetAuthoringService, Transaction);
             AxisTestFactory = new AxisTestSceneFactory(AssetAuthoringService, Transaction);
             AxisTest2Factory = new AxisTest2SceneFactory(AssetAuthoringService, Transaction);
-            SceneMemoryProbeFactory = new SceneMemoryProbeSceneFactory(AssetAuthoringService);
             PbrMaterialGalleryMaterials = new PbrMaterialGalleryMaterialFactory(AssetAuthoringService, Transaction);
             PbrMaterialGalleryScene = new PbrMaterialGallerySceneFactory(AssetAuthoringService, Transaction);
             PbrTexturedShowcaseMaterials = new PbrTexturedShowcaseMaterialFactory(AssetAuthoringService, Transaction);
@@ -293,19 +213,9 @@ namespace DemoDisc.EditorTools {
                 throw new ArgumentNullException(nameof(assets));
             } else if (assets.GeneratedCubeTestSolidMaterial == null) {
                 throw new ArgumentNullException(nameof(assets));
-            } else if (assets.DepthClipProbeMaterial == null) {
-                throw new ArgumentNullException(nameof(assets));
-            } else if (assets.DepthClipProbeCenterMaterial == null) {
-                throw new ArgumentNullException(nameof(assets));
             } else if (assets.GeneratedArrowModel == null) {
                 throw new ArgumentNullException(nameof(assets));
             } else if (assets.AxisMaterials == null) {
-                throw new ArgumentNullException(nameof(assets));
-            } else if (assets.RacerMaterials == null) {
-                throw new ArgumentNullException(nameof(assets));
-            } else if (assets.LamppostModel == null) {
-                throw new ArgumentNullException(nameof(assets));
-            } else if (assets.RacerModel == null) {
                 throw new ArgumentNullException(nameof(assets));
             }
 
@@ -322,16 +232,11 @@ namespace DemoDisc.EditorTools {
                 editorCore.DefaultFontAssetForEditor);
 
             GeneratedAuthoringSceneDefinition cubeTestSceneDefinition = CubeTestFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedCubeTestSolidMaterial);
-            GeneratedAuthoringSceneDefinition groundCubeProbeSceneDefinition = GroundCubeProbeFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
-            GeneratedAuthoringSceneDefinition scaledCubeSceneDefinition = ScaledCubeFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial);
-            GeneratedAuthoringSceneDefinition depthClipProbeSceneDefinition = DepthClipProbeFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.DepthClipProbeMaterial, assets.DepthClipProbeCenterMaterial);
             GeneratedAuthoringSceneDefinition coloredCubeGridSceneDefinition;
             GeneratedAuthoringSceneDefinition texturedCubeGridSceneDefinition;
             GeneratedAuthoringSceneDefinition axisTestSceneDefinition = AxisTestFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
             GeneratedAuthoringSceneDefinition axisTest2SceneDefinition = AxisTest2Factory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, assets.GeneratedArrowModel, assets.AxisMaterials);
-            GeneratedAuthoringSceneDefinition sceneMemoryProbeSceneDefinition = SceneMemoryProbeFactory.CreateSceneDefinition();
             GeneratedAuthoringSceneDefinition directionalShadowPlazaSceneDefinition = DirectionalShadowPlazaFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial);
-            GeneratedAuthoringSceneDefinition spotlightStreetSliceSceneDefinition = SpotlightStreetSliceFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedPlaneModel, assets.GeneratedCubeModel, assets.GeneratedStandardMaterial, assets.LamppostModel, assets.RacerModel, assets.RacerMaterials);
             PbrMaterialGalleryMaterials.WriteMaterialAssets(projectRootPath);
             RuntimeMaterial[] pbrGalleryMaterials = PbrMaterialGalleryMaterials.CreateRuntimeMaterials();
             GeneratedAuthoringSceneDefinition pbrMaterialGallerySceneDefinition = PbrMaterialGalleryScene.CreateSceneDefinition(projectRootPath, assets.GeneratedPlaneModel, assets.GeneratedSphereModel, assets.GeneratedStandardMaterial, pbrGalleryMaterials);
@@ -348,16 +253,11 @@ namespace DemoDisc.EditorTools {
             coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
             texturedCubeGridSceneDefinition = TexturedCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, TexturedCubeGridFactory.CreateRuntimeMaterials(assets.GeneratedStandardMaterial));
             AuthoringSceneWriteService.WriteScene(cubeTestSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(groundCubeProbeSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(scaledCubeSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(depthClipProbeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(coloredCubeGridSceneDefinition);
             AuthoringSceneWriteService.WriteScene(texturedCubeGridSceneDefinition);
             AuthoringSceneWriteService.WriteScene(axisTestSceneDefinition);
             AuthoringSceneWriteService.WriteScene(axisTest2SceneDefinition);
-            AuthoringSceneWriteService.WriteScene(sceneMemoryProbeSceneDefinition);
             AuthoringSceneWriteService.WriteScene(directionalShadowPlazaSceneDefinition);
-            AuthoringSceneWriteService.WriteScene(spotlightStreetSliceSceneDefinition);
             AuthoringSceneWriteService.WriteScene(pbrMaterialGallerySceneDefinition);
             AuthoringSceneWriteService.WriteScene(pbrTexturedShowcaseSceneDefinition);
             AuthoringSceneWriteService.WriteScene(pbrShadowTheaterSceneDefinition);

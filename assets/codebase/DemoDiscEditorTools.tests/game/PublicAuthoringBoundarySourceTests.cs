@@ -25,8 +25,6 @@ namespace DemoDisc.EditorTools.tests {
         [Fact]
         public void Current_generation_paths_use_only_the_public_authoring_boundary() {
             string[] sourcePaths = {
-                @"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\TiltTrialLevel01TessellationAuthoringService.cs",
-                @"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\menu\NormalizeRenderingAndPhysicsMusicGainCommand.cs",
                 @"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\physics\PhysicsNintendoDsSceneGenerator.cs",
                 @"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\physics\PhysicsSceneFactory.cs",
                 @"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\rendering\GeneratedAuthoringSceneWriteService.cs",

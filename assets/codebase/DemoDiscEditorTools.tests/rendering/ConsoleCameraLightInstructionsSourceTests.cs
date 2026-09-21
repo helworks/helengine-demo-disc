@@ -88,7 +88,6 @@ namespace DemoDisc.EditorTools.tests {
                 Path.Combine(ProjectRootPath, "assets", "codebase", "DemoDiscEditorTools", "rendering", "CubeTestSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "DemoDiscEditorTools", "rendering", "ColoredCubeGridSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "DemoDiscEditorTools", "rendering", "DirectionalShadowPlazaSceneFactory.cs"),
-                Path.Combine(ProjectRootPath, "assets", "codebase", "DemoDiscEditorTools", "rendering", "ScaledCubeSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "DemoDiscEditorTools", "rendering", "TexturedCubeGridSceneFactory.cs"),
                 Path.Combine(ProjectRootPath, "assets", "codebase", "DemoDiscEditorTools", "physics", "PhysicsSceneFactory.cs")
             ];

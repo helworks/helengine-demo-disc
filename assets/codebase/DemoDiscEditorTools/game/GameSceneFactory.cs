@@ -52,11 +52,6 @@ namespace DemoDisc.EditorTools {
         const string TiltTrialGameplaySceneAssetDirectoryRelativePath = "scenes/games/tilt";
 
         /// <summary>
-        /// Stable authored asset path used by the standalone Level 1 rendering validation scene.
-        /// </summary>
-        const string TiltTrialLevel01RenderTestSceneAssetRelativePath = "scenes/physics/test_scene_tilt_trial_level_01_render.helen";
-
-        /// <summary>
         /// Stable mesh save-state slot used by the generated player sphere material reference.
         /// </summary>
         const string PlayerSphereMaterialReferenceName = "Materials[0]";
@@ -122,41 +117,6 @@ namespace DemoDisc.EditorTools {
         readonly RuntimeMaterial TiltTrialCourseMaterial;
 
         /// <summary>
-        /// Authored six-colored-face model used exclusively by the render-only Tilt Trial clipping probe.
-        /// </summary>
-        readonly RuntimeModel TiltTrialClippingProbeModel;
-
-        /// <summary>
-        /// Authored textured material used exclusively by the render-only Tilt Trial clipping probe.
-        /// </summary>
-        readonly RuntimeMaterial TiltTrialClippingProbeMaterial;
-
-        /// <summary>
-        /// Authored golden-coin model used by the standalone render-test scene.
-        /// </summary>
-        readonly RuntimeModel GoldenCoinModel;
-
-        /// <summary>
-        /// Authored golden-coin material used by the standalone render-test scene.
-        /// </summary>
-        readonly RuntimeMaterial GoldenCoinMaterial;
-
-        /// <summary>
-        /// Authored goal-flag model used by the standalone render-test scene.
-        /// </summary>
-        readonly RuntimeModel GoalFlagModel;
-
-        /// <summary>
-        /// Authored goal-flag pole material used by the standalone render-test scene.
-        /// </summary>
-        readonly RuntimeMaterial GoalFlagPoleMaterial;
-
-        /// <summary>
-        /// Authored goal-flag banner material used by the standalone render-test scene.
-        /// </summary>
-        readonly RuntimeMaterial GoalFlagBannerMaterial;
-
-        /// <summary>
         /// Editor service used to persist the 3DS-specific reference-canvas dimensions without changing the shared DS layout.
         /// </summary>
         readonly ComponentPlatformEditingService PlatformEditingServiceValue = new ComponentPlatformEditingService();
@@ -177,9 +137,15 @@ namespace DemoDisc.EditorTools {
         readonly MeshComponentModifierStackService MeshComponentModifierStackServiceValue = new MeshComponentModifierStackService();
 
         /// <summary>
-        /// Maximum world-space edge length used to subdivide scaled Tilt Trial render-test course geometry on SD devices.
+        /// Maximum world-space edge length used to subdivide scaled Tilt Trial course geometry on SD devices, whose
+        /// per-vertex lighting needs denser meshes than the authored unit cube provides.
         /// </summary>
-        const double TiltTrialRenderTestTessellationMaxEdgeLength = 1d;
+        const double TiltTrialCourseTessellationMaxEdgeLength = 0.5d;
+
+        /// <summary>
+        /// MeshComponent member that bakes the entity scale into the tessellated mesh on SD devices.
+        /// </summary>
+        const string MeshBakeScaleMemberName = "MeshBakeScale";
 
         /// <summary>
         /// Stable platform identifier used by Nintendo DS-specific presentation overrides.
@@ -238,12 +204,6 @@ namespace DemoDisc.EditorTools {
                 throw new ArgumentException($"Game scene generation requires authored runtime material '{TiltTrialPlayerSphereMarbleMaterialAssetId}'.", nameof(assets));
             } else if (assets.TiltTrialCourseMaterial == null) {
                 throw new ArgumentException($"Game scene generation requires authored runtime material '{TiltTrialCourseMaterialAssetId}'.", nameof(assets));
-            } else if (assets.TiltTrialClippingProbeModel == null || assets.TiltTrialClippingProbeMaterial == null) {
-                throw new ArgumentException("Game scene generation requires the authored Tilt Trial clipping probe model and material.", nameof(assets));
-            } else if (assets.GoldenCoinModel == null || assets.GoldenCoinMaterial == null) {
-                throw new ArgumentException("Game scene generation requires the authored golden-coin model and material.", nameof(assets));
-            } else if (assets.GoalFlagModel == null || assets.GoalFlagPoleMaterial == null || assets.GoalFlagBannerMaterial == null) {
-                throw new ArgumentException("Game scene generation requires the authored goal-flag model and materials.", nameof(assets));
             }
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
             Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
@@ -253,13 +213,6 @@ namespace DemoDisc.EditorTools {
             GeneratedSphereModel = assets.GeneratedSphereModel;
             TiltTrialPlayerSphereMarbleMaterial = assets.TiltTrialPlayerSphereMarbleMaterial;
             TiltTrialCourseMaterial = assets.TiltTrialCourseMaterial;
-            TiltTrialClippingProbeModel = assets.TiltTrialClippingProbeModel;
-            TiltTrialClippingProbeMaterial = assets.TiltTrialClippingProbeMaterial;
-            GoldenCoinModel = assets.GoldenCoinModel;
-            GoldenCoinMaterial = assets.GoldenCoinMaterial;
-            GoalFlagModel = assets.GoalFlagModel;
-            GoalFlagPoleMaterial = assets.GoalFlagPoleMaterial;
-            GoalFlagBannerMaterial = assets.GoalFlagBannerMaterial;
             ProjectRootPath = Path.GetFullPath(projectRootPath);
         }
 
@@ -276,24 +229,6 @@ namespace DemoDisc.EditorTools {
                     CreateLevelSelectCameraEntity(),
                     CreateTiltPlayViewportBackgroundEntity(),
                     CreateTiltPlayShellUiEntity()
-                ]
-            };
-        }
-
-        /// <summary>
-        /// Creates a deterministic clipping probe containing one scaled cube, one light, a fixed-axis zoom camera, and the FPS overlay.
-        /// </summary>
-        /// <returns>Generated authored Level 1 render-test scene.</returns>
-        public GeneratedAuthoringSceneDefinition CreateTiltTrialLevel01RenderTestScene() {
-            return new GeneratedAuthoringSceneDefinition {
-                SceneId = GameSceneCatalog.TiltTrialLevel01RenderTestSceneId,
-                SceneAssetRelativePath = TiltTrialLevel01RenderTestSceneAssetRelativePath,
-                SceneSettings = new SceneSettingsAsset(),
-                RootEntities = [
-                    CreateLevel01RenderTestCameraEntity(),
-                    CreateDirectionalLightEntity(),
-                    CreateLevel01RenderTestFpsEntity(),
-                    CreateLevel01RenderOnlyStageRootEntity()
                 ]
             };
         }
@@ -1636,136 +1571,8 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
-        /// Creates the fixed-axis camera used to move directly toward and through the clipping probe cube.
-        /// </summary>
-        /// <returns>Generated render-test camera entity.</returns>
-        EditorEntity CreateLevel01RenderTestCameraEntity() {
-            float4 orientation;
-            float4.CreateFromYawPitchRoll(0.6435011f, -0.3805064f, 0f, out orientation);
-            Entity entity = OwningCore.EntityFactory.Create("TiltTrialLevel01RenderTestCamera");
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.LocalPosition = new float3(6f, 4f, 8f);
-            entity.LocalScale = float3.One;
-            entity.LocalOrientation = orientation;
-            entity.AddComponent(new CameraComponent {
-                CameraDrawOrder = 0,
-                LayerMask = EditorLayerMasks.SceneObjects,
-                Viewport = new float4(0f, 0f, 1f, 1f),
-                NearPlaneDistance = 0.1f,
-                FarPlaneDistance = 160f,
-                ClearSettings = new CameraClearSettings(true, new float4(100f / 255f, 149f / 255f, 237f / 255f, 1f), true, 1f, false, 0),
-                RenderSettings = new CameraRenderSettings {
-                    DepthPrepassMode = DepthPrepassMode.Auto,
-                    ShadowDistance = 80f,
-                    PostProcessTier = PostProcessTier.Disabled
-                }
-            });
-            entity.AddComponent(new DemoDisc.rendering.DemoDiscOrbitCameraComponent {
-                OrbitCenter = float3.Zero,
-                AutoYawSpeedRadians = 0f,
-                ManualYawSpeedRadians = 0f,
-                ManualPitchSpeedRadians = 0f
-            });
-            return RequireEditorEntity(entity, "clipping-probe camera");
-        }
-
-        /// <summary>
-        /// Creates the FPS-only diagnostic overlay for the Level 1 rendering validation scene.
-        /// </summary>
-        /// <returns>Generated FPS overlay entity.</returns>
-        EditorEntity CreateLevel01RenderTestFpsEntity() {
-            Entity entity = OwningCore.EntityFactory.Create("TiltTrialLevel01RenderTestFps");
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            FPSComponent fpsComponent = new FPSComponent {
-                Font = ResolveRequiredEditorFont(),
-                FontScale = 2f
-            };
-            entity.AddComponent(fpsComponent);
-            ApplyEditorFontReference(entity, fpsComponent);
-            return RequireEditorEntity(entity, "Level 1 render-test FPS overlay");
-        }
-
-        /// <summary>
-        /// Creates the clipping probe root with exactly one authored six-colored-face 5-by-1-by-5 cube.
-        /// </summary>
-        /// <returns>Generated render-only stage root.</returns>
-        EditorEntity CreateLevel01RenderOnlyStageRootEntity() {
-            Entity entity = OwningCore.EntityFactory.Create("Ps2ClippingProbe");
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.LocalPosition = float3.Zero;
-            entity.LocalScale = float3.One;
-            entity.LocalOrientation = float4.Identity;
-            entity.AddChild(CreateLevel01RenderOnlyCourseBoxEntity("ClipProbeCube", float3.Zero, new float3(5f, 1f, 5f), float4.Identity));
-            return RequireEditorEntity(entity, "single-cube clipping probe");
-        }
-
-        /// <summary>
-        /// Creates the visible Level 1 player sphere without physics, reset, or session behavior.
-        /// </summary>
-        /// <returns>Generated visual-only player sphere entity.</returns>
-        Entity CreateLevel01RenderOnlyPlayerSphereEntity() {
-            Entity entity = OwningCore.EntityFactory.Create("PlayerSphere");
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.LocalPosition = new float3(0f, 1.2f, -7f);
-            entity.LocalScale = float3.One;
-            entity.LocalOrientation = float4.Identity;
-            MeshComponent meshComponent = new MeshComponent {
-                Model = GeneratedSphereModel,
-                Materials = new[] { TiltTrialPlayerSphereMarbleMaterial },
-                RenderOrder3D = 0
-            };
-            entity.AddComponent(meshComponent);
-            ApplyTiltTrialPlayerSphereMaterialReference(entity, meshComponent);
-            return entity;
-        }
-
-        /// <summary>
-        /// Creates one authored colored-face clipping probe cube for the render-only Level 1 scene.
-        /// </summary>
-        /// <param name="name">Authored entity name.</param>
-        /// <param name="position">Local position.</param>
-        /// <param name="scale">Full box dimensions.</param>
-        /// <param name="orientation">Local orientation.</param>
-        /// <returns>Generated visual-only colored-face clipping probe cube.</returns>
-        Entity CreateLevel01RenderOnlyCourseBoxEntity(string name, float3 position, float3 scale, float4 orientation) {
-            if (string.IsNullOrWhiteSpace(name)) {
-                throw new ArgumentException("Render-only course box names must be provided.", nameof(name));
-            }
-
-            Entity entity = OwningCore.EntityFactory.Create(name);
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.LocalPosition = position;
-            entity.LocalScale = scale;
-            entity.LocalOrientation = orientation;
-            MeshComponent meshComponent = new MeshComponent {
-                Model = TiltTrialClippingProbeModel,
-                Materials = new[] { TiltTrialClippingProbeMaterial },
-                RenderOrder3D = 0
-            };
-            entity.AddComponent(meshComponent);
-            ApplyTiltTrialClippingProbeReferences(entity, meshComponent);
-            return entity;
-        }
-
-        /// <summary>
-        /// Stores the authored model and material references required to serialize the isolated colored-face clipping probe mesh.
-        /// </summary>
-        /// <param name="entity">Generated probe entity that owns the mesh component.</param>
-        /// <param name="meshComponent">Probe mesh component assigned to the generated entity.</param>
-        void ApplyTiltTrialClippingProbeReferences(Entity entity, MeshComponent meshComponent) {
-            if (entity == null) {
-                throw new ArgumentNullException(nameof(entity));
-            } else if (meshComponent == null) {
-                throw new ArgumentNullException(nameof(meshComponent));
-            }
-
-            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(meshComponent, "Model", AssetAuthoringService.CreateFileReference(TiltTrialClippingProbeModelFactory.ModelRelativePath, AssetEntryKind.Model));
-            saveComponent.SetAssetReference(meshComponent, "Materials[0]", AssetAuthoringService.CreateFileReference(TiltTrialClippingProbeMaterialFactory.MaterialRelativePath, AssetEntryKind.Material));
-        }
-
-        /// <summary>
-        /// Stores PS2- and PSP-only MeshComponent tessellation settings for one scaled Level 1 render-test course object.
+        /// Stores the SD-device MeshComponent tessellation and scale bake for one scaled course piece. HD devices render
+        /// the course as authored.
         /// </summary>
         /// <param name="entity">Entity that owns the MeshComponent and its editor persistence metadata.</param>
         /// <param name="meshComponent">Course MeshComponent that should receive component-only tessellation settings.</param>
@@ -1779,91 +1586,11 @@ namespace DemoDisc.EditorTools {
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
             EntityComponentSaveState saveState = saveComponent.GetOrCreateComponentState(meshComponent);
             MeshComponentModifier modifier = new MeshComponentModifier(MeshComponentModifier.TessellateKind) {
-                MaxEdgeLength = TiltTrialRenderTestTessellationMaxEdgeLength
+                MaxEdgeLength = TiltTrialCourseTessellationMaxEdgeLength
             };
             MeshComponentModifierStackServiceValue.SetStack(saveState, DemoDiscOverrideScopes.Sd, new[] { modifier });
-        }
-
-        /// <summary>
-        /// Creates a visual-only coin using the shared authored golden-coin blueprint.
-        /// </summary>
-        /// <param name="name">Authored entity name.</param>
-        /// <param name="position">Local position.</param>
-        /// <returns>Generated visual-only coin entity.</returns>
-        Entity CreateLevel01RenderOnlyCoinEntity(string name, float3 position) {
-            if (string.IsNullOrWhiteSpace(name)) {
-                throw new ArgumentException("Render-only coin names must be provided.", nameof(name));
-            }
-
-            Entity entity = OwningCore.EntityFactory.Create(name);
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.LocalPosition = position;
-            entity.LocalScale = new float3(0.51f, 0.51f, 0.51f);
-            entity.LocalOrientation = float4.Identity;
-            MeshComponent meshComponent = new MeshComponent {
-                Model = GoldenCoinModel,
-                Materials = new[] { GoldenCoinMaterial },
-                RenderOrder3D = 0
-            };
-            entity.AddComponent(meshComponent);
-            ApplyRenderOnlyCoinReferences(entity, meshComponent);
-            return entity;
-        }
-
-        /// <summary>
-        /// Creates a visual-only finish flag using the shared authored flag blueprint.
-        /// </summary>
-        /// <param name="position">Local position.</param>
-        /// <returns>Generated visual-only goal flag entity.</returns>
-        Entity CreateLevel01RenderOnlyGoalFlagEntity(float3 position) {
-            Entity entity = OwningCore.EntityFactory.Create("GoalFlag");
-            entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.LocalPosition = position;
-            entity.LocalScale = new float3(1.2f, 1.2f, 1.2f);
-            entity.LocalOrientation = float4.Identity;
-            MeshComponent meshComponent = new MeshComponent {
-                Model = GoalFlagModel,
-                Materials = new[] { GoalFlagPoleMaterial, GoalFlagBannerMaterial },
-                RenderOrder3D = 0
-            };
-            entity.AddComponent(meshComponent);
-            ApplyRenderOnlyGoalFlagReferences(entity, meshComponent);
-            return entity;
-        }
-
-        /// <summary>
-        /// Stores the file-backed model and material references for one standalone coin mesh.
-        /// </summary>
-        /// <param name="entity">Coin entity receiving the save metadata.</param>
-        /// <param name="meshComponent">Coin mesh component receiving the references.</param>
-        void ApplyRenderOnlyCoinReferences(Entity entity, MeshComponent meshComponent) {
-            if (entity == null) {
-                throw new ArgumentNullException(nameof(entity));
-            } else if (meshComponent == null) {
-                throw new ArgumentNullException(nameof(meshComponent));
-            }
-
-            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(meshComponent, "Model", AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoldenCoinCommonModelRelativePath, AssetEntryKind.Model));
-            saveComponent.SetAssetReference(meshComponent, "Materials[0]", AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoldenCoinMaterialRelativePath, AssetEntryKind.Material));
-        }
-
-        /// <summary>
-        /// Stores the file-backed model and material references for one standalone goal-flag mesh.
-        /// </summary>
-        /// <param name="entity">Goal-flag entity receiving the save metadata.</param>
-        /// <param name="meshComponent">Goal-flag mesh component receiving the references.</param>
-        void ApplyRenderOnlyGoalFlagReferences(Entity entity, MeshComponent meshComponent) {
-            if (entity == null) {
-                throw new ArgumentNullException(nameof(entity));
-            } else if (meshComponent == null) {
-                throw new ArgumentNullException(nameof(meshComponent));
-            }
-
-            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(meshComponent, "Model", AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoalFlagCommonModelRelativePath, AssetEntryKind.Model));
-            saveComponent.SetAssetReference(meshComponent, "Materials[0]", AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoalFlagPoleMaterialRelativePath, AssetEntryKind.Material));
-            saveComponent.SetAssetReference(meshComponent, "Materials[1]", AssetAuthoringService.CreateFileReference(SplitPlayAssetCatalog.GoalFlagBannerMaterialRelativePath, AssetEntryKind.Material));
+            EntityComponentPlatformOverrideState sdOverride = saveState.GetOrCreateScopedPlatformOverride(DemoDiscOverrideScopes.Sd);
+            sdOverride.SetMemberValue(MeshBakeScaleMemberName, true.ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -2103,7 +1830,7 @@ namespace DemoDisc.EditorTools {
         /// </summary>
         /// <returns>Generated kinematic stage piece.</returns>
         Entity CreateLevel01BlockerLeftEntity() {
-            return CreateKinematicCourseBoxEntity("BridgeBlockerLeft", new float3(-0.95f, 1.25f, 3.2f), new float3(1.1f, 1.5f, 1.1f), float4.Identity);
+            return CreateKinematicCourseBoxEntity("BridgeBlockerLeft", new float3(-0.95f, 1.25f, 3.2f), new float3(1.1f, 1.5f, 1.1f), float4.Identity, true);
         }
 
         /// <summary>
@@ -2111,7 +1838,7 @@ namespace DemoDisc.EditorTools {
         /// </summary>
         /// <returns>Generated kinematic stage piece.</returns>
         Entity CreateLevel01BlockerRightEntity() {
-            return CreateKinematicCourseBoxEntity("BridgeBlockerRight", new float3(0.95f, 1.25f, 7.3f), new float3(1.1f, 1.5f, 1.1f), float4.Identity);
+            return CreateKinematicCourseBoxEntity("BridgeBlockerRight", new float3(0.95f, 1.25f, 7.3f), new float3(1.1f, 1.5f, 1.1f), float4.Identity, true);
         }
 
         /// <summary>

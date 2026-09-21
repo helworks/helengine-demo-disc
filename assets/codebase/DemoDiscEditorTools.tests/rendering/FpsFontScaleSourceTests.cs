@@ -23,13 +23,9 @@ namespace DemoDisc.EditorTools.tests {
                 DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "AxisTest2SceneFactory.cs"),
                 DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "ColoredCubeGridSceneFactory.cs"),
                 DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "CubeTestSceneFactory.cs"),
-                DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "DepthClipProbeSceneFactory.cs"),
                 DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "DirectionalShadowPlazaSceneFactory.cs"),
-                DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "GroundCubeProbeSceneFactory.cs"),
                 DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "MatrixRenderSceneFactory.cs"),
                 DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "physics", "PhysicsSceneFactory.cs"),
-                DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "ScaledCubeSceneFactory.cs"),
-                DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "SpotlightStreetSliceSceneFactory.cs"),
                 DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "TexturedCubeGridSceneFactory.cs")
             ];
             foreach (string sourcePath in kitFactorySourcePaths) {

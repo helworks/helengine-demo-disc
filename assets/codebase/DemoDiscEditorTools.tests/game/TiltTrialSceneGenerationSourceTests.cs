@@ -200,44 +200,9 @@ namespace DemoDisc.EditorTools.tests {
         /// <summary>
         /// Ensures the dedicated render test scene isolates one clipping-probe cube with deterministic camera controls.
         /// </summary>
-        [Fact]
-        public void Level_01_render_test_scene_uses_one_cube_light_camera_and_fps_only() {
-            string catalogSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "GameSceneCatalog.cs"));
-            string generatorSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "GameSceneGenerator.cs"));
-            string preparationSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "rendering", "RenderingSceneAssetPreparationService.cs"));
-            string factorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "GameSceneFactory.cs"));
-
-            Assert.Contains("TiltTrialLevel01RenderTestSceneId", catalogSource, StringComparison.Ordinal);
-            Assert.Contains("CreateTiltTrialLevel01RenderTestScene", generatorSource, StringComparison.Ordinal);
-            Assert.Contains("CreateLevel01RenderOnlyCourseBoxEntity", factorySource, StringComparison.Ordinal);
-            Assert.Contains("new FPSComponent", factorySource, StringComparison.Ordinal);
-            Assert.Contains("test_scene_tilt_trial_level_01_render.helen", factorySource, StringComparison.Ordinal);
-            Assert.Contains("CreateLevel01RenderOnlyStageRootEntity", factorySource, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialClippingProbeModel = tiltTrialClippingProbeModel", preparationSource, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialClippingProbeMaterial = tiltTrialClippingProbeMaterial", preparationSource, StringComparison.Ordinal);
-            Assert.Contains("Model = TiltTrialClippingProbeModel", factorySource, StringComparison.Ordinal);
-            Assert.Contains("Materials = new[] { TiltTrialClippingProbeMaterial }", factorySource, StringComparison.Ordinal);
-            Assert.Contains("AssetAuthoringService.CreateFileReference(TiltTrialClippingProbeModelFactory.ModelRelativePath, AssetEntryKind.Model)", factorySource, StringComparison.Ordinal);
-            Assert.Contains("AssetAuthoringService.CreateFileReference(TiltTrialClippingProbeMaterialFactory.MaterialRelativePath, AssetEntryKind.Material)", factorySource, StringComparison.Ordinal);
-            Assert.DoesNotContain("CreateLevel01RenderOnlyCourseBoxEntity(\"ClipProbeCube\", float3.Zero, new float3(5f, 1f, 5f), float4.Identity, true)", factorySource, StringComparison.Ordinal);
-            Assert.Contains("entity.LocalPosition = new float3(6f, 4f, 8f)", factorySource, StringComparison.Ordinal);
-            Assert.Contains("float4.CreateFromYawPitchRoll(0.6435011f, -0.3805064f, 0f, out orientation)", factorySource, StringComparison.Ordinal);
-            Assert.Contains("ManualYawSpeedRadians = 0f", factorySource, StringComparison.Ordinal);
-            Assert.Contains("ManualPitchSpeedRadians = 0f", factorySource, StringComparison.Ordinal);
-        }
-
         /// <summary>
         /// Verifies the render-only stage excludes the former course, sphere, coin, and flag root attachments.
         /// </summary>
-        [Fact]
-        public void Level_01_render_test_scene_excludes_unrelated_visual_roots() {
-            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "GameSceneFactory.cs"));
-
-            Assert.DoesNotContain("entity.AddChild(CreateLevel01RenderOnlyPlayerSphereEntity())", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("entity.AddChild(CreateLevel01RenderOnlyCoinEntity(", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("entity.AddChild(CreateLevel01RenderOnlyGoalFlagEntity(", source, StringComparison.Ordinal);
-        }
-
         /// <summary>
         /// Ensures gameplay sessions bind and refresh target-time text from the current level metadata.
         /// </summary>
