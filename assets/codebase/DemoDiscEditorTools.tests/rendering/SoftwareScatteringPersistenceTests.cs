@@ -57,9 +57,39 @@ namespace DemoDisc.EditorTools.tests {
         }
 
         /// <summary>Saved showcases retain canonical model identities and all twelve gallery scattering overrides.</summary>
+        [Theory]
+        [InlineData("ray_tracing_teapot", 2)]
+        [InlineData("ray_tracing_spheres", 12)]
+        [InlineData("ray_tracing_soft_shadows", 4)]
+        public void Saved_showcases_have_identity_backed_models(string name, int expectedModels) {
+            using FileStream stream = File.OpenRead(Path.Combine(FindProjectRoot(), "assets", "scenes", "rendering", name + ".helen"));
+            SceneAsset scene = Assert.IsType<SceneAsset>(helengine.editor.AssetSerializer.Deserialize(stream));
+            Stack<SceneEntityAsset> pending = new Stack<SceneEntityAsset>(scene.RootEntities);
+            AutomaticScriptComponentPersistenceDescriptor descriptor = new AutomaticScriptComponentPersistenceDescriptor(new ScriptComponentReflectionSchemaBuilder());
+            ComponentPlatformOverridePayloadService overrides = new ComponentPlatformOverridePayloadService();
+            int models = 0;
+            while (pending.Count > 0) {
+                SceneEntityAsset entity = pending.Pop();
+                foreach (SceneEntityAsset child in entity.Children ?? Array.Empty<SceneEntityAsset>()) pending.Push(child);
+                foreach (SceneComponentAssetRecord record in entity.Components ?? Array.Empty<SceneComponentAssetRecord>()) {
+                    if (!record.ComponentTypeId.StartsWith("DemoDisc.Raytracing.SoftwareModelComponent,", StringComparison.Ordinal)) continue;
+                    SoftwareModelComponent model = Assert.IsType<SoftwareModelComponent>(descriptor.DeserializeComponent(overrides.UnwrapBaseRecord(record), null, null));
+                    if (model.ModelReference.SourceKind != SceneAssetReferenceSourceKind.FileSystem) continue;
+                    Assert.Equal(32, model.ModelReference.AssetId.Length);
+                    Assert.StartsWith("sha256:", model.ModelReference.ContentHash);
+                    if (name == "ray_tracing_spheres") Assert.Single(model.Scattering);
+                    models++;
+                }
+            }
+            Assert.Equal(expectedModels, models);
+        }
+
         /// <summary>All four saved ray tracing scenes expose the shared main-menu return action.</summary>
         [Theory]
         [InlineData("software_path_tracer")]
+        [InlineData("ray_tracing_teapot")]
+        [InlineData("ray_tracing_spheres")]
+        [InlineData("ray_tracing_soft_shadows")]
         public void Saved_ray_tracing_scenes_enable_main_menu_return(string name) {
             using FileStream stream = File.OpenRead(Path.Combine(FindProjectRoot(), "assets", "scenes", "rendering", name + ".helen"));
             SceneAsset scene = Assert.IsType<SceneAsset>(helengine.editor.AssetSerializer.Deserialize(stream));
