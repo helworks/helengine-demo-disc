@@ -24,6 +24,27 @@ namespace DemoDisc.EditorTools.tests {
             Assert.DoesNotContain(FlattenComponents(handheldScene.RootEntities), component => string.Equals(component.ComponentTypeId, audioSourceComponentTypeId, StringComparison.Ordinal));
         }
 
+        [Fact]
+        public void Standard_menu_uses_viewport_scaling_for_the_shared_720p_layout() {
+            SceneAsset scene = LoadSceneAsset(@"assets\scenes\DemoDiscMainMenu.helen");
+            SceneEntityAsset menuRoot = Assert.Single(scene.RootEntities, entity => entity.Name == "DemoDiscMenuRoot");
+            string viewportTypeId = AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(ViewportComponent));
+            string canvasFitTypeId = AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(ReferenceCanvasFitComponent));
+            SceneComponentAssetRecord viewportRecord = Assert.Single(
+                menuRoot.Components ?? Array.Empty<SceneComponentAssetRecord>(),
+                component => component.ComponentTypeId == viewportTypeId);
+            ComponentPersistenceRegistry registry = GeneratedScenePersistenceRegistryFactory.Create();
+            ViewportComponent viewport = Assert.IsType<ViewportComponent>(
+                registry.GetDescriptor(viewportRecord.ComponentTypeId).DeserializeComponent(viewportRecord, new EntitySaveComponent(), null));
+
+            Assert.Equal(ViewportComponent.ScreenBindingMode, viewport.BindingMode);
+            Assert.Equal(ViewportComponent.ReferenceCanvasScalingMode, viewport.ScalingMode);
+            Assert.Equal(new int2(1280, 720), viewport.FixedSize);
+            Assert.Equal(1280, viewport.ReferenceWidth);
+            Assert.Equal(720, viewport.ReferenceHeight);
+            Assert.DoesNotContain(FlattenComponents(scene.RootEntities), component => component.ComponentTypeId == canvasFitTypeId);
+        }
+
         static SceneAsset LoadSceneAsset(string relativePath) {
             string fullPath = Path.Combine(ProjectRootPath, relativePath);
             using FileStream stream = File.OpenRead(fullPath);

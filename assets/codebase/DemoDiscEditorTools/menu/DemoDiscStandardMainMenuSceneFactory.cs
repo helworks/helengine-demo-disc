@@ -203,9 +203,8 @@ namespace DemoDisc.EditorTools {
             });
             entity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
-                FixedSize = new int2(DemoMenuLayout.CanvasWidth, DemoMenuLayout.CanvasHeight)
-            });
-            entity.AddComponent(new ReferenceCanvasFitComponent {
+                ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
+                FixedSize = new int2(DemoMenuLayout.CanvasWidth, DemoMenuLayout.CanvasHeight),
                 ReferenceWidth = DemoMenuLayout.CanvasWidth,
                 ReferenceHeight = DemoMenuLayout.CanvasHeight
             });
