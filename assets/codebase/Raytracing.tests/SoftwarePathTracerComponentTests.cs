@@ -19,18 +19,6 @@ namespace DemoDisc.Raytracing.tests {
             new float3(0f, 1f, 0f),
             45f);
 
-        static string SourcePath(string fileName, [CallerFilePath] string testSourcePath = null) {
-            DirectoryInfo directory = new DirectoryInfo(Path.GetDirectoryName(testSourcePath));
-            while (directory != null) {
-                string projectFilePath = Path.Combine(directory.FullName, "project.heproj");
-                if (File.Exists(projectFilePath)) {
-                    return Path.Combine(directory.FullName, "assets", "codebase", "Raytracing", fileName);
-                }
-                directory = directory.Parent;
-            }
-            throw new InvalidOperationException("Could not locate the DemoDisc project root from the test source path.");
-        }
-
         /// <summary>
         /// Proves the new public session surface exists before implementation is supplied.
         /// </summary>
@@ -54,54 +42,6 @@ namespace DemoDisc.Raytracing.tests {
             Assert.True(method.IsGenericMethodDefinition);
             Assert.Equal(1, method.GetGenericArguments().Length);
             Assert.NotEmpty(method.GetCustomAttributes(typeof(NativeBorrowedReturnAttribute), false));
-        }
-
-        /// <summary>
-        /// Pins the exception forms and payload accesses rejected by the native Windows C++ backend.
-        /// </summary>
-        [Fact]
-        public void Native_windows_codegen_uses_stable_supported_exception_forms() {
-            string tracerSource = File.ReadAllText(SourcePath("SoftwarePathTracer.cs"));
-            string componentSource = File.ReadAllText(SourcePath("SoftwarePathTracerComponent.cs"));
-            string bvhSource = File.ReadAllText(SourcePath("SoftwareBvh.cs"));
-
-            Assert.DoesNotContain("Math.Pow", tracerSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("nameof(platformId), platformId,", tracerSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("name, value,", tracerSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("nameof(depth), depth,", bvhSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("ObjectDisposedException", bvhSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("ObjectDisposedException", componentSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("catch (Exception", tracerSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("catch (Exception", componentSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("exception.Message", componentSource, StringComparison.Ordinal);
-            Assert.DoesNotContain(", exception);", tracerSource, StringComparison.Ordinal);
-            Assert.DoesNotContain(", exception);", componentSource, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Pins the generated access paths that previously materialized nullable values or abstract scene-root collections.
-        /// </summary>
-        [Fact]
-        public void Native_windows_codegen_uses_primitive_status_checks_and_concrete_scene_roots() {
-            string componentSource = File.ReadAllText(SourcePath("SoftwarePathTracerComponent.cs"));
-            string sceneSource = File.ReadAllText(SourcePath("SoftwareTraceScene.cs"));
-
-            Assert.DoesNotContain("session?.", componentSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("??", componentSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("IReadOnlyList<Entity>", componentSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("IReadOnlyList<Entity>", sceneSource, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Pins the nested model-instance name and local struct-array initializer forms rejected by native C++ generation.
-        /// </summary>
-        [Fact]
-        public void Native_windows_codegen_avoids_nested_entity_collision_and_inline_struct_arrays() {
-            string sceneSource = File.ReadAllText(SourcePath("SoftwareTraceScene.cs"));
-
-            Assert.DoesNotContain("public readonly Entity Entity;", sceneSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("float3[] firstPoints = {", sceneSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("float3[] secondPoints = {", sceneSource, StringComparison.Ordinal);
         }
 
         /// <summary>

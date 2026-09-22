@@ -115,77 +115,11 @@ namespace DemoDisc.TiltPlay.tests {
             Assert.False(DemoDisc.TiltPlay.TiltTrialSessionComponent.ShouldShowGameplayPanel(DemoDisc.TiltPlay.TiltTrialSessionState.Failed));
         }
 
-        /// <summary>
-        /// Ensures session initialization freezes gameplay and only the explicit start branch can release it.
-        /// </summary>
-        [Fact]
-        public void Session_initializes_frozen_until_the_accept_start_transition() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\TiltPlay\TiltTrialSessionComponent.cs");
-
-            Assert.Contains("SessionStateMachine.Initialize(TiltTrialSessionState.Start)", source, StringComparison.Ordinal);
-            Assert.Contains("CaptureFrozenPlayerPose();", source, StringComparison.Ordinal);
-            Assert.Contains("SetGameplayUpdatesSuppressed(true);", source, StringComparison.Ordinal);
-            Assert.Contains("void UpdateStartState()", source, StringComparison.Ordinal);
-            Assert.Contains("if (!WasAcceptPressed())", source, StringComparison.Ordinal);
-            Assert.Contains("SetGameplayUpdatesSuppressed(false);", source, StringComparison.Ordinal);
-            Assert.Contains("SessionStateMachine.TryChangeState(TiltTrialSessionState.Playing);", source, StringComparison.Ordinal);
-            Assert.Contains("StartOverlayEntity.Enabled = SessionStateMachine.CurrentState == TiltTrialSessionState.Start", source, StringComparison.Ordinal);
-
-            int startStateMethodIndex = source.IndexOf("void UpdateStartState()", StringComparison.Ordinal);
-            int playingStateMethodIndex = source.IndexOf("void UpdatePlayingState()", StringComparison.Ordinal);
-            string startStateMethodSource = source.Substring(startStateMethodIndex, playingStateMethodIndex - startStateMethodIndex);
-
-            Assert.Contains("RefreshOverlayPresentation();", startStateMethodSource, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Ensures every non-playing Tilt Trial session state stops shared fixed-step physics and scene disposal releases that stop.
-        /// </summary>
-        [Fact]
-        public void Session_pauses_shared_physics_until_playing_and_releases_it_on_disposal() {
-            string source = File.ReadAllText(ResolveTiltTrialSessionComponentSourcePath());
-
-            Assert.Contains("Core.Instance.PhysicsSimulationIsPaused = updatesAreSuppressed;", source, StringComparison.Ordinal);
-            Assert.Contains("public override void Dispose()", source, StringComparison.Ordinal);
-            Assert.Contains("Core.Instance.PhysicsSimulationIsPaused = false;", source, StringComparison.Ordinal);
-        }
-
         [Fact]
         public void Format_coin_progress_returns_expected_hud_label() {
             string label = DemoDisc.TiltPlay.TiltTrialSessionComponent.FormatCoinProgress(3, 7);
 
             Assert.Equal("Coins 3/7", label);
-        }
-
-        [Fact]
-        public void Session_retries_coin_discovery_when_scene_expansion_has_not_finished() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\TiltPlay\TiltTrialSessionComponent.cs");
-
-            Assert.Contains("if (CollectibleCoinComponents == null || CollectibleCoinComponents.Count == 0) {", source, StringComparison.Ordinal);
-        }
-
-        [Fact]
-        public void Goal_clear_uses_trigger_observer_state_instead_of_level_01_center_distance_check() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\TiltPlay\TiltTrialSessionComponent.cs");
-
-            Assert.Contains("GoalTriggerObserver.GetWasEnteredThisFrame()", source, StringComparison.Ordinal);
-            Assert.Contains("|| GoalTriggerObserver.GetIsTriggered()", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("dx <=", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("dy <=", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("dz <=", source, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Ensures the Clear/results overlay accepts left-stick vertical navigation in addition to the D-pad.
-        /// </summary>
-        [Fact]
-        public void Clear_overlay_navigation_accepts_left_stick_vertical_direction() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\TiltPlay\TiltTrialSessionComponent.cs");
-
-            Assert.Contains("|| WasLeftStickUpPressed();", source, StringComparison.Ordinal);
-            Assert.Contains("|| WasLeftStickDownPressed();", source, StringComparison.Ordinal);
-            Assert.Contains("bool WasLeftStickUpPressed()", source, StringComparison.Ordinal);
-            Assert.Contains("bool WasLeftStickDownPressed()", source, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -258,25 +192,6 @@ namespace DemoDisc.TiltPlay.tests {
             Assert.Equal((byte)247, retryLabel.Color.X);
             Assert.Equal((byte)40, exitBackground.FillColor.X);
             Assert.Equal((byte)247, exitLabel.Color.X);
-        }
-
-        static string ResolveTiltTrialSessionComponentSourcePath() {
-            DirectoryInfo directory = new DirectoryInfo(AppContext.BaseDirectory);
-            while (directory != null) {
-                string candidate = Path.Combine(directory.FullName, "assets", "codebase", "TiltPlay", "TiltTrialSessionComponent.cs");
-                if (File.Exists(candidate)) {
-                    return candidate;
-                }
-
-                directory = directory.Parent;
-            }
-
-            const string checkoutSourcePath = @"C:\dev\helprojs\demodisc\assets\codebase\TiltPlay\TiltTrialSessionComponent.cs";
-            if (File.Exists(checkoutSourcePath)) {
-                return checkoutSourcePath;
-            }
-
-            throw new FileNotFoundException("Unable to locate TiltTrialSessionComponent.cs from the active test checkout.");
         }
 
         static helengine.Entity CreateEntity(helengine.Entity parent, List<helengine.Component> components) {

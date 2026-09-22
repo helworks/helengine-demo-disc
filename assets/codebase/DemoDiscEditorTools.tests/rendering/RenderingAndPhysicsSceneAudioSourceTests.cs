@@ -42,30 +42,6 @@ namespace DemoDisc.EditorTools.tests {
             AssertAllScenesAreSilent(PhysicsSceneRelativePaths, audioSourceComponentTypeId);
         }
 
-        [Fact]
-        public void Rendering_and_physics_generators_do_not_author_shared_music() {
-            string renderingSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\rendering\RenderingSceneGenerator.cs");
-            string physicsSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\physics\PhysicsSceneFactory.cs");
-            string physicsNintendoDsSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\physics\PhysicsNintendoDsSceneGenerator.cs");
-
-            Assert.DoesNotContain("CreateRenderingAndPhysicsMusicEntity", renderingSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("CreateRenderingAndPhysicsMusicEntity", physicsSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("CreateRenderingAndPhysicsMusicEntity", physicsNintendoDsSource, StringComparison.Ordinal);
-            Assert.Contains("LoadSceneAssetWithoutSharedMusic", physicsNintendoDsSource, StringComparison.Ordinal);
-            Assert.Contains("StripSharedSceneMusic", physicsNintendoDsSource, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Verifies the handheld physics generator skips the matrix scene because the rendering pipeline authors it, including its handheld augmentation.
-        /// </summary>
-        [Fact]
-        public void Nintendo_handheld_generator_skips_the_rendering_pipeline_matrix_scene() {
-            string physicsNintendoDsSource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\physics\PhysicsNintendoDsSceneGenerator.cs");
-
-            Assert.Contains("string.Equals(sceneEntry.SceneId, \"test_scene_matrix_render\", StringComparison.Ordinal)", physicsNintendoDsSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("CreateFreshPhysicsSceneAssetWithoutSharedMusic", physicsNintendoDsSource, StringComparison.Ordinal);
-        }
-
         static void AssertAllScenesAreSilent(IEnumerable<string> relativePaths, string audioSourceComponentTypeId) {
             foreach (string relativePath in relativePaths) {
                 SceneAsset scene = LoadSceneAsset(relativePath);

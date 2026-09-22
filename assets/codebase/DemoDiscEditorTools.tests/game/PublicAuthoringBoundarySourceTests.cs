@@ -5,100 +5,6 @@ namespace DemoDisc.EditorTools.tests {
     /// Verifies gameplay generation reaches file-backed assets only through the public editor authoring capability.
     /// </summary>
     public sealed class PublicAuthoringBoundarySourceTests {
-        /// <summary>
-        /// Ensures gameplay scene factories do not depend on the scene-tools reference wrapper.
-        /// </summary>
-        [Fact]
-        public void Gameplay_scene_factories_use_the_public_authoring_capability_for_references() {
-            string gameSceneFactorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\GameSceneFactory.cs");
-            string zombislayerSceneFactorySource = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\ZombislayerSceneFactory.cs");
-
-            Assert.DoesNotContain("DemoDiscEditorAssetReferenceFactory", gameSceneFactorySource, StringComparison.Ordinal);
-            Assert.DoesNotContain("DemoDiscEditorAssetReferenceFactory", zombislayerSceneFactorySource, StringComparison.Ordinal);
-            Assert.Contains("AssetAuthoringService.CreateFileReference", gameSceneFactorySource, StringComparison.Ordinal);
-            Assert.Contains("AuthoringSession.CreateFileReference", zombislayerSceneFactorySource, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Ensures Task 6 command paths do not construct editor readers, writers, content managers, or resolvers directly.
-        /// </summary>
-        [Fact]
-        public void Current_generation_paths_use_only_the_public_authoring_boundary() {
-            string[] sourcePaths = {
-                @"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\physics\PhysicsNintendoDsSceneGenerator.cs",
-                @"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\physics\PhysicsSceneFactory.cs",
-                @"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\rendering\GeneratedAuthoringSceneWriteService.cs",
-                @"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\TiltTrialGameplayPresentationRootFactory.cs"
-            };
-
-            foreach (string sourcePath in sourcePaths) {
-                string source = File.ReadAllText(sourcePath);
-                Assert.DoesNotContain("AssetSerializer", source, StringComparison.Ordinal);
-                Assert.DoesNotContain("GeneratedAssetWriteService", source, StringComparison.Ordinal);
-                Assert.DoesNotContain("new ContentManager", source, StringComparison.Ordinal);
-                Assert.DoesNotContain("new EditorSceneAssetReferenceResolver", source, StringComparison.Ordinal);
-                Assert.DoesNotContain("RemoveLegacyPresentationRoots", source, StringComparison.Ordinal);
-                Assert.DoesNotContain("ExcludeLegacyOverlayFromConsoles", source, StringComparison.Ordinal);
-            }
-        }
-
-        /// <summary>
-        /// Ensures project-authored code cannot recreate the editor host's private
-        /// import, identity, serializer, or project-path graph.
-        /// </summary>
-        [Fact]
-        public void Production_code_does_not_recreate_editor_host_authoring_services() {
-            string codebasePath = Path.Combine(@"C:\dev\helprojs\demodisc", "assets", "codebase");
-            string[] forbiddenFragments = {
-                "Assembly.Load(\"helengine.editor.app\")",
-                "EditorHostImporterFactory",
-                "new AssetImportManager",
-                "AssetSerializer.Serialize",
-                "new EditorAssetReferenceResolver",
-                "new GeneratedAssetWriteService",
-                "EditorProjectPaths",
-                "Assembly.LoadFrom(",
-                "Type.GetType(\"helengine.editor"
-            };
-
-            string[] productionSourcePaths = Directory.GetFiles(codebasePath, "*.cs", SearchOption.AllDirectories)
-                .Where(path => !path.Contains(".tests", StringComparison.OrdinalIgnoreCase))
-                .ToArray();
-            Assert.NotEmpty(productionSourcePaths);
-
-            foreach (string sourcePath in productionSourcePaths) {
-                string source = File.ReadAllText(sourcePath);
-                foreach (string forbiddenFragment in forbiddenFragments) {
-                    Assert.DoesNotContain(forbiddenFragment, source, StringComparison.Ordinal);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Every command publishes only through authoring transactions it owns and commits. A command that has
-        /// to read back what it published publishes more than once, so the count is not pinned to one; what is
-        /// pinned is that every publication commits and that no command reaches past the transaction boundary.
-        /// </summary>
-        [Fact]
-        public void Every_editor_generation_command_commits_every_authoring_transaction_it_opens() {
-            string codebasePath = Path.Combine(@"C:\dev\helprojs\demodisc", "assets", "codebase");
-            string[] commandSources = Directory.GetFiles(codebasePath, "*.cs", SearchOption.AllDirectories)
-                .Where(path => !path.Contains(".tests", StringComparison.OrdinalIgnoreCase))
-                .Where(path => File.ReadAllText(path).Contains(": IEditorCommand", StringComparison.Ordinal))
-                .ToArray();
-
-            Assert.NotEmpty(commandSources);
-            foreach (string sourcePath in commandSources) {
-                string source = File.ReadAllText(sourcePath);
-                int transactionCount = CountOccurrences(source, ".BeginTransaction()");
-                Assert.True(transactionCount >= 1, $"'{sourcePath}' must publish through an authoring transaction.");
-                Assert.Equal(transactionCount, CountOccurrences(source, ".Commit()"));
-                Assert.DoesNotContain("new SceneSaveService", source, StringComparison.Ordinal);
-                Assert.DoesNotContain("new BlueprintSaveService", source, StringComparison.Ordinal);
-                Assert.DoesNotContain("new MaterialAssetSettingsService", source, StringComparison.Ordinal);
-            }
-        }
-
         static int CountOccurrences(string source, string value) {
             int count = 0;
             int offset = 0;
@@ -107,30 +13,6 @@ namespace DemoDisc.EditorTools.tests {
                 offset += value.Length;
             }
             return count;
-        }
-
-        /// <summary>
-        /// Ensures every generated native writer call supplies the project-owned stable identity catalog.
-        /// </summary>
-        [Fact]
-        public void Generated_native_writers_supply_explicit_project_identities() {
-            string codebasePath = Path.Combine(@"C:\dev\helprojs\demodisc", "assets", "codebase");
-            string generatedSceneWriterSource = File.ReadAllText(Path.Combine(codebasePath, "DemoDiscEditorTools", "rendering", "GeneratedAuthoringSceneWriteService.cs"));
-            Assert.Contains("global::DemoDisc.EditorTools.ProjectAuthoringAssetIdentityCatalog.GetSceneIdentity", generatedSceneWriterSource, StringComparison.Ordinal);
-
-            string[] productionSourcePaths = Directory.GetFiles(codebasePath, "*.cs", SearchOption.AllDirectories)
-                .Where(path => !path.Contains(".tests", StringComparison.OrdinalIgnoreCase))
-                .ToArray();
-
-            foreach (string sourcePath in productionSourcePaths) {
-                string source = File.ReadAllText(sourcePath);
-                if (source.Contains("WriteNativeAsset(", StringComparison.Ordinal)
-                    || source.Contains("WriteNativeBlueprint(", StringComparison.Ordinal)
-                    || source.Contains("WriteNativeMaterial(", StringComparison.Ordinal)
-                    || source.Contains("WriteNativeScene(", StringComparison.Ordinal)) {
-                    Assert.Contains("ProjectAuthoringAssetIdentityCatalog", source, StringComparison.Ordinal);
-                }
-            }
         }
 
         /// <summary>

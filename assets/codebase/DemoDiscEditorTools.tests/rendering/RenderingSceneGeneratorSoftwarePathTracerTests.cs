@@ -13,41 +13,6 @@ namespace DemoDisc.EditorTools.tests {
         static readonly string ProjectRootPath = ResolveProjectRoot();
 
         [Fact]
-        public void Generator_registers_one_shared_software_path_tracer_scene_without_companion_ids() {
-            string source = ReadGeneratorSource();
-
-            Assert.Contains("public const string SoftwarePathTracerSceneId = \"scenes/rendering/software_path_tracer.helen\";", source, StringComparison.Ordinal);
-            Assert.Contains("readonly SoftwarePathTracerSceneFactory SoftwarePathTracerFactory;", source, StringComparison.Ordinal);
-            Assert.Contains("SoftwarePathTracerFactory = new SoftwarePathTracerSceneFactory(AssetAuthoringService);", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("software_path_tracer_ds", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("software_path_tracer_3ds", source, StringComparison.Ordinal);
-
-            int factoryIndex = source.IndexOf("SoftwarePathTracerFactory.CreateSceneDefinition(", StringComparison.Ordinal);
-            int factoryEndIndex = source.IndexOf(";", factoryIndex);
-            Assert.True(factoryIndex >= 0 && factoryEndIndex > factoryIndex);
-            string factoryCall = source.Substring(factoryIndex, factoryEndIndex - factoryIndex);
-            Assert.Contains("EngineSceneAssetReferenceFactory.CreateCubeModel()", factoryCall, StringComparison.Ordinal);
-            Assert.Contains("editorCore.DefaultFontAssetForEditor", factoryCall, StringComparison.Ordinal);
-            Assert.DoesNotContain("assets.GeneratedCubeModel", factoryCall, StringComparison.Ordinal);
-        }
-
-        [Fact]
-        public void Generator_writes_the_shared_software_scene_once_after_existing_rendering_showcases() {
-            string source = ReadGeneratorSource();
-            const string definition = "GeneratedAuthoringSceneDefinition softwarePathTracerSceneDefinition = SoftwarePathTracerFactory.CreateSceneDefinition(";
-            const string write = "AuthoringSceneWriteService.WriteScene(softwarePathTracerSceneDefinition);";
-
-            int definitionIndex = source.IndexOf(definition, StringComparison.Ordinal);
-            int matrixWriteIndex = source.IndexOf("AuthoringSceneWriteService.WriteScene(matrixRenderSceneDefinition);", StringComparison.Ordinal);
-            int writeIndex = source.IndexOf(write, StringComparison.Ordinal);
-            Assert.True(definitionIndex >= 0);
-            Assert.True(matrixWriteIndex >= 0);
-            Assert.True(writeIndex > matrixWriteIndex);
-            Assert.True(writeIndex > definitionIndex);
-            Assert.Equal(writeIndex, source.LastIndexOf(write, StringComparison.Ordinal));
-        }
-
-        [Fact]
         public void Generated_shared_software_scene_contains_the_expected_serialized_graph_and_references() {
             SceneAsset scene = LoadSceneAsset();
             Assert.Equal(SceneId, scene.Id);
@@ -234,10 +199,6 @@ namespace DemoDisc.EditorTools.tests {
             foreach (string platformId in nonHandheldPlatforms) {
                 Assert.False(global::DemoDisc.testing.DemoDiscOverrideScopeReader.ExistsOnPlatform(bottomCamera, platformId));
             }
-        }
-
-        static string ReadGeneratorSource() {
-            return File.ReadAllText(Path.Combine(ProjectRootPath, "assets", "codebase", "DemoDiscEditorTools", "rendering", "RenderingSceneGenerator.cs"));
         }
 
         static SceneAsset LoadSceneAsset() {

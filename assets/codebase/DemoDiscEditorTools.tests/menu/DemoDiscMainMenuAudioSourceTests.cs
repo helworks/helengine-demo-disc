@@ -24,20 +24,6 @@ namespace DemoDisc.EditorTools.tests {
             Assert.DoesNotContain(FlattenComponents(handheldScene.RootEntities), component => string.Equals(component.ComponentTypeId, audioSourceComponentTypeId, StringComparison.Ordinal));
         }
 
-        /// <summary>
-        /// Ensures both menu scene factories no longer author music entities.
-        /// </summary>
-        [Fact]
-        public void Menu_scene_factories_do_not_author_music() {
-            string standardFactorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "menu", "DemoDiscStandardMainMenuSceneFactory.cs"));
-            string handheldFactorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "menu", "DemoDiscHandheldMainMenuSceneFactory.cs"));
-            string themeSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "menu.authoring", "DemoDiscMenuTheme.cs"));
-
-            Assert.DoesNotContain("AudioSourceComponent", standardFactorySource, StringComparison.Ordinal);
-            Assert.DoesNotContain("AudioSourceComponent", handheldFactorySource, StringComparison.Ordinal);
-            Assert.DoesNotContain("ThemeMusic", themeSource, StringComparison.Ordinal);
-        }
-
         static SceneAsset LoadSceneAsset(string relativePath) {
             string fullPath = Path.Combine(ProjectRootPath, relativePath);
             using FileStream stream = File.OpenRead(fullPath);

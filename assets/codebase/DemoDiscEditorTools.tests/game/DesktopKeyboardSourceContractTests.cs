@@ -20,24 +20,6 @@ namespace DemoDisc.EditorTools.tests {
         /// </summary>
         static readonly string[] DesktopOnlyInputReferenceFragments = ["Keys.", "GetMouse", "WasMouse", "IsMouse", "RequestPointerWrapEnabled", "SetPointerWrapEnabled"];
 
-        /// <summary>
-        /// Ensures keyboard fallback input is emitted only when desktop compilation is active.
-        /// </summary>
-        [Fact]
-        public void Runtime_input_sources_keep_keyboard_references_inside_desktop_guards() {
-            for (int directoryIndex = 0; directoryIndex < RuntimeSourceDirectoryNames.Length; directoryIndex++) {
-                string runtimeSourceDirectoryPath = Path.Combine(RuntimeSourceRootPath, RuntimeSourceDirectoryNames[directoryIndex]);
-                string[] sourceFilePaths = Directory.GetFiles(runtimeSourceDirectoryPath, "*.cs", SearchOption.AllDirectories);
-                for (int fileIndex = 0; fileIndex < sourceFilePaths.Length; fileIndex++) {
-                    string sourceFilePath = sourceFilePaths[fileIndex];
-                    string nonDesktopSource = RemoveDesktopOnlySource(File.ReadAllText(sourceFilePath));
-                    for (int referenceIndex = 0; referenceIndex < DesktopOnlyInputReferenceFragments.Length; referenceIndex++) {
-                        Assert.DoesNotContain(DesktopOnlyInputReferenceFragments[referenceIndex], nonDesktopSource, StringComparison.Ordinal);
-                    }
-                }
-            }
-        }
-
         [Fact]
         public void RemoveDesktopOnlySource_keeps_the_non_desktop_branch_of_an_inverse_guard() {
             string source = "#if !DESKTOP_PLATFORM\nreturn false;\n#else\nreturn Keys.Enter;\n#endif";

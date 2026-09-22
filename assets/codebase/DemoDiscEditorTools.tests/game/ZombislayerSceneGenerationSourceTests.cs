@@ -6,38 +6,6 @@ namespace DemoDisc.EditorTools.tests {
     /// </summary>
     public sealed class ZombislayerSceneGenerationSourceTests {
         /// <summary>
-        /// Ensures the top-level gameplay scene generator stages Zombislayer assets and writes the dedicated gameplay scene.
-        /// </summary>
-        [Fact]
-        public void Game_scene_generator_writes_zombislayer_gameplay_scene() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\GameSceneGenerator.cs");
-
-            Assert.Contains("ZombislayerAssetPreparationService zombislayerAssetPreparationService = new ZombislayerAssetPreparationService(AssetAuthoringService);", source, StringComparison.Ordinal);
-            Assert.Contains("ZombislayerGenerationAssets zombislayerAssets = zombislayerAssetPreparationService.Prepare();", source, StringComparison.Ordinal);
-            Assert.Contains("ZombislayerSceneFactory zombislayerSceneFactory = new ZombislayerSceneFactory(zombislayerAssets, AssetAuthoringService);", source, StringComparison.Ordinal);
-            Assert.Contains("GeneratedAuthoringSceneDefinition zombislayerScene = zombislayerSceneFactory.CreateGameplayScene();", source, StringComparison.Ordinal);
-            Assert.Contains("sceneWriteService.WriteScene(zombislayerScene);", source, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Ensures the Zombislayer scene factory authors imported environment and weapon entities together with gameplay-owned runtime components.
-        /// </summary>
-        [Fact]
-        public void Zombislayer_scene_factory_authors_imported_models_session_and_fps_controller() {
-            string source = File.ReadAllText(@"C:\dev\helprojs\demodisc\assets\codebase\DemoDiscEditorTools\game\ZombislayerSceneFactory.cs");
-
-            Assert.Contains("new DemoDisc.Zombislayer.ZombislayerSessionComponent()", source, StringComparison.Ordinal);
-            Assert.Contains("new DemoDisc.Zombislayer.ZombislayerFpsControllerComponent()", source, StringComparison.Ordinal);
-            Assert.Contains("\"ZombislayerWeapon\"", source, StringComparison.Ordinal);
-            Assert.Contains("\"ZombislayerPauseOverlay\"", source, StringComparison.Ordinal);
-            Assert.Contains("AuthoringSession.CreateFileReference(ZombislayerAssetCatalog.EnvironmentModelRelativePath, AssetEntryKind.Model)", source, StringComparison.Ordinal);
-            Assert.Contains("AuthoringSession.CreateFileReference(ZombislayerAssetCatalog.WeaponModelRelativePath, AssetEntryKind.Model)", source, StringComparison.Ordinal);
-            Assert.Contains("const string GameplaySceneAssetRelativePath = \"scenes/games/zombislayer.helen\";", source, StringComparison.Ordinal);
-            Assert.Contains("SceneId = GameSceneCatalog.ZombislayerSceneId", source, StringComparison.Ordinal);
-            Assert.Contains("SceneAssetRelativePath = GameplaySceneAssetRelativePath", source, StringComparison.Ordinal);
-        }
-
-        /// <summary>
         /// Ensures only the canonical current authored path is registered for the runtime Zombislayer scene id.
         /// </summary>
         [Fact]

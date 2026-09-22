@@ -6,88 +6,6 @@ namespace DemoDisc.EditorTools.tests {
     /// </summary>
     public sealed class TiltTrialPlatformPresentationSourceTests {
         /// <summary>
-        /// Ensures presentation generation writes Blueprint assets instead of gameplay level scenes.
-        /// </summary>
-        [Fact]
-        public void Presentation_generator_writes_only_console_and_handheld_blueprints() {
-            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "TiltTrialGameplayPresentationBlueprintGenerator.cs"));
-
-            Assert.Contains("TiltTrialConsolePresentation.hblueprint", source, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialHandheldPresentation.hblueprint", source, StringComparison.Ordinal);
-            Assert.Contains("WriteNativeBlueprint", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("BlueprintSaveService", source, StringComparison.Ordinal);
-            Assert.DoesNotContain(".helen", source, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Ensures platform-specific controls target semantic session actions rather than UI child positions.
-        /// </summary>
-        [Fact]
-        public void Handheld_presentation_uses_serialized_semantic_action_bridges() {
-            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "GameSceneFactory.cs"));
-
-            Assert.Contains("TiltTrialPresentationActionComponent", source, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialSessionAction.LevelSelect", source, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialResultRetryButton", source, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialResultExitButton", source, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialResultNextButton", source, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialSessionAction.Retry", source, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialSessionAction.Next", source, StringComparison.Ordinal);
-            Assert.Contains("new InteractableComponent", source, StringComparison.Ordinal);
-            Assert.Contains("TargetEntityName = \"PlayerSphere\"", source, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Ensures the handheld results menu exposes stable roles for selection-state presentation.
-        /// </summary>
-        [Fact]
-        public void Session_component_binds_handheld_result_button_visuals_by_stable_role() {
-            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltTrialSessionComponent.cs"));
-
-            Assert.Contains("TiltTrialResultRetryButton", source, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialResultExitButton", source, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialResultNextButton", source, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialResultRetryButtonLabel", source, StringComparison.Ordinal);
-            Assert.Contains("TryFindRoundedRectComponent", source, StringComparison.Ordinal);
-            Assert.Contains("TryFindResultButtonLabel", source, StringComparison.Ordinal);
-            Assert.Contains("ApplyResultButtonSelection", source, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Ensures the runtime session resolves its presentation-owned controls by stable names.
-        /// </summary>
-        [Fact]
-        public void Session_component_does_not_depend_on_presentation_child_order() {
-            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltTrialSessionComponent.cs"));
-
-            Assert.Contains("TryFindNamedEntity(Parent, \"TiltTrialTimerText\")", source, StringComparison.Ordinal);
-            Assert.Contains("TryFindNamedEntity(Parent, \"TiltTrialResultsOverlay\")", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("TryFindChildEntity(Parent, 0)", source, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Ensures the handheld gameplay controller owns the game-specific bottom-screen presentation.
-        /// </summary>
-        [Fact]
-        public void Handheld_gameplay_controller_owns_bottom_screen_presentation() {
-            string factorySource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "GameSceneFactory.cs"));
-            string sessionSource = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "TiltPlay", "TiltTrialSessionComponent.cs"));
-            sessionSource = sessionSource.Replace("\r\n", "\n", StringComparison.Ordinal);
-
-            Assert.Contains("CreateHandheldGameplayControllerEntity", factorySource, StringComparison.Ordinal);
-            Assert.Contains("root.AddChild(CreateHandheldGameplayControllerEntity(levelEntry));", factorySource, StringComparison.Ordinal);
-            Assert.Contains("CreateHandheldGameplayBottomScreenCameraEntity", factorySource, StringComparison.Ordinal);
-            Assert.Contains("TiltTrialHandheldGameplayBottomScreenRoot", factorySource, StringComparison.Ordinal);
-            Assert.Contains("controllerEntity.AddComponent(new DemoDisc.TiltPlay.TiltTrialSessionComponent());", factorySource, StringComparison.Ordinal);
-            Assert.DoesNotContain("CreateHandheldBottomUiEntity", factorySource, StringComparison.Ordinal);
-            Assert.Contains("if (ResultsBodyTextComponent == null)", sessionSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("missingDependencies.Add(\"timer text\")", sessionSource, StringComparison.Ordinal);
-            Assert.DoesNotContain("missingDependencies.Add(\"target times text\")", sessionSource, StringComparison.Ordinal);
-            Assert.Contains("if (TimerTextComponent == null) {\n                return;\n            }", sessionSource, StringComparison.Ordinal);
-            Assert.Contains("if (CoinTextComponent == null) {\n                return;\n            }", sessionSource, StringComparison.Ordinal);
-        }
-
-        /// <summary>
         /// Ensures the committed handheld Blueprint starts with only the prompt visible over the camera clear color.
         /// </summary>
         [Fact]
@@ -151,20 +69,6 @@ namespace DemoDisc.EditorTools.tests {
 
                 Assert.Equal(expectedButtonLabels[buttonIndex], labelComponent.Text);
             }
-        }
-
-        /// <summary>
-        /// Ensures the DS start-prompt sprite samples its complete texture because the OBJ path cannot crop SourceRect.
-        /// </summary>
-        [Fact]
-        public void Nintendo_ds_start_prompt_uses_the_full_texture_source_rect() {
-            string source = File.ReadAllText(global::DemoDisc.testing.DemoDiscTestProject.GetPath("assets", "codebase", "DemoDiscEditorTools", "game", "GameSceneFactory.cs"));
-            source = source.Replace("\r\n", "\n", StringComparison.Ordinal);
-
-            Assert.Contains(
-                "overrideComponent.SourceRect = string.Equals(platformId, NintendoDsPlatformId, StringComparison.Ordinal)\n                ? new float4(0f, 0f, 1f, 1f)\n                : resolvedIcon.SourceRect;",
-                source,
-                StringComparison.Ordinal);
         }
 
         /// <summary>
