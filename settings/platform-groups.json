@@ -18,8 +18,6 @@
       "platformIds": [
         "dc",
         "gamecube",
-        "n64",
-        "ps1",
         "ps2",
         "psp",
         "psvita",
@@ -27,6 +25,15 @@
         "xbox"
       ],
       "children": [
+        {
+          "id": "msd",
+          "displayName": "Micro SD (240p)",
+          "platformIds": [
+            "n64",
+            "ps1"
+          ],
+          "children": []
+        },
         {
           "id": "dual-screen",
           "displayName": "Dual-screen devices",

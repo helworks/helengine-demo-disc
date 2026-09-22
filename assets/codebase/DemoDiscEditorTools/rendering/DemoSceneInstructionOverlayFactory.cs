@@ -107,14 +107,14 @@ namespace DemoDisc.EditorTools {
         const float DesktopInstructionCameraSecondaryIconLeft = 72f;
 
         /// <summary>
-        /// Fixed desktop and console vertical nudge used to visually center the larger labels against the shared icon rows.
+        /// Fixed desktop and console vertical offset that centers the camera label's UI-font line in its 48-pixel icon row.
         /// </summary>
-        const float DesktopInstructionRotateTextTopAdjustment = -9f;
+        const float DesktopInstructionRotateTextTopAdjustment = 5f;
 
         /// <summary>
-        /// Fixed desktop and console vertical nudge used to keep the toggle-light label aligned against the face-button icon row.
+        /// Fixed desktop and console vertical offset that centers the light label's UI-font line in its 46-pixel icon row.
         /// </summary>
-        const float DesktopInstructionToggleTextTopAdjustment = -10f;
+        const float DesktopInstructionToggleTextTopAdjustment = 4f;
 
         /// <summary>
         /// Fixed desktop and console label width used by the shared instruction overlay after the readability scale-up pass.
@@ -318,6 +318,10 @@ namespace DemoDisc.EditorTools {
         static readonly DesktopInstructionPlatformIconSlotSpec[] ConsoleCameraIconSlotSpecs = new[] {
             new DesktopInstructionPlatformIconSlotSpec("ps2", "dpad", new int2(48, 48), 0),
             new DesktopInstructionPlatformIconSlotSpec("ps2", "left_stick", new int2(48, 48), 1),
+            new DesktopInstructionPlatformIconSlotSpec("n64", "dpad", new int2(48, 48), 0),
+            new DesktopInstructionPlatformIconSlotSpec("n64", "control_stick", new int2(48, 48), 1),
+            new DesktopInstructionPlatformIconSlotSpec("ps1", "dpad", new int2(48, 48), 0),
+            new DesktopInstructionPlatformIconSlotSpec("ps1", "left_stick", new int2(48, 48), 1),
             new DesktopInstructionPlatformIconSlotSpec("gamecube", "dpad", new int2(48, 48), 0),
             new DesktopInstructionPlatformIconSlotSpec("gamecube", "control_stick", new int2(48, 48), 1),
             new DesktopInstructionPlatformIconSlotSpec("wii", "dpad", new int2(48, 48), 0),
@@ -333,6 +337,8 @@ namespace DemoDisc.EditorTools {
         /// </summary>
         static readonly DesktopInstructionPlatformIconSpec[] ConsoleLightIconSpecs = new[] {
             new DesktopInstructionPlatformIconSpec("ps2", "circle", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("n64", "c_cluster", new int2(46, 46)),
+            new DesktopInstructionPlatformIconSpec("ps1", "triangle", new int2(46, 46)),
             new DesktopInstructionPlatformIconSpec("gamecube", "y", new int2(46, 46)),
             new DesktopInstructionPlatformIconSpec("wii", "2", new int2(46, 46)),
             new DesktopInstructionPlatformIconSpec("switch", "x", new int2(46, 46)),
@@ -353,6 +359,10 @@ namespace DemoDisc.EditorTools {
             }
 
             Entity viewportRootEntity = CreateInstructionViewportRoot("DemoSceneInstructionViewport", "DemoSceneInstructionPanel", out Entity panelEntity);
+            // Micro SD uses the console Blueprint; do not draw a second panel over it.
+            EntitySaveComponent viewportSave = FindRequiredEntitySaveComponent(viewportRootEntity);
+            viewportSave.OverrideLevelOrder = DemoDiscOverrideScopes.CreateGroupFirstLevelOrder();
+            viewportSave.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.MicroSd).Exists = false;
 
             CreateDesktopInstructionCameraRow(panelEntity, projectRootPath, font, "Camera", DesktopInstructionFirstRowTop, DesktopInstructionRotateTextTopAdjustment);
             CreateDesktopInstructionRow(panelEntity, projectRootPath, font, "LightIcon", "Light", DesktopInstructionSecondRowTop, DesktopInstructionToggleTextTopAdjustment, LightIconSpecs);
@@ -433,6 +443,11 @@ namespace DemoDisc.EditorTools {
             panelEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(viewportRootEntity, panelName);
             panelEntity.LocalPosition = new float3(DesktopInstructionPanelLeft, DesktopInstructionPanelTop, 0f);
             panelEntity.LayerMask = DesktopOverlayLayerMask;
+            EntitySaveComponent panelSave = FindRequiredEntitySaveComponent(panelEntity);
+            panelSave.OverrideLevelOrder = DemoDiscOverrideScopes.CreateGroupFirstLevelOrder();
+            SceneEntityPlatformTransformOverrideAsset microSdPanel = panelSave.GetOrCreateTransformPlatformOverride(DemoDiscOverrideScopes.MicroSd);
+            microSdPanel.HasLocalScaleOverride = true;
+            microSdPanel.LocalScale = new float3(1.5f, 1.5f, 1f);
             panelEntity.AddComponent(new RoundedRectComponent {
                 Size = new int2(panelWidth, DesktopInstructionPanelHeight),
                 Radius = 8f,
@@ -511,6 +526,7 @@ namespace DemoDisc.EditorTools {
             };
             textEntity.AddComponent(textComponent);
             ApplyFontReference(textEntity, textComponent);
+            PreserveMicroSdLabelSize(textEntity, textComponent);
         }
 
         /// <summary>
@@ -585,6 +601,7 @@ namespace DemoDisc.EditorTools {
             };
             textEntity.AddComponent(textComponent);
             ApplyFontReference(textEntity, textComponent);
+            PreserveMicroSdLabelSize(textEntity, textComponent);
         }
 
         /// <summary>
@@ -889,10 +906,31 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
-        /// Stores the supplied editor font reference on the generated scene save state for the given text component.
+        /// Preserves the current glyph size while the Micro SD instruction panel grows.
         /// </summary>
         /// <param name="entity">Entity that owns the component.</param>
         /// <param name="component">Component whose font reference should be stored.</param>
+        void PreserveMicroSdLabelSize(Entity entity, TextComponent text) {
+            // Micro SD uses the same UI font and effective scale as the FPS component. Text geometry is
+            // resolved from FontScale directly, so the panel transform does not need compensation here.
+            EntitySaveComponent save = FindRequiredEntitySaveComponent(entity);
+            save.OverrideLevelOrder = DemoDiscOverrideScopes.CreateGroupFirstLevelOrder();
+            ComponentPlatformEditingService editing = new ComponentPlatformEditingService();
+            TextComponent scopedText = (TextComponent)editing.EnsureScopeOverrideComponent(text, save, DemoDiscOverrideScopes.MicroSd);
+            scopedText.Font = AssetAuthoringService.RendererResources.DefaultFontAsset;
+            scopedText.FontScale = 4f;
+            scopedText.Size = new int2(DesktopInstructionTextWidth, 64);
+            editing.MarkScopePropertyOverride(text, save, DemoDiscOverrideScopes.MicroSd, nameof(TextComponent.Font));
+            editing.MarkScopePropertyOverride(text, save, DemoDiscOverrideScopes.MicroSd, nameof(TextComponent.FontScale));
+            editing.MarkScopePropertyOverride(text, save, DemoDiscOverrideScopes.MicroSd, nameof(TextComponent.Size));
+            editing.StoreScopeAssetReference(text, scopedText, save, DemoDiscOverrideScopes.MicroSd, nameof(TextComponent.Font),
+                DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+            editing.PersistScopeOverride(text, scopedText, save, DemoDiscOverrideScopes.MicroSd);
+        }
+
+        /// <summary>
+        /// Stores the authored font reference for an instruction label.
+        /// </summary>
         void ApplyFontReference(Entity entity, Component component) {
             if (entity == null) {
                 throw new ArgumentNullException(nameof(entity));

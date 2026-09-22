@@ -63,6 +63,7 @@ namespace DemoDisc.EditorTools {
                 labelComponent,
                 FontReferenceName,
                 AssetAuthoringService.CreateFileReference(SceneLabelFontRelativePath, AssetEntryKind.Font));
+            MicroSdTextComponentOverrideService.Apply(labelComponent, saveComponent, font, SceneLabelWidth);
             sceneUiEntity.AddComponent(new DemoDisc.rendering.DemoDiscDebugSceneLabelComponent());
             saveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.DualScreen).Exists = false;
             labelEntity.Enabled = true;

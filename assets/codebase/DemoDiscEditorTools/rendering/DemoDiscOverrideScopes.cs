@@ -4,7 +4,7 @@ using DemoDisc.rendering;
 namespace DemoDisc.EditorTools {
     /// <summary>
     /// The only override scopes the generators author. Every platform supports every feature, so generated scene
-    /// content never names a platform: it varies by platform group (HD, SD, dual-screen) and, for debug-only
+    /// content never names a platform: it varies by platform group (HD, SD, Micro SD, dual-screen) and, for debug-only
     /// content, by build config. A scope applies to a build target when it is a prefix of that target's path under
     /// the entity's level order, so group scopes live on entities with <see cref="GroupFirstLevelOrder"/> and build
     /// config scopes on entities with <see cref="BuildConfigFirstLevelOrder"/>.
@@ -16,9 +16,14 @@ namespace DemoDisc.EditorTools {
         public const string HdGroupId = "hd";
 
         /// <summary>
-        /// Group id of the SD devices; the dual-screen group nests beneath it.
+        /// Group id of the SD devices; Micro SD and dual-screen groups nest beneath it.
         /// </summary>
         public const string SdGroupId = "sd";
+
+        /// <summary>
+        /// Group id of 240p consoles, nested beneath the SD devices.
+        /// </summary>
+        public const string MicroSdGroupId = "msd";
 
         /// <summary>
         /// Group id of the dual-screen handhelds, nested beneath <see cref="SdGroupId"/>.
@@ -79,6 +84,12 @@ namespace DemoDisc.EditorTools {
         /// </summary>
         public static EditorOverrideScope Sd => EditorOverrideScope.Common
             .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.Group, SdGroupId));
+
+        /// <summary>
+        /// Gets sd/msd under the group-first level order for 240p console layout overrides.
+        /// </summary>
+        public static EditorOverrideScope MicroSd => Sd
+            .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.Group, MicroSdGroupId));
 
         /// <summary>
         /// Gets <c>sd/dual-screen</c> under the group-first level order: the DS and 3DS rigs.

@@ -131,6 +131,15 @@ namespace DemoDisc.EditorTools {
                 FixedSize = new int2(ReferenceViewportWidth, ReferenceViewportHeight)
             });
 
+            // On the 240p group, the shared eight-reference-pixel label margin shrinks to two pixels.
+            // Shift the row by 24 reference pixels so label and swatch stay together and the label lands
+            // eight pixels from the screen edge, aligned with the diagnostics overlay.
+            EntitySaveComponent viewportSave = FindRequiredEntitySaveComponent(viewportEntity);
+            viewportSave.OverrideLevelOrder = DemoDiscOverrideScopes.CreateGroupFirstLevelOrder();
+            SceneEntityPlatformTransformOverrideAsset microSdTransform = viewportSave.GetOrCreateTransformPlatformOverride(DemoDiscOverrideScopes.MicroSd);
+            microSdTransform.HasLocalPositionOverride = true;
+            microSdTransform.LocalPosition = new float3(24f, 0f, 0f);
+
             Entity labelEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(viewportEntity, IndicatorLabelEntityName);
             labelEntity.LocalPosition = new float3(IndicatorLabelLeft, IndicatorLabelTop, 0.1f);
             labelEntity.LayerMask = overlayLayerMask;
@@ -144,10 +153,18 @@ namespace DemoDisc.EditorTools {
             };
             labelEntity.AddComponent(labelComponent);
             ApplyEditorFontReference(labelEntity, labelComponent);
+            MicroSdTextComponentOverrideService.Apply(labelComponent, FindRequiredEntitySaveComponent(labelEntity), font, 176);
 
             Entity swatchEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(viewportEntity, IndicatorSwatchEntityName);
             swatchEntity.LocalPosition = new float3(IndicatorSwatchLeft, IndicatorSwatchTop, 0.1f);
             swatchEntity.LayerMask = overlayLayerMask;
+            EntitySaveComponent swatchSave = FindRequiredEntitySaveComponent(swatchEntity);
+            swatchSave.OverrideLevelOrder = DemoDiscOverrideScopes.CreateGroupFirstLevelOrder();
+            SceneEntityPlatformTransformOverrideAsset microSdSwatch = swatchSave.GetOrCreateTransformPlatformOverride(DemoDiscOverrideScopes.MicroSd);
+            microSdSwatch.HasLocalPositionOverride = true;
+            // Follow the measured label with one font-space, independent of its padded text region.
+            microSdSwatch.LocalPosition = new float3(IndicatorLabelLeft + font.MeasureString("Light ").X * 4f, IndicatorSwatchTop, 0.1f);
+
             swatchEntity.AddComponent(new RoundedRectComponent {
                 Size = new int2(IndicatorSwatchSize, IndicatorSwatchSize),
                 Radius = IndicatorSwatchRadius,

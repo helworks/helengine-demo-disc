@@ -38,6 +38,12 @@ namespace DemoDisc.EditorTools.tests {
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/ps2/dpad.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/ps2/left_stick.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/ps2/circle.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/n64/dpad.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/n64/control_stick.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/n64/c_cluster.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/ps1/dpad.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/ps1/left_stick.png");
+            Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/ps1/triangle.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/gamecube/dpad.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/gamecube/control_stick.png");
             Assert.Contains(blueprint.AssetReferences, reference => reference.RelativePath == "textures/instructions/controls/generated/gamecube/y.png");

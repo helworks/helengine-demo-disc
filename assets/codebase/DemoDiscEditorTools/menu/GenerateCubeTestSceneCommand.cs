@@ -28,6 +28,11 @@ namespace DemoDisc.EditorTools {
             using EditorAuthoringTransaction transaction = context.Authoring.BeginTransaction();
             RenderingSceneAssetPreparationService assetPreparationService = new RenderingSceneAssetPreparationService(context.Authoring, transaction);
             RenderingSceneGenerationAssets assets = assetPreparationService.Prepare();
+            // The scene references this Blueprint, so regenerate it with the same current authoring rules.
+            ConsoleCameraLightInstructionsBlueprintGenerator instructions = new ConsoleCameraLightInstructionsBlueprintGenerator(context.Authoring, transaction);
+            instructions.Generate(context.ProjectRootPath,
+                new DemoSceneInstructionOverlayFactory(context.Authoring, transaction),
+                context.Authoring.RendererResources.DefaultFontAsset);
             CubeTestSceneFactory factory = new CubeTestSceneFactory(context.Authoring, transaction);
             GeneratedAuthoringSceneDefinition sceneDefinition = factory.CreateSceneDefinition(
                 context.ProjectRootPath,
