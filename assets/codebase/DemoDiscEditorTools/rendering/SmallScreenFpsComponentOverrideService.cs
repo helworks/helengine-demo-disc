@@ -1,3 +1,4 @@
+using helengine.editor;
 using DemoDisc.rendering;
 
 namespace DemoDisc.EditorTools {
@@ -11,14 +12,13 @@ namespace DemoDisc.EditorTools {
         static readonly ComponentPlatformEditingService PlatformEditingService = new ComponentPlatformEditingService();
 
         /// <summary>
-        /// Platforms whose frame buffers are too small for the shared two-times overlay: PSP at 480x272 and N64 at 320x240.
+        /// PSP keeps its own platform override; N64 and PS1 share the sd/msd group override.
         /// </summary>
-        static readonly string[] PlatformIds = ["psp", "n64"];
+        const string PspPlatformId = "psp";
 
         /// <summary>
-        /// Small-screen font scale, half of the shared two-times overlay. The N64 value was tuned against an emulator
-        /// capture rather than derived: a quarter of the shared scale produced glyphs roughly four pixels tall, which
-        /// the pass's one-bit alpha cutout reduced to unreadable smears, so N64 shares the PSP value.
+        /// Small-screen font scale, half of the shared two-times overlay. The 240p value was tuned against
+        /// an N64 emulator capture and applies to both platforms in sd/msd.
         /// </summary>
         const float FontScale = 1f;
 
@@ -54,24 +54,26 @@ namespace DemoDisc.EditorTools {
                 fpsComponent,
                 "Font",
                 DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
-            for (int index = 0; index < PlatformIds.Length; index++) {
-                string platformId = PlatformIds[index];
-                FPSComponent overrideComponent = (FPSComponent)PlatformEditingService.EnsurePlatformOverrideComponent(
-                    fpsComponent,
-                    saveComponent,
-                    platformId);
-                overrideComponent.FontScale = FontScale;
-                PlatformEditingService.MarkPropertyOverride(
-                    fpsComponent,
-                    saveComponent,
-                    platformId,
-                    nameof(FPSComponent.FontScale));
-                PlatformEditingService.PersistPlatformOverride(
-                    fpsComponent,
-                    overrideComponent,
-                    saveComponent,
-                    platformId);
-            }
+            saveComponent.OverrideLevelOrder = DemoDiscOverrideScopes.CreateGroupFirstLevelOrder();
+            EditorOverrideScope microSdScope = DemoDiscOverrideScopes.MicroSd;
+            FPSComponent microSd = (FPSComponent)PlatformEditingService.EnsureScopeOverrideComponent(
+                fpsComponent, saveComponent, microSdScope);
+            microSd.FontScale = FontScale;
+            microSd.Padding = new int2(8, 16);
+            PlatformEditingService.MarkScopePropertyOverride(
+                fpsComponent, saveComponent, microSdScope, nameof(FPSComponent.FontScale));
+            PlatformEditingService.MarkScopePropertyOverride(
+                fpsComponent, saveComponent, microSdScope, nameof(FPSComponent.Padding));
+            PlatformEditingService.PersistScopeOverride(fpsComponent, microSd, saveComponent, microSdScope);
+
+            EditorOverrideScope pspScope = DemoDiscOverrideScopes.Sd.Append(
+                new EditorOverrideScopeStep(SceneOverrideScopeStepKind.Platform, PspPlatformId));
+            FPSComponent psp = (FPSComponent)PlatformEditingService.EnsureScopeOverrideComponent(
+                fpsComponent, saveComponent, pspScope);
+            psp.FontScale = FontScale;
+            PlatformEditingService.MarkScopePropertyOverride(
+                fpsComponent, saveComponent, pspScope, nameof(FPSComponent.FontScale));
+            PlatformEditingService.PersistScopeOverride(fpsComponent, psp, saveComponent, pspScope);
         }
     }
 }
