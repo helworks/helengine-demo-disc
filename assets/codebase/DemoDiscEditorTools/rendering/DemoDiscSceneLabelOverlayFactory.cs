@@ -1,4 +1,5 @@
 using DemoDisc.rendering;
+using helengine.editor;
 
 namespace DemoDisc.EditorTools {
     public sealed class DemoDiscSceneLabelOverlayFactory {
@@ -64,9 +65,21 @@ namespace DemoDisc.EditorTools {
                 FontReferenceName,
                 AssetAuthoringService.CreateFileReference(SceneLabelFontRelativePath, AssetEntryKind.Font));
             MicroSdTextComponentOverrideService.Apply(labelComponent, saveComponent, font, SceneLabelWidth);
-            sceneUiEntity.AddComponent(new DemoDisc.rendering.DemoDiscDebugSceneLabelComponent());
+            sceneUiEntity.AddComponent(new DemoDisc.rendering.DemoDiscDebugSceneLabelComponent {
+                LabelEntityReference = CreateEntityReference(saveComponent)
+            });
             saveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.DualScreen).Exists = false;
             labelEntity.Enabled = true;
+        }
+
+        SceneEntityReference CreateEntityReference(EntitySaveComponent saveComponent) {
+            if (saveComponent.EntityId == 0u) {
+                if (AssetAuthoringService.OwningCore is not EditorCore editorCore || editorCore.SceneEntityIdAllocator == null) {
+                    throw new InvalidOperationException("Scene label references require an active editor scene-entity id allocator.");
+                }
+                saveComponent.EntityId = editorCore.SceneEntityIdAllocator.Allocate();
+            }
+            return new SceneEntityReference { EntityId = saveComponent.EntityId };
         }
 
         EntitySaveComponent FindRequiredEntitySaveComponent(Entity entity) {
