@@ -1424,8 +1424,6 @@ namespace DemoDisc.EditorTools {
             CreateUiTextEntity(failOverlayEntity, "TiltTrialFailTitleText", new float3(36f, 28f, 0.1f), "Time Up", new int2(280, 42), 2f, 5, new byte4(255, 223, 223, 255), TextAlignment.Left);
             CreateUiTextEntity(failOverlayEntity, "TiltTrialFailBodyText", new float3(36f, 86f, 0.1f), "Retry", new int2(320, 96), 1.35f, 5, new byte4(247, 248, 252, 255), TextAlignment.Left);
 
-            ConfigureTiltTrialSessionUiReferences(sessionComponent, entity);
-
             Entity coinTextEntity = OwningCore.EntityFactory.CreateChild(entity, "TiltTrialCoinText");
             coinTextEntity.LocalPosition = new float3(16f, 16f, 0f);
             coinTextEntity.Static = false;
@@ -1471,6 +1469,8 @@ namespace DemoDisc.EditorTools {
             EntitySaveComponent physicsBoundsStatusTextEntitySaveComponent = FindRequiredEntitySaveComponent(physicsBoundsStatusTextEntity);
             physicsBoundsStatusTextEntitySaveComponent.OverrideLevelOrder = DemoDiscOverrideScopes.CreateBuildConfigFirstLevelOrder();
             physicsBoundsStatusTextEntitySaveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.Release).Exists = false;
+
+            ConfigureTiltTrialSessionUiReferences(sessionComponent, entity);
 
             if (entity is EditorEntity editorEntity) {
                 return editorEntity;
