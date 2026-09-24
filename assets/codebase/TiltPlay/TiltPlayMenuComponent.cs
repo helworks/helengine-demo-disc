@@ -15,6 +15,13 @@ namespace DemoDisc.TiltPlay {
         /// </summary>
         const short GamepadStickNavigationThreshold = 16384;
 
+        public SceneEntityReference TitlePanelReference { get; set; }
+        public SceneEntityReference OptionsPanelReference { get; set; }
+        public SceneEntityReference LevelSelectPanelReference { get; set; }
+        public SceneEntityReference PlaySelectedOverlayReference { get; set; }
+        public SceneEntityReference OptionsSelectedOverlayReference { get; set; }
+        public SceneEntityReference DemoDiscSelectedOverlayReference { get; set; }
+
         /// <summary>
         /// Generated title panel resolved through its stable presentation role.
         /// </summary>
@@ -82,7 +89,6 @@ namespace DemoDisc.TiltPlay {
                 throw new InvalidOperationException("Tilt Play menu controller requires an attached shell entity.");
             }
 
-            ResolveRuntimeDependenciesWhenNeeded();
             InitializeStateWhenNeeded();
             HandleInput();
             ApplyPresentation();
@@ -180,18 +186,24 @@ namespace DemoDisc.TiltPlay {
         /// Resolves generated shell dependencies required to control visibility and selector input.
         /// </summary>
         void ResolveRuntimeDependenciesWhenNeeded() {
-            if (TitlePanelEntity != null && OptionsPanelEntity != null && LevelSelectPanelEntity != null && LevelSelectComponent != null
-                && PlayButtonSelectedOverlay != null && OptionsButtonSelectedOverlay != null && DemoDiscButtonSelectedOverlay != null) {
-                return;
-            }
-
-            TitlePanelEntity = FindRequiredNamedEntity(Parent, "TiltPlayTitlePanel");
-            OptionsPanelEntity = FindRequiredNamedEntity(Parent, "TiltPlayOptionsPanel");
-            LevelSelectPanelEntity = FindRequiredNamedEntity(Parent, "TiltPlayLevelSelectPanel");
+            TitlePanelEntity = TitlePanelReference?.ResolvedEntity
+                ?? throw new InvalidOperationException("Tilt Play menu requires a bound title panel.");
+            OptionsPanelEntity = OptionsPanelReference?.ResolvedEntity
+                ?? throw new InvalidOperationException("Tilt Play menu requires a bound options panel.");
+            LevelSelectPanelEntity = LevelSelectPanelReference?.ResolvedEntity
+                ?? throw new InvalidOperationException("Tilt Play menu requires a bound level-select panel.");
             LevelSelectComponent = FindRequiredComponent<TiltTrialLevelSelectComponent>(LevelSelectPanelEntity);
-            PlayButtonSelectedOverlay = FindRequiredNamedEntity(Parent, "TiltPlayPlayButtonSelectedOverlay");
-            OptionsButtonSelectedOverlay = FindRequiredNamedEntity(Parent, "TiltPlayOptionsButtonSelectedOverlay");
-            DemoDiscButtonSelectedOverlay = FindRequiredNamedEntity(Parent, "TiltPlayDemoDiscButtonSelectedOverlay");
+            PlayButtonSelectedOverlay = PlaySelectedOverlayReference?.ResolvedEntity
+                ?? throw new InvalidOperationException("Tilt Play menu requires a bound Play overlay.");
+            OptionsButtonSelectedOverlay = OptionsSelectedOverlayReference?.ResolvedEntity
+                ?? throw new InvalidOperationException("Tilt Play menu requires a bound Options overlay.");
+            DemoDiscButtonSelectedOverlay = DemoDiscSelectedOverlayReference?.ResolvedEntity
+                ?? throw new InvalidOperationException("Tilt Play menu requires a bound Demo Disc overlay.");
+        }
+
+        public override void ComponentInitialized(Entity entity) {
+            base.ComponentInitialized(entity);
+            ResolveRuntimeDependenciesWhenNeeded();
         }
 
         /// <summary>

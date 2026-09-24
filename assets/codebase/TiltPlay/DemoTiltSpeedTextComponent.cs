@@ -69,10 +69,6 @@ namespace DemoDisc.TiltPlay {
                 return;
             }
 
-            ResolveTextComponentWhenNeeded();
-            ResolveTargetEntityWhenNeeded();
-            ResolveTargetRigidBodyWhenNeeded();
-
             string speedText = FormatSpeedKilometersPerHour(TargetRigidBody.GetLinearVelocity());
             if (!string.Equals(SpeedTextComponent.Text, speedText, StringComparison.Ordinal)) {
                 SpeedTextComponent.Text = speedText;
@@ -121,31 +117,14 @@ namespace DemoDisc.TiltPlay {
         }
 
         /// <summary>
-        /// Resolves the tracked ball entity from the serialized target reference when the runtime cache is still empty.
+        /// Captures the authored target and same-entity text before the first update.
         /// </summary>
-        void ResolveTargetEntityWhenNeeded() {
-            if (TargetEntity != null) {
-                return;
-            } else if (TargetEntityReference == null) {
-                throw new InvalidOperationException("DemoTiltSpeedTextComponent requires a serialized target entity reference.");
-            } else if (TargetEntityReference.EntityId == 0u) {
-                throw new InvalidOperationException("DemoTiltSpeedTextComponent requires a non-zero target scene entity id.");
-            } else if (Core.Instance == null) {
-                throw new InvalidOperationException("A core instance must exist before Tilt Trial HUD updates can run.");
-            }
-
-            List<Entity> entities = Core.Instance.ObjectManager.Entities;
-            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                Entity candidate = entities[entityIndex];
-                if (FindSceneEntityRuntimeIdOrZero(candidate) != TargetEntityReference.EntityId) {
-                    continue;
-                }
-
-                TargetEntity = candidate;
-                return;
-            }
-
-            throw new InvalidOperationException($"DemoTiltSpeedTextComponent could not resolve target scene entity id {TargetEntityReference.EntityId}.");
+        public override void ComponentInitialized(Entity entity) {
+            base.ComponentInitialized(entity);
+            TargetEntity = TargetEntityReference?.ResolvedEntity
+                ?? throw new InvalidOperationException("DemoTiltSpeedTextComponent requires a bound target entity reference.");
+            ResolveTextComponentWhenNeeded();
+            ResolveTargetRigidBodyWhenNeeded();
         }
 
         /// <summary>

@@ -256,7 +256,8 @@ namespace DemoDisc.EditorTools {
         EditorEntity CreateTiltPlayShellUiEntity() {
             Entity shell = OwningCore.EntityFactory.Create("TiltPlayShellUi");
             shell.LayerMask = EditorLayerMasks.SceneObjects;
-            shell.AddComponent(new DemoDisc.TiltPlay.TiltPlayMenuComponent());
+            DemoDisc.TiltPlay.TiltPlayMenuComponent menuComponent = new DemoDisc.TiltPlay.TiltPlayMenuComponent();
+            shell.AddComponent(menuComponent);
             shell.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
                 FixedSize = new int2(1280, 720)
@@ -271,9 +272,9 @@ namespace DemoDisc.EditorTools {
             titlePanel.AddComponent(new DemoDisc.TiltPlay.TiltTrialPresentationRoleComponent {
                 Role = "TiltPlayTitlePanel"
             });
-            CreateTiltPlayActionButton(titlePanel, "TiltPlayPlayButton", new float3(380f, 398f, 0.1f), new int2(520, 72), DemoDisc.TiltPlay.TiltPlayMenuAction.Play, TiltPlayPrimaryButtonTextureRelativePath, TiltPlayPrimaryButtonSelectedTextureRelativePath);
-            CreateTiltPlayActionButton(titlePanel, "TiltPlayOptionsButton", new float3(380f, 486f, 0.1f), new int2(250, 52), DemoDisc.TiltPlay.TiltPlayMenuAction.Options, TiltPlayOptionsButtonTextureRelativePath, TiltPlayOptionsButtonSelectedTextureRelativePath);
-            CreateTiltPlayActionButton(titlePanel, "TiltPlayDemoDiscButton", new float3(650f, 486f, 0.1f), new int2(250, 52), DemoDisc.TiltPlay.TiltPlayMenuAction.BackToDemoDisc, TiltPlayDemoDiscButtonTextureRelativePath, TiltPlayDemoDiscButtonSelectedTextureRelativePath);
+            Entity playButton = CreateTiltPlayActionButton(titlePanel, "TiltPlayPlayButton", new float3(380f, 398f, 0.1f), new int2(520, 72), DemoDisc.TiltPlay.TiltPlayMenuAction.Play, TiltPlayPrimaryButtonTextureRelativePath, TiltPlayPrimaryButtonSelectedTextureRelativePath);
+            Entity optionsButton = CreateTiltPlayActionButton(titlePanel, "TiltPlayOptionsButton", new float3(380f, 486f, 0.1f), new int2(250, 52), DemoDisc.TiltPlay.TiltPlayMenuAction.Options, TiltPlayOptionsButtonTextureRelativePath, TiltPlayOptionsButtonSelectedTextureRelativePath);
+            Entity demoDiscButton = CreateTiltPlayActionButton(titlePanel, "TiltPlayDemoDiscButton", new float3(650f, 486f, 0.1f), new int2(250, 52), DemoDisc.TiltPlay.TiltPlayMenuAction.BackToDemoDisc, TiltPlayDemoDiscButtonTextureRelativePath, TiltPlayDemoDiscButtonSelectedTextureRelativePath);
 
             Entity optionsPanel = CreateRoundedPanelEntity(shell, "TiltPlayOptionsPanel", new float3(0f, 0f, 0f), new int2(1280, 720), 0f, 0f, new byte4(18, 29, 45, 255), new byte4(18, 29, 45, 255), 1);
             optionsPanel.Enabled = false;
@@ -287,6 +288,13 @@ namespace DemoDisc.EditorTools {
             });
             levelSelectPanel.Enabled = false;
             shell.AddChild(levelSelectPanel);
+
+            menuComponent.TitlePanelReference = AuthoredReference(titlePanel);
+            menuComponent.OptionsPanelReference = AuthoredReference(optionsPanel);
+            menuComponent.LevelSelectPanelReference = AuthoredReference(levelSelectPanel);
+            menuComponent.PlaySelectedOverlayReference = AuthoredReference(playButton.Children[0]);
+            menuComponent.OptionsSelectedOverlayReference = AuthoredReference(optionsButton.Children[0]);
+            menuComponent.DemoDiscSelectedOverlayReference = AuthoredReference(demoDiscButton.Children[0]);
 
             if (shell is EditorEntity editorEntity) {
                 return editorEntity;
@@ -556,8 +564,10 @@ namespace DemoDisc.EditorTools {
 
             Entity controllerEntity = OwningCore.EntityFactory.Create("TiltTrialHandheldGameplayController");
             controllerEntity.LayerMask = EditorLayerMasks.SceneObjects;
-            controllerEntity.AddComponent(new DemoDisc.TiltPlay.TiltTrialSessionComponent());
+            DemoDisc.TiltPlay.TiltTrialSessionComponent sessionComponent = new DemoDisc.TiltPlay.TiltTrialSessionComponent();
+            controllerEntity.AddComponent(sessionComponent);
             controllerEntity.AddChild(CreateHandheldGameplayBottomScreenCameraEntity(levelEntry));
+            ConfigureTiltTrialSessionUiReferences(sessionComponent, controllerEntity);
             if (controllerEntity is EditorEntity editorEntity) {
                 return editorEntity;
             }
@@ -1026,6 +1036,7 @@ namespace DemoDisc.EditorTools {
 
             ConfigureTiltTrialCameraTarget(cameraEntity, playerSphereEntity);
             ConfigureTiltTrialSpeedTextTarget(uiEntity, playerSphereEntity);
+            ConfigureTiltTrialStageTargets(stageRootEntity, cameraEntity, playerSphereEntity);
             ConfigureTiltTrialGoalTarget(stageRootEntity, playerSphereEntity);
             ConfigureTiltTrialCoinTargets(stageRootEntity, playerSphereEntity);
             return new GeneratedAuthoringSceneDefinition {
@@ -1360,7 +1371,8 @@ namespace DemoDisc.EditorTools {
         EditorEntity CreateGameplayUiEntity(global::DemoDisc.TiltPlay.TiltTrialLevelCatalogEntry levelEntry) {
             Entity entity = OwningCore.EntityFactory.Create("TiltTrialUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.AddComponent(new DemoDisc.TiltPlay.TiltTrialSessionComponent());
+            DemoDisc.TiltPlay.TiltTrialSessionComponent sessionComponent = new DemoDisc.TiltPlay.TiltTrialSessionComponent();
+            entity.AddComponent(sessionComponent);
             entity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
                 FixedSize = new int2(1280, 720)
@@ -1411,6 +1423,8 @@ namespace DemoDisc.EditorTools {
             failOverlayEntity.Enabled = false;
             CreateUiTextEntity(failOverlayEntity, "TiltTrialFailTitleText", new float3(36f, 28f, 0.1f), "Time Up", new int2(280, 42), 2f, 5, new byte4(255, 223, 223, 255), TextAlignment.Left);
             CreateUiTextEntity(failOverlayEntity, "TiltTrialFailBodyText", new float3(36f, 86f, 0.1f), "Retry", new int2(320, 96), 1.35f, 5, new byte4(247, 248, 252, 255), TextAlignment.Left);
+
+            ConfigureTiltTrialSessionUiReferences(sessionComponent, entity);
 
             Entity coinTextEntity = OwningCore.EntityFactory.CreateChild(entity, "TiltTrialCoinText");
             coinTextEntity.LocalPosition = new float3(16f, 16f, 0f);
@@ -1463,6 +1477,53 @@ namespace DemoDisc.EditorTools {
             }
 
             throw new InvalidOperationException("Tilt Trial UI generation requires editor-authored entities.");
+        }
+
+        void ConfigureTiltTrialSessionUiReferences(DemoDisc.TiltPlay.TiltTrialSessionComponent session, Entity uiRoot) {
+            if (session == null || uiRoot == null) {
+                throw new ArgumentNullException(session == null ? nameof(session) : nameof(uiRoot));
+            }
+            EditorEntity editorUiRoot = uiRoot as EditorEntity
+                ?? throw new InvalidOperationException("Tilt Trial session UI references require an editor-authored root.");
+            session.TimerTextReference = AuthoredReference(FindRequiredChildEntityByName(editorUiRoot, "TiltTrialTimerText"));
+            session.CoinTextReference = AuthoredReference(FindRequiredChildEntityByName(editorUiRoot, "TiltTrialCoinText"));
+            session.TargetTimesTextReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialTargetTimesText"));
+            session.GameplayPanelReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialHandheldGameplayPanel"));
+            session.StartOverlayReference = AuthoredReference(FindRequiredChildEntityByName(editorUiRoot, "TiltTrialStartOverlay"));
+            session.ResultsOverlayReference = AuthoredReference(FindRequiredChildEntityByName(editorUiRoot, "TiltTrialResultsOverlay"));
+            session.ResultsTitleTextReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialResultsTitleText"));
+            session.ResultsBodyTextReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialResultsBodyText"));
+            session.ResultsRetryButtonReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialResultRetryButton"));
+            session.ResultsExitButtonReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialResultExitButton"));
+            session.ResultsNextButtonReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialResultNextButton"));
+            session.ResultsRetryButtonLabelReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialResultRetryButtonLabel"));
+            session.ResultsExitButtonLabelReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialResultExitButtonLabel"));
+            session.ResultsNextButtonLabelReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialResultNextButtonLabel"));
+            session.FailOverlayReference = AuthoredReference(FindRequiredChildEntityByName(editorUiRoot, "TiltTrialFailOverlay"));
+            session.FailTitleTextReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialFailTitleText"));
+            session.FailBodyTextReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialFailBodyText"));
+            session.SpeedTextReference = AuthoredReference(FindRequiredChildEntityByName(editorUiRoot, "TiltTrialSpeedText"));
+        }
+
+        SceneEntityReference OptionalAuthoredReference(Entity entity) {
+            return entity == null ? new SceneEntityReference() : AuthoredReference(entity);
+        }
+
+        Entity FindOptionalChildEntityByName(Entity root, string name) {
+            if (root == null || root.Children == null) {
+                return null;
+            }
+            for (int index = 0; index < root.Children.Count; index++) {
+                Entity child = root.Children[index];
+                if (child is EditorEntity editorChild && string.Equals(editorChild.Name, name, StringComparison.Ordinal)) {
+                    return child;
+                }
+                Entity nested = FindOptionalChildEntityByName(child, name);
+                if (nested != null) {
+                    return nested;
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -2055,6 +2116,18 @@ namespace DemoDisc.EditorTools {
             };
         }
 
+        void ConfigureTiltTrialStageTargets(EditorEntity stageRootEntity, EditorEntity cameraEntity, EditorEntity playerSphereEntity) {
+            if (!TryFindComponent<DemoDisc.TiltPlay.DemoTiltStageComponent>(stageRootEntity, out DemoDisc.TiltPlay.DemoTiltStageComponent stageComponent)) {
+                throw new InvalidOperationException("Tilt Trial stage generation requires a DemoTiltStageComponent.");
+            }
+            stageComponent.OrbitCameraReference = new SceneEntityReference {
+                EntityId = FindRequiredEntitySaveComponent(cameraEntity).EntityId
+            };
+            stageComponent.PlayerSphereReference = new SceneEntityReference {
+                EntityId = FindRequiredEntitySaveComponent(playerSphereEntity).EntityId
+            };
+        }
+
         /// <summary>
         /// Wires the generated goal trigger observer to the generated player sphere after fresh scene ids have been assigned.
         /// </summary>
@@ -2384,6 +2457,12 @@ namespace DemoDisc.EditorTools {
             }
 
             throw new InvalidOperationException("Generated editor entities must include EntitySaveComponent.");
+        }
+
+        SceneEntityReference AuthoredReference(Entity entity) {
+            return new SceneEntityReference {
+                EntityId = FindRequiredEntitySaveComponent(entity).EntityId
+            };
         }
     }
 }

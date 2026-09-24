@@ -50,10 +50,14 @@ namespace DemoDisc.EditorTools {
             }
 
             uint playerEntityId = FindRequiredPlayerEntityId(sceneRoots);
+            uint stageRootEntityId = FindRequiredStageRootEntityId(sceneRoots);
+            uint goalEntityId = FindRequiredGoalInstanceEntityId(sceneRoots);
             Entity consoleRoot = CreatePresentationRoot(
                 "TiltTrialConsolePresentation",
                 TiltTrialGameplayPresentationBlueprintGenerator.ConsoleBlueprintRelativePath,
-                playerEntityId);
+                playerEntityId,
+                stageRootEntityId,
+                goalEntityId);
             // Absent on the dual-screen rigs, present everywhere else including every release build.
             FindRequiredEntitySaveComponent(consoleRoot)
                 .GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.DualScreen).Exists = false;
@@ -61,7 +65,9 @@ namespace DemoDisc.EditorTools {
             Entity handheldRoot = CreatePresentationRoot(
                 "TiltTrialHandheldPresentation",
                 TiltTrialGameplayPresentationBlueprintGenerator.HandheldBlueprintRelativePath,
-                playerEntityId);
+                playerEntityId,
+                stageRootEntityId,
+                goalEntityId);
             // Absent everywhere by default, present beneath the dual-screen group. Every platform outside the
             // group, current or future, resolves the Common value and never receives the root.
             EntitySaveComponent handheldSaveComponent = FindRequiredEntitySaveComponent(handheldRoot);
@@ -82,7 +88,7 @@ namespace DemoDisc.EditorTools {
         /// <param name="blueprintRelativePath">Project-relative presentation Blueprint path.</param>
         /// <param name="playerEntityId">Authored scene entity id of the player sphere.</param>
         /// <returns>Generated presentation root entity.</returns>
-        Entity CreatePresentationRoot(string name, string blueprintRelativePath, uint playerEntityId) {
+        Entity CreatePresentationRoot(string name, string blueprintRelativePath, uint playerEntityId, uint stageRootEntityId, uint goalEntityId) {
             Entity entity = OwningCore.EntityFactory.Create(name);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = float3.Zero;
@@ -95,11 +101,173 @@ namespace DemoDisc.EditorTools {
                     AssetEntryKind.Blueprint)
             };
             BlueprintAsset blueprintAsset = AssetAuthoringService.LoadNativeAsset<BlueprintAsset>(blueprintRelativePath);
-            BlueprintEntityReferenceOverrideService overrideService = new BlueprintEntityReferenceOverrideService(
-                GeneratedScenePersistenceRegistryFactory.Create(ScriptTypeResolverValue));
-            overrideService.BindAllEntityReferences(blueprintInstance, blueprintAsset, playerEntityId);
+            ComponentPersistenceRegistry persistenceRegistry = GeneratedScenePersistenceRegistryFactory.Create(ScriptTypeResolverValue);
+            BlueprintEntityReferenceOverrideService overrideService = new BlueprintEntityReferenceOverrideService(persistenceRegistry);
+            BlueprintEntityReferenceOverrideAsset[] allOverrides = overrideService.CreateAllEntityReferenceOverrides(blueprintAsset, playerEntityId);
+            blueprintInstance.EntityReferenceOverrides = CreateRuntimeReferenceOverrides(
+                blueprintAsset.RootEntity,
+                persistenceRegistry,
+                allOverrides,
+                playerEntityId,
+                stageRootEntityId,
+                goalEntityId);
             entity.AddComponent(blueprintInstance);
             return entity;
+        }
+
+        BlueprintEntityReferenceOverrideAsset[] CreateRuntimeReferenceOverrides(
+            SceneEntityAsset blueprintRoot,
+            ComponentPersistenceRegistry persistenceRegistry,
+            BlueprintEntityReferenceOverrideAsset[] discovered,
+            uint playerEntityId,
+            uint stageRootEntityId,
+            uint goalEntityId) {
+            List<BlueprintEntityReferenceOverrideAsset> result = new List<BlueprintEntityReferenceOverrideAsset>();
+            for (int index = 0; index < discovered.Length; index++) {
+                BlueprintEntityReferenceOverrideAsset candidate = discovered[index];
+                Type componentType = FindComponentType(blueprintRoot, persistenceRegistry, candidate.SourceEntityId, candidate.ComponentKey);
+                uint targetEntityId;
+                if (componentType == typeof(DemoDisc.TiltPlay.TiltTrialSessionComponent)) {
+                    if (candidate.PropertyName == nameof(DemoDisc.TiltPlay.TiltTrialSessionComponent.PlayerSphereReference)) {
+                        targetEntityId = playerEntityId;
+                    } else if (candidate.PropertyName == nameof(DemoDisc.TiltPlay.TiltTrialSessionComponent.GoalEntityReference)) {
+                        targetEntityId = goalEntityId;
+                    } else if (candidate.PropertyName == nameof(DemoDisc.TiltPlay.TiltTrialSessionComponent.StageRootReference)) {
+                        targetEntityId = stageRootEntityId;
+                    } else {
+                        continue;
+                    }
+                } else if (componentType == typeof(DemoDisc.TiltPlay.DemoTiltFollowCameraComponent)
+                    && candidate.PropertyName == nameof(DemoDisc.TiltPlay.DemoTiltFollowCameraComponent.TargetEntityReference)) {
+                    targetEntityId = playerEntityId;
+                } else if (componentType == typeof(DemoDisc.TiltPlay.DemoTiltSpeedTextComponent)
+                    && candidate.PropertyName == nameof(DemoDisc.TiltPlay.DemoTiltSpeedTextComponent.TargetEntityReference)) {
+                    targetEntityId = playerEntityId;
+                } else {
+                    continue;
+                }
+
+                result.Add(new BlueprintEntityReferenceOverrideAsset {
+                    SourceEntityId = candidate.SourceEntityId,
+                    ComponentKey = candidate.ComponentKey,
+                    PropertyName = candidate.PropertyName,
+                    TargetEntityId = targetEntityId
+                });
+            }
+            return result.ToArray();
+        }
+
+        Type FindComponentType(SceneEntityAsset entity, ComponentPersistenceRegistry persistenceRegistry, uint sourceEntityId, string componentKey) {
+            if (entity == null) {
+                return null;
+            }
+            if (entity.Id == sourceEntityId && entity.Components != null) {
+                for (int index = 0; index < entity.Components.Length; index++) {
+                    SceneComponentAssetRecord record = entity.Components[index];
+                    if (record != null && string.Equals(record.ComponentKey, componentKey, StringComparison.Ordinal)) {
+                        SceneComponentAssetRecord baseRecord = new ComponentPlatformOverridePayloadService().UnwrapBaseRecord(record);
+                        return persistenceRegistry.GetDescriptor(baseRecord.ComponentTypeId).ComponentType;
+                    }
+                }
+            }
+            if (entity.Children != null) {
+                for (int index = 0; index < entity.Children.Length; index++) {
+                    Type type = FindComponentType(entity.Children[index], persistenceRegistry, sourceEntityId, componentKey);
+                    if (type != null) {
+                        return type;
+                    }
+                }
+            }
+            return null;
+        }
+
+        uint FindRequiredStageRootEntityId(Entity[] sceneRoots) {
+            Entity stageRoot = FindEntityWithComponent<DemoDisc.TiltPlay.DemoTiltStageComponent>(sceneRoots);
+            if (stageRoot == null) {
+                throw new InvalidOperationException("Tilt Trial gameplay scenes must contain one stage root.");
+            }
+            return GetRequiredEntityId(stageRoot, "stage root");
+        }
+
+        uint FindRequiredGoalInstanceEntityId(Entity[] sceneRoots) {
+            Entity goal = FindBlueprintInstance(sceneRoots, SplitPlayAssetCatalog.GoalFlagBlueprintRelativePath);
+            if (goal == null) {
+                throw new InvalidOperationException("Tilt Trial gameplay scenes must contain one goal Blueprint instance.");
+            }
+            return GetRequiredEntityId(goal, "goal Blueprint instance");
+        }
+
+        static Entity FindEntityWithComponent<T>(Entity[] roots) where T : Component {
+            for (int rootIndex = 0; rootIndex < roots.Length; rootIndex++) {
+                Entity match = FindEntityWithComponent<T>(roots[rootIndex]);
+                if (match != null) {
+                    return match;
+                }
+            }
+            return null;
+        }
+
+        static Entity FindEntityWithComponent<T>(Entity entity) where T : Component {
+            if (entity == null) {
+                return null;
+            }
+            if (entity.Components != null) {
+                for (int index = 0; index < entity.Components.Count; index++) {
+                    if (entity.Components[index] is T) {
+                        return entity;
+                    }
+                }
+            }
+            if (entity.Children != null) {
+                for (int index = 0; index < entity.Children.Count; index++) {
+                    Entity match = FindEntityWithComponent<T>(entity.Children[index]);
+                    if (match != null) {
+                        return match;
+                    }
+                }
+            }
+            return null;
+        }
+
+        static Entity FindBlueprintInstance(Entity[] roots, string relativePath) {
+            for (int index = 0; index < roots.Length; index++) {
+                Entity match = FindBlueprintInstance(roots[index], relativePath);
+                if (match != null) {
+                    return match;
+                }
+            }
+            return null;
+        }
+
+        static Entity FindBlueprintInstance(Entity entity, string relativePath) {
+            if (entity == null) {
+                return null;
+            }
+            if (entity.Components != null) {
+                for (int index = 0; index < entity.Components.Count; index++) {
+                    if (entity.Components[index] is BlueprintInstanceComponent instance
+                        && string.Equals(instance.BlueprintAssetReference?.RelativePath, relativePath, StringComparison.Ordinal)) {
+                        return entity;
+                    }
+                }
+            }
+            if (entity.Children != null) {
+                for (int index = 0; index < entity.Children.Count; index++) {
+                    Entity match = FindBlueprintInstance(entity.Children[index], relativePath);
+                    if (match != null) {
+                        return match;
+                    }
+                }
+            }
+            return null;
+        }
+
+        uint GetRequiredEntityId(Entity entity, string description) {
+            uint entityId = FindRequiredEntitySaveComponent(entity).EntityId;
+            if (entityId == 0u) {
+                throw new InvalidOperationException($"Tilt Trial {description} requires a non-zero scene entity id.");
+            }
+            return entityId;
         }
 
         /// <summary>

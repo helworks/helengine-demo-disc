@@ -28,6 +28,12 @@ namespace DemoDisc.TiltPlay {
         /// </summary>
         static readonly float3 CameraRightAxis = new float3(1f, 0f, 0f);
 
+        /// <summary>Authored playable sphere for this stage.</summary>
+        public SceneEntityReference PlayerSphereReference { get; set; }
+
+        /// <summary>Authored orbit camera for this stage.</summary>
+        public SceneEntityReference OrbitCameraReference { get; set; }
+
         /// <summary>
         /// Stores the resolved runtime playable sphere entity once scene lookup succeeds.
         /// </summary>
@@ -86,10 +92,6 @@ namespace DemoDisc.TiltPlay {
             if (Parent == null) {
                 throw new InvalidOperationException("DemoTiltStageComponent requires an attached stage root entity.");
             } else if (UpdatesAreSuppressed) {
-                return;
-            }
-
-            if (!ResolveRuntimeDependenciesWhenNeeded()) {
                 return;
             }
 
@@ -157,77 +159,20 @@ namespace DemoDisc.TiltPlay {
         /// <summary>
         /// Resolves the cached follow camera, followed sphere, and sphere rigid body required by the Tilt Trial controller.
         /// </summary>
-        bool ResolveRuntimeDependenciesWhenNeeded() {
-            if (!ResolveFollowCameraWhenNeeded()) {
-                return false;
-            }
-            ResolvePlayerSphereWhenNeeded();
-
-            if (PlayerSphereRigidBody != null) {
-                return true;
-            }
-
+        public override void ComponentInitialized(Entity entity) {
+            base.ComponentInitialized(entity);
+            PlayerSphereEntity = PlayerSphereReference?.ResolvedEntity
+                ?? throw new InvalidOperationException("DemoTiltStageComponent requires a bound player sphere reference.");
+            OrbitCameraEntity = OrbitCameraReference?.ResolvedEntity
+                ?? throw new InvalidOperationException("DemoTiltStageComponent requires a bound orbit camera reference.");
             PlayerSphereRigidBody = FindRequiredRigidBodyComponent(PlayerSphereEntity);
-            return true;
-        }
-
-        /// <summary>
-        /// Resolves the active Tilt Trial follow-camera component and its owning camera entity from the live scene.
-        /// </summary>
-        bool ResolveFollowCameraWhenNeeded() {
-            if (FollowCameraComponent != null && OrbitCameraEntity != null) {
-                return true;
-            } else if (Core.Instance == null) {
-                throw new InvalidOperationException("A core instance must exist before Tilt Trial camera resolution can run.");
-            }
-
-            List<Entity> entities = Core.Instance.ObjectManager.Entities;
-            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                Entity entity = entities[entityIndex];
-                DemoTiltFollowCameraComponent component = FindFollowCameraComponentOrNull(entity);
-                if (component == null) {
-                    continue;
-                }
-
-                OrbitCameraEntity = entity;
-                FollowCameraComponent = component;
-                return true;
-            }
-
-            return false;
+            FollowCameraComponent = FindFollowCameraComponentOrNull(OrbitCameraEntity)
+                ?? throw new InvalidOperationException("DemoTiltStageComponent requires a follow camera on its authored orbit camera.");
         }
 
         /// <summary>
         /// Resolves the playable sphere entity from the serialized target reference owned by the active follow camera.
         /// </summary>
-        void ResolvePlayerSphereWhenNeeded() {
-            if (PlayerSphereEntity != null) {
-                return;
-            } else if (FollowCameraComponent == null) {
-                throw new InvalidOperationException("DemoTiltStageComponent requires a resolved follow camera before player resolution can run.");
-            } else if (FollowCameraComponent.TargetEntityReference == null) {
-                throw new InvalidOperationException("DemoTiltStageComponent requires the Tilt Trial follow camera to expose a serialized player target reference.");
-            } else if (FollowCameraComponent.TargetEntityReference.EntityId == 0u) {
-                throw new InvalidOperationException("DemoTiltStageComponent requires the Tilt Trial follow camera to reference a non-zero scene entity id.");
-            } else if (Core.Instance == null) {
-                throw new InvalidOperationException("A core instance must exist before Tilt Trial player resolution can run.");
-            }
-
-            uint targetSceneEntityId = FollowCameraComponent.TargetEntityReference.EntityId;
-            List<Entity> entities = Core.Instance.ObjectManager.Entities;
-            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                Entity entity = entities[entityIndex];
-                if (FindSceneEntityRuntimeIdOrZero(entity) != targetSceneEntityId) {
-                    continue;
-                }
-
-                PlayerSphereEntity = entity;
-                return;
-            }
-
-            throw new InvalidOperationException($"DemoTiltStageComponent could not resolve the Tilt Trial player sphere for scene entity id {targetSceneEntityId}.");
-        }
-
         /// <summary>
         /// Resolves the keyboard and left-stick movement axes for the current frame.
         /// </summary>

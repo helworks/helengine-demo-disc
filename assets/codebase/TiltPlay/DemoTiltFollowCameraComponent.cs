@@ -122,8 +122,6 @@ namespace DemoDisc.TiltPlay {
                 return;
             }
 
-            ResolveTargetEntityWhenNeeded();
-            ResolveTargetRigidBodyWhenNeeded();
             EnsureOrbitInitialized();
 
             Core core = Core.Instance ?? throw new InvalidOperationException("A core instance must exist before Tilt Trial follow camera updates can run.");
@@ -154,30 +152,13 @@ namespace DemoDisc.TiltPlay {
         }
 
         /// <summary>
-        /// Resolves the tracked runtime entity from the serialized scene-entity id when the target has not been cached yet.
+        /// Captures the authored ball and its rigid body after scene references have been bound.
         /// </summary>
-        void ResolveTargetEntityWhenNeeded() {
-            if (TargetEntity != null) {
-                return;
-            } else if (TargetEntityReference == null) {
-                throw new InvalidOperationException("DemoTiltFollowCameraComponent requires a serialized target entity reference.");
-            } else if (TargetEntityReference.EntityId == 0u) {
-                throw new InvalidOperationException("DemoTiltFollowCameraComponent requires a non-zero target scene entity id.");
-            } else if (Core.Instance == null) {
-                throw new InvalidOperationException("A core instance must exist before Tilt Trial follow camera target resolution can run.");
-            }
-
-            List<Entity> entities = Core.Instance.ObjectManager.Entities;
-            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                Entity candidate = entities[entityIndex];
-                uint candidateSceneEntityId = FindSceneEntityRuntimeIdOrZero(candidate);
-                if (candidateSceneEntityId == TargetEntityReference.EntityId) {
-                    TargetEntity = candidate;
-                    return;
-                }
-            }
-
-            throw new InvalidOperationException($"DemoTiltFollowCameraComponent could not resolve target scene entity id {TargetEntityReference.EntityId}.");
+        public override void ComponentInitialized(Entity entity) {
+            base.ComponentInitialized(entity);
+            TargetEntity = TargetEntityReference?.ResolvedEntity
+                ?? throw new InvalidOperationException("DemoTiltFollowCameraComponent requires a bound target entity reference.");
+            ResolveTargetRigidBodyWhenNeeded();
         }
 
         /// <summary>

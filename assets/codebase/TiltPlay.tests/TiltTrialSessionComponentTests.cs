@@ -116,6 +116,55 @@ namespace DemoDisc.TiltPlay.tests {
         }
 
         [Fact]
+        public void Session_component_exposes_authored_player_goal_and_stage_links() {
+            Type sessionType = typeof(DemoDisc.TiltPlay.TiltTrialSessionComponent);
+
+            Assert.NotNull(sessionType.GetProperty("PlayerSphereReference"));
+            Assert.NotNull(sessionType.GetProperty("GoalEntityReference"));
+            Assert.NotNull(sessionType.GetProperty("StageRootReference"));
+            Assert.NotNull(sessionType.GetProperty("GameplayPanelReference"));
+        }
+
+        [Fact]
+        public void Session_binds_renamed_scene_targets_from_references_and_allows_absent_handheld_panel() {
+            helengine.Entity player = CreateEntity(null, [
+                new RigidBody3DComponent(),
+                new DemoDisc.TiltPlay.DemoTiltBallResetComponent()
+            ]);
+            helengine.Entity goal = CreateEntity(null, [new global::helengine.SceneEntityTriggerObserverComponent()]);
+            helengine.Entity camera = CreateEntity(null, [new DemoDisc.TiltPlay.DemoTiltFollowCameraComponent()]);
+            DemoDisc.TiltPlay.DemoTiltStageComponent stage = new DemoDisc.TiltPlay.DemoTiltStageComponent {
+                OrbitCameraReference = ResolvedReference(camera)
+            };
+            helengine.Entity stageRoot = CreateEntity(null, [stage]);
+            helengine.Entity timer = CreateEntity(null, [new TextComponent()]);
+            helengine.Entity coinText = CreateEntity(null, [new TextComponent()]);
+            helengine.Entity start = CreateEntity(null, []);
+            helengine.Entity results = CreateEntity(null, []);
+            helengine.Entity fail = CreateEntity(null, []);
+            DemoDisc.TiltPlay.TiltTrialSessionComponent session = new DemoDisc.TiltPlay.TiltTrialSessionComponent {
+                PlayerSphereReference = ResolvedReference(player),
+                GoalEntityReference = ResolvedReference(goal),
+                StageRootReference = ResolvedReference(stageRoot),
+                TimerTextReference = ResolvedReference(timer),
+                CoinTextReference = ResolvedReference(coinText),
+                StartOverlayReference = ResolvedReference(start),
+                ResultsOverlayReference = ResolvedReference(results),
+                FailOverlayReference = ResolvedReference(fail)
+            };
+
+            typeof(DemoDisc.TiltPlay.TiltTrialSessionComponent)
+                .GetMethod("BindFixedReferences", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .Invoke(session, null);
+
+            Type sessionType = typeof(DemoDisc.TiltPlay.TiltTrialSessionComponent);
+            Assert.Same(player, sessionType.GetField("PlayerSphereEntity", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(session));
+            Assert.Same(goal, sessionType.GetField("GoalEntity", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(session));
+            Assert.Same(stage, sessionType.GetField("StageComponent", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(session));
+            Assert.Null(sessionType.GetField("GameplayPanelEntity", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(session));
+        }
+
+        [Fact]
         public void Format_coin_progress_returns_expected_hud_label() {
             string label = DemoDisc.TiltPlay.TiltTrialSessionComponent.FormatCoinProgress(3, 7);
 
@@ -175,9 +224,12 @@ namespace DemoDisc.TiltPlay.tests {
             ])]);
             DemoDisc.TiltPlay.TiltTrialSessionComponent session = new DemoDisc.TiltPlay.TiltTrialSessionComponent();
             Type sessionType = typeof(DemoDisc.TiltPlay.TiltTrialSessionComponent);
-            sessionType.GetField("ResultsNextButtonEntity", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, nextButton);
-            sessionType.GetField("ResultsRetryButtonEntity", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, retryButton);
-            sessionType.GetField("ResultsExitButtonEntity", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, exitButton);
+            sessionType.GetField("ResultsNextButtonBackground", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, nextBackground);
+            sessionType.GetField("ResultsRetryButtonBackground", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, retryBackground);
+            sessionType.GetField("ResultsExitButtonBackground", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, exitBackground);
+            sessionType.GetField("ResultsNextButtonLabel", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, nextLabel);
+            sessionType.GetField("ResultsRetryButtonLabel", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, retryLabel);
+            sessionType.GetField("ResultsExitButtonLabel", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, exitLabel);
             sessionType.GetField("OverlaySelectionIndex", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(session, 0);
 
             sessionType.GetMethod("ApplyResultButtonSelection", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(session, null);
@@ -196,15 +248,15 @@ namespace DemoDisc.TiltPlay.tests {
 
         static helengine.Entity CreateEntity(helengine.Entity parent, List<helengine.Component> components) {
             helengine.Entity entity = (helengine.Entity)RuntimeHelpers.GetUninitializedObject(typeof(helengine.Entity));
-            typeof(helengine.Entity).GetField("isEnabled", BindingFlags.Instance | BindingFlags.NonPublic)!
+            typeof(helengine.Entity).GetField("IsEnabled", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(entity, true);
-            typeof(helengine.Entity).GetField("layerMask", BindingFlags.Instance | BindingFlags.NonPublic)!
+            typeof(helengine.Entity).GetField("LayerMaskValue", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(entity, (ushort)1);
             typeof(helengine.Entity).GetProperty(nameof(helengine.Entity.Parent), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!
                 .SetValue(entity, parent);
-            typeof(helengine.Entity).GetField("components", BindingFlags.Instance | BindingFlags.NonPublic)!
+            typeof(helengine.Entity).GetField("ComponentsValue", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(entity, components);
-            typeof(helengine.Entity).GetField("children", BindingFlags.Instance | BindingFlags.NonPublic)!
+            typeof(helengine.Entity).GetField("ChildrenValue", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(entity, new List<helengine.Entity>());
             for (int componentIndex = 0; componentIndex < components.Count; componentIndex++) {
                 typeof(helengine.Component).GetProperty(nameof(helengine.Component.Parent), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!
@@ -218,8 +270,15 @@ namespace DemoDisc.TiltPlay.tests {
             return new T();
         }
 
+        static SceneEntityReference ResolvedReference(helengine.Entity entity) {
+            SceneEntityReference reference = new SceneEntityReference();
+            typeof(SceneEntityReference).GetProperty(nameof(SceneEntityReference.ResolvedEntity), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!
+                .SetValue(reference, entity);
+            return reference;
+        }
+
         static void SetChildren(helengine.Entity entity, List<helengine.Entity> children) {
-            typeof(helengine.Entity).GetField("children", BindingFlags.Instance | BindingFlags.NonPublic)!
+            typeof(helengine.Entity).GetField("ChildrenValue", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(entity, children);
         }
     }
