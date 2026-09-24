@@ -35,7 +35,7 @@ namespace DemoDisc.EditorTools {
                 FontScale = 2f
             });
             SmallScreenFpsComponentOverrideService.Apply(entity);
-            entity.AddComponent(new DemoDisc.menu.DemoDiscReturnToMenuComponent());
+            entity.AddComponent(new DemoDisc.menu.DemoDiscReturnToMenuComponent { AllowPointerReturn = false });
             entity.AddComponent(new DemoDisc.rendering.DemoDiscLightToggleComponent());
             DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory(AssetAuthoringService);
             lightIndicatorOverlayFactory.AttachToSceneUi(entity, font);

@@ -34,11 +34,11 @@ namespace DemoDisc.menu {
         bool SceneLoadWasRequested;
 
         /// <summary>
-        /// Binds one sibling interactable when the component is attached to an authored clickable host.
+        /// Binds one sibling interactable after all components of an authored clickable host are initialized.
         /// </summary>
         /// <param name="entity">Owning entity.</param>
-        public override void ComponentAdded(Entity entity) {
-            base.ComponentAdded(entity);
+        public override void ComponentInitialized(Entity entity) {
+            base.ComponentInitialized(entity);
             if (AllowPointerReturn) {
                 TryBindInteractable();
             }
@@ -48,10 +48,6 @@ namespace DemoDisc.menu {
         /// Performs per-frame input polling for the demo-disc return bind.
         /// </summary>
         public override void Update() {
-            if (AllowPointerReturn) {
-                TryBindInteractable();
-            }
-
             InputSystem inputSystem = Core.Instance.Input;
             bool wasReturnPressed = AllowGamepadReturn && WasGamepadReturnPressed(inputSystem);
 #if DESKTOP_PLATFORM

@@ -441,7 +441,7 @@ namespace DemoDisc.EditorTools {
         EditorEntity CreateHandheldLevelSelectUiEntity() {
             Entity entity = OwningCore.EntityFactory.Create("TiltTrialHandheldLevelSelectUi");
             entity.LayerMask = EditorLayerMasks.SceneObjects;
-            entity.AddComponent(new DemoDiscReturnToMenuComponent());
+            entity.AddComponent(new DemoDiscReturnToMenuComponent { AllowPointerReturn = false });
             entity.AddComponent(new DemoDisc.TiltPlay.TiltTrialLevelSelectComponent {
                 UseDetailsStage = true
             });
