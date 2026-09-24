@@ -1506,7 +1506,7 @@ namespace DemoDisc.EditorTools {
         }
 
         SceneEntityReference OptionalAuthoredReference(Entity entity) {
-            return entity == null ? new SceneEntityReference() : AuthoredReference(entity);
+            return entity == null ? null : AuthoredReference(entity);
         }
 
         Entity FindOptionalChildEntityByName(Entity root, string name) {
