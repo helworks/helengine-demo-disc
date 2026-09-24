@@ -94,6 +94,7 @@ namespace DemoDisc.EditorTools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
+            Entity directionalLight = CreateDirectionalLightEntity();
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -103,7 +104,7 @@ namespace DemoDisc.EditorTools {
                 },
                 RootEntities = new[] {
                     cameraEntity,
-                    CreateDirectionalLightEntity(),
+                    directionalLight,
                     CreateGroundEntity(planeModel, standardMaterial),
                     CreateShadowMastEntity(cubeModel, standardMaterial),
                     CreateBuildingEntity("DirectionalShadowPlazaWestTower", new float3(-16f, 7f, -9f), new float3(6f, 14f, 6f), cubeModel, standardMaterial),
@@ -118,7 +119,7 @@ namespace DemoDisc.EditorTools {
                 DesktopPresentationRootEntities = new[] {
                     instructionOverlayEntity,
                     consoleInstructionBlueprintEntity,
-                    CreateFpsEntity()
+                    CreateFpsEntity(directionalLight)
                 }
             };
         }
@@ -165,8 +166,8 @@ namespace DemoDisc.EditorTools {
         /// Creates the authored FPS overlay entity for the live directional-shadow plaza scene.
         /// </summary>
         /// <returns>Live authored FPS overlay entity.</returns>
-        Entity CreateFpsEntity() {
-            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("DirectionalShadowPlazaFps", "7. Shadow Plaza");
+        Entity CreateFpsEntity(Entity directionalLight) {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("DirectionalShadowPlazaFps", "7. Shadow Plaza", new[] { directionalLight });
         }
 
         /// <summary>

@@ -105,6 +105,7 @@ namespace DemoDisc.EditorTools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
+            Entity keyLightEntity = CreateKeyLightEntity();
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -114,11 +115,11 @@ namespace DemoDisc.EditorTools {
                 },
                 RootEntities = new[] {
                     CreateCameraEntity(),
-                    CreateKeyLightEntity(),
+                    keyLightEntity,
                     CreateHeroEntity(cubeModel, CreateRuntimeMaterial())
                 },
                 DesktopPresentationRootEntities = new[] {
-                    CreateUiEntity(),
+                    CreateUiEntity(keyLightEntity),
                     instructionOverlayEntity,
                     consoleInstructionBlueprintEntity
                 }
@@ -176,8 +177,8 @@ namespace DemoDisc.EditorTools {
         /// Creates the authored UI root entity carrying the shared overlay kit plus the phase-status readout.
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
-        Entity CreateUiEntity() {
-            Entity entity = new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("MatrixRenderUi", "6. Matrix Render");
+        Entity CreateUiEntity(Entity keyLightEntity) {
+            Entity entity = new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("MatrixRenderUi", "6. Matrix Render", new[] { keyLightEntity });
             Entity phaseStatusEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(entity, "MatrixRenderPhaseStatus");
             phaseStatusEntity.LocalPosition = new float3(16f, 112f, 0f);
             phaseStatusEntity.Static = false;

@@ -95,6 +95,14 @@ namespace DemoDisc.menu {
         }
 
         /// <summary>
+        /// Binds the authored splash visuals before the first frame update.
+        /// </summary>
+        public override void ComponentInitialized(Entity entity) {
+            base.ComponentInitialized(entity);
+            BackgroundRectangle = FindRequiredBackgroundRectangle(BackgroundSpriteEntityReference?.ResolvedEntity);
+            LogoSprite = FindRequiredSpriteOnEntity(LogoSpriteEntityReference?.ResolvedEntity, "logo");
+        }
+        /// <summary>
         /// Returns menu input ownership when the splash component is removed after its update pass.
         /// </summary>
         public override void Dispose() {
@@ -116,7 +124,7 @@ namespace DemoDisc.menu {
 
             HasCompletedFirstUpdate = true;
 
-            ResolveSpritesWhenNeeded();
+
             FitBackgroundToViewport();
             ElapsedSeconds += ResolveAnimationFrameDeltaSeconds(Core.Instance.FrameDeltaSeconds);
             int alpha = ResolveAlphaForElapsedSeconds(ElapsedSeconds);
@@ -233,86 +241,23 @@ namespace DemoDisc.menu {
         }
 
         /// <summary>
-        /// Resolves both serialized splash sprite entity references once the scene hierarchy is available.
+        /// Resolves the required rounded rectangle on the authored background entity.
         /// </summary>
-        void ResolveSpritesWhenNeeded() {
-            if (BackgroundRectangle != null && LogoSprite != null) {
-                return;
-            } else if (Core.Instance == null || Core.Instance.ObjectManager == null) {
-                throw new InvalidOperationException("Helen of Code splash sprite resolution requires an initialized object manager.");
+        /// <param name="entity">Resolved background entity.</param>
+        /// <returns>The required background rectangle.</returns>
+        RoundedRectComponent FindRequiredBackgroundRectangle(Entity entity) {
+            if (entity == null || entity.Components == null) {
+                throw new InvalidOperationException("Helen of Code splash requires a resolved background entity reference.");
             }
 
-            BackgroundRectangle = ResolveBackgroundRectangle(BackgroundSpriteEntityReference);
-            LogoSprite = FindRequiredSprite(LogoSpriteEntityReference, "logo");
-            SetSpriteAlpha(0);
-        }
-
-        /// <summary>
-        /// Resolves the full-screen solid rectangle used to hide the menu while the splash is visible.
-        /// </summary>
-        /// <param name="entityReference">Stable reference identifying the authored background entity.</param>
-        /// <returns>The required background rectangle component.</returns>
-        RoundedRectComponent ResolveBackgroundRectangle(SceneEntityReference entityReference) {
-            return FindRequiredBackgroundRectangle(entityReference);
-        }
-
-        /// <summary>
-        /// Resolves one serialized scene entity reference to its required sprite component.
-        /// </summary>
-        /// <param name="entityReference">Stable reference identifying the sprite entity.</param>
-        /// <param name="description">Human-readable role of the required sprite.</param>
-        /// <returns>The sprite component attached to the referenced entity.</returns>
-        SpriteComponent FindRequiredSprite(SceneEntityReference entityReference, string description) {
-            if (entityReference == null || entityReference.EntityId == 0u) {
-                throw new InvalidOperationException($"Helen of Code splash requires a serialized {description} sprite entity reference.");
-            }
-
-            List<Entity> entities = Core.Instance.ObjectManager.Entities;
-            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                Entity candidateEntity = entities[entityIndex];
-                if (FindSceneEntityRuntimeIdOrZero(candidateEntity) != entityReference.EntityId) {
-                    continue;
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is RoundedRectComponent backgroundRectangle) {
+                    return backgroundRectangle;
                 }
-
-                return FindRequiredSpriteOnEntity(candidateEntity, description);
             }
 
-            throw new InvalidOperationException($"Helen of Code splash could not resolve the serialized {description} sprite entity reference '{entityReference.EntityId}'.");
+            throw new InvalidOperationException("Helen of Code splash background entity must contain one RoundedRectComponent.");
         }
-
-        /// <summary>
-        /// Resolves the rounded rectangle on the entity identified by the persisted background reference.
-        /// </summary>
-        /// <param name="entityReference">Stable reference identifying the background entity.</param>
-        /// <returns>The background rectangle component.</returns>
-        RoundedRectComponent FindRequiredBackgroundRectangle(SceneEntityReference entityReference) {
-            if (entityReference == null || entityReference.EntityId == 0u) {
-                throw new InvalidOperationException("Helen of Code splash requires a serialized background entity reference.");
-            }
-
-            List<Entity> entities = Core.Instance.ObjectManager.Entities;
-            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                Entity candidateEntity = entities[entityIndex];
-                if (FindSceneEntityRuntimeIdOrZero(candidateEntity) != entityReference.EntityId) {
-                    continue;
-                }
-
-                if (candidateEntity.Components == null) {
-                    break;
-                }
-
-                for (int componentIndex = 0; componentIndex < candidateEntity.Components.Count; componentIndex++) {
-                    if (candidateEntity.Components[componentIndex] is RoundedRectComponent backgroundRectangle) {
-                        return backgroundRectangle;
-                    }
-                }
-
-                break;
-            }
-
-            throw new InvalidOperationException($"Helen of Code splash background entity '{entityReference.EntityId}' must contain one RoundedRectComponent.");
-        }
-
         /// <summary>
         /// Finds the sprite component attached to one resolved splash entity.
         /// </summary>
@@ -331,25 +276,6 @@ namespace DemoDisc.menu {
             }
 
             throw new InvalidOperationException($"Helen of Code splash {description} sprite entity must contain one SpriteComponent.");
-        }
-
-        /// <summary>
-        /// Finds the stable scene id attached to one runtime entity.
-        /// </summary>
-        /// <param name="entity">Entity whose scene id should be inspected.</param>
-        /// <returns>The authored scene entity id, or zero when unavailable.</returns>
-        uint FindSceneEntityRuntimeIdOrZero(Entity entity) {
-            if (entity == null || entity.Components == null) {
-                return 0u;
-            }
-
-            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                if (entity.Components[componentIndex] is SceneEntityRuntimeIdComponent runtimeIdComponent) {
-                    return runtimeIdComponent.SceneEntityId;
-                }
-            }
-
-            return 0u;
         }
 
         /// <summary>

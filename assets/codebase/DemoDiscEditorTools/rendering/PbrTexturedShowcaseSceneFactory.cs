@@ -56,6 +56,7 @@ namespace DemoDisc.EditorTools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
+            Entity directionalLight = CreateDirectionalLightEntity();
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -65,13 +66,13 @@ namespace DemoDisc.EditorTools {
                 },
                 RootEntities = new[] {
                     CreateCameraEntity(),
-                    CreateDirectionalLightEntity(),
+                    directionalLight,
                     CreateGroundEntity(planeModel, groundMaterial),
                     CreatePropEntity("PbrTexturedShowcaseMetalProp", new float3(-2.6f, 1.2f, 0f), new float3(2.4f, 2.4f, 2.4f), cubeModel, metalMaterial),
                     CreatePropEntity("PbrTexturedShowcaseWoodProp", new float3(2.6f, 1.2f, 0f), new float3(2.4f, 2.4f, 2.4f), cubeModel, woodMaterial)
                 },
                 DesktopPresentationRootEntities = new[] {
-                    CreateUiEntity(),
+                    CreateUiEntity(directionalLight),
                     instructionOverlayEntity,
                     consoleInstructionBlueprintEntity
                 }
@@ -120,8 +121,8 @@ namespace DemoDisc.EditorTools {
         /// Creates the authored UI root entity for the PBR textured showcase scene.
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
-        Entity CreateUiEntity() {
-            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("PbrTexturedShowcaseUi", "14. PBR Textures");
+        Entity CreateUiEntity(Entity directionalLight) {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("PbrTexturedShowcaseUi", "14. PBR Textures", new[] { directionalLight });
         }
 
         /// <summary>

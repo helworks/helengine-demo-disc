@@ -53,8 +53,8 @@ namespace DemoDisc.EditorTools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
-            Entity uiEntity = CreateUiEntity();
             Entity directionalLightEntity = CreateDirectionalLightEntity();
+            Entity uiEntity = CreateUiEntity(directionalLightEntity);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -150,8 +150,8 @@ namespace DemoDisc.EditorTools {
         /// Creates the authored UI root entity for the cube-test scene.
         /// </summary>
         /// <returns>Live authored UI root entity.</returns>
-        Entity CreateUiEntity() {
-            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("CubeTestUi", "1. Cube Test");
+        Entity CreateUiEntity(Entity directionalLightEntity) {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("CubeTestUi", "1. Cube Test", new[] { directionalLightEntity });
         }
 
         /// <summary>

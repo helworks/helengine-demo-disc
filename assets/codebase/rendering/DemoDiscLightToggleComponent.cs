@@ -64,6 +64,15 @@ namespace DemoDisc.rendering {
         static readonly byte4 OffSwatchColor = new byte4(0, 0, 0, 255);
 
         /// <summary>
+        /// Authored scene entities whose directional lights take part in the fixed color cycle.
+        /// </summary>
+        public SceneEntityReference[] LightEntityReferences { get; set; }
+
+        /// <summary>
+        /// Authored entity containing the indicator swatch rectangle.
+        /// </summary>
+        public SceneEntityReference IndicatorSwatchEntityReference { get; set; }
+        /// <summary>
         /// Cached authored directional lights controlled by this component.
         /// </summary>
         readonly List<DemoDiscDirectionalLightToggleState> LightStates;
@@ -83,6 +92,7 @@ namespace DemoDisc.rendering {
         /// </summary>
         public DemoDiscLightToggleComponent() {
             LightStates = new List<DemoDiscDirectionalLightToggleState>();
+            LightEntityReferences = Array.Empty<SceneEntityReference>();
             CurrentLightStateIndex = 0;
         }
 
@@ -137,21 +147,21 @@ namespace DemoDisc.rendering {
         }
 
         /// <summary>
-        /// Captures the authored directional-light states from the active object manager.
+        /// Captures only the authored directional lights listed by this scene's references.
         /// </summary>
         void CaptureDirectionalLightStates() {
             LightStates.Clear();
-            if (Core.Instance == null || Core.Instance.ObjectManager == null) {
-                throw new InvalidOperationException("Light toggle component requires an initialized object manager.");
+            if (LightEntityReferences == null) {
+                throw new InvalidOperationException("Light toggle component requires an initialized directional-light reference array.");
             }
 
-            List<Entity> entities = Core.Instance.ObjectManager.Entities;
-            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                Entity entity = entities[entityIndex];
+            for (int referenceIndex = 0; referenceIndex < LightEntityReferences.Length; referenceIndex++) {
+                Entity entity = LightEntityReferences[referenceIndex]?.ResolvedEntity;
                 if (entity == null || entity.Components == null) {
-                    continue;
+                    throw new InvalidOperationException($"Light toggle component requires resolved directional-light entity reference at index {referenceIndex}.");
                 }
 
+                bool foundDirectionalLight = false;
                 for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
                     if (entity.Components[componentIndex] is DirectionalLightComponent directionalLightComponent) {
                         LightStates.Add(new DemoDiscDirectionalLightToggleState {
@@ -159,7 +169,13 @@ namespace DemoDisc.rendering {
                             AuthoredIntensity = directionalLightComponent.Intensity,
                             AuthoredShadowsEnabled = directionalLightComponent.ShadowsEnabled
                         });
+                        foundDirectionalLight = true;
+                        break;
                     }
+                }
+
+                if (!foundDirectionalLight) {
+                    throw new InvalidOperationException($"Light toggle directional-light entity reference at index {referenceIndex} must contain a DirectionalLightComponent.");
                 }
             }
         }
@@ -172,7 +188,7 @@ namespace DemoDisc.rendering {
                 throw new InvalidOperationException("Light toggle component must be attached to an initialized scene UI root.");
             }
 
-            IndicatorSwatch = FindRequiredIndicatorSwatch(Parent);
+            IndicatorSwatch = FindRequiredIndicatorSwatch(IndicatorSwatchEntityReference?.ResolvedEntity);
         }
 
         /// <summary>
@@ -246,53 +262,22 @@ namespace DemoDisc.rendering {
         }
 
         /// <summary>
-        /// Finds the authored preview square created by the shared light-indicator overlay factory.
+        /// Finds the preview square on the authored indicator entity.
         /// </summary>
-        /// <param name="rootEntity">Scene UI root that owns the indicator subtree.</param>
-        /// <returns>Rounded-rectangle preview square component.</returns>
-        RoundedRectComponent FindRequiredIndicatorSwatch(Entity rootEntity) {
-            if (rootEntity == null) {
-                throw new ArgumentNullException(nameof(rootEntity));
+        /// <param name="swatchEntity">Resolved entity identified by the persisted indicator reference.</param>
+        /// <returns>The authored rounded-rectangle preview square.</returns>
+        RoundedRectComponent FindRequiredIndicatorSwatch(Entity swatchEntity) {
+            if (swatchEntity == null || swatchEntity.Components == null) {
+                throw new InvalidOperationException("Light toggle component requires a resolved authored light indicator swatch entity reference.");
             }
 
-            RoundedRectComponent indicatorSwatch = FindIndicatorSwatchRecursive(rootEntity);
-            if (indicatorSwatch != null) {
-                return indicatorSwatch;
-            }
-
-            throw new InvalidOperationException("Light toggle component requires an authored light indicator swatch.");
-        }
-
-        /// <summary>
-        /// Walks the scene UI subtree until it finds the authored indicator swatch component.
-        /// </summary>
-        /// <param name="entity">Current scene UI entity being inspected.</param>
-        /// <returns>Resolved rounded-rectangle indicator swatch, or null when the current branch does not contain it.</returns>
-        RoundedRectComponent FindIndicatorSwatchRecursive(Entity entity) {
-            if (entity == null) {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            if (entity.Components != null) {
-                for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                    if (entity.Components[componentIndex] is RoundedRectComponent roundedRectComponent) {
-                        return roundedRectComponent;
-                    }
+            for (int componentIndex = 0; componentIndex < swatchEntity.Components.Count; componentIndex++) {
+                if (swatchEntity.Components[componentIndex] is RoundedRectComponent roundedRectComponent) {
+                    return roundedRectComponent;
                 }
             }
 
-            if (entity.Children == null) {
-                return null;
-            }
-
-            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
-                RoundedRectComponent resolvedComponent = FindIndicatorSwatchRecursive(entity.Children[childIndex]);
-                if (resolvedComponent != null) {
-                    return resolvedComponent;
-                }
-            }
-
-            return null;
+            throw new InvalidOperationException("Light toggle component's authored indicator swatch entity must contain a RoundedRectComponent.");
         }
 
         /// <summary>

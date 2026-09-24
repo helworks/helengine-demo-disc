@@ -1,4 +1,4 @@
-﻿using DemoDisc.EditorTools;
+using DemoDisc.EditorTools;
 
 namespace DemoDisc.EditorTools {
     /// <summary>
@@ -771,7 +771,7 @@ namespace DemoDisc.EditorTools {
                 instructionOverlayRootEntity.Dispose();
             }
 
-            EditorEntity validationUiEntity = CreateLivePhysicsShowcaseUiEntity(string.Empty);
+            EditorEntity validationUiEntity = CreateLivePhysicsShowcaseUiEntity(string.Empty, FindRequiredSceneEntityAssetByName(scenarioEntity.Children, "KeyLight").Id);
             try {
                 ReassignGeneratedEditorEntityIds(validationUiEntity);
                 rootEntities.Add(SerializeGeneratedEditorEntity(validationUiEntity, assetReferences, assetReferenceKeys));
@@ -821,7 +821,7 @@ namespace DemoDisc.EditorTools {
                 instructionOverlayRootEntity.Dispose();
             }
 
-            EditorEntity physicsShowcaseUiEntity = CreateLivePhysicsShowcaseUiEntity(ResolveDemoDiscSceneLabel(sceneId));
+            EditorEntity physicsShowcaseUiEntity = CreateLivePhysicsShowcaseUiEntity(ResolveDemoDiscSceneLabel(sceneId), FindRequiredSceneEntityAssetByName(scenarioEntity.Children, "KeyLight").Id);
             try {
                 ReassignGeneratedEditorEntityIds(physicsShowcaseUiEntity);
                 rootEntities.Add(SerializeGeneratedEditorEntity(physicsShowcaseUiEntity, assetReferences, assetReferenceKeys));
@@ -1661,8 +1661,14 @@ namespace DemoDisc.EditorTools {
             }
 
             List<Entity> rootEntities = new List<Entity> { cameraEntity };
+            IReadOnlyList<EditorEntity> scenarioRoots = LoadPlayablePhysicsShowcaseScenarioRoots(projectRootPath, authoredSceneAsset);
+            for (int index = 0; index < scenarioRoots.Count; index++) {
+                rootEntities.Add(scenarioRoots[index]);
+            }
+            AssignFreshGeneratedEditorEntityIds(rootEntities);
+
             List<Entity> desktopPresentationRoots = new List<Entity> {
-                CreateLivePhysicsShowcaseUiEntity(ResolveDemoDiscSceneLabel(normalizedSceneId))
+                CreateLivePhysicsShowcaseUiEntity(ResolveDemoDiscSceneLabel(normalizedSceneId), FindDirectionalLightEntities(rootEntities))
             };
             if (includeDesktopInstructionOverlay) {
                 DemoDisc.EditorTools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoDisc.EditorTools.DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction);
@@ -1672,12 +1678,6 @@ namespace DemoDisc.EditorTools {
                 desktopPresentationRoots.Insert(0, instructionOverlayEntity);
                 desktopPresentationRoots.Insert(1, consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService));
             }
-
-            IReadOnlyList<EditorEntity> scenarioRoots = LoadPlayablePhysicsShowcaseScenarioRoots(projectRootPath, authoredSceneAsset);
-            for (int index = 0; index < scenarioRoots.Count; index++) {
-                rootEntities.Add(scenarioRoots[index]);
-            }
-            AssignFreshGeneratedEditorEntityIds(rootEntities);
             AssignFreshGeneratedEditorEntityIds(desktopPresentationRoots);
 
             return new DemoDisc.EditorTools.GeneratedAuthoringSceneDefinition {
@@ -1688,6 +1688,30 @@ namespace DemoDisc.EditorTools {
             };
         }
 
+        Entity[] FindDirectionalLightEntities(IReadOnlyList<Entity> roots) {
+            List<Entity> lightEntities = new List<Entity>();
+            for (int rootIndex = 0; rootIndex < roots.Count; rootIndex++) {
+                CollectDirectionalLightEntities(roots[rootIndex], lightEntities);
+            }
+            return lightEntities.ToArray();
+        }
+
+        void CollectDirectionalLightEntities(Entity entity, List<Entity> lightEntities) {
+            if (entity == null) return;
+            if (entity.Components != null) {
+                for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                    if (entity.Components[componentIndex] is DirectionalLightComponent) {
+                        lightEntities.Add(entity);
+                        break;
+                    }
+                }
+            }
+            if (entity.Children != null) {
+                for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
+                    CollectDirectionalLightEntities(entity.Children[childIndex], lightEntities);
+                }
+            }
+        }
         /// <summary>
         /// Normalizes playable showcase scene identifiers so callers may use either authored asset ids or the shorter logical ids exposed by the demo-disc menu catalog.
         /// </summary>
@@ -1847,12 +1871,26 @@ namespace DemoDisc.EditorTools {
         /// Creates one live authored UI root that shows FPS diagnostics and owns the playable showcase light-toggle updater.
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
-        EditorEntity CreateLivePhysicsShowcaseUiEntity(string sceneLabel) {
+        EditorEntity CreateLivePhysicsShowcaseUiEntity(string sceneLabel, uint keyLightEntityId) {
             Entity entity = new DemoDisc.EditorTools.DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("ShowcaseUi", sceneLabel);
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is DemoDisc.rendering.DemoDiscLightToggleComponent lightToggle) {
+                    lightToggle.LightEntityReferences = new[] { new SceneEntityReference { EntityId = keyLightEntityId } };
+                    break;
+                }
+            }
             if (entity is EditorEntity editorEntity) {
                 return editorEntity;
             }
 
+            throw new InvalidOperationException("The physics showcase UI root must be authored through editor entities.");
+        }
+
+        EditorEntity CreateLivePhysicsShowcaseUiEntity(string sceneLabel, Entity[] directionalLightEntities) {
+            Entity entity = new DemoDisc.EditorTools.DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("ShowcaseUi", sceneLabel, directionalLightEntities);
+            if (entity is EditorEntity editorEntity) {
+                return editorEntity;
+            }
             throw new InvalidOperationException("The physics showcase UI root must be authored through editor entities.");
         }
 

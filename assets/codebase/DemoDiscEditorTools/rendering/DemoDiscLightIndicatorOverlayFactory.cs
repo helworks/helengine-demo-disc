@@ -105,6 +105,23 @@ namespace DemoDisc.EditorTools {
         const float IndicatorSwatchBorderThickness = 1f;
 
         /// <summary>
+        /// Creates a serialized reference to one generated overlay entity.
+        /// </summary>
+        /// <param name="entity">Generated entity that should receive a persisted scene id.</param>
+        /// <returns>Serialized reference to the generated entity.</returns>
+        SceneEntityReference CreateEntityReference(Entity entity) {
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            if (saveComponent.EntityId == 0u) {
+                if (AssetAuthoringService.OwningCore is not EditorCore editorCore || editorCore.SceneEntityIdAllocator == null) {
+                    throw new InvalidOperationException("Generated light-indicator references require an active editor scene-entity id allocator.");
+                }
+
+                saveComponent.EntityId = editorCore.SceneEntityIdAllocator.Allocate();
+            }
+
+            return new SceneEntityReference { EntityId = saveComponent.EntityId };
+        }
+        /// <summary>
         /// Attaches the shared screen-bound light indicator row beneath the supplied scene UI root.
         /// </summary>
         /// <param name="sceneUiEntity">Scene UI entity that should own the indicator row.</param>
@@ -173,6 +190,23 @@ namespace DemoDisc.EditorTools {
                 BorderColor = new byte4(30, 30, 30, 255),
                 RenderOrder2D = IndicatorRenderOrder,
             });
+
+            DemoDiscLightToggleComponent lightToggle = FindRequiredLightToggle(sceneUiEntity);
+            lightToggle.IndicatorSwatchEntityReference = CreateEntityReference(swatchEntity);
+        }
+
+        DemoDiscLightToggleComponent FindRequiredLightToggle(Entity sceneUiEntity) {
+            if (sceneUiEntity.Components == null) {
+                throw new InvalidOperationException("Scene UI entities must expose initialized components.");
+            }
+
+            for (int componentIndex = 0; componentIndex < sceneUiEntity.Components.Count; componentIndex++) {
+                if (sceneUiEntity.Components[componentIndex] is DemoDiscLightToggleComponent lightToggle) {
+                    return lightToggle;
+                }
+            }
+
+            throw new InvalidOperationException("Scene UI root must contain one light toggle component before creating the indicator.");
         }
 
         /// <summary>

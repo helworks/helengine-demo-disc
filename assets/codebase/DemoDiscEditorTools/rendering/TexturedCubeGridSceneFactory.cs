@@ -376,7 +376,7 @@ namespace DemoDisc.EditorTools {
                 DesktopPresentationRootEntities = new[] {
                     instructionOverlayEntity,
                     consoleInstructionBlueprintEntity,
-                    CreateUiEntity()
+                    CreateUiEntity(rootEntities[1])
                 }
             };
         }
@@ -436,8 +436,8 @@ namespace DemoDisc.EditorTools {
         /// Creates the authored UI root entity for the textured cube-grid scene.
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
-        Entity CreateUiEntity() {
-            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("TexturedCubeGridUi", "3. Textured Cubes");
+        Entity CreateUiEntity(Entity directionalLightEntity) {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("TexturedCubeGridUi", "3. Textured Cubes", new[] { directionalLightEntity });
         }
 
         /// <summary>

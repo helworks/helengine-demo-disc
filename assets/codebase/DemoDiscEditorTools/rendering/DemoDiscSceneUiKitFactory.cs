@@ -1,3 +1,4 @@
+using helengine.editor;
 using DemoDisc.rendering;
 
 namespace DemoDisc.EditorTools {
@@ -13,13 +14,15 @@ namespace DemoDisc.EditorTools {
         public DemoDiscSceneUiKitFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
+
         /// <summary>
-        /// Creates one authored UI root carrying the shared demo-disc overlay kit: FPS diagnostics, return-to-menu handling, the light toggle with its indicator swatch, and the debug-gated scene label.
+        /// Creates one authored UI root carrying diagnostics, return-to-menu handling, light controls, and the optional debug label.
         /// </summary>
         /// <param name="entityName">Stable name for the generated UI root entity.</param>
-        /// <param name="sceneLabel">Numbered scene label shown by debug-environment builds; empty for probe scenes that never appear in a menu.</param>
+        /// <param name="sceneLabel">Numbered scene label shown by debug-environment builds.</param>
+        /// <param name="directionalLightEntities">Directional-light entities authored by this scene.</param>
         /// <returns>Live authored UI root entity.</returns>
-        public Entity CreateStandardSceneUi(string entityName, string sceneLabel) {
+        public Entity CreateStandardSceneUi(string entityName, string sceneLabel, Entity[] directionalLightEntities = null) {
             if (string.IsNullOrWhiteSpace(entityName)) {
                 throw new ArgumentException("UI root entity name must be provided.", nameof(entityName));
             }
@@ -30,29 +33,24 @@ namespace DemoDisc.EditorTools {
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new FPSComponent {
-                Font = font,
-                FontScale = 2f
-            });
+            entity.AddComponent(new FPSComponent { Font = font, FontScale = 2f });
             SmallScreenFpsComponentOverrideService.Apply(entity);
             entity.AddComponent(new DemoDisc.menu.DemoDiscReturnToMenuComponent { AllowPointerReturn = false });
-            entity.AddComponent(new DemoDisc.rendering.DemoDiscLightToggleComponent());
-            DemoDiscLightIndicatorOverlayFactory lightIndicatorOverlayFactory = new DemoDiscLightIndicatorOverlayFactory(AssetAuthoringService);
-            lightIndicatorOverlayFactory.AttachToSceneUi(entity, font);
+            entity.AddComponent(new DemoDisc.rendering.DemoDiscLightToggleComponent {
+                LightEntityReferences = CreateEntityReferences(directionalLightEntities)
+            });
+            new DemoDiscLightIndicatorOverlayFactory(AssetAuthoringService).AttachToSceneUi(entity, font);
             if (!string.IsNullOrWhiteSpace(sceneLabel)) {
-                DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new DemoDiscSceneLabelOverlayFactory(AssetAuthoringService);
-                sceneLabelOverlayFactory.AttachToSceneUi(entity, font, sceneLabel);
+                new DemoDiscSceneLabelOverlayFactory(AssetAuthoringService).AttachToSceneUi(entity, font, sceneLabel);
             }
             return entity;
         }
 
         /// <summary>
-        /// Creates the dual-screen counterpart of the standard UI root, authored for the bottom screen. It
-        /// carries only the diagnostics and the scene label: the return-to-menu binding, the light toggle and
-        /// the light indicator come from the shared bottom-screen chrome Blueprint instead.
+        /// Creates the dual-screen counterpart of the standard UI root for the bottom screen.
         /// </summary>
         /// <param name="entityName">Stable name for the generated UI root entity.</param>
-        /// <param name="sceneLabel">Numbered scene label shown by debug-environment builds; empty for probe scenes that never appear in a menu.</param>
+        /// <param name="sceneLabel">Numbered scene label shown by debug-environment builds.</param>
         /// <returns>Live authored bottom-screen UI root entity.</returns>
         public Entity CreateHandheldSceneUi(string entityName, string sceneLabel) {
             if (string.IsNullOrWhiteSpace(entityName)) {
@@ -65,16 +63,43 @@ namespace DemoDisc.EditorTools {
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new FPSComponent {
-                Font = font,
-                FontScale = HandheldFpsScale
-            });
+            entity.AddComponent(new FPSComponent { Font = font, FontScale = HandheldFpsScale });
             if (!string.IsNullOrWhiteSpace(sceneLabel)) {
-                DemoDiscSceneLabelOverlayFactory sceneLabelOverlayFactory = new DemoDiscSceneLabelOverlayFactory(AssetAuthoringService);
-                sceneLabelOverlayFactory.AttachToSceneUi(entity, font, sceneLabel);
+                new DemoDiscSceneLabelOverlayFactory(AssetAuthoringService).AttachToSceneUi(entity, font, sceneLabel);
+            }
+            return entity;
+        }
+
+        SceneEntityReference[] CreateEntityReferences(Entity[] entities) {
+            if (entities == null || entities.Length == 0) {
+                return Array.Empty<SceneEntityReference>();
             }
 
-            return entity;
+            SceneEntityReference[] references = new SceneEntityReference[entities.Length];
+            for (int index = 0; index < entities.Length; index++) {
+                EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entities[index]);
+                if (saveComponent.EntityId == 0u) {
+                    if (AssetAuthoringService.OwningCore is not EditorCore editorCore || editorCore.SceneEntityIdAllocator == null) {
+                        throw new InvalidOperationException("Standard scene UI light references require an active editor scene-entity id allocator.");
+                    }
+                    saveComponent.EntityId = editorCore.SceneEntityIdAllocator.Allocate();
+                }
+                references[index] = new SceneEntityReference { EntityId = saveComponent.EntityId };
+            }
+
+            return references;
+        }
+
+        EntitySaveComponent FindRequiredEntitySaveComponent(Entity entity) {
+            if (entity == null || entity.Components == null) {
+                throw new InvalidOperationException("Authored scene entities must expose initialized components.");
+            }
+            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
+                if (entity.Components[componentIndex] is EntitySaveComponent saveComponent) {
+                    return saveComponent;
+                }
+            }
+            throw new InvalidOperationException("Authored scene entities require an EntitySaveComponent for references.");
         }
 
         /// <summary>
@@ -82,15 +107,10 @@ namespace DemoDisc.EditorTools {
         /// </summary>
         const float HandheldFpsScale = 1f;
 
-        /// <summary>
-        /// Resolves the shared editor default font required by the overlay kit's text components.
-        /// </summary>
-        /// <returns>Editor default font asset.</returns>
         FontAsset ResolveRequiredEditorFont() {
             if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {
                 throw new InvalidOperationException("A default editor font must be loaded before demo-disc scene UI can be generated.");
             }
-
             return AssetAuthoringService.RendererResources.DefaultFontAsset;
         }
     }

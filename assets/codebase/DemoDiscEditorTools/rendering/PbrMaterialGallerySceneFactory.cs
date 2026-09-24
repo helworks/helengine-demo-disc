@@ -88,7 +88,7 @@ namespace DemoDisc.EditorTools {
                 },
                 RootEntities = rootEntities,
                 DesktopPresentationRootEntities = new[] {
-                    CreateUiEntity(),
+                    CreateUiEntity(rootEntities[1], rootEntities[2]),
                     instructionOverlayEntity,
                     consoleInstructionBlueprintEntity
                 }
@@ -137,8 +137,8 @@ namespace DemoDisc.EditorTools {
         /// Creates the authored UI root entity for the PBR material gallery scene.
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
-        Entity CreateUiEntity() {
-            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("PbrMaterialGalleryUi", "13. PBR Gallery");
+        Entity CreateUiEntity(Entity keyLightEntity, Entity fillLightEntity) {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("PbrMaterialGalleryUi", "13. PBR Gallery", new[] { keyLightEntity, fillLightEntity });
         }
 
         /// <summary>

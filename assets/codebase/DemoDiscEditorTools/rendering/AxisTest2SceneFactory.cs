@@ -131,6 +131,8 @@ namespace DemoDisc.EditorTools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
+            Entity directionalLightRig = CreateDirectionalLightRigEntity(projectRootPath, arrowModel, axisMaterials[4]);
+            Entity directionalLight = directionalLightRig.Children[0];
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -140,7 +142,7 @@ namespace DemoDisc.EditorTools {
                 },
                 RootEntities = new[] {
                     cameraEntity,
-                    CreateDirectionalLightRigEntity(projectRootPath, arrowModel, axisMaterials[4]),
+                    directionalLightRig,
                     CreateFloorEntity(cubeModel, axisMaterials[3]),
                     CreateGroundEntity(cubeModel, axisMaterials[3]),
                     CreateXAxisEntity(cubeModel, axisMaterials[0]),
@@ -154,7 +156,7 @@ namespace DemoDisc.EditorTools {
                 DesktopPresentationRootEntities = new[] {
                     instructionOverlayEntity,
                     consoleInstructionBlueprintEntity,
-                    CreateUiEntity()
+                    CreateUiEntity(directionalLight)
                 }
             };
         }
@@ -209,8 +211,8 @@ namespace DemoDisc.EditorTools {
         /// Creates the authored UI root entity for the live axis-test-2 scene.
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
-        Entity CreateUiEntity() {
-            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("AxisTest2Ui", "5. Axis 2");
+        Entity CreateUiEntity(Entity directionalLight) {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("AxisTest2Ui", "5. Axis 2", new[] { directionalLight });
         }
 
         /// <summary>

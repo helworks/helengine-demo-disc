@@ -59,6 +59,7 @@ namespace DemoDisc.EditorTools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
+            Entity directionalLight = CreateDirectionalLightEntity();
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -68,7 +69,7 @@ namespace DemoDisc.EditorTools {
                 },
                 RootEntities = new[] {
                     CreateCameraEntity(),
-                    CreateDirectionalLightEntity(),
+                    directionalLight,
                     CreateSpotLightEntity(),
                     CreatePedestalEntity(cubeModel, pedestalMaterial),
                     CreateClusterSphereEntity("PbrShadowTheaterSphereLowRoughMetal", new float3(-1.3f, 1.8f, 0f), sphereModel, lowRoughnessMetal),
@@ -76,7 +77,7 @@ namespace DemoDisc.EditorTools {
                     CreateClusterSphereEntity("PbrShadowTheaterSphereDielectric", new float3(0f, 1.8f, 1.6f), sphereModel, lowRoughnessDielectric)
                 },
                 DesktopPresentationRootEntities = new[] {
-                    CreateUiEntity(),
+                    CreateUiEntity(directionalLight),
                     instructionOverlayEntity,
                     consoleInstructionBlueprintEntity
                 }
@@ -125,8 +126,8 @@ namespace DemoDisc.EditorTools {
         /// Creates the authored UI root entity for the PBR shadow theater scene.
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
-        Entity CreateUiEntity() {
-            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("PbrShadowTheaterUi", "15. PBR Shadow Theater");
+        Entity CreateUiEntity(Entity directionalLight) {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("PbrShadowTheaterUi", "15. PBR Shadow Theater", new[] { directionalLight });
         }
 
         /// <summary>

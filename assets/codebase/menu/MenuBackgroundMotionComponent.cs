@@ -52,11 +52,22 @@ namespace DemoDisc.menu {
         }
 
         /// <summary>
+        /// Binds the authored background layers before the first frame update.
+        /// </summary>
+        public override void ComponentInitialized(Entity entity) {
+            base.ComponentInitialized(entity);
+            GridEntity = GridEntityReference?.ResolvedEntity
+                ?? throw new InvalidOperationException("Menu background motion requires a resolved grid entity reference.");
+            ScanlineEntity = ScanlineEntityReference?.ResolvedEntity
+                ?? throw new InvalidOperationException("Menu background motion requires a resolved scanline entity reference.");
+        }
+
+        /// <summary>
         /// Advances both decorative background layers after their serialized scene references resolve.
         /// </summary>
         public override void Update() {
             base.Update();
-            ResolveEntitiesWhenNeeded();
+
             if (GridEntity == null || ScanlineEntity == null) {
                 return;
             }
@@ -64,20 +75,6 @@ namespace DemoDisc.menu {
             double frameSeconds = Core.Instance.FrameDeltaSeconds;
             MoveGrid((float)((double)GridPixelsPerSecond * frameSeconds));
             MoveScanlines((float)((double)ScanlinePixelsPerSecond * frameSeconds));
-        }
-
-        /// <summary>
-        /// Resolves both authored layer roots after the scene loader attaches runtime entity identifiers.
-        /// </summary>
-        void ResolveEntitiesWhenNeeded() {
-            if (GridEntity != null && ScanlineEntity != null) {
-                return;
-            } else if (Core.Instance == null || Core.Instance.ObjectManager == null) {
-                throw new InvalidOperationException("Menu background motion requires an initialized object manager.");
-            }
-
-            GridEntity = FindRequiredEntity(GridEntityReference, "grid");
-            ScanlineEntity = FindRequiredEntity(ScanlineEntityReference, "scanline");
         }
 
         /// <summary>
@@ -120,45 +117,5 @@ namespace DemoDisc.menu {
             ScanlineEntity.LocalPosition = new float3(localPosition.X, nextY, localPosition.Z);
         }
 
-        /// <summary>
-        /// Resolves one serialized scene entity reference to its runtime entity.
-        /// </summary>
-        /// <param name="entityReference">Serialized reference identifying the required entity.</param>
-        /// <param name="description">Human-readable layer description used in failure messages.</param>
-        /// <returns>Resolved runtime entity, or <c>null</c> while the scene loader is still creating it.</returns>
-        Entity FindRequiredEntity(SceneEntityReference entityReference, string description) {
-            if (entityReference == null || entityReference.EntityId == 0u) {
-                throw new InvalidOperationException($"Menu background motion requires a serialized {description} entity reference.");
-            }
-
-            List<Entity> entities = Core.Instance.ObjectManager.Entities;
-            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                Entity candidateEntity = entities[entityIndex];
-                if (FindSceneEntityRuntimeIdOrZero(candidateEntity) == entityReference.EntityId) {
-                    return candidateEntity;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Finds the stable serialized scene id attached to one runtime entity.
-        /// </summary>
-        /// <param name="entity">Runtime entity whose scene id should be inspected.</param>
-        /// <returns>Serialized entity id, or zero when the runtime id has not been attached.</returns>
-        uint FindSceneEntityRuntimeIdOrZero(Entity entity) {
-            if (entity == null || entity.Components == null) {
-                return 0u;
-            }
-
-            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                if (entity.Components[componentIndex] is SceneEntityRuntimeIdComponent runtimeIdComponent) {
-                    return runtimeIdComponent.SceneEntityId;
-                }
-            }
-
-            return 0u;
-        }
     }
 }

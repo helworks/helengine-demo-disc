@@ -56,7 +56,7 @@ namespace DemoDisc.menu {
         /// </summary>
         public override void Update() {
             base.Update();
-            ResolveRectanglesWhenNeeded();
+
             FitBackgroundToViewport();
             SceneManager sceneManager = Core.Instance.SceneManager;
             bool visible = sceneManager != null && sceneManager.IsSceneTransitionActive;
@@ -65,21 +65,14 @@ namespace DemoDisc.menu {
         }
 
         /// <summary>
-        /// Resolves the authored rectangles after the complete serialized scene hierarchy is available to the object manager.
+        /// Binds the authored loading-screen rectangles before the first frame update.
         /// </summary>
-        void ResolveRectanglesWhenNeeded() {
-            if (Background != null && Track != null && Fill != null) {
-                return;
-            } else if (Core.Instance == null || Core.Instance.ObjectManager == null) {
-                throw new InvalidOperationException("Loading screen rectangle resolution requires an initialized object manager.");
-            }
-
-            Background = FindRequiredRoundedRect(BackgroundEntityReference, "background");
-            Track = FindRequiredRoundedRect(TrackEntityReference, "track");
-            Fill = FindRequiredRoundedRect(FillEntityReference, "fill");
-            SetVisible(false, 0f);
+        public override void ComponentInitialized(Entity entity) {
+            base.ComponentInitialized(entity);
+            Background = FindRequiredRoundedRect(BackgroundEntityReference?.ResolvedEntity, "background");
+            Track = FindRequiredRoundedRect(TrackEntityReference?.ResolvedEntity, "track");
+            Fill = FindRequiredRoundedRect(FillEntityReference?.ResolvedEntity, "fill");
         }
-
         /// <summary>
         /// Applies presentation alpha and a clamped fill width for one transition state.
         /// </summary>
@@ -137,50 +130,22 @@ namespace DemoDisc.menu {
         }
 
         /// <summary>
-        /// Returns the rounded rectangle attached to one serialized entity reference.
+        /// Returns the required rounded rectangle on one already-resolved authored entity.
         /// </summary>
-        /// <param name="entityReference">Stable reference identifying the generated rectangle entity.</param>
+        /// <param name="entity">Resolved entity that should own the rectangle.</param>
         /// <param name="description">Human-readable rectangle role.</param>
         /// <returns>The required rounded rectangle component.</returns>
-        RoundedRectComponent FindRequiredRoundedRect(SceneEntityReference entityReference, string description) {
-            if (entityReference == null || entityReference.EntityId == 0u) {
-                throw new InvalidOperationException($"The loading screen requires a serialized {description} entity reference.");
-            }
-
-            List<Entity> entities = Core.Instance.ObjectManager.Entities;
-            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                Entity entity = entities[entityIndex];
-                if (FindSceneEntityRuntimeIdOrZero(entity) != entityReference.EntityId || entity.Components == null) {
-                    continue;
-                }
-
-                for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                    if (entity.Components[componentIndex] is RoundedRectComponent rectangle) {
-                        return rectangle;
-                    }
-                }
-            }
-
-            throw new InvalidOperationException($"The loading screen {description} entity '{entityReference.EntityId}' must contain one RoundedRectComponent.");
-        }
-
-        /// <summary>
-        /// Returns the stable authored scene id attached to one runtime entity.
-        /// </summary>
-        /// <param name="entity">Runtime entity whose persisted scene id should be inspected.</param>
-        /// <returns>Stable authored scene id, or zero when no persisted id is attached.</returns>
-        uint FindSceneEntityRuntimeIdOrZero(Entity entity) {
+        RoundedRectComponent FindRequiredRoundedRect(Entity entity, string description) {
             if (entity == null || entity.Components == null) {
-                return 0u;
+                throw new InvalidOperationException($"The loading screen requires a resolved {description} entity reference.");
             }
 
             for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                if (entity.Components[componentIndex] is SceneEntityRuntimeIdComponent runtimeIdComponent) {
-                    return runtimeIdComponent.SceneEntityId;
+                if (entity.Components[componentIndex] is RoundedRectComponent rectangle) {
+                    return rectangle;
                 }
             }
 
-            return 0u;
-        }
-    }
+            throw new InvalidOperationException($"The loading screen {description} entity must contain one RoundedRectComponent.");
+        }    }
 }

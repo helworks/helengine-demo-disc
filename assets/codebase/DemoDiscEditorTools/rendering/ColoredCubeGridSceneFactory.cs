@@ -196,7 +196,7 @@ namespace DemoDisc.EditorTools {
                 },
                 RootEntities = rootEntities,
                 DesktopPresentationRootEntities = new[] {
-                    CreateUiEntity(),
+                    CreateUiEntity(rootEntities[1]),
                     instructionOverlayEntity,
                     consoleInstructionBlueprintEntity
                 }
@@ -267,8 +267,8 @@ namespace DemoDisc.EditorTools {
         /// Creates the authored UI root entity for the colored cube-grid scene.
         /// </summary>
         /// <returns>Live authored UI entity.</returns>
-        Entity CreateUiEntity() {
-            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("ColoredCubeGridUi", "2. Colored Cubes");
+        Entity CreateUiEntity(Entity directionalLightEntity) {
+            return new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("ColoredCubeGridUi", "2. Colored Cubes", new[] { directionalLightEntity });
         }
 
         /// <summary>
