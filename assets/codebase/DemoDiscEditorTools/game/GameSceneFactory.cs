@@ -1485,12 +1485,12 @@ namespace DemoDisc.EditorTools {
             }
             EditorEntity editorUiRoot = uiRoot as EditorEntity
                 ?? throw new InvalidOperationException("Tilt Trial session UI references require an editor-authored root.");
-            session.TimerTextReference = AuthoredReference(FindRequiredChildEntityByName(editorUiRoot, "TiltTrialTimerText"));
-            session.CoinTextReference = AuthoredReference(FindRequiredChildEntityByName(editorUiRoot, "TiltTrialCoinText"));
+            session.TimerTextReference = FindRequiredAuthoredReference(uiRoot, "TiltTrialTimerText");
+            session.CoinTextReference = FindRequiredAuthoredReference(uiRoot, "TiltTrialCoinText");
             session.TargetTimesTextReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialTargetTimesText"));
             session.GameplayPanelReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialHandheldGameplayPanel"));
-            session.StartOverlayReference = AuthoredReference(FindRequiredChildEntityByName(editorUiRoot, "TiltTrialStartOverlay"));
-            session.ResultsOverlayReference = AuthoredReference(FindRequiredChildEntityByName(editorUiRoot, "TiltTrialResultsOverlay"));
+            session.StartOverlayReference = FindRequiredAuthoredReference(uiRoot, "TiltTrialStartOverlay");
+            session.ResultsOverlayReference = FindRequiredAuthoredReference(uiRoot, "TiltTrialResultsOverlay");
             session.ResultsTitleTextReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialResultsTitleText"));
             session.ResultsBodyTextReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialResultsBodyText"));
             session.ResultsRetryButtonReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialResultRetryButton"));
@@ -1499,10 +1499,17 @@ namespace DemoDisc.EditorTools {
             session.ResultsRetryButtonLabelReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialResultRetryButtonLabel"));
             session.ResultsExitButtonLabelReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialResultExitButtonLabel"));
             session.ResultsNextButtonLabelReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialResultNextButtonLabel"));
-            session.FailOverlayReference = AuthoredReference(FindRequiredChildEntityByName(editorUiRoot, "TiltTrialFailOverlay"));
+            session.FailOverlayReference = FindRequiredAuthoredReference(uiRoot, "TiltTrialFailOverlay");
             session.FailTitleTextReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialFailTitleText"));
             session.FailBodyTextReference = OptionalAuthoredReference(FindOptionalChildEntityByName(uiRoot, "TiltTrialFailBodyText"));
-            session.SpeedTextReference = AuthoredReference(FindRequiredChildEntityByName(editorUiRoot, "TiltTrialSpeedText"));
+            session.SpeedTextReference = FindRequiredAuthoredReference(uiRoot, "TiltTrialSpeedText");
+        }
+
+        SceneEntityReference FindRequiredAuthoredReference(Entity root, string name) {
+            Entity entity = FindOptionalChildEntityByName(root, name);
+            return entity == null
+                ? throw new InvalidOperationException($"Tilt Trial generation requires entity '{name}' in the presentation hierarchy.")
+                : AuthoredReference(entity);
         }
 
         SceneEntityReference OptionalAuthoredReference(Entity entity) {
