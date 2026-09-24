@@ -89,7 +89,6 @@ namespace DemoDisc.rendering {
                 throw new InvalidOperationException("DemoFollowCameraComponent requires an attached parent camera entity.");
             }
 
-            ResolveTargetEntityWhenNeeded();
             EnsureOrbitInitialized();
 
             Core core = Core.Instance ?? throw new InvalidOperationException("A core instance must exist before follow camera updates can run.");
@@ -106,58 +105,12 @@ namespace DemoDisc.rendering {
         }
 
         /// <summary>
-        /// Resolves the tracked runtime entity from the serialized scene-entity id when the target has not been cached yet.
+        /// Captures the already-bound authored target before the first update.
         /// </summary>
-        void ResolveTargetEntityWhenNeeded() {
-            if (TargetEntity != null) {
-                return;
-            }
-            if (TargetEntityReference == null) {
-                throw new InvalidOperationException("DemoFollowCameraComponent requires a serialized target entity reference.");
-            }
-            if (TargetEntityReference.EntityId == 0u) {
-                throw new InvalidOperationException("DemoFollowCameraComponent requires a non-zero target scene entity id.");
-            }
-            if (Core.Instance == null) {
-                throw new InvalidOperationException("A core instance must exist before follow camera target resolution can run.");
-            }
-
-            List<Entity> entities = Core.Instance.ObjectManager.Entities;
-            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                Entity candidate = entities[entityIndex];
-                uint candidateSceneEntityId = FindSceneEntityRuntimeIdOrZero(candidate);
-                if (candidateSceneEntityId == 0u) {
-                    continue;
-                }
-                if (candidateSceneEntityId == TargetEntityReference.EntityId) {
-                    TargetEntity = candidate;
-                    return;
-                }
-            }
-
-            throw new InvalidOperationException($"DemoFollowCameraComponent could not resolve target scene entity id {TargetEntityReference.EntityId}.");
-        }
-
-        /// <summary>
-        /// Finds the runtime scene-id component attached to one candidate entity when present.
-        /// </summary>
-        /// <param name="entity">Candidate runtime entity.</param>
-        /// <returns>Resolved authored scene entity id when present; otherwise <c>0</c>.</returns>
-        uint FindSceneEntityRuntimeIdOrZero(Entity entity) {
-            if (entity == null) {
-                throw new ArgumentNullException(nameof(entity));
-            }
-            if (entity.Components == null) {
-                return 0u;
-            }
-
-            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                if (entity.Components[componentIndex] is SceneEntityRuntimeIdComponent runtimeIdComponent) {
-                    return runtimeIdComponent.SceneEntityId;
-                }
-            }
-
-            return 0u;
+        public override void ComponentInitialized(Entity entity) {
+            base.ComponentInitialized(entity);
+            TargetEntity = TargetEntityReference?.ResolvedEntity
+                ?? throw new InvalidOperationException("DemoFollowCameraComponent requires a bound target entity reference.");
         }
 
         /// <summary>
