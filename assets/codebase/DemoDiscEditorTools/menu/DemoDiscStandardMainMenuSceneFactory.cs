@@ -64,6 +64,17 @@ namespace DemoDisc.EditorTools {
         const int NintendoDsLogoTopInset = 36;
 
         /// <summary>
+        /// Shared high-resolution menu background; platform cookers can produce native variants from this source.
+        /// </summary>
+        const string DemoDiscMainMenuBackgroundTexturePath = "textures/menu/main_menu_background.png";
+
+        /// <summary>One quarter of the oversized background texture quad.</summary>
+        const int MainMenuBackgroundTileWidth = 960;
+
+        /// <summary>One quarter of the oversized background texture quad.</summary>
+        const int MainMenuBackgroundTileHeight = 720;
+
+        /// <summary>
         /// Fixed left inset applied to visible Nintendo DS bottom-menu item labels.
         /// </summary>
         const int NintendoDsBottomMenuLabelLeft = 8;
@@ -425,7 +436,7 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
-        /// Creates the subtle grid and scanline layers that animate behind every standard menu visual.
+        /// Creates the shared rotating texture background behind every standard menu visual.
         /// </summary>
         /// <param name="generatedRootEntity">Generated menu subtree that owns the background layers.</param>
         /// <param name="definition">Menu definition that provides the established accent palette.</param>
@@ -451,6 +462,23 @@ namespace DemoDisc.EditorTools {
             for (int y = -48; y <= DemoMenuLayout.CanvasHeight + 48; y += 48) {
                 CreateBackgroundEntity(gridEntity, $"DemoDiscAnimatedBackgroundGridHorizontal{y}", new float3(-48f, y, 0f), new int2(DemoMenuLayout.CanvasWidth + 96, 1), 0f, 0f, gridColor, gridColor, 2);
             }
+
+            CreateMenuBackgroundTile(backgroundEntity, 0, new float3(-MainMenuBackgroundTileWidth, -MainMenuBackgroundTileHeight, 0f));
+            CreateMenuBackgroundTile(backgroundEntity, 1, new float3(0f, -MainMenuBackgroundTileHeight, 0f));
+            CreateMenuBackgroundTile(backgroundEntity, 2, new float3(-MainMenuBackgroundTileWidth, 0f, 0f));
+            CreateMenuBackgroundTile(backgroundEntity, 3, new float3(0f, 0f, 0f));
+        }
+
+        void CreateMenuBackgroundTile(Entity backgroundEntity, int tileIndex, float3 localPosition) {
+            Entity tileEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(backgroundEntity, $"DemoDiscAnimatedBackgroundTile{tileIndex}");
+            tileEntity.Static = false;
+            tileEntity.LocalPosition = localPosition;
+            SpriteComponent spriteComponent = new SpriteComponent {
+                Size = new int2(MainMenuBackgroundTileWidth, MainMenuBackgroundTileHeight),
+                RenderOrder2D = 2
+            };
+            tileEntity.AddComponent(spriteComponent);
+            ApplyTextureReference(tileEntity, spriteComponent, DemoDiscMainMenuBackgroundTexturePath);
             for (int y = -8; y <= DemoMenuLayout.CanvasHeight + 8; y += 8) {
                 CreateBackgroundEntity(scanlineEntity, $"DemoDiscAnimatedBackgroundScanline{y}", new float3(0f, y, 0.1f), new int2(DemoMenuLayout.CanvasWidth, 1), 0f, 0f, scanlineColor, scanlineColor, 3);
             }
