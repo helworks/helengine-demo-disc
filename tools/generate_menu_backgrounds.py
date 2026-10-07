@@ -16,7 +16,7 @@ PALETTE = [
     (96, 76, 120),      # scanline over grid
 ]
 VARIANTS = (
-    ("main_menu_background.png", 960, 720, "RGB", "c6b0ea0d4e534180af4313cce7d93f12"),
+    ("main_menu_background.png", 512, 512, "RGB", "c6b0ea0d4e534180af4313cce7d93f12"),
     ("main_menu_background_ps1.png", 240, 240, "INDEXED4", "9ef42b9c5a7d4862a9d1336e1f9c72a4"),
 )
 
