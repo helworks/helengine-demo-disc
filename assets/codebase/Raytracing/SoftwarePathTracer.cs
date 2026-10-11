@@ -34,13 +34,11 @@ namespace DemoDisc.Raytracing {
                 throw new ArgumentOutOfRangeException(nameof(height), "Trace dimensions must be positive.");
             }
 
-            int pixelCount;
-            try {
-                pixelCount = checked(width * height);
-            }
-            catch (OverflowException) {
+            long widePixelCount = (long)width * height;
+            if (widePixelCount > int.MaxValue) {
                 throw new ArgumentOutOfRangeException(nameof(width), "Trace dimensions exceed the supported pixel count.");
             }
+            int pixelCount = (int)widePixelCount;
 
             Width = width;
             Height = height;
@@ -60,6 +58,9 @@ namespace DemoDisc.Raytracing {
 
             if (string.Equals(platformId, "ds", StringComparison.OrdinalIgnoreCase)) {
                 return new SoftwareTraceResolution(256, 192);
+            }
+            if (string.Equals(platformId, "ps1", StringComparison.OrdinalIgnoreCase)) {
+                return new SoftwareTraceResolution(128, 96);
             }
 
             if (string.Equals(platformId, "3ds", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "gamecube", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "ps2", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "psp", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "psvita", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "switch", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "wii", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "wiiu", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "windows", StringComparison.OrdinalIgnoreCase)) {
@@ -205,6 +206,7 @@ namespace DemoDisc.Raytracing {
         /// </summary>
         /// <param name="pixelCount">Number of pixels to allocate.</param>
         /// <returns>A buffer with exactly pixelCount elements.</returns>
+        [NativeOwnedReturn]
         float3[] AllocateAccumulator(int pixelCount);
 
         /// <summary>
@@ -212,6 +214,7 @@ namespace DemoDisc.Raytracing {
         /// </summary>
         /// <param name="byteCount">Number of bytes to allocate.</param>
         /// <returns>A buffer with exactly byteCount elements.</returns>
+        [NativeOwnedReturn]
         byte[] AllocateTileRgba8(int byteCount);
     }
 
@@ -435,7 +438,7 @@ namespace DemoDisc.Raytracing {
     /// The progressive traversal and tile scratch are currently worker-owned; future multithreading
     /// requires worker-local scratch plus synchronized or partitioned accumulator ownership.
     /// </summary>
-    public sealed class SoftwarePathTracer {
+    public sealed class SoftwarePathTracer : IDisposable {
         /// <summary>
         /// Maximum number of diffuse surface hits considered by one sample.
         /// </summary>
@@ -507,12 +510,14 @@ namespace DemoDisc.Raytracing {
         /// <summary>
         /// Progressive accumulator owned by this tracer; scene and BVH arrays remain borrowed.
         /// </summary>
-        float3[] accumulation = Array.Empty<float3>();
+        [NativeOwnedMember]
+        float3[] accumulation;
 
         /// <summary>
         /// Reusable RGBA8 tile staging buffer owned by this tracer.
         /// </summary>
-        byte[] tileRgba8 = Array.Empty<byte>();
+        [NativeOwnedMember]
+        byte[] tileRgba8;
 
         /// <summary>
         /// Fixed image resolution selected during progressive initialization.
@@ -626,7 +631,7 @@ namespace DemoDisc.Raytracing {
         /// verification, but must not replace or mutate the array.
         /// </summary>
         public float3[] Accumulation {
-            get { return accumulation; }
+            get { return accumulation ?? Array.Empty<float3>(); }
         }
 
         /// <summary>
@@ -634,7 +639,7 @@ namespace DemoDisc.Raytracing {
         /// it for upload, but must not replace or mutate the array.
         /// </summary>
         public byte[] TileRgba8 {
-            get { return tileRgba8; }
+            get { return tileRgba8 ?? Array.Empty<byte>(); }
         }
 
         /// <summary>
@@ -674,6 +679,18 @@ namespace DemoDisc.Raytracing {
         /// <param name="exposure">Positive finite CPU tone-mapping exposure.</param>
         /// <param name="allocator">Optional deterministic buffer allocator used by failure tests.</param>
         public void InitializeProgressive(SoftwareTraceResolution resolution, SoftwareTraceCamera camera, float exposure, ISoftwareTraceBufferAllocator allocator = null) {
+            if (!TryInitializeProgressive(resolution, camera, exposure, allocator)) {
+                throw new InvalidOperationException(ProgressiveAllocationFailureMessage);
+            }
+        }
+
+        /// <summary>Initializes progressive buffers with explicit rejection of invalid allocator results. Fatal-only targets never promise recovery from an allocator or backend that aborts.</summary>
+        /// <param name="resolution">Validated positive image dimensions.</param>
+        /// <param name="camera">Finite orthonormal camera basis.</param>
+        /// <param name="exposure">Positive finite tone-mapping exposure.</param>
+        /// <param name="allocator">Optional owned-buffer allocation seam.</param>
+        /// <returns>False after releasing buffers when an allocator returns an invalid result; managed allocator exceptions retain rollback behavior.</returns>
+        public bool TryInitializeProgressive(SoftwareTraceResolution resolution, SoftwareTraceCamera camera, float exposure, ISoftwareTraceBufferAllocator allocator = null) {
             if (progressiveInitialized) {
                 throw new InvalidOperationException("Software progressive tracing is already initialized.");
             }
@@ -682,36 +699,36 @@ namespace DemoDisc.Raytracing {
                 throw new ArgumentOutOfRangeException(nameof(exposure), "Progressive exposure must be finite and positive.");
             }
 
-            int localTilesX;
-            int localTilesY;
-            int localTileCount;
-            try {
-                localTilesX = checked((resolution.Width / TileSize) + (resolution.Width % TileSize == 0 ? 0 : 1));
-                localTilesY = checked((resolution.Height / TileSize) + (resolution.Height % TileSize == 0 ? 0 : 1));
-                localTileCount = checked(localTilesX * localTilesY);
-            }
-            catch (OverflowException) {
+            int localTilesX = (resolution.Width / TileSize) + (resolution.Width % TileSize == 0 ? 0 : 1);
+            int localTilesY = (resolution.Height / TileSize) + (resolution.Height % TileSize == 0 ? 0 : 1);
+            long wideTileCount = (long)localTilesX * localTilesY;
+            if (wideTileCount > int.MaxValue) {
                 throw new ArgumentOutOfRangeException(nameof(resolution), "Progressive tile dimensions exceed the supported count.");
             }
+            int localTileCount = (int)wideTileCount;
 
             if (localTilesX <= 0 || localTilesY <= 0 || localTileCount <= 0) {
                 throw new ArgumentOutOfRangeException(nameof(resolution), "Progressive tile dimensions must be positive.");
             }
 
-            float3[] allocatedAccumulator = null;
-            byte[] allocatedTile = null;
+#if !HELENGINE_CODEGEN_FATAL_ONLY
             try {
-                allocatedAccumulator = allocator == null
+#endif
+                NativeOwnership.Release(ref accumulation);
+                accumulation = allocator == null
                     ? new float3[resolution.PixelCount]
                     : allocator.AllocateAccumulator(resolution.PixelCount);
-                if (allocatedAccumulator == null || allocatedAccumulator.Length != resolution.PixelCount) {
-                    throw new InvalidOperationException("The progressive accumulator allocator returned an invalid buffer.");
+                if (accumulation == null || accumulation.Length != resolution.PixelCount) {
+                    ResetProgressiveState();
+                    return false;
                 }
-                allocatedTile = allocator == null
+                NativeOwnership.Release(ref tileRgba8);
+                tileRgba8 = allocator == null
                     ? new byte[TileRgba8Bytes]
                     : allocator.AllocateTileRgba8(TileRgba8Bytes);
-                if (allocatedTile == null || allocatedTile.Length != TileRgba8Bytes) {
-                    throw new InvalidOperationException("The progressive tile allocator returned an invalid buffer.");
+                if (tileRgba8 == null || tileRgba8.Length != TileRgba8Bytes) {
+                    ResetProgressiveState();
+                    return false;
                 }
 
                 this.resolution = resolution;
@@ -723,14 +740,15 @@ namespace DemoDisc.Raytracing {
                 this.permutationStep = ChoosePermutationStep(localTileCount);
                 this.nextTilePosition = 0;
                 this.completedPasses = 0;
-                this.accumulation = allocatedAccumulator;
-                this.tileRgba8 = allocatedTile;
                 this.progressiveInitialized = true;
+                return true;
+#if !HELENGINE_CODEGEN_FATAL_ONLY
             }
             catch {
                 ResetProgressiveState();
                 throw new InvalidOperationException(ProgressiveAllocationFailureMessage);
             }
+#endif
         }
 
         /// <summary>
@@ -1008,8 +1026,8 @@ namespace DemoDisc.Raytracing {
         /// </summary>
         void ResetProgressiveState() {
             progressiveInitialized = false;
-            accumulation = Array.Empty<float3>();
-            tileRgba8 = Array.Empty<byte>();
+            NativeOwnership.Release(ref accumulation);
+            NativeOwnership.Release(ref tileRgba8);
             resolution = default;
             camera = default;
             exposure = 0f;
@@ -1019,6 +1037,13 @@ namespace DemoDisc.Raytracing {
             tilesY = 0;
             tileCount = 0;
             permutationStep = 0;
+        }
+
+        /// <summary>Releases only this tracer's progressive buffers; triangle, material, BVH and traversal inputs remain borrowed.</summary>
+        public void Dispose() {
+            ResetProgressiveState();
+            NativeOwnership.Release(ref accumulation);
+            NativeOwnership.Release(ref tileRgba8);
         }
 
         /// <summary>

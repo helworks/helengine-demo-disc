@@ -24,9 +24,17 @@ namespace DemoDisc.Raytracing {
     public sealed class SoftwarePathTraceSession : IDisposable {
         readonly RenderManager2D renderManager2D;
         RuntimeTexture presentationTexture;
+        [NativeOwnedMember]
         SoftwareTraceScene scene;
+        [NativeOwnedMember]
         SoftwareBvh bvh;
+        [NativeOwnedMember]
         SoftwarePathTracer tracer;
+#if !HELENGINE_CODEGEN_FATAL_ONLY
+        /// <summary>Provides a borrowed observation for managed allocation callbacks; the preparation scope retains ownership until initialization completes.</summary>
+        SoftwarePathTracer PreparingTracer;
+#endif
+        [NativeOwnedMember]
         int[] traversalStack;
         bool presentationReleaseAttempted;
         SoftwarePathTraceSessionState state;
@@ -58,8 +66,16 @@ namespace DemoDisc.Raytracing {
         /// <summary>Gets the BVH while tracing.</summary>
         public SoftwareBvh Bvh => bvh;
 
-        /// <summary>Gets the progressive tracer while tracing.</summary>
-        public SoftwarePathTracer Tracer => tracer;
+        /// <summary>Gets the borrowed published tracer. Managed allocation callbacks additionally observe the tracer while its preparation scope owns it.</summary>
+        public SoftwarePathTracer Tracer {
+            get {
+#if !HELENGINE_CODEGEN_FATAL_ONLY
+                return tracer ?? PreparingTracer;
+#else
+                return tracer;
+#endif
+            }
+        }
 
         /// <summary>Gets the stable failure message after a failed initialization or upload.</summary>
         public string FailureMessage => failureMessage;
@@ -80,6 +96,7 @@ namespace DemoDisc.Raytracing {
         /// <param name="exposure">Positive tone-mapping exposure.</param>
         /// <param name="allocator">Optional progressive allocation seam.</param>
         /// <param name="platformName">Optional runtime platform identity used to select the presentation texture format.</param>
+        /// <param name="ps1ImageBufferBudgetBytes">Positive PS1 image-buffer budget; models and BVH are separately accounted and other platforms retain their existing behavior.</param>
         public void Initialize(
             List<Entity> sceneRoots,
             ISoftwareModelAssetSource modelSource,
@@ -87,46 +104,92 @@ namespace DemoDisc.Raytracing {
             SoftwareTraceCamera camera,
             float exposure,
             ISoftwareTraceBufferAllocator allocator = null,
-            string platformName = null) {
+            string platformName = null,
+            long ps1ImageBufferBudgetBytes = SoftwareTraceImageBudget.DefaultPs1Bytes) {
+            if (!TryInitialize(sceneRoots, modelSource, resolution, camera, exposure, allocator, platformName, ps1ImageBufferBudgetBytes)) {
+                throw new InvalidOperationException(failureMessage);
+            }
+        }
+
+        /// <summary>Prepares the session with an explicit status for budget and returned-buffer failures. Managed exceptions retain rollback; fatal-only backend errors remain fatal rather than pretending to recover.</summary>
+        /// <param name="sceneRoots">Authored roots borrowed while geometry is flattened.</param>
+        /// <param name="modelSource">Source producing owned CPU-readable model assets.</param>
+        /// <param name="resolution">Validated exact image dimensions.</param>
+        /// <param name="camera">Finite orthonormal camera basis.</param>
+        /// <param name="exposure">Positive CPU tone-mapping exposure.</param>
+        /// <param name="allocator">Optional progressive owned-buffer seam.</param>
+        /// <param name="platformName">Runtime platform identifier.</param>
+        /// <param name="ps1ImageBufferBudgetBytes">Explicit positive PS1 image-buffer limit, independent of models and BVH.</param>
+        /// <returns>True only after complete preparation; false leaves Failed with all reachable owned resources released.</returns>
+        public bool TryInitialize(
+            List<Entity> sceneRoots,
+            ISoftwareModelAssetSource modelSource,
+            SoftwareTraceResolution resolution,
+            SoftwareTraceCamera camera,
+            float exposure,
+            ISoftwareTraceBufferAllocator allocator = null,
+            string platformName = null,
+            long ps1ImageBufferBudgetBytes = SoftwareTraceImageBudget.DefaultPs1Bytes) {
             if (state != SoftwarePathTraceSessionState.Uninitialized) {
                 throw new InvalidOperationException("Software path trace session initialization is permitted only once.");
             }
 
             long displayBytes = 0L;
+#if !HELENGINE_CODEGEN_FATAL_ONLY
             try {
+#endif
+                if (!SoftwareTraceImageBudget.TryValidate(resolution, platformName, ps1ImageBufferBudgetBytes, out string budgetFailure)) {
+                    FailPreparation(budgetFailure);
+                    return false;
+                }
                 ValidateInitializationArguments(sceneRoots, modelSource, resolution, camera, exposure);
                 int presentationBytesPerPixel = IsDsPlatform(platformName) ? 2 : 4;
                 displayBytes = checked((long)resolution.Width * resolution.Height * presentationBytesPerPixel);
                 state = SoftwarePathTraceSessionState.CreatingPresentation;
                 CreatePresentationTexture(resolution, platformName);
                 ObservePeak(checked(displayBytes + displayBytes));
-                ThrowIfDisposedDuringInitialization();
+                if (CancelDisposedInitialization()) return false;
 
                 state = SoftwarePathTraceSessionState.LoadingModels;
+                NativeOwnership.DisposeAndRelease(ref scene);
                 scene = SoftwareTraceScene.Build(sceneRoots, modelSource);
                 ObservePeak(checked(displayBytes + scene.InitializationPeakOwnedBytes));
-                ThrowIfDisposedDuringInitialization();
+                if (CancelDisposedInitialization()) return false;
 
                 state = SoftwarePathTraceSessionState.BuildingBvh;
+                NativeOwnership.DisposeAndRelease(ref bvh);
                 bvh = SoftwareBvh.Build(scene.Triangles);
                 long bvhBytes = checked(((long)bvh.Nodes.Length * 32L) + ((long)bvh.TriangleOrder.Length * 4L));
                 ObservePeak(checked(displayBytes + scene.SteadyStateOwnedBytes + bvhBytes));
-                ThrowIfDisposedDuringInitialization();
+                if (CancelDisposedInitialization()) return false;
 
+                NativeOwnership.Release(ref traversalStack);
                 traversalStack = new int[SoftwareBvh.TraversalStackCapacity];
                 ObservePeak(checked(displayBytes + scene.SteadyStateOwnedBytes + bvhBytes + ((long)traversalStack.Length * 4L)));
-                ThrowIfDisposedDuringInitialization();
+                if (CancelDisposedInitialization()) return false;
 
-                tracer = new SoftwarePathTracer(scene.Triangles, scene.Materials, scene.AreaLight, bvh, traversalStack);
                 state = SoftwarePathTraceSessionState.AllocatingProgressiveBuffers;
-                SoftwarePathTracer initializingTracer = tracer;
-                initializingTracer.InitializeProgressive(resolution, camera, exposure, allocator);
-                if (state == SoftwarePathTraceSessionState.Disposed) {
-                    // Dispose may clear the session field while an allocator callback is in flight;
-                    // reset the local tracer once its late buffers become reachable.
-                    initializingTracer.DisposeProgressive();
+                SoftwarePathTracer initializingTracer = new SoftwarePathTracer(scene.Triangles, scene.Materials, scene.AreaLight, bvh, traversalStack);
+                try {
+#if !HELENGINE_CODEGEN_FATAL_ONLY
+                    SetPreparingTracer(initializingTracer);
+#endif
+                    if (!initializingTracer.TryInitializeProgressive(resolution, camera, exposure, allocator)) {
+                        if (!CancelDisposedInitialization()) {
+                            FailPreparation("Software progressive buffers could not be allocated.");
+                        }
+                        return false;
+                    }
+                    if (CancelDisposedInitialization()) return false;
+                    NativeOwnership.DisposeAndRelease(ref tracer);
+                    tracer = initializingTracer;
+                    initializingTracer = null;
+                } finally {
+#if !HELENGINE_CODEGEN_FATAL_ONLY
+                    PreparingTracer = null;
+#endif
+                    NativeOwnership.DisposeAndRelease(ref initializingTracer);
                 }
-                ThrowIfDisposedDuringInitialization();
 
                 steadyStateOwnedBytes = checked(displayBytes
                     + scene.SteadyStateOwnedBytes
@@ -135,6 +198,8 @@ namespace DemoDisc.Raytracing {
                     + tracer.ProgressiveOwnedBytes);
                 ObservePeak(steadyStateOwnedBytes);
                 state = SoftwarePathTraceSessionState.Tracing;
+                return true;
+#if !HELENGINE_CODEGEN_FATAL_ONLY
             }
             catch {
                 if (state == SoftwarePathTraceSessionState.Disposed) {
@@ -150,6 +215,26 @@ namespace DemoDisc.Raytracing {
                 state = SoftwarePathTraceSessionState.Failed;
                 throw new InvalidOperationException(failureMessage);
             }
+#endif
+        }
+
+#if !HELENGINE_CODEGEN_FATAL_ONLY
+        /// <summary>
+        /// Retains a borrowed view of the tracer for synchronous allocation observers while the initialization scope owns it.
+        /// The caller clears this view before releasing the tracer or publishing ownership to the session.
+        /// </summary>
+        /// <param name="preparingTracer">Borrowed tracer whose lifetime remains controlled by the initialization scope.</param>
+        void SetPreparingTracer([NativeRetainsBorrow] SoftwarePathTracer preparingTracer) {
+            PreparingTracer = preparingTracer;
+        }
+#endif
+
+        /// <summary>Publishes a known preparation failure only after releasing reachable resources in reverse dependency order.</summary>
+        /// <param name="message">Specific validation or allocation-status diagnostic.</param>
+        void FailPreparation(string message) {
+            CleanupOwnedResources();
+            failureMessage = message;
+            state = SoftwarePathTraceSessionState.Failed;
         }
 
         /// <summary>
@@ -161,7 +246,9 @@ namespace DemoDisc.Raytracing {
                 throw new InvalidOperationException("Software path tracing is not in the tracing state.");
             }
 
+#if !HELENGINE_CODEGEN_FATAL_ONLY
             try {
+#endif
                 SoftwareTraceTile tile = tracer.RenderNextTile();
                 renderManager2D.UpdateTextureRegion(
                     presentationTexture,
@@ -172,6 +259,7 @@ namespace DemoDisc.Raytracing {
                     tracer.TileRgba8,
                     tracer.TileRowPitch);
                 return tile;
+#if !HELENGINE_CODEGEN_FATAL_ONLY
             }
             catch {
                 failureMessage = "Software path tracing failed.";
@@ -179,17 +267,18 @@ namespace DemoDisc.Raytracing {
                 state = SoftwarePathTraceSessionState.Failed;
                 throw new InvalidOperationException(failureMessage);
             }
+#endif
         }
 
         /// <summary>
         /// Releases progressive state, BVH arrays, and the presentation texture through its creator exactly once.
         /// </summary>
         public void Dispose() {
-            if (state == SoftwarePathTraceSessionState.Disposed) {
-                return;
-            }
-
             CleanupOwnedResources();
+            NativeOwnership.DisposeAndRelease(ref tracer);
+            NativeOwnership.DisposeAndRelease(ref bvh);
+            NativeOwnership.Release(ref traversalStack);
+            NativeOwnership.DisposeAndRelease(ref scene);
             state = SoftwarePathTraceSessionState.Disposed;
         }
 
@@ -276,29 +365,26 @@ namespace DemoDisc.Raytracing {
         /// </summary>
         void CleanupOwnedResources() {
             steadyStateOwnedBytes = 0L;
-            if (tracer != null) {
-                tracer.DisposeProgressive();
-            }
-            if (bvh != null) {
-                bvh.Dispose();
-            }
+            NativeOwnership.DisposeAndRelease(ref tracer);
+            NativeOwnership.DisposeAndRelease(ref bvh);
+            NativeOwnership.Release(ref traversalStack);
+            NativeOwnership.DisposeAndRelease(ref scene);
 
             RuntimeTexture ownedTexture = presentationTexture;
             presentationTexture = null;
             if (ownedTexture != null && !presentationReleaseAttempted) {
                 presentationReleaseAttempted = true;
+#if !HELENGINE_CODEGEN_FATAL_ONLY
                 try {
+#endif
                     renderManager2D.ReleaseTexture(ownedTexture);
+#if !HELENGINE_CODEGEN_FATAL_ONLY
                 }
                 catch {
                     // Cleanup is idempotent even when a backend release reports its own failure.
                 }
+#endif
             }
-
-            tracer = null;
-            traversalStack = null;
-            bvh = null;
-            scene = null;
             initializationPeakOwnedBytes = 0L;
         }
 
@@ -309,11 +395,15 @@ namespace DemoDisc.Raytracing {
             }
         }
 
-        /// <summary>Rejects callbacks that dispose the session while staged initialization is still running.</summary>
-        void ThrowIfDisposedDuringInitialization() {
+        /// <summary>Reports disposal during synchronous preparation without publishing late callback resources or dereferencing a destroyed session-owned tracer.</summary>
+        /// <returns>True after cleaning late resources when disposal interrupted preparation.</returns>
+        bool CancelDisposedInitialization() {
             if (state == SoftwarePathTraceSessionState.Disposed) {
-                throw new InvalidOperationException("The software path trace session has been disposed.");
+                CleanupOwnedResources();
+                failureMessage = "The software path trace session has been disposed.";
+                return true;
             }
+            return false;
         }
 
         }
@@ -356,6 +446,7 @@ namespace DemoDisc.Raytracing {
         TextComponent sppText;
         TextComponent elapsedText;
         TextComponent raysPerSecondText;
+        [NativeOwnedMember]
         SoftwarePathTraceSession session;
         string componentFailureMessage;
         double traceStartSeconds;
@@ -449,8 +540,12 @@ namespace DemoDisc.Raytracing {
             TraceCameraUp = new float3(0f, 1f, 0f);
             VerticalFieldOfViewDegrees = 45f;
             Exposure = 1f;
+            Ps1ImageBufferBudgetBytes = SoftwareTraceImageBudget.DefaultPs1Bytes;
             lastHudState = SoftwarePathTraceSessionState.Uninitialized;
         }
+
+        /// <summary>Configures the positive PS1-only image-buffer ceiling. This excludes models/BVH; other platforms retain their established image allocation policy.</summary>
+        public long Ps1ImageBufferBudgetBytes { get; set; }
 
         /// <summary>Resets only local lifecycle flags while the authored hierarchy is still being attached.</summary>
         public override void ComponentAdded(Entity entity) {
@@ -459,7 +554,7 @@ namespace DemoDisc.Raytracing {
             returnRequested = false;
             componentDisposed = false;
             componentFailureMessage = null;
-            session = null;
+            NativeOwnership.DisposeAndRelease(ref session);
             outputSprite = null;
             sppText = null;
             elapsedText = null;
@@ -477,12 +572,15 @@ namespace DemoDisc.Raytracing {
             }
 
             lifecycleInitialized = true;
+#if !HELENGINE_CODEGEN_FATAL_ONLY
             try {
+#endif
                 ValidateComponentSettings();
                 outputSprite = FindRequiredComponent<SpriteComponent>(OutputSpriteEntityReference, "output sprite", out _);
                 sppText = FindRequiredComponent<TextComponent>(SppTextEntityReference, "SPP text", out _);
                 elapsedText = FindRequiredComponent<TextComponent>(ElapsedTextEntityReference, "elapsed text", out _);
                 raysPerSecondText = FindRequiredComponent<TextComponent>(RaysPerSecondTextEntityReference, "rays-per-second text", out _);
+                NativeOwnership.DisposeAndRelease(ref session);
                 session = new SoftwarePathTraceSession(OwnerCore.RenderManager2D);
                 SoftwareTraceResolution resolution = SoftwareTraceResolution.ForPlatform(OwnerCore.PlatformInfo.Name);
                 SoftwareTraceCamera camera = new SoftwareTraceCamera(
@@ -493,40 +591,51 @@ namespace DemoDisc.Raytracing {
                     VerticalFieldOfViewDegrees);
                 List<Entity> sceneRoots = new List<Entity>();
                 sceneRoots.Add(Parent);
-                session.Initialize(
+                bool prepared = session.TryInitialize(
                     sceneRoots,
                     new ContentSoftwareModelAssetSource(OwnerCore.ContentManager),
                     resolution,
                     camera,
                     Exposure,
                     null,
-                    OwnerCore.PlatformInfo.Name);
+                    OwnerCore.PlatformInfo.Name,
+                    Ps1ImageBufferBudgetBytes);
+                if (!prepared) {
+                    HandleInitializationFailure();
+                    base.ComponentInitialized(entity);
+                    return;
+                }
                 outputSprite.Texture = session.PresentationTexture;
                 traceStartSeconds = OwnerCore.TotalElapsedSeconds;
                 lastHudRefreshSeconds = 0d;
                 lastHudSpp = -1;
                 RefreshHud(true);
+#if !HELENGINE_CODEGEN_FATAL_ONLY
             }
             catch {
-                if (session == null || string.IsNullOrWhiteSpace(session.FailureMessage)) {
-                    componentFailureMessage = CreateComponentFailureMessage();
-                }
-                else {
-                    componentFailureMessage = session.FailureMessage;
-                }
-                if (outputSprite != null) {
-                    outputSprite.Texture = null;
-                }
-                if (session != null) {
-                    session.Dispose();
-                    session = null;
-                }
-                if (sppText != null) {
-                    sppText.Text = "Trace error: " + componentFailureMessage;
-                }
+                HandleInitializationFailure();
             }
+#endif
 
             base.ComponentInitialized(entity);
+        }
+
+        /// <summary>Detaches presentation borrowers and disposes the failed session before showing its explicit diagnostic in the authored HUD.</summary>
+        void HandleInitializationFailure() {
+            if (session == null || string.IsNullOrWhiteSpace(session.FailureMessage)) {
+                componentFailureMessage = CreateComponentFailureMessage();
+            } else {
+                componentFailureMessage = session.FailureMessage;
+            }
+            if (outputSprite != null) {
+                outputSprite.Texture = null;
+            }
+            if (session != null) {
+                NativeOwnership.DisposeAndRelease(ref session);
+            }
+            if (sppText != null) {
+                sppText.Text = "Trace error: " + componentFailureMessage;
+            }
         }
 
         /// <summary>Renders at most one tile and upload per update, with platform-specific Return handling.</summary>
@@ -542,8 +651,11 @@ namespace DemoDisc.Raytracing {
                 return;
             }
 
+#if !HELENGINE_CODEGEN_FATAL_ONLY
             try {
+#endif
                 session.RenderAndUploadNextTile();
+#if !HELENGINE_CODEGEN_FATAL_ONLY
             }
             catch {
                 if (session == null || string.IsNullOrWhiteSpace(session.FailureMessage)) {
@@ -556,6 +668,7 @@ namespace DemoDisc.Raytracing {
                     outputSprite.Texture = null;
                 }
             }
+#endif
             RefreshHud(false);
         }
 
@@ -567,16 +680,16 @@ namespace DemoDisc.Raytracing {
 
         /// <summary>Releases session resources and calls the base component disposer once.</summary>
         public override void Dispose() {
-            if (componentDisposed) {
-                return;
-            }
-
+            bool wasDisposed = componentDisposed;
             componentDisposed = true;
             try {
                 ClearOutputTextureAndDisposeSession();
             }
             finally {
-                base.Dispose();
+                NativeOwnership.DisposeAndRelease(ref session);
+                if (!wasDisposed) {
+                    base.Dispose();
+                }
             }
         }
 
@@ -746,10 +859,7 @@ namespace DemoDisc.Raytracing {
             if (outputSprite != null) {
                 outputSprite.Texture = null;
             }
-            if (session != null) {
-                session.Dispose();
-                session = null;
-            }
+            NativeOwnership.DisposeAndRelease(ref session);
             outputSprite = null;
             sppText = null;
             elapsedText = null;

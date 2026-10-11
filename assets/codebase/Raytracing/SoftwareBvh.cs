@@ -154,11 +154,13 @@ namespace DemoDisc.Raytracing {
         /// <summary>
         /// Compact flat nodes owned by this BVH.
         /// </summary>
+        [NativeOwnedMember]
         SoftwareBvhNode[] nodes;
 
         /// <summary>
         /// Original triangle indices arranged into deterministic leaf ranges.
         /// </summary>
+        [NativeOwnedMember]
         int[] triangleOrder;
 
         /// <summary>
@@ -195,14 +197,14 @@ namespace DemoDisc.Raytracing {
         /// Gets the compact flat nodes owned by this BVH.
         /// </summary>
         public SoftwareBvhNode[] Nodes {
-            get { return nodes; }
+            get { return nodes ?? Array.Empty<SoftwareBvhNode>(); }
         }
 
         /// <summary>
         /// Gets the triangle-order slots owned by this BVH.
         /// </summary>
         public int[] TriangleOrder {
-            get { return triangleOrder; }
+            get { return triangleOrder ?? Array.Empty<int>(); }
         }
 
         /// <summary>
@@ -220,7 +222,9 @@ namespace DemoDisc.Raytracing {
         /// <param name="maximumDepth">Maximum root-relative build depth.</param>
         /// <param name="sourceTriangles">Exact source triangle array retained by reference for traversal identity validation.</param>
         SoftwareBvh([NativeTakesOwnership] SoftwareBvhNode[] nodes, [NativeTakesOwnership] int[] triangleOrder, int maximumDepth, SoftwareTriangle[] sourceTriangles) {
+            NativeOwnership.Release(ref this.nodes);
             this.nodes = nodes;
+            NativeOwnership.Release(ref this.triangleOrder);
             this.triangleOrder = triangleOrder;
             this.maximumDepth = maximumDepth;
             this.sourceTriangles = sourceTriangles;
@@ -231,6 +235,7 @@ namespace DemoDisc.Raytracing {
         /// </summary>
         /// <param name="triangles">Validated triangles to index; the caller retains ownership and must keep this exact array instance and its contents immutable for the BVH lifetime.</param>
         /// <returns>A compact deterministic BVH owning only its nodes and order array.</returns>
+        [NativeOwnedReturn]
         public static SoftwareBvh Build(SoftwareTriangle[] triangles) {
             if (triangles == null) {
                 throw new ArgumentNullException(nameof(triangles));
@@ -260,13 +265,9 @@ namespace DemoDisc.Raytracing {
         /// Releases the node and triangle-order arrays; repeated disposal is harmless.
         /// </summary>
         public void Dispose() {
-            if (disposed) {
-                return;
-            }
-
             disposed = true;
-            nodes = Array.Empty<SoftwareBvhNode>();
-            triangleOrder = Array.Empty<int>();
+            NativeOwnership.Release(ref nodes);
+            NativeOwnership.Release(ref triangleOrder);
             sourceTriangles = null;
         }
 

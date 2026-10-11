@@ -248,7 +248,14 @@ namespace DemoDisc.Raytracing {
     /// <summary>
     /// Owns compact transformed geometry, compact materials, and exactly one rectangular area emitter.
     /// </summary>
-    public sealed class SoftwareTraceScene {
+    public sealed class SoftwareTraceScene : IDisposable {
+        /// <summary>Owns the compact triangle array independently of borrowed model components and entity roots.</summary>
+        [NativeOwnedMember]
+        SoftwareTriangle[] TrianglesValue;
+
+        /// <summary>Owns compact material values produced by scene flattening.</summary>
+        [NativeOwnedMember]
+        SoftwareMaterialData[] MaterialsValue;
         /// <summary>
         /// Explicit owned bytes for one compact triangle element.
         /// </summary>
@@ -272,12 +279,12 @@ namespace DemoDisc.Raytracing {
         /// <summary>
         /// Stores compact transformed triangles.
         /// </summary>
-        public SoftwareTriangle[] Triangles { get; }
+        public SoftwareTriangle[] Triangles => TrianglesValue ?? Array.Empty<SoftwareTriangle>();
 
         /// <summary>
         /// Stores compact per-instance material data.
         /// </summary>
-        public SoftwareMaterialData[] Materials { get; }
+        public SoftwareMaterialData[] Materials => MaterialsValue ?? Array.Empty<SoftwareMaterialData>();
 
         /// <summary>
         /// Stores the single derived rectangular area light.
@@ -360,8 +367,10 @@ namespace DemoDisc.Raytracing {
                 throw new InvalidOperationException("Software trace scenes require exactly one emissive component instance.");
             }
 
-            Triangles = triangles.ToArray();
-            Materials = materials.ToArray();
+            NativeOwnership.Release(ref TrianglesValue);
+            TrianglesValue = triangles.ToArray();
+            NativeOwnership.Release(ref MaterialsValue);
+            MaterialsValue = materials.ToArray();
             AreaLight = DeriveAreaLight(Triangles, Materials, emitterInstances[0]);
             SteadyStateOwnedBytes = ((long)Triangles.Length * SoftwareTriangleBytes) + ((long)Materials.Length * SoftwareMaterialDataBytes) + SoftwareAreaLightBytes;
             InitializationPeakOwnedBytes = SteadyStateOwnedBytes + peakRawOwnedBytes;
@@ -373,6 +382,7 @@ namespace DemoDisc.Raytracing {
         /// <param name="entities">Entities whose attached software model components are consumed.</param>
         /// <param name="source">Source that returns owned raw model assets.</param>
         /// <returns>A compact software trace scene.</returns>
+        [NativeOwnedReturn]
         public static SoftwareTraceScene Build(List<Entity> entities, ISoftwareModelAssetSource source) {
             return new SoftwareTraceScene(entities, source);
         }
@@ -383,8 +393,15 @@ namespace DemoDisc.Raytracing {
         /// <param name="entities">Entities whose attached software model components are consumed.</param>
         /// <param name="source">Source that returns owned raw model assets.</param>
         /// <returns>A compact software trace scene.</returns>
+        [NativeOwnedReturn]
         public static SoftwareTraceScene Create(List<Entity> entities, ISoftwareModelAssetSource source) {
             return new SoftwareTraceScene(entities, source);
+        }
+
+        /// <summary>Releases compact arrays exactly once; source entities, model components and loaded raw-model aliases remain outside this owner.</summary>
+        public void Dispose() {
+            NativeOwnership.Release(ref TrianglesValue);
+            NativeOwnership.Release(ref MaterialsValue);
         }
 
         /// <summary>
