@@ -53,6 +53,7 @@ namespace DemoDisc.EditorTools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
+            ExcludeLegacyInstructionsFromAndroid(instructionOverlayEntity);
             Entity directionalLightEntity = CreateDirectionalLightEntity();
             Entity uiEntity = CreateUiEntity(directionalLightEntity);
 
@@ -75,6 +76,17 @@ namespace DemoDisc.EditorTools {
             };
         }
 
+        /// <summary>Selects the shared instruction Blueprint on Android when the Cube Test is regenerated, excluding its legacy scene panel.</summary>
+        /// <param name="root">Legacy instruction viewport whose other platform configurations remain authored.</param>
+        static void ExcludeLegacyInstructionsFromAndroid(Entity root) {
+            for (int index = 0; index < root.Components.Count; index++) {
+                if (root.Components[index] is EntitySaveComponent save) {
+                    save.GetOrCreateExistencePlatformOverride("android").Exists = false;
+                    return;
+                }
+            }
+            throw new InvalidOperationException("The legacy instruction root requires entity save metadata.");
+        }
         /// <summary>
         /// Creates the authored camera entity for the cube-test scene.
         /// </summary>

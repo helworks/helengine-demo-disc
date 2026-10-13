@@ -1,5 +1,38 @@
 {
   "platforms": [
+{
+    "platformId":  "android",
+    "overridesProjectScenes":  true,
+    "selectedSceneReferences":  [
+                                    {
+                                        "sourceKind":  1,
+                                        "relativePath":  "scenes/rendering/cube_test.helen",
+                                        "providerId":  "",
+                                        "assetId":  "10000000000000000000000000000010",
+                                        "contentHash":  "sha256:3692394edebb0d920be38e6689bba36b79181bb70a2e8ebf859b26336db7e47d"
+                                    }
+                                ],
+    "sceneOrders":  [
+                        {
+                            "orderNumber":  1,
+                            "sceneReference":  {
+                                                   "sourceKind":  1,
+                                                   "relativePath":  "scenes/rendering/cube_test.helen",
+                                                   "providerId":  "",
+                                                   "assetId":  "10000000000000000000000000000010",
+                                                   "contentHash":  "sha256:3692394edebb0d920be38e6689bba36b79181bb70a2e8ebf859b26336db7e47d"
+                                               }
+                        }
+                    ],
+    "overridesLoadingScreenSceneId":  true,
+    "loadingScreenSceneId":  "",
+    "selectedBuildProfileId":  "debug",
+    "selectedGraphicsProfileId":  "android-native",
+    "selectedCodegenProfileId":  "default",
+    "selectedGraphicsOptionValues":  {
+                                         "screen-orientation":  "landscape"
+                                     }
+},
     {
       "platformId": "windows",
       "selectedSceneReferences": [

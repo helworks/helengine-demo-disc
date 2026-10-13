@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "requiredEngineVersion": "1.0.0\u002B7d5e78dcc7a5948cf8f3f23e9e6ffcd5f578390f",
   "supportedPlatforms": [
+    "android",
     "windows",
     "ps2",
     "ps3",

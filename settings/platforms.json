@@ -1,5 +1,6 @@
 {
   "supportedPlatforms": [
+    "android",
     "3ds",
     "dc",
     "ds",
