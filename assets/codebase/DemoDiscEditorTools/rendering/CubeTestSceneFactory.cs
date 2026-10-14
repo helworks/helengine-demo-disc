@@ -53,9 +53,9 @@ namespace DemoDisc.EditorTools {
             Entity instructionOverlayEntity = instructionOverlayFactory.CreateDesktopInstructionOverlayRoot(projectRootPath, instructionFont);
             ConsoleCameraLightInstructionsSceneAttachmentService consoleInstructionAttachmentService = new ConsoleCameraLightInstructionsSceneAttachmentService();
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
-            ExcludeLegacyInstructionsFromAndroid(instructionOverlayEntity);
             Entity directionalLightEntity = CreateDirectionalLightEntity();
             Entity uiEntity = CreateUiEntity(directionalLightEntity);
+            ConfigureAndroidPresentation(instructionOverlayEntity, uiEntity);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -74,6 +74,64 @@ namespace DemoDisc.EditorTools {
                     uiEntity
                 }
             };
+        }
+
+        /// <summary>
+        /// Authors the Android landscape presentation of the desktop scene UI. The content and the desktop presentation stay
+        /// common; Android only swaps the legacy instruction panel for the shared Blueprint, scales the overlays by density
+        /// and pins the light swatch and scene label to the screen edges they sit against on the reference canvas.
+        /// </summary>
+        /// <param name="instructionOverlayEntity">Legacy desktop instruction viewport, replaced by the Blueprint on Android.</param>
+        /// <param name="uiEntity">Desktop scene UI root holding the FPS counter, light swatch and scene label.</param>
+        static void ConfigureAndroidPresentation(Entity instructionOverlayEntity, Entity uiEntity) {
+            ExcludeLegacyInstructionsFromAndroid(instructionOverlayEntity);
+            AndroidDensityPresentationAuthoringService android = new AndroidDensityPresentationAuthoringService();
+            android.ConfigureDensitySubtree(uiEntity);
+            android.AnchorToLeftBottomEdges(FindRequiredDescendant(uiEntity, DemoDiscLightIndicatorOverlayFactory.IndicatorSwatchEntityName));
+            android.AnchorToRightTopEdges(FindRequiredDescendant(uiEntity, DemoDiscSceneLabelOverlayFactory.LabelEntityName));
+            for (int index = 0; index < uiEntity.Components.Count; index++) {
+                if (uiEntity.Components[index] is DemoDiscLightToggleComponent lightToggle) {
+                    android.PinPropertyForAndroid(uiEntity, lightToggle, nameof(DemoDiscLightToggleComponent.IndicatorSwatchEntityReference));
+                } else if (uiEntity.Components[index] is DemoDiscDebugSceneLabelComponent sceneLabel) {
+                    android.PinPropertyForAndroid(uiEntity, sceneLabel, nameof(DemoDiscDebugSceneLabelComponent.LabelEntityReference));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finds one named entity in a generated subtree.
+        /// </summary>
+        /// <param name="root">Subtree root to search.</param>
+        /// <param name="name">Exact entity name.</param>
+        /// <returns>The first entity with the supplied name.</returns>
+        static EditorEntity FindRequiredDescendant(Entity root, string name) {
+            EditorEntity found = FindDescendant(root, name);
+            if (found == null) {
+                throw new InvalidOperationException("The Cube Test scene UI is missing " + name + ".");
+            }
+
+            return found;
+        }
+
+        /// <summary>
+        /// Depth-first search for one named entity.
+        /// </summary>
+        /// <param name="entity">Entity to inspect along with its children.</param>
+        /// <param name="name">Exact entity name.</param>
+        /// <returns>The matching entity, or null when the subtree has none.</returns>
+        static EditorEntity FindDescendant(Entity entity, string name) {
+            if (entity is EditorEntity editorEntity && editorEntity.Name == name) {
+                return editorEntity;
+            }
+
+            for (int index = 0; index < entity.Children.Count; index++) {
+                EditorEntity found = FindDescendant(entity.Children[index], name);
+                if (found != null) {
+                    return found;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>Selects the shared instruction Blueprint on Android when the Cube Test is regenerated, excluding its legacy scene panel.</summary>

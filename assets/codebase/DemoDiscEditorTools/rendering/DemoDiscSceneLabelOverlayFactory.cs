@@ -4,7 +4,10 @@ using helengine.editor;
 namespace DemoDisc.EditorTools {
     public sealed class DemoDiscSceneLabelOverlayFactory {
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
-        const string LabelEntityName = "DemoDiscSceneLabelText";
+        /// <summary>
+        /// Name of the generated scene label text entity, used by presentation rules that pin it to the screen edge.
+        /// </summary>
+        public const string LabelEntityName = "DemoDiscSceneLabelText";
         const string FontReferenceName = "Font";
         const string ViewportEntityName = "DemoDiscSceneLabelViewport";
         const int SceneLabelCanvasWidth = 1280;

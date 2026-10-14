@@ -13,6 +13,11 @@ namespace DemoDisc.EditorTools {
         readonly EditorAuthoringTransaction Transaction;
 
         /// <summary>
+        /// Name of the instruction panel entity beneath the Blueprint's viewport root.
+        /// </summary>
+        const string InstructionPanelEntityName = "ConsoleCameraLightInstructionsPanel";
+
+        /// <summary>
         /// Initializes one console instruction Blueprint generator.
         /// </summary>
         /// <param name="assetAuthoringService">Host-owned capability used to save the current Blueprint.</param>
@@ -42,6 +47,7 @@ namespace DemoDisc.EditorTools {
 
             Entity root = overlayFactory.CreateConsoleCameraLightInstructionsRoot(projectRootPath, font);
             try {
+                ConfigureAndroidPresentation(root);
                 AssetAuthoringService.WriteNativeBlueprint(
                     ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath,
                     GeneratedScenePersistenceRegistryFactory.Create(),
@@ -51,6 +57,24 @@ namespace DemoDisc.EditorTools {
             } finally {
                 root.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Authors the Android landscape presentation of the shared instructions: density-scaled viewport, scalable
+        /// glyphs, and the panel pinned to the bottom-left screen edges it sits against on the reference canvas.
+        /// </summary>
+        /// <param name="root">Generated Blueprint root whose viewport holds the instruction panel.</param>
+        static void ConfigureAndroidPresentation(Entity root) {
+            AndroidDensityPresentationAuthoringService android = new AndroidDensityPresentationAuthoringService();
+            android.ConfigureDensitySubtree(root);
+            for (int index = 0; index < root.Children.Count; index++) {
+                if (root.Children[index] is EditorEntity panel && panel.Name == InstructionPanelEntityName) {
+                    android.AnchorToLeftBottomEdges(panel);
+                    return;
+                }
+            }
+
+            throw new InvalidOperationException("The console instruction Blueprint is missing " + InstructionPanelEntityName + ".");
         }
     }
 }

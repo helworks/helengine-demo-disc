@@ -23,6 +23,9 @@ namespace DemoDisc.EditorTools {
                     && !reference.RelativePath.StartsWith("scenes/benchmarks/", StringComparison.OrdinalIgnoreCase)
                     && !reference.RelativePath.StartsWith("scenes/games/tilt/tilt_trial_level_", StringComparison.OrdinalIgnoreCase)) {
                     continue;
+                } else if (string.Equals(reference.RelativePath, CubeTestSceneFactory.SceneId, StringComparison.OrdinalIgnoreCase)) {
+                    // The Cube Test generator authors its Android presentation itself.
+                    continue;
                 }
                 SceneAsset scene = context.Authoring.LoadNativeAsset<SceneAsset>(reference.RelativePath);
                 if (!reference.RelativePath.StartsWith("scenes/games/", StringComparison.OrdinalIgnoreCase)) {
@@ -31,9 +34,6 @@ namespace DemoDisc.EditorTools {
                 references.ConfigureScene(scene, registry, context.Authoring);
                 transaction.WriteAsset(reference.RelativePath, scene);
             }
-            BlueprintAsset blueprint = context.Authoring.LoadNativeAsset<BlueprintAsset>(ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath);
-            viewports.ConfigureBlueprint(blueprint, registry, context.Authoring.CreateSceneAssetReferenceResolver());
-            transaction.WriteAsset(ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath, blueprint);
             BlueprintAsset tiltBlueprint = context.Authoring.LoadNativeAsset<BlueprintAsset>(TiltTrialGameplayPresentationBlueprintGenerator.ConsoleBlueprintRelativePath);
             references.ConfigureTiltBlueprint(tiltBlueprint);
             transaction.WriteAsset(TiltTrialGameplayPresentationBlueprintGenerator.ConsoleBlueprintRelativePath, tiltBlueprint);

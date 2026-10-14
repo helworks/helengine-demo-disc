@@ -3,8 +3,8 @@ using helengine.editor;
 namespace DemoDisc.EditorTools {
     /// <summary>Authors the shared viewport density and instruction selection used by Android scene overlays.</summary>
     public sealed class AndroidSceneViewportAuthoringService {
-        /// <summary>Approved Android overlay multiplier, producing the 650 by 348 instruction panel at 420 DPI.</summary>
-        const float AndroidUiScale = 0.5625f;
+        /// <summary>Approved Android overlay multiplier, shared with the generators that author it on live entities.</summary>
+        const float AndroidUiScale = AndroidDensityPresentationAuthoringService.AndroidUiScale;
         /// <summary>Applies scene-local Android diagnostics and selects the shared instruction Blueprint when present.</summary>
         /// <param name="scene">Existing authored scene whose common content is retained.</param>
         /// <param name="registry">Persistence descriptors for the current project components.</param>
@@ -14,16 +14,9 @@ namespace DemoDisc.EditorTools {
             bool hasBlueprint = scene.RootEntities.Any(entity => entity.Name == "ConsoleCameraLightInstructions");
             foreach (SceneEntityAsset root in scene.RootEntities) {
                 if (root.Name != "DemoSceneInstructionViewport" || !hasBlueprint) {
-                    ConfigureEntity(root, registry, resolver, false);
+                    ConfigureEntity(root, registry, resolver);
                 }
             }
-        }
-        /// <summary>Applies density, scalable font pixels and physical edge anchoring to the shared instruction Blueprint.</summary>
-        /// <param name="blueprint">Existing shared instruction definition.</param>
-        /// <param name="registry">Persistence descriptors used for its Android property overrides.</param>
-        /// <param name="resolver">Session-owned reference resolver used to preserve font dependencies.</param>
-        public void ConfigureBlueprint(BlueprintAsset blueprint, ComponentPersistenceRegistry registry, ISceneAssetReferenceResolver resolver) {
-            ConfigureEntity(blueprint.RootEntity, registry, resolver, true);
         }
 
         /// <summary>Selects the shared instruction Blueprint on Android while retaining the legacy panel and other platform configurations in the authored scene.</summary>
@@ -45,7 +38,7 @@ namespace DemoDisc.EditorTools {
             legacy.PlatformExistenceOverrides = overrides.ToArray();
         }
         /// <summary>Applies density to each authored viewport and enables scalable glyphs only for Android.</summary>
-        void ConfigureEntity(SceneEntityAsset entity, ComponentPersistenceRegistry registry, ISceneAssetReferenceResolver resolver, bool configureAnchors) {
+        void ConfigureEntity(SceneEntityAsset entity, ComponentPersistenceRegistry registry, ISceneAssetReferenceResolver resolver) {
             ComponentPlatformOverridePayloadService payloads = new ComponentPlatformOverridePayloadService();
             for (int index = 0; index < entity.Components.Length; index++) {
                 SceneComponentAssetRecord record = entity.Components[index];
@@ -62,7 +55,7 @@ namespace DemoDisc.EditorTools {
                 EntityComponentPlatformOverrideState android = new EntityComponentPlatformOverrideState();
                 if (component is ViewportComponent viewport) {
                     viewport.ScalingMode = ViewportComponent.DensityScalingMode;
-                    viewport.PixelsPerCentimeter = (float)(160d / 2.54d);
+                    viewport.PixelsPerCentimeter = AndroidDensityPresentationAuthoringService.AndroidPixelsPerCentimeter;
                     viewport.UiScale = AndroidUiScale;
                     android.SetPropertyOverride("ScalingMode");
                     android.SetPropertyOverride("PixelsPerCentimeter");
@@ -73,7 +66,7 @@ namespace DemoDisc.EditorTools {
                 } else if (component is FPSComponent fps) {
                     fps.NativeFontPixels = TextNativePixelMode.Disabled;
                     android.SetPropertyOverride("NativeFontPixels");
-                    AddAndroidComponent(entity, new ViewportComponent { ScalingMode = ViewportComponent.DensityScalingMode, UiScale = AndroidUiScale }, registry, "c0de0000000000000000000000000001");
+                    AddAndroidComponent(entity, new ViewportComponent { ScalingMode = ViewportComponent.DensityScalingMode, UiScale = AndroidUiScale }, registry, AndroidDensityPresentationAuthoringService.FpsDensityViewportComponentKey);
                 }
                 android.Payload = descriptor.SerializeComponent(component, record.ComponentIndex, state).Payload;
                 foreach (KeyValuePair<string, SceneAssetReference> reference in state.EnumerateNamedAssetReferences()) {
@@ -82,38 +75,12 @@ namespace DemoDisc.EditorTools {
                 state.SetPlatformOverride("android", android);
                 entity.Components[index] = payloads.Wrap(payloads.UnwrapBaseRecord(record), state);
             }
-            if (configureAnchors && entity.Name == "ConsoleCameraLightInstructionsPanel") {
-                int2 size = ReadLayoutSize(entity, registry, resolver, payloads);
-                bool label = entity.Name == "DemoDiscSceneLabelText";
-                AddAndroidComponent(entity, new LayoutComponent {
-                    LayoutSpace = LayoutComponent.CameraViewportLayoutSpace,
-                    AnchorFlags = label ? (byte)(LayoutComponent.RightAnchorFlag | LayoutComponent.TopAnchorFlag) : (byte)(LayoutComponent.LeftAnchorFlag | LayoutComponent.BottomAnchorFlag),
-                    AnchorDistances = label
-                        ? new float4(0f, 1280f - entity.LocalPosition.X - size.X, entity.LocalPosition.Y, 0f)
-                        : new float4(entity.LocalPosition.X, 0f, 0f, 720f - entity.LocalPosition.Y - size.Y)
-                }, registry, "c0de0000000000000000000000000002");
-            }
             foreach (SceneEntityAsset child in entity.Children) {
-                ConfigureEntity(child, registry, resolver, configureAnchors);
+                ConfigureEntity(child, registry, resolver);
             }
         }
 
-        /// <summary>Reads the authored widget bounds needed to preserve its reference edge margins.</summary>
-        int2 ReadLayoutSize(SceneEntityAsset entity, ComponentPersistenceRegistry registry, ISceneAssetReferenceResolver resolver, ComponentPlatformOverridePayloadService payloads) {
-            foreach (SceneComponentAssetRecord record in entity.Components) {
-                if (record.ComponentTypeId == "helengine.TextComponent" || record.ComponentTypeId == "helengine.RoundedRectComponent") {
-                    Component component = registry.GetDescriptor(record.ComponentTypeId).DeserializeComponent(payloads.UnwrapBaseRecord(record), new EntitySaveComponent(), resolver);
-                    if (component is TextComponent text) {
-                        return text.Size;
-                    } else if (component is RoundedRectComponent panel) {
-                        return panel.Size;
-                    }
-                }
-            }
-            throw new InvalidOperationException("Anchored Cube Test widget has no authored bounds: " + entity.Name);
-        }
-
-        /// <summary>Adds or replaces an Android-only layout component while preserving every other platform's serialized content.</summary>
+        /// <summary>Adds or replaces an Android-only component while preserving every other platform's serialized content.</summary>
         void AddAndroidComponent(SceneEntityAsset entity, Component component, ComponentPersistenceRegistry registry, string key) {
             EditorOverrideScope scope = new EditorOverrideScope("android");
             List<SceneEntityPlatformComponentOverrideAsset> overrides = entity.PlatformComponentOverrides.ToList();
