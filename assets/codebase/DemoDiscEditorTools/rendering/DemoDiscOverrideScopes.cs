@@ -4,7 +4,7 @@ using DemoDisc.rendering;
 namespace DemoDisc.EditorTools {
     /// <summary>
     /// The only override scopes the generators author. Every platform supports every feature, so generated scene
-    /// content never names a platform: it varies by platform group (HD, SD, Micro SD, dual-screen) and, for debug-only
+    /// content never names a platform: it varies by platform group (HD, SD, Micro SD, dual-screen, mobile) and, for debug-only
     /// content, by build config. A scope applies to a build target when it is a prefix of that target's path under
     /// the entity's level order, so group scopes live on entities with <see cref="GroupFirstLevelOrder"/> and build
     /// config scopes on entities with <see cref="BuildConfigFirstLevelOrder"/>.
@@ -29,6 +29,11 @@ namespace DemoDisc.EditorTools {
         /// Group id of the dual-screen handhelds, nested beneath <see cref="SdGroupId"/>.
         /// </summary>
         public const string DualScreenGroupId = "dual-screen";
+
+        /// <summary>
+        /// Group id of the touch-screen mobile devices, a top-level group beside HD and SD.
+        /// </summary>
+        public const string MobileGroupId = "mobile";
 
         /// <summary>
         /// Build config id of debug builds.
@@ -96,6 +101,12 @@ namespace DemoDisc.EditorTools {
         /// </summary>
         public static EditorOverrideScope DualScreen => Sd
             .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.Group, DualScreenGroupId));
+
+        /// <summary>
+        /// Gets <c>mobile</c> under the group-first level order: the density-scaled touch-screen presentation.
+        /// </summary>
+        public static EditorOverrideScope Mobile => EditorOverrideScope.Common
+            .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.Group, MobileGroupId));
 
         /// <summary>
         /// Gets <c>release</c> under the build-config-first level order: every platform's release build.

@@ -44,6 +44,14 @@
           "children": []
         }
       ]
+    },
+    {
+      "id": "mobile",
+      "displayName": "Mobile devices",
+      "platformIds": [
+        "android"
+      ],
+      "children": []
     }
   ],
   "defaultLevelOrder": [
