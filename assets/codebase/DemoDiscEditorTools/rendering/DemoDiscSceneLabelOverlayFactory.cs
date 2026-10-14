@@ -6,16 +6,14 @@ namespace DemoDisc.EditorTools {
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
         const string LabelEntityName = "DemoDiscSceneLabelText";
         const string FontReferenceName = "Font";
-        const string SceneLabelFontRelativePath = "Fonts/DemoDiscBody.ttf";
         const string ViewportEntityName = "DemoDiscSceneLabelViewport";
         const int SceneLabelCanvasWidth = 1280;
         const int SceneLabelCanvasHeight = 720;
         const float SceneLabelRight = 24f;
         const float SceneLabelTop = 72f;
         const int SceneLabelWidth = 656;
-        const int SceneLabelHeight = 56;
-        const float SceneLabelFontScale = 1.35f;
-        const int SceneLabelRenderOrder = 7;
+        const int SceneLabelHeight = DemoDiscSceneUiFont.ReferenceRowHeight;
+        const float SceneLabelDepth = 7;
         public DemoDiscSceneLabelOverlayFactory(IEditorProjectAuthoringSession assetAuthoringService) {
             AssetAuthoringService = assetAuthoringService ?? throw new ArgumentNullException(nameof(assetAuthoringService));
         }
@@ -49,22 +47,21 @@ namespace DemoDisc.EditorTools {
                 0.1f);
             labelEntity.Static = false;
             labelEntity.LayerMask = overlayLayerMask;
+            SceneUiDepth.SetWorldDepth(labelEntity, SceneLabelDepth);
             TextComponent labelComponent = new TextComponent {
                 Text = labelText,
                 Font = font,
-                FontScale = SceneLabelFontScale,
+                NativeFontPixels = DemoDiscSceneUiFont.Mode,
                 Alignment = TextAlignment.Right,
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(SceneLabelWidth, SceneLabelHeight),
-                RenderOrder2D = SceneLabelRenderOrder
             };
             labelEntity.AddComponent(labelComponent);
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(labelEntity);
             saveComponent.SetAssetReference(
                 labelComponent,
                 FontReferenceName,
-                AssetAuthoringService.CreateFileReference(SceneLabelFontRelativePath, AssetEntryKind.Font));
-            MicroSdTextComponentOverrideService.Apply(labelComponent, saveComponent, font, SceneLabelWidth);
+                DemoDiscSceneUiFont.CreateReference(AssetAuthoringService));
             sceneUiEntity.AddComponent(new DemoDisc.rendering.DemoDiscDebugSceneLabelComponent {
                 LabelEntityReference = CreateEntityReference(saveComponent)
             });

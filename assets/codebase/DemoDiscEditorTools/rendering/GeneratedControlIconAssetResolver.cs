@@ -8,6 +8,13 @@ namespace DemoDisc.EditorTools {
     /// Resolves generated control icons into both source paths and imported texture asset ids.
     /// </summary>
     public sealed class GeneratedControlIconAssetResolver {
+        /// <summary>
+        /// Largest edge, in texels, the PS2 cooks for a control icon. The icons are drawn at roughly 48x60 screen pixels on the
+        /// PS2, and the GS samples without mipmaps, so the 256-texel sources minified on screen alias badly; the cooker's offline
+        /// resize keeps them smooth and keeps each icon out of the PS2's small texture memory.
+        /// </summary>
+        public const int Ps2MaxResolution = 64;
+
         public ResolvedControlIcon RequireIcon(
             string projectRootPath,
             string platformId,
@@ -35,8 +42,7 @@ namespace DemoDisc.EditorTools {
                 throw new ArgumentNullException(nameof(transaction));
             }
 
-            TextureAssetImportSettings settingsIntent = new TextureAssetImportSettings();
-            settingsIntent.Importer.ImporterId = "gdi";
+            TextureAssetImportSettings settingsIntent = CreateSettingsIntent(fullSourcePath);
             TextureAssetImportSettings settings = assetAuthoringService.WriteGeneratedTexture(
                 relativePath,
                 File.ReadAllBytes(fullSourcePath),
@@ -57,6 +63,37 @@ namespace DemoDisc.EditorTools {
                 ImportedTextureAssetId = settings.Importer.AssetId,
                 SourceRect = LoadTrimmedSourceRect(fullProjectRootPath, relativePath)
             };
+        }
+
+        /// <summary>
+        /// Builds the import settings for one icon: the GDI importer, the per-platform processor settings already authored next to
+        /// the source (so hand-tuned entries such as the N64 and PS1 sizes survive regeneration), and the PS2 size cap.
+        /// </summary>
+        /// <param name="fullSourcePath">Absolute path of the icon PNG.</param>
+        /// <returns>Settings intent handed to the authoring session.</returns>
+        static TextureAssetImportSettings CreateSettingsIntent(string fullSourcePath) {
+            TextureAssetImportSettings settingsIntent = new TextureAssetImportSettings();
+            settingsIntent.Importer.ImporterId = "gdi";
+            string settingsPath = fullSourcePath + ".hasset";
+            if (File.Exists(settingsPath)) {
+                using FileStream stream = new FileStream(settingsPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                TextureAssetImportSettings existing = TextureAssetImportSettingsBinarySerializer.Deserialize(stream);
+                foreach (KeyValuePair<string, TextureAssetProcessorSettings> platform in existing.Processor.Platforms) {
+                    settingsIntent.Processor.Platforms[platform.Key] = platform.Value;
+                }
+                foreach (KeyValuePair<string, Dictionary<string, TextureAssetProcessorSettings>> environment in existing.Processor.Environments) {
+                    settingsIntent.Processor.Environments[environment.Key] = environment.Value;
+                }
+            }
+
+            // A fresh entry starts from the processor defaults, whose alpha precision is Opaque; spell out the PS2 builder's own
+            // icon format (RGBA32 with 8-bit alpha) so only the size changes and the icons keep their transparency.
+            settingsIntent.Processor.Platforms["ps2"] = new TextureAssetProcessorSettings {
+                MaxResolution = Ps2MaxResolution,
+                ColorFormat = TextureAssetColorFormat.Rgba32,
+                AlphaPrecision = TextureAssetAlphaPrecision.A8
+            };
+            return settingsIntent;
         }
 
         static float4 LoadTrimmedSourceRect(string fullProjectRootPath, string relativePath) {

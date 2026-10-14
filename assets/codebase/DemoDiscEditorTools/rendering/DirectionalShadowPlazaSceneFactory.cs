@@ -297,7 +297,7 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
-        /// Stores the generated editor-font reference on the entity save state for the supplied FPS component.
+        /// Stores the shared scene UI font reference on the entity save state for the supplied FPS component.
         /// </summary>
         /// <param name="entity">Entity that owns the FPS component.</param>
         /// <param name="component">FPS component whose font reference should be stored.</param>
@@ -309,7 +309,7 @@ namespace DemoDisc.EditorTools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, FontReferenceName, DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+            saveComponent.SetAssetReference(component, FontReferenceName, DemoDiscSceneUiFont.CreateReference(AssetAuthoringService));
         }
 
         /// <summary>

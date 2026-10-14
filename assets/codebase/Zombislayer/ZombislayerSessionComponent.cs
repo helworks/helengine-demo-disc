@@ -30,6 +30,8 @@ namespace DemoDisc.Zombislayer {
         /// </summary>
         public ZombislayerSessionComponent() {
             SessionStateMachine = CreateStateMachine();
+            SessionStateMachine.Initialize(ZombislayerSessionState.Playing);
+            IsSessionStateInitialized = true;
             UpdateOrder = 1;
         }
 

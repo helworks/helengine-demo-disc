@@ -6,12 +6,17 @@ namespace DemoDisc.menu {
         /// <summary>
         /// Gets the authored title font path.
         /// </summary>
-        public string TitleFontPath => "Fonts/DemoDiscTitle.ttf";
+        public string TitleFontPath => "Fonts/DemoDiscMenuTitle.ttf";
 
         /// <summary>
-        /// Gets the authored body font path.
+        /// Gets the authored button-label font path used by the menu body.
         /// </summary>
-        public string BodyFontPath => "Fonts/DemoDiscBody.ttf";
+        public string BodyFontPath => "Fonts/DemoDiscMenuButtons.ttf";
+
+        /// <summary>
+        /// Gets the independent authored font path used by the scrolling footer identity text.
+        /// </summary>
+        public string CarouselFontPath => "Fonts/DemoDiscMenuCarousel.ttf";
 
         /// <summary>
         /// Gets the decorative logo texture path.

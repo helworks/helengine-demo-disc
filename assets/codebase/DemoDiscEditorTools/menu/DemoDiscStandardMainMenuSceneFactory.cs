@@ -19,6 +19,11 @@ namespace DemoDisc.EditorTools {
         const double MainMenuPanelWidthRatio = 0.4d;
 
         /// <summary>
+        /// Platform id used for the Nintendo 64's square-corner menu surfaces.
+        /// </summary>
+        const string Nintendo64PlatformId = "n64";
+
+        /// <summary>
         /// Runtime 2D layer mask used by baked menu visuals after authored scene layers are normalized during packaging.
         /// </summary>
         const byte RuntimeLayerMask = 0b00000001;
@@ -100,9 +105,9 @@ namespace DemoDisc.EditorTools {
         const float NintendoDsBottomMenuLabelFontScale = 1f;
 
         /// <summary>
-        /// Fixed render order applied to visible Nintendo DS bottom-menu item labels.
+        /// World depth applied to visible Nintendo DS bottom-menu item labels.
         /// </summary>
-        const byte NintendoDsBottomMenuLabelRenderOrder = 220;
+        const float NintendoDsBottomMenuLabelDepth = 220;
 
         /// <summary>
         /// Dedicated authored scene layer used by the Nintendo DS menu metadata subtree so scene save preserves the runtime panel-binding structure.
@@ -127,6 +132,7 @@ namespace DemoDisc.EditorTools {
         /// Host-owned public capability used for authored references and native asset loads.
         /// </summary>
         readonly IEditorProjectAuthoringSession AssetAuthoringService;
+        readonly ComponentPlatformEditingService PlatformEditingService = new ComponentPlatformEditingService();
 
         /// <summary>
         /// Initializes one demo-disc main menu scene factory.
@@ -214,7 +220,7 @@ namespace DemoDisc.EditorTools {
             });
             entity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
-                ScalingMode = ViewportComponent.ReferenceCanvasScalingMode,
+                ScalingMode = ViewportComponent.ReferenceCanvasStretchScalingMode,
                 FixedSize = new int2(DemoMenuLayout.CanvasWidth, DemoMenuLayout.CanvasHeight),
                 ReferenceWidth = DemoMenuLayout.CanvasWidth,
                 ReferenceHeight = DemoMenuLayout.CanvasHeight
@@ -361,14 +367,16 @@ namespace DemoDisc.EditorTools {
                 SelectedFillColor = selectedFillColor,
                 SelectedBorderColor = selectedBorderColor
             });
-            itemEntity.AddComponent(new RoundedRectComponent {
+            SceneUiDepth.SetWorldDepth(itemEntity, 33);
+            RoundedRectComponent itemBackground = new RoundedRectComponent {
                 Size = new int2(DemoMenuLayout.ButtonWidth, DemoMenuLayout.ButtonHeight),
                 Radius = 7.2f,
                 BorderThickness = 2f,
                 FillColor = visibleIndex == 0 ? selectedFillColor : idleFillColor,
                 BorderColor = visibleIndex == 0 ? selectedBorderColor : idleBorderColor,
-                RenderOrder2D = 33,
-            });
+            };
+            itemEntity.AddComponent(itemBackground);
+            ApplyNintendo64SquareCorners(itemEntity, itemBackground);
 
             CreateTextEntity(
                 itemEntity,
@@ -380,7 +388,7 @@ namespace DemoDisc.EditorTools {
                 new int2(DemoMenuLayout.ButtonWidth - 40, 76),
                 34,
                 null,
-                2f,
+                1f,
                 true,
                 definition.SurfaceBorderColor,
                 2f);
@@ -396,13 +404,13 @@ namespace DemoDisc.EditorTools {
         /// <param name="fontPath">Project-relative font path assigned through save metadata.</param>
         /// <param name="color">Text color.</param>
         /// <param name="size">Text layout size.</param>
-        /// <param name="renderOrder2D">2D render order.</param>
+        /// <param name="depth">World Z depth.</param>
         /// <param name="anchorComponent">Optional anchor component attached to the entity.</param>
         /// <param name="fontScale">Uniform glyph scale applied to the authored text component.</param>
         /// <param name="isStatic">Whether the authored text entity should be marked static for runtime caching.</param>
         /// <param name="outlineColor">Optional text outline color.</param>
         /// <param name="outlineScale">Optional text outline scale.</param>
-        Entity CreateTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, byte4 outlineColor = default, float outlineScale = 0f) {
+        Entity CreateTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, float depth, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, byte4 outlineColor = default, float outlineScale = 0f) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -415,13 +423,15 @@ namespace DemoDisc.EditorTools {
             entity.LocalPosition = localPosition;
             entity.Static = isStatic;
 
+            SceneUiDepth.SetWorldDepth(entity, depth);
             TextComponent textComponent = new TextComponent {
                 Text = text ?? string.Empty,
                 Font = PlaceholderFont,
                 Color = color,
                 Size = size,
+                NativeFontPixels = TextNativePixelMode.RoundUp,
                 FontScale = fontScale,
-                RenderOrder2D = renderOrder2D,
+
                 OutlineColor = outlineColor,
                 OutlineScale = outlineScale,
             };
@@ -464,6 +474,7 @@ namespace DemoDisc.EditorTools {
             spriteEntity.LocalPosition = new float3(-MainMenuBackgroundSize / 2f, -MainMenuBackgroundSize / 2f, 2f);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = new int2(MainMenuBackgroundSize, MainMenuBackgroundSize),
+                Color = new byte4(192, 192, 192, 255),
             };
             spriteEntity.AddComponent(spriteComponent);
             ApplyTextureReference(spriteEntity, spriteComponent, DemoDiscMainMenuBackgroundTexturePath);
@@ -478,12 +489,12 @@ namespace DemoDisc.EditorTools {
         /// <param name="text">Authored text content.</param>
         /// <param name="color">Text color.</param>
         /// <param name="size">Text layout size.</param>
-        /// <param name="renderOrder2D">2D render order.</param>
+        /// <param name="depth">World Z depth.</param>
         /// <param name="anchorComponent">Optional anchor component attached to the entity.</param>
         /// <param name="fontScale">Uniform glyph scale applied to the authored text component.</param>
         /// <param name="isStatic">Whether the authored text entity should be marked static for runtime caching.</param>
         /// <param name="convertTextToSprite">Whether scene packaging should bake this authored text into a sprite-backed runtime component.</param>
-        void CreateNintendoDsTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, bool convertTextToSprite = false) {
+        void CreateNintendoDsTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, float depth, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, bool convertTextToSprite = false) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -496,13 +507,15 @@ namespace DemoDisc.EditorTools {
             entity.LocalPosition = localPosition;
             entity.Static = isStatic;
 
+            SceneUiDepth.SetWorldDepth(entity, depth);
             TextComponent textComponent = new TextComponent {
                 Text = text ?? string.Empty,
                 Font = PlaceholderFont,
                 Color = color,
                 Size = size,
+                NativeFontPixels = TextNativePixelMode.RoundUp,
                 FontScale = fontScale,
-                RenderOrder2D = renderOrder2D,
+
                 ConvertTextToSprite = convertTextToSprite
             };
             entity.AddComponent(textComponent);
@@ -524,9 +537,9 @@ namespace DemoDisc.EditorTools {
         /// <param name="borderThickness">Border thickness.</param>
         /// <param name="fillColor">Fill color.</param>
         /// <param name="borderColor">Border color.</param>
-        /// <param name="renderOrder2D">2D render order.</param>
+        /// <param name="depth">World Z depth.</param>
         /// <returns>The authored background entity so callers can attach layout behavior when needed.</returns>
-        Entity CreateBackgroundEntity(Entity parent, string entityName, float3 localPosition, int2 size, float radius, float borderThickness, byte4 fillColor, byte4 borderColor, byte renderOrder2D) {
+        Entity CreateBackgroundEntity(Entity parent, string entityName, float3 localPosition, int2 size, float radius, float borderThickness, byte4 fillColor, byte4 borderColor, float depth) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -535,16 +548,50 @@ namespace DemoDisc.EditorTools {
 
             Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
-            entity.AddComponent(new RoundedRectComponent {
+            SceneUiDepth.SetWorldDepth(entity, depth);
+            RoundedRectComponent background = new RoundedRectComponent {
                 Size = size,
                 Radius = radius,
                 BorderThickness = borderThickness,
                 FillColor = fillColor,
                 BorderColor = borderColor,
-                RenderOrder2D = renderOrder2D,
-            });
+            };
+            entity.AddComponent(background);
+            ApplyNintendo64SquareCorners(entity, background);
 
             return entity;
+        }
+
+        /// <summary>
+        /// Stores square corners as an N64-only component override for menu surfaces that use rounded corners elsewhere.
+        /// </summary>
+        /// <param name="entity">Entity whose background should be squared on N64.</param>
+        /// <param name="commonComponent">Shared surface component used by other platforms.</param>
+        void ApplyNintendo64SquareCorners(Entity entity, RoundedRectComponent commonComponent) {
+            if (entity == null) {
+                throw new ArgumentNullException(nameof(entity));
+            } else if (commonComponent == null) {
+                throw new ArgumentNullException(nameof(commonComponent));
+            } else if (commonComponent.Radius <= 0f) {
+                return;
+            }
+
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            RoundedRectComponent nintendo64Component = (RoundedRectComponent)PlatformEditingService.EnsurePlatformOverrideComponent(
+                commonComponent,
+                saveComponent,
+                Nintendo64PlatformId);
+            nintendo64Component.Radius = 0f;
+            PlatformEditingService.MarkScopePropertyOverride(
+                commonComponent,
+                saveComponent,
+                EditorOverrideScope.ForPlatform(Nintendo64PlatformId),
+                nameof(RoundedRectComponent.Radius));
+            PlatformEditingService.PersistPlatformOverride(
+                commonComponent,
+                nintendo64Component,
+                saveComponent,
+                Nintendo64PlatformId);
         }
 
         /// <summary>
@@ -560,9 +607,9 @@ namespace DemoDisc.EditorTools {
             }
 
             Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(generatedRootEntity, "DemoDiscOverlayImage");
+            SceneUiDepth.SetWorldDepth(entity, 31);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = new int2(overlayImage.Width, overlayImage.Height),
-                RenderOrder2D = 31,
             };
             entity.AddComponent(spriteComponent);
             ApplyTextureReference(entity, spriteComponent, overlayImage.TexturePath);
@@ -602,15 +649,15 @@ namespace DemoDisc.EditorTools {
             anchorComponent.LayoutSpace = LayoutComponent.CameraViewportLayoutSpace;
             anchorComponent.SetAnchorDistances(right: platformInfoOverlay.RightMargin, top: platformInfoOverlay.TopMargin);
             entity.AddComponent(anchorComponent);
-            CreateTextEntity(entity, "DemoDiscTitleHelengineText", new float3(-300f, 0f, 0.1f), "HELENGINE", definition.BodyFontPath, definition.TextColor, new int2(280, 28), 42, null, 2f, false, definition.SurfaceBorderColor, 2f);
-            CreateTextEntity(entity, "DemoDiscTitleDemoDiscText", new float3(-280f, 64f, 0.1f), "DEMO DISC", definition.BodyFontPath, definition.MutedTextColor, new int2(280, 28), 42, null, 2f, false, definition.SurfaceBorderColor, 2f);
+            CreateTextEntity(entity, "DemoDiscTitleHelengineText", new float3(-300f, 0f, 0.1f), "HELENGINE", definition.TitleFontPath, definition.TextColor, new int2(400, 28), 42, null, 1f, false, definition.SurfaceBorderColor, 2f);
+            CreateTextEntity(entity, "DemoDiscTitleDemoDiscText", new float3(-280f, 64f, 0.1f), "DEMO DISC", definition.TitleFontPath, definition.MutedTextColor, new int2(400, 28), 42, null, 1f, false, definition.SurfaceBorderColor, 2f);
         }
 
         /// <summary>
         /// Creates the static maker signature anchored at the bottom-left of the standard menu viewport.
         /// </summary>
         /// <param name="generatedRootEntity">Generated menu subtree that owns the footer.</param>
-        /// <param name="definition">Menu definition that provides the shared body font and muted text color.</param>
+        /// <param name="definition">Menu definition that provides the carousel font and muted text color.</param>
         void CreateFooterIdentityEntity(Entity generatedRootEntity, MenuDefinition definition) {
             if (generatedRootEntity == null) {
                 throw new ArgumentNullException(nameof(generatedRootEntity));
@@ -626,7 +673,7 @@ namespace DemoDisc.EditorTools {
             entity.AddComponent(anchorComponent);
             CreateBackgroundEntity(entity, "DemoDiscFooterIdentityTopBorder", new float3(0f, 0f, 0.1f), new int2(DemoMenuLayout.CanvasWidth, 1), 0f, 0f, definition.MutedTextColor, definition.MutedTextColor, 51);
             CreateBackgroundEntity(entity, "DemoDiscFooterIdentityBottomBorder", new float3(0f, 41f, 0.1f), new int2(DemoMenuLayout.CanvasWidth, 1), 0f, 0f, definition.MutedTextColor, definition.MutedTextColor, 51);
-            Entity footerTextEntity = CreateTextEntity(entity, "DemoDiscFooterIdentityText", new float3(DemoMenuLayout.CanvasWidth, 2f, 0.2f), "MADE BY HELENA / HELEN OF CODE", definition.BodyFontPath, definition.MutedTextColor, new int2(420, 20), 52, null, 1f, false);
+            Entity footerTextEntity = CreateTextEntity(entity, "DemoDiscFooterIdentityText", new float3(DemoMenuLayout.CanvasWidth, 2f, 0.2f), "MADE BY HELENA / HELEN OF CODE", definition.CarouselFontPath, definition.MutedTextColor, new int2(420, 20), 52, null, 1f, false);
             entity.AddComponent(new FooterIdentityMarqueeComponent {
                 TextEntityReference = CreateEntityReference(footerTextEntity),
                 StripWidth = DemoMenuLayout.CanvasWidth,

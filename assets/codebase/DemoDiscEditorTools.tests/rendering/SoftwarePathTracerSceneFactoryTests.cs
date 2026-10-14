@@ -131,7 +131,8 @@ namespace DemoDisc.EditorTools.tests {
                 Assert.True(saveState.TryGetAssetReference("Font", out SceneAssetReference fontReference));
                 Assert.NotNull(fontReference);
                 Assert.Equal(SceneAssetReferenceSourceKind.FileSystem, fontReference.SourceKind);
-                Assert.Equal("Fonts/DemoDiscBody.ttf", fontReference.RelativePath);
+                Assert.Equal(DemoDiscSceneUiFont.RelativePath, fontReference.RelativePath);
+                Assert.Equal(TextNativePixelMode.RoundUp, text.NativeFontPixels);
             });
 
             Entity controllerEntity = Assert.Single(entities.Where(entity => entity.Components.OfType<SoftwarePathTracerComponent>().Any()));
@@ -173,31 +174,32 @@ namespace DemoDisc.EditorTools.tests {
             Assert.Single(desktopTree.SelectMany(entity => entity.Components.OfType<RoundedRectComponent>()));
 
             var expectedRows = new[] {
-                (Name: "SoftwarePathTracerSppText", Position: new float3(4f, 4f, 0.1f)),
-                (Name: "SoftwarePathTracerElapsedText", Position: new float3(4f, 16f, 0.1f)),
-                (Name: "SoftwarePathTracerRaysPerSecondText", Position: new float3(4f, 28f, 0.1f))
+                (Name: "SoftwarePathTracerSppText", Position: new float3(4f, 4f, 1f)),
+                (Name: "SoftwarePathTracerElapsedText", Position: new float3(4f, 22f, 1f)),
+                (Name: "SoftwarePathTracerRaysPerSecondText", Position: new float3(4f, 40f, 1f))
             };
             foreach (var expected in expectedRows) {
                 Entity row = desktopTree.Single(entity => EntityName(entity) == expected.Name);
                 Assert.Contains(row, desktopRoot.Children);
                 TextComponent text = Component<TextComponent>(row);
                 AssertVector(row.LocalPosition, expected.Position);
-                Assert.Equal(0.35f, text.FontScale);
+                Assert.Equal(TextNativePixelMode.RoundUp, text.NativeFontPixels);
+                Assert.Equal(1f, text.FontScale);
                 Assert.Equal(TextAlignment.Left, text.Alignment);
-                Assert.Equal(new int2(128, 12), text.Size);
+                Assert.Equal(new int2(128, 18), text.Size);
             }
 
             Entity returnTarget = desktopTree.Single(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnTarget");
             Assert.Contains(returnTarget, desktopRoot.Children);
-            Assert.Equal(new float3(208f, 4f, 0.1f), returnTarget.LocalPosition);
+            Assert.Equal(new float3(208f, 4f, 2f), returnTarget.LocalPosition);
             Assert.Equal(new int2(108, 28), Component<InteractableComponent>(returnTarget).Size);
             Assert.Single(returnTarget.Components.OfType<DemoDiscReturnToMenuComponent>());
             Entity returnLabel = desktopTree.Single(entity => EntityName(entity) == "SoftwarePathTracerDesktopReturnLabel");
             Assert.Contains(returnLabel, returnTarget.Children);
             TextComponent returnText = Component<TextComponent>(returnLabel);
-            Assert.Equal(0.45f, returnText.FontScale);
+            Assert.Equal(TextNativePixelMode.RoundUp, returnText.NativeFontPixels);
             Assert.Equal(TextAlignment.Center, returnText.Alignment);
-            Assert.Equal(new int2(100, 20), returnText.Size);
+            Assert.Equal(new int2(100, 18), returnText.Size);
         }
 
         [Fact]
@@ -406,11 +408,11 @@ namespace DemoDisc.EditorTools.tests {
             Entity handheldButton = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerHandheldReturnButton");
             Entity handheldLabel = entities.Single(entity => EntityName(entity) == "SoftwarePathTracerHandheldReturnLabel");
             Assert.Contains(desktopLabel, desktopTarget.Children);
-            Assert.Equal(0.45f, Component<TextComponent>(desktopLabel).FontScale);
+            Assert.Equal(TextNativePixelMode.RoundUp, Component<TextComponent>(desktopLabel).NativeFontPixels);
             Assert.Equal(TextAlignment.Center, Component<TextComponent>(desktopLabel).Alignment);
-            Assert.Equal(new int2(100, 20), Component<TextComponent>(desktopLabel).Size);
-            Assert.True(Component<TextComponent>(desktopLabel).RenderOrder2D > Component<RoundedRectComponent>(desktopTarget).RenderOrder2D);
-            Assert.True(Component<TextComponent>(handheldLabel).RenderOrder2D > Component<RoundedRectComponent>(handheldButton).RenderOrder2D);
+            Assert.Equal(new int2(100, 18), Component<TextComponent>(desktopLabel).Size);
+            Assert.True(desktopLabel.Position.Z > desktopTarget.Position.Z);
+            Assert.True(handheldLabel.Position.Z > handheldButton.Position.Z);
         }
 
         [Fact]
@@ -700,7 +702,7 @@ namespace DemoDisc.EditorTools.tests {
 
             protected override object Invoke(MethodInfo targetMethod, object[] args) {
                 if (string.Equals(targetMethod.Name, nameof(IEditorProjectAuthoringSession.CreateFileReference), StringComparison.Ordinal)) {
-                    return global::helengine.SceneAssetReferenceFactory.CreateFileSystemFont("Fonts/DemoDiscBody.ttf");
+                    return global::helengine.SceneAssetReferenceFactory.CreateFileSystemFont(DemoDiscSceneUiFont.RelativePath);
                 }
 
                 return targetMethod.Invoke(inner, args);

@@ -799,11 +799,13 @@ namespace DemoDisc.TiltPlay {
             CollectCoinsInHierarchy(stageRoot, CollectibleCoinComponents);
         }
 
+        [NativeBorrowedReturn]
         static Entity ResolveRequired(SceneEntityReference reference, string description) {
             return reference?.ResolvedEntity
                 ?? throw new InvalidOperationException($"Tilt Trial session requires a bound {description} reference.");
         }
 
+        [NativeBorrowedReturn]
         static TextComponent FindRequiredText(SceneEntityReference reference, string description) {
             return FindOptionalText(reference)
                 ?? throw new InvalidOperationException($"Tilt Trial session requires a bound {description} reference with TextComponent.");
@@ -825,6 +827,7 @@ namespace DemoDisc.TiltPlay {
             return null;
         }
 
+        [NativeBorrowedReturn]
         static global::helengine.SceneEntityTriggerObserverComponent FindTriggerObserverRecursive(Entity entity) {
             global::helengine.SceneEntityTriggerObserverComponent observer = TryFindTriggerObserverComponent(entity);
             if (observer != null) {

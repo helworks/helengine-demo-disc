@@ -44,6 +44,12 @@ namespace DemoDisc.menu {
         RoundedRectComponent Fill;
 
         /// <summary>
+        /// Borrowed scene manager whose pre-load notification keeps the overlay visible before the next update.
+        /// </summary>
+        SceneManager BoundSceneManager;
+
+
+        /// <summary>
         /// Initializes the component before the generated child hierarchy is materialized.
         /// </summary>
         /// <param name="entity">Persistent loading-scene root that owns the generated rectangles.</param>
@@ -65,6 +71,18 @@ namespace DemoDisc.menu {
         }
 
         /// <summary>
+        /// Fits the persistent blackout and progress bar after authored references and viewport layout are ready, before the first published frame.
+        /// </summary>
+        /// <param name="entity">Loading-overlay owner prepared by the engine's scene-readiness pass.</param>
+        public override void ScenePrepared(Entity entity) {
+            base.ScenePrepared(entity);
+            FitBackgroundToViewport();
+            SceneManager sceneManager = Core.Instance.SceneManager;
+            bool visible = sceneManager != null && sceneManager.IsSceneTransitionActive;
+            SetVisible(visible, visible ? sceneManager.SceneTransitionProgress : 0f);
+        }
+
+        /// <summary>
         /// Binds the authored loading-screen rectangles before the first frame update.
         /// </summary>
         public override void ComponentInitialized(Entity entity) {
@@ -72,7 +90,35 @@ namespace DemoDisc.menu {
             Background = FindRequiredRoundedRect(BackgroundEntityReference?.ResolvedEntity, "background");
             Track = FindRequiredRoundedRect(TrackEntityReference?.ResolvedEntity, "track");
             Fill = FindRequiredRoundedRect(FillEntityReference?.ResolvedEntity, "fill");
+            if (BoundSceneManager != null) {
+                BoundSceneManager.SceneLoading -= HandleSceneLoading;
+            }
+            BoundSceneManager = Core.Instance.SceneManager;
+            if (BoundSceneManager != null) {
+                BoundSceneManager.SceneLoading += HandleSceneLoading;
+            }
         }
+        /// <summary>
+        /// Removes the borrowed scene-manager subscription before this component is released.
+        /// </summary>
+        public override void Dispose() {
+            if (BoundSceneManager != null) {
+                BoundSceneManager.SceneLoading -= HandleSceneLoading;
+                BoundSceneManager = null;
+            }
+            base.Dispose();
+        }
+
+        /// <summary>
+        /// Makes the overlay opaque at the transition's pre-load boundary even when input queued the transition after this component's update.
+        /// </summary>
+        /// <param name="sceneManager">Manager notifying the load before reading the target payload.</param>
+        /// <param name="eventArgs">Metadata identifying the scene about to load.</param>
+        void HandleSceneLoading(SceneManager sceneManager, SceneLoadingEventArgs eventArgs) {
+            bool visible = sceneManager.IsSceneTransitionActive;
+            SetVisible(visible, visible ? sceneManager.SceneTransitionProgress : 0f);
+        }
+
         /// <summary>
         /// Applies presentation alpha and a clamped fill width for one transition state.
         /// </summary>

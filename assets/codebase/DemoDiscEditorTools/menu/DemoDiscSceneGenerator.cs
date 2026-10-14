@@ -22,11 +22,6 @@ namespace DemoDisc.EditorTools {
         readonly DemoDiscMainMenuSceneFactory SceneFactory;
 
         /// <summary>
-        /// Authoring helper used to stamp build-scene-driven platform existence overrides into the canonical generated menu scene.
-        /// </summary>
-        readonly DemoDiscMenuBuildSceneAuthoringService MenuBuildSceneAuthoringService;
-
-        /// <summary>
         /// Factory used to author the initial Helen of Code splash scene.
         /// </summary>
         readonly HelenOfCodeSplashSceneFactory SplashSceneFactory;
@@ -49,7 +44,6 @@ namespace DemoDisc.EditorTools {
             Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
             SceneWriteService = new GeneratedAuthoringSceneWriteService(scriptTypeResolver, AssetAuthoringService, Transaction);
             SceneFactory = new DemoDiscMainMenuSceneFactory(AssetAuthoringService);
-            MenuBuildSceneAuthoringService = new DemoDiscMenuBuildSceneAuthoringService();
             SplashSceneFactory = new HelenOfCodeSplashSceneFactory(AssetAuthoringService);
             LoadingScreenFactory = new SceneLoadingScreenFactory(AssetAuthoringService);
         }
@@ -69,11 +63,9 @@ namespace DemoDisc.EditorTools {
             SceneWriteService.WriteScene(SplashSceneFactory.CreateSceneDefinition());
             SceneWriteService.WriteScene(LoadingScreenFactory.CreateSceneDefinition());
             GeneratedAuthoringSceneDefinition standardSceneDefinition = SceneFactory.CreateStandardSceneDefinition(providerTypeName, definition);
-            MenuBuildSceneAuthoringService.ApplyBuildSceneAvailability(projectRootPath, standardSceneDefinition, definition);
             SceneWriteService.WriteScene(standardSceneDefinition);
 
             GeneratedAuthoringSceneDefinition handheldSceneDefinition = SceneFactory.CreateHandheldSceneDefinition(providerTypeName, definition);
-            MenuBuildSceneAuthoringService.ApplyBuildSceneAvailability(projectRootPath, handheldSceneDefinition, definition);
             SceneWriteService.WriteScene(handheldSceneDefinition);
         }
 

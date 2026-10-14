@@ -169,6 +169,14 @@ namespace DemoDisc.menu {
             while (currentEntity != null) {
                 if (currentEntity.Components != null) {
                     for (int componentIndex = 0; componentIndex < currentEntity.Components.Count; componentIndex++) {
+                        if (currentEntity.Components[componentIndex] is ViewportComponent viewport
+                            && (viewport.ScalingMode == ViewportComponent.ReferenceCanvasScalingMode
+                                || viewport.ScalingMode == ViewportComponent.ReferenceCanvasStretchScalingMode)) {
+                            AnchorSpace anchorSpace = viewport.AnchorSpace;
+                            return new float2(
+                                (float)anchorSpace.Size.X / viewport.ReferenceWidth,
+                                (float)anchorSpace.Size.Y / viewport.ReferenceHeight);
+                        }
                         if (currentEntity.Components[componentIndex] is ReferenceCanvasFitComponent referenceCanvas) {
                             return referenceCanvas.CalculateScale();
                         }
@@ -190,6 +198,11 @@ namespace DemoDisc.menu {
             while (currentEntity != null) {
                 if (currentEntity.Components != null) {
                     for (int componentIndex = 0; componentIndex < currentEntity.Components.Count; componentIndex++) {
+                        if (currentEntity.Components[componentIndex] is ViewportComponent viewport
+                            && (viewport.ScalingMode == ViewportComponent.ReferenceCanvasScalingMode
+                                || viewport.ScalingMode == ViewportComponent.ReferenceCanvasStretchScalingMode)) {
+                            return StripWidth * ResolveCanvasScale().X;
+                        }
                         if (currentEntity.Components[componentIndex] is ReferenceCanvasFitComponent referenceCanvas) {
                             return referenceCanvas.CalculatePosition(new float3(StripWidth, 0f, 0f)).X;
                         }

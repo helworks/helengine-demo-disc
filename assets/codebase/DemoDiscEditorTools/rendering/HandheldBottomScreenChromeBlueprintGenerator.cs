@@ -20,21 +20,6 @@ namespace DemoDisc.EditorTools {
         public const string ChromeRootEntityName = "DemoDiscBottomScreenChrome";
 
         /// <summary>
-        /// Fixed font scale used by the dual-screen bottom overlay so button text matches the physics showcase sizing.
-        /// </summary>
-        const float NintendoDsBottomOverlayFontScale = 1f;
-
-        /// <summary>
-        /// Fixed font scale used by Nintendo 3DS button labels once the shared reference canvas resolves to the 3DS screen.
-        /// </summary>
-        const float Nintendo3DsBottomButtonLabelFontScale = 0.5f;
-
-        /// <summary>
-        /// Stable platform identifier used for the generated Nintendo 3DS button-label component override.
-        /// </summary>
-        const string Nintendo3DsPlatformId = "3ds";
-
-        /// <summary>
         /// Runtime layer mask used by generated bottom-screen entities so the handheld cameras can render them.
         /// </summary>
         const ushort PersistedSceneLayerMask = EditorLayerMasks.SceneObjects;
@@ -75,9 +60,9 @@ namespace DemoDisc.EditorTools {
         const int BackButtonLabelLeft = 80;
 
         /// <summary>
-        /// Fixed vertical inset used by the action button labels.
+        /// Fixed vertical inset that centers one 16-pixel label row (11 pixel DS scene font) inside the 32-pixel action buttons.
         /// </summary>
-        const int ButtonLabelTop = 6;
+        const int ButtonLabelTop = 8;
 
         /// <summary>
         /// Fixed width used by the back button label.
@@ -87,7 +72,7 @@ namespace DemoDisc.EditorTools {
         /// <summary>
         /// Fixed height used by the action button labels.
         /// </summary>
-        const int ButtonLabelHeight = 20;
+        const int ButtonLabelHeight = 16;
 
         /// <summary>
         /// Fixed top offset that stacks the light button above the back button.
@@ -120,26 +105,24 @@ namespace DemoDisc.EditorTools {
         const int LightSwatchSize = 16;
 
         /// <summary>
-        /// Render order used by the light swatch. It must sit at 220 or above: the DS bottom-screen renderer only
-        /// promotes orders at or above 220 to the foreground OBJ priority, and at the base priority the
-        /// earlier-drawn opaque button body wins the hardware tie and hides the swatch.
+        /// World depth used by the light swatch, keeping it ahead of the button body and border.
         /// </summary>
-        const byte LightSwatchRenderOrder = 222;
+        const float LightSwatchDepth = 222;
 
         /// <summary>
-        /// Render order used by the action button sprite body.
+        /// World depth used by the action button sprite body.
         /// </summary>
-        const byte ButtonSpriteRenderOrder = 210;
+        const float ButtonSpriteDepth = 210;
 
         /// <summary>
-        /// Render order used by the action button labels.
+        /// World depth used by the action button labels.
         /// </summary>
-        const byte ButtonLabelRenderOrder = 221;
+        const float ButtonLabelDepth = 221;
 
         /// <summary>
-        /// Render order used by the transparent borders drawn over the action buttons.
+        /// World depth used by the transparent borders drawn over the action buttons.
         /// </summary>
-        const byte ButtonBorderRenderOrder = 220;
+        const float ButtonBorderDepth = 220;
 
         /// <summary>
         /// Border thickness used by the action buttons.
@@ -155,11 +138,6 @@ namespace DemoDisc.EditorTools {
         /// Caller-owned transaction that publishes the Blueprint.
         /// </summary>
         readonly EditorAuthoringTransaction Transaction;
-
-        /// <summary>
-        /// Editor component override service used to persist the 3DS label scale without changing the shared baseline.
-        /// </summary>
-        readonly ComponentPlatformEditingService PlatformEditingServiceValue = new ComponentPlatformEditingService();
 
         /// <summary>
         /// Initializes one bottom-screen chrome Blueprint generator.
@@ -228,13 +206,13 @@ namespace DemoDisc.EditorTools {
             lightSwatchEntity.LocalPosition = new float3(LightSwatchLeft, LightSwatchTop, 0.1f);
             lightSwatchEntity.LayerMask = PersistedSceneLayerMask;
             lightSwatchEntity.Static = true;
+            SceneUiDepth.SetWorldDepth(lightSwatchEntity, LightSwatchDepth);
             lightSwatchEntity.AddComponent(new RoundedRectComponent {
                 Size = new int2(LightSwatchSize, LightSwatchSize),
                 Radius = 2f,
                 BorderThickness = 1f,
                 FillColor = new byte4(255, 255, 255, 255),
                 BorderColor = new byte4(30, 30, 30, 255),
-                RenderOrder2D = LightSwatchRenderOrder,
             });
         }
 
@@ -264,28 +242,27 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
-        /// Adds one centered action-button label carrying the shared baseline scale and the 3DS override.
+        /// Adds one centered action-button label drawn with the shared scene UI font at native pixel size.
         /// </summary>
         /// <param name="labelEntity">Entity that owns the label.</param>
         /// <param name="text">Label text.</param>
         /// <param name="width">Label width.</param>
         void CreateButtonLabel(Entity labelEntity, string text, int width) {
+            SceneUiDepth.SetWorldDepth(labelEntity, ButtonLabelDepth);
             TextComponent labelComponent = new TextComponent {
                 Text = text,
                 Font = AssetAuthoringService.RendererResources.DefaultFontAsset,
-                FontScale = NintendoDsBottomOverlayFontScale,
+                NativeFontPixels = DemoDiscSceneUiFont.Mode,
                 Alignment = TextAlignment.Center,
                 Color = new byte4(255, 255, 255, 255),
                 Size = new int2(width, ButtonLabelHeight),
-                RenderOrder2D = ButtonLabelRenderOrder,
             };
             labelEntity.AddComponent(labelComponent);
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(labelEntity);
             saveComponent.SetAssetReference(
                 labelComponent,
                 "Font",
-                DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringService));
-            ApplyNintendo3DsLabelOverride(labelEntity, labelComponent);
+                DemoDiscSceneUiFont.CreateReference(AssetAuthoringService));
         }
 
         /// <summary>
@@ -293,13 +270,13 @@ namespace DemoDisc.EditorTools {
         /// </summary>
         /// <param name="buttonEntity">Action-button entity receiving the body.</param>
         void CreateButtonBody(Entity buttonEntity) {
+            SceneUiDepth.SetWorldDepth(buttonEntity, ButtonSpriteDepth);
             buttonEntity.AddComponent(new RoundedRectComponent {
                 Size = new int2(BackButtonWidth, BackButtonHeight),
                 Radius = 3f,
                 BorderThickness = 0f,
                 FillColor = new byte4(48, 29, 65, 255),
                 BorderColor = new byte4(48, 29, 65, 255),
-                RenderOrder2D = ButtonSpriteRenderOrder,
             });
         }
 
@@ -312,38 +289,14 @@ namespace DemoDisc.EditorTools {
             borderEntity.LocalPosition = new float3(0f, 0f, 0.1f);
             borderEntity.LayerMask = PersistedSceneLayerMask;
             borderEntity.Static = true;
+            SceneUiDepth.SetWorldDepth(borderEntity, ButtonBorderDepth);
             borderEntity.AddComponent(new RoundedRectComponent {
                 Size = new int2(BackButtonWidth, BackButtonHeight),
                 Radius = 3f,
                 BorderThickness = ButtonBorderThickness,
                 FillColor = new byte4(0, 0, 0, 0),
                 BorderColor = new byte4(201, 147, 255, 255),
-                RenderOrder2D = ButtonBorderRenderOrder,
             });
-        }
-
-        /// <summary>
-        /// Persists the smaller Nintendo 3DS label scale while retaining one shared centered label definition.
-        /// </summary>
-        /// <param name="labelEntity">Generated button-label entity receiving the platform override.</param>
-        /// <param name="commonLabelComponent">Shared label component used as the baseline.</param>
-        void ApplyNintendo3DsLabelOverride(Entity labelEntity, TextComponent commonLabelComponent) {
-            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(labelEntity);
-            TextComponent overrideComponent = (TextComponent)PlatformEditingServiceValue.EnsurePlatformOverrideComponent(
-                commonLabelComponent,
-                saveComponent,
-                Nintendo3DsPlatformId);
-            overrideComponent.FontScale = Nintendo3DsBottomButtonLabelFontScale;
-            PlatformEditingServiceValue.MarkPropertyOverride(
-                commonLabelComponent,
-                saveComponent,
-                Nintendo3DsPlatformId,
-                nameof(TextComponent.FontScale));
-            PlatformEditingServiceValue.PersistPlatformOverride(
-                commonLabelComponent,
-                overrideComponent,
-                saveComponent,
-                Nintendo3DsPlatformId);
         }
 
         /// <summary>

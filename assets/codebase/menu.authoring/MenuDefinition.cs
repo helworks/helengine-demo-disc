@@ -10,7 +10,8 @@ namespace DemoDisc.menu {
         /// <param name="subtitle">Optional supporting subtitle rendered under the title.</param>
         /// <param name="initialPanelId">Panel id that should become active when the menu host starts.</param>
         /// <param name="titleFontPath">Project-relative path to the title font asset.</param>
-        /// <param name="bodyFontPath">Project-relative path to the body font asset.</param>
+        /// <param name="bodyFontPath">Project-relative path to the button-label font asset.</param>
+        /// <param name="carouselFontPath">Project-relative path to the independent scrolling-footer font asset.</param>
         /// <param name="backgroundColor">Primary background color used by the menu canvas.</param>
         /// <param name="surfaceColor">Surface color used by panel chrome.</param>
         /// <param name="surfaceBorderColor">Border color used by panel chrome.</param>
@@ -27,6 +28,7 @@ namespace DemoDisc.menu {
             string initialPanelId,
             string titleFontPath,
             string bodyFontPath,
+            string carouselFontPath,
             byte4 backgroundColor,
             byte4 surfaceColor,
             byte4 surfaceBorderColor,
@@ -52,6 +54,9 @@ namespace DemoDisc.menu {
             if (string.IsNullOrWhiteSpace(bodyFontPath)) {
                 throw new ArgumentException("Body font path must be provided.", nameof(bodyFontPath));
             }
+            if (string.IsNullOrWhiteSpace(carouselFontPath)) {
+                throw new ArgumentException("Carousel font path must be provided.", nameof(carouselFontPath));
+            }
             if (panels == null) {
                 throw new ArgumentNullException(nameof(panels));
             }
@@ -64,6 +69,7 @@ namespace DemoDisc.menu {
             InitialPanelId = initialPanelId;
             TitleFontPath = titleFontPath;
             BodyFontPath = bodyFontPath;
+            CarouselFontPath = carouselFontPath;
             BackgroundColor = backgroundColor;
             SurfaceColor = surfaceColor;
             SurfaceBorderColor = surfaceBorderColor;
@@ -97,9 +103,14 @@ namespace DemoDisc.menu {
         public string TitleFontPath { get; }
 
         /// <summary>
-        /// Gets the project-relative path to the body font asset.
+        /// Gets the project-relative path to the menu button-label font asset.
         /// </summary>
         public string BodyFontPath { get; }
+
+        /// <summary>
+        /// Gets the project-relative path to the scrolling footer identity font asset.
+        /// </summary>
+        public string CarouselFontPath { get; }
 
         /// <summary>
         /// Gets the primary background color used by the menu canvas.

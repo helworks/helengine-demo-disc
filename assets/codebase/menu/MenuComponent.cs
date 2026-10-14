@@ -165,6 +165,21 @@ namespace DemoDisc.menu {
         }
 
         /// <summary>
+        /// Binds the complete menu hierarchy before publication without running keyboard, pointer or gamepad input.
+        /// </summary>
+        /// <param name="entity">Menu owner whose viewport and authored child references have finished preparation.</param>
+        public override void ScenePrepared(Entity entity) {
+            base.ScenePrepared(entity);
+            if (!IsInitialized) {
+                TryInitialize();
+            }
+            if (!IsInitialized) {
+                throw new InvalidOperationException("The prepared menu requires its complete authored hierarchy.");
+            }
+
+        }
+
+        /// <summary>
         /// Routes keyboard and gamepad input through the baked menu hierarchy.
         /// </summary>
         public override void Update() {

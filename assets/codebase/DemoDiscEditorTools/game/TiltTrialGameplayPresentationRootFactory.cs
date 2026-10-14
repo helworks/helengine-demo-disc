@@ -115,7 +115,8 @@ namespace DemoDisc.EditorTools {
             return entity;
         }
 
-        BlueprintEntityReferenceOverrideAsset[] CreateRuntimeReferenceOverrides(
+        /// <summary>Builds the scene-owned player, stage and goal bindings while retaining Blueprint-local presentation references.</summary>
+        public BlueprintEntityReferenceOverrideAsset[] CreateRuntimeReferenceOverrides(
             SceneEntityAsset blueprintRoot,
             ComponentPersistenceRegistry persistenceRegistry,
             BlueprintEntityReferenceOverrideAsset[] discovered,
@@ -127,7 +128,7 @@ namespace DemoDisc.EditorTools {
                 BlueprintEntityReferenceOverrideAsset candidate = discovered[index];
                 Type componentType = FindComponentType(blueprintRoot, persistenceRegistry, candidate.SourceEntityId, candidate.ComponentKey);
                 uint targetEntityId;
-                if (componentType == typeof(DemoDisc.TiltPlay.TiltTrialSessionComponent)) {
+                if (componentType?.FullName == "DemoDisc.TiltPlay.TiltTrialSessionComponent") {
                     if (candidate.PropertyName == nameof(DemoDisc.TiltPlay.TiltTrialSessionComponent.PlayerSphereReference)) {
                         targetEntityId = playerEntityId;
                     } else if (candidate.PropertyName == nameof(DemoDisc.TiltPlay.TiltTrialSessionComponent.GoalEntityReference)) {
@@ -137,10 +138,10 @@ namespace DemoDisc.EditorTools {
                     } else {
                         continue;
                     }
-                } else if (componentType == typeof(DemoDisc.TiltPlay.DemoTiltFollowCameraComponent)
+                } else if (componentType?.FullName == "DemoDisc.TiltPlay.DemoTiltFollowCameraComponent"
                     && candidate.PropertyName == nameof(DemoDisc.TiltPlay.DemoTiltFollowCameraComponent.TargetEntityReference)) {
                     targetEntityId = playerEntityId;
-                } else if (componentType == typeof(DemoDisc.TiltPlay.DemoTiltSpeedTextComponent)
+                } else if (componentType?.FullName == "DemoDisc.TiltPlay.DemoTiltSpeedTextComponent"
                     && candidate.PropertyName == nameof(DemoDisc.TiltPlay.DemoTiltSpeedTextComponent.TargetEntityReference)) {
                     targetEntityId = playerEntityId;
                 } else {
@@ -166,7 +167,7 @@ namespace DemoDisc.EditorTools {
                     SceneComponentAssetRecord record = entity.Components[index];
                     if (record != null && string.Equals(record.ComponentKey, componentKey, StringComparison.Ordinal)) {
                         SceneComponentAssetRecord baseRecord = new ComponentPlatformOverridePayloadService().UnwrapBaseRecord(record);
-                        return persistenceRegistry.GetDescriptor(baseRecord.ComponentTypeId).ComponentType;
+                        return persistenceRegistry.ResolveComponentType(baseRecord.ComponentTypeId);
                     }
                 }
             }

@@ -116,13 +116,13 @@ namespace DemoDisc.EditorTools {
             Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, "HelenOfCodeSplashBackground");
             entity.LayerMask = SplashRuntimeLayerMask;
             entity.LocalPosition = new float3(0f, 0f, 0f);
+            SceneUiDepth.SetWorldDepth(entity, 1);
             entity.AddComponent(new RoundedRectComponent {
                 Size = new int2(DemoMenuLayout.CanvasWidth, DemoMenuLayout.CanvasHeight),
                 Radius = 0f,
                 BorderThickness = 0f,
                 FillColor = new byte4(0, 0, 0, 255),
                 BorderColor = new byte4(0, 0, 0, 255),
-                RenderOrder2D = 1
             });
             return entity;
         }
@@ -140,10 +140,10 @@ namespace DemoDisc.EditorTools {
                 (DemoMenuLayout.CanvasWidth - logoSize) / 2f,
                 logoOffset,
                 0.1f);
+            SceneUiDepth.SetWorldDepth(entity, 2);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = new int2(logoSize, logoSize),
                 Color = new byte4(255, 255, 255, 0),
-                RenderOrder2D = 2
             };
             entity.AddComponent(spriteComponent);
             ApplyTextureReference(entity, spriteComponent, LogoTexturePath);

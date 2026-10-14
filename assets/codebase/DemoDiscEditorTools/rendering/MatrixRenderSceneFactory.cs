@@ -180,16 +180,18 @@ namespace DemoDisc.EditorTools {
         Entity CreateUiEntity(Entity keyLightEntity) {
             Entity entity = new DemoDiscSceneUiKitFactory(AssetAuthoringService).CreateStandardSceneUi("MatrixRenderUi", "6. Matrix Render", new[] { keyLightEntity });
             Entity phaseStatusEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(entity, "MatrixRenderPhaseStatus");
-            phaseStatusEntity.LocalPosition = new float3(16f, 112f, 0f);
+            phaseStatusEntity.LocalPosition = new float3(16f, 192f, 0f);
             phaseStatusEntity.Static = false;
-            phaseStatusEntity.AddComponent(new TextComponent {
+            SceneUiDepth.SetWorldDepth(phaseStatusEntity, 1);
+            TextComponent phaseStatusText = new TextComponent {
                 Text = "Operation: Translation",
                 Font = ResolveRequiredEditorFont(),
                 Color = new byte4(255, 255, 255, 255),
-                Size = new int2(1024, 56),
-                FontScale = 1.5f,
-                RenderOrder2D = 1,
-            });
+                Size = new int2(1024, DemoDiscSceneUiFont.ReferenceRowHeight),
+                NativeFontPixels = DemoDiscSceneUiFont.Mode,
+            };
+            phaseStatusEntity.AddComponent(phaseStatusText);
+            DemoDiscSceneUiFont.StoreReference(AssetAuthoringService, phaseStatusEntity, phaseStatusText);
             phaseStatusEntity.AddComponent(new DemoDisc.rendering.MatrixRenderPhaseStatusTextComponent());
             return entity;
         }

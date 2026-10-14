@@ -7,7 +7,7 @@ using DemoDisc.rendering;
 
 namespace DemoDisc.EditorTools.tests {
     /// <summary>
-    /// Verifies that non-Nintendo DS FPS overlays use the shared demo-disc font scale.
+    /// Verifies that the generated FPS overlays use the shared scene UI font at native pixel size.
     /// </summary>
     public sealed class FpsFontScaleSourceTests {
         [Fact]
@@ -39,14 +39,14 @@ namespace DemoDisc.EditorTools.tests {
         }
 
         [Fact]
-        public void Matrix_render_scene_includes_the_shared_fps_ui_font_reference() {
+        public void Matrix_render_scene_includes_the_shared_scene_ui_font_reference() {
             string scenePath = DemoDiscTestProject.GetPath("assets", "scenes", "rendering", "test_scene_matrix_render.helen");
             using FileStream stream = File.OpenRead(scenePath);
             SceneAsset scene = Assert.IsType<SceneAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
 
             Assert.Contains(
                 scene.AssetReferences ?? Array.Empty<SceneAssetReference>(),
-                reference => string.Equals(reference.RelativePath, "generated/editor/fonts/ui.hefont", StringComparison.Ordinal));
+                reference => string.Equals(reference.RelativePath, DemoDiscSceneUiFont.RelativePath, StringComparison.OrdinalIgnoreCase));
         }
 
         static IEnumerable<SceneComponentAssetRecord> EnumerateComponents(SceneEntityAsset[] entities) {

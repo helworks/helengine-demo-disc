@@ -33,13 +33,15 @@ namespace DemoDisc.EditorTools {
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new FPSComponent { Font = font, FontScale = 2f });
+            FPSComponent fpsComponent = new FPSComponent { Font = font, NativeFontPixels = DemoDiscSceneUiFont.Mode };
+            entity.AddComponent(fpsComponent);
+            FindRequiredEntitySaveComponent(entity).SetAssetReference(fpsComponent, "Font", DemoDiscSceneUiFont.CreateReference(AssetAuthoringService));
             SmallScreenFpsComponentOverrideService.Apply(entity);
             entity.AddComponent(new DemoDisc.menu.DemoDiscReturnToMenuComponent { AllowPointerReturn = false });
             entity.AddComponent(new DemoDisc.rendering.DemoDiscLightToggleComponent {
                 LightEntityReferences = CreateEntityReferences(directionalLightEntities)
             });
-            new DemoDiscLightIndicatorOverlayFactory(AssetAuthoringService).AttachToSceneUi(entity, font);
+            new DemoDiscLightIndicatorOverlayFactory(AssetAuthoringService).AttachToSceneUi(entity);
             if (!string.IsNullOrWhiteSpace(sceneLabel)) {
                 new DemoDiscSceneLabelOverlayFactory(AssetAuthoringService).AttachToSceneUi(entity, font, sceneLabel);
             }
@@ -63,7 +65,9 @@ namespace DemoDisc.EditorTools {
             entity.LocalPosition = float3.Zero;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
-            entity.AddComponent(new FPSComponent { Font = font, FontScale = HandheldFpsScale });
+            FPSComponent fpsComponent = new FPSComponent { Font = font, NativeFontPixels = DemoDiscSceneUiFont.Mode };
+            entity.AddComponent(fpsComponent);
+            FindRequiredEntitySaveComponent(entity).SetAssetReference(fpsComponent, "Font", DemoDiscSceneUiFont.CreateReference(AssetAuthoringService));
             if (!string.IsNullOrWhiteSpace(sceneLabel)) {
                 new DemoDiscSceneLabelOverlayFactory(AssetAuthoringService).AttachToSceneUi(entity, font, sceneLabel);
             }
@@ -101,11 +105,6 @@ namespace DemoDisc.EditorTools {
             }
             throw new InvalidOperationException("Authored scene entities require an EntitySaveComponent for references.");
         }
-
-        /// <summary>
-        /// Font scale used by bottom-screen diagnostics once the shared reference canvas resolves to a handheld screen.
-        /// </summary>
-        const float HandheldFpsScale = 1f;
 
         FontAsset ResolveRequiredEditorFont() {
             if (AssetAuthoringService.RendererResources.DefaultFontAsset == null) {

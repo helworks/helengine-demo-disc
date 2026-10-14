@@ -75,14 +75,15 @@ namespace DemoDisc.EditorTools {
         /// <param name="name">Stable child name.</param>
         /// <param name="position">Authored local position.</param>
         /// <param name="size">Authored rectangle size.</param>
-        /// <param name="renderOrder">Overlay draw order.</param>
+        /// <param name="depth">World Z depth.</param>
         /// <param name="color">Initial transparent rectangle color.</param>
         /// <returns>Created rectangle entity with a stable persisted scene id.</returns>
-        Entity CreateRectangle(Entity parent, string name, float3 position, int2 size, byte renderOrder, byte4 color) {
+        Entity CreateRectangle(Entity parent, string name, float3 position, int2 size, float depth, byte4 color) {
             Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, name);
             entity.LayerMask = RuntimeLayerMask;
             entity.LocalPosition = position;
-            entity.AddComponent(new RoundedRectComponent { Size = size, Radius = 0f, BorderThickness = 1f, FillColor = color, BorderColor = color, RenderOrder2D = renderOrder });
+            SceneUiDepth.SetWorldDepth(entity, depth);
+            entity.AddComponent(new RoundedRectComponent { Size = size, Radius = 0f, BorderThickness = 1f, FillColor = color, BorderColor = color });
             return entity;
         }
 

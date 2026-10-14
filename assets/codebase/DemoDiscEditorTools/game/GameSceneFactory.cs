@@ -153,9 +153,9 @@ namespace DemoDisc.EditorTools {
         const string NintendoDsPlatformId = "ds";
 
         /// <summary>
-        /// Foreground OBJ render order used by the Nintendo DS start icon.
+        /// Foreground world depth used by the Nintendo DS start icon.
         /// </summary>
-        const byte NintendoDsStartPromptIconRenderOrder = 220;
+        const float NintendoDsStartPromptIconDepth = 220;
 
         /// <summary>
         /// Stable platform identifier used by the 3DS handheld viewport overrides.
@@ -656,6 +656,7 @@ namespace DemoDisc.EditorTools {
             Entity speedTextEntity = OwningCore.EntityFactory.CreateChild(panelEntity, "TiltTrialSpeedText");
             speedTextEntity.LocalPosition = new float3(12f, 66f, 0.1f);
             speedTextEntity.Static = false;
+            SceneUiDepth.SetWorldDepth(speedTextEntity, 2);
             TextComponent speedTextComponent = new TextComponent {
                 Text = "0\nkm/h",
                 Font = ResolveRequiredEditorFont(),
@@ -663,7 +664,6 @@ namespace DemoDisc.EditorTools {
                 Size = new int2(220, 58),
                 FontScale = 0.9f,
                 Alignment = TextAlignment.Center,
-                RenderOrder2D = 2,
             };
             speedTextEntity.AddComponent(speedTextComponent);
             ApplyFontReference(speedTextEntity, speedTextComponent, TiltTrialSpeedHudFontRelativePath);
@@ -713,9 +713,9 @@ namespace DemoDisc.EditorTools {
         /// <param name="promptPosition">Top-left position of the prompt row.</param>
         /// <param name="promptSize">Authored prompt row size.</param>
         /// <param name="fontScale">Text font scale for the target presentation.</param>
-        /// <param name="renderOrder2D">2D render order shared by the prompt parts.</param>
+        /// <param name="depth">World Z depth shared by the prompt parts.</param>
         /// <param name="iconBounds">Maximum display bounds for the generated control icon.</param>
-        void CreateTiltTrialStartPrompt(Entity parent, float3 promptPosition, int2 promptSize, float fontScale, byte renderOrder2D, int2 iconBounds) {
+        void CreateTiltTrialStartPrompt(Entity parent, float3 promptPosition, int2 promptSize, float fontScale, float depth, int2 iconBounds) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (promptSize.X <= 0 || promptSize.Y <= 0) {
@@ -741,7 +741,7 @@ namespace DemoDisc.EditorTools {
                 "Press",
                 new int2(prefixWidth, promptSize.Y),
                 fontScale,
-                renderOrder2D,
+                depth,
                 promptColor,
                 TextAlignment.Right);
 
@@ -752,10 +752,10 @@ namespace DemoDisc.EditorTools {
                 promptPosition.Z);
             iconEntity.Static = false;
             ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(ProjectRootPath, "windows", "enter", AssetAuthoringService, Transaction);
+            SceneUiDepth.SetWorldDepth(iconEntity, depth);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = commonIcon.FitDisplaySizeWithin(iconBounds),
                 SourceRect = commonIcon.SourceRect,
-                RenderOrder2D = renderOrder2D
             };
             iconEntity.AddComponent(spriteComponent);
             ApplyLevelSelectPromptTexture(iconEntity, spriteComponent, commonIcon.SourcePngRelativePath);
@@ -776,7 +776,7 @@ namespace DemoDisc.EditorTools {
                 "to start",
                 new int2(suffixWidth, promptSize.Y),
                 fontScale,
-                renderOrder2D,
+                depth,
                 promptColor,
                 TextAlignment.Left);
         }
@@ -801,8 +801,10 @@ namespace DemoDisc.EditorTools {
             PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.Size));
             PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.SourceRect));
             if (string.Equals(platformId, NintendoDsPlatformId, StringComparison.Ordinal)) {
-                overrideComponent.RenderOrder2D = NintendoDsStartPromptIconRenderOrder;
-                PlatformEditingServiceValue.MarkPropertyOverride(commonComponent, saveComponent, platformId, nameof(SpriteComponent.RenderOrder2D));
+                SceneEntityPlatformTransformOverrideAsset transform = saveComponent.GetOrCreateTransformPlatformOverride(platformId);
+                float3 position = transform.HasLocalPositionOverride ? transform.LocalPosition : entity.LocalPosition;
+                transform.HasLocalPositionOverride = true;
+                transform.LocalPosition = new float3(position.X, position.Y, (NintendoDsStartPromptIconDepth - entity.Parent.Position.Z) / entity.Parent.Scale.Z);
             }
             PlatformEditingServiceValue.StoreAssetReference(commonComponent, overrideComponent, saveComponent, platformId, TextureAssetScenePersistenceSupport.TextureReferenceName, AssetAuthoringService.CreateFileReference(resolvedIcon.SourcePngRelativePath, AssetEntryKind.Image));
             PlatformEditingServiceValue.PersistPlatformOverride(commonComponent, overrideComponent, saveComponent, platformId);
@@ -849,10 +851,10 @@ namespace DemoDisc.EditorTools {
             iconEntity.LocalPosition = new float3(10f, 7f, 0.1f);
             iconEntity.LayerMask = EditorLayerMasks.SceneObjects;
             ResolvedControlIcon commonIcon = ControlIconResolver.RequireIcon(ProjectRootPath, "windows", controlId, AssetAuthoringService, Transaction);
+            SceneUiDepth.SetWorldDepth(iconEntity, 3);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = commonIcon.FitDisplaySizeWithin(iconBounds),
                 SourceRect = commonIcon.SourceRect,
-                RenderOrder2D = 3
             };
             iconEntity.AddComponent(spriteComponent);
             ApplyLevelSelectPromptTexture(iconEntity, spriteComponent, commonIcon.SourcePngRelativePath);
@@ -931,15 +933,15 @@ namespace DemoDisc.EditorTools {
         /// <param name="position">Sprite position in the reference canvas.</param>
         /// <param name="size">Authored pixel size of the sprite.</param>
         /// <param name="textureRelativePath">Project-relative PNG path for the sprite.</param>
-        /// <param name="renderOrder">2D render order within the title screen.</param>
+        /// <param name="depth">World Z depth within the title screen.</param>
         /// <returns>Created sprite entity.</returns>
-        Entity CreateTiltPlaySpriteEntity(Entity parent, string name, float3 position, int2 size, string textureRelativePath, byte renderOrder) {
+        Entity CreateTiltPlaySpriteEntity(Entity parent, string name, float3 position, int2 size, string textureRelativePath, float depth) {
             Entity spriteEntity = OwningCore.EntityFactory.CreateChild(parent, name);
             spriteEntity.LocalPosition = position;
             spriteEntity.LayerMask = EditorLayerMasks.SceneObjects;
+            SceneUiDepth.SetWorldDepth(spriteEntity, depth);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = size,
-                RenderOrder2D = renderOrder
             };
             spriteEntity.AddComponent(spriteComponent);
             spriteEntity.AddComponent(new DemoDisc.TiltPlay.TiltTrialPresentationRoleComponent {
@@ -1391,6 +1393,7 @@ namespace DemoDisc.EditorTools {
             Entity speedTextEntity = OwningCore.EntityFactory.CreateChild(entity, "TiltTrialSpeedText");
             speedTextEntity.LocalPosition = new float3(16f, 600f, 0f);
             speedTextEntity.Static = false;
+            SceneUiDepth.SetWorldDepth(speedTextEntity, 1);
             TextComponent speedTextComponent = new TextComponent {
                 Text = "0\nkm/h",
                 Font = ResolveRequiredEditorFont(),
@@ -1398,7 +1401,6 @@ namespace DemoDisc.EditorTools {
                 Size = new int2(320, 224),
                 FontScale = 2.2f,
                 Alignment = TextAlignment.Center,
-                RenderOrder2D = 1,
             };
             speedTextEntity.AddComponent(speedTextComponent);
             LayoutComponent speedTextAnchorComponent = new LayoutComponent();
@@ -1427,6 +1429,7 @@ namespace DemoDisc.EditorTools {
             Entity coinTextEntity = OwningCore.EntityFactory.CreateChild(entity, "TiltTrialCoinText");
             coinTextEntity.LocalPosition = new float3(16f, 16f, 0f);
             coinTextEntity.Static = false;
+            SceneUiDepth.SetWorldDepth(coinTextEntity, 1);
             TextComponent coinTextComponent = new TextComponent {
                 Text = "Coins 0/0",
                 Font = ResolveRequiredEditorFont(),
@@ -1434,7 +1437,6 @@ namespace DemoDisc.EditorTools {
                 Size = new int2(280, 44),
                 FontScale = 1.45f,
                 Alignment = TextAlignment.Left,
-                RenderOrder2D = 1,
             };
             coinTextEntity.AddComponent(coinTextComponent);
             LayoutComponent coinTextAnchorComponent = new LayoutComponent();
@@ -1449,6 +1451,7 @@ namespace DemoDisc.EditorTools {
             Entity physicsBoundsStatusTextEntity = OwningCore.EntityFactory.CreateChild(entity, "TiltTrialPhysicsBoundsStatusText");
             physicsBoundsStatusTextEntity.LocalPosition = new float3(16f, 56f, 0f);
             physicsBoundsStatusTextEntity.Static = false;
+            SceneUiDepth.SetWorldDepth(physicsBoundsStatusTextEntity, 1);
             TextComponent physicsBoundsStatusTextComponent = new TextComponent {
                 Text = "F3 Bounds Off",
                 Font = ResolveRequiredEditorFont(),
@@ -1456,7 +1459,6 @@ namespace DemoDisc.EditorTools {
                 Size = new int2(280, 36),
                 FontScale = 1.1f,
                 Alignment = TextAlignment.Left,
-                RenderOrder2D = 1,
             };
             physicsBoundsStatusTextEntity.AddComponent(physicsBoundsStatusTextComponent);
             LayoutComponent physicsBoundsStatusAnchorComponent = new LayoutComponent();
@@ -2330,9 +2332,9 @@ namespace DemoDisc.EditorTools {
         /// <param name="borderThickness">Border thickness in authored pixels.</param>
         /// <param name="fillColor">Panel fill color.</param>
         /// <param name="borderColor">Panel border color.</param>
-        /// <param name="renderOrder2D">2D render order.</param>
+        /// <param name="depth">World Z depth.</param>
         /// <returns>Created panel entity.</returns>
-        Entity CreateRoundedPanelEntity(Entity parent, string entityName, float3 localPosition, int2 size, float radius, float borderThickness, byte4 fillColor, byte4 borderColor, byte renderOrder2D) {
+        Entity CreateRoundedPanelEntity(Entity parent, string entityName, float3 localPosition, int2 size, float radius, float borderThickness, byte4 fillColor, byte4 borderColor, float depth) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -2342,13 +2344,13 @@ namespace DemoDisc.EditorTools {
             Entity entity = OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
             entity.Static = false;
+            SceneUiDepth.SetWorldDepth(entity, depth);
             entity.AddComponent(new RoundedRectComponent {
                 Size = size,
                 Radius = radius,
                 BorderThickness = borderThickness,
                 FillColor = fillColor,
                 BorderColor = borderColor,
-                RenderOrder2D = renderOrder2D,
             });
             entity.AddComponent(new DemoDisc.TiltPlay.TiltTrialPresentationRoleComponent {
                 Role = entityName
@@ -2365,11 +2367,11 @@ namespace DemoDisc.EditorTools {
         /// <param name="text">Initial text content.</param>
         /// <param name="size">Text layout size in authored pixels.</param>
         /// <param name="fontScale">Uniform glyph scale.</param>
-        /// <param name="renderOrder2D">2D render order.</param>
+        /// <param name="depth">World Z depth.</param>
         /// <param name="color">Text color.</param>
         /// <param name="alignment">Requested text alignment.</param>
         /// <returns>Created text entity.</returns>
-        Entity CreateUiTextEntity(Entity parent, string entityName, float3 localPosition, string text, int2 size, float fontScale, byte renderOrder2D, byte4 color, TextAlignment alignment) {
+        Entity CreateUiTextEntity(Entity parent, string entityName, float3 localPosition, string text, int2 size, float fontScale, float depth, byte4 color, TextAlignment alignment) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -2379,6 +2381,7 @@ namespace DemoDisc.EditorTools {
             Entity entity = OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
             entity.Static = false;
+            SceneUiDepth.SetWorldDepth(entity, depth);
             TextComponent textComponent = new TextComponent {
                 Text = text ?? string.Empty,
                 Font = ResolveRequiredEditorFont(),
@@ -2386,7 +2389,6 @@ namespace DemoDisc.EditorTools {
                 Size = size,
                 FontScale = fontScale,
                 Alignment = alignment,
-                RenderOrder2D = renderOrder2D,
             };
             entity.AddComponent(textComponent);
             ApplyFontReference(entity, textComponent, TiltTrialSpeedHudFontRelativePath);

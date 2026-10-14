@@ -91,8 +91,8 @@ namespace DemoDisc.EditorTools {
                     : sceneId == SoftwareRayTracingShowcaseFactory.TeapotSceneId
                         ? "Left: red diffuse | Right: silver mirror"
                         : "Same sphere size, increasing height above the floor";
-                CreateHudTextEntity(sppTextEntity.Parent, "RayTracingLegend", legend, new float3(4f, 214f, 0.1f), hudFont, new int2(312, 24), 0.45f, TextAlignment.Left);
-                CreateHudTextEntity(handheldHudRoot, "RayTracingHandheldLegend", legend, new float3(16f, 104f, 0.1f), hudFont, new int2(224, 44), 0.45f, TextAlignment.Left);
+                CreateHudTextEntity(sppTextEntity.Parent, "RayTracingLegend", legend, new float3(4f, 184f, 0.1f), hudFont, new int2(312, 52), TextAlignment.Left);
+                CreateHudTextEntity(handheldHudRoot, "RayTracingHandheldLegend", legend, new float3(16f, 104f, 0.1f), hudFont, new int2(224, 48), TextAlignment.Left);
             }
 
             return new GeneratedAuthoringSceneDefinition {
@@ -216,26 +216,23 @@ namespace DemoDisc.EditorTools {
                 "SPP: 0",
                 new float3(4f, 4f, 0.1f),
                 hudFont,
-                new int2(128, 12),
-                0.35f,
+                new int2(128, 18),
                 TextAlignment.Left);
             Entity elapsedText = CreateHudTextEntity(
                 root,
                 "SoftwarePathTracerElapsedText",
                 "Time: 0.0s",
-                new float3(4f, 16f, 0.1f),
+                new float3(4f, 22f, 0.1f),
                 hudFont,
-                new int2(128, 12),
-                0.35f,
+                new int2(128, 18),
                 TextAlignment.Left);
             Entity raysPerSecondText = CreateHudTextEntity(
                 root,
                 "SoftwarePathTracerRaysPerSecondText",
                 "Rays/s: 0",
-                new float3(4f, 28f, 0.1f),
+                new float3(4f, 40f, 0.1f),
                 hudFont,
-                new int2(128, 12),
-                0.35f,
+                new int2(128, 18),
                 TextAlignment.Left);
             Entity returnTarget = CreateRoundedPanelEntity(
                 root,
@@ -257,10 +254,9 @@ namespace DemoDisc.EditorTools {
                 returnTarget,
                 "SoftwarePathTracerDesktopReturnLabel",
                 "MAIN MENU",
-                new float3(4f, 4f, 0.1f),
+                new float3(4f, 5f, 0.1f),
                 hudFont,
-                new int2(100, 20),
-                0.45f,
+                new int2(100, 18),
                 TextAlignment.Center,
                 3);
             return (sppText, elapsedText, raysPerSecondText);
@@ -269,19 +265,19 @@ namespace DemoDisc.EditorTools {
         /// <summary>
         /// Creates one local rounded rectangle used by the software path tracer's authored HUD trees.
         /// </summary>
-        Entity CreateRoundedPanelEntity(Entity parent, string name, float3 position, int2 size, float radius, float borderThickness, byte4 fillColor, byte4 borderColor, byte renderOrder) {
+        Entity CreateRoundedPanelEntity(Entity parent, string name, float3 position, int2 size, float radius, float borderThickness, byte4 fillColor, byte4 borderColor, float depth) {
             Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, name);
             entity.LayerMask = EditorLayerMasks.SceneObjects;
             entity.LocalPosition = position;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
+            SceneUiDepth.SetWorldDepth(entity, depth);
             entity.AddComponent(new RoundedRectComponent {
                 Size = size,
                 Radius = radius,
                 BorderThickness = borderThickness,
                 FillColor = fillColor,
                 BorderColor = borderColor,
-                RenderOrder2D = renderOrder
             });
             return entity;
         }
@@ -299,10 +295,10 @@ namespace DemoDisc.EditorTools {
             entity.LocalPosition = new float3(0f, 0f, 0f);
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
+            SceneUiDepth.SetWorldDepth(entity, 0);
             SpriteComponent outputSprite = new SpriteComponent {
                 Size = new int2(320, 240),
                 Color = new byte4(255, 255, 255, 255),
-                RenderOrder2D = 0
             };
             entity.AddComponent(outputSprite);
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
@@ -319,14 +315,14 @@ namespace DemoDisc.EditorTools {
         /// <summary>
         /// Creates one diagnostic text row under either a desktop root or a handheld presentation subtree.
         /// </summary>
-        Entity CreateHudTextEntity(Entity parent, string name, string text, float3 position, FontAsset font, byte renderOrder2D = 1) {
-            return CreateHudTextEntity(parent, name, text, position, font, new int2(320, 24), 1f, TextAlignment.Left, renderOrder2D);
+        Entity CreateHudTextEntity(Entity parent, string name, string text, float3 position, FontAsset font, float depth = 1) {
+            return CreateHudTextEntity(parent, name, text, position, font, new int2(320, 18), TextAlignment.Left, depth);
         }
 
         /// <summary>
         /// Creates one diagnostic text row with explicit layout and visual settings.
         /// </summary>
-        Entity CreateHudTextEntity(Entity parent, string name, string text, float3 position, FontAsset font, int2 size, float fontScale, TextAlignment alignment, byte renderOrder2D = 1) {
+        Entity CreateHudTextEntity(Entity parent, string name, string text, float3 position, FontAsset font, int2 size, TextAlignment alignment, float depth = 1) {
             Entity entity = parent == null
                 ? AssetAuthoringService.OwningCore.EntityFactory.Create(name)
                 : AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, name);
@@ -334,18 +330,18 @@ namespace DemoDisc.EditorTools {
             entity.LocalPosition = position;
             entity.LocalScale = float3.One;
             entity.LocalOrientation = float4.Identity;
+            SceneUiDepth.SetWorldDepth(entity, depth);
             entity.AddComponent(new TextComponent {
                 Text = text,
                 Font = font,
-                FontScale = fontScale,
+                NativeFontPixels = DemoDiscSceneUiFont.Mode,
                 Alignment = alignment,
                 Color = new byte4(255, 255, 255, 255),
                 Size = size,
-                RenderOrder2D = renderOrder2D
             });
             TextComponent textComponent = entity.Components.OfType<TextComponent>().Single();
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(textComponent, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringService));
+            saveComponent.SetAssetReference(textComponent, "Font", DemoDiscSceneUiFont.CreateReference(AssetAuthoringService));
             return entity;
         }
 
@@ -414,7 +410,7 @@ namespace DemoDisc.EditorTools {
                 2);
             button.AddComponent(new InteractableComponent { Size = new int2(224, 32) });
             button.AddComponent(new NintendoDsReturnOverlayComponent());
-            CreateHudTextEntity(button, "SoftwarePathTracerHandheldReturnLabel", "MAIN MENU", new float3(4f, 4f, 0.1f), hudFont, new int2(216, 24), 0.6f, TextAlignment.Center, 3);
+            CreateHudTextEntity(button, "SoftwarePathTracerHandheldReturnLabel", "MAIN MENU", new float3(4f, 4f, 0.1f), hudFont, new int2(216, 18), TextAlignment.Center, 3);
             return button;
         }
 

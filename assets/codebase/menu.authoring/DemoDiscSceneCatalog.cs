@@ -79,6 +79,17 @@ namespace DemoDisc.menu {
         }
 
         /// <summary>
+        /// Builds the benchmark menu items shown by the demo-disc menu.
+        /// </summary>
+        /// <returns>Benchmark entries followed by the category return action.</returns>
+        public MenuItemDefinition[] CreateBenchmarkSceneItems() {
+            return [
+                new MenuItemDefinition("benchmark-max-objects", "Max Objects", true, new MenuActionDefinition(MenuActionKind.LoadScene, "max_objects")),
+                new MenuItemDefinition("benchmarks-back", "Back", true, new MenuActionDefinition(MenuActionKind.Back, string.Empty))
+            ];
+        }
+
+        /// <summary>
         /// Builds the curated physics scene entry set shared by the demo-disc menu and handheld scene generators.
         /// </summary>
         /// <returns>Curated physics scene entries.</returns>

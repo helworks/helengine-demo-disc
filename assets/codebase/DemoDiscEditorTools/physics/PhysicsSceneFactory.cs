@@ -1957,7 +1957,7 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
-        /// Stores the shared generated UI-font reference on the entity save state for the supplied FPS component.
+        /// Stores the shared scene UI font reference on the entity save state for the supplied FPS component.
         /// </summary>
         /// <param name="entity">Entity that owns the FPS component.</param>
         /// <param name="component">FPS component whose font reference should be stored.</param>
@@ -1969,11 +1969,11 @@ namespace DemoDisc.EditorTools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference());
+            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneUiFont.CreateReference(AssetAuthoringService));
         }
 
         /// <summary>
-        /// Stores the shared authored body-font reference on the entity save state for the supplied text component.
+        /// Stores the shared scene UI font reference on the entity save state for the supplied text component.
         /// </summary>
         /// <param name="entity">Entity that owns the text component.</param>
         /// <param name="component">Text component whose font reference should be stored.</param>
@@ -1985,7 +1985,7 @@ namespace DemoDisc.EditorTools {
             }
 
             EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringService));
+            saveComponent.SetAssetReference(component, "Font", DemoDiscSceneUiFont.CreateReference(AssetAuthoringService));
         }
 
         /// <summary>
@@ -2001,20 +2001,20 @@ namespace DemoDisc.EditorTools {
             }
 
             if (component is FPSComponent fpsComponent) {
-                NormalizeGeneratedEditorFontReference(fpsComponent.Font, saveState, true);
+                NormalizeGeneratedEditorFontReference(fpsComponent.Font, saveState);
             } else if (component is DebugComponent debugComponent) {
-                NormalizeGeneratedEditorFontReference(debugComponent.Font, saveState, false);
+                NormalizeGeneratedEditorFontReference(debugComponent.Font, saveState);
             } else if (component is TextComponent textComponent) {
-                NormalizeGeneratedEditorFontReference(textComponent.Font, saveState, false);
+                NormalizeGeneratedEditorFontReference(textComponent.Font, saveState);
             }
         }
 
         /// <summary>
-        /// Stores the shared authored body-font reference when one generated overlay component uses the active editor font instance.
+        /// Stores the shared scene UI font reference when one generated overlay component uses the active editor font instance.
         /// </summary>
         /// <param name="font">Runtime font assigned to the generated overlay component.</param>
         /// <param name="saveState">Save metadata that should carry the normalized font reference.</param>
-        void NormalizeGeneratedEditorFontReference(FontAsset font, EntityComponentSaveState saveState, bool useEditorUiFont) {
+        void NormalizeGeneratedEditorFontReference(FontAsset font, EntityComponentSaveState saveState) {
             if (saveState == null) {
                 throw new ArgumentNullException(nameof(saveState));
             } else if (font == null) {
@@ -2025,11 +2025,7 @@ namespace DemoDisc.EditorTools {
                 return;
             }
 
-            saveState.SetAssetReference(
-                "Font",
-                useEditorUiFont
-                    ? DemoDiscSceneComponentRecordFactory.CreateEditorUiFontReference()
-                    : DemoDiscSceneComponentRecordFactory.CreateEditorFontReference(AssetAuthoringService));
+            saveState.SetAssetReference("Font", DemoDiscSceneUiFont.CreateReference(AssetAuthoringService));
         }
 
         /// <summary>
@@ -2566,23 +2562,7 @@ namespace DemoDisc.EditorTools {
         /// </summary>
         /// <param name="entity">Generated live editor subtree root that should receive fresh scene entity ids.</param>
         void AssignFreshGeneratedEditorEntityIds(EditorEntity entity) {
-            if (entity == null) {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            EntitySaveComponent saveComponent = EnsureEntitySaveComponent(entity);
-            saveComponent.EntityId = AllocateSceneEntityId();
-            if (entity.Children == null) {
-                return;
-            }
-
-            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
-                if (entity.Children[childIndex] is not EditorEntity childEntity) {
-                    continue;
-                }
-
-                AssignFreshGeneratedEditorEntityIds(childEntity);
-            }
+            new GeneratedEntityIdReassignmentService().Reassign(entity, AllocateSceneEntityId, EnsureEntitySaveComponent);
         }
 
         /// <summary>
@@ -2666,23 +2646,7 @@ namespace DemoDisc.EditorTools {
         /// </summary>
         /// <param name="entity">Generated editor subtree root whose save-component ids should be reassigned.</param>
         void ReassignGeneratedEditorEntityIds(EditorEntity entity) {
-            if (entity == null) {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
-            saveComponent.EntityId = AllocateSceneEntityId();
-            if (entity.Children == null) {
-                return;
-            }
-
-            for (int childIndex = 0; childIndex < entity.Children.Count; childIndex++) {
-                if (entity.Children[childIndex] is not EditorEntity childEntity) {
-                    continue;
-                }
-
-                ReassignGeneratedEditorEntityIds(childEntity);
-            }
+            new GeneratedEntityIdReassignmentService().Reassign(entity, AllocateSceneEntityId, FindRequiredEntitySaveComponent);
         }
 
         /// <summary>

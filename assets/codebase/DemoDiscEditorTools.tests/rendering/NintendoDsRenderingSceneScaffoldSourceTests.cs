@@ -24,7 +24,7 @@ namespace DemoDisc.EditorTools.tests {
                 SceneEntityAsset border = Assert.Single(button.Children, child => child.Name == "Border");
                 RoundedRectComponent borderRect = ReadRoundedRect(border, registry);
                 Assert.Equal(2f, borderRect.BorderThickness);
-                Assert.Equal(220, borderRect.RenderOrder2D);
+                Assert.True(border.LocalPosition.Z > 0f);
                 Assert.Equal(0, borderRect.FillColor.W);
             }
 
@@ -33,9 +33,8 @@ namespace DemoDisc.EditorTools.tests {
             RoundedRectComponent swatchRect = ReadRoundedRect(swatch, registry);
             Assert.Equal(16, swatchRect.Size.X);
             Assert.Equal(16, swatchRect.Size.Y);
-            // The DS renderer only promotes orders at or above 220 to the foreground sprite priority, and at the
-            // base priority the earlier-drawn opaque button body hides the swatch.
-            Assert.True(swatchRect.RenderOrder2D >= 220);
+            // The child swatch must remain in front of the button body.
+            Assert.True(swatch.LocalPosition.Z > 0f);
         }
 
         /// <summary>
@@ -56,13 +55,14 @@ namespace DemoDisc.EditorTools.tests {
                 SceneEntityAsset button = Assert.Single(chromeRoot.Children, child => child.Name == buttonName);
                 SceneEntityAsset label = Assert.Single(button.Children, child => child.Name == labelName);
                 SceneComponentAssetRecord record = Assert.Single(label.Components, component => component.ComponentTypeId == textTypeId);
-                // The labels carry a 3DS font-scale override, so the persisted record wraps the base payload.
-                SceneComponentAssetRecord baseRecord = new global::helengine.editor.ComponentPlatformOverridePayloadService().UnwrapBaseRecord(record);
+                // The labels draw the shared scene UI font at native pixel size, so they carry no per-platform font-scale override.
                 TextComponent labelComponent = Assert.IsType<TextComponent>(
-                    registry.GetDescriptor(baseRecord.ComponentTypeId).DeserializeComponent(baseRecord, new EntitySaveComponent(), null));
+                    registry.GetDescriptor(record.ComponentTypeId).DeserializeComponent(record, new EntitySaveComponent(), null));
 
                 Assert.Equal(text, labelComponent.Text);
                 Assert.Equal(TextAlignment.Center, labelComponent.Alignment);
+                Assert.Equal(TextNativePixelMode.RoundUp, labelComponent.NativeFontPixels);
+                Assert.Equal(1f, labelComponent.FontScale);
             }
         }
 

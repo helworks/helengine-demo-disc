@@ -97,6 +97,11 @@ namespace DemoDisc.EditorTools {
         public const string MatrixRenderSceneId = "scenes/rendering/test_scene_matrix_render.helen";
 
         /// <summary>
+        /// Stable scene id used by the Max Objects benchmark.
+        /// </summary>
+        public const string MaxObjectsBenchmarkSceneId = "scenes/benchmarks/max_objects.helen";
+
+        /// <summary>
         /// Writer used to persist generated live-authored scenes through the editor save pipeline.
         /// </summary>
         readonly GeneratedAuthoringSceneWriteService AuthoringSceneWriteService;
@@ -167,6 +172,11 @@ namespace DemoDisc.EditorTools {
         readonly SoftwarePathTracerSceneFactory SoftwarePathTracerFactory;
 
         /// <summary>
+        /// Factory used to author the incremental Max Objects benchmark scene.
+        /// </summary>
+        readonly MaxObjectsBenchmarkSceneFactory MaxObjectsBenchmarkFactory;
+
+        /// <summary>
         /// Initializes one city rendering scene generator.
         /// </summary>
         /// <param name="scriptTypeResolver">Resolver used to restore project-authored components during temporary handheld clone loads.</param>
@@ -191,6 +201,7 @@ namespace DemoDisc.EditorTools {
             PbrShadowTheaterScene = new PbrShadowTheaterSceneFactory(AssetAuthoringService, Transaction);
             MatrixRenderFactory = new MatrixRenderSceneFactory(AssetAuthoringService, Transaction);
             SoftwarePathTracerFactory = new SoftwarePathTracerSceneFactory(AssetAuthoringService);
+            MaxObjectsBenchmarkFactory = new MaxObjectsBenchmarkSceneFactory(AssetAuthoringService);
         }
 
         /// <summary>
@@ -248,6 +259,9 @@ namespace DemoDisc.EditorTools {
                 projectRootPath,
                 EngineSceneAssetReferenceFactory.CreateCubeModel(),
                 editorCore.DefaultFontAssetForEditor);
+            GeneratedAuthoringSceneDefinition maxObjectsBenchmarkSceneDefinition = MaxObjectsBenchmarkFactory.CreateSceneDefinition(
+                assets.GeneratedCubeModel,
+                assets.GeneratedCubeTestSolidMaterial);
             ColoredCubeGridFactory.WriteMaterialAssets(projectRootPath);
             TexturedCubeGridFactory.WriteAssets(projectRootPath);
             coloredCubeGridSceneDefinition = ColoredCubeGridFactory.CreateSceneDefinition(projectRootPath, assets.GeneratedCubeModel, ColoredCubeGridFactory.CreateRuntimeMaterials());
@@ -263,6 +277,7 @@ namespace DemoDisc.EditorTools {
             AuthoringSceneWriteService.WriteScene(pbrShadowTheaterSceneDefinition);
             AuthoringSceneWriteService.WriteScene(matrixRenderSceneDefinition);
             AuthoringSceneWriteService.WriteScene(softwarePathTracerSceneDefinition);
+            AuthoringSceneWriteService.WriteScene(maxObjectsBenchmarkSceneDefinition);
             SoftwareRayTracingMeshFactory.WriteAssets(Transaction);
             foreach (string sceneId in new[] { SoftwareRayTracingShowcaseFactory.TeapotSceneId, SoftwareRayTracingShowcaseFactory.SpheresSceneId, SoftwareRayTracingShowcaseFactory.ShadowsSceneId }) {
                 AuthoringSceneWriteService.WriteScene(SoftwarePathTracerFactory.CreateShowcaseDefinition(projectRootPath, sceneId, editorCore.DefaultFontAssetForEditor, Transaction.CreateReference(SoftwareRayTracingMeshFactory.SpherePath, AssetEntryKind.Model), Transaction.CreateReference(SoftwareRayTracingMeshFactory.TeapotPath, AssetEntryKind.Model)));

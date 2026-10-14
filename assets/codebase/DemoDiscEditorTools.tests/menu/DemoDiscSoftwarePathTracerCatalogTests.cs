@@ -31,6 +31,20 @@ namespace DemoDisc.EditorTools.tests {
             Assert.DoesNotContain(new DemoDiscSceneCatalog().CreateDemoSceneItems(), item => item.Action.TargetId == "software_path_tracer");
         }
 
+        /// <summary>Ensures the benchmark category remains present even when a platform omits its benchmark scene.</summary>
+        [Fact]
+        public void Benchmark_category_routes_to_max_objects() {
+            MenuDefinition definition = new DemoDiscMenuDefinitionProvider().CreateMenuDefinition();
+            MenuPanelDefinition main = Assert.Single(definition.Panels, panel => panel.PanelId == "main");
+            MenuItemDefinition benchmarkEntry = Assert.Single(main.Items, item => item.ItemId == "main-benchmarks");
+            MenuPanelDefinition benchmarkPanel = Assert.Single(definition.Panels, panel => panel.PanelId == benchmarkEntry.Action.TargetId);
+
+            Assert.Equal(MenuActionKind.OpenPanel, benchmarkEntry.Action.Kind);
+            Assert.Equal(new[] { "Max Objects", "Back" }, benchmarkPanel.Items.Select(item => item.Label));
+            Assert.Equal(MenuActionKind.LoadScene, benchmarkPanel.Items[0].Action.Kind);
+            Assert.Equal("max_objects", benchmarkPanel.Items[0].Action.TargetId);
+        }
+
         /// <summary>Ensures automated navigation follows the same category, scene, and return routes as the menu.</summary>
         [Fact]
         public void Helenui_profile_routes_cornell_box_through_ray_tracing() {

@@ -3,11 +3,10 @@ namespace DemoDisc.rendering {
     /// Enables the authored scene-name overlay only for debug-environment builds.
     /// </summary>
     public sealed class DemoDiscDebugSceneLabelComponent : UpdateComponent {
-        const byte DebugLabelRenderOrder = 7;
         Entity OwnerEntity;
         Entity LabelEntity;
 
-        /// <summary>The authored label entity; older scenes resolve once by render order until regenerated.</summary>
+        /// <summary>The authored label entity, identified independently of its render depth.</summary>
         public SceneEntityReference LabelEntityReference { get; set; }
 
         public override void ComponentAdded(Entity entity) {
@@ -33,10 +32,6 @@ namespace DemoDisc.rendering {
             }
 
             LabelEntity = LabelEntityReference?.ResolvedEntity;
-            // Older authored scenes do not carry this link yet; Task 7 scene regeneration removes this compatibility search.
-            if (LabelEntity == null) {
-                LabelEntity = FindLabelByRenderOrder(OwnerEntity);
-            }
             if (LabelEntity == null) {
                 return;
             }
@@ -48,37 +43,5 @@ namespace DemoDisc.rendering {
 #endif
         }
 
-        static Entity FindLabelByRenderOrder(Entity parent) {
-            if (parent == null || parent.Children == null) {
-                return null;
-            }
-            for (int index = 0; index < parent.Children.Count; index++) {
-                Entity child = parent.Children[index];
-                if (child == null) {
-                    continue;
-                }
-                if (ContainsDebugLabelText(child)) {
-                    return child;
-                }
-                Entity nestedMatch = FindLabelByRenderOrder(child);
-                if (nestedMatch != null) {
-                    return nestedMatch;
-                }
-            }
-            return null;
-        }
-
-        static bool ContainsDebugLabelText(Entity entity) {
-            if (entity.Components == null) {
-                return false;
-            }
-            for (int index = 0; index < entity.Components.Count; index++) {
-                if (entity.Components[index] is TextComponent textComponent
-                    && textComponent.RenderOrder2D == DebugLabelRenderOrder) {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }

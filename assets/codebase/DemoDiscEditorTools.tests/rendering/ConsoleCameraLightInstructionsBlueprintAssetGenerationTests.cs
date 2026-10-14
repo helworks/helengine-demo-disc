@@ -11,6 +11,33 @@ namespace DemoDisc.EditorTools.tests {
     public sealed class ConsoleCameraLightInstructionsBlueprintAssetGenerationTests {
         static readonly string BlueprintPath = DemoDiscTestProject.GetPath("assets", "blueprints", "ui", "ConsoleCameraLightInstructions.hblueprint");
 
+        /// <summary>Ensures the PS3 light action displays Triangle while the common PS2 prompt remains Circle.</summary>
+        [Fact]
+        public void Console_light_uses_ps3_triangle_without_changing_ps2_circle() {
+            using FileStream stream = File.OpenRead(BlueprintPath);
+            BlueprintAsset blueprint = Assert.IsType<BlueprintAsset>(global::helengine.editor.AssetSerializer.Deserialize(stream));
+            SceneEntityAsset panel = Assert.Single(blueprint.RootEntity.Children, e => e.Name == "ConsoleCameraLightInstructionsPanel");
+            SceneEntityAsset icon = Assert.Single(panel.Children, e => e.Name == "LightIcon");
+            SceneComponentAssetRecord record = Assert.Single(icon.Components, c => c.ComponentTypeId == "helengine.SpriteComponent");
+            ComponentPlatformOverridePayloadService wrapper = new ComponentPlatformOverridePayloadService();
+            EntityComponentPlatformOverrideState ps3 = Assert.Single(wrapper.ReadOverrideStates(record), o =>
+                o.Scope.TryGetStepId(SceneOverrideScopeStepKind.Platform, out string platform) && platform == "ps3");
+            Assert.Equal(new[] { "Size", "SourceRect" }, ps3.EnumeratePropertyOverrides().OrderBy(p => p));
+            Assert.Equal("textures/instructions/controls/generated/ps3/triangle.png", Assert.Single(ps3.EnumerateAssetReferences()).RelativePath);
+            Assert.Contains(blueprint.AssetReferences, r => r.RelativePath == "textures/instructions/controls/generated/ps3/triangle.png");
+            EditorTaggedSceneComponentFieldReader fields = new EditorTaggedSceneComponentFieldReader(ps3.Payload);
+            Assert.True(fields.TryGetFieldReader("Size", out EngineBinaryReader size));
+            using (size) { Assert.Equal(DemoSceneInstructionOverlayFactory.InstructionIconSize, size.ReadInt32()); Assert.Equal(DemoSceneInstructionOverlayFactory.InstructionIconSize, size.ReadInt32()); }
+            Assert.True(fields.TryGetFieldReader("SourceRect", out EngineBinaryReader rect));
+            using (rect) {
+                Assert.Equal(0.2109375f, rect.ReadSingle()); Assert.Equal(0.2109375f, rect.ReadSingle());
+                Assert.Equal(0.58203125f, rect.ReadSingle()); Assert.Equal(0.58203125f, rect.ReadSingle());
+            }
+            fields = new EditorTaggedSceneComponentFieldReader(wrapper.UnwrapBaseRecord(record).Payload);
+            Assert.True(fields.TryGetFieldReader("Texture", out EngineBinaryReader texture));
+            using (texture) Assert.Equal("textures/instructions/controls/generated/ps2/circle.png", SceneComponentBinaryFieldEncoding.ReadOptionalReference(texture).RelativePath);
+        }
+
         [Fact]
         public void Committed_console_blueprint_contains_only_the_camera_light_panel() {
             Assert.True(File.Exists(BlueprintPath), $"Expected generated Blueprint at '{BlueprintPath}'.");

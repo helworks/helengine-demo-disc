@@ -89,9 +89,9 @@ namespace DemoDisc.EditorTools {
         const float NintendoDsBottomMenuLabelFontScale = 1f;
 
         /// <summary>
-        /// Fixed render order applied to visible Nintendo DS bottom-menu item labels.
+        /// World depth applied to visible Nintendo DS bottom-menu item labels.
         /// </summary>
-        const byte NintendoDsBottomMenuLabelRenderOrder = 220;
+        const float NintendoDsBottomMenuLabelDepth = 220;
 
         /// <summary>
         /// Runtime layer used by the Nintendo DS menu metadata subtree so the handheld cameras can render its panel-binding structure.
@@ -170,14 +170,14 @@ namespace DemoDisc.EditorTools {
         /// <param name="fontPath">Project-relative font path assigned through save metadata.</param>
         /// <param name="color">Text color.</param>
         /// <param name="size">Text layout size.</param>
-        /// <param name="renderOrder2D">2D render order.</param>
+        /// <param name="depth">World Z depth.</param>
         /// <param name="anchorComponent">Optional anchor component attached to the entity.</param>
         /// <param name="fontScale">Uniform glyph scale applied to the authored text component.</param>
         /// <param name="isStatic">Whether the authored text entity should be marked static for runtime caching.</param>
         /// <param name="convertTextToSprite">Whether the Nintendo DS text should be converted into a sprite-friendly representation.</param>
         /// <param name="outlineColor">Optional text outline color.</param>
         /// <param name="outlineScale">Optional text outline scale.</param>
-        void CreateNintendoDsTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, byte renderOrder2D, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, bool convertTextToSprite = false, byte4 outlineColor = default, float outlineScale = 0f) {
+        void CreateNintendoDsTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, float depth, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, bool convertTextToSprite = false, byte4 outlineColor = default, float outlineScale = 0f) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -190,13 +190,15 @@ namespace DemoDisc.EditorTools {
             entity.LocalPosition = localPosition;
             entity.Static = isStatic;
 
+            SceneUiDepth.SetWorldDepth(entity, depth);
             TextComponent textComponent = new TextComponent {
                 Text = text ?? string.Empty,
                 Font = PlaceholderFont,
                 Color = color,
                 Size = size,
+                NativeFontPixels = TextNativePixelMode.RoundUp,
                 FontScale = fontScale,
-                RenderOrder2D = renderOrder2D,
+
                 ConvertTextToSprite = convertTextToSprite,
                 OutlineColor = outlineColor,
                 OutlineScale = outlineScale
@@ -220,9 +222,9 @@ namespace DemoDisc.EditorTools {
         /// <param name="borderThickness">Border thickness.</param>
         /// <param name="fillColor">Fill color.</param>
         /// <param name="borderColor">Border color.</param>
-        /// <param name="renderOrder2D">2D render order.</param>
+        /// <param name="depth">World Z depth.</param>
         /// <returns>The authored background entity so callers can attach layout behavior when needed.</returns>
-        Entity CreateBackgroundEntity(Entity parent, string entityName, float3 localPosition, int2 size, float radius, float borderThickness, byte4 fillColor, byte4 borderColor, byte renderOrder2D) {
+        Entity CreateBackgroundEntity(Entity parent, string entityName, float3 localPosition, int2 size, float radius, float borderThickness, byte4 fillColor, byte4 borderColor, float depth) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -231,13 +233,13 @@ namespace DemoDisc.EditorTools {
 
             Entity entity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
+            SceneUiDepth.SetWorldDepth(entity, depth);
             entity.AddComponent(new RoundedRectComponent {
                 Size = size,
                 Radius = radius,
                 BorderThickness = borderThickness,
                 FillColor = fillColor,
                 BorderColor = borderColor,
-                RenderOrder2D = renderOrder2D,
             });
 
             return entity;
@@ -375,9 +377,9 @@ namespace DemoDisc.EditorTools {
             entity.LocalScale = new float3(1f, 1f, 1f);
             entity.LocalOrientation = float4.Identity;
 
+            SceneUiDepth.SetWorldDepth(entity, 20);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = new int2(displayWidth, displayHeight),
-                RenderOrder2D = 20,
             };
             entity.AddComponent(spriteComponent);
             ApplyTextureReference(entity, spriteComponent, overlayImage.TexturePath);
@@ -416,8 +418,8 @@ namespace DemoDisc.EditorTools {
             };
             versionAnchorComponent.SetAnchorDistances(right: 8f, bottom: 8f);
 
-            CreateNintendoDsTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(8f, 148f, 0f), string.Empty, definition.BodyFontPath, definition.TextColor, new int2(1, 1), 42, nameAnchorComponent, 0.84f, false);
-            CreateNintendoDsTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(176f, 148f, 0f), string.Empty, definition.BodyFontPath, definition.MutedTextColor, new int2(72, 1), 42, versionAnchorComponent, 0.84f, false);
+            CreateNintendoDsTextEntity(entity, "DemoDiscPlatformInfoNameText", new float3(8f, 148f, 0f), string.Empty, definition.TitleFontPath, definition.TextColor, new int2(1, 1), 42, nameAnchorComponent, 1f, false);
+            CreateNintendoDsTextEntity(entity, "DemoDiscPlatformInfoVersionText", new float3(176f, 148f, 0f), string.Empty, definition.TitleFontPath, definition.MutedTextColor, new int2(72, 1), 42, versionAnchorComponent, 1f, false);
         }
 
         /// <summary>
@@ -508,13 +510,13 @@ namespace DemoDisc.EditorTools {
                 SelectedFillColor = selectedFillColor,
                 SelectedBorderColor = selectedFillColor
             });
+            SceneUiDepth.SetWorldDepth(itemEntity, 33);
             itemEntity.AddComponent(new RoundedRectComponent {
                 Size = new int2(NintendoDsScreenWidth, NintendoDsButtonHeight),
                 Radius = 0f,
                 BorderThickness = 0f,
                 FillColor = visibleIndex == 0 ? selectedFillColor : idleFillColor,
                 BorderColor = visibleIndex == 0 ? selectedFillColor : idleFillColor,
-                RenderOrder2D = 33,
             });
             CreateNintendoDsTextEntity(
                 itemEntity,
@@ -524,7 +526,7 @@ namespace DemoDisc.EditorTools {
                 definition.BodyFontPath,
                 definition.TextColor,
                 new int2(NintendoDsBottomMenuLabelWidth, NintendoDsBottomMenuLabelHeight),
-                NintendoDsBottomMenuLabelRenderOrder,
+                NintendoDsBottomMenuLabelDepth,
                 null,
                 NintendoDsBottomMenuLabelFontScale,
                 true,

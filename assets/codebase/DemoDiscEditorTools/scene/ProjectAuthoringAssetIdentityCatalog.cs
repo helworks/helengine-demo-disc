@@ -23,6 +23,7 @@ namespace DemoDisc.EditorTools {
                 ["scenes/rendering/ray_tracing_spheres.helen"] = "10000000000000000000000000000041",
                 ["scenes/rendering/ray_tracing_soft_shadows.helen"] = "10000000000000000000000000000042",
                 ["scenes/rendering/software_path_tracer.helen"] = "1000000000000000000000000000001f",
+                ["scenes/benchmarks/max_objects.helen"] = "10000000000000000000000000000050",
                 ["scenes/physics/test_scene_character_slope.helen"] = "10000000000000000000000000000020",
                 ["scenes/physics/test_scene_character_steps.helen"] = "10000000000000000000000000000021",
                 ["scenes/physics/test_scene_character_moving_platform.helen"] = "10000000000000000000000000000022",

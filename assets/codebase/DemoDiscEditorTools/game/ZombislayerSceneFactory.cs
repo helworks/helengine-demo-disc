@@ -355,9 +355,9 @@ namespace DemoDisc.EditorTools {
         /// <param name="borderThickness">Border thickness in pixels.</param>
         /// <param name="fillColor">Panel fill color.</param>
         /// <param name="borderColor">Panel border color.</param>
-        /// <param name="renderOrder2D">2D render order.</param>
+        /// <param name="depth">World Z depth.</param>
         /// <returns>Generated panel entity.</returns>
-        Entity CreateRoundedPanelEntity(Entity parent, string entityName, float3 localPosition, int2 size, float radius, float borderThickness, byte4 fillColor, byte4 borderColor, byte renderOrder2D) {
+        Entity CreateRoundedPanelEntity(Entity parent, string entityName, float3 localPosition, int2 size, float radius, float borderThickness, byte4 fillColor, byte4 borderColor, float depth) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -367,13 +367,13 @@ namespace DemoDisc.EditorTools {
             Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
             entity.Static = false;
+            SceneUiDepth.SetWorldDepth(entity, depth);
             entity.AddComponent(new RoundedRectComponent {
                 Size = size,
                 Radius = radius,
                 BorderThickness = borderThickness,
                 FillColor = fillColor,
                 BorderColor = borderColor,
-                RenderOrder2D = renderOrder2D,
             });
             return entity;
         }
@@ -387,11 +387,11 @@ namespace DemoDisc.EditorTools {
         /// <param name="text">Initial text content.</param>
         /// <param name="size">Text layout size in authored pixels.</param>
         /// <param name="fontScale">Uniform glyph scale.</param>
-        /// <param name="renderOrder2D">2D render order.</param>
+        /// <param name="depth">World Z depth.</param>
         /// <param name="color">Text color.</param>
         /// <param name="alignment">Requested text alignment.</param>
         /// <returns>Created text entity.</returns>
-        Entity CreateUiTextEntity(Entity parent, string entityName, float3 localPosition, string text, int2 size, float fontScale, byte renderOrder2D, byte4 color, TextAlignment alignment) {
+        Entity CreateUiTextEntity(Entity parent, string entityName, float3 localPosition, string text, int2 size, float fontScale, float depth, byte4 color, TextAlignment alignment) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -401,6 +401,7 @@ namespace DemoDisc.EditorTools {
             Entity entity = AuthoringSession.OwningCore.EntityFactory.CreateChild(parent, entityName);
             entity.LocalPosition = localPosition;
             entity.Static = false;
+            SceneUiDepth.SetWorldDepth(entity, depth);
             TextComponent textComponent = new TextComponent {
                 Text = text ?? string.Empty,
                 Font = ResolveRequiredEditorFont(),
@@ -408,7 +409,6 @@ namespace DemoDisc.EditorTools {
                 Size = size,
                 FontScale = fontScale,
                 Alignment = alignment,
-                RenderOrder2D = renderOrder2D,
             };
             entity.AddComponent(textComponent);
             ApplyFontReference(entity, textComponent, PauseOverlayFontRelativePath);

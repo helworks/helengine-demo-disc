@@ -37,6 +37,28 @@ namespace DemoDisc.EditorTools {
             AnimationClipAsset animationClip = new AnimationClipAsset {
                 Id = "Animations/DemoDiscLogoIdle.animation",
                 Duration = 4f,
+                PositionOffsetTracks = [
+                    new PositionOffsetKeyframeTrackAsset {
+                        Keyframes = [
+                            new PositionKeyframeAsset(0f, new float3(0f, 6f, 0f), AnimationInterpolationMode.Linear),
+                            new PositionKeyframeAsset(1f, new float3(6f, 0f, 0f), AnimationInterpolationMode.Linear),
+                            new PositionKeyframeAsset(2f, new float3(0f, 6f, 0f), AnimationInterpolationMode.Linear),
+                            new PositionKeyframeAsset(3f, new float3(-6f, 0f, 0f), AnimationInterpolationMode.Linear),
+                            new PositionKeyframeAsset(4f, new float3(0f, 6f, 0f), AnimationInterpolationMode.Linear)
+                        ]
+                    }
+                ],
+                ScaleTracks = [
+                    new ScaleKeyframeTrackAsset {
+                        Keyframes = [
+                            new PositionKeyframeAsset(0f, new float3(0.95f, 1.06f, 1f), AnimationInterpolationMode.Linear),
+                            new PositionKeyframeAsset(1f, new float3(1.08f, 0.93f, 1f), AnimationInterpolationMode.Linear),
+                            new PositionKeyframeAsset(2f, new float3(0.95f, 1.06f, 1f), AnimationInterpolationMode.Linear),
+                            new PositionKeyframeAsset(3f, new float3(1.08f, 0.93f, 1f), AnimationInterpolationMode.Linear),
+                            new PositionKeyframeAsset(4f, new float3(0.95f, 1.06f, 1f), AnimationInterpolationMode.Linear)
+                        ]
+                    }
+                ],
                 RotationTracks = [
                     new RotationKeyframeTrackAsset {
                         Keyframes = [

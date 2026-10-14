@@ -108,9 +108,8 @@ namespace DemoDisc.EditorTools.tests {
         static Entity FindSwatch(Entity parent) {
             for (int index = 0; index < parent.Components.Count; index++) {
                 if (parent.Components[index] is RoundedRectComponent roundedRect
-                    && roundedRect.RenderOrder2D == 252
-                    && roundedRect.Size.X == 32
-                    && roundedRect.Size.Y == 32) {
+                    && roundedRect.Size.X == DemoSceneInstructionOverlayFactory.LightSwatchSize
+                    && roundedRect.Size.Y == DemoSceneInstructionOverlayFactory.LightSwatchSize) {
                     return parent;
                 }
             }

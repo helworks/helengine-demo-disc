@@ -14,10 +14,12 @@ namespace DemoDisc.menu {
             MenuItemDefinition[] rayTracingSceneItems = sceneCatalog.CreateSoftwareRayTracingSceneItems();
             MenuItemDefinition[] physicsSceneItems = sceneCatalog.CreatePhysicsSceneItems();
             MenuItemDefinition[] gameSceneItems = sceneCatalog.CreateGameSceneItems();
+            MenuItemDefinition[] benchmarkSceneItems = sceneCatalog.CreateBenchmarkSceneItems();
             MenuItemDefinition[] mainMenuItems = [
                 new MenuItemDefinition("main-scenes", "Rendering", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "scene-select")),
                 new MenuItemDefinition("main-physics", "Physics", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "physics-select")),
                 new MenuItemDefinition("main-games", "Games", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "games-select")),
+                new MenuItemDefinition("main-benchmarks", "Benchmarks", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "benchmarks-select")),
                 new MenuItemDefinition("main-options", "Options", true, new MenuActionDefinition(MenuActionKind.OpenPanel, "options"))
             ];
             return new MenuDefinition(
@@ -26,6 +28,7 @@ namespace DemoDisc.menu {
                 "main",
                 theme.TitleFontPath,
                 theme.BodyFontPath,
+                theme.CarouselFontPath,
                 theme.BackgroundColor,
                 theme.SurfaceColor,
                 theme.SurfaceBorderColor,
@@ -59,6 +62,11 @@ namespace DemoDisc.menu {
                         "Games",
                         4,
                         gameSceneItems),
+                    new MenuPanelDefinition(
+                        "benchmarks-select",
+                        "Benchmarks",
+                        4,
+                        benchmarkSceneItems),
                     new MenuPanelDefinition(
                         "options",
                         "Options",
