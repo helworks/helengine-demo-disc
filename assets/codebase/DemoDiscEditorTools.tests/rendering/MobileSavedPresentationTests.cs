@@ -46,9 +46,10 @@ namespace DemoDisc.EditorTools.tests {
         };
 
         /// <summary>
-        /// Physics validation scenes that keep only the legacy scene-local instruction panel.
+        /// Physics validation scenes built from authored scene assets; they mount the shared instruction Blueprint
+        /// beside the legacy panel like the playable showcases.
         /// </summary>
-        public static TheoryData<string> LegacyInstructionScenes => new TheoryData<string> {
+        public static TheoryData<string> ValidationInstructionScenes => new TheoryData<string> {
             "scenes/physics/test_scene_character_moving_platform.helen",
             "scenes/physics/test_scene_character_slope.helen",
             "scenes/physics/test_scene_character_steps.helen",
@@ -94,7 +95,7 @@ namespace DemoDisc.EditorTools.tests {
                 foreach (object[] row in BlueprintInstructionScenes) {
                     assets.Add((string)row[0]);
                 }
-                foreach (object[] row in LegacyInstructionScenes) {
+                foreach (object[] row in ValidationInstructionScenes) {
                     assets.Add((string)row[0]);
                 }
 
@@ -120,6 +121,7 @@ namespace DemoDisc.EditorTools.tests {
         /// <param name="scenePath">Assets-relative scene path.</param>
         [Theory]
         [MemberData(nameof(BlueprintInstructionScenes))]
+        [MemberData(nameof(ValidationInstructionScenes))]
         public void Android_presents_the_instruction_blueprint_instead_of_the_legacy_panel(string scenePath) {
             SceneAsset scene = LoadScene(scenePath);
             SceneEntityAsset legacy = FindRoot(scene, MobilePresentationAuthoringService.LegacyInstructionRootEntityName);
@@ -137,7 +139,7 @@ namespace DemoDisc.EditorTools.tests {
         /// <param name="scenePath">Assets-relative scene path.</param>
         [Theory]
         [MemberData(nameof(BlueprintInstructionScenes))]
-        [MemberData(nameof(LegacyInstructionScenes))]
+        [MemberData(nameof(ValidationInstructionScenes))]
         public void Android_resolves_the_density_scaled_scene_ui(string scenePath) {
             SceneAsset scene = LoadScene(scenePath);
             SceneEntityAsset ui = FindUiRoot(scene);
@@ -160,21 +162,34 @@ namespace DemoDisc.EditorTools.tests {
         }
 
         /// <summary>
-        /// Checks the legacy-only physics scenes keep their scene-local panel on Android, density scaled.
+        /// Checks every Micro SD platform shows exactly one instruction panel: the legacy panel steps aside and the
+        /// shared console instruction Blueprint presents the controls.
         /// </summary>
         /// <param name="scenePath">Assets-relative scene path.</param>
         [Theory]
-        [MemberData(nameof(LegacyInstructionScenes))]
-        public void Android_scales_the_legacy_instruction_panel_when_no_blueprint_replaces_it(string scenePath) {
+        [MemberData(nameof(BlueprintInstructionScenes))]
+        [MemberData(nameof(ValidationInstructionScenes))]
+        public void Micro_sd_presents_the_instruction_blueprint_instead_of_the_legacy_panel(string scenePath) {
             SceneAsset scene = LoadScene(scenePath);
             SceneEntityAsset legacy = FindRoot(scene, MobilePresentationAuthoringService.LegacyInstructionRootEntityName);
+            SceneEntityAsset blueprint = FindRoot(scene, MobilePresentationAuthoringService.InstructionBlueprintRootEntityName);
 
-            Assert.True(DemoDiscOverrideScopeReader.ExistsOnPlatform(legacy, AndroidPlatformId));
-            AssertDensityViewportOnAndroidOnly(legacy);
-            foreach (string name in new[] { "CameraText", "LightIconText" }) {
-                TextComponent text = ResolveComponent<TextComponent>(Find(legacy, name), "helengine.TextComponent", AndroidPlatformId);
-                Assert.Equal(TextNativePixelMode.Disabled, text.NativeFontPixels);
+            foreach (string platformId in MicroSdPlatformIds()) {
+                Assert.False(DemoDiscOverrideScopeReader.ExistsOnPlatform(legacy, platformId), "The legacy panel must step aside on " + platformId + ".");
+                Assert.True(DemoDiscOverrideScopeReader.ExistsOnPlatform(blueprint, platformId), "The instruction Blueprint must present on " + platformId + ".");
             }
+        }
+
+        /// <summary>
+        /// Reads the Micro SD group's platforms from the committed platform group tree.
+        /// </summary>
+        /// <returns>Platform ids of the Micro SD group; never empty.</returns>
+        static IReadOnlyList<string> MicroSdPlatformIds() {
+            EditorProjectPlatformGroupsDocument groups = new EditorProjectPlatformGroupsService(DemoDiscTestProject.RootPath).Read();
+            EditorProjectPlatformGroupDefinition microSd = EditorProjectPlatformGroupsService.FindGroup(groups, DemoDiscOverrideScopes.MicroSdGroupId);
+            Assert.NotNull(microSd);
+            Assert.NotEmpty(microSd.PlatformIds);
+            return microSd.PlatformIds;
         }
 
         /// <summary>
