@@ -39,10 +39,12 @@ namespace DemoDisc.EditorTools.tests {
 
         static TComponent ReadComponent<TComponent>(SceneEntityAsset entity) where TComponent : Component {
             ComponentPersistenceRegistry registry = new ComponentPersistenceRegistry();
+            ComponentPlatformOverridePayloadService payloads = new ComponentPlatformOverridePayloadService();
             string typeId = AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(TComponent));
             foreach (SceneComponentAssetRecord record in entity.Components ?? Array.Empty<SceneComponentAssetRecord>()) {
                 if (record.ComponentTypeId == typeId) {
-                    return (TComponent)registry.GetDescriptor(typeId).DeserializeComponent(record, null, null);
+                    // Platform-overridden components are saved inside an override wrapper; the common value is its base record.
+                    return (TComponent)registry.GetDescriptor(typeId).DeserializeComponent(payloads.UnwrapBaseRecord(record), null, null);
                 }
             }
             throw new InvalidOperationException($"Authored '{entity.Name}' is missing {typeof(TComponent).Name}.");
