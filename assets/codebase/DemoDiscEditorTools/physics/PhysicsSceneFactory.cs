@@ -764,12 +764,17 @@ namespace DemoDisc.EditorTools {
                 cameraEntity
             };
 
+            // The legacy panel steps aside on Micro SD and mobile for the shared console instruction Blueprint, so the
+            // validation scenes mount the Blueprint exactly as the playable showcases do.
             EditorEntity instructionOverlayRootEntity = CreatePhysicsShowcaseDesktopInstructionOverlayRoot();
+            EditorEntity instructionBlueprintRootEntity = CreateConsoleInstructionBlueprintRoot();
             try {
-                new DemoDisc.EditorTools.MobilePresentationAuthoringService().ConfigureScenePresentation(new Entity[] { instructionOverlayRootEntity });
+                new DemoDisc.EditorTools.MobilePresentationAuthoringService().ConfigureScenePresentation(new Entity[] { instructionOverlayRootEntity, instructionBlueprintRootEntity });
                 rootEntities.Add(SerializeGeneratedEditorRoot(instructionOverlayRootEntity, assetReferences, assetReferenceKeys));
+                rootEntities.Add(SerializeGeneratedEditorRoot(instructionBlueprintRootEntity, assetReferences, assetReferenceKeys));
             } finally {
                 instructionOverlayRootEntity.Dispose();
+                instructionBlueprintRootEntity.Dispose();
             }
 
             EditorEntity validationUiEntity = CreateLivePhysicsShowcaseUiEntity(string.Empty, FindRequiredSceneEntityAssetByName(scenarioEntity.Children, "KeyLight").Id);
@@ -1208,6 +1213,26 @@ namespace DemoDisc.EditorTools {
 
             ReassignGeneratedEditorEntityIds(editorOverlayRootEntity);
             return editorOverlayRootEntity;
+        }
+
+        /// <summary>
+        /// Creates the shared console camera and light instruction Blueprint instance root for one validation scene.
+        /// </summary>
+        /// <returns>Live Blueprint instance root carrying a scene-local entity id.</returns>
+        EditorEntity CreateConsoleInstructionBlueprintRoot() {
+            if (string.IsNullOrWhiteSpace(CurrentProjectRootPath)) {
+                throw new InvalidOperationException("Mounting the console instruction Blueprint requires an active project root path.");
+            }
+
+            Entity blueprintRootEntity = new DemoDisc.EditorTools.ConsoleCameraLightInstructionsSceneAttachmentService().CreateBlueprintInstanceRoot(CurrentProjectRootPath, AssetAuthoringService);
+            if (blueprintRootEntity is not EditorEntity editorBlueprintRootEntity) {
+                throw new InvalidOperationException("The console instruction Blueprint root must be authored through editor entities.");
+            }
+
+            // Its dual-screen exclusion is a group scope, which matches only on the group-first level order.
+            FindRequiredEntitySaveComponent(editorBlueprintRootEntity).OverrideLevelOrder = DemoDisc.EditorTools.DemoDiscOverrideScopes.CreateGroupFirstLevelOrder();
+            ReassignGeneratedEditorEntityIds(editorBlueprintRootEntity);
+            return editorBlueprintRootEntity;
         }
 
         /// <summary>
