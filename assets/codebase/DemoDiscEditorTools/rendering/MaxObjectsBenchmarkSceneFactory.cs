@@ -50,7 +50,7 @@ namespace DemoDisc.EditorTools {
                 SpawnIntervalSeconds = 1d
             });
 
-            return new GeneratedAuthoringSceneDefinition {
+            GeneratedAuthoringSceneDefinition sceneDefinition = new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
@@ -59,6 +59,8 @@ namespace DemoDisc.EditorTools {
                 RootEntities = [CreateDirectionalLightEntity()],
                 DesktopPresentationRootEntities = [uiEntity]
             };
+            new MobilePresentationAuthoringService().ConfigureScenePresentation(sceneDefinition.DesktopPresentationRootEntities);
+            return sceneDefinition;
         }
 
         Entity CreateCameraEntity(Entity parent) {

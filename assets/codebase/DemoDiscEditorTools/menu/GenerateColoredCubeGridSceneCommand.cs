@@ -37,6 +37,7 @@ namespace DemoDisc.EditorTools {
             GeneratedAuthoringSceneWriteService sceneWriteService = new GeneratedAuthoringSceneWriteService(context.ScriptTypeResolver, context.Authoring, transaction);
             sceneWriteService.WriteScene(sceneDefinition);
             transaction.Commit();
+            new MobileMaterialAuthoringService().Configure(context.Authoring);
         }
     }
 }

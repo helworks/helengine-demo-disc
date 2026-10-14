@@ -188,7 +188,7 @@ namespace DemoDisc.EditorTools {
             rootEntities[1] = CreateDirectionalLightEntity();
             Array.Copy(cubeEntities, 0, rootEntities, 2, cubeEntities.Length);
 
-            return new GeneratedAuthoringSceneDefinition {
+            GeneratedAuthoringSceneDefinition sceneDefinition = new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
@@ -201,6 +201,8 @@ namespace DemoDisc.EditorTools {
                     consoleInstructionBlueprintEntity
                 }
             };
+            new MobilePresentationAuthoringService().ConfigureScenePresentation(sceneDefinition.DesktopPresentationRootEntities);
+            return sceneDefinition;
         }
 
         /// <summary>

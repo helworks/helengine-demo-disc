@@ -107,6 +107,25 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
+        /// Authors the mobile presentation of one generated path tracer scene: the full-screen camera's HUD scales by
+        /// density on the mobile group. The bottom-screen camera exists only on the dual-screen rigs, so it gets none.
+        /// Callers run this just before saving instead of it running inside the definition builders, because authoring an
+        /// override makes the editor re-apply its viewport layout preview to the live entities, and a definition's
+        /// entities keep their authored layout until the save restores and serializes them.
+        /// </summary>
+        /// <param name="definition">Definition built by <see cref="CreateSceneDefinition"/> or <see cref="CreateShowcaseDefinition"/>.</param>
+        /// <returns>The same definition, ready to be written.</returns>
+        public GeneratedAuthoringSceneDefinition WithMobilePresentation(GeneratedAuthoringSceneDefinition definition) {
+            if (definition == null) {
+                throw new ArgumentNullException(nameof(definition));
+            }
+
+            Entity camera = definition.RootEntities.Single(root => root is EditorEntity editorEntity && editorEntity.Name == "SoftwarePathTracerCamera");
+            new MobilePresentationAuthoringService().ConfigureDensitySubtree(camera);
+            return definition;
+        }
+
+        /// <summary>
         /// Creates the ordinary full-screen camera used to present the runtime output and HUD.
         /// </summary>
         Entity CreatePresentationCameraEntity(out Entity presentationViewportEntity) {

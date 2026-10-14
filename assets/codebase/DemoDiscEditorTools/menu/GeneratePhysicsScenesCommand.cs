@@ -29,6 +29,7 @@ namespace DemoDisc.EditorTools {
             PhysicsSceneGenerator generator = new PhysicsSceneGenerator(context.Authoring, transaction);
             generator.Generate(context.ProjectRootPath);
             transaction.Commit();
+            new MobileMaterialAuthoringService().Configure(context.Authoring);
         }
     }
 }

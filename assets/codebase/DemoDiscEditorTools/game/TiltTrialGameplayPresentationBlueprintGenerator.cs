@@ -43,8 +43,28 @@ namespace DemoDisc.EditorTools {
                 throw new InvalidOperationException("Tilt Trial presentation generation requires an active editor core.");
             }
 
-            WriteBlueprint(ConsoleBlueprintRelativePath, sceneFactory.CreateTiltTrialConsolePresentationRoot());
+            EditorEntity consoleRoot = sceneFactory.CreateTiltTrialConsolePresentationRoot();
+            ExcludeCamerasFromMobile(consoleRoot);
+            WriteBlueprint(ConsoleBlueprintRelativePath, consoleRoot);
             WriteBlueprint(HandheldBlueprintRelativePath, sceneFactory.CreateTiltTrialHandheldPresentationRoot());
+        }
+
+        /// <summary>
+        /// Removes the console presentation's own cameras on mobile, where the level scene's camera, driven by the
+        /// stage controller, presents the course and the Blueprint contributes only its HUD and lighting rig.
+        /// </summary>
+        /// <param name="entity">Console presentation subtree to search for camera entities.</param>
+        static void ExcludeCamerasFromMobile(Entity entity) {
+            for (int index = 0; index < entity.Components.Count; index++) {
+                if (entity.Components[index] is CameraComponent) {
+                    new MobilePresentationAuthoringService().Exclude(entity);
+                    break;
+                }
+            }
+
+            for (int index = 0; index < entity.Children.Count; index++) {
+                ExcludeCamerasFromMobile(entity.Children[index]);
+            }
         }
 
         /// <summary>

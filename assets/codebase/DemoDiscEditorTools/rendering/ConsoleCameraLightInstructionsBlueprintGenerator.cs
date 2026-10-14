@@ -47,7 +47,7 @@ namespace DemoDisc.EditorTools {
 
             Entity root = overlayFactory.CreateConsoleCameraLightInstructionsRoot(projectRootPath, font);
             try {
-                ConfigureAndroidPresentation(root);
+                ConfigureMobilePresentation(root);
                 AssetAuthoringService.WriteNativeBlueprint(
                     ConsoleCameraLightInstructionsAssetCatalog.ConsoleCameraLightInstructionsBlueprintRelativePath,
                     GeneratedScenePersistenceRegistryFactory.Create(),
@@ -60,16 +60,16 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
-        /// Authors the Android landscape presentation of the shared instructions: density-scaled viewport, scalable
+        /// Authors the mobile landscape presentation of the shared instructions: density-scaled viewport, scalable
         /// glyphs, and the panel pinned to the bottom-left screen edges it sits against on the reference canvas.
         /// </summary>
         /// <param name="root">Generated Blueprint root whose viewport holds the instruction panel.</param>
-        static void ConfigureAndroidPresentation(Entity root) {
-            AndroidDensityPresentationAuthoringService android = new AndroidDensityPresentationAuthoringService();
-            android.ConfigureDensitySubtree(root);
+        static void ConfigureMobilePresentation(Entity root) {
+            MobilePresentationAuthoringService mobile = new MobilePresentationAuthoringService();
+            mobile.ConfigureDensitySubtree(root);
             for (int index = 0; index < root.Children.Count; index++) {
                 if (root.Children[index] is EditorEntity panel && panel.Name == InstructionPanelEntityName) {
-                    android.AnchorToLeftBottomEdges(panel);
+                    mobile.AnchorToLeftBottomEdges(panel);
                     return;
                 }
             }

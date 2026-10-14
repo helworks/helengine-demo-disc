@@ -96,7 +96,7 @@ namespace DemoDisc.EditorTools {
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
             Entity directionalLight = CreateDirectionalLightEntity();
 
-            return new GeneratedAuthoringSceneDefinition {
+            GeneratedAuthoringSceneDefinition sceneDefinition = new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
@@ -122,6 +122,8 @@ namespace DemoDisc.EditorTools {
                     CreateFpsEntity(directionalLight)
                 }
             };
+            new MobilePresentationAuthoringService().ConfigureScenePresentation(sceneDefinition.DesktopPresentationRootEntities);
+            return sceneDefinition;
         }
 
         /// <summary>

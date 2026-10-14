@@ -134,7 +134,7 @@ namespace DemoDisc.EditorTools {
             Entity directionalLightRig = CreateDirectionalLightRigEntity(projectRootPath, arrowModel, axisMaterials[4]);
             Entity directionalLight = directionalLightRig.Children[0];
 
-            return new GeneratedAuthoringSceneDefinition {
+            GeneratedAuthoringSceneDefinition sceneDefinition = new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
@@ -159,6 +159,8 @@ namespace DemoDisc.EditorTools {
                     CreateUiEntity(directionalLight)
                 }
             };
+            new MobilePresentationAuthoringService().ConfigureScenePresentation(sceneDefinition.DesktopPresentationRootEntities);
+            return sceneDefinition;
         }
 
         /// <summary>

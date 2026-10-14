@@ -766,7 +766,8 @@ namespace DemoDisc.EditorTools {
 
             EditorEntity instructionOverlayRootEntity = CreatePhysicsShowcaseDesktopInstructionOverlayRoot();
             try {
-                rootEntities.Add(SerializeGeneratedEditorEntity(instructionOverlayRootEntity, assetReferences, assetReferenceKeys));
+                new DemoDisc.EditorTools.MobilePresentationAuthoringService().ConfigureScenePresentation(new Entity[] { instructionOverlayRootEntity });
+                rootEntities.Add(SerializeGeneratedEditorRoot(instructionOverlayRootEntity, assetReferences, assetReferenceKeys));
             } finally {
                 instructionOverlayRootEntity.Dispose();
             }
@@ -774,7 +775,8 @@ namespace DemoDisc.EditorTools {
             EditorEntity validationUiEntity = CreateLivePhysicsShowcaseUiEntity(string.Empty, FindRequiredSceneEntityAssetByName(scenarioEntity.Children, "KeyLight").Id);
             try {
                 ReassignGeneratedEditorEntityIds(validationUiEntity);
-                rootEntities.Add(SerializeGeneratedEditorEntity(validationUiEntity, assetReferences, assetReferenceKeys));
+                new DemoDisc.EditorTools.MobilePresentationAuthoringService().ConfigureScenePresentation(new Entity[] { validationUiEntity });
+                rootEntities.Add(SerializeGeneratedEditorRoot(validationUiEntity, assetReferences, assetReferenceKeys));
             } finally {
                 validationUiEntity.Dispose();
             }
@@ -816,7 +818,8 @@ namespace DemoDisc.EditorTools {
 
             EditorEntity instructionOverlayRootEntity = CreatePhysicsShowcaseDesktopInstructionOverlayRoot();
             try {
-                rootEntities.Add(SerializeGeneratedEditorEntity(instructionOverlayRootEntity, assetReferences, assetReferenceKeys));
+                new DemoDisc.EditorTools.MobilePresentationAuthoringService().ConfigureScenePresentation(new Entity[] { instructionOverlayRootEntity });
+                rootEntities.Add(SerializeGeneratedEditorRoot(instructionOverlayRootEntity, assetReferences, assetReferenceKeys));
             } finally {
                 instructionOverlayRootEntity.Dispose();
             }
@@ -824,7 +827,8 @@ namespace DemoDisc.EditorTools {
             EditorEntity physicsShowcaseUiEntity = CreateLivePhysicsShowcaseUiEntity(ResolveDemoDiscSceneLabel(sceneId), FindRequiredSceneEntityAssetByName(scenarioEntity.Children, "KeyLight").Id);
             try {
                 ReassignGeneratedEditorEntityIds(physicsShowcaseUiEntity);
-                rootEntities.Add(SerializeGeneratedEditorEntity(physicsShowcaseUiEntity, assetReferences, assetReferenceKeys));
+                new DemoDisc.EditorTools.MobilePresentationAuthoringService().ConfigureScenePresentation(new Entity[] { physicsShowcaseUiEntity });
+                rootEntities.Add(SerializeGeneratedEditorRoot(physicsShowcaseUiEntity, assetReferences, assetReferenceKeys));
             } finally {
                 physicsShowcaseUiEntity.Dispose();
             }
@@ -980,6 +984,22 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
+        /// Serializes one generated root subtree at its authored layout. Authoring a platform override makes the editor
+        /// re-apply its viewport layout preview to the live entities, fitted to the current editor window, so the subtree
+        /// is serialized inside the engine's authored-layout scope, exactly as the scene save pipeline does.
+        /// </summary>
+        /// <param name="root">Generated editor root to serialize.</param>
+        /// <param name="assetReferences">Scene-level asset references being accumulated.</param>
+        /// <param name="assetReferenceKeys">Deduplication keys for the accumulated scene-level asset references.</param>
+        /// <returns>Serialized scene-asset entity carrying authored, unscaled values.</returns>
+        SceneEntityAsset SerializeGeneratedEditorRoot(
+            EditorEntity root,
+            List<SceneAssetReference> assetReferences,
+            HashSet<string> assetReferenceKeys) {
+            return SceneViewportAuthoredLayoutScope.ForEntity(root).Serialize(() => SerializeGeneratedEditorEntity(root, assetReferences, assetReferenceKeys));
+        }
+
+        /// <summary>
         /// Serializes one generated editor-authored entity subtree into a scene-asset entity while collecting any component asset references referenced by the subtree.
         /// </summary>
         /// <param name="entity">Generated editor entity to serialize.</param>
@@ -1047,11 +1067,95 @@ namespace DemoDisc.EditorTools {
                 LocalPosition = entity.LocalPosition,
                 LocalScale = entity.LocalScale,
                 LocalOrientation = entity.LocalOrientation,
+                HasOverrideLevelOrder = saveComponent.OverrideLevelOrder != null,
+                OverrideLevelOrder = saveComponent.OverrideLevelOrder == null ? Array.Empty<SceneOverrideScopeStepKind>() : saveComponent.OverrideLevelOrder.ToArray(),
                 Components = componentRecords.ToArray(),
-                PlatformTransformOverrides = Array.Empty<SceneEntityPlatformTransformOverrideAsset>(),
-                PlatformComponentOverrides = Array.Empty<SceneEntityPlatformComponentOverrideAsset>(),
+                PlatformExistenceOverrides = CloneGeneratedExistenceOverrides(saveComponent),
+                PlatformTransformOverrides = CloneGeneratedTransformOverrides(saveComponent),
+                PlatformComponentOverrides = SerializeGeneratedComponentOverrides(saveComponent),
                 Children = childEntities.ToArray()
             };
+        }
+
+        /// <summary>
+        /// Copies the entity existence overrides a generator authored on one live entity into scene-asset payloads.
+        /// </summary>
+        /// <param name="saveComponent">Hidden save component that owns the existence overrides.</param>
+        /// <returns>Serializable existence overrides.</returns>
+        static SceneEntityPlatformExistenceOverrideAsset[] CloneGeneratedExistenceOverrides(EntitySaveComponent saveComponent) {
+            List<SceneEntityPlatformExistenceOverrideAsset> overrides = new List<SceneEntityPlatformExistenceOverrideAsset>();
+            foreach (SceneEntityPlatformExistenceOverrideAsset overrideState in saveComponent.EnumerateExistencePlatformOverrides()) {
+                if (overrideState == null) {
+                    continue;
+                }
+
+                overrides.Add(new SceneEntityPlatformExistenceOverrideAsset {
+                    Scope = overrideState.Scope,
+                    Exists = overrideState.Exists
+                });
+            }
+
+            return overrides.ToArray();
+        }
+
+        /// <summary>
+        /// Copies the transform overrides a generator authored on one live entity into scene-asset payloads.
+        /// </summary>
+        /// <param name="saveComponent">Hidden save component that owns the transform overrides.</param>
+        /// <returns>Serializable transform overrides.</returns>
+        static SceneEntityPlatformTransformOverrideAsset[] CloneGeneratedTransformOverrides(EntitySaveComponent saveComponent) {
+            List<SceneEntityPlatformTransformOverrideAsset> overrides = new List<SceneEntityPlatformTransformOverrideAsset>();
+            foreach (SceneEntityPlatformTransformOverrideAsset overrideState in saveComponent.EnumerateTransformPlatformOverrides()) {
+                if (overrideState == null) {
+                    continue;
+                }
+
+                overrides.Add(new SceneEntityPlatformTransformOverrideAsset {
+                    Scope = overrideState.Scope,
+                    HasLocalPositionOverride = overrideState.HasLocalPositionOverride,
+                    LocalPosition = overrideState.LocalPosition,
+                    HasLocalScaleOverride = overrideState.HasLocalScaleOverride,
+                    LocalScale = overrideState.LocalScale,
+                    HasLocalOrientationOverride = overrideState.HasLocalOrientationOverride,
+                    LocalOrientation = overrideState.LocalOrientation
+                });
+            }
+
+            return overrides.ToArray();
+        }
+
+        /// <summary>
+        /// Serializes the component additions and removals a generator authored on one live entity, such as the
+        /// mobile-only density viewport beside each FPS counter.
+        /// </summary>
+        /// <param name="saveComponent">Hidden save component that owns the component existence overrides.</param>
+        /// <returns>Serializable component existence overrides.</returns>
+        SceneEntityPlatformComponentOverrideAsset[] SerializeGeneratedComponentOverrides(EntitySaveComponent saveComponent) {
+            List<SceneEntityPlatformComponentOverrideAsset> overrides = new List<SceneEntityPlatformComponentOverrideAsset>();
+            foreach (EntityPlatformComponentOverrideState overrideState in saveComponent.EnumerateComponentPlatformOverrides()) {
+                if (overrideState == null || !overrideState.HasAnyOverrides) {
+                    continue;
+                }
+
+                List<SceneEntityPlatformAddedComponentAsset> addedComponents = new List<SceneEntityPlatformAddedComponentAsset>();
+                foreach (EntityPlatformAddedComponentState addedState in overrideState.EnumerateAddedComponents()) {
+                    if (addedState == null || addedState.Component == null || addedState.SaveState == null) {
+                        throw new InvalidOperationException("Generated platform-only components must carry a component and its save state.");
+                    }
+
+                    SceneComponentAssetRecord record = PersistenceRegistry.GetDescriptor(addedState.Component).SerializeComponent(addedState.Component, 0, addedState.SaveState);
+                    record.ComponentKey = addedState.ComponentKey;
+                    addedComponents.Add(new SceneEntityPlatformAddedComponentAsset { Component = record });
+                }
+
+                overrides.Add(new SceneEntityPlatformComponentOverrideAsset {
+                    Scope = overrideState.Scope.ToSteps(),
+                    RemovedComponentKeys = overrideState.EnumerateRemovedComponentKeys().Where(key => !string.IsNullOrWhiteSpace(key)).ToArray(),
+                    AddedComponents = addedComponents.ToArray()
+                });
+            }
+
+            return overrides.ToArray();
         }
 
         /// <summary>
@@ -1679,6 +1783,7 @@ namespace DemoDisc.EditorTools {
                 desktopPresentationRoots.Insert(1, consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService));
             }
             AssignFreshGeneratedEditorEntityIds(desktopPresentationRoots);
+            new DemoDisc.EditorTools.MobilePresentationAuthoringService().ConfigureScenePresentation(desktopPresentationRoots);
 
             return new DemoDisc.EditorTools.GeneratedAuthoringSceneDefinition {
                 SceneId = normalizedSceneId,

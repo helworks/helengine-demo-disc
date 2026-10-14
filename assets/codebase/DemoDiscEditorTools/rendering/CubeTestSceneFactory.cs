@@ -55,7 +55,7 @@ namespace DemoDisc.EditorTools {
             Entity consoleInstructionBlueprintEntity = consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService);
             Entity directionalLightEntity = CreateDirectionalLightEntity();
             Entity uiEntity = CreateUiEntity(directionalLightEntity);
-            ConfigureAndroidPresentation(instructionOverlayEntity, uiEntity);
+            ConfigureMobilePresentation(instructionOverlayEntity, consoleInstructionBlueprintEntity, uiEntity);
 
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
@@ -77,25 +77,18 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
-        /// Authors the Android landscape presentation of the desktop scene UI. The content and the desktop presentation stay
-        /// common; Android only swaps the legacy instruction panel for the shared Blueprint, scales the overlays by density
-        /// and pins the light swatch and scene label to the screen edges they sit against on the reference canvas.
+        /// Authors the mobile landscape presentation of the desktop scene UI. The content and the desktop presentation stay
+        /// common; mobile swaps the legacy instruction panel for the shared Blueprint, scales the overlays by density and
+        /// pins the light swatch and scene label to the screen edges they sit against on the reference canvas.
         /// </summary>
-        /// <param name="instructionOverlayEntity">Legacy desktop instruction viewport, replaced by the Blueprint on Android.</param>
+        /// <param name="instructionOverlayEntity">Legacy desktop instruction viewport, replaced by the Blueprint on mobile.</param>
+        /// <param name="consoleInstructionBlueprintEntity">Shared instruction Blueprint instance that replaces it.</param>
         /// <param name="uiEntity">Desktop scene UI root holding the FPS counter, light swatch and scene label.</param>
-        static void ConfigureAndroidPresentation(Entity instructionOverlayEntity, Entity uiEntity) {
-            ExcludeLegacyInstructionsFromAndroid(instructionOverlayEntity);
-            AndroidDensityPresentationAuthoringService android = new AndroidDensityPresentationAuthoringService();
-            android.ConfigureDensitySubtree(uiEntity);
-            android.AnchorToLeftBottomEdges(FindRequiredDescendant(uiEntity, DemoDiscLightIndicatorOverlayFactory.IndicatorSwatchEntityName));
-            android.AnchorToRightTopEdges(FindRequiredDescendant(uiEntity, DemoDiscSceneLabelOverlayFactory.LabelEntityName));
-            for (int index = 0; index < uiEntity.Components.Count; index++) {
-                if (uiEntity.Components[index] is DemoDiscLightToggleComponent lightToggle) {
-                    android.PinPropertyForAndroid(uiEntity, lightToggle, nameof(DemoDiscLightToggleComponent.IndicatorSwatchEntityReference));
-                } else if (uiEntity.Components[index] is DemoDiscDebugSceneLabelComponent sceneLabel) {
-                    android.PinPropertyForAndroid(uiEntity, sceneLabel, nameof(DemoDiscDebugSceneLabelComponent.LabelEntityReference));
-                }
-            }
+        static void ConfigureMobilePresentation(Entity instructionOverlayEntity, Entity consoleInstructionBlueprintEntity, Entity uiEntity) {
+            MobilePresentationAuthoringService mobile = new MobilePresentationAuthoringService();
+            mobile.ConfigureScenePresentation(new[] { instructionOverlayEntity, consoleInstructionBlueprintEntity, uiEntity });
+            mobile.AnchorToLeftBottomEdges(FindRequiredDescendant(uiEntity, DemoDiscLightIndicatorOverlayFactory.IndicatorSwatchEntityName));
+            mobile.AnchorToRightTopEdges(FindRequiredDescendant(uiEntity, DemoDiscSceneLabelOverlayFactory.LabelEntityName));
         }
 
         /// <summary>
@@ -134,17 +127,6 @@ namespace DemoDisc.EditorTools {
             return null;
         }
 
-        /// <summary>Selects the shared instruction Blueprint on Android when the Cube Test is regenerated, excluding its legacy scene panel.</summary>
-        /// <param name="root">Legacy instruction viewport whose other platform configurations remain authored.</param>
-        static void ExcludeLegacyInstructionsFromAndroid(Entity root) {
-            for (int index = 0; index < root.Components.Count; index++) {
-                if (root.Components[index] is EntitySaveComponent save) {
-                    save.GetOrCreateExistencePlatformOverride("android").Exists = false;
-                    return;
-                }
-            }
-            throw new InvalidOperationException("The legacy instruction root requires entity save metadata.");
-        }
         /// <summary>
         /// Creates the authored camera entity for the cube-test scene.
         /// </summary>

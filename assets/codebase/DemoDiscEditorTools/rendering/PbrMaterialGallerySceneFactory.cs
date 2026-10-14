@@ -80,7 +80,7 @@ namespace DemoDisc.EditorTools {
             rootEntities[4] = CreateGroundEntity(planeModel, groundMaterial);
             Array.Copy(sphereEntities, 0, rootEntities, 5, sphereEntities.Length);
 
-            return new GeneratedAuthoringSceneDefinition {
+            GeneratedAuthoringSceneDefinition sceneDefinition = new GeneratedAuthoringSceneDefinition {
                 SceneId = SceneId,
                 SceneSettings = new SceneSettingsAsset(),
                 NintendoDsScene = new GeneratedDsSceneDefinition {
@@ -93,6 +93,8 @@ namespace DemoDisc.EditorTools {
                     consoleInstructionBlueprintEntity
                 }
             };
+            new MobilePresentationAuthoringService().ConfigureScenePresentation(sceneDefinition.DesktopPresentationRootEntities);
+            return sceneDefinition;
         }
 
         /// <summary>

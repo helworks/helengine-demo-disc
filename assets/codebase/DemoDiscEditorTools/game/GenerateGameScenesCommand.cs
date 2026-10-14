@@ -30,6 +30,7 @@ namespace DemoDisc.EditorTools {
                 assetGenerator.GenerateReusableAssets(context.ProjectRootPath);
                 assetTransaction.Commit();
             }
+            new MobileMaterialAuthoringService().Configure(context.Authoring);
 
             using (helengine.editor.EditorAuthoringTransaction sceneTransaction = context.Authoring.BeginTransaction()) {
                 GameSceneGenerator sceneGenerator = new GameSceneGenerator(context.ScriptTypeResolver, context.Authoring, sceneTransaction);

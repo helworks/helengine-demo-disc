@@ -37,6 +37,7 @@ namespace DemoDisc.EditorTools {
             RenderingSceneGenerator generator = new RenderingSceneGenerator(context.ScriptTypeResolver, context.Authoring, transaction);
             generator.Generate(context.ProjectRootPath, assets);
             transaction.Commit();
+            new MobileMaterialAuthoringService().Configure(context.Authoring);
         }
     }
 }

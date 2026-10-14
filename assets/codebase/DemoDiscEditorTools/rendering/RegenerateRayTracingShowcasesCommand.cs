@@ -16,9 +16,9 @@ namespace DemoDisc.EditorTools {
             SoftwarePathTracerSceneFactory factory = new SoftwarePathTracerSceneFactory(context.Authoring);
             GeneratedAuthoringSceneWriteService writer = new GeneratedAuthoringSceneWriteService(context.ScriptTypeResolver, context.Authoring, transaction);
             EditorCore core = (EditorCore)context.Authoring.OwningCore;
-            writer.WriteScene(factory.CreateSceneDefinition(context.ProjectRootPath, EngineSceneAssetReferenceFactory.CreateCubeModel(), core.DefaultFontAssetForEditor));
+            writer.WriteScene(factory.WithMobilePresentation(factory.CreateSceneDefinition(context.ProjectRootPath, EngineSceneAssetReferenceFactory.CreateCubeModel(), core.DefaultFontAssetForEditor)));
             foreach (string sceneId in new[] { SoftwareRayTracingShowcaseFactory.TeapotSceneId, SoftwareRayTracingShowcaseFactory.SpheresSceneId, SoftwareRayTracingShowcaseFactory.ShadowsSceneId }) {
-                writer.WriteScene(factory.CreateShowcaseDefinition(context.ProjectRootPath, sceneId, core.DefaultFontAssetForEditor, transaction.CreateReference(SoftwareRayTracingMeshFactory.SpherePath, AssetEntryKind.Model), transaction.CreateReference(SoftwareRayTracingMeshFactory.TeapotPath, AssetEntryKind.Model)));
+                writer.WriteScene(factory.WithMobilePresentation(factory.CreateShowcaseDefinition(context.ProjectRootPath, sceneId, core.DefaultFontAssetForEditor, transaction.CreateReference(SoftwareRayTracingMeshFactory.SpherePath, AssetEntryKind.Model), transaction.CreateReference(SoftwareRayTracingMeshFactory.TeapotPath, AssetEntryKind.Model))));
             }
             transaction.Commit();
         }

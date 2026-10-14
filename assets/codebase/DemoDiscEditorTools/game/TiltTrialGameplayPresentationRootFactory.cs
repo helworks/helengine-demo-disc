@@ -73,12 +73,32 @@ namespace DemoDisc.EditorTools {
             EntitySaveComponent handheldSaveComponent = FindRequiredEntitySaveComponent(handheldRoot);
             handheldSaveComponent.GetOrCreateExistencePlatformOverride(EditorOverrideScope.Common).Exists = false;
             handheldSaveComponent.GetOrCreateExistencePlatformOverride(DemoDiscOverrideScopes.DualScreen).Exists = true;
+            ExcludeSceneSessionAndLightsFromMobile(sceneRoots);
 
             Entity[] roots = new Entity[sceneRoots.Length + 2];
             Array.Copy(sceneRoots, 0, roots, 0, sceneRoots.Length);
             roots[sceneRoots.Length] = consoleRoot;
             roots[sceneRoots.Length + 1] = handheldRoot;
             return roots;
+        }
+
+        /// <summary>
+        /// On mobile the console presentation Blueprint supplies the session HUD and the lighting rig, so the level's
+        /// own session root and light roots step aside there and the scene keeps one HUD and one rig.
+        /// </summary>
+        /// <param name="sceneRoots">Authored gameplay roots of one Tilt Trial level scene.</param>
+        static void ExcludeSceneSessionAndLightsFromMobile(Entity[] sceneRoots) {
+            MobilePresentationAuthoringService mobile = new MobilePresentationAuthoringService();
+            for (int rootIndex = 0; rootIndex < sceneRoots.Length; rootIndex++) {
+                Entity root = sceneRoots[rootIndex];
+                for (int index = 0; index < root.Components.Count; index++) {
+                    Component component = root.Components[index];
+                    if (component is DemoDisc.TiltPlay.TiltTrialSessionComponent || component is DirectionalLightComponent || component is AmbientLightComponent) {
+                        mobile.Exclude(root);
+                        break;
+                    }
+                }
+            }
         }
 
         /// <summary>
