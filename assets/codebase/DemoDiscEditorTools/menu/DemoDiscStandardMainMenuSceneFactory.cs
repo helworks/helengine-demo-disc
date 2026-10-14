@@ -410,7 +410,8 @@ namespace DemoDisc.EditorTools {
         /// <param name="isStatic">Whether the authored text entity should be marked static for runtime caching.</param>
         /// <param name="outlineColor">Optional text outline color.</param>
         /// <param name="outlineScale">Optional text outline scale.</param>
-        Entity CreateTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, float depth, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, byte4 outlineColor = default, float outlineScale = 0f) {
+        /// <param name="alignment">Horizontal alignment of the glyphs inside the authored layout box.</param>
+        Entity CreateTextEntity(Entity parent, string entityName, float3 localPosition, string text, string fontPath, byte4 color, int2 size, float depth, helengine.LayoutComponent anchorComponent, float fontScale = 1f, bool isStatic = true, byte4 outlineColor = default, float outlineScale = 0f, TextAlignment alignment = TextAlignment.Left) {
             if (parent == null) {
                 throw new ArgumentNullException(nameof(parent));
             } else if (string.IsNullOrWhiteSpace(entityName)) {
@@ -431,6 +432,7 @@ namespace DemoDisc.EditorTools {
                 Size = size,
                 NativeFontPixels = TextNativePixelMode.RoundUp,
                 FontScale = fontScale,
+                Alignment = alignment,
 
                 OutlineColor = outlineColor,
                 OutlineScale = outlineScale,
@@ -649,8 +651,13 @@ namespace DemoDisc.EditorTools {
             anchorComponent.LayoutSpace = LayoutComponent.CameraViewportLayoutSpace;
             anchorComponent.SetAnchorDistances(right: platformInfoOverlay.RightMargin, top: platformInfoOverlay.TopMargin);
             entity.AddComponent(anchorComponent);
-            CreateTextEntity(entity, "DemoDiscTitleHelengineText", new float3(-300f, 0f, 0.1f), "HELENGINE", definition.TitleFontPath, definition.TextColor, new int2(400, 28), 42, null, 1f, false, definition.SurfaceBorderColor, 2f);
-            CreateTextEntity(entity, "DemoDiscTitleDemoDiscText", new float3(-280f, 64f, 0.1f), "DEMO DISC", definition.TitleFontPath, definition.MutedTextColor, new int2(400, 28), 42, null, 1f, false, definition.SurfaceBorderColor, 2f);
+
+            // The title glyphs render at the cooked font's native size while the layout box scales with the canvas width,
+            // so the box ends exactly on the right anchor and right-aligns the measured text: its right edge stays on the
+            // margin at every canvas width as long as the text fits between the canvas left edge and the margin.
+            int titleBoxWidth = DemoMenuLayout.CanvasWidth - platformInfoOverlay.RightMargin;
+            CreateTextEntity(entity, "DemoDiscTitleHelengineText", new float3(-titleBoxWidth, 0f, 0.1f), "HELENGINE", definition.TitleFontPath, definition.TextColor, new int2(titleBoxWidth, 28), 42, null, 1f, false, definition.SurfaceBorderColor, 2f, TextAlignment.Right);
+            CreateTextEntity(entity, "DemoDiscTitleDemoDiscText", new float3(-titleBoxWidth, 64f, 0.1f), "DEMO DISC", definition.TitleFontPath, definition.MutedTextColor, new int2(titleBoxWidth, 28), 42, null, 1f, false, definition.SurfaceBorderColor, 2f, TextAlignment.Right);
         }
 
         /// <summary>
