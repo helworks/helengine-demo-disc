@@ -51,7 +51,7 @@ namespace DemoDisc.EditorTools {
             if (settings == null || settings.Importer == null) {
                 throw new InvalidOperationException($"Generated control icon '{relativePath}' did not produce prepared texture settings.");
             }
-            if (settings == null || settings.Importer == null || string.IsNullOrWhiteSpace(settings.Importer.AssetId)) {
+            if (settings == null || settings.Importer == null || string.IsNullOrWhiteSpace(settings.Importer.ProcessedAssetId)) {
                 throw new InvalidOperationException($"Generated control icon '{relativePath}' did not produce a persisted imported texture asset id.");
             }
 
@@ -60,7 +60,7 @@ namespace DemoDisc.EditorTools {
                 FamilyId = familyId,
                 ControlId = controlId,
                 SourcePngRelativePath = relativePath,
-                ImportedTextureAssetId = settings.Importer.AssetId,
+                ImportedTextureAssetId = settings.Importer.ProcessedAssetId,
                 SourceRect = LoadTrimmedSourceRect(fullProjectRootPath, relativePath)
             };
         }

@@ -2103,7 +2103,6 @@ namespace DemoDisc.EditorTools {
             TextureAssetImportSettings settings = new TextureAssetImportSettings();
             settings.Importer.ImporterId = TextureImporterId;
             settings.Importer.SourceChecksum = ComputeSourceChecksum(textureBytes);
-            settings.Importer.AssetId = PhysicsDemoSphereTileTextureAssetId;
             return settings;
         }
 

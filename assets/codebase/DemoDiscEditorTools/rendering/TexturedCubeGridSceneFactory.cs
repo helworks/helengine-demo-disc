@@ -651,7 +651,6 @@ namespace DemoDisc.EditorTools {
             TextureAssetImportSettings settings = new TextureAssetImportSettings();
             settings.Importer.ImporterId = TextureImporterId;
             settings.Importer.SourceChecksum = ComputeSourceChecksum(textureBytes);
-            settings.Importer.AssetId = CubeTextureAssetIds[cubeIndex];
             settings.Processor.Platforms["ps2"] = new TextureAssetProcessorSettings {
                 ColorFormat = TextureAssetColorFormat.Indexed8,
                 AlphaPrecision = TextureAssetAlphaPrecision.A8

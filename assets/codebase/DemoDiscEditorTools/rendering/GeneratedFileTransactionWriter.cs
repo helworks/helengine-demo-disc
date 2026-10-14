@@ -38,7 +38,7 @@ namespace DemoDisc.EditorTools {
                 sourceBytes,
                 settings,
                 transaction);
-            return prepared.Importer.AssetId;
+            return prepared.Importer.ProcessedAssetId;
         }
 
         /// <summary>

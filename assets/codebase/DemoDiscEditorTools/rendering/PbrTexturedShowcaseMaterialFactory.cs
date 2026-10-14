@@ -129,7 +129,7 @@ namespace DemoDisc.EditorTools {
                 File.ReadAllBytes(sourceTexturePath),
                 settingsIntent,
                 Transaction);
-            string assetId = settings.Importer.AssetId;
+            string assetId = settings.Importer.ProcessedAssetId;
             if (string.IsNullOrWhiteSpace(assetId)) {
                 throw new InvalidOperationException($"PBR textured showcase requires a persisted imported texture asset id for '{relativeTexturePath}'.");
             }
