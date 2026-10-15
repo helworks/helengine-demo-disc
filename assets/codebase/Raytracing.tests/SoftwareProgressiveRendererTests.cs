@@ -32,6 +32,7 @@ namespace DemoDisc.Raytracing.tests {
         [InlineData("wii", 320, 240, 76800, 921600)]
         [InlineData("wiiu", 320, 240, 76800, 921600)]
         [InlineData("windows", 320, 240, 76800, 921600)]
+        [InlineData("webgpu", 320, 240, 76800, 921600)]
         public void Resolution_and_accumulator_bytes_match_contract(string platform, int width, int height, int pixels, long bytes) {
             SoftwareTraceResolution resolution = SoftwareTraceResolution.ForPlatform(platform);
 

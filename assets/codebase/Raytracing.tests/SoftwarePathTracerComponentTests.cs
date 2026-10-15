@@ -282,6 +282,7 @@ namespace DemoDisc.Raytracing.tests {
         [InlineData("ds", 256, 192, TextureAssetColorFormat.Rgba4444, TextureAssetAlphaPrecision.A4, 2)]
         [InlineData("DS", 256, 192, TextureAssetColorFormat.Rgba4444, TextureAssetAlphaPrecision.A4, 2)]
         [InlineData("windows", 320, 240, TextureAssetColorFormat.Rgba32, TextureAssetAlphaPrecision.A8, 4)]
+        [InlineData("webgpu", 320, 240, TextureAssetColorFormat.Rgba32, TextureAssetAlphaPrecision.A8, 4)]
         public void Initialize_platform_resolution_reports_exact_texture_and_memory(string platformName, int expectedWidth, int expectedHeight, TextureAssetColorFormat expectedColorFormat, TextureAssetAlphaPrecision expectedAlphaPrecision, int expectedBytesPerPixel) {
             using TestFixture fixture = CreateFixture(new SoftwareTraceResolution(expectedWidth, expectedHeight));
             SoftwareTraceResolution resolution = SoftwareTraceResolution.ForPlatform(platformName);

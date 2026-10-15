@@ -63,7 +63,7 @@ namespace DemoDisc.Raytracing {
                 return new SoftwareTraceResolution(128, 96);
             }
 
-            if (string.Equals(platformId, "3ds", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "gamecube", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "ps2", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "psp", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "psvita", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "switch", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "wii", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "wiiu", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "windows", StringComparison.OrdinalIgnoreCase)) {
+            if (string.Equals(platformId, "3ds", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "gamecube", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "ps2", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "psp", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "psvita", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "switch", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "wii", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "wiiu", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "windows", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "webgpu", StringComparison.OrdinalIgnoreCase)) {
                 return new SoftwareTraceResolution(320, 240);
             }
 
