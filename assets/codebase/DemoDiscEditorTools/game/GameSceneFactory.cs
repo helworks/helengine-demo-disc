@@ -1041,6 +1041,11 @@ namespace DemoDisc.EditorTools {
             ConfigureTiltTrialStageTargets(stageRootEntity, cameraEntity, playerSphereEntity);
             ConfigureTiltTrialGoalTarget(stageRootEntity, playerSphereEntity);
             ConfigureTiltTrialCoinTargets(stageRootEntity, playerSphereEntity);
+            DemoDisc.TiltPlay.TiltTrialSessionComponent session = uiEntity.Components.OfType<DemoDisc.TiltPlay.TiltTrialSessionComponent>().Single();
+            session.PlayerSphereReference = new SceneEntityReference { EntityId = FindRequiredEntitySaveComponent(playerSphereEntity).EntityId };
+            session.StageRootReference = new SceneEntityReference { EntityId = FindRequiredEntitySaveComponent(stageRootEntity).EntityId };
+            Entity goal = stageRootEntity.Children.Single(child => child.Components.OfType<BlueprintInstanceComponent>().Any(instance => instance.BlueprintAssetReference?.RelativePath == SplitPlayAssetCatalog.GoalFlagBlueprintRelativePath));
+            session.GoalEntityReference = new SceneEntityReference { EntityId = FindRequiredEntitySaveComponent((EditorEntity)goal).EntityId };
             return new GeneratedAuthoringSceneDefinition {
                 SceneId = levelEntry.SceneId,
                 SceneAssetRelativePath = BuildTiltTrialGameplaySceneAssetRelativePath(levelEntry.SceneId),

@@ -36,6 +36,30 @@ namespace DemoDisc.EditorTools.tests {
             }
         }
 
+        /// <summary>Checks the three external gameplay bindings persisted on each desktop Tilt level.</summary>
+        [Fact]
+        public void Persisted_tilt_sessions_bind_player_stage_and_goal() {
+            var paths=Directory.GetFiles(Path.Combine(Root,"assets/scenes/games/tilt"),"tilt_trial_level_*.helen");
+            Assert.Equal(5,paths.Length);
+            foreach(string path in paths) {
+                using var stream=File.OpenRead(path);
+                var scene=(SceneAsset)helengine.editor.AssetSerializer.Deserialize(stream);
+                var entities=Flatten(scene.RootEntities).ToDictionary(entity=>entity.Id);
+                var session=Assert.Single(entities.Values.SelectMany(entity=>entity.Components).Where(record=>record.ComponentTypeId=="DemoDisc.TiltPlay.TiltTrialSessionComponent, TiltPlay"));
+                var fields=new EditorTaggedSceneComponentFieldReader(new ComponentPlatformOverridePayloadService().UnwrapBaseRecord(session).Payload);
+                foreach(string name in new[]{"PlayerSphereReference","StageRootReference","GoalEntityReference"}) {
+                    Assert.True(fields.TryGetFieldReader(name,out var reader),path+": "+name);
+                    using(reader) {
+                        var reference=reader.ReadSceneEntityReference();
+                        Assert.NotNull(reference);
+                        Assert.True(entities.TryGetValue(reference.EntityId,out var entity),path+": "+name);
+                        if(name=="PlayerSphereReference") Assert.Contains(entity.Components,component=>component.ComponentTypeId.Contains("RigidBody3DComponent",StringComparison.Ordinal));
+                        else if(name=="GoalEntityReference") Assert.Contains("Goal",entity.Name);
+                        else Assert.Contains("Stage",entity.Name);
+                    }
+                }
+            }
+        }
         static SceneAsset Load(string relative) {using var stream=File.OpenRead(Path.Combine(Root,relative));return (SceneAsset)helengine.editor.AssetSerializer.Deserialize(stream);}
         static IEnumerable<SceneEntityAsset> Flatten(IEnumerable<SceneEntityAsset> roots) {foreach(var entity in roots){yield return entity;foreach(var child in Flatten(entity.Children)) yield return child;}}
         static string ReadString(SceneComponentAssetRecord record,string name) {var fields=new EditorTaggedSceneComponentFieldReader(new ComponentPlatformOverridePayloadService().UnwrapBaseRecord(record).Payload);Assert.True(fields.TryGetFieldReader(name,out var reader));using(reader)return reader.ReadString();}
