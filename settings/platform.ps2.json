@@ -21,8 +21,7 @@
     "rendererHdrEnabled": true,
     "rendererPostProcessTier": 2,
     "selectedOptionValues": {
-      "default-width": "640",
-      "default-height": "448",
+      "video-mode": "ntsc-640x448i",
       "vsync-enabled": "true",
       "fullscreen-enabled": "false",
       "depth-handler-mode": "hardware"
