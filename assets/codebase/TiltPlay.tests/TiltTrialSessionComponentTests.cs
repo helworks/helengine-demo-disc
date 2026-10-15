@@ -19,10 +19,15 @@ namespace DemoDisc.TiltPlay.tests {
 
         [Fact]
         public void Collect_coin_disables_direct_parent_when_no_wrapper_trigger_entity_is_present() {
-            helengine.Entity wrapperEntity = CreateEntity(null, []);
-            DemoDisc.TiltPlay.TiltTrialCollectibleCoinComponent coinComponent = AttachComponent<DemoDisc.TiltPlay.TiltTrialCollectibleCoinComponent>();
-            helengine.Entity coinEntity = CreateEntity(wrapperEntity, [coinComponent]);
-            SetChildren(wrapperEntity, [coinEntity]);
+            using helengine.Core core = new helengine.Core(new CoreInitializationOptions { ContentStreamSource = new HostFileSystemContentStreamSource(AppContext.BaseDirectory) });
+            core.Initialize(null, null, null, new PlatformInfo("test", "test-version"));
+            helengine.Entity wrapperEntity = new helengine.Entity(core);
+            wrapperEntity.InitComponents(); wrapperEntity.InitChildren();
+            helengine.Entity coinEntity = new helengine.Entity(core);
+            coinEntity.InitComponents(); coinEntity.InitChildren();
+            DemoDisc.TiltPlay.TiltTrialCollectibleCoinComponent coinComponent = new DemoDisc.TiltPlay.TiltTrialCollectibleCoinComponent();
+            coinEntity.AddComponent(coinComponent);
+            wrapperEntity.AddChild(coinEntity);
 
             coinComponent.Collect();
 
@@ -126,7 +131,7 @@ namespace DemoDisc.TiltPlay.tests {
         }
 
         [Fact]
-        public void Session_binds_renamed_scene_targets_from_references_and_allows_absent_handheld_panel() {
+        public void Session_initialization_binds_references_before_scene_registration() {
             helengine.Entity player = CreateEntity(null, [
                 new RigidBody3DComponent(),
                 new DemoDisc.TiltPlay.DemoTiltBallResetComponent()
@@ -153,9 +158,10 @@ namespace DemoDisc.TiltPlay.tests {
                 FailOverlayReference = ResolvedReference(fail)
             };
 
-            typeof(DemoDisc.TiltPlay.TiltTrialSessionComponent)
-                .GetMethod("BindFixedReferences", BindingFlags.Instance | BindingFlags.NonPublic)!
-                .Invoke(session, null);
+            helengine.Entity uiRoot = CreateEntity(null, [session]);
+            typeof(helengine.Entity).GetField("IsEnabled", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(uiRoot, false);
+            session.ComponentInitialized(uiRoot);
+            Assert.Null(typeof(DemoDisc.TiltPlay.TiltTrialSessionComponent).GetField("CurrentLevel", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(session));
 
             Type sessionType = typeof(DemoDisc.TiltPlay.TiltTrialSessionComponent);
             Assert.Same(player, sessionType.GetField("PlayerSphereEntity", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(session));

@@ -408,6 +408,8 @@ namespace DemoDisc.TiltPlay {
             }
 
             ReportStage("TiltTrialSession:EnsureSessionState:Validate");
+            // Scene registration follows ComponentInitialized; the first update sees the completed scene catalog.
+            CurrentLevel = ResolveCurrentLevel();
             if (CurrentLevel == null) {
                 throw new InvalidOperationException("Tilt Trial session requires a resolvable current level catalog entry.");
             }
@@ -755,8 +757,7 @@ namespace DemoDisc.TiltPlay {
         public override void ComponentInitialized(Entity entity) {
             base.ComponentInitialized(entity);
             BindFixedReferences();
-            CurrentLevel = ResolveCurrentLevel()
-                ?? throw new InvalidOperationException("Tilt Trial session requires a resolvable current level catalog entry.");
+
         }
 
         void BindFixedReferences() {
