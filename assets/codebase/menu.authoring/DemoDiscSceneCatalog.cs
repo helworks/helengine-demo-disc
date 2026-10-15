@@ -43,7 +43,11 @@ namespace DemoDisc.menu {
         /// </summary>
         /// <returns>Curated physics scene menu items.</returns>
         public MenuItemDefinition[] CreatePhysicsSceneItems() {
+#if DESKTOP_PLATFORM
+            IReadOnlyList<DemoDiscPhysicsSceneEntry> physicsSceneEntries = CreateDesktopPhysicsSceneEntries();
+#else
             IReadOnlyList<DemoDiscPhysicsSceneEntry> physicsSceneEntries = CreatePhysicsSceneEntries();
+#endif
             MenuItemDefinition[] items = new MenuItemDefinition[physicsSceneEntries.Count + 1];
             for (int index = 0; index < physicsSceneEntries.Count; index++) {
                 DemoDiscPhysicsSceneEntry sceneEntry = physicsSceneEntries[index];
@@ -111,6 +115,26 @@ namespace DemoDisc.menu {
         }
 
         /// <summary>
+        /// Exposes all twelve authored desktop physics scenes while retaining the separate curated handheld list.
+        /// </summary>
+        /// <returns>Complete desktop physics entries in stable menu order.</returns>
+        public IReadOnlyList<DemoDiscPhysicsSceneEntry> CreateDesktopPhysicsSceneEntries() {
+            return [
+                new DemoDiscPhysicsSceneEntry("physics-dynamic-stack-boxes", "Stacked Boxes", "test_scene_dynamic_stack_boxes"),
+                new DemoDiscPhysicsSceneEntry("physics-dynamic-sphere-stack", "Sphere Stack", "test_scene_dynamic_sphere_stack"),
+                new DemoDiscPhysicsSceneEntry("physics-dynamic-mixed-stack", "Mixed Stack", "test_scene_dynamic_mixed_stack"),
+                new DemoDiscPhysicsSceneEntry("physics-single-falling-cube", "Falling Cube", "test_scene_single_falling_cube"),
+                new DemoDiscPhysicsSceneEntry("physics-character-moving-platform", "Moving Platform", "test_scene_character_moving_platform"),
+                new DemoDiscPhysicsSceneEntry("physics-character-slope", "Character Slope", "test_scene_character_slope"),
+                new DemoDiscPhysicsSceneEntry("physics-character-steps", "Character Steps", "test_scene_character_steps"),
+                new DemoDiscPhysicsSceneEntry("physics-kinematic-push", "Kinematic Push", "test_scene_kinematic_push"),
+                new DemoDiscPhysicsSceneEntry("physics-mesh-ground-stability", "Mesh Ground", "test_scene_mesh_ground_stability"),
+                new DemoDiscPhysicsSceneEntry("physics-render-only-slope", "Render Slope", "test_scene_render_only_slope"),
+                new DemoDiscPhysicsSceneEntry("physics-strict-rotated-box", "Rotated Box", "test_scene_strict_rotated_box_compare"),
+                new DemoDiscPhysicsSceneEntry("physics-trigger-volume", "Trigger Volume", "test_scene_trigger_volume")
+            ];
+        }
+        /// <summary>
         /// Builds the curated Nintendo handheld physics scene entry set, including the matrix render probe that should not appear in the playable physics menu.
         /// </summary>
         /// <returns>Curated Nintendo handheld scene entries.</returns>
@@ -137,7 +161,10 @@ namespace DemoDisc.menu {
                 new DemoDiscGameSceneEntry(
                     "games-tilt-trial",
                     "Tilt Trial",
-                    "tilt_trial")
+                    "tilt_trial"),
+#if DESKTOP_PLATFORM
+                new DemoDiscGameSceneEntry("games-zombislayer", "Zombislayer", "zombislayer")
+#endif
             ];
         }
     }

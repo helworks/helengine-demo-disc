@@ -253,6 +253,20 @@ namespace DemoDisc.EditorTools {
             windowsSettings.SetFieldValue(ReceivesShadowFieldId, "true");
             windowsSettings.SetFieldValue(BaseColorFieldId, SharedBaseColor);
 
+            GeneratedMaterialPlatformDefinition webgpuSettings = definition.GetOrCreatePlatform("webgpu");
+            webgpuSettings.SchemaId = WindowsMaterialSchemaId;
+            webgpuSettings.SetFieldValue(UseCustomShaderFieldId, "false");
+            webgpuSettings.SetFieldValue(ShaderAssetIdFieldId, StandardShaderAssetId);
+            webgpuSettings.SetFieldValue(TextureIdFieldId, string.Empty);
+            webgpuSettings.SetFieldValue(MetallicFieldId, metallicText);
+            webgpuSettings.SetFieldValue(RoughnessFieldId, roughnessText);
+            webgpuSettings.SetFieldValue(SpecularFieldId, "0.5");
+            webgpuSettings.SetFieldValue(AlphaModeFieldId, "opaque");
+            webgpuSettings.SetFieldValue(DoubleSidedFieldId, "false");
+            webgpuSettings.SetFieldValue(CastsShadowFieldId, "true");
+            webgpuSettings.SetFieldValue(ReceivesShadowFieldId, "true");
+            webgpuSettings.SetFieldValue(BaseColorFieldId, SharedBaseColor);
+
             GeneratedMaterialPlatformDefinition pspSettings = definition.GetOrCreatePlatform("psp");
             pspSettings.SchemaId = WindowsMaterialSchemaId;
             pspSettings.SetFieldValue(UseCustomShaderFieldId, "false");

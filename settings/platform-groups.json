@@ -8,7 +8,8 @@
         "switch",
         "wiiu",
         "windows",
-        "x360"
+        "x360",
+        "webgpu"
       ],
       "children": []
     },
