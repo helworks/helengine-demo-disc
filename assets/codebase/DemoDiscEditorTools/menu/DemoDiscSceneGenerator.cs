@@ -62,7 +62,7 @@ namespace DemoDisc.EditorTools {
             string providerTypeName = BuildProviderTypeName(typeof(DemoDiscMenuDefinitionProvider));
             SceneWriteService.WriteScene(SplashSceneFactory.CreateSceneDefinition());
             SceneWriteService.WriteScene(LoadingScreenFactory.CreateSceneDefinition());
-            GeneratedAuthoringSceneDefinition standardSceneDefinition = SceneFactory.CreateStandardSceneDefinition(providerTypeName, definition);
+            GeneratedAuthoringSceneDefinition standardSceneDefinition = SceneFactory.CreateStandardSceneDefinition(providerTypeName, new DemoDiscDesktopMenuDefinitionFactory().Create());
             SceneWriteService.WriteScene(standardSceneDefinition);
 
             GeneratedAuthoringSceneDefinition handheldSceneDefinition = SceneFactory.CreateHandheldSceneDefinition(providerTypeName, definition);

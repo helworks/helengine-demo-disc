@@ -1796,8 +1796,9 @@ namespace DemoDisc.EditorTools {
             }
             AssignFreshGeneratedEditorEntityIds(rootEntities);
 
+            Entity[] directionalLightEntities = FindDirectionalLightEntities(rootEntities);
             List<Entity> desktopPresentationRoots = new List<Entity> {
-                CreateLivePhysicsShowcaseUiEntity(ResolveDemoDiscSceneLabel(normalizedSceneId), FindDirectionalLightEntities(rootEntities))
+                CreateLivePhysicsShowcaseUiEntity(ResolveDemoDiscSceneLabel(normalizedSceneId), directionalLightEntities)
             };
             if (includeDesktopInstructionOverlay) {
                 DemoDisc.EditorTools.DemoSceneInstructionOverlayFactory instructionOverlayFactory = new DemoDisc.EditorTools.DemoSceneInstructionOverlayFactory(AssetAuthoringService, Transaction);
@@ -1808,6 +1809,9 @@ namespace DemoDisc.EditorTools {
                 desktopPresentationRoots.Insert(1, consoleInstructionAttachmentService.CreateBlueprintInstanceRoot(projectRootPath, AssetAuthoringService));
             }
             AssignFreshGeneratedEditorEntityIds(desktopPresentationRoots);
+            // These targets belong to the scenario, outside the renumbered UI subtree.
+            // Bind them after renumbering so coincident old UI IDs cannot remap an external light.
+            foreach (Entity presentation in desktopPresentationRoots) BindScenarioLights(presentation, directionalLightEntities);
             new DemoDisc.EditorTools.MobilePresentationAuthoringService().ConfigureScenePresentation(desktopPresentationRoots);
 
             return new DemoDisc.EditorTools.GeneratedAuthoringSceneDefinition {
@@ -1816,6 +1820,20 @@ namespace DemoDisc.EditorTools {
                 RootEntities = rootEntities.ToArray(),
                 DesktopPresentationRootEntities = desktopPresentationRoots.ToArray()
             };
+        }
+
+        /// <summary>Restores external light bindings after the UI receives its final scene-local IDs.</summary>
+        void BindScenarioLights(Entity presentation, Entity[] lights) {
+            foreach (Component component in presentation.Components) {
+                if (component is DemoDisc.rendering.DemoDiscLightToggleComponent toggle) {
+                    SceneEntityReference[] references = new SceneEntityReference[lights.Length];
+                    for (int index = 0; index < lights.Length; index++) {
+                        references[index] = new SceneEntityReference { EntityId = FindRequiredEntitySaveComponent((EditorEntity)lights[index]).EntityId };
+                    }
+                    toggle.LightEntityReferences = references;
+                }
+            }
+            foreach (Entity child in presentation.Children) BindScenarioLights(child, lights);
         }
 
         Entity[] FindDirectionalLightEntities(IReadOnlyList<Entity> roots) {
