@@ -15,5 +15,7 @@
     "wiiu",
     "windows",
     "x360"
+  ,
+    "webgpu"
   ]
 }

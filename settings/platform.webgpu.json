@@ -1,0 +1,30 @@
+{
+  "platformId": "webgpu",
+  "version": "1.0.0",
+  "build": {
+    "selectedBuildProfileId": "release",
+    "selectedOptionValues": {}
+  },
+  "graphics": {
+    "selectedGraphicsProfileId": "webgpu",
+    "defaultWidth": 1280,
+    "defaultHeight": 720,
+    "rendererHdrEnabled": false,
+    "selectedOptionValues": {
+      "default-width": "1280",
+      "default-height": "720"
+    }
+  },
+  "codegen": {
+    "selectedCodegenProfileId": "default",
+    "selectedOptionValues": {
+      "write-conversion-report": "true",
+      "load-native-runtime-metadata": "true",
+      "additional-preprocessor-symbols": "DESKTOP_PLATFORM",
+      "codegen-enabled-features": "host_file_system",
+      "codegen-use-rtti": "true",
+      "codegen-use-exceptions": "true",
+      "type-remaps": "System.Numerics.Vector2=helengine.float2;System.Numerics.Vector3=helengine.float3;System.Numerics.Vector4=helengine.float4;System.Numerics.Quaternion=helengine.float4"
+    }
+  }
+}

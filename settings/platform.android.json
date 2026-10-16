@@ -40,5 +40,9 @@
         "controlIndex": 1
       }
     }
+  },
+  "runtimeSettings": {
+    "initialPresetId": "",
+    "presets": []
   }
 }
