@@ -18,6 +18,9 @@ namespace DemoDisc.menu {
         /// </summary>
         const short GamepadStickNavigationThreshold = 16384;
 
+        /// <summary>One complete sprite rotation, kept constant for managed and native builds.</summary>
+        const float FullRotationRadians = (float)(Math.PI * 2d);
+
         /// <summary>
         /// Baked panels keyed by stable panel id.
         /// </summary>
@@ -76,6 +79,7 @@ namespace DemoDisc.menu {
             SelectedItemIdValue = string.Empty;
             // Native builds do not zero-initialize C# instance fields automatically.
             // Keep every runtime-only dependency in a known state until it is resolved.
+            BackgroundSprite = null;
             ActivePanel = null;
             PressedPointerItem = null;
             IsInitialized = false;
@@ -89,9 +93,12 @@ namespace DemoDisc.menu {
             set { ProviderTypeNameValue = value ?? string.Empty; }
         }
 
-        /// <summary>
-        /// Gets or sets the initial panel id selected when the baked menu becomes active.
-        /// </summary>
+        /// <summary>Identifies the centered background sprite bound once after scene reference fixups.</summary>
+        public SceneEntityReference BackgroundEntityReference { get; set; }
+
+        SpriteComponent BackgroundSprite;
+
+        /// <summary>Gets or sets the initial panel id selected when the baked menu becomes active.</summary>
         public string InitialPanelId {
             get { return InitialPanelIdValue; }
             set { InitialPanelIdValue = value ?? string.Empty; }
@@ -140,6 +147,7 @@ namespace DemoDisc.menu {
             PanelsById.Clear();
             PanelRuntimes.Clear();
             PanelHistory.Clear();
+            BackgroundSprite = null;
             ActivePanel = null;
             PressedPointerItem = null;
             ActivePanelIdValue = string.Empty;
@@ -156,6 +164,7 @@ namespace DemoDisc.menu {
             PanelsById.Clear();
             PanelRuntimes.Clear();
             PanelHistory.Clear();
+            BackgroundSprite = null;
             ActivePanel = null;
             PressedPointerItem = null;
             ActivePanelIdValue = string.Empty;
@@ -176,6 +185,11 @@ namespace DemoDisc.menu {
             if (!IsInitialized) {
                 throw new InvalidOperationException("The prepared menu requires its complete authored hierarchy.");
             }
+            if (BackgroundEntityReference != null && BackgroundEntityReference.EntityId != 0u) {
+                Entity background = BackgroundEntityReference.ResolvedEntity
+                    ?? throw new InvalidOperationException("Menu background reference was not resolved before preparation.");
+                BackgroundSprite = FindRequiredComponent<SpriteComponent>(background);
+            }
 
         }
 
@@ -183,6 +197,13 @@ namespace DemoDisc.menu {
         /// Routes keyboard and gamepad input through the baked menu hierarchy.
         /// </summary>
         public override void Update() {
+            if (BackgroundSprite != null) {
+                BackgroundSprite.RotationRadians += (float)(Core.Instance.FrameDeltaSeconds * (Math.PI / 180d));
+                if (BackgroundSprite.RotationRadians >= FullRotationRadians) {
+                    BackgroundSprite.RotationRadians = BackgroundSprite.RotationRadians % FullRotationRadians;
+                }
+            }
+
             if (!IsInitialized) {
                 TryInitialize();
                 if (!IsInitialized) {

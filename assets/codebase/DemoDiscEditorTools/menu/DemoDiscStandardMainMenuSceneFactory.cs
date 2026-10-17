@@ -214,10 +214,11 @@ namespace DemoDisc.EditorTools {
         /// <returns>Live-authored menu root entity.</returns>
         Entity CreateMenuRootEntity(string providerTypeName, MenuDefinition definition) {
             Entity entity = AssetAuthoringService.OwningCore.EntityFactory.Create("DemoDiscMenuRoot");
-            entity.AddComponent(new MenuComponent {
+            MenuComponent menuComponent = new MenuComponent {
                 ProviderTypeName = providerTypeName,
                 InitialPanelId = definition.InitialPanelId
-            });
+            };
+            entity.AddComponent(menuComponent);
             entity.AddComponent(new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
                 ScalingMode = ViewportComponent.ReferenceCanvasStretchScalingMode,
@@ -228,7 +229,7 @@ namespace DemoDisc.EditorTools {
 
             Entity generatedRootEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(entity, DemoMenuLayout.GeneratedRootEntityName);
 
-            CreateAnimatedBackgroundEntity(generatedRootEntity, definition);
+            menuComponent.BackgroundEntityReference = CreateEntityReference(CreateAnimatedBackgroundEntity(generatedRootEntity, definition));
 
             if (definition.OverlayImage != null) {
                 CreateOverlayImageEntity(generatedRootEntity, definition.OverlayImage);
@@ -452,7 +453,7 @@ namespace DemoDisc.EditorTools {
         /// </summary>
         /// <param name="generatedRootEntity">Generated menu subtree that owns the background layers.</param>
         /// <param name="definition">Menu definition that provides the established accent palette.</param>
-        void CreateAnimatedBackgroundEntity(Entity generatedRootEntity, MenuDefinition definition) {
+        Entity CreateAnimatedBackgroundEntity(Entity generatedRootEntity, MenuDefinition definition) {
             if (generatedRootEntity == null) {
                 throw new ArgumentNullException(nameof(generatedRootEntity));
             } else if (definition == null) {
@@ -461,25 +462,15 @@ namespace DemoDisc.EditorTools {
 
             Entity backgroundEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(generatedRootEntity, "DemoDiscAnimatedBackground");
             backgroundEntity.Static = false;
-            backgroundEntity.LocalPosition = new float3(DemoMenuLayout.CanvasWidth / 2f, DemoMenuLayout.CanvasHeight / 2f, 0f);
-            backgroundEntity.AddComponent(new AxisRotationComponent {
-                Axis = new float3(0f, 0f, 1f),
-                AngularSpeedRadiansPerSecond = MathF.PI / 180f
-            });
-
-            CreateMenuBackgroundSprite(backgroundEntity);
-        }
-
-        void CreateMenuBackgroundSprite(Entity backgroundEntity) {
-            Entity spriteEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(backgroundEntity, "DemoDiscAnimatedBackgroundSprite");
-            spriteEntity.Static = false;
-            spriteEntity.LocalPosition = new float3(-MainMenuBackgroundSize / 2f, -MainMenuBackgroundSize / 2f, 2f);
+            backgroundEntity.LocalPosition = new float3(DemoMenuLayout.CanvasWidth / 2f, DemoMenuLayout.CanvasHeight / 2f, 2f);
             SpriteComponent spriteComponent = new SpriteComponent {
                 Size = new int2(MainMenuBackgroundSize, MainMenuBackgroundSize),
+                Pivot = new float2(0.5f, 0.5f),
                 Color = new byte4(192, 192, 192, 255),
             };
-            spriteEntity.AddComponent(spriteComponent);
-            ApplyTextureReference(spriteEntity, spriteComponent, DemoDiscMainMenuBackgroundTexturePath);
+            backgroundEntity.AddComponent(spriteComponent);
+            ApplyTextureReference(backgroundEntity, spriteComponent, DemoDiscMainMenuBackgroundTexturePath);
+            return backgroundEntity;
         }
 
         /// <summary>
