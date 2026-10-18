@@ -660,56 +660,56 @@
           "relativePath": "scenes/rendering/axis_test.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000017",
-          "contentHash": "sha256:b025fd8e68158f1a0353de4c99c3b5ea9e495a439d8df5aebef6a988cb46d4e2"
+          "contentHash": "sha256:b17141ea4d8911f15e122e86bec26354fdd9a50ca8dfdffedc999d705fcc1098"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/axis_test2.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000018",
-          "contentHash": "sha256:11c946a22a95857ff47b1dff570f5403dceda5b07c9e9f34408bea3201f61f24"
+          "contentHash": "sha256:4907ee5d06f178c1f9576a4e6c446a159b3247311f6e29855f4bdc49235b81ab"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/colored_cube_grid.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000011",
-          "contentHash": "sha256:39b6edcaefd772309a44ac1e96692071f1aec86a1f8d86b65eb8ed6811e51c26"
+          "contentHash": "sha256:b5d1398026aac53f2fd0727eab0fab1a500f18d7a2cbab8f70dce17e210fcc11"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/cube_test.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000010",
-          "contentHash": "sha256:787bf9da7cfd2fb6d4baa3ddce3eb14b8b5fade44aa4817af107cebe8afd9429"
+          "contentHash": "sha256:8799ee7c3fd043f545b4e0a87e1926ef88968a191c541037612e414e8a5120ca"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000013",
-          "contentHash": "sha256:bef935c948cf999e2570504b7839ecc5ef812ce6fa2bf6172124f012d2d56d09"
+          "contentHash": "sha256:cdc55d1aebaa3bff3b52790d63c7be1d7dbe737c47f70b598328d85e8f735ce4"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_material_gallery.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001b",
-          "contentHash": "sha256:2c464e88f0f92e253130d10041e4342fd86034d3b579ca866c0666b7e691aaa8"
+          "contentHash": "sha256:ecbb724de39cdc069e5ee9e777ec5f0b3aa9b56acbab752e4c084ae018e6eb46"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001d",
-          "contentHash": "sha256:b883a8a6c6af1b7987e968e2a19115e9bdd313a672b6dbc4f6ce50ecaa6d703f"
+          "contentHash": "sha256:7c1a3736ce8bac46ab7c0f19d725f6a5ad210f025df6bdbe95a3fb6d966fdff5"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001c",
-          "contentHash": "sha256:21516bea10a7d193d45d6317e71dffd7bca7bced8dc890d705ef20c2b08e0f2b"
+          "contentHash": "sha256:7f19dd99994150888ba1719831d3d101e8072483183b550e984200c048992956"
         },
         {
           "sourceKind": 1,
@@ -744,14 +744,14 @@
           "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001e",
-          "contentHash": "sha256:5e4e428040900894f838ae0b57bb5753b4895904428d2904d8b1163553bba5ca"
+          "contentHash": "sha256:8dfb3b1a790ff13f7e94b4320b9731829b589018e5db02bd5fee896b7f6b7055"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/textured_cube_grid.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000015",
-          "contentHash": "sha256:2ee63a418db383b60323a3075ec5cf9ee32381a092f3ac57f863f24737f97df2"
+          "contentHash": "sha256:9585c5a4cd34331fe37886a29118f825bf9c915e0ae9b856e1948edd61d88d52"
         }
       ],
       "sceneOrders": [
@@ -771,7 +771,7 @@
             "relativePath": "scenes/rendering/axis_test.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000017",
-            "contentHash": "sha256:b025fd8e68158f1a0353de4c99c3b5ea9e495a439d8df5aebef6a988cb46d4e2"
+            "contentHash": "sha256:b17141ea4d8911f15e122e86bec26354fdd9a50ca8dfdffedc999d705fcc1098"
           },
           "orderNumber": 2
         },
@@ -781,7 +781,7 @@
             "relativePath": "scenes/rendering/axis_test2.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000018",
-            "contentHash": "sha256:11c946a22a95857ff47b1dff570f5403dceda5b07c9e9f34408bea3201f61f24"
+            "contentHash": "sha256:4907ee5d06f178c1f9576a4e6c446a159b3247311f6e29855f4bdc49235b81ab"
           },
           "orderNumber": 3
         },
@@ -791,7 +791,7 @@
             "relativePath": "scenes/rendering/colored_cube_grid.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000011",
-            "contentHash": "sha256:39b6edcaefd772309a44ac1e96692071f1aec86a1f8d86b65eb8ed6811e51c26"
+            "contentHash": "sha256:b5d1398026aac53f2fd0727eab0fab1a500f18d7a2cbab8f70dce17e210fcc11"
           },
           "orderNumber": 4
         },
@@ -801,7 +801,7 @@
             "relativePath": "scenes/rendering/cube_test.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000010",
-            "contentHash": "sha256:787bf9da7cfd2fb6d4baa3ddce3eb14b8b5fade44aa4817af107cebe8afd9429"
+            "contentHash": "sha256:8799ee7c3fd043f545b4e0a87e1926ef88968a191c541037612e414e8a5120ca"
           },
           "orderNumber": 5
         },
@@ -811,7 +811,7 @@
             "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000013",
-            "contentHash": "sha256:bef935c948cf999e2570504b7839ecc5ef812ce6fa2bf6172124f012d2d56d09"
+            "contentHash": "sha256:cdc55d1aebaa3bff3b52790d63c7be1d7dbe737c47f70b598328d85e8f735ce4"
           },
           "orderNumber": 6
         },
@@ -821,7 +821,7 @@
             "relativePath": "scenes/rendering/pbr_material_gallery.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001b",
-            "contentHash": "sha256:2c464e88f0f92e253130d10041e4342fd86034d3b579ca866c0666b7e691aaa8"
+            "contentHash": "sha256:ecbb724de39cdc069e5ee9e777ec5f0b3aa9b56acbab752e4c084ae018e6eb46"
           },
           "orderNumber": 7
         },
@@ -831,7 +831,7 @@
             "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001d",
-            "contentHash": "sha256:b883a8a6c6af1b7987e968e2a19115e9bdd313a672b6dbc4f6ce50ecaa6d703f"
+            "contentHash": "sha256:7c1a3736ce8bac46ab7c0f19d725f6a5ad210f025df6bdbe95a3fb6d966fdff5"
           },
           "orderNumber": 8
         },
@@ -841,7 +841,7 @@
             "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001c",
-            "contentHash": "sha256:21516bea10a7d193d45d6317e71dffd7bca7bced8dc890d705ef20c2b08e0f2b"
+            "contentHash": "sha256:7f19dd99994150888ba1719831d3d101e8072483183b550e984200c048992956"
           },
           "orderNumber": 9
         },
@@ -891,7 +891,7 @@
             "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001e",
-            "contentHash": "sha256:5e4e428040900894f838ae0b57bb5753b4895904428d2904d8b1163553bba5ca"
+            "contentHash": "sha256:8dfb3b1a790ff13f7e94b4320b9731829b589018e5db02bd5fee896b7f6b7055"
           },
           "orderNumber": 14
         },
@@ -901,7 +901,7 @@
             "relativePath": "scenes/rendering/textured_cube_grid.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000015",
-            "contentHash": "sha256:2ee63a418db383b60323a3075ec5cf9ee32381a092f3ac57f863f24737f97df2"
+            "contentHash": "sha256:9585c5a4cd34331fe37886a29118f825bf9c915e0ae9b856e1948edd61d88d52"
           },
           "orderNumber": 15
         }
@@ -6668,56 +6668,56 @@
           "relativePath": "scenes/rendering/axis_test.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000017",
-          "contentHash": "sha256:b025fd8e68158f1a0353de4c99c3b5ea9e495a439d8df5aebef6a988cb46d4e2"
+          "contentHash": "sha256:b17141ea4d8911f15e122e86bec26354fdd9a50ca8dfdffedc999d705fcc1098"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/axis_test2.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000018",
-          "contentHash": "sha256:11c946a22a95857ff47b1dff570f5403dceda5b07c9e9f34408bea3201f61f24"
+          "contentHash": "sha256:4907ee5d06f178c1f9576a4e6c446a159b3247311f6e29855f4bdc49235b81ab"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/colored_cube_grid.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000011",
-          "contentHash": "sha256:39b6edcaefd772309a44ac1e96692071f1aec86a1f8d86b65eb8ed6811e51c26"
+          "contentHash": "sha256:b5d1398026aac53f2fd0727eab0fab1a500f18d7a2cbab8f70dce17e210fcc11"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/cube_test.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000010",
-          "contentHash": "sha256:787bf9da7cfd2fb6d4baa3ddce3eb14b8b5fade44aa4817af107cebe8afd9429"
+          "contentHash": "sha256:8799ee7c3fd043f545b4e0a87e1926ef88968a191c541037612e414e8a5120ca"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000013",
-          "contentHash": "sha256:bef935c948cf999e2570504b7839ecc5ef812ce6fa2bf6172124f012d2d56d09"
+          "contentHash": "sha256:cdc55d1aebaa3bff3b52790d63c7be1d7dbe737c47f70b598328d85e8f735ce4"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_material_gallery.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001b",
-          "contentHash": "sha256:2c464e88f0f92e253130d10041e4342fd86034d3b579ca866c0666b7e691aaa8"
+          "contentHash": "sha256:ecbb724de39cdc069e5ee9e777ec5f0b3aa9b56acbab752e4c084ae018e6eb46"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001d",
-          "contentHash": "sha256:b883a8a6c6af1b7987e968e2a19115e9bdd313a672b6dbc4f6ce50ecaa6d703f"
+          "contentHash": "sha256:7c1a3736ce8bac46ab7c0f19d725f6a5ad210f025df6bdbe95a3fb6d966fdff5"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001c",
-          "contentHash": "sha256:21516bea10a7d193d45d6317e71dffd7bca7bced8dc890d705ef20c2b08e0f2b"
+          "contentHash": "sha256:7f19dd99994150888ba1719831d3d101e8072483183b550e984200c048992956"
         },
         {
           "sourceKind": 1,
@@ -6752,14 +6752,14 @@
           "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001e",
-          "contentHash": "sha256:5e4e428040900894f838ae0b57bb5753b4895904428d2904d8b1163553bba5ca"
+          "contentHash": "sha256:8dfb3b1a790ff13f7e94b4320b9731829b589018e5db02bd5fee896b7f6b7055"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/textured_cube_grid.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000015",
-          "contentHash": "sha256:2ee63a418db383b60323a3075ec5cf9ee32381a092f3ac57f863f24737f97df2"
+          "contentHash": "sha256:9585c5a4cd34331fe37886a29118f825bf9c915e0ae9b856e1948edd61d88d52"
         }
       ],
       "sceneOrders": [
@@ -6779,7 +6779,7 @@
             "relativePath": "scenes/rendering/axis_test.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000017",
-            "contentHash": "sha256:b025fd8e68158f1a0353de4c99c3b5ea9e495a439d8df5aebef6a988cb46d4e2"
+            "contentHash": "sha256:b17141ea4d8911f15e122e86bec26354fdd9a50ca8dfdffedc999d705fcc1098"
           },
           "orderNumber": 2
         },
@@ -6789,7 +6789,7 @@
             "relativePath": "scenes/rendering/axis_test2.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000018",
-            "contentHash": "sha256:11c946a22a95857ff47b1dff570f5403dceda5b07c9e9f34408bea3201f61f24"
+            "contentHash": "sha256:4907ee5d06f178c1f9576a4e6c446a159b3247311f6e29855f4bdc49235b81ab"
           },
           "orderNumber": 3
         },
@@ -6799,7 +6799,7 @@
             "relativePath": "scenes/rendering/colored_cube_grid.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000011",
-            "contentHash": "sha256:39b6edcaefd772309a44ac1e96692071f1aec86a1f8d86b65eb8ed6811e51c26"
+            "contentHash": "sha256:b5d1398026aac53f2fd0727eab0fab1a500f18d7a2cbab8f70dce17e210fcc11"
           },
           "orderNumber": 4
         },
@@ -6809,7 +6809,7 @@
             "relativePath": "scenes/rendering/cube_test.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000010",
-            "contentHash": "sha256:787bf9da7cfd2fb6d4baa3ddce3eb14b8b5fade44aa4817af107cebe8afd9429"
+            "contentHash": "sha256:8799ee7c3fd043f545b4e0a87e1926ef88968a191c541037612e414e8a5120ca"
           },
           "orderNumber": 5
         },
@@ -6819,7 +6819,7 @@
             "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000013",
-            "contentHash": "sha256:bef935c948cf999e2570504b7839ecc5ef812ce6fa2bf6172124f012d2d56d09"
+            "contentHash": "sha256:cdc55d1aebaa3bff3b52790d63c7be1d7dbe737c47f70b598328d85e8f735ce4"
           },
           "orderNumber": 6
         },
@@ -6829,7 +6829,7 @@
             "relativePath": "scenes/rendering/pbr_material_gallery.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001b",
-            "contentHash": "sha256:2c464e88f0f92e253130d10041e4342fd86034d3b579ca866c0666b7e691aaa8"
+            "contentHash": "sha256:ecbb724de39cdc069e5ee9e777ec5f0b3aa9b56acbab752e4c084ae018e6eb46"
           },
           "orderNumber": 7
         },
@@ -6839,7 +6839,7 @@
             "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001d",
-            "contentHash": "sha256:b883a8a6c6af1b7987e968e2a19115e9bdd313a672b6dbc4f6ce50ecaa6d703f"
+            "contentHash": "sha256:7c1a3736ce8bac46ab7c0f19d725f6a5ad210f025df6bdbe95a3fb6d966fdff5"
           },
           "orderNumber": 8
         },
@@ -6849,7 +6849,7 @@
             "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001c",
-            "contentHash": "sha256:21516bea10a7d193d45d6317e71dffd7bca7bced8dc890d705ef20c2b08e0f2b"
+            "contentHash": "sha256:7f19dd99994150888ba1719831d3d101e8072483183b550e984200c048992956"
           },
           "orderNumber": 9
         },
@@ -6899,7 +6899,7 @@
             "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001e",
-            "contentHash": "sha256:5e4e428040900894f838ae0b57bb5753b4895904428d2904d8b1163553bba5ca"
+            "contentHash": "sha256:8dfb3b1a790ff13f7e94b4320b9731829b589018e5db02bd5fee896b7f6b7055"
           },
           "orderNumber": 14
         },
@@ -6909,7 +6909,7 @@
             "relativePath": "scenes/rendering/textured_cube_grid.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000015",
-            "contentHash": "sha256:2ee63a418db383b60323a3075ec5cf9ee32381a092f3ac57f863f24737f97df2"
+            "contentHash": "sha256:9585c5a4cd34331fe37886a29118f825bf9c915e0ae9b856e1948edd61d88d52"
           },
           "orderNumber": 15
         }
