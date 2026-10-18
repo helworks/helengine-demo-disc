@@ -1,0 +1,75 @@
+{
+  "platformId": "ps1",
+  "version": "1.0.0",
+  "build": {
+    "selectedBuildProfileId": "release",
+    "textureScalePercent": 100,
+    "shaderVariantPruningEnabled": true,
+    "selectedOptionValues": {
+      "game-name": "helengine",
+      "gpu-model-reduction": "false",
+      "gpu-model-maximum-vertices": "256",
+      "gpu-model-maximum-indices": "768",
+      "gpu-sphere-rings": "6",
+      "gpu-sphere-sectors": "12"
+    }
+  },
+  "graphics": {
+    "selectedGraphicsProfileId": "ps1-opaque",
+    "defaultWidth": 1280,
+    "defaultHeight": 720,
+    "vSyncEnabled": true,
+    "fullscreenEnabled": false,
+    "rendererDepthPrepassMode": 0,
+    "rendererShadowQualityTier": "medium",
+    "rendererHdrEnabled": true,
+    "rendererPostProcessTier": 2,
+    "selectedOptionValues": {}
+  },
+  "codegen": {
+    "selectedCodegenProfileId": "default",
+    "selectedOptionValues": {
+      "codegen-forced-disabled-features": "shaders;debug_overlay",
+      "generated-math-convention": "engine-row-vector",
+      "pointer-size-bytes": "4",
+      "load-native-runtime-metadata": "false",
+      "scene-code-modules": "true",
+      "codegen-header-template-definitions": "true",
+      "codegen-module-lifetime-pins": "true",
+      "codegen-use-std-string": "false",
+      "codegen-use-std-vector": "false",
+      "codegen-use-std-unordered-map": "false",
+      "codegen-use-std-unordered-set": "false",
+      "codegen-use-std-shared-ptr": "false",
+      "codegen-use-std-function": "false",
+      "codegen-use-std-chrono": "false",
+      "codegen-use-rtti": "true",
+      "codegen-use-exceptions": "false",
+      "codegen-use-std-math": "false",
+      "codegen-runtime-math-header": "Ps1Math.hpp",
+      "codegen-use-hosted-file-system": "false",
+      "codegen-runtime-provider-header": "Ps1RuntimeProvider.hpp",
+      "codegen-compact-native-exception-messages": "true"
+    }
+  },
+  "input": {
+    "standardActions": {
+      "accept": {
+        "deviceKind": 0,
+        "controlKind": 0,
+        "deviceIndex": 0,
+        "controlIndex": 0
+      },
+      "return": {
+        "deviceKind": 0,
+        "controlKind": 0,
+        "deviceIndex": 0,
+        "controlIndex": 1
+      }
+    }
+  },
+  "runtimeSettings": {
+    "initialPresetId": "",
+    "presets": []
+  }
+}

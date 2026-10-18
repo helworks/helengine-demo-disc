@@ -46,6 +46,44 @@ namespace DemoDisc.menu {
             return false;
         }
 
+        /// <summary>Captures all navigation button edges and both vertical-axis samples in one device traversal.</summary>
+        /// <param name="inputSystem">Input system supplying the current and previous device states.</param>
+        /// <param name="currentStickY">Strongest connected vertical axis in the current frame.</param>
+        /// <param name="previousStickY">Strongest connected vertical axis in the previous frame.</param>
+        /// <returns>Union of per-device newly pressed buttons, preserving a second controller's press while another holds the same button.</returns>
+        public static ulong ReadMenuNavigationState(InputSystem inputSystem, out short currentStickY, out short previousStickY) {
+            if (inputSystem == null) {
+                throw new ArgumentNullException(nameof(inputSystem));
+            }
+
+            ulong pressedButtons = 0UL;
+            currentStickY = 0;
+            previousStickY = 0;
+            int controllerCount = inputSystem.GetGamepadCount();
+            for (int controllerIndex = 0; controllerIndex < controllerCount; controllerIndex++) {
+                InputGamepadState current = inputSystem.GetGamepadState(controllerIndex);
+                InputGamepadState previous = inputSystem.GetPreviousGamepadState(controllerIndex);
+                if (current.Connected) {
+                    pressedButtons |= current.Buttons & ~previous.Buttons;
+                    if (Math.Abs((int)current.LeftStickY) > Math.Abs((int)currentStickY)) {
+                        currentStickY = current.LeftStickY;
+                    }
+                }
+                if (previous.Connected && Math.Abs((int)previous.LeftStickY) > Math.Abs((int)previousStickY)) {
+                    previousStickY = previous.LeftStickY;
+                }
+            }
+            return pressedButtons;
+        }
+
+        /// <summary>Tests a captured navigation button mask without rereading the controller list.</summary>
+        /// <param name="buttons">Button mask captured for this menu update.</param>
+        /// <param name="button">Abstract button to inspect.</param>
+        /// <returns>Whether the captured mask contains the requested button.</returns>
+        public static bool ContainsButton(ulong buttons, InputGamepadButton button) {
+            return (buttons & (1UL << (int)button)) != 0;
+        }
+
         /// <summary>
         /// Returns the strongest connected left-stick horizontal value across all controller devices.
         /// </summary>

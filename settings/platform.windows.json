@@ -2,7 +2,7 @@
   "platformId": "windows",
   "version": "1.0.0",
   "build": {
-    "selectedBuildProfileId": "debug",
+    "selectedBuildProfileId": "profiler",
     "textureScalePercent": 100,
     "shaderVariantPruningEnabled": true,
     "selectedOptionValues": {
@@ -33,8 +33,8 @@
       "write-conversion-report": "true",
       "include-project-defined-preprocessor-symbols": "false",
       "load-native-runtime-metadata": "true",
-      "codegen-enabled-features": "host_file_system",
-      "codegen-generated-function-profiling": "false",
+      "codegen-enabled-features": "host_file_system;runtime_profiler",
+      "codegen-generated-function-profiling": "true",
       "codegen-generated-function-profiling-maintained-symbol-prefixes": "helengine.Core.UpdatePhysics(;helengine.BepuPhysicsWorld3D.Step(;helengine.BepuPhysicsWorld3D.CountAwakeDynamicBodies(;helengine.BepuPhysicsWorld3D.CollectTriggerEvents(;helengine.BepuPhysicsWorld3D.SynchronizeBodiesBackToEntities(;BepuPhysics.Simulation.Timestep(;BepuPhysics.DefaultTimestepper.Timestep(;BepuPhysics.Simulation.PredictBoundingBoxes(;BepuPhysics.PoseIntegrator.PredictBoundingBoxes(float, BepuUtilities.Memory.BufferPool,;BepuPhysics.Simulation.CollisionDetection(;BepuPhysics.CollisionDetection.BroadPhase.Update(;BepuPhysics.CollisionDetection.BroadPhase.Update2(;BepuPhysics.CollisionDetection.CollidableOverlapFinder.DispatchOverlaps(;BepuPhysics.Trees.Tree.GetSelfOverlaps(;BepuPhysics.CollisionDetection.CollisionBatcher.Flush(;BepuPhysics.CollisionDetection.NarrowPhase.Flush(;BepuPhysics.Simulation.Solve(;BepuPhysics.Solver.PrepareConstraintIntegrationResponsibilities(;BepuPhysics.Solver.Solve(;BepuPhysics.PoseIntegrator.IntegrateAfterSubstepping(;BepuPhysics.Simulation.IncrementallyOptimizeDataStructures("
     }
   },

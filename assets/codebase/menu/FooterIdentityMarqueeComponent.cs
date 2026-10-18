@@ -11,7 +11,13 @@ namespace DemoDisc.menu {
         /// <summary>
         /// Full reference-canvas width where the text restarts after leaving the left edge.
         /// </summary>
-        public float StripWidth { get; set; }
+        public float StripWidth {
+            get { return StripWidthValue; }
+            set {
+                StripWidthValue = value;
+                IsCanvasLayoutDirty = true;
+            }
+        }
 
         /// <summary>
         /// Constant marquee speed expressed in reference-canvas pixels per second.
@@ -39,6 +45,24 @@ namespace DemoDisc.menu {
         /// </summary>
         bool HasMeasuredTextWidth;
 
+        /// <summary>Authored restart coordinate whose setter invalidates the fitted cache.</summary>
+        float StripWidthValue;
+
+        /// <summary>Viewport found once after the scene hierarchy has been prepared.</summary>
+        ViewportComponent LayoutViewport;
+
+        /// <summary>Legacy reference canvas used when no viewport owns this footer.</summary>
+        ReferenceCanvasFitComponent LayoutReferenceCanvas;
+
+        /// <summary>Horizontal canvas scale retained until the owning layout changes.</summary>
+        float CanvasScaleX;
+
+        /// <summary>Fitted restart coordinate retained until the layout or strip width changes.</summary>
+        float FittedStripStartX;
+
+        /// <summary>Tracks layout changes without walking the footer ancestry from Update.</summary>
+        bool IsCanvasLayoutDirty;
+
         /// <summary>
         /// Initializes one footer marquee with every runtime-resolved reference in a known state, because native builds do not zero-initialize C# instance fields automatically.
         /// </summary>
@@ -47,6 +71,41 @@ namespace DemoDisc.menu {
             FooterTextComponent = null;
             MeasuredTextWidth = 0f;
             HasMeasuredTextWidth = false;
+            StripWidthValue = 0f;
+            LayoutViewport = null;
+            LayoutReferenceCanvas = null;
+            CanvasScaleX = 0f;
+            FittedStripStartX = 0f;
+            IsCanvasLayoutDirty = true;
+        }
+
+        /// <summary>Binds the serialized text fixup and canvas owner once, after initial scene layout has completed.</summary>
+        /// <param name="entity">Prepared entity owning this marquee.</param>
+        public override void ScenePrepared(Entity entity) {
+            base.ScenePrepared(entity);
+            ReleaseRuntimeBindings();
+            if (TextEntityReference == null || TextEntityReference.EntityId == 0u) {
+                throw new InvalidOperationException("Footer marquee requires a serialized text entity reference.");
+            }
+            TextEntity = TextEntityReference.ResolvedEntity
+                ?? throw new InvalidOperationException("Footer text reference was not resolved before preparation.");
+            FooterTextComponent = FindRequiredTextComponent(TextEntity);
+            BindCanvasOwner();
+            FooterTextComponent.Text = BuildFooterText();
+            PositionTextAtStripStart();
+        }
+
+        /// <summary>Detaches layout listeners and drops borrowed references when the footer leaves its owner.</summary>
+        /// <param name="entity">Entity losing the marquee component.</param>
+        public override void ComponentRemoved(Entity entity) {
+            ReleaseRuntimeBindings();
+            base.ComponentRemoved(entity);
+        }
+
+        /// <summary>Releases layout listeners before native component destruction.</summary>
+        public override void Dispose() {
+            ReleaseRuntimeBindings();
+            base.Dispose();
         }
 
         /// <summary>
@@ -55,14 +114,16 @@ namespace DemoDisc.menu {
         public override void Update() {
             base.Update();
 
-            ResolveTextEntityWhenNeeded();
-            if (TextEntity == null || !EnsureMeasuredTextWidth()) {
+            if (TextEntity == null) {
+                throw new InvalidOperationException("Footer marquee must be prepared before its first update.");
+            }
+            RefreshCanvasLayoutCache();
+            if (!EnsureMeasuredTextWidth()) {
                 return;
             }
 
-            float2 canvasScale = ResolveCanvasScale();
             float textWidth = MeasuredTextWidth;
-            double movement = (double)PixelsPerSecond * canvasScale.X * Core.Instance.FrameDeltaSeconds;
+            double movement = (double)PixelsPerSecond * CanvasScaleX * Core.Instance.FrameDeltaSeconds;
             float3 localPosition = TextEntity.LocalPosition;
             float nextPositionX = localPosition.X - (float)movement;
             if (nextPositionX + textWidth <= 0f) {
@@ -71,33 +132,6 @@ namespace DemoDisc.menu {
             }
 
             TextEntity.LocalPosition = new float3(nextPositionX, localPosition.Y, localPosition.Z);
-        }
-
-        /// <summary>
-        /// Resolves the text entity once the asynchronous scene loader has created its runtime entity id component.
-        /// </summary>
-        void ResolveTextEntityWhenNeeded() {
-            if (TextEntity != null) {
-                return;
-            } else if (TextEntityReference == null || TextEntityReference.EntityId == 0u) {
-                throw new InvalidOperationException("Footer marquee requires a serialized text entity reference.");
-            } else if (Core.Instance == null || Core.Instance.ObjectManager == null) {
-                throw new InvalidOperationException("Footer marquee requires an initialized object manager.");
-            }
-
-            List<Entity> entities = Core.Instance.ObjectManager.Entities;
-            for (int entityIndex = 0; entityIndex < entities.Count; entityIndex++) {
-                Entity candidateEntity = entities[entityIndex];
-                if (FindSceneEntityRuntimeIdOrZero(candidateEntity) != TextEntityReference.EntityId) {
-                    continue;
-                }
-
-                TextEntity = candidateEntity;
-                FooterTextComponent = FindRequiredTextComponent(TextEntity);
-                PositionTextAtStripStart();
-                FooterTextComponent.Text = BuildFooterText();
-                return;
-            }
         }
 
         /// <summary>
@@ -156,82 +190,74 @@ namespace DemoDisc.menu {
         /// Places the text at the authored strip start after converting that position into the active canvas coordinates.
         /// </summary>
         void PositionTextAtStripStart() {
+            RefreshCanvasLayoutCache();
             float3 localPosition = TextEntity.LocalPosition;
-            TextEntity.LocalPosition = new float3(ResolveFittedStripStartX(), localPosition.Y, localPosition.Z);
+            TextEntity.LocalPosition = new float3(FittedStripStartX, localPosition.Y, localPosition.Z);
         }
 
-        /// <summary>
-        /// Resolves the current horizontal and vertical conversion factors from the footer's owning reference canvas.
-        /// </summary>
-        /// <returns>Scale factors that convert the footer's authored measurements into active canvas coordinates.</returns>
-        float2 ResolveCanvasScale() {
+        /// <summary>Finds and subscribes the nearest authored canvas owner during scene preparation.</summary>
+        void BindCanvasOwner() {
             Entity currentEntity = Parent;
             while (currentEntity != null) {
                 if (currentEntity.Components != null) {
                     for (int componentIndex = 0; componentIndex < currentEntity.Components.Count; componentIndex++) {
                         if (currentEntity.Components[componentIndex] is ViewportComponent viewport
                             && (viewport.ScalingMode == ViewportComponent.ReferenceCanvasScalingMode
-                                || viewport.ScalingMode == ViewportComponent.ReferenceCanvasStretchScalingMode)) {
-                            AnchorSpace anchorSpace = viewport.AnchorSpace;
-                            return new float2(
-                                (float)anchorSpace.Size.X / viewport.ReferenceWidth,
-                                (float)anchorSpace.Size.Y / viewport.ReferenceHeight);
+                                || viewport.ScalingMode == ViewportComponent.ReferenceCanvasStretchScalingMode
+                                || viewport.ScalingMode == ViewportComponent.DensityScalingMode)) {
+                            LayoutViewport = viewport;
+                            LayoutViewport.AnchorBoundsChanged += HandleCanvasBoundsChanged;
+                            return;
                         }
                         if (currentEntity.Components[componentIndex] is ReferenceCanvasFitComponent referenceCanvas) {
-                            return referenceCanvas.CalculateScale();
+                            LayoutReferenceCanvas = referenceCanvas;
+                            LayoutReferenceCanvas.AnchorBoundsChanged += HandleCanvasBoundsChanged;
+                            return;
                         }
                     }
                 }
-
                 currentEntity = currentEntity.Parent;
             }
-
             throw new InvalidOperationException("Footer marquee must be inside a reference-canvas-owned menu hierarchy.");
         }
 
-        /// <summary>
-        /// Resolves the strip's authored restart coordinate through the footer's owning reference canvas.
-        /// </summary>
-        /// <returns>Fitted horizontal coordinate at the right edge of the authored strip.</returns>
-        float ResolveFittedStripStartX() {
-            Entity currentEntity = Parent;
-            while (currentEntity != null) {
-                if (currentEntity.Components != null) {
-                    for (int componentIndex = 0; componentIndex < currentEntity.Components.Count; componentIndex++) {
-                        if (currentEntity.Components[componentIndex] is ViewportComponent viewport
-                            && (viewport.ScalingMode == ViewportComponent.ReferenceCanvasScalingMode
-                                || viewport.ScalingMode == ViewportComponent.ReferenceCanvasStretchScalingMode)) {
-                            return StripWidth * ResolveCanvasScale().X;
-                        }
-                        if (currentEntity.Components[componentIndex] is ReferenceCanvasFitComponent referenceCanvas) {
-                            return referenceCanvas.CalculatePosition(new float3(StripWidth, 0f, 0f)).X;
-                        }
-                    }
-                }
-
-                currentEntity = currentEntity.Parent;
-            }
-
-            throw new InvalidOperationException("Footer marquee must be inside a reference-canvas-owned menu hierarchy.");
+        /// <summary>Invalidates fitted values and text measurement when the existing canvas owner reports a layout change.</summary>
+        void HandleCanvasBoundsChanged() {
+            IsCanvasLayoutDirty = true;
+            HasMeasuredTextWidth = false;
         }
 
-        /// <summary>
-        /// Finds the stable serialized scene id attached to an entity, or returns zero before scene loading attaches one.
-        /// </summary>
-        /// <param name="entity">Runtime entity whose stable scene id should be inspected.</param>
-        /// <returns>Serialized scene entity id, or zero when unavailable.</returns>
-        uint FindSceneEntityRuntimeIdOrZero(Entity entity) {
-            if (entity == null || entity.Components == null) {
-                return 0u;
+        /// <summary>Recomputes fitted values only after preparation, resize or an authored strip-width change.</summary>
+        void RefreshCanvasLayoutCache() {
+            if (!IsCanvasLayoutDirty) {
+                return;
             }
-
-            for (int componentIndex = 0; componentIndex < entity.Components.Count; componentIndex++) {
-                if (entity.Components[componentIndex] is SceneEntityRuntimeIdComponent runtimeIdComponent) {
-                    return runtimeIdComponent.SceneEntityId;
-                }
+            if (LayoutViewport != null) {
+                CanvasScaleX = (float)LayoutViewport.PreparedLayoutMetrics.ScaleX;
+                FittedStripStartX = StripWidthValue * CanvasScaleX;
+            } else if (LayoutReferenceCanvas != null) {
+                CanvasScaleX = LayoutReferenceCanvas.CalculateScale().X;
+                FittedStripStartX = LayoutReferenceCanvas.CalculatePosition(new float3(StripWidthValue, 0f, 0f)).X;
+            } else {
+                throw new InvalidOperationException("Footer marquee requires a prepared canvas binding.");
             }
+            IsCanvasLayoutDirty = false;
+        }
 
-            return 0u;
+        /// <summary>Unsubscribes callbacks and clears runtime aliases without disposing scene-owned components.</summary>
+        void ReleaseRuntimeBindings() {
+            if (LayoutViewport != null) {
+                LayoutViewport.AnchorBoundsChanged -= HandleCanvasBoundsChanged;
+            }
+            if (LayoutReferenceCanvas != null) {
+                LayoutReferenceCanvas.AnchorBoundsChanged -= HandleCanvasBoundsChanged;
+            }
+            LayoutViewport = null;
+            LayoutReferenceCanvas = null;
+            TextEntity = null;
+            FooterTextComponent = null;
+            HasMeasuredTextWidth = false;
+            IsCanvasLayoutDirty = true;
         }
     }
 }

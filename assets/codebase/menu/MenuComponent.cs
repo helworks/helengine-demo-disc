@@ -56,6 +56,9 @@ namespace DemoDisc.menu {
         /// </summary>
         MenuItemRuntime PressedPointerItem;
 
+        /// <summary>Viewport bound once with the complete baked menu hierarchy.</summary>
+        ViewportComponent MenuViewport;
+
         /// <summary>
         /// Backing field for the active panel id.
         /// </summary>
@@ -80,6 +83,7 @@ namespace DemoDisc.menu {
             // Native builds do not zero-initialize C# instance fields automatically.
             // Keep every runtime-only dependency in a known state until it is resolved.
             BackgroundSprite = null;
+            MenuViewport = null;
             ActivePanel = null;
             PressedPointerItem = null;
             IsInitialized = false;
@@ -148,6 +152,7 @@ namespace DemoDisc.menu {
             PanelRuntimes.Clear();
             PanelHistory.Clear();
             BackgroundSprite = null;
+            MenuViewport = null;
             ActivePanel = null;
             PressedPointerItem = null;
             ActivePanelIdValue = string.Empty;
@@ -165,6 +170,7 @@ namespace DemoDisc.menu {
             PanelRuntimes.Clear();
             PanelHistory.Clear();
             BackgroundSprite = null;
+            MenuViewport = null;
             ActivePanel = null;
             PressedPointerItem = null;
             ActivePanelIdValue = string.Empty;
@@ -240,6 +246,7 @@ namespace DemoDisc.menu {
                 return;
             }
 
+            MenuViewport = FindFirstComponent<ViewportComponent>(Parent);
             BindPanels(Parent);
             ActivatePanel(InitialPanelIdValue, false);
             IsInitialized = true;
@@ -503,21 +510,30 @@ namespace DemoDisc.menu {
                 return;
             }
 
-            int pointerX = ResolvePointerXInMenuSpace(inputSystem);
-            int pointerY = ResolvePointerYInMenuSpace(inputSystem);
+            bool pointerPressed = inputSystem.WasPointerPrimaryPressed();
+            bool hoverSelectionRequired = pointerPressed
+                || inputSystem.GetPointerDeltaX() != 0 || inputSystem.GetPointerDeltaY() != 0;
+            bool pointerReleased = inputSystem.WasPointerPrimaryReleased();
+            if (!hoverSelectionRequired && !pointerPressed && !pointerReleased) {
+                return;
+            }
+
+            float4 viewportBounds = ResolveMenuViewportBounds();
+            int pointerX = inputSystem.GetPointerX() - (int)Math.Round(viewportBounds.X);
+            int pointerY = inputSystem.GetPointerY() - (int)Math.Round(viewportBounds.Y);
             MenuItemRuntime hoveredItem = FindHoveredItem(ActivePanel, pointerX, pointerY);
             if (hoveredItem != null
                 && hoveredItem.Index != ActivePanel.SelectedItemIndex
-                && IsPointerHoverSelectionUpdateRequired(inputSystem)) {
+                && hoverSelectionRequired) {
                 SetSelection(ActivePanel, hoveredItem.Index);
             }
 
-            if (inputSystem.WasPointerPrimaryPressed()) {
+            if (pointerPressed) {
                 PressedPointerItem = hoveredItem;
                 return;
             }
 
-            if (inputSystem.WasPointerPrimaryReleased()) {
+            if (pointerReleased) {
                 if (IsSameRuntimeItem(PressedPointerItem, hoveredItem)) {
                     ExecuteAction(hoveredItem.Definition);
                 }
@@ -527,93 +543,27 @@ namespace DemoDisc.menu {
         }
 
         /// <summary>
-        /// Returns whether the current frame should allow passive pointer hover to retarget selection.
-        /// </summary>
-        /// <param name="inputSystem">Input system supplying the current frame state.</param>
-        /// <returns>True when pointer movement or a new press should update hover selection.</returns>
-        bool IsPointerHoverSelectionUpdateRequired(InputSystem inputSystem) {
-            if (inputSystem == null) {
-                throw new ArgumentNullException(nameof(inputSystem));
-            }
-
-            if (inputSystem.GetPointerDeltaX() != 0 || inputSystem.GetPointerDeltaY() != 0) {
-                return true;
-            }
-
-            return inputSystem.WasPointerPrimaryPressed();
-        }
-
-        /// <summary>
         /// Handles d-pad, left-stick, and face-button navigation for the primary gamepad.
         /// </summary>
         /// <param name="inputSystem">Input system supplying the current frame state.</param>
         void HandleGamepadInput(InputSystem inputSystem) {
-            if (DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadUp)
-                || WasLeftStickUpPressed(inputSystem)) {
+            short currentStickY;
+            short previousStickY;
+            ulong pressedButtons = DemoDiscGamepadInput.ReadMenuNavigationState(inputSystem, out currentStickY, out previousStickY);
+            if (DemoDiscGamepadInput.ContainsButton(pressedButtons, InputGamepadButton.DPadUp)
+                || (currentStickY <= -GamepadStickNavigationThreshold && previousStickY > -GamepadStickNavigationThreshold)) {
                 MoveSelection(-1);
-            } else if (DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.DPadDown)
-                || WasLeftStickDownPressed(inputSystem)) {
+            } else if (DemoDiscGamepadInput.ContainsButton(pressedButtons, InputGamepadButton.DPadDown)
+                || (currentStickY >= GamepadStickNavigationThreshold && previousStickY < GamepadStickNavigationThreshold)) {
                 MoveSelection(1);
             } else if (Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Accept)
-                || DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.South)) {
+                || DemoDiscGamepadInput.ContainsButton(pressedButtons, InputGamepadButton.South)) {
                 ConfirmSelection();
             } else if (Core.Instance.StandardPlatformInput.WasActionPressed(StandardPlatformAction.Return)
-                || DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.Select)
-                || DemoDiscGamepadInput.WasButtonPressed(inputSystem, InputGamepadButton.East)) {
+                || DemoDiscGamepadInput.ContainsButton(pressedButtons, InputGamepadButton.Select)
+                || DemoDiscGamepadInput.ContainsButton(pressedButtons, InputGamepadButton.East)) {
                 NavigateBack();
             }
-        }
-
-        /// <summary>
-        /// Returns whether the primary left stick crossed the upward navigation threshold this frame.
-        /// </summary>
-        /// <param name="inputSystem">Input system supplying current and previous gamepad states.</param>
-        /// <returns>True only when the stick newly enters its upward range.</returns>
-        bool WasLeftStickUpPressed(InputSystem inputSystem) {
-            short currentStickY = DemoDiscGamepadInput.GetLeftStickY(inputSystem);
-            short previousStickY = DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem);
-            return currentStickY <= -GamepadStickNavigationThreshold
-                && previousStickY > -GamepadStickNavigationThreshold;
-        }
-
-        /// <summary>
-        /// Returns whether the primary left stick crossed the downward navigation threshold this frame.
-        /// </summary>
-        /// <param name="inputSystem">Input system supplying current and previous gamepad states.</param>
-        /// <returns>True only when the stick newly enters its downward range.</returns>
-        bool WasLeftStickDownPressed(InputSystem inputSystem) {
-            short currentStickY = DemoDiscGamepadInput.GetLeftStickY(inputSystem);
-            short previousStickY = DemoDiscGamepadInput.GetPreviousLeftStickY(inputSystem);
-            return currentStickY >= GamepadStickNavigationThreshold
-                && previousStickY < GamepadStickNavigationThreshold;
-        }
-
-        /// <summary>
-        /// Resolves the current pointer X coordinate in the menu root's local viewport space.
-        /// </summary>
-        /// <param name="inputSystem">Input system supplying the current frame state.</param>
-        /// <returns>Pointer X coordinate normalized into the active menu viewport.</returns>
-        int ResolvePointerXInMenuSpace(InputSystem inputSystem) {
-            if (inputSystem == null) {
-                throw new ArgumentNullException(nameof(inputSystem));
-            }
-
-            float4 viewportBounds = ResolveMenuViewportBounds();
-            return inputSystem.GetPointerX() - (int)Math.Round(viewportBounds.X);
-        }
-
-        /// <summary>
-        /// Resolves the current pointer Y coordinate in the menu root's local viewport space.
-        /// </summary>
-        /// <param name="inputSystem">Input system supplying the current frame state.</param>
-        /// <returns>Pointer Y coordinate normalized into the active menu viewport.</returns>
-        int ResolvePointerYInMenuSpace(InputSystem inputSystem) {
-            if (inputSystem == null) {
-                throw new ArgumentNullException(nameof(inputSystem));
-            }
-
-            float4 viewportBounds = ResolveMenuViewportBounds();
-            return inputSystem.GetPointerY() - (int)Math.Round(viewportBounds.Y);
         }
 
         /// <summary>
@@ -625,7 +575,7 @@ namespace DemoDisc.menu {
                 return new float4(0f, 0f, 0f, 0f);
             }
 
-            ViewportComponent viewportComponent = FindFirstComponent<ViewportComponent>(Parent);
+            ViewportComponent viewportComponent = MenuViewport;
             if (viewportComponent == null) {
                 return new float4(0f, 0f, 0f, 0f);
             }
