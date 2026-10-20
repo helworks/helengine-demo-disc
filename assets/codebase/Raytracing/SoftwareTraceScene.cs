@@ -694,7 +694,7 @@ namespace DemoDisc.Raytracing {
         /// <param name="emission">Pre-multiplied emission to validate.</param>
         /// <returns>True when emission is non-negative and greater than the geometric tolerance.</returns>
         static bool IsUsableEmission(float3 emission) {
-            return float.IsFinite(emission.X) && float.IsFinite(emission.Y) && float.IsFinite(emission.Z) && emission.X >= 0f && emission.Y >= 0f && emission.Z >= 0f && emission.LengthSquared() > GeometryTolerance * GeometryTolerance;
+            return float.IsFinite((float)(emission.X)) && float.IsFinite((float)(emission.Y)) && float.IsFinite((float)(emission.Z)) && emission.X >= 0f && emission.Y >= 0f && emission.Z >= 0f && emission.LengthSquared() > GeometryTolerance * GeometryTolerance;
         }
 
         /// <summary>
@@ -711,7 +711,7 @@ namespace DemoDisc.Raytracing {
             if (float3.Dot(first.GeometricNormal, second.GeometricNormal) < 1f - GeometryTolerance) {
                 return false;
             }
-            if (Math.Abs(float3.Dot(first.GeometricNormal, second.P0 - first.P0)) > GeometryTolerance) {
+            if (Math.Abs((double)(float3.Dot(first.GeometricNormal, second.P0 - first.P0))) > GeometryTolerance) {
                 return false;
             }
 
@@ -800,9 +800,9 @@ namespace DemoDisc.Raytracing {
                 }
                 float3 edge1 = corners[firstOtherIndex] - corner;
                 float3 edge2 = corners[secondOtherIndex] - corner;
-                float edge1Length = edge1.Length();
-                float edge2Length = edge2.Length();
-                if (edge1Length <= GeometryTolerance || edge2Length <= GeometryTolerance || Math.Abs(float3.Dot(edge1, edge2)) > GeometryTolerance * edge1Length * edge2Length) {
+                float edge1Length = (float)(edge1.Length());
+                float edge2Length = (float)(edge2.Length());
+                if (edge1Length <= GeometryTolerance || edge2Length <= GeometryTolerance || Math.Abs((double)(float3.Dot(edge1, edge2))) > GeometryTolerance * edge1Length * edge2Length) {
                     continue;
                 }
                 float3 expectedOpposite = corner + edge1 + edge2;
@@ -829,7 +829,7 @@ namespace DemoDisc.Raytracing {
                     Edge1 = edge1,
                     Edge2 = edge2,
                     Normal = first.GeometricNormal,
-                    Area = edge1.Length() * edge2.Length(),
+                    Area = (float)(edge1.Length() * edge2.Length()),
                     FirstTriangle = firstIndex,
                     SecondTriangle = secondIndex
                 };
@@ -886,7 +886,7 @@ namespace DemoDisc.Raytracing {
         /// <param name="second">Second vector.</param>
         /// <returns>True when all components are within tolerance.</returns>
         static bool NearlyEqual(float3 first, float3 second) {
-            return Math.Abs(first.X - second.X) <= GeometryTolerance && Math.Abs(first.Y - second.Y) <= GeometryTolerance && Math.Abs(first.Z - second.Z) <= GeometryTolerance;
+            return Math.Abs((double)(first.X - second.X)) <= GeometryTolerance && Math.Abs((double)(first.Y - second.Y)) <= GeometryTolerance && Math.Abs((double)(first.Z - second.Z)) <= GeometryTolerance;
         }
 
         /// <summary>

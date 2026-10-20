@@ -277,7 +277,7 @@ namespace DemoDisc.rendering {
             int rowCount = (ObjectCount + CubesPerRow - 1) / CubesPerRow;
             float gridHeight = Math.Max(0, rowCount - 1) * CubeSpacing;
             float halfHeight = (gridHeight * 0.5f) + 1.5f;
-            float tangent = (float)Math.Tan(BenchmarkCamera.FieldOfView * 0.5f);
+            float tangent = (float)Math.Tan((BenchmarkCamera.FieldOfView * 0.5f).ToDouble());
             float cameraDistance = tangent > 0f ? halfHeight / tangent : 18f;
             BenchmarkCamera.Parent.LocalPosition = new float3(0f, gridHeight * 0.5f, Math.Max(18f, cameraDistance));
         }

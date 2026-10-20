@@ -174,14 +174,14 @@ namespace DemoDisc.rendering {
             }
 
             float3 offset = Parent.LocalPosition - OrbitCenter;
-            double orbitRadius = Math.Sqrt((offset.X * offset.X) + (offset.Y * offset.Y) + (offset.Z * offset.Z));
+            double orbitRadius = Math.Sqrt(((offset.X * offset.X) + (offset.Y * offset.Y) + (offset.Z * offset.Z)).ToDouble());
             if (orbitRadius <= MinimumOrbitRadius) {
                 throw new InvalidOperationException("DemoDiscOrbitCameraComponent requires the authored camera pose to be offset from the orbit center.");
             }
 
-            double horizontalRadius = Math.Sqrt((offset.X * offset.X) + (offset.Z * offset.Z));
-            double yawRadians = Math.Atan2(offset.X, offset.Z);
-            double pitchRadians = -Math.Atan2(offset.Y, horizontalRadius);
+            double horizontalRadius = Math.Sqrt(((offset.X * offset.X) + (offset.Z * offset.Z)).ToDouble());
+            double yawRadians = Math.Atan2(offset.X.ToDouble(), offset.Z.ToDouble());
+            double pitchRadians = -Math.Atan2(offset.Y.ToDouble(), horizontalRadius);
 
             CurrentOrbitRadius = (float)orbitRadius;
             CurrentYawRadians = (float)yawRadians;
@@ -315,9 +315,9 @@ namespace DemoDisc.rendering {
         /// </summary>
         void ApplyOrbitPose() {
             double horizontalRadius = Math.Cos(CurrentPitchRadians) * CurrentOrbitRadius;
-            double x = OrbitCenter.X + (Math.Sin(CurrentYawRadians) * horizontalRadius);
-            double y = OrbitCenter.Y - (Math.Sin(CurrentPitchRadians) * CurrentOrbitRadius);
-            double z = OrbitCenter.Z + (Math.Cos(CurrentYawRadians) * horizontalRadius);
+            double x = OrbitCenter.X.ToDouble() + (Math.Sin(CurrentYawRadians) * horizontalRadius);
+            double y = OrbitCenter.Y.ToDouble() - (Math.Sin(CurrentPitchRadians) * CurrentOrbitRadius);
+            double z = OrbitCenter.Z.ToDouble() + (Math.Cos(CurrentYawRadians) * horizontalRadius);
             Parent.LocalPosition = new float3((float)x, (float)y, (float)z);
 
             float4 orientation;

@@ -93,7 +93,7 @@ namespace DemoDisc.TiltPlay {
         /// <param name="linearVelocity">Current world-space rigid-body velocity.</param>
         /// <returns>Speed in kilometers per hour.</returns>
         public static float ResolveSpeedKilometersPerHour(float3 linearVelocity) {
-            return linearVelocity.Length() * MetersPerSecondToKilometersPerHour;
+            return (float)(linearVelocity.Length() * MetersPerSecondToKilometersPerHour);
         }
 
         /// <summary>

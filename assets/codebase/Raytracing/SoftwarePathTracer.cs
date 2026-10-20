@@ -129,11 +129,11 @@ namespace DemoDisc.Raytracing {
             ValidateUnit(forward, nameof(forward));
             ValidateUnit(right, nameof(right));
             ValidateUnit(up, nameof(up));
-            if (Math.Abs(float3.Dot(forward, right)) > BasisTolerance || Math.Abs(float3.Dot(forward, up)) > BasisTolerance || Math.Abs(float3.Dot(right, up)) > BasisTolerance) {
+            if (Math.Abs((double)(float3.Dot(forward, right))) > BasisTolerance || Math.Abs((double)(float3.Dot(forward, up))) > BasisTolerance || Math.Abs((double)(float3.Dot(right, up))) > BasisTolerance) {
                 throw new ArgumentOutOfRangeException(nameof(up), "Camera basis vectors must be mutually orthogonal.");
             }
 
-            float handedness = float3.Dot(float3.Cross(right, up), forward);
+            float handedness = (float)(float3.Dot(float3.Cross(right, up), forward));
             if (!float.IsFinite(handedness) || handedness >= -1f + (BasisTolerance * 2f)) {
                 throw new ArgumentOutOfRangeException(nameof(up), "Camera basis must use the forward/right/up handedness convention.");
             }
@@ -145,7 +145,7 @@ namespace DemoDisc.Raytracing {
         /// <param name="value">Basis vector.</param>
         /// <param name="name">Argument name.</param>
         static void ValidateUnit(float3 value, string name) {
-            float lengthSquared = (value.X * value.X) + (value.Y * value.Y) + (value.Z * value.Z);
+            float lengthSquared = (float)((value.X * value.X) + (value.Y * value.Y) + (value.Z * value.Z));
             if (!float.IsFinite(lengthSquared) || lengthSquared <= 0f || Math.Abs(lengthSquared - 1f) > BasisTolerance) {
                 throw new ArgumentOutOfRangeException(name, "Camera basis vectors must be finite unit vectors.");
             }
@@ -157,7 +157,7 @@ namespace DemoDisc.Raytracing {
         /// <param name="value">Vector to inspect.</param>
         /// <returns>True when every component is finite.</returns>
         static bool IsFinite(float3 value) {
-            return float.IsFinite(value.X) && float.IsFinite(value.Y) && float.IsFinite(value.Z);
+            return float.IsFinite((float)(value.X)) && float.IsFinite((float)(value.Y)) && float.IsFinite((float)(value.Z));
         }
     }
 
@@ -296,7 +296,7 @@ namespace DemoDisc.Raytracing {
             float tangentY = radial * (float)Math.Sin(phi);
             float normalPart = (float)Math.Sqrt(Math.Max(0f, 1f - firstSample));
 
-            float3 reference = Math.Abs(normal.Y) < 0.9f ? new float3(0f, 1f, 0f) : new float3(1f, 0f, 0f);
+            float3 reference = Math.Abs((double)(normal.Y)) < 0.9f ? new float3(0f, 1f, 0f) : new float3(1f, 0f, 0f);
             float3 tangent = float3.Normalize(float3.Cross(reference, normal));
             float3 bitangent = float3.Cross(normal, tangent);
             float3 result = Add(Add(Scale(tangent, tangentX), Scale(bitangent, tangentY)), Scale(normal, normalPart));
@@ -380,7 +380,7 @@ namespace DemoDisc.Raytracing {
             float edge1LengthSquared = LengthSquared(light.Edge1);
             float edge2LengthSquared = LengthSquared(light.Edge2);
             float edgeLengthProduct = (float)Math.Sqrt(edge1LengthSquared * edge2LengthSquared);
-            if (!float.IsFinite(edgeLengthProduct) || edgeLengthProduct <= 0f || Math.Abs(float3.Dot(light.Edge1, light.Edge2)) > 0.002f * edgeLengthProduct) {
+            if (!float.IsFinite(edgeLengthProduct) || edgeLengthProduct <= 0f || Math.Abs((double)(float3.Dot(light.Edge1, light.Edge2))) > 0.002f * edgeLengthProduct) {
                 throw new ArgumentOutOfRangeException(nameof(light), "Area-light edges must be finite and orthogonal.");
             }
             float geometricArea = (float)Math.Sqrt(crossLengthSquared);
@@ -389,7 +389,7 @@ namespace DemoDisc.Raytracing {
                 throw new ArgumentOutOfRangeException(nameof(light), "Area-light area must match its edge vectors.");
             }
             float3 unitCross = Scale(cross, 1f / geometricArea);
-            if (Math.Abs(float3.Dot(unitCross, light.InwardNormal)) < 0.998f) {
+            if (Math.Abs((double)(float3.Dot(unitCross, light.InwardNormal))) < 0.998f) {
                 throw new ArgumentOutOfRangeException(nameof(light), "Area-light normal must be perpendicular to its edges.");
             }
         }
@@ -400,7 +400,7 @@ namespace DemoDisc.Raytracing {
         /// <param name="value">Vector to measure.</param>
         /// <returns>The squared length.</returns>
         static float LengthSquared(float3 value) {
-            return (value.X * value.X) + (value.Y * value.Y) + (value.Z * value.Z);
+            return (float)((value.X * value.X) + (value.Y * value.Y) + (value.Z * value.Z));
         }
 
         /// <summary>
@@ -409,7 +409,7 @@ namespace DemoDisc.Raytracing {
         /// <param name="value">Vector to inspect.</param>
         /// <returns>True when every component is finite.</returns>
         static bool IsFinite(float3 value) {
-            return float.IsFinite(value.X) && float.IsFinite(value.Y) && float.IsFinite(value.Z);
+            return float.IsFinite((float)(value.X)) && float.IsFinite((float)(value.Y)) && float.IsFinite((float)(value.Z));
         }
 
         /// <summary>
@@ -946,8 +946,8 @@ namespace DemoDisc.Raytracing {
                     if (!IsFinite(lightDirection)) {
                         return DiscardSample();
                     }
-                    float cosSurface = float3.Dot(orientedNormal, lightDirection);
-                    float cosLight = float3.Dot(sampledLight.InwardNormal, Negate(lightDirection));
+                    float cosSurface = (float)(float3.Dot(orientedNormal, lightDirection));
+                    float cosLight = (float)(float3.Dot(sampledLight.InwardNormal, Negate(lightDirection)));
                     if (!float.IsFinite(cosSurface) || !float.IsFinite(cosLight)) {
                         return DiscardSample();
                     }
@@ -1061,10 +1061,10 @@ namespace DemoDisc.Raytracing {
             ValidateUnitCameraVector(value.Forward, nameof(value));
             ValidateUnitCameraVector(value.Right, nameof(value));
             ValidateUnitCameraVector(value.Up, nameof(value));
-            if (Math.Abs(float3.Dot(value.Forward, value.Right)) > SoftwareTraceCamera.BasisTolerance || Math.Abs(float3.Dot(value.Forward, value.Up)) > SoftwareTraceCamera.BasisTolerance || Math.Abs(float3.Dot(value.Right, value.Up)) > SoftwareTraceCamera.BasisTolerance) {
+            if (Math.Abs((double)(float3.Dot(value.Forward, value.Right))) > SoftwareTraceCamera.BasisTolerance || Math.Abs((double)(float3.Dot(value.Forward, value.Up))) > SoftwareTraceCamera.BasisTolerance || Math.Abs((double)(float3.Dot(value.Right, value.Up))) > SoftwareTraceCamera.BasisTolerance) {
                 throw new ArgumentOutOfRangeException(nameof(value), "Camera basis vectors must be mutually orthogonal.");
             }
-            float handedness = float3.Dot(float3.Cross(value.Right, value.Up), value.Forward);
+            float handedness = (float)(float3.Dot(float3.Cross(value.Right, value.Up), value.Forward));
             if (!float.IsFinite(handedness) || handedness >= -1f + (SoftwareTraceCamera.BasisTolerance * 2f)) {
                 throw new ArgumentOutOfRangeException(nameof(value), "Camera basis must use the forward/right/up handedness convention.");
             }
@@ -1163,9 +1163,9 @@ namespace DemoDisc.Raytracing {
         /// <param name="average">Linear average radiance.</param>
         /// <param name="destination">RGBA byte offset in TileRgba8.</param>
         void WriteToneMappedPixel(float3 average, int destination) {
-            tileRgba8[destination] = ToneMapChannel(average.X);
-            tileRgba8[destination + 1] = ToneMapChannel(average.Y);
-            tileRgba8[destination + 2] = ToneMapChannel(average.Z);
+            tileRgba8[destination] = ToneMapChannel((float)(average.X));
+            tileRgba8[destination + 1] = ToneMapChannel((float)(average.Y));
+            tileRgba8[destination + 2] = ToneMapChannel((float)(average.Z));
             tileRgba8[destination + 3] = 255;
         }
 
@@ -1430,7 +1430,7 @@ namespace DemoDisc.Raytracing {
         /// <param name="value">Vector to inspect.</param>
         /// <returns>True when all vector components are finite.</returns>
         static bool IsFinite(float3 value) {
-            return float.IsFinite(value.X) && float.IsFinite(value.Y) && float.IsFinite(value.Z);
+            return float.IsFinite((float)(value.X)) && float.IsFinite((float)(value.Y)) && float.IsFinite((float)(value.Z));
         }
 
         /// <summary>
@@ -1439,7 +1439,7 @@ namespace DemoDisc.Raytracing {
         /// <param name="value">Vector to measure.</param>
         /// <returns>The squared length.</returns>
         static float LengthSquared(float3 value) {
-            return (value.X * value.X) + (value.Y * value.Y) + (value.Z * value.Z);
+            return (float)((value.X * value.X) + (value.Y * value.Y) + (value.Z * value.Z));
         }
     }
 }

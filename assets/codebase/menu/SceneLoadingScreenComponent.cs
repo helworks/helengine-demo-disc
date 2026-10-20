@@ -134,7 +134,7 @@ namespace DemoDisc.menu {
             Fill.BorderColor = new byte4(135, 94, 163, alpha);
             float clampedProgress = Math.Clamp(progress, 0f, 1f);
             float2 canvasScale = ResolveCanvasScale();
-            int fittedFillWidth = (int)Math.Round(ProgressTrackWidth * clampedProgress * canvasScale.X);
+            int fittedFillWidth = (int)Math.Round((ProgressTrackWidth * clampedProgress * canvasScale.X).ToDouble());
             Fill.Size = new int2(fittedFillWidth, Fill.Size.Y);
         }
 

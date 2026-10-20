@@ -87,8 +87,8 @@ namespace DemoDisc.menu {
             }
 
             float3 localPosition = GridEntity.LocalPosition;
-            float nextX = localPosition.X - movement;
-            float nextY = localPosition.Y - movement;
+            float nextX = (float)(localPosition.X - movement);
+            float nextY = (float)(localPosition.Y - movement);
             if (nextX <= -GridPeriod) {
                 nextX += GridPeriod;
             }
@@ -109,7 +109,7 @@ namespace DemoDisc.menu {
             }
 
             float3 localPosition = ScanlineEntity.LocalPosition;
-            float nextY = localPosition.Y - movement;
+            float nextY = (float)(localPosition.Y - movement);
             if (nextY <= -ScanlinePeriod) {
                 nextY += ScanlinePeriod;
             }

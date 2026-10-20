@@ -123,14 +123,14 @@ namespace DemoDisc.rendering {
 
             float3 orbitCenter = ResolveOrbitCenter();
             float3 offset = Parent.LocalPosition - orbitCenter;
-            double orbitRadius = Math.Sqrt((offset.X * offset.X) + (offset.Y * offset.Y) + (offset.Z * offset.Z));
+            double orbitRadius = Math.Sqrt(((offset.X * offset.X) + (offset.Y * offset.Y) + (offset.Z * offset.Z)).ToDouble());
             if (orbitRadius <= MinimumOrbitRadius) {
                 throw new InvalidOperationException("DemoFollowCameraComponent requires the authored camera pose to be offset from the tracked target.");
             }
 
-            double horizontalRadius = Math.Sqrt((offset.X * offset.X) + (offset.Z * offset.Z));
-            double yawRadians = Math.Atan2(offset.X, offset.Z);
-            double pitchRadians = -Math.Atan2(offset.Y, horizontalRadius);
+            double horizontalRadius = Math.Sqrt(((offset.X * offset.X) + (offset.Z * offset.Z)).ToDouble());
+            double yawRadians = Math.Atan2(offset.X.ToDouble(), offset.Z.ToDouble());
+            double pitchRadians = -Math.Atan2(offset.Y.ToDouble(), horizontalRadius);
 
             CurrentOrbitRadius = (float)orbitRadius;
             CurrentYawRadians = (float)yawRadians;
@@ -242,9 +242,9 @@ namespace DemoDisc.rendering {
         void ApplyOrbitPose() {
             float3 orbitCenter = ResolveOrbitCenter();
             double horizontalRadius = Math.Cos(CurrentPitchRadians) * CurrentOrbitRadius;
-            double x = orbitCenter.X + (Math.Sin(CurrentYawRadians) * horizontalRadius);
-            double y = orbitCenter.Y - (Math.Sin(CurrentPitchRadians) * CurrentOrbitRadius);
-            double z = orbitCenter.Z + (Math.Cos(CurrentYawRadians) * horizontalRadius);
+            double x = orbitCenter.X.ToDouble() + (Math.Sin(CurrentYawRadians) * horizontalRadius);
+            double y = orbitCenter.Y.ToDouble() - (Math.Sin(CurrentPitchRadians) * CurrentOrbitRadius);
+            double z = orbitCenter.Z.ToDouble() + (Math.Cos(CurrentYawRadians) * horizontalRadius);
             Parent.LocalPosition = new float3((float)x, (float)y, (float)z);
 
             float4 orientation;

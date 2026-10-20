@@ -36,13 +36,13 @@ namespace DemoDisc.Raytracing {
                 return true;
             }
 
-            float signedCosine = float3.Dot(incoming, outwardNormal);
+            float signedCosine = (float)(float3.Dot(incoming, outwardNormal));
             bool entering = signedCosine < 0f;
             float3 normal = entering ? outwardNormal : -outwardNormal;
             float incidentIndex = entering ? 1f : indexOfRefraction;
             float transmittedIndex = entering ? indexOfRefraction : 1f;
             float eta = incidentIndex / transmittedIndex;
-            float cosIncident = Math.Clamp(-float3.Dot(incoming, normal), 0f, 1f);
+            float cosIncident = Math.Clamp((float)(-float3.Dot(incoming, normal)), 0f, 1f);
             double sinTransmittedSquared = (double)eta * eta * Math.Max(0f, 1f - cosIncident * cosIncident);
             if (sinTransmittedSquared >= 1f) {
                 outgoing = Reflect(incoming, normal);
@@ -75,7 +75,7 @@ namespace DemoDisc.Raytracing {
                 throw new ArgumentOutOfRangeException(nameof(material), "Refractive index must be finite and at least one.");
             }
             float3 color = material.ReflectionColor;
-            if (!float.IsFinite(color.X) || !float.IsFinite(color.Y) || !float.IsFinite(color.Z) || color.X < 0f || color.Y < 0f || color.Z < 0f || color.X > 1f || color.Y > 1f || color.Z > 1f) {
+            if (!float.IsFinite((float)(color.X)) || !float.IsFinite((float)(color.Y)) || !float.IsFinite((float)(color.Z)) || color.X < 0f || color.Y < 0f || color.Z < 0f || color.X > 1f || color.Y > 1f || color.Z > 1f) {
                 throw new ArgumentOutOfRangeException(nameof(material), "Reflection color channels must be finite and between zero and one.");
             }
         }

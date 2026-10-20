@@ -152,10 +152,10 @@ namespace DemoDisc.menu {
                 throw new InvalidOperationException("Platform info requires initialized runtime platform metadata.");
             }
 
-            bool useHorizontalRowLayout = Math.Abs(PlatformNameBaseLocalPosition.Y - PlatformVersionBaseLocalPosition.Y) < 0.01f;
+            bool useHorizontalRowLayout = Math.Abs((PlatformNameBaseLocalPosition.Y - PlatformVersionBaseLocalPosition.Y).ToDouble()) < 0.01f;
             if (useHorizontalRowLayout) {
-                ApplyHorizontalText(PlatformNameTextEntity, PlatformNameTextComponent, PlatformNameLayoutComponent, Core.Instance.PlatformInfo.Name, PlatformNameBaseLocalPosition.X, PlatformNameBaseLocalPosition.Y, PlatformNameBaseSize, TextAlignment.Left);
-                ApplyHorizontalText(PlatformVersionTextEntity, PlatformVersionTextComponent, PlatformVersionLayoutComponent, Core.Instance.PlatformInfo.Version, PlatformVersionBaseLocalPosition.X, PlatformVersionBaseLocalPosition.Y, PlatformVersionBaseSize, TextAlignment.Right);
+                ApplyHorizontalText(PlatformNameTextEntity, PlatformNameTextComponent, PlatformNameLayoutComponent, Core.Instance.PlatformInfo.Name, PlatformNameBaseLocalPosition.X.ToSingle(), PlatformNameBaseLocalPosition.Y.ToSingle(), PlatformNameBaseSize, TextAlignment.Left);
+                ApplyHorizontalText(PlatformVersionTextEntity, PlatformVersionTextComponent, PlatformVersionLayoutComponent, Core.Instance.PlatformInfo.Version, PlatformVersionBaseLocalPosition.X.ToSingle(), PlatformVersionBaseLocalPosition.Y.ToSingle(), PlatformVersionBaseSize, TextAlignment.Right);
                 return;
             }
 
@@ -262,10 +262,10 @@ namespace DemoDisc.menu {
             textComponent.Alignment = TextAlignment.Right;
             textComponent.Text = text;
             float2 measuredSize = textComponent.Font.MeasureString(text);
-            double fontScale = textComponent.FontScale;
+            double fontScale = textComponent.FontScale.ToDouble();
             textComponent.Size = new int2(
-                (int)Math.Ceiling(measuredSize.X * fontScale),
-                (int)Math.Ceiling(measuredSize.Y * fontScale));
+                (int)Math.Ceiling(measuredSize.X.ToDouble() * fontScale),
+                (int)Math.Ceiling(measuredSize.Y.ToDouble() * fontScale));
             entity.LocalPosition = new float3(-textComponent.Size.X, topOffset, 0f);
         }
 
@@ -289,10 +289,10 @@ namespace DemoDisc.menu {
             textComponent.Alignment = alignment;
             textComponent.Text = text;
             float2 measuredSize = textComponent.Font.MeasureString(text);
-            double fontScale = textComponent.FontScale;
+            double fontScale = textComponent.FontScale.ToDouble();
             textComponent.Size = new int2(
-                Math.Max(baseSize.X, (int)Math.Ceiling(measuredSize.X * fontScale)),
-                Math.Max(baseSize.Y, (int)Math.Ceiling(measuredSize.Y * fontScale)));
+                Math.Max(baseSize.X, (int)Math.Ceiling(measuredSize.X.ToDouble() * fontScale)),
+                Math.Max(baseSize.Y, (int)Math.Ceiling(measuredSize.Y.ToDouble() * fontScale)));
             if (layoutComponent != null && layoutComponent.IsAnchored) {
                 layoutComponent.RefreshAnchoring();
                 return;

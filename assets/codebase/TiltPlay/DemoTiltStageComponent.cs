@@ -334,7 +334,7 @@ namespace DemoDisc.TiltPlay {
         /// <param name="vectorName">Vector label used when reporting invalid direction failures.</param>
         /// <returns>Normalized planar vector.</returns>
         static float3 NormalizePlanarOrThrow(float3 value, string vectorName) {
-            double lengthSquared = (value.X * value.X) + (value.Z * value.Z);
+            double lengthSquared = ((value.X * value.X) + (value.Z * value.Z)).ToDouble();
             if (lengthSquared <= MinimumPlanarLengthSquared) {
                 throw new InvalidOperationException($"DemoTiltStageComponent could not derive a valid planar {vectorName} direction from the active camera orientation.");
             }
@@ -356,7 +356,7 @@ namespace DemoDisc.TiltPlay {
             }
 
             float3 velocityDelta = targetPlanarVelocity - currentPlanarVelocity;
-            double deltaLengthSquared = (velocityDelta.X * velocityDelta.X) + (velocityDelta.Z * velocityDelta.Z);
+            double deltaLengthSquared = ((velocityDelta.X * velocityDelta.X) + (velocityDelta.Z * velocityDelta.Z)).ToDouble();
             if (deltaLengthSquared <= MinimumPlanarLengthSquared || maximumPlanarStep == 0d) {
                 return currentPlanarVelocity;
             }

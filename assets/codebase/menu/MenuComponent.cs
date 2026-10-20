@@ -519,8 +519,8 @@ namespace DemoDisc.menu {
             }
 
             float4 viewportBounds = ResolveMenuViewportBounds();
-            int pointerX = inputSystem.GetPointerX() - (int)Math.Round(viewportBounds.X);
-            int pointerY = inputSystem.GetPointerY() - (int)Math.Round(viewportBounds.Y);
+            int pointerX = inputSystem.GetPointerX() - (int)Math.Round(viewportBounds.X.ToDouble());
+            int pointerY = inputSystem.GetPointerY() - (int)Math.Round(viewportBounds.Y.ToDouble());
             MenuItemRuntime hoveredItem = FindHoveredItem(ActivePanel, pointerX, pointerY);
             if (hoveredItem != null
                 && hoveredItem.Index != ActivePanel.SelectedItemIndex
@@ -886,7 +886,7 @@ namespace DemoDisc.menu {
             }
 
             if (itemsRootEntity.Children.Count >= 2) {
-                float step = itemsRootEntity.Children[1].LocalPosition.Y - itemsRootEntity.Children[0].LocalPosition.Y;
+                float step = (float)(itemsRootEntity.Children[1].LocalPosition.Y - itemsRootEntity.Children[0].LocalPosition.Y);
                 if (step > 0f) {
                     return step;
                 }

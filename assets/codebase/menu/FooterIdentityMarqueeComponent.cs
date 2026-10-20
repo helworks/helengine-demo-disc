@@ -125,7 +125,7 @@ namespace DemoDisc.menu {
             float textWidth = MeasuredTextWidth;
             double movement = (double)PixelsPerSecond * CanvasScaleX * Core.Instance.FrameDeltaSeconds;
             float3 localPosition = TextEntity.LocalPosition;
-            float nextPositionX = localPosition.X - (float)movement;
+            float nextPositionX = (float)(localPosition.X - (float)movement);
             if (nextPositionX + textWidth <= 0f) {
                 PositionTextAtStripStart();
                 return;
@@ -145,8 +145,8 @@ namespace DemoDisc.menu {
                 return false;
             }
 
-            MeasuredTextWidth = FooterTextComponent.Font.MeasureTight(FooterTextComponent.Text).Width
-                * FooterTextComponent.FontScale;
+            MeasuredTextWidth = (float)(FooterTextComponent.Font.MeasureTight(FooterTextComponent.Text).Width
+                * FooterTextComponent.FontScale);
             HasMeasuredTextWidth = true;
             return true;
         }
@@ -236,8 +236,8 @@ namespace DemoDisc.menu {
                 CanvasScaleX = (float)LayoutViewport.PreparedLayoutMetrics.ScaleX;
                 FittedStripStartX = StripWidthValue * CanvasScaleX;
             } else if (LayoutReferenceCanvas != null) {
-                CanvasScaleX = LayoutReferenceCanvas.CalculateScale().X;
-                FittedStripStartX = LayoutReferenceCanvas.CalculatePosition(new float3(StripWidthValue, 0f, 0f)).X;
+                CanvasScaleX = LayoutReferenceCanvas.CalculateScale().X.ToSingle();
+                FittedStripStartX = LayoutReferenceCanvas.CalculatePosition(new float3(StripWidthValue, 0f, 0f)).X.ToSingle();
             } else {
                 throw new InvalidOperationException("Footer marquee requires a prepared canvas binding.");
             }

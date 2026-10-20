@@ -331,20 +331,20 @@ namespace DemoDisc.Raytracing {
         /// <returns>Zero for X, one for Y, or two for Z.</returns>
         static int SelectLargestCentroidAxis(SoftwareTriangle[] triangles, int[] order, int start, int count) {
             SoftwareTriangle first = triangles[order[start]];
-            float minX = first.Centroid.X;
+            float minX = (float)(first.Centroid.X);
             float maxX = minX;
-            float minY = first.Centroid.Y;
+            float minY = (float)(first.Centroid.Y);
             float maxY = minY;
-            float minZ = first.Centroid.Z;
+            float minZ = (float)(first.Centroid.Z);
             float maxZ = minZ;
             for (int i = 1; i < count; i++) {
                 SoftwareTriangle triangle = triangles[order[start + i]];
-                if (triangle.Centroid.X < minX) minX = triangle.Centroid.X;
-                if (triangle.Centroid.X > maxX) maxX = triangle.Centroid.X;
-                if (triangle.Centroid.Y < minY) minY = triangle.Centroid.Y;
-                if (triangle.Centroid.Y > maxY) maxY = triangle.Centroid.Y;
-                if (triangle.Centroid.Z < minZ) minZ = triangle.Centroid.Z;
-                if (triangle.Centroid.Z > maxZ) maxZ = triangle.Centroid.Z;
+                if (triangle.Centroid.X < minX) minX = (float)(triangle.Centroid.X);
+                if (triangle.Centroid.X > maxX) maxX = (float)(triangle.Centroid.X);
+                if (triangle.Centroid.Y < minY) minY = (float)(triangle.Centroid.Y);
+                if (triangle.Centroid.Y > maxY) maxY = (float)(triangle.Centroid.Y);
+                if (triangle.Centroid.Z < minZ) minZ = (float)(triangle.Centroid.Z);
+                if (triangle.Centroid.Z > maxZ) maxZ = (float)(triangle.Centroid.Z);
             }
 
             float xExtent = maxX - minX;
@@ -440,9 +440,9 @@ namespace DemoDisc.Raytracing {
         /// <param name="axis">Zero for X, one for Y, or two for Z.</param>
         /// <returns>The selected centroid component.</returns>
         static float GetCentroidComponent(float3 centroid, int axis) {
-            if (axis == 0) return centroid.X;
-            if (axis == 1) return centroid.Y;
-            return centroid.Z;
+            if (axis == 0) return (float)(centroid.X);
+            if (axis == 1) return (float)(centroid.Y);
+            return (float)(centroid.Z);
         }
 
         /// <summary>
@@ -460,13 +460,13 @@ namespace DemoDisc.Raytracing {
             for (int i = 1; i < count; i++) {
                 SoftwareTriangle triangle = triangles[order[start + i]];
                 minimum = new float3(
-                    Math.Min(minimum.X, triangle.BoundsMin.X),
-                    Math.Min(minimum.Y, triangle.BoundsMin.Y),
-                    Math.Min(minimum.Z, triangle.BoundsMin.Z));
+                    Math.Min((double)(minimum.X), (double)(triangle.BoundsMin.X)),
+                    Math.Min((double)(minimum.Y), (double)(triangle.BoundsMin.Y)),
+                    Math.Min((double)(minimum.Z), (double)(triangle.BoundsMin.Z)));
                 maximum = new float3(
-                    Math.Max(maximum.X, triangle.BoundsMax.X),
-                    Math.Max(maximum.Y, triangle.BoundsMax.Y),
-                    Math.Max(maximum.Z, triangle.BoundsMax.Z));
+                    Math.Max((double)(maximum.X), (double)(triangle.BoundsMax.X)),
+                    Math.Max((double)(maximum.Y), (double)(triangle.BoundsMax.Y)),
+                    Math.Max((double)(maximum.Z), (double)(triangle.BoundsMax.Z)));
             }
             return new SoftwareBounds(minimum, maximum);
         }
@@ -596,25 +596,25 @@ namespace DemoDisc.Raytracing {
             }
 
             float3 pVector = float3.Cross(ray.Direction, triangle.Edge2);
-            float determinant = float3.Dot(triangle.Edge1, pVector);
+            float determinant = (float)(float3.Dot(triangle.Edge1, pVector));
             if (Math.Abs(determinant) <= DeterminantEpsilon) {
                 return false;
             }
 
             float inverseDeterminant = 1f / determinant;
             float3 originToCorner = ray.Origin - triangle.P0;
-            float u = float3.Dot(originToCorner, pVector) * inverseDeterminant;
+            float u = (float)(float3.Dot(originToCorner, pVector) * inverseDeterminant);
             if (u < -BarycentricEpsilon || u > 1f + BarycentricEpsilon) {
                 return false;
             }
 
             float3 qVector = float3.Cross(originToCorner, triangle.Edge1);
-            float v = float3.Dot(ray.Direction, qVector) * inverseDeterminant;
+            float v = (float)(float3.Dot(ray.Direction, qVector) * inverseDeterminant);
             if (v < -BarycentricEpsilon || u + v > 1f + BarycentricEpsilon) {
                 return false;
             }
 
-            float distance = float3.Dot(triangle.Edge2, qVector) * inverseDeterminant;
+            float distance = (float)(float3.Dot(triangle.Edge2, qVector) * inverseDeterminant);
             if (distance < 0f || distance < minimumDistance || distance > maximumDistance || !float.IsFinite(distance)) {
                 return false;
             }
@@ -651,9 +651,9 @@ namespace DemoDisc.Raytracing {
 
             float nearDistance = 0f;
             float farDistance = maximumDistance;
-            if (!IntersectSlab(ray.Origin.X, ray.Direction.X, bounds.Min.X, bounds.Max.X, ref nearDistance, ref farDistance) ||
-                !IntersectSlab(ray.Origin.Y, ray.Direction.Y, bounds.Min.Y, bounds.Max.Y, ref nearDistance, ref farDistance) ||
-                !IntersectSlab(ray.Origin.Z, ray.Direction.Z, bounds.Min.Z, bounds.Max.Z, ref nearDistance, ref farDistance)) {
+            if (!IntersectSlab((float)(ray.Origin.X), (float)(ray.Direction.X), (float)(bounds.Min.X), (float)(bounds.Max.X), ref nearDistance, ref farDistance) ||
+                !IntersectSlab((float)(ray.Origin.Y), (float)(ray.Direction.Y), (float)(bounds.Min.Y), (float)(bounds.Max.Y), ref nearDistance, ref farDistance) ||
+                !IntersectSlab((float)(ray.Origin.Z), (float)(ray.Direction.Z), (float)(bounds.Min.Z), (float)(bounds.Max.Z), ref nearDistance, ref farDistance)) {
                 return false;
             }
 

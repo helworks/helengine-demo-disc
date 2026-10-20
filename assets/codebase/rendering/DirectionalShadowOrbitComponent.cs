@@ -35,8 +35,8 @@ namespace DemoDisc.rendering {
             base.Update();
 
             double angleRadians = BaseAngleRadians + (AngularSpeedRadians * Core.Instance.TotalElapsedSeconds);
-            double x = OrbitCenter.X + (Math.Sin(angleRadians) * OrbitRadius);
-            double z = OrbitCenter.Z + (Math.Cos(angleRadians) * OrbitRadius);
+            double x = OrbitCenter.X.ToDouble() + (Math.Sin(angleRadians) * OrbitRadius);
+            double z = OrbitCenter.Z.ToDouble() + (Math.Cos(angleRadians) * OrbitRadius);
             Parent.LocalPosition = new float3((float)x, OrbitCenter.Y + OrbitHeight, (float)z);
 
             float4 orientation;
