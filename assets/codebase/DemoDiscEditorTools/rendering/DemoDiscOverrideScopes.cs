@@ -3,9 +3,9 @@ using DemoDisc.rendering;
 
 namespace DemoDisc.EditorTools {
     /// <summary>
-    /// The only override scopes the generators author. Every platform supports every feature, so generated scene
-    /// content never names a platform: it varies by platform group (HD, SD, Micro SD, dual-screen, mobile) and, for debug-only
-    /// content, by build config. A scope applies to a build target when it is a prefix of that target's path under
+    /// Override scopes authored by the generators. Shared presentation normally varies by platform group, while
+    /// target-specific presentation can refine that group (for example, compact N64 instructions). Debug-only
+    /// content varies by build config. A scope applies to a build target when it is a prefix of that target's path under
     /// the entity's level order, so group scopes live on entities with <see cref="GroupFirstLevelOrder"/> and build
     /// config scopes on entities with <see cref="BuildConfigFirstLevelOrder"/>.
     /// </summary>
@@ -96,6 +96,10 @@ namespace DemoDisc.EditorTools {
         public static EditorOverrideScope MicroSd => Sd
             .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.Group, MicroSdGroupId));
 
+        /// <summary>Gets the N64 platform below the Micro SD presentation group.</summary>
+        public static EditorOverrideScope Nintendo64 => MicroSd
+            .Append(new EditorOverrideScopeStep(SceneOverrideScopeStepKind.Platform, "n64"));
+
         /// <summary>
         /// Gets <c>sd/dual-screen</c> under the group-first level order: the DS and 3DS rigs.
         /// </summary>
@@ -160,7 +164,7 @@ namespace DemoDisc.EditorTools {
 
         /// <summary>
         /// Builds the one-step path for a single platform. Only the build-config-driven menu exclusions use it;
-        /// generated scene content varies by group, never by platform.
+        /// ordinary scene content uses the group-first scopes above.
         /// </summary>
         /// <param name="platformId">Platform identifier the override should apply to.</param>
         public static EditorOverrideScope Platform(string platformId) {

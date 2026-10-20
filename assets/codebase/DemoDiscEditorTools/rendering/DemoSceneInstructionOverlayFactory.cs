@@ -91,6 +91,14 @@ namespace DemoDisc.EditorTools {
         /// </summary>
         public const float MicroSdInstructionPanelScale = 1.5f;
 
+        /// <summary>Reference-sized N64 instructions; native text already retains its readable pixel size.</summary>
+        public const float Nintendo64InstructionPanelScale = 1f;
+
+        /// <summary>Keeps the compact N64 panel at the existing Micro SD bottom margin.</summary>
+        public const float Nintendo64InstructionPanelTop = DesktopViewportHeight - 24 - DesktopInstructionPanelHeight * Nintendo64InstructionPanelScale;
+
+        const float Nintendo64InstructionLabelTopInRow = (InstructionIconSize / 2 * Nintendo64InstructionPanelScale - DemoDiscSceneUiFont.ReferenceCapCenter) / Nintendo64InstructionPanelScale;
+
         /// <summary>
         /// Micro SD panel top that keeps the scaled panel 24 reference pixels above the bottom of the screen.
         /// </summary>
@@ -466,6 +474,11 @@ namespace DemoDisc.EditorTools {
             microSdPanel.LocalPosition = new float3(DesktopInstructionPanelLeft, MicroSdInstructionPanelTop, 0f);
             microSdPanel.HasLocalScaleOverride = true;
             microSdPanel.LocalScale = new float3(MicroSdInstructionPanelScale, MicroSdInstructionPanelScale, 1f);
+            SceneEntityPlatformTransformOverrideAsset nintendo64Panel = panelSave.GetOrCreateTransformPlatformOverride(DemoDiscOverrideScopes.Nintendo64);
+            nintendo64Panel.HasLocalPositionOverride = true;
+            nintendo64Panel.LocalPosition = new float3(DesktopInstructionPanelLeft, Nintendo64InstructionPanelTop, 0f);
+            nintendo64Panel.HasLocalScaleOverride = true;
+            nintendo64Panel.LocalScale = new float3(Nintendo64InstructionPanelScale, Nintendo64InstructionPanelScale, 1f);
             SceneUiDepth.SetWorldDepth(panelEntity, 200);
             panelEntity.AddComponent(new RoundedRectComponent {
                 Size = new int2(DesktopInstructionPanelWidth, DesktopInstructionPanelHeight),
@@ -610,6 +623,9 @@ namespace DemoDisc.EditorTools {
             SceneEntityPlatformTransformOverrideAsset microSdText = textSave.GetOrCreateTransformPlatformOverride(DemoDiscOverrideScopes.MicroSd);
             microSdText.HasLocalPositionOverride = true;
             microSdText.LocalPosition = new float3(DesktopInstructionLabelLeft, rowTop + MicroSdInstructionLabelTopInRow, 0.1f);
+            SceneEntityPlatformTransformOverrideAsset nintendo64Text = textSave.GetOrCreateTransformPlatformOverride(DemoDiscOverrideScopes.Nintendo64);
+            nintendo64Text.HasLocalPositionOverride = true;
+            nintendo64Text.LocalPosition = new float3(DesktopInstructionLabelLeft, rowTop + Nintendo64InstructionLabelTopInRow, 0.1f);
             TextComponent textComponent = new TextComponent {
                 Text = text,
                 Font = font,

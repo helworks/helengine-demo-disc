@@ -914,226 +914,120 @@
       "selectedSceneReferences": [
         {
           "sourceKind": 1,
-          "relativePath": "scenes/HelenOfCodeSplash.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000003",
-          "contentHash": "sha256:518ba0729600dba4ae806bfeebb1ca36c83017db28c0a47772a9d6c64c39611d"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/SceneLoadingScreen.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000004",
-          "contentHash": "sha256:f17d659bcd194f6dfc28a8ddbd5007b59ac5f836f2dbf14cd5039d56fa958974"
-        },
-        {
-          "sourceKind": 1,
           "relativePath": "scenes/DemoDiscMainMenu.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000001",
-          "contentHash": "sha256:de3cf052d68465cdb0e26190716d4787e986bd5b03928a94b489f333bcb83cfd"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/cube_test.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000010",
-          "contentHash": "sha256:3692394edebb0d920be38e6689bba36b79181bb70a2e8ebf859b26336db7e47d"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/colored_cube_grid.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000011",
-          "contentHash": "sha256:3ae0c21ae3345e93241eb0c927e394a1a0d4726b9dca1939aacab23f81d3598b"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/textured_cube_grid.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000015",
-          "contentHash": "sha256:115c0d7e7c5bfaff626e648a027110120eb9a9a73ec28e37bafadd8ba48edefe"
+          "contentHash": "sha256:ac1954d812dcb51959847d21025f37a3cfde09d405ea11682c8e18927b5621ec"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/axis_test.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000017",
-          "contentHash": "sha256:f678eb7cf853f00eb78fdb4d7af2df9aedf07d28597ffa1dd9a5ab0c6da908d6"
+          "contentHash": "sha256:63ac00560198ccea0e3e5dc21cf4664c94a549192ef2242a055de4646be380a1"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/axis_test2.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000018",
-          "contentHash": "sha256:88212361ea99f06aaafc6b8012112ebf19d252d689d4c203fb798d015a2a85c6"
+          "contentHash": "sha256:be2d4b6b15528b44b0ddf7fde0e7ed45ab9cb108572df9842ce1f7779dfdd334"
         },
         {
           "sourceKind": 1,
-          "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+          "relativePath": "scenes/rendering/colored_cube_grid.helen",
           "providerId": "",
-          "assetId": "1000000000000000000000000000001e",
-          "contentHash": "sha256:56066b3243a0f9355a86fdae27ee628a39acaced7d6a3990aed7f8b32bd12e19"
+          "assetId": "10000000000000000000000000000011",
+          "contentHash": "sha256:d61e1cf84bbebc7c090aeed8a0cd3f65fc320889c2ea245b667df0db93b5abd5"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/cube_test.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000010",
+          "contentHash": "sha256:1b2cccdbaa2f8af9fe0f975afb33151ae6635226b4c59599b401fd7839a1d2fe"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000013",
-          "contentHash": "sha256:5d79fcbadfd4aa2157d04d087762c2f1f9ff52399fc1f29a9c4f83f718c20964"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/physics/test_scene_dynamic_stack_boxes.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000023",
-          "contentHash": "sha256:f3e45fa4509a58d8b9bae7059b8c753cb69268132a9c6bd7004fbde73b5cbde4"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/physics/test_scene_dynamic_sphere_stack.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000025",
-          "contentHash": "sha256:8cbc4ed22df12e72c25d3535ba55de388eb6b65e5da1fee10faf5a77859b8d47"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/physics/test_scene_dynamic_mixed_stack.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000028",
-          "contentHash": "sha256:54c53ffee57c12a1b1e9ce5ad906635ec1d2be8ae1fbb484bcc7faea24ae2f7f"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000030",
-          "contentHash": "sha256:03d3d3bf1f400276b9df03a869091fec3a0737f3e1abcbd90adaf86dfff10aa7"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_01.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000033",
-          "contentHash": "sha256:7b3a85ea734df39c57050a229220c22259c9420fded65e80a9c4bea67ffd8182"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_02.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000034",
-          "contentHash": "sha256:312f1e1abea108ac72254e0ac67e152be62e9dd3e273ed7e9d1b77ed5497d193"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_03.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000035",
-          "contentHash": "sha256:24886d0f8736af67d17a3da975f872cc50dca5a7c85d66ca6aae7fad8ab9673e"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_04.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000036",
-          "contentHash": "sha256:b2aca8335554d7674a43e4d36fe245f61a8833f3abd26175c678736299e93422"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_05.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000037",
-          "contentHash": "sha256:83be9dd0d94ec66ff655c5e7f4846170dc71bc84b5f5b5884ecc3fc76e6f2a8c"
+          "contentHash": "sha256:cc40a199ca7f186f529d9a9c8a275dd23b99a841a504fa974dab659fd4699fb6"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_material_gallery.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001b",
-          "contentHash": "sha256:59d9a753b674b9433cc711583ffb78f2e24f9746d0850aeec4aa2c59ea9fae16"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
-          "providerId": "",
-          "assetId": "1000000000000000000000000000001c",
-          "contentHash": "sha256:61bd61aba683b28d3dbd7cca628bd12d7a89757ab9d8831206ad320d27e232bf"
+          "contentHash": "sha256:49ab4aa65b9619f773f050f8c214951cf71872c6b486ecad91d6d526d3ce7b15"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001d",
-          "contentHash": "sha256:7dc34b21989cd9a4e5d9b2d6fee85ccd67f606fea7a3d80aed64221afae0dcfc"
+          "contentHash": "sha256:c5d2ccab4f536c451558a966e8ebcdd4dd94ee3f191f1a1d42157477455798c9"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
+          "providerId": "",
+          "assetId": "1000000000000000000000000000001c",
+          "contentHash": "sha256:41afadce50a6b1d6826d18e582276980f5eea69b75ab4c2ffc151df7011093c4"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_soft_shadows.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000042",
+          "contentHash": "sha256:1ea3abc5d29415da0f4b224033d961ff42edede9457b399e6142e87d09e6c087"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_spheres.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000041",
+          "contentHash": "sha256:6e84654ed65399a86c0d1ffa2fd52c584f680d4d605f2038f6ad58bf9502966e"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_teapot.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000040",
+          "contentHash": "sha256:420bfd1ea358e4fe52524325eb036fe42251df7c6496390b1428d5a768f5d6f1"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/software_path_tracer.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001f",
-          "contentHash": "sha256:d9c4a050e5b18467fe27305de200c35d6e20e44d8f4dd3ebf72e4499c16cec18"
+          "contentHash": "sha256:bccf3830439b14307256eee22bb1aee9e795cdccf1e33816aad3b8c74ea93c72"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+          "providerId": "",
+          "assetId": "1000000000000000000000000000001e",
+          "contentHash": "sha256:123163d58d1313d022220307fecb41b1906e790326ea32e601e0d60dc7502c39"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/textured_cube_grid.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000015",
+          "contentHash": "sha256:9589bac370353d86f2ab7f3ea181d68f19799a3f0b1d423f87c4f697aa1f63f1"
         }
       ],
       "sceneOrders": [
         {
           "sceneReference": {
             "sourceKind": 1,
-            "relativePath": "scenes/HelenOfCodeSplash.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000003",
-            "contentHash": "sha256:518ba0729600dba4ae806bfeebb1ca36c83017db28c0a47772a9d6c64c39611d"
-          },
-          "orderNumber": 1
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/SceneLoadingScreen.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000004",
-            "contentHash": "sha256:f17d659bcd194f6dfc28a8ddbd5007b59ac5f836f2dbf14cd5039d56fa958974"
-          },
-          "orderNumber": 2
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
             "relativePath": "scenes/DemoDiscMainMenu.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000001",
-            "contentHash": "sha256:de3cf052d68465cdb0e26190716d4787e986bd5b03928a94b489f333bcb83cfd"
+            "contentHash": "sha256:ac1954d812dcb51959847d21025f37a3cfde09d405ea11682c8e18927b5621ec"
           },
-          "orderNumber": 3
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/cube_test.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000010",
-            "contentHash": "sha256:3692394edebb0d920be38e6689bba36b79181bb70a2e8ebf859b26336db7e47d"
-          },
-          "orderNumber": 4
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/colored_cube_grid.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000011",
-            "contentHash": "sha256:3ae0c21ae3345e93241eb0c927e394a1a0d4726b9dca1939aacab23f81d3598b"
-          },
-          "orderNumber": 5
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/textured_cube_grid.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000015",
-            "contentHash": "sha256:115c0d7e7c5bfaff626e648a027110120eb9a9a73ec28e37bafadd8ba48edefe"
-          },
-          "orderNumber": 6
+          "orderNumber": 1
         },
         {
           "sceneReference": {
@@ -1141,9 +1035,9 @@
             "relativePath": "scenes/rendering/axis_test.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000017",
-            "contentHash": "sha256:f678eb7cf853f00eb78fdb4d7af2df9aedf07d28597ffa1dd9a5ab0c6da908d6"
+            "contentHash": "sha256:63ac00560198ccea0e3e5dc21cf4664c94a549192ef2242a055de4646be380a1"
           },
-          "orderNumber": 7
+          "orderNumber": 2
         },
         {
           "sceneReference": {
@@ -1151,19 +1045,29 @@
             "relativePath": "scenes/rendering/axis_test2.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000018",
-            "contentHash": "sha256:88212361ea99f06aaafc6b8012112ebf19d252d689d4c203fb798d015a2a85c6"
+            "contentHash": "sha256:be2d4b6b15528b44b0ddf7fde0e7ed45ab9cb108572df9842ce1f7779dfdd334"
           },
-          "orderNumber": 8
+          "orderNumber": 3
         },
         {
           "sceneReference": {
             "sourceKind": 1,
-            "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+            "relativePath": "scenes/rendering/colored_cube_grid.helen",
             "providerId": "",
-            "assetId": "1000000000000000000000000000001e",
-            "contentHash": "sha256:56066b3243a0f9355a86fdae27ee628a39acaced7d6a3990aed7f8b32bd12e19"
+            "assetId": "10000000000000000000000000000011",
+            "contentHash": "sha256:d61e1cf84bbebc7c090aeed8a0cd3f65fc320889c2ea245b667df0db93b5abd5"
           },
-          "orderNumber": 9
+          "orderNumber": 4
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/cube_test.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000010",
+            "contentHash": "sha256:1b2cccdbaa2f8af9fe0f975afb33151ae6635226b4c59599b401fd7839a1d2fe"
+          },
+          "orderNumber": 5
         },
         {
           "sceneReference": {
@@ -1171,99 +1075,9 @@
             "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000013",
-            "contentHash": "sha256:5d79fcbadfd4aa2157d04d087762c2f1f9ff52399fc1f29a9c4f83f718c20964"
+            "contentHash": "sha256:cc40a199ca7f186f529d9a9c8a275dd23b99a841a504fa974dab659fd4699fb6"
           },
-          "orderNumber": 10
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/physics/test_scene_dynamic_stack_boxes.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000023",
-            "contentHash": "sha256:f3e45fa4509a58d8b9bae7059b8c753cb69268132a9c6bd7004fbde73b5cbde4"
-          },
-          "orderNumber": 11
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/physics/test_scene_dynamic_sphere_stack.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000025",
-            "contentHash": "sha256:8cbc4ed22df12e72c25d3535ba55de388eb6b65e5da1fee10faf5a77859b8d47"
-          },
-          "orderNumber": 12
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/physics/test_scene_dynamic_mixed_stack.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000028",
-            "contentHash": "sha256:54c53ffee57c12a1b1e9ce5ad906635ec1d2be8ae1fbb484bcc7faea24ae2f7f"
-          },
-          "orderNumber": 13
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000030",
-            "contentHash": "sha256:03d3d3bf1f400276b9df03a869091fec3a0737f3e1abcbd90adaf86dfff10aa7"
-          },
-          "orderNumber": 14
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_01.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000033",
-            "contentHash": "sha256:7b3a85ea734df39c57050a229220c22259c9420fded65e80a9c4bea67ffd8182"
-          },
-          "orderNumber": 15
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_02.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000034",
-            "contentHash": "sha256:312f1e1abea108ac72254e0ac67e152be62e9dd3e273ed7e9d1b77ed5497d193"
-          },
-          "orderNumber": 16
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_03.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000035",
-            "contentHash": "sha256:24886d0f8736af67d17a3da975f872cc50dca5a7c85d66ca6aae7fad8ab9673e"
-          },
-          "orderNumber": 17
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_04.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000036",
-            "contentHash": "sha256:b2aca8335554d7674a43e4d36fe245f61a8833f3abd26175c678736299e93422"
-          },
-          "orderNumber": 18
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_05.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000037",
-            "contentHash": "sha256:83be9dd0d94ec66ff655c5e7f4846170dc71bc84b5f5b5884ecc3fc76e6f2a8c"
-          },
-          "orderNumber": 19
+          "orderNumber": 6
         },
         {
           "sceneReference": {
@@ -1271,19 +1085,9 @@
             "relativePath": "scenes/rendering/pbr_material_gallery.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001b",
-            "contentHash": "sha256:59d9a753b674b9433cc711583ffb78f2e24f9746d0850aeec4aa2c59ea9fae16"
+            "contentHash": "sha256:49ab4aa65b9619f773f050f8c214951cf71872c6b486ecad91d6d526d3ce7b15"
           },
-          "orderNumber": 20
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
-            "providerId": "",
-            "assetId": "1000000000000000000000000000001c",
-            "contentHash": "sha256:61bd61aba683b28d3dbd7cca628bd12d7a89757ab9d8831206ad320d27e232bf"
-          },
-          "orderNumber": 21
+          "orderNumber": 7
         },
         {
           "sceneReference": {
@@ -1291,9 +1095,49 @@
             "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001d",
-            "contentHash": "sha256:7dc34b21989cd9a4e5d9b2d6fee85ccd67f606fea7a3d80aed64221afae0dcfc"
+            "contentHash": "sha256:c5d2ccab4f536c451558a966e8ebcdd4dd94ee3f191f1a1d42157477455798c9"
           },
-          "orderNumber": 22
+          "orderNumber": 8
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
+            "providerId": "",
+            "assetId": "1000000000000000000000000000001c",
+            "contentHash": "sha256:41afadce50a6b1d6826d18e582276980f5eea69b75ab4c2ffc151df7011093c4"
+          },
+          "orderNumber": 9
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_soft_shadows.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000042",
+            "contentHash": "sha256:1ea3abc5d29415da0f4b224033d961ff42edede9457b399e6142e87d09e6c087"
+          },
+          "orderNumber": 10
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_spheres.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000041",
+            "contentHash": "sha256:6e84654ed65399a86c0d1ffa2fd52c584f680d4d605f2038f6ad58bf9502966e"
+          },
+          "orderNumber": 11
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_teapot.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000040",
+            "contentHash": "sha256:420bfd1ea358e4fe52524325eb036fe42251df7c6496390b1428d5a768f5d6f1"
+          },
+          "orderNumber": 12
         },
         {
           "sceneReference": {
@@ -1301,11 +1145,32 @@
             "relativePath": "scenes/rendering/software_path_tracer.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001f",
-            "contentHash": "sha256:d9c4a050e5b18467fe27305de200c35d6e20e44d8f4dd3ebf72e4499c16cec18"
+            "contentHash": "sha256:bccf3830439b14307256eee22bb1aee9e795cdccf1e33816aad3b8c74ea93c72"
           },
-          "orderNumber": 23
+          "orderNumber": 13
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+            "providerId": "",
+            "assetId": "1000000000000000000000000000001e",
+            "contentHash": "sha256:123163d58d1313d022220307fecb41b1906e790326ea32e601e0d60dc7502c39"
+          },
+          "orderNumber": 14
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/textured_cube_grid.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000015",
+            "contentHash": "sha256:9589bac370353d86f2ab7f3ea181d68f19799a3f0b1d423f87c4f697aa1f63f1"
+          },
+          "orderNumber": 15
         }
-      ]
+      ],
+      "overridesProjectScenes": true
     },
     {
       "platformId": "psp",
@@ -1710,226 +1575,120 @@
       "selectedSceneReferences": [
         {
           "sourceKind": 1,
-          "relativePath": "scenes/HelenOfCodeSplash.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000003",
-          "contentHash": "sha256:518ba0729600dba4ae806bfeebb1ca36c83017db28c0a47772a9d6c64c39611d"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/SceneLoadingScreen.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000004",
-          "contentHash": "sha256:f17d659bcd194f6dfc28a8ddbd5007b59ac5f836f2dbf14cd5039d56fa958974"
-        },
-        {
-          "sourceKind": 1,
           "relativePath": "scenes/DemoDiscMainMenu.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000001",
-          "contentHash": "sha256:de3cf052d68465cdb0e26190716d4787e986bd5b03928a94b489f333bcb83cfd"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/cube_test.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000010",
-          "contentHash": "sha256:3692394edebb0d920be38e6689bba36b79181bb70a2e8ebf859b26336db7e47d"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/colored_cube_grid.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000011",
-          "contentHash": "sha256:3ae0c21ae3345e93241eb0c927e394a1a0d4726b9dca1939aacab23f81d3598b"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/textured_cube_grid.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000015",
-          "contentHash": "sha256:115c0d7e7c5bfaff626e648a027110120eb9a9a73ec28e37bafadd8ba48edefe"
+          "contentHash": "sha256:ac1954d812dcb51959847d21025f37a3cfde09d405ea11682c8e18927b5621ec"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/axis_test.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000017",
-          "contentHash": "sha256:f678eb7cf853f00eb78fdb4d7af2df9aedf07d28597ffa1dd9a5ab0c6da908d6"
+          "contentHash": "sha256:63ac00560198ccea0e3e5dc21cf4664c94a549192ef2242a055de4646be380a1"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/axis_test2.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000018",
-          "contentHash": "sha256:88212361ea99f06aaafc6b8012112ebf19d252d689d4c203fb798d015a2a85c6"
+          "contentHash": "sha256:be2d4b6b15528b44b0ddf7fde0e7ed45ab9cb108572df9842ce1f7779dfdd334"
         },
         {
           "sourceKind": 1,
-          "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+          "relativePath": "scenes/rendering/colored_cube_grid.helen",
           "providerId": "",
-          "assetId": "1000000000000000000000000000001e",
-          "contentHash": "sha256:56066b3243a0f9355a86fdae27ee628a39acaced7d6a3990aed7f8b32bd12e19"
+          "assetId": "10000000000000000000000000000011",
+          "contentHash": "sha256:d61e1cf84bbebc7c090aeed8a0cd3f65fc320889c2ea245b667df0db93b5abd5"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/cube_test.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000010",
+          "contentHash": "sha256:1b2cccdbaa2f8af9fe0f975afb33151ae6635226b4c59599b401fd7839a1d2fe"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000013",
-          "contentHash": "sha256:5d79fcbadfd4aa2157d04d087762c2f1f9ff52399fc1f29a9c4f83f718c20964"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/physics/test_scene_dynamic_stack_boxes.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000023",
-          "contentHash": "sha256:f3e45fa4509a58d8b9bae7059b8c753cb69268132a9c6bd7004fbde73b5cbde4"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/physics/test_scene_dynamic_sphere_stack.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000025",
-          "contentHash": "sha256:8cbc4ed22df12e72c25d3535ba55de388eb6b65e5da1fee10faf5a77859b8d47"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/physics/test_scene_dynamic_mixed_stack.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000028",
-          "contentHash": "sha256:54c53ffee57c12a1b1e9ce5ad906635ec1d2be8ae1fbb484bcc7faea24ae2f7f"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000030",
-          "contentHash": "sha256:03d3d3bf1f400276b9df03a869091fec3a0737f3e1abcbd90adaf86dfff10aa7"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_01.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000033",
-          "contentHash": "sha256:7b3a85ea734df39c57050a229220c22259c9420fded65e80a9c4bea67ffd8182"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_02.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000034",
-          "contentHash": "sha256:312f1e1abea108ac72254e0ac67e152be62e9dd3e273ed7e9d1b77ed5497d193"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_03.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000035",
-          "contentHash": "sha256:24886d0f8736af67d17a3da975f872cc50dca5a7c85d66ca6aae7fad8ab9673e"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_04.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000036",
-          "contentHash": "sha256:b2aca8335554d7674a43e4d36fe245f61a8833f3abd26175c678736299e93422"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_05.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000037",
-          "contentHash": "sha256:83be9dd0d94ec66ff655c5e7f4846170dc71bc84b5f5b5884ecc3fc76e6f2a8c"
+          "contentHash": "sha256:cc40a199ca7f186f529d9a9c8a275dd23b99a841a504fa974dab659fd4699fb6"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_material_gallery.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001b",
-          "contentHash": "sha256:59d9a753b674b9433cc711583ffb78f2e24f9746d0850aeec4aa2c59ea9fae16"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
-          "providerId": "",
-          "assetId": "1000000000000000000000000000001c",
-          "contentHash": "sha256:61bd61aba683b28d3dbd7cca628bd12d7a89757ab9d8831206ad320d27e232bf"
+          "contentHash": "sha256:49ab4aa65b9619f773f050f8c214951cf71872c6b486ecad91d6d526d3ce7b15"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001d",
-          "contentHash": "sha256:7dc34b21989cd9a4e5d9b2d6fee85ccd67f606fea7a3d80aed64221afae0dcfc"
+          "contentHash": "sha256:c5d2ccab4f536c451558a966e8ebcdd4dd94ee3f191f1a1d42157477455798c9"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
+          "providerId": "",
+          "assetId": "1000000000000000000000000000001c",
+          "contentHash": "sha256:41afadce50a6b1d6826d18e582276980f5eea69b75ab4c2ffc151df7011093c4"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_soft_shadows.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000042",
+          "contentHash": "sha256:1ea3abc5d29415da0f4b224033d961ff42edede9457b399e6142e87d09e6c087"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_spheres.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000041",
+          "contentHash": "sha256:6e84654ed65399a86c0d1ffa2fd52c584f680d4d605f2038f6ad58bf9502966e"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_teapot.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000040",
+          "contentHash": "sha256:420bfd1ea358e4fe52524325eb036fe42251df7c6496390b1428d5a768f5d6f1"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/software_path_tracer.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001f",
-          "contentHash": "sha256:d9c4a050e5b18467fe27305de200c35d6e20e44d8f4dd3ebf72e4499c16cec18"
+          "contentHash": "sha256:bccf3830439b14307256eee22bb1aee9e795cdccf1e33816aad3b8c74ea93c72"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+          "providerId": "",
+          "assetId": "1000000000000000000000000000001e",
+          "contentHash": "sha256:123163d58d1313d022220307fecb41b1906e790326ea32e601e0d60dc7502c39"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/textured_cube_grid.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000015",
+          "contentHash": "sha256:9589bac370353d86f2ab7f3ea181d68f19799a3f0b1d423f87c4f697aa1f63f1"
         }
       ],
       "sceneOrders": [
         {
           "sceneReference": {
             "sourceKind": 1,
-            "relativePath": "scenes/HelenOfCodeSplash.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000003",
-            "contentHash": "sha256:518ba0729600dba4ae806bfeebb1ca36c83017db28c0a47772a9d6c64c39611d"
-          },
-          "orderNumber": 1
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/SceneLoadingScreen.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000004",
-            "contentHash": "sha256:f17d659bcd194f6dfc28a8ddbd5007b59ac5f836f2dbf14cd5039d56fa958974"
-          },
-          "orderNumber": 2
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
             "relativePath": "scenes/DemoDiscMainMenu.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000001",
-            "contentHash": "sha256:de3cf052d68465cdb0e26190716d4787e986bd5b03928a94b489f333bcb83cfd"
+            "contentHash": "sha256:ac1954d812dcb51959847d21025f37a3cfde09d405ea11682c8e18927b5621ec"
           },
-          "orderNumber": 3
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/cube_test.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000010",
-            "contentHash": "sha256:3692394edebb0d920be38e6689bba36b79181bb70a2e8ebf859b26336db7e47d"
-          },
-          "orderNumber": 4
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/colored_cube_grid.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000011",
-            "contentHash": "sha256:3ae0c21ae3345e93241eb0c927e394a1a0d4726b9dca1939aacab23f81d3598b"
-          },
-          "orderNumber": 5
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/textured_cube_grid.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000015",
-            "contentHash": "sha256:115c0d7e7c5bfaff626e648a027110120eb9a9a73ec28e37bafadd8ba48edefe"
-          },
-          "orderNumber": 6
+          "orderNumber": 1
         },
         {
           "sceneReference": {
@@ -1937,9 +1696,9 @@
             "relativePath": "scenes/rendering/axis_test.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000017",
-            "contentHash": "sha256:f678eb7cf853f00eb78fdb4d7af2df9aedf07d28597ffa1dd9a5ab0c6da908d6"
+            "contentHash": "sha256:63ac00560198ccea0e3e5dc21cf4664c94a549192ef2242a055de4646be380a1"
           },
-          "orderNumber": 7
+          "orderNumber": 2
         },
         {
           "sceneReference": {
@@ -1947,19 +1706,29 @@
             "relativePath": "scenes/rendering/axis_test2.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000018",
-            "contentHash": "sha256:88212361ea99f06aaafc6b8012112ebf19d252d689d4c203fb798d015a2a85c6"
+            "contentHash": "sha256:be2d4b6b15528b44b0ddf7fde0e7ed45ab9cb108572df9842ce1f7779dfdd334"
           },
-          "orderNumber": 8
+          "orderNumber": 3
         },
         {
           "sceneReference": {
             "sourceKind": 1,
-            "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+            "relativePath": "scenes/rendering/colored_cube_grid.helen",
             "providerId": "",
-            "assetId": "1000000000000000000000000000001e",
-            "contentHash": "sha256:56066b3243a0f9355a86fdae27ee628a39acaced7d6a3990aed7f8b32bd12e19"
+            "assetId": "10000000000000000000000000000011",
+            "contentHash": "sha256:d61e1cf84bbebc7c090aeed8a0cd3f65fc320889c2ea245b667df0db93b5abd5"
           },
-          "orderNumber": 9
+          "orderNumber": 4
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/cube_test.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000010",
+            "contentHash": "sha256:1b2cccdbaa2f8af9fe0f975afb33151ae6635226b4c59599b401fd7839a1d2fe"
+          },
+          "orderNumber": 5
         },
         {
           "sceneReference": {
@@ -1967,99 +1736,9 @@
             "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000013",
-            "contentHash": "sha256:5d79fcbadfd4aa2157d04d087762c2f1f9ff52399fc1f29a9c4f83f718c20964"
+            "contentHash": "sha256:cc40a199ca7f186f529d9a9c8a275dd23b99a841a504fa974dab659fd4699fb6"
           },
-          "orderNumber": 10
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/physics/test_scene_dynamic_stack_boxes.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000023",
-            "contentHash": "sha256:f3e45fa4509a58d8b9bae7059b8c753cb69268132a9c6bd7004fbde73b5cbde4"
-          },
-          "orderNumber": 11
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/physics/test_scene_dynamic_sphere_stack.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000025",
-            "contentHash": "sha256:8cbc4ed22df12e72c25d3535ba55de388eb6b65e5da1fee10faf5a77859b8d47"
-          },
-          "orderNumber": 12
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/physics/test_scene_dynamic_mixed_stack.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000028",
-            "contentHash": "sha256:54c53ffee57c12a1b1e9ce5ad906635ec1d2be8ae1fbb484bcc7faea24ae2f7f"
-          },
-          "orderNumber": 13
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000030",
-            "contentHash": "sha256:03d3d3bf1f400276b9df03a869091fec3a0737f3e1abcbd90adaf86dfff10aa7"
-          },
-          "orderNumber": 14
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_01.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000033",
-            "contentHash": "sha256:7b3a85ea734df39c57050a229220c22259c9420fded65e80a9c4bea67ffd8182"
-          },
-          "orderNumber": 15
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_02.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000034",
-            "contentHash": "sha256:312f1e1abea108ac72254e0ac67e152be62e9dd3e273ed7e9d1b77ed5497d193"
-          },
-          "orderNumber": 16
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_03.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000035",
-            "contentHash": "sha256:24886d0f8736af67d17a3da975f872cc50dca5a7c85d66ca6aae7fad8ab9673e"
-          },
-          "orderNumber": 17
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_04.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000036",
-            "contentHash": "sha256:b2aca8335554d7674a43e4d36fe245f61a8833f3abd26175c678736299e93422"
-          },
-          "orderNumber": 18
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_05.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000037",
-            "contentHash": "sha256:83be9dd0d94ec66ff655c5e7f4846170dc71bc84b5f5b5884ecc3fc76e6f2a8c"
-          },
-          "orderNumber": 19
+          "orderNumber": 6
         },
         {
           "sceneReference": {
@@ -2067,19 +1746,9 @@
             "relativePath": "scenes/rendering/pbr_material_gallery.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001b",
-            "contentHash": "sha256:59d9a753b674b9433cc711583ffb78f2e24f9746d0850aeec4aa2c59ea9fae16"
+            "contentHash": "sha256:49ab4aa65b9619f773f050f8c214951cf71872c6b486ecad91d6d526d3ce7b15"
           },
-          "orderNumber": 20
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
-            "providerId": "",
-            "assetId": "1000000000000000000000000000001c",
-            "contentHash": "sha256:61bd61aba683b28d3dbd7cca628bd12d7a89757ab9d8831206ad320d27e232bf"
-          },
-          "orderNumber": 21
+          "orderNumber": 7
         },
         {
           "sceneReference": {
@@ -2087,9 +1756,49 @@
             "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001d",
-            "contentHash": "sha256:7dc34b21989cd9a4e5d9b2d6fee85ccd67f606fea7a3d80aed64221afae0dcfc"
+            "contentHash": "sha256:c5d2ccab4f536c451558a966e8ebcdd4dd94ee3f191f1a1d42157477455798c9"
           },
-          "orderNumber": 22
+          "orderNumber": 8
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
+            "providerId": "",
+            "assetId": "1000000000000000000000000000001c",
+            "contentHash": "sha256:41afadce50a6b1d6826d18e582276980f5eea69b75ab4c2ffc151df7011093c4"
+          },
+          "orderNumber": 9
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_soft_shadows.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000042",
+            "contentHash": "sha256:1ea3abc5d29415da0f4b224033d961ff42edede9457b399e6142e87d09e6c087"
+          },
+          "orderNumber": 10
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_spheres.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000041",
+            "contentHash": "sha256:6e84654ed65399a86c0d1ffa2fd52c584f680d4d605f2038f6ad58bf9502966e"
+          },
+          "orderNumber": 11
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_teapot.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000040",
+            "contentHash": "sha256:420bfd1ea358e4fe52524325eb036fe42251df7c6496390b1428d5a768f5d6f1"
+          },
+          "orderNumber": 12
         },
         {
           "sceneReference": {
@@ -2097,11 +1806,32 @@
             "relativePath": "scenes/rendering/software_path_tracer.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001f",
-            "contentHash": "sha256:d9c4a050e5b18467fe27305de200c35d6e20e44d8f4dd3ebf72e4499c16cec18"
+            "contentHash": "sha256:bccf3830439b14307256eee22bb1aee9e795cdccf1e33816aad3b8c74ea93c72"
           },
-          "orderNumber": 23
+          "orderNumber": 13
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+            "providerId": "",
+            "assetId": "1000000000000000000000000000001e",
+            "contentHash": "sha256:123163d58d1313d022220307fecb41b1906e790326ea32e601e0d60dc7502c39"
+          },
+          "orderNumber": 14
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/textured_cube_grid.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000015",
+            "contentHash": "sha256:9589bac370353d86f2ab7f3ea181d68f19799a3f0b1d423f87c4f697aa1f63f1"
+          },
+          "orderNumber": 15
         }
-      ]
+      ],
+      "overridesProjectScenes": true
     },
     {
       "platformId": "wii",
@@ -4428,226 +4158,120 @@
       "selectedSceneReferences": [
         {
           "sourceKind": 1,
-          "relativePath": "scenes/HelenOfCodeSplash.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000003",
-          "contentHash": "sha256:518ba0729600dba4ae806bfeebb1ca36c83017db28c0a47772a9d6c64c39611d"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/SceneLoadingScreen.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000004",
-          "contentHash": "sha256:f17d659bcd194f6dfc28a8ddbd5007b59ac5f836f2dbf14cd5039d56fa958974"
-        },
-        {
-          "sourceKind": 1,
           "relativePath": "scenes/DemoDiscMainMenu.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000001",
-          "contentHash": "sha256:de3cf052d68465cdb0e26190716d4787e986bd5b03928a94b489f333bcb83cfd"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/cube_test.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000010",
-          "contentHash": "sha256:3692394edebb0d920be38e6689bba36b79181bb70a2e8ebf859b26336db7e47d"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/colored_cube_grid.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000011",
-          "contentHash": "sha256:3ae0c21ae3345e93241eb0c927e394a1a0d4726b9dca1939aacab23f81d3598b"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/textured_cube_grid.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000015",
-          "contentHash": "sha256:115c0d7e7c5bfaff626e648a027110120eb9a9a73ec28e37bafadd8ba48edefe"
+          "contentHash": "sha256:ac1954d812dcb51959847d21025f37a3cfde09d405ea11682c8e18927b5621ec"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/axis_test.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000017",
-          "contentHash": "sha256:f678eb7cf853f00eb78fdb4d7af2df9aedf07d28597ffa1dd9a5ab0c6da908d6"
+          "contentHash": "sha256:63ac00560198ccea0e3e5dc21cf4664c94a549192ef2242a055de4646be380a1"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/axis_test2.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000018",
-          "contentHash": "sha256:88212361ea99f06aaafc6b8012112ebf19d252d689d4c203fb798d015a2a85c6"
+          "contentHash": "sha256:be2d4b6b15528b44b0ddf7fde0e7ed45ab9cb108572df9842ce1f7779dfdd334"
         },
         {
           "sourceKind": 1,
-          "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+          "relativePath": "scenes/rendering/colored_cube_grid.helen",
           "providerId": "",
-          "assetId": "1000000000000000000000000000001e",
-          "contentHash": "sha256:56066b3243a0f9355a86fdae27ee628a39acaced7d6a3990aed7f8b32bd12e19"
+          "assetId": "10000000000000000000000000000011",
+          "contentHash": "sha256:d61e1cf84bbebc7c090aeed8a0cd3f65fc320889c2ea245b667df0db93b5abd5"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/cube_test.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000010",
+          "contentHash": "sha256:1b2cccdbaa2f8af9fe0f975afb33151ae6635226b4c59599b401fd7839a1d2fe"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000013",
-          "contentHash": "sha256:5d79fcbadfd4aa2157d04d087762c2f1f9ff52399fc1f29a9c4f83f718c20964"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/physics/test_scene_dynamic_stack_boxes.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000023",
-          "contentHash": "sha256:f3e45fa4509a58d8b9bae7059b8c753cb69268132a9c6bd7004fbde73b5cbde4"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/physics/test_scene_dynamic_sphere_stack.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000025",
-          "contentHash": "sha256:8cbc4ed22df12e72c25d3535ba55de388eb6b65e5da1fee10faf5a77859b8d47"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/physics/test_scene_dynamic_mixed_stack.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000028",
-          "contentHash": "sha256:54c53ffee57c12a1b1e9ce5ad906635ec1d2be8ae1fbb484bcc7faea24ae2f7f"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000030",
-          "contentHash": "sha256:03d3d3bf1f400276b9df03a869091fec3a0737f3e1abcbd90adaf86dfff10aa7"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_01.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000033",
-          "contentHash": "sha256:7b3a85ea734df39c57050a229220c22259c9420fded65e80a9c4bea67ffd8182"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_02.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000034",
-          "contentHash": "sha256:312f1e1abea108ac72254e0ac67e152be62e9dd3e273ed7e9d1b77ed5497d193"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_03.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000035",
-          "contentHash": "sha256:24886d0f8736af67d17a3da975f872cc50dca5a7c85d66ca6aae7fad8ab9673e"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_04.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000036",
-          "contentHash": "sha256:b2aca8335554d7674a43e4d36fe245f61a8833f3abd26175c678736299e93422"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_05.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000037",
-          "contentHash": "sha256:83be9dd0d94ec66ff655c5e7f4846170dc71bc84b5f5b5884ecc3fc76e6f2a8c"
+          "contentHash": "sha256:cc40a199ca7f186f529d9a9c8a275dd23b99a841a504fa974dab659fd4699fb6"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_material_gallery.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001b",
-          "contentHash": "sha256:59d9a753b674b9433cc711583ffb78f2e24f9746d0850aeec4aa2c59ea9fae16"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
-          "providerId": "",
-          "assetId": "1000000000000000000000000000001c",
-          "contentHash": "sha256:61bd61aba683b28d3dbd7cca628bd12d7a89757ab9d8831206ad320d27e232bf"
+          "contentHash": "sha256:49ab4aa65b9619f773f050f8c214951cf71872c6b486ecad91d6d526d3ce7b15"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001d",
-          "contentHash": "sha256:7dc34b21989cd9a4e5d9b2d6fee85ccd67f606fea7a3d80aed64221afae0dcfc"
+          "contentHash": "sha256:c5d2ccab4f536c451558a966e8ebcdd4dd94ee3f191f1a1d42157477455798c9"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
+          "providerId": "",
+          "assetId": "1000000000000000000000000000001c",
+          "contentHash": "sha256:41afadce50a6b1d6826d18e582276980f5eea69b75ab4c2ffc151df7011093c4"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_soft_shadows.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000042",
+          "contentHash": "sha256:1ea3abc5d29415da0f4b224033d961ff42edede9457b399e6142e87d09e6c087"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_spheres.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000041",
+          "contentHash": "sha256:6e84654ed65399a86c0d1ffa2fd52c584f680d4d605f2038f6ad58bf9502966e"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_teapot.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000040",
+          "contentHash": "sha256:420bfd1ea358e4fe52524325eb036fe42251df7c6496390b1428d5a768f5d6f1"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/software_path_tracer.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001f",
-          "contentHash": "sha256:d9c4a050e5b18467fe27305de200c35d6e20e44d8f4dd3ebf72e4499c16cec18"
+          "contentHash": "sha256:bccf3830439b14307256eee22bb1aee9e795cdccf1e33816aad3b8c74ea93c72"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+          "providerId": "",
+          "assetId": "1000000000000000000000000000001e",
+          "contentHash": "sha256:123163d58d1313d022220307fecb41b1906e790326ea32e601e0d60dc7502c39"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/textured_cube_grid.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000015",
+          "contentHash": "sha256:9589bac370353d86f2ab7f3ea181d68f19799a3f0b1d423f87c4f697aa1f63f1"
         }
       ],
       "sceneOrders": [
         {
           "sceneReference": {
             "sourceKind": 1,
-            "relativePath": "scenes/HelenOfCodeSplash.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000003",
-            "contentHash": "sha256:518ba0729600dba4ae806bfeebb1ca36c83017db28c0a47772a9d6c64c39611d"
-          },
-          "orderNumber": 1
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/SceneLoadingScreen.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000004",
-            "contentHash": "sha256:f17d659bcd194f6dfc28a8ddbd5007b59ac5f836f2dbf14cd5039d56fa958974"
-          },
-          "orderNumber": 2
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
             "relativePath": "scenes/DemoDiscMainMenu.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000001",
-            "contentHash": "sha256:de3cf052d68465cdb0e26190716d4787e986bd5b03928a94b489f333bcb83cfd"
+            "contentHash": "sha256:ac1954d812dcb51959847d21025f37a3cfde09d405ea11682c8e18927b5621ec"
           },
-          "orderNumber": 3
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/cube_test.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000010",
-            "contentHash": "sha256:3692394edebb0d920be38e6689bba36b79181bb70a2e8ebf859b26336db7e47d"
-          },
-          "orderNumber": 4
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/colored_cube_grid.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000011",
-            "contentHash": "sha256:3ae0c21ae3345e93241eb0c927e394a1a0d4726b9dca1939aacab23f81d3598b"
-          },
-          "orderNumber": 5
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/textured_cube_grid.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000015",
-            "contentHash": "sha256:115c0d7e7c5bfaff626e648a027110120eb9a9a73ec28e37bafadd8ba48edefe"
-          },
-          "orderNumber": 6
+          "orderNumber": 1
         },
         {
           "sceneReference": {
@@ -4655,9 +4279,9 @@
             "relativePath": "scenes/rendering/axis_test.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000017",
-            "contentHash": "sha256:f678eb7cf853f00eb78fdb4d7af2df9aedf07d28597ffa1dd9a5ab0c6da908d6"
+            "contentHash": "sha256:63ac00560198ccea0e3e5dc21cf4664c94a549192ef2242a055de4646be380a1"
           },
-          "orderNumber": 7
+          "orderNumber": 2
         },
         {
           "sceneReference": {
@@ -4665,19 +4289,29 @@
             "relativePath": "scenes/rendering/axis_test2.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000018",
-            "contentHash": "sha256:88212361ea99f06aaafc6b8012112ebf19d252d689d4c203fb798d015a2a85c6"
+            "contentHash": "sha256:be2d4b6b15528b44b0ddf7fde0e7ed45ab9cb108572df9842ce1f7779dfdd334"
           },
-          "orderNumber": 8
+          "orderNumber": 3
         },
         {
           "sceneReference": {
             "sourceKind": 1,
-            "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+            "relativePath": "scenes/rendering/colored_cube_grid.helen",
             "providerId": "",
-            "assetId": "1000000000000000000000000000001e",
-            "contentHash": "sha256:56066b3243a0f9355a86fdae27ee628a39acaced7d6a3990aed7f8b32bd12e19"
+            "assetId": "10000000000000000000000000000011",
+            "contentHash": "sha256:d61e1cf84bbebc7c090aeed8a0cd3f65fc320889c2ea245b667df0db93b5abd5"
           },
-          "orderNumber": 9
+          "orderNumber": 4
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/cube_test.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000010",
+            "contentHash": "sha256:1b2cccdbaa2f8af9fe0f975afb33151ae6635226b4c59599b401fd7839a1d2fe"
+          },
+          "orderNumber": 5
         },
         {
           "sceneReference": {
@@ -4685,99 +4319,9 @@
             "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000013",
-            "contentHash": "sha256:5d79fcbadfd4aa2157d04d087762c2f1f9ff52399fc1f29a9c4f83f718c20964"
+            "contentHash": "sha256:cc40a199ca7f186f529d9a9c8a275dd23b99a841a504fa974dab659fd4699fb6"
           },
-          "orderNumber": 10
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/physics/test_scene_dynamic_stack_boxes.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000023",
-            "contentHash": "sha256:f3e45fa4509a58d8b9bae7059b8c753cb69268132a9c6bd7004fbde73b5cbde4"
-          },
-          "orderNumber": 11
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/physics/test_scene_dynamic_sphere_stack.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000025",
-            "contentHash": "sha256:8cbc4ed22df12e72c25d3535ba55de388eb6b65e5da1fee10faf5a77859b8d47"
-          },
-          "orderNumber": 12
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/physics/test_scene_dynamic_mixed_stack.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000028",
-            "contentHash": "sha256:54c53ffee57c12a1b1e9ce5ad906635ec1d2be8ae1fbb484bcc7faea24ae2f7f"
-          },
-          "orderNumber": 13
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000030",
-            "contentHash": "sha256:03d3d3bf1f400276b9df03a869091fec3a0737f3e1abcbd90adaf86dfff10aa7"
-          },
-          "orderNumber": 14
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_01.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000033",
-            "contentHash": "sha256:7b3a85ea734df39c57050a229220c22259c9420fded65e80a9c4bea67ffd8182"
-          },
-          "orderNumber": 15
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_02.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000034",
-            "contentHash": "sha256:312f1e1abea108ac72254e0ac67e152be62e9dd3e273ed7e9d1b77ed5497d193"
-          },
-          "orderNumber": 16
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_03.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000035",
-            "contentHash": "sha256:24886d0f8736af67d17a3da975f872cc50dca5a7c85d66ca6aae7fad8ab9673e"
-          },
-          "orderNumber": 17
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_04.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000036",
-            "contentHash": "sha256:b2aca8335554d7674a43e4d36fe245f61a8833f3abd26175c678736299e93422"
-          },
-          "orderNumber": 18
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_05.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000037",
-            "contentHash": "sha256:83be9dd0d94ec66ff655c5e7f4846170dc71bc84b5f5b5884ecc3fc76e6f2a8c"
-          },
-          "orderNumber": 19
+          "orderNumber": 6
         },
         {
           "sceneReference": {
@@ -4785,19 +4329,9 @@
             "relativePath": "scenes/rendering/pbr_material_gallery.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001b",
-            "contentHash": "sha256:59d9a753b674b9433cc711583ffb78f2e24f9746d0850aeec4aa2c59ea9fae16"
+            "contentHash": "sha256:49ab4aa65b9619f773f050f8c214951cf71872c6b486ecad91d6d526d3ce7b15"
           },
-          "orderNumber": 20
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
-            "providerId": "",
-            "assetId": "1000000000000000000000000000001c",
-            "contentHash": "sha256:61bd61aba683b28d3dbd7cca628bd12d7a89757ab9d8831206ad320d27e232bf"
-          },
-          "orderNumber": 21
+          "orderNumber": 7
         },
         {
           "sceneReference": {
@@ -4805,9 +4339,49 @@
             "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001d",
-            "contentHash": "sha256:7dc34b21989cd9a4e5d9b2d6fee85ccd67f606fea7a3d80aed64221afae0dcfc"
+            "contentHash": "sha256:c5d2ccab4f536c451558a966e8ebcdd4dd94ee3f191f1a1d42157477455798c9"
           },
-          "orderNumber": 22
+          "orderNumber": 8
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
+            "providerId": "",
+            "assetId": "1000000000000000000000000000001c",
+            "contentHash": "sha256:41afadce50a6b1d6826d18e582276980f5eea69b75ab4c2ffc151df7011093c4"
+          },
+          "orderNumber": 9
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_soft_shadows.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000042",
+            "contentHash": "sha256:1ea3abc5d29415da0f4b224033d961ff42edede9457b399e6142e87d09e6c087"
+          },
+          "orderNumber": 10
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_spheres.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000041",
+            "contentHash": "sha256:6e84654ed65399a86c0d1ffa2fd52c584f680d4d605f2038f6ad58bf9502966e"
+          },
+          "orderNumber": 11
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_teapot.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000040",
+            "contentHash": "sha256:420bfd1ea358e4fe52524325eb036fe42251df7c6496390b1428d5a768f5d6f1"
+          },
+          "orderNumber": 12
         },
         {
           "sceneReference": {
@@ -4815,11 +4389,32 @@
             "relativePath": "scenes/rendering/software_path_tracer.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001f",
-            "contentHash": "sha256:d9c4a050e5b18467fe27305de200c35d6e20e44d8f4dd3ebf72e4499c16cec18"
+            "contentHash": "sha256:bccf3830439b14307256eee22bb1aee9e795cdccf1e33816aad3b8c74ea93c72"
           },
-          "orderNumber": 23
+          "orderNumber": 13
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+            "providerId": "",
+            "assetId": "1000000000000000000000000000001e",
+            "contentHash": "sha256:123163d58d1313d022220307fecb41b1906e790326ea32e601e0d60dc7502c39"
+          },
+          "orderNumber": 14
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/textured_cube_grid.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000015",
+            "contentHash": "sha256:9589bac370353d86f2ab7f3ea181d68f19799a3f0b1d423f87c4f697aa1f63f1"
+          },
+          "orderNumber": 15
         }
-      ]
+      ],
+      "overridesProjectScenes": true
     },
     {
       "platformId": "x360",
@@ -5622,226 +5217,120 @@
       "selectedSceneReferences": [
         {
           "sourceKind": 1,
-          "relativePath": "scenes/HelenOfCodeSplash.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000003",
-          "contentHash": "sha256:518ba0729600dba4ae806bfeebb1ca36c83017db28c0a47772a9d6c64c39611d"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/SceneLoadingScreen.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000004",
-          "contentHash": "sha256:f17d659bcd194f6dfc28a8ddbd5007b59ac5f836f2dbf14cd5039d56fa958974"
-        },
-        {
-          "sourceKind": 1,
           "relativePath": "scenes/DemoDiscMainMenu.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000001",
-          "contentHash": "sha256:de3cf052d68465cdb0e26190716d4787e986bd5b03928a94b489f333bcb83cfd"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/cube_test.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000010",
-          "contentHash": "sha256:3692394edebb0d920be38e6689bba36b79181bb70a2e8ebf859b26336db7e47d"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/colored_cube_grid.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000011",
-          "contentHash": "sha256:3ae0c21ae3345e93241eb0c927e394a1a0d4726b9dca1939aacab23f81d3598b"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/textured_cube_grid.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000015",
-          "contentHash": "sha256:115c0d7e7c5bfaff626e648a027110120eb9a9a73ec28e37bafadd8ba48edefe"
+          "contentHash": "sha256:ac1954d812dcb51959847d21025f37a3cfde09d405ea11682c8e18927b5621ec"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/axis_test.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000017",
-          "contentHash": "sha256:f678eb7cf853f00eb78fdb4d7af2df9aedf07d28597ffa1dd9a5ab0c6da908d6"
+          "contentHash": "sha256:63ac00560198ccea0e3e5dc21cf4664c94a549192ef2242a055de4646be380a1"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/axis_test2.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000018",
-          "contentHash": "sha256:88212361ea99f06aaafc6b8012112ebf19d252d689d4c203fb798d015a2a85c6"
+          "contentHash": "sha256:be2d4b6b15528b44b0ddf7fde0e7ed45ab9cb108572df9842ce1f7779dfdd334"
         },
         {
           "sourceKind": 1,
-          "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+          "relativePath": "scenes/rendering/colored_cube_grid.helen",
           "providerId": "",
-          "assetId": "1000000000000000000000000000001e",
-          "contentHash": "sha256:56066b3243a0f9355a86fdae27ee628a39acaced7d6a3990aed7f8b32bd12e19"
+          "assetId": "10000000000000000000000000000011",
+          "contentHash": "sha256:d61e1cf84bbebc7c090aeed8a0cd3f65fc320889c2ea245b667df0db93b5abd5"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/cube_test.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000010",
+          "contentHash": "sha256:1b2cccdbaa2f8af9fe0f975afb33151ae6635226b4c59599b401fd7839a1d2fe"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000013",
-          "contentHash": "sha256:5d79fcbadfd4aa2157d04d087762c2f1f9ff52399fc1f29a9c4f83f718c20964"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/physics/test_scene_dynamic_stack_boxes.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000023",
-          "contentHash": "sha256:f3e45fa4509a58d8b9bae7059b8c753cb69268132a9c6bd7004fbde73b5cbde4"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/physics/test_scene_dynamic_sphere_stack.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000025",
-          "contentHash": "sha256:8cbc4ed22df12e72c25d3535ba55de388eb6b65e5da1fee10faf5a77859b8d47"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/physics/test_scene_dynamic_mixed_stack.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000028",
-          "contentHash": "sha256:54c53ffee57c12a1b1e9ce5ad906635ec1d2be8ae1fbb484bcc7faea24ae2f7f"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000030",
-          "contentHash": "sha256:03d3d3bf1f400276b9df03a869091fec3a0737f3e1abcbd90adaf86dfff10aa7"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_01.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000033",
-          "contentHash": "sha256:7b3a85ea734df39c57050a229220c22259c9420fded65e80a9c4bea67ffd8182"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_02.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000034",
-          "contentHash": "sha256:312f1e1abea108ac72254e0ac67e152be62e9dd3e273ed7e9d1b77ed5497d193"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_03.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000035",
-          "contentHash": "sha256:24886d0f8736af67d17a3da975f872cc50dca5a7c85d66ca6aae7fad8ab9673e"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_04.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000036",
-          "contentHash": "sha256:b2aca8335554d7674a43e4d36fe245f61a8833f3abd26175c678736299e93422"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/games/tilt/tilt_trial_level_05.helen",
-          "providerId": "",
-          "assetId": "10000000000000000000000000000037",
-          "contentHash": "sha256:83be9dd0d94ec66ff655c5e7f4846170dc71bc84b5f5b5884ecc3fc76e6f2a8c"
+          "contentHash": "sha256:cc40a199ca7f186f529d9a9c8a275dd23b99a841a504fa974dab659fd4699fb6"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_material_gallery.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001b",
-          "contentHash": "sha256:59d9a753b674b9433cc711583ffb78f2e24f9746d0850aeec4aa2c59ea9fae16"
-        },
-        {
-          "sourceKind": 1,
-          "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
-          "providerId": "",
-          "assetId": "1000000000000000000000000000001c",
-          "contentHash": "sha256:61bd61aba683b28d3dbd7cca628bd12d7a89757ab9d8831206ad320d27e232bf"
+          "contentHash": "sha256:49ab4aa65b9619f773f050f8c214951cf71872c6b486ecad91d6d526d3ce7b15"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001d",
-          "contentHash": "sha256:7dc34b21989cd9a4e5d9b2d6fee85ccd67f606fea7a3d80aed64221afae0dcfc"
+          "contentHash": "sha256:c5d2ccab4f536c451558a966e8ebcdd4dd94ee3f191f1a1d42157477455798c9"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
+          "providerId": "",
+          "assetId": "1000000000000000000000000000001c",
+          "contentHash": "sha256:41afadce50a6b1d6826d18e582276980f5eea69b75ab4c2ffc151df7011093c4"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_soft_shadows.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000042",
+          "contentHash": "sha256:1ea3abc5d29415da0f4b224033d961ff42edede9457b399e6142e87d09e6c087"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_spheres.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000041",
+          "contentHash": "sha256:6e84654ed65399a86c0d1ffa2fd52c584f680d4d605f2038f6ad58bf9502966e"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_teapot.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000040",
+          "contentHash": "sha256:420bfd1ea358e4fe52524325eb036fe42251df7c6496390b1428d5a768f5d6f1"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/software_path_tracer.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001f",
-          "contentHash": "sha256:d9c4a050e5b18467fe27305de200c35d6e20e44d8f4dd3ebf72e4499c16cec18"
+          "contentHash": "sha256:bccf3830439b14307256eee22bb1aee9e795cdccf1e33816aad3b8c74ea93c72"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+          "providerId": "",
+          "assetId": "1000000000000000000000000000001e",
+          "contentHash": "sha256:123163d58d1313d022220307fecb41b1906e790326ea32e601e0d60dc7502c39"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/textured_cube_grid.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000015",
+          "contentHash": "sha256:9589bac370353d86f2ab7f3ea181d68f19799a3f0b1d423f87c4f697aa1f63f1"
         }
       ],
       "sceneOrders": [
         {
           "sceneReference": {
             "sourceKind": 1,
-            "relativePath": "scenes/HelenOfCodeSplash.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000003",
-            "contentHash": "sha256:518ba0729600dba4ae806bfeebb1ca36c83017db28c0a47772a9d6c64c39611d"
-          },
-          "orderNumber": 1
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/SceneLoadingScreen.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000004",
-            "contentHash": "sha256:f17d659bcd194f6dfc28a8ddbd5007b59ac5f836f2dbf14cd5039d56fa958974"
-          },
-          "orderNumber": 2
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
             "relativePath": "scenes/DemoDiscMainMenu.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000001",
-            "contentHash": "sha256:de3cf052d68465cdb0e26190716d4787e986bd5b03928a94b489f333bcb83cfd"
+            "contentHash": "sha256:ac1954d812dcb51959847d21025f37a3cfde09d405ea11682c8e18927b5621ec"
           },
-          "orderNumber": 3
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/cube_test.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000010",
-            "contentHash": "sha256:3692394edebb0d920be38e6689bba36b79181bb70a2e8ebf859b26336db7e47d"
-          },
-          "orderNumber": 4
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/colored_cube_grid.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000011",
-            "contentHash": "sha256:3ae0c21ae3345e93241eb0c927e394a1a0d4726b9dca1939aacab23f81d3598b"
-          },
-          "orderNumber": 5
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/textured_cube_grid.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000015",
-            "contentHash": "sha256:115c0d7e7c5bfaff626e648a027110120eb9a9a73ec28e37bafadd8ba48edefe"
-          },
-          "orderNumber": 6
+          "orderNumber": 1
         },
         {
           "sceneReference": {
@@ -5849,9 +5338,9 @@
             "relativePath": "scenes/rendering/axis_test.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000017",
-            "contentHash": "sha256:f678eb7cf853f00eb78fdb4d7af2df9aedf07d28597ffa1dd9a5ab0c6da908d6"
+            "contentHash": "sha256:63ac00560198ccea0e3e5dc21cf4664c94a549192ef2242a055de4646be380a1"
           },
-          "orderNumber": 7
+          "orderNumber": 2
         },
         {
           "sceneReference": {
@@ -5859,19 +5348,29 @@
             "relativePath": "scenes/rendering/axis_test2.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000018",
-            "contentHash": "sha256:88212361ea99f06aaafc6b8012112ebf19d252d689d4c203fb798d015a2a85c6"
+            "contentHash": "sha256:be2d4b6b15528b44b0ddf7fde0e7ed45ab9cb108572df9842ce1f7779dfdd334"
           },
-          "orderNumber": 8
+          "orderNumber": 3
         },
         {
           "sceneReference": {
             "sourceKind": 1,
-            "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+            "relativePath": "scenes/rendering/colored_cube_grid.helen",
             "providerId": "",
-            "assetId": "1000000000000000000000000000001e",
-            "contentHash": "sha256:56066b3243a0f9355a86fdae27ee628a39acaced7d6a3990aed7f8b32bd12e19"
+            "assetId": "10000000000000000000000000000011",
+            "contentHash": "sha256:d61e1cf84bbebc7c090aeed8a0cd3f65fc320889c2ea245b667df0db93b5abd5"
           },
-          "orderNumber": 9
+          "orderNumber": 4
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/cube_test.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000010",
+            "contentHash": "sha256:1b2cccdbaa2f8af9fe0f975afb33151ae6635226b4c59599b401fd7839a1d2fe"
+          },
+          "orderNumber": 5
         },
         {
           "sceneReference": {
@@ -5879,99 +5378,9 @@
             "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000013",
-            "contentHash": "sha256:5d79fcbadfd4aa2157d04d087762c2f1f9ff52399fc1f29a9c4f83f718c20964"
+            "contentHash": "sha256:cc40a199ca7f186f529d9a9c8a275dd23b99a841a504fa974dab659fd4699fb6"
           },
-          "orderNumber": 10
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/physics/test_scene_dynamic_stack_boxes.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000023",
-            "contentHash": "sha256:f3e45fa4509a58d8b9bae7059b8c753cb69268132a9c6bd7004fbde73b5cbde4"
-          },
-          "orderNumber": 11
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/physics/test_scene_dynamic_sphere_stack.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000025",
-            "contentHash": "sha256:8cbc4ed22df12e72c25d3535ba55de388eb6b65e5da1fee10faf5a77859b8d47"
-          },
-          "orderNumber": 12
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/physics/test_scene_dynamic_mixed_stack.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000028",
-            "contentHash": "sha256:54c53ffee57c12a1b1e9ce5ad906635ec1d2be8ae1fbb484bcc7faea24ae2f7f"
-          },
-          "orderNumber": 13
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000030",
-            "contentHash": "sha256:03d3d3bf1f400276b9df03a869091fec3a0737f3e1abcbd90adaf86dfff10aa7"
-          },
-          "orderNumber": 14
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_01.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000033",
-            "contentHash": "sha256:7b3a85ea734df39c57050a229220c22259c9420fded65e80a9c4bea67ffd8182"
-          },
-          "orderNumber": 15
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_02.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000034",
-            "contentHash": "sha256:312f1e1abea108ac72254e0ac67e152be62e9dd3e273ed7e9d1b77ed5497d193"
-          },
-          "orderNumber": 16
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_03.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000035",
-            "contentHash": "sha256:24886d0f8736af67d17a3da975f872cc50dca5a7c85d66ca6aae7fad8ab9673e"
-          },
-          "orderNumber": 17
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_04.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000036",
-            "contentHash": "sha256:b2aca8335554d7674a43e4d36fe245f61a8833f3abd26175c678736299e93422"
-          },
-          "orderNumber": 18
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/games/tilt/tilt_trial_level_05.helen",
-            "providerId": "",
-            "assetId": "10000000000000000000000000000037",
-            "contentHash": "sha256:83be9dd0d94ec66ff655c5e7f4846170dc71bc84b5f5b5884ecc3fc76e6f2a8c"
-          },
-          "orderNumber": 19
+          "orderNumber": 6
         },
         {
           "sceneReference": {
@@ -5979,19 +5388,9 @@
             "relativePath": "scenes/rendering/pbr_material_gallery.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001b",
-            "contentHash": "sha256:59d9a753b674b9433cc711583ffb78f2e24f9746d0850aeec4aa2c59ea9fae16"
+            "contentHash": "sha256:49ab4aa65b9619f773f050f8c214951cf71872c6b486ecad91d6d526d3ce7b15"
           },
-          "orderNumber": 20
-        },
-        {
-          "sceneReference": {
-            "sourceKind": 1,
-            "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
-            "providerId": "",
-            "assetId": "1000000000000000000000000000001c",
-            "contentHash": "sha256:61bd61aba683b28d3dbd7cca628bd12d7a89757ab9d8831206ad320d27e232bf"
-          },
-          "orderNumber": 21
+          "orderNumber": 7
         },
         {
           "sceneReference": {
@@ -5999,9 +5398,49 @@
             "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001d",
-            "contentHash": "sha256:7dc34b21989cd9a4e5d9b2d6fee85ccd67f606fea7a3d80aed64221afae0dcfc"
+            "contentHash": "sha256:c5d2ccab4f536c451558a966e8ebcdd4dd94ee3f191f1a1d42157477455798c9"
           },
-          "orderNumber": 22
+          "orderNumber": 8
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
+            "providerId": "",
+            "assetId": "1000000000000000000000000000001c",
+            "contentHash": "sha256:41afadce50a6b1d6826d18e582276980f5eea69b75ab4c2ffc151df7011093c4"
+          },
+          "orderNumber": 9
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_soft_shadows.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000042",
+            "contentHash": "sha256:1ea3abc5d29415da0f4b224033d961ff42edede9457b399e6142e87d09e6c087"
+          },
+          "orderNumber": 10
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_spheres.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000041",
+            "contentHash": "sha256:6e84654ed65399a86c0d1ffa2fd52c584f680d4d605f2038f6ad58bf9502966e"
+          },
+          "orderNumber": 11
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_teapot.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000040",
+            "contentHash": "sha256:420bfd1ea358e4fe52524325eb036fe42251df7c6496390b1428d5a768f5d6f1"
+          },
+          "orderNumber": 12
         },
         {
           "sceneReference": {
@@ -6009,11 +5448,32 @@
             "relativePath": "scenes/rendering/software_path_tracer.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001f",
-            "contentHash": "sha256:d9c4a050e5b18467fe27305de200c35d6e20e44d8f4dd3ebf72e4499c16cec18"
+            "contentHash": "sha256:bccf3830439b14307256eee22bb1aee9e795cdccf1e33816aad3b8c74ea93c72"
           },
-          "orderNumber": 23
+          "orderNumber": 13
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+            "providerId": "",
+            "assetId": "1000000000000000000000000000001e",
+            "contentHash": "sha256:123163d58d1313d022220307fecb41b1906e790326ea32e601e0d60dc7502c39"
+          },
+          "orderNumber": 14
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/textured_cube_grid.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000015",
+            "contentHash": "sha256:9589bac370353d86f2ab7f3ea181d68f19799a3f0b1d423f87c4f697aa1f63f1"
+          },
+          "orderNumber": 15
         }
-      ]
+      ],
+      "overridesProjectScenes": true
     },
     {
       "platformId": "webgpu",
@@ -6661,105 +6121,105 @@
           "relativePath": "scenes/DemoDiscMainMenu.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000001",
-          "contentHash": "sha256:1ada8b8fbf9a6f94b93427b291a1071c99d631bfae207ca8e76568eaf7d16128"
+          "contentHash": "sha256:ac1954d812dcb51959847d21025f37a3cfde09d405ea11682c8e18927b5621ec"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/axis_test.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000017",
-          "contentHash": "sha256:b17141ea4d8911f15e122e86bec26354fdd9a50ca8dfdffedc999d705fcc1098"
+          "contentHash": "sha256:63ac00560198ccea0e3e5dc21cf4664c94a549192ef2242a055de4646be380a1"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/axis_test2.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000018",
-          "contentHash": "sha256:4907ee5d06f178c1f9576a4e6c446a159b3247311f6e29855f4bdc49235b81ab"
+          "contentHash": "sha256:be2d4b6b15528b44b0ddf7fde0e7ed45ab9cb108572df9842ce1f7779dfdd334"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/colored_cube_grid.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000011",
-          "contentHash": "sha256:b5d1398026aac53f2fd0727eab0fab1a500f18d7a2cbab8f70dce17e210fcc11"
+          "contentHash": "sha256:d61e1cf84bbebc7c090aeed8a0cd3f65fc320889c2ea245b667df0db93b5abd5"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/cube_test.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000010",
-          "contentHash": "sha256:8799ee7c3fd043f545b4e0a87e1926ef88968a191c541037612e414e8a5120ca"
+          "contentHash": "sha256:1b2cccdbaa2f8af9fe0f975afb33151ae6635226b4c59599b401fd7839a1d2fe"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000013",
-          "contentHash": "sha256:cdc55d1aebaa3bff3b52790d63c7be1d7dbe737c47f70b598328d85e8f735ce4"
+          "contentHash": "sha256:cc40a199ca7f186f529d9a9c8a275dd23b99a841a504fa974dab659fd4699fb6"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_material_gallery.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001b",
-          "contentHash": "sha256:ecbb724de39cdc069e5ee9e777ec5f0b3aa9b56acbab752e4c084ae018e6eb46"
+          "contentHash": "sha256:49ab4aa65b9619f773f050f8c214951cf71872c6b486ecad91d6d526d3ce7b15"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001d",
-          "contentHash": "sha256:7c1a3736ce8bac46ab7c0f19d725f6a5ad210f025df6bdbe95a3fb6d966fdff5"
+          "contentHash": "sha256:c5d2ccab4f536c451558a966e8ebcdd4dd94ee3f191f1a1d42157477455798c9"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001c",
-          "contentHash": "sha256:7f19dd99994150888ba1719831d3d101e8072483183b550e984200c048992956"
+          "contentHash": "sha256:41afadce50a6b1d6826d18e582276980f5eea69b75ab4c2ffc151df7011093c4"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/ray_tracing_soft_shadows.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000042",
-          "contentHash": "sha256:4f4ad6e594c11afcabaf33dd0bbd7f73b967cadde7715847469c5c9e3936a59d"
+          "contentHash": "sha256:1ea3abc5d29415da0f4b224033d961ff42edede9457b399e6142e87d09e6c087"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/ray_tracing_spheres.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000041",
-          "contentHash": "sha256:22528bb964d8a543443f87fafa939ba3f7249977f34819f8809de952eb6486fa"
+          "contentHash": "sha256:6e84654ed65399a86c0d1ffa2fd52c584f680d4d605f2038f6ad58bf9502966e"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/ray_tracing_teapot.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000040",
-          "contentHash": "sha256:ff50950fa2136eae39d5669afdec5ae2ba6e43ab89a3bd9618dead8e79b3cc93"
+          "contentHash": "sha256:420bfd1ea358e4fe52524325eb036fe42251df7c6496390b1428d5a768f5d6f1"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/software_path_tracer.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001f",
-          "contentHash": "sha256:5b3720988968a9d11569bb1ba8acac5db1bcee20ee5fe95282b77420690bbe7d"
+          "contentHash": "sha256:bccf3830439b14307256eee22bb1aee9e795cdccf1e33816aad3b8c74ea93c72"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
           "providerId": "",
           "assetId": "1000000000000000000000000000001e",
-          "contentHash": "sha256:8dfb3b1a790ff13f7e94b4320b9731829b589018e5db02bd5fee896b7f6b7055"
+          "contentHash": "sha256:123163d58d1313d022220307fecb41b1906e790326ea32e601e0d60dc7502c39"
         },
         {
           "sourceKind": 1,
           "relativePath": "scenes/rendering/textured_cube_grid.helen",
           "providerId": "",
           "assetId": "10000000000000000000000000000015",
-          "contentHash": "sha256:9585c5a4cd34331fe37886a29118f825bf9c915e0ae9b856e1948edd61d88d52"
+          "contentHash": "sha256:9589bac370353d86f2ab7f3ea181d68f19799a3f0b1d423f87c4f697aa1f63f1"
         }
       ],
       "sceneOrders": [
@@ -6769,7 +6229,7 @@
             "relativePath": "scenes/DemoDiscMainMenu.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000001",
-            "contentHash": "sha256:1ada8b8fbf9a6f94b93427b291a1071c99d631bfae207ca8e76568eaf7d16128"
+            "contentHash": "sha256:ac1954d812dcb51959847d21025f37a3cfde09d405ea11682c8e18927b5621ec"
           },
           "orderNumber": 1
         },
@@ -6779,7 +6239,7 @@
             "relativePath": "scenes/rendering/axis_test.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000017",
-            "contentHash": "sha256:b17141ea4d8911f15e122e86bec26354fdd9a50ca8dfdffedc999d705fcc1098"
+            "contentHash": "sha256:63ac00560198ccea0e3e5dc21cf4664c94a549192ef2242a055de4646be380a1"
           },
           "orderNumber": 2
         },
@@ -6789,7 +6249,7 @@
             "relativePath": "scenes/rendering/axis_test2.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000018",
-            "contentHash": "sha256:4907ee5d06f178c1f9576a4e6c446a159b3247311f6e29855f4bdc49235b81ab"
+            "contentHash": "sha256:be2d4b6b15528b44b0ddf7fde0e7ed45ab9cb108572df9842ce1f7779dfdd334"
           },
           "orderNumber": 3
         },
@@ -6799,7 +6259,7 @@
             "relativePath": "scenes/rendering/colored_cube_grid.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000011",
-            "contentHash": "sha256:b5d1398026aac53f2fd0727eab0fab1a500f18d7a2cbab8f70dce17e210fcc11"
+            "contentHash": "sha256:d61e1cf84bbebc7c090aeed8a0cd3f65fc320889c2ea245b667df0db93b5abd5"
           },
           "orderNumber": 4
         },
@@ -6809,7 +6269,7 @@
             "relativePath": "scenes/rendering/cube_test.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000010",
-            "contentHash": "sha256:8799ee7c3fd043f545b4e0a87e1926ef88968a191c541037612e414e8a5120ca"
+            "contentHash": "sha256:1b2cccdbaa2f8af9fe0f975afb33151ae6635226b4c59599b401fd7839a1d2fe"
           },
           "orderNumber": 5
         },
@@ -6819,7 +6279,7 @@
             "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000013",
-            "contentHash": "sha256:cdc55d1aebaa3bff3b52790d63c7be1d7dbe737c47f70b598328d85e8f735ce4"
+            "contentHash": "sha256:cc40a199ca7f186f529d9a9c8a275dd23b99a841a504fa974dab659fd4699fb6"
           },
           "orderNumber": 6
         },
@@ -6829,7 +6289,7 @@
             "relativePath": "scenes/rendering/pbr_material_gallery.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001b",
-            "contentHash": "sha256:ecbb724de39cdc069e5ee9e777ec5f0b3aa9b56acbab752e4c084ae018e6eb46"
+            "contentHash": "sha256:49ab4aa65b9619f773f050f8c214951cf71872c6b486ecad91d6d526d3ce7b15"
           },
           "orderNumber": 7
         },
@@ -6839,7 +6299,7 @@
             "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001d",
-            "contentHash": "sha256:7c1a3736ce8bac46ab7c0f19d725f6a5ad210f025df6bdbe95a3fb6d966fdff5"
+            "contentHash": "sha256:c5d2ccab4f536c451558a966e8ebcdd4dd94ee3f191f1a1d42157477455798c9"
           },
           "orderNumber": 8
         },
@@ -6849,7 +6309,7 @@
             "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001c",
-            "contentHash": "sha256:7f19dd99994150888ba1719831d3d101e8072483183b550e984200c048992956"
+            "contentHash": "sha256:41afadce50a6b1d6826d18e582276980f5eea69b75ab4c2ffc151df7011093c4"
           },
           "orderNumber": 9
         },
@@ -6859,7 +6319,7 @@
             "relativePath": "scenes/rendering/ray_tracing_soft_shadows.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000042",
-            "contentHash": "sha256:4f4ad6e594c11afcabaf33dd0bbd7f73b967cadde7715847469c5c9e3936a59d"
+            "contentHash": "sha256:1ea3abc5d29415da0f4b224033d961ff42edede9457b399e6142e87d09e6c087"
           },
           "orderNumber": 10
         },
@@ -6869,7 +6329,7 @@
             "relativePath": "scenes/rendering/ray_tracing_spheres.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000041",
-            "contentHash": "sha256:22528bb964d8a543443f87fafa939ba3f7249977f34819f8809de952eb6486fa"
+            "contentHash": "sha256:6e84654ed65399a86c0d1ffa2fd52c584f680d4d605f2038f6ad58bf9502966e"
           },
           "orderNumber": 11
         },
@@ -6879,7 +6339,7 @@
             "relativePath": "scenes/rendering/ray_tracing_teapot.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000040",
-            "contentHash": "sha256:ff50950fa2136eae39d5669afdec5ae2ba6e43ab89a3bd9618dead8e79b3cc93"
+            "contentHash": "sha256:420bfd1ea358e4fe52524325eb036fe42251df7c6496390b1428d5a768f5d6f1"
           },
           "orderNumber": 12
         },
@@ -6889,7 +6349,7 @@
             "relativePath": "scenes/rendering/software_path_tracer.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001f",
-            "contentHash": "sha256:5b3720988968a9d11569bb1ba8acac5db1bcee20ee5fe95282b77420690bbe7d"
+            "contentHash": "sha256:bccf3830439b14307256eee22bb1aee9e795cdccf1e33816aad3b8c74ea93c72"
           },
           "orderNumber": 13
         },
@@ -6899,7 +6359,7 @@
             "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
             "providerId": "",
             "assetId": "1000000000000000000000000000001e",
-            "contentHash": "sha256:8dfb3b1a790ff13f7e94b4320b9731829b589018e5db02bd5fee896b7f6b7055"
+            "contentHash": "sha256:123163d58d1313d022220307fecb41b1906e790326ea32e601e0d60dc7502c39"
           },
           "orderNumber": 14
         },
@@ -6909,7 +6369,270 @@
             "relativePath": "scenes/rendering/textured_cube_grid.helen",
             "providerId": "",
             "assetId": "10000000000000000000000000000015",
-            "contentHash": "sha256:9585c5a4cd34331fe37886a29118f825bf9c915e0ae9b856e1948edd61d88d52"
+            "contentHash": "sha256:9589bac370353d86f2ab7f3ea181d68f19799a3f0b1d423f87c4f697aa1f63f1"
+          },
+          "orderNumber": 15
+        }
+      ]
+    },
+    {
+      "platformId": "xbox",
+      "overridesProjectScenes": true,
+      "selectedSceneReferences": [
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/DemoDiscMainMenu.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000001",
+          "contentHash": "sha256:ac1954d812dcb51959847d21025f37a3cfde09d405ea11682c8e18927b5621ec"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/axis_test.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000017",
+          "contentHash": "sha256:63ac00560198ccea0e3e5dc21cf4664c94a549192ef2242a055de4646be380a1"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/axis_test2.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000018",
+          "contentHash": "sha256:be2d4b6b15528b44b0ddf7fde0e7ed45ab9cb108572df9842ce1f7779dfdd334"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/colored_cube_grid.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000011",
+          "contentHash": "sha256:d61e1cf84bbebc7c090aeed8a0cd3f65fc320889c2ea245b667df0db93b5abd5"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/cube_test.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000010",
+          "contentHash": "sha256:1b2cccdbaa2f8af9fe0f975afb33151ae6635226b4c59599b401fd7839a1d2fe"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000013",
+          "contentHash": "sha256:cc40a199ca7f186f529d9a9c8a275dd23b99a841a504fa974dab659fd4699fb6"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/pbr_material_gallery.helen",
+          "providerId": "",
+          "assetId": "1000000000000000000000000000001b",
+          "contentHash": "sha256:49ab4aa65b9619f773f050f8c214951cf71872c6b486ecad91d6d526d3ce7b15"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
+          "providerId": "",
+          "assetId": "1000000000000000000000000000001d",
+          "contentHash": "sha256:c5d2ccab4f536c451558a966e8ebcdd4dd94ee3f191f1a1d42157477455798c9"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
+          "providerId": "",
+          "assetId": "1000000000000000000000000000001c",
+          "contentHash": "sha256:41afadce50a6b1d6826d18e582276980f5eea69b75ab4c2ffc151df7011093c4"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_soft_shadows.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000042",
+          "contentHash": "sha256:1ea3abc5d29415da0f4b224033d961ff42edede9457b399e6142e87d09e6c087"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_spheres.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000041",
+          "contentHash": "sha256:6e84654ed65399a86c0d1ffa2fd52c584f680d4d605f2038f6ad58bf9502966e"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/ray_tracing_teapot.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000040",
+          "contentHash": "sha256:420bfd1ea358e4fe52524325eb036fe42251df7c6496390b1428d5a768f5d6f1"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/software_path_tracer.helen",
+          "providerId": "",
+          "assetId": "1000000000000000000000000000001f",
+          "contentHash": "sha256:bccf3830439b14307256eee22bb1aee9e795cdccf1e33816aad3b8c74ea93c72"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+          "providerId": "",
+          "assetId": "1000000000000000000000000000001e",
+          "contentHash": "sha256:123163d58d1313d022220307fecb41b1906e790326ea32e601e0d60dc7502c39"
+        },
+        {
+          "sourceKind": 1,
+          "relativePath": "scenes/rendering/textured_cube_grid.helen",
+          "providerId": "",
+          "assetId": "10000000000000000000000000000015",
+          "contentHash": "sha256:9589bac370353d86f2ab7f3ea181d68f19799a3f0b1d423f87c4f697aa1f63f1"
+        }
+      ],
+      "sceneOrders": [
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/DemoDiscMainMenu.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000001",
+            "contentHash": "sha256:ac1954d812dcb51959847d21025f37a3cfde09d405ea11682c8e18927b5621ec"
+          },
+          "orderNumber": 1
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/axis_test.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000017",
+            "contentHash": "sha256:63ac00560198ccea0e3e5dc21cf4664c94a549192ef2242a055de4646be380a1"
+          },
+          "orderNumber": 2
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/axis_test2.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000018",
+            "contentHash": "sha256:be2d4b6b15528b44b0ddf7fde0e7ed45ab9cb108572df9842ce1f7779dfdd334"
+          },
+          "orderNumber": 3
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/colored_cube_grid.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000011",
+            "contentHash": "sha256:d61e1cf84bbebc7c090aeed8a0cd3f65fc320889c2ea245b667df0db93b5abd5"
+          },
+          "orderNumber": 4
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/cube_test.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000010",
+            "contentHash": "sha256:1b2cccdbaa2f8af9fe0f975afb33151ae6635226b4c59599b401fd7839a1d2fe"
+          },
+          "orderNumber": 5
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/directional_shadow_plaza.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000013",
+            "contentHash": "sha256:cc40a199ca7f186f529d9a9c8a275dd23b99a841a504fa974dab659fd4699fb6"
+          },
+          "orderNumber": 6
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/pbr_material_gallery.helen",
+            "providerId": "",
+            "assetId": "1000000000000000000000000000001b",
+            "contentHash": "sha256:49ab4aa65b9619f773f050f8c214951cf71872c6b486ecad91d6d526d3ce7b15"
+          },
+          "orderNumber": 7
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/pbr_shadow_theater.helen",
+            "providerId": "",
+            "assetId": "1000000000000000000000000000001d",
+            "contentHash": "sha256:c5d2ccab4f536c451558a966e8ebcdd4dd94ee3f191f1a1d42157477455798c9"
+          },
+          "orderNumber": 8
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/pbr_textured_showcase.helen",
+            "providerId": "",
+            "assetId": "1000000000000000000000000000001c",
+            "contentHash": "sha256:41afadce50a6b1d6826d18e582276980f5eea69b75ab4c2ffc151df7011093c4"
+          },
+          "orderNumber": 9
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_soft_shadows.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000042",
+            "contentHash": "sha256:1ea3abc5d29415da0f4b224033d961ff42edede9457b399e6142e87d09e6c087"
+          },
+          "orderNumber": 10
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_spheres.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000041",
+            "contentHash": "sha256:6e84654ed65399a86c0d1ffa2fd52c584f680d4d605f2038f6ad58bf9502966e"
+          },
+          "orderNumber": 11
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/ray_tracing_teapot.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000040",
+            "contentHash": "sha256:420bfd1ea358e4fe52524325eb036fe42251df7c6496390b1428d5a768f5d6f1"
+          },
+          "orderNumber": 12
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/software_path_tracer.helen",
+            "providerId": "",
+            "assetId": "1000000000000000000000000000001f",
+            "contentHash": "sha256:bccf3830439b14307256eee22bb1aee9e795cdccf1e33816aad3b8c74ea93c72"
+          },
+          "orderNumber": 13
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/test_scene_matrix_render.helen",
+            "providerId": "",
+            "assetId": "1000000000000000000000000000001e",
+            "contentHash": "sha256:123163d58d1313d022220307fecb41b1906e790326ea32e601e0d60dc7502c39"
+          },
+          "orderNumber": 14
+        },
+        {
+          "sceneReference": {
+            "sourceKind": 1,
+            "relativePath": "scenes/rendering/textured_cube_grid.helen",
+            "providerId": "",
+            "assetId": "10000000000000000000000000000015",
+            "contentHash": "sha256:9589bac370353d86f2ab7f3ea181d68f19799a3f0b1d423f87c4f697aa1f63f1"
           },
           "orderNumber": 15
         }

@@ -118,6 +118,15 @@ namespace DemoDisc.EditorTools {
                 0.1f);
             microSdTransform.HasLocalScaleOverride = true;
             microSdTransform.LocalScale = new float3(MicroSdScale, MicroSdScale, 1f);
+            const float Nintendo64Scale = DemoSceneInstructionOverlayFactory.Nintendo64InstructionPanelScale;
+            SceneEntityPlatformTransformOverrideAsset nintendo64Transform = swatchSave.GetOrCreateTransformPlatformOverride(DemoDiscOverrideScopes.Nintendo64);
+            nintendo64Transform.HasLocalPositionOverride = true;
+            nintendo64Transform.LocalPosition = new float3(
+                DemoSceneInstructionOverlayFactory.DesktopInstructionPanelLeft + DemoSceneInstructionOverlayFactory.LightSwatchPanelLeft * Nintendo64Scale,
+                DemoSceneInstructionOverlayFactory.Nintendo64InstructionPanelTop + DemoSceneInstructionOverlayFactory.LightSwatchPanelTop * Nintendo64Scale,
+                0.1f);
+            nintendo64Transform.HasLocalScaleOverride = true;
+            nintendo64Transform.LocalScale = new float3(Nintendo64Scale, Nintendo64Scale, 1f);
 
             DemoDiscLightToggleComponent lightToggle = FindRequiredLightToggle(sceneUiEntity);
             lightToggle.IndicatorSwatchEntityReference = CreateEntityReference(swatchEntity);
