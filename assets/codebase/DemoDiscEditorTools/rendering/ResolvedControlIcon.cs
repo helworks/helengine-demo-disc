@@ -19,12 +19,12 @@ namespace DemoDisc.EditorTools {
                 throw new InvalidOperationException("Resolved control icon source rect must be positive.");
             }
 
-            double sourceAspectRatio = SourceRect.Z / SourceRect.W;
-            double constrainedWidth = maxDisplaySize.X;
-            double constrainedHeight = Math.Round(constrainedWidth / sourceAspectRatio);
+            RealEvaluation sourceAspectRatio = SourceRect.Z / SourceRect.W;
+            RealEvaluation constrainedWidth = maxDisplaySize.X;
+            RealEvaluation constrainedHeight = RealMath.Round(constrainedWidth / sourceAspectRatio);
             if (constrainedHeight > maxDisplaySize.Y) {
                 constrainedHeight = maxDisplaySize.Y;
-                constrainedWidth = Math.Round(constrainedHeight * sourceAspectRatio);
+                constrainedWidth = RealMath.Round(constrainedHeight * sourceAspectRatio);
             }
 
             return new int2(

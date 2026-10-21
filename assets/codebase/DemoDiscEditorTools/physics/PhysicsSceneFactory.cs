@@ -2570,9 +2570,9 @@ namespace DemoDisc.EditorTools {
         /// </summary>
         /// <param name="value">Normalized channel value.</param>
         /// <returns>Clamped byte channel.</returns>
-        static byte ConvertColorChannelToByte(float value) {
-            double scaledValue = Math.Round(Math.Clamp((double)value, 0d, 1d) * 255d, MidpointRounding.AwayFromZero);
-            return (byte)scaledValue;
+        static byte ConvertColorChannelToByte(RealEvaluation value) {
+            RealEvaluation scaledValue = RealMath.Round(RealMath.Clamp(value, 0d, 1d) * 255d, MidpointRounding.AwayFromZero);
+            return (byte)(int)scaledValue;
         }
 
         /// <summary>
@@ -2914,7 +2914,7 @@ namespace DemoDisc.EditorTools {
         }
 
         /// <summary>
-        /// Writes one `float4` payload into a binary component stream.
+        /// Writes one legacy vector payload as four fixed IEEE binary32 channels.
         /// </summary>
         /// <param name="writer">Destination writer receiving the payload.</param>
         /// <param name="value">Vector value to write.</param>
@@ -2923,10 +2923,10 @@ namespace DemoDisc.EditorTools {
                 throw new ArgumentNullException(nameof(writer));
             }
 
-            writer.WriteSingle(value.X);
-            writer.WriteSingle(value.Y);
-            writer.WriteSingle(value.Z);
-            writer.WriteSingle(value.W);
+            writer.WriteSingle(value.X.ToSingle());
+            writer.WriteSingle(value.Y.ToSingle());
+            writer.WriteSingle(value.Z.ToSingle());
+            writer.WriteSingle(value.W.ToSingle());
         }
 
         /// <summary>

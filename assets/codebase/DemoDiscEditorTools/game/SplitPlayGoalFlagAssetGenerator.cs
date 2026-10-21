@@ -255,8 +255,8 @@ namespace DemoDisc.EditorTools {
             };
 
             void AppendCylinderY(float3 baseCenter, float radius, float height, int radialSteps) {
-                float minY = baseCenter.Y;
-                float maxY = baseCenter.Y + height;
+                RealEvaluation minY = baseCenter.Y;
+                RealEvaluation maxY = baseCenter.Y + height;
 
                 ushort bottomCenterIndex = (ushort)positions.Count;
                 positions.Add(new float3(baseCenter.X, minY, baseCenter.Z));
@@ -264,12 +264,12 @@ namespace DemoDisc.EditorTools {
                 texCoords.Add(new float2(0.5f, 0.5f));
 
                 for (int step = 0; step < radialSteps; step++) {
-                    float angle = (MathF.PI * 2f * step) / radialSteps;
-                    float x = baseCenter.X + MathF.Cos(angle) * radius;
-                    float z = baseCenter.Z + MathF.Sin(angle) * radius;
+                    RealEvaluation angle = (RealMath.PI * 2f * step) / radialSteps;
+                    RealEvaluation x = baseCenter.X + RealMath.Cos(angle) * radius;
+                    RealEvaluation z = baseCenter.Z + RealMath.Sin(angle) * radius;
                     positions.Add(new float3(x, minY, z));
                     normals.Add(new float3(0f, -1f, 0f));
-                    texCoords.Add(new float2((MathF.Cos(angle) + 1f) * 0.5f, (MathF.Sin(angle) + 1f) * 0.5f));
+                    texCoords.Add(new float2((RealMath.Cos(angle) + 1f) * 0.5f, (RealMath.Sin(angle) + 1f) * 0.5f));
                 }
 
                 for (int step = 0; step < radialSteps; step++) {
@@ -286,12 +286,12 @@ namespace DemoDisc.EditorTools {
                 texCoords.Add(new float2(0.5f, 0.5f));
 
                 for (int step = 0; step < radialSteps; step++) {
-                    float angle = (MathF.PI * 2f * step) / radialSteps;
-                    float x = baseCenter.X + MathF.Cos(angle) * radius;
-                    float z = baseCenter.Z + MathF.Sin(angle) * radius;
+                    RealEvaluation angle = (RealMath.PI * 2f * step) / radialSteps;
+                    RealEvaluation x = baseCenter.X + RealMath.Cos(angle) * radius;
+                    RealEvaluation z = baseCenter.Z + RealMath.Sin(angle) * radius;
                     positions.Add(new float3(x, maxY, z));
                     normals.Add(new float3(0f, 1f, 0f));
-                    texCoords.Add(new float2((MathF.Cos(angle) + 1f) * 0.5f, (MathF.Sin(angle) + 1f) * 0.5f));
+                    texCoords.Add(new float2((RealMath.Cos(angle) + 1f) * 0.5f, (RealMath.Sin(angle) + 1f) * 0.5f));
                 }
 
                 for (int step = 0; step < radialSteps; step++) {
@@ -304,11 +304,11 @@ namespace DemoDisc.EditorTools {
 
                 ushort sideStartIndex = (ushort)positions.Count;
                 for (int step = 0; step < radialSteps; step++) {
-                    float angle = (MathF.PI * 2f * step) / radialSteps;
-                    float x = baseCenter.X + MathF.Cos(angle) * radius;
-                    float z = baseCenter.Z + MathF.Sin(angle) * radius;
-                    float3 normal = new float3(MathF.Cos(angle), 0f, MathF.Sin(angle));
-                    float u = (float)step / radialSteps;
+                    RealEvaluation angle = (RealMath.PI * 2f * step) / radialSteps;
+                    RealEvaluation x = baseCenter.X + RealMath.Cos(angle) * radius;
+                    RealEvaluation z = baseCenter.Z + RealMath.Sin(angle) * radius;
+                    float3 normal = new float3(RealMath.Cos(angle), 0f, RealMath.Sin(angle));
+                    RealEvaluation u = (RealEvaluation)step / radialSteps;
 
                     positions.Add(new float3(x, maxY, z));
                     normals.Add(normal);
@@ -396,7 +396,7 @@ namespace DemoDisc.EditorTools {
             }
 
             float3 NormalizeSafe(float3 value) {
-                float length = value.Length();
+                RealEvaluation length = value.Length();
                 return length <= 0.0001f ? new float3(1f, 0f, 0f) : value / length;
             }
         }
