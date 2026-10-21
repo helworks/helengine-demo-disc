@@ -23,6 +23,9 @@ namespace DemoDisc.EditorTools {
         /// </summary>
         const string Nintendo64PlatformId = "n64";
 
+        /// <summary>Platform whose fixed-resolution menu layout is prepared by the cooker.</summary>
+        const string PlayStation1PlatformId = "ps1";
+
         /// <summary>
         /// Runtime 2D layer mask used by baked menu visuals after authored scene layers are normalized during packaging.
         /// </summary>
@@ -219,13 +222,15 @@ namespace DemoDisc.EditorTools {
                 InitialPanelId = definition.InitialPanelId
             };
             entity.AddComponent(menuComponent);
-            entity.AddComponent(new ViewportComponent {
+            ViewportComponent viewport = new ViewportComponent {
                 BindingMode = ViewportComponent.ScreenBindingMode,
                 ScalingMode = ViewportComponent.ReferenceCanvasStretchScalingMode,
                 FixedSize = new int2(DemoMenuLayout.CanvasWidth, DemoMenuLayout.CanvasHeight),
                 ReferenceWidth = DemoMenuLayout.CanvasWidth,
                 ReferenceHeight = DemoMenuLayout.CanvasHeight
-            });
+            };
+            entity.AddComponent(viewport);
+            ApplyPlayStation1CookedLayout(entity, viewport);
 
             Entity generatedRootEntity = AssetAuthoringService.OwningCore.EntityFactory.CreateChild(entity, DemoMenuLayout.GeneratedRootEntityName);
 
@@ -553,6 +558,24 @@ namespace DemoDisc.EditorTools {
             ApplyNintendo64SquareCorners(entity, background);
 
             return entity;
+        }
+
+        /// <summary>Persists PS1-only Cook processing while retaining dynamic layout for other platforms.</summary>
+        /// <param name="entity">Authored menu root that owns the viewport and its override state.</param>
+        /// <param name="viewport">Shared viewport whose geometry remains in authored coordinates.</param>
+        void ApplyPlayStation1CookedLayout(Entity entity, ViewportComponent viewport) {
+            EntitySaveComponent saveComponent = FindRequiredEntitySaveComponent(entity);
+            EditorOverrideScopeResolver scopeResolver = EditorOverrideScopeResolver.Load(AssetAuthoringService.ProjectRootPath);
+            EditorOverrideScope scope = scopeResolver.BuildTargetPath(
+                scopeResolver.ResolveLevelOrder(saveComponent.OverrideLevelOrder), PlayStation1PlatformId, null);
+            ViewportComponent platformViewport = (ViewportComponent)PlatformEditingService.EnsureScopeOverrideComponent(
+                viewport, saveComponent, scope);
+            platformViewport.LayoutProcessingMode = ViewportLayoutProcessingMode.Cook;
+            PlatformEditingService.MarkScopePropertyOverride(
+                viewport, saveComponent, scope,
+                nameof(ViewportComponent.LayoutProcessingMode));
+            PlatformEditingService.PersistScopeOverride(
+                viewport, platformViewport, saveComponent, scope);
         }
 
         /// <summary>
