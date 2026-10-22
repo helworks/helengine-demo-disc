@@ -2,7 +2,7 @@
   "projectFormatVersion": 1,
   "name": "DemoDisc",
   "version": "1.0.0",
-  "requiredEngineVersion": "1.0.0\u002B7d5e78dcc7a5948cf8f3f23e9e6ffcd5f578390f",
+  "requiredEngineVersion": "1.0.0+7d5e78dcc7a5948cf8f3f23e9e6ffcd5f578390f",
   "supportedPlatforms": [
     "android",
     "windows",
@@ -21,7 +21,10 @@
     "x360",
     "webgpu",
     "ps1",
-    "xbox"
+    "xbox",
+    "linux",
+    "macos",
+    "ios"
   ],
   "created": "2026-04-08T22:28:00.3959454Z",
   "lastOpened": "2026-04-28T16:20:48.8005795Z",

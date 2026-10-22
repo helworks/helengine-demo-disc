@@ -16,6 +16,9 @@
     "windows",
     "x360",
     "webgpu",
-    "xbox"
+    "xbox",
+    "linux",
+    "macos",
+    "ios"
   ]
 }
