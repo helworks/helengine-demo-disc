@@ -1,0 +1,38 @@
+{
+  "platformId": "macos",
+  "version": "1.0.0",
+  "build": {
+    "selectedBuildProfileId": "debug",
+    "textureScalePercent": 100,
+    "shaderVariantPruningEnabled": true,
+    "selectedOptionValues": {
+      "texture-scale-percent": "100",
+      "shader-variant-pruning": "true"
+    }
+  },
+  "graphics": {
+    "selectedGraphicsProfileId": "metal",
+    "defaultWidth": 1280,
+    "defaultHeight": 720,
+    "vSyncEnabled": true,
+    "fullscreenEnabled": false,
+    "selectedOptionValues": {
+      "default-width": "1280",
+      "default-height": "720",
+      "vsync-enabled": "true",
+      "fullscreen-enabled": "false"
+    }
+  },
+  "codegen": {
+    "selectedCodegenProfileId": "default",
+    "selectedOptionValues": {
+      "write-conversion-report": "true",
+      "include-project-defined-preprocessor-symbols": "false",
+      "load-native-runtime-metadata": "true",
+      "codegen-enabled-features": "host_file_system",
+      "codegen-generated-function-profiling": "false",
+      "codegen-use-rtti": "true",
+      "codegen-use-exceptions": "true"
+    }
+  }
+}
