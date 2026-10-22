@@ -50,7 +50,7 @@ namespace DemoDisc.Raytracing {
         /// Resolves the fixed showcase resolution for one supported platform identifier.
         /// </summary>
         /// <param name="platformId">Ordinal platform identifier; matching is case-insensitive.</param>
-        /// <returns>256x192 for the case-insensitive ds identifier, otherwise 320x240 for a supported platform.</returns>
+        /// <returns>128x96 for PS1, 256x192 for DS, otherwise 320x240 for a supported platform; matching is case-insensitive.</returns>
         public static SoftwareTraceResolution ForPlatform(string platformId) {
             if (platformId == null) {
                 throw new ArgumentNullException(nameof(platformId));
@@ -63,7 +63,7 @@ namespace DemoDisc.Raytracing {
                 return new SoftwareTraceResolution(128, 96);
             }
 
-            if (string.Equals(platformId, "3ds", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "gamecube", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "ps2", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "psp", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "psvita", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "switch", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "wii", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "wiiu", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "windows", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "webgpu", StringComparison.OrdinalIgnoreCase)) {
+            if (string.Equals(platformId, "3ds", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "gamecube", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "ps2", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "psp", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "psvita", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "switch", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "wii", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "wiiu", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "windows", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "linux", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "macos", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "ios", StringComparison.OrdinalIgnoreCase) || string.Equals(platformId, "webgpu", StringComparison.OrdinalIgnoreCase)) {
                 return new SoftwareTraceResolution(320, 240);
             }
 
