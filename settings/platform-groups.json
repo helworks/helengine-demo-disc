@@ -8,6 +8,8 @@
         "switch",
         "wiiu",
         "windows",
+        "linux",
+        "macos",
         "x360",
         "webgpu"
       ],
@@ -50,7 +52,8 @@
       "id": "mobile",
       "displayName": "Mobile devices",
       "platformIds": [
-        "android"
+        "android",
+        "ios"
       ],
       "children": []
     }
