@@ -445,6 +445,7 @@ namespace DemoDisc.EditorTools {
             };
             entity.AddComponent(textComponent);
             ApplyFontReference(entity, textComponent, fontPath);
+            ApplyScalableFontPixels(entity, textComponent);
 
             if (anchorComponent != null) {
                 entity.AddComponent(anchorComponent);
@@ -558,6 +559,21 @@ namespace DemoDisc.EditorTools {
             ApplyNintendo64SquareCorners(entity, background);
 
             return entity;
+        }
+
+        /// <summary>Lets high-resolution desktop and mobile targets scale glyphs with their authored viewport; console native pixels remain unchanged.</summary>
+        /// <param name="entity">Text entity with editor persistence metadata.</param>
+        /// <param name="text">Common text component retaining the console native-pixel policy.</param>
+        void ApplyScalableFontPixels(Entity entity, TextComponent text) {
+            EntitySaveComponent save = FindRequiredEntitySaveComponent(entity);
+            EditorOverrideScopeResolver resolver = EditorOverrideScopeResolver.Load(AssetAuthoringService.ProjectRootPath);
+            foreach (string platformId in new[] { "linux", "macos", "ios", "android" }) {
+                EditorOverrideScope scope = resolver.BuildTargetPath(resolver.ResolveLevelOrder(save.OverrideLevelOrder), platformId, null);
+                TextComponent platformText = (TextComponent)PlatformEditingService.EnsureScopeOverrideComponent(text, save, scope);
+                platformText.NativeFontPixels = TextNativePixelMode.Disabled;
+                PlatformEditingService.MarkScopePropertyOverride(text, save, scope, nameof(TextComponent.NativeFontPixels));
+                PlatformEditingService.PersistScopeOverride(text, platformText, save, scope);
+            }
         }
 
         /// <summary>Persists PS1-only Cook processing while retaining dynamic layout for other platforms.</summary>

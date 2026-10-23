@@ -86,6 +86,44 @@ namespace DemoDisc.EditorTools.tests {
             AssertSquareCornersForN64(mainItem, 7.2f);
         }
 
+        /// <summary>High-resolution targets scale menu glyphs while common and console native-pixel policies remain intact.</summary>
+        [Fact]
+        public void Standard_menu_scales_font_pixels_only_for_desktop_and_mobile_targets() {
+            SceneAsset scene = LoadSceneAsset(@"assets\scenes\DemoDiscMainMenu.helen");
+            string typeId = AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(TextComponent));
+            ComponentPlatformOverridePayloadService payloads = new ComponentPlatformOverridePayloadService();
+            ComponentPersistenceRegistry registry = GeneratedScenePersistenceRegistryFactory.Create();
+            SceneComponentAssetRecord[] texts = FlattenComponents(scene.RootEntities).Where(record => record.ComponentTypeId == typeId).ToArray();
+            Assert.NotEmpty(texts);
+            foreach (SceneComponentAssetRecord record in texts) {
+                TextComponent common = Assert.IsType<TextComponent>(registry.GetDescriptor(typeId).DeserializeComponent(payloads.UnwrapBaseRecord(record), new EntitySaveComponent(), null));
+                Assert.Equal(TextNativePixelMode.RoundUp, common.NativeFontPixels);
+                string[] changed = payloads.ReadOverrideStates(record)
+                    .Where(state => state.EnumeratePropertyOverrides().Contains(nameof(TextComponent.NativeFontPixels)))
+                    .Select(state => {
+                        Assert.True(state.Scope.TryGetStepId(SceneOverrideScopeStepKind.Platform, out string platform));
+                        EditorTaggedSceneComponentFieldReader fields = new EditorTaggedSceneComponentFieldReader(state.Payload);
+                        Assert.True(fields.TryGetFieldReader(nameof(TextComponent.NativeFontPixels), out EngineBinaryReader value));
+                        using (value) Assert.Equal((byte)TextNativePixelMode.Disabled, value.ReadByte());
+                        return platform;
+                    }).OrderBy(platform => platform, StringComparer.Ordinal).ToArray();
+                Assert.Equal(new[] { "android", "ios", "linux", "macos" }, changed);
+            }
+        }
+
+        /// <summary>Four high-resolution profiles rasterize the same authored font sizes as the Windows baseline.</summary>
+        [Theory]
+        [InlineData("DemoDiscMenuButtons", 64)]
+        [InlineData("DemoDiscMenuCarousel", 32)]
+        [InlineData("DemoDiscMenuTitle", 69)]
+        public void Standard_menu_font_profiles_match_windows_baseline(string fontName, int expectedPixelSize) {
+            using FileStream stream = File.OpenRead(Path.Combine(ProjectRootPath, "assets", "fonts", fontName + ".ttf.hasset"));
+            AssetImportSettings settings = SectionedAssetImportSettingsBinarySerializer.Deserialize(stream);
+            Assert.Equal(expectedPixelSize, settings.Processor.Platforms["windows"].Font.PixelSize);
+            foreach (string platform in new[] { "linux", "macos", "ios", "android" }) {
+                Assert.Equal(expectedPixelSize, settings.Processor.Platforms[platform].Font.PixelSize);
+            }
+        }
         static void AssertSquareCornersForN64(SceneEntityAsset entity, float commonRadius) {
             string roundedRectTypeId = AutomaticScriptComponentPersistenceDescriptor.BuildComponentTypeId(typeof(RoundedRectComponent));
             SceneComponentAssetRecord persistedComponent = Assert.Single(
